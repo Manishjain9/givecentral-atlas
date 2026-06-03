@@ -1510,10 +1510,29 @@ function applyHistCorrect(rid){
 // ─────────────────────────────────────────────────────────────
 // FIX DISPATCHER — called from data-action attributes
 // ─────────────────────────────────────────────────────────────
+const FIX_DISPATCH = {
+  fixDonor:        (rid) => fixDonor(Number(rid)),
+  openDonorSelect: (rid) => openDonorSelect(Number(rid)),
+  acknowledgeRow:  (rid) => acknowledgeRow(Number(rid)),
+  flagOfficer:     (rid) => flagOfficer(Number(rid)),
+  showHistory:     (rid) => showHistory(Number(rid)),
+  setAmt:          (rid, amt) => setAmt(Number(rid), Number(amt)),
+  viewOriginal:    (ref) => viewOriginal(ref),
+  deleteRow:       (rid) => deleteRow(Number(rid), null),
+  setGL:           (rid, gl) => setGL(Number(rid), gl),
+  fixYear:         (rid) => fixYear(Number(rid)),
+  openModal:       (id) => openModal(id),
+};
+
 function runFix(el) {
   const action = el.dataset.action;
   if (!action) return;
-  try { eval(action); } catch(e) { console.warn('Fix action failed:', action, e); }
+  const match = action.match(/^(\w+)\(([^)]*)\)$/);
+  if (!match) return;
+  const [, fn, rawArgs] = match;
+  const args = rawArgs ? rawArgs.split(',').map(a => a.trim().replace(/^['"]|['"]$/g, '')) : [];
+  if (FIX_DISPATCH[fn]) FIX_DISPATCH[fn](...args);
+  else console.warn('Unknown fix action:', fn);
 }
 
 // Keyboard

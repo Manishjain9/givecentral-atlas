@@ -1,0 +1,48 @@
+# ──────────────────────────────────────────────────────────────
+# Security headers for GiveCentral Atlas demo
+# ──────────────────────────────────────────────────────────────
+
+<IfModule mod_headers.c>
+  # Prevent this site from being embedded in iframes on other domains
+  Header always set X-Frame-Options "SAMEORIGIN"
+
+  # Stop browsers from MIME-sniffing the content-type
+  Header always set X-Content-Type-Options "nosniff"
+
+  # Force HTTPS for 1 year (enable only after SSL is confirmed working)
+  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+  # Limit referrer information sent to third parties
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Restrict browser features not needed by this app
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+
+  # Content Security Policy
+  # Allows: self, Google Fonts, inline styles (needed for prototype), inline scripts (needed for prototype)
+  # Blocks: all other external scripts, iframes from foreign origins, object/embed tags
+  Header always set Content-Security-Policy "\
+default-src 'self'; \
+font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; \
+style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; \
+script-src 'self' 'unsafe-inline'; \
+img-src 'self' data:; \
+connect-src 'self'; \
+object-src 'none'; \
+base-uri 'self'; \
+form-action 'self'; \
+frame-ancestors 'self';"
+</IfModule>
+
+# ──────────────────────────────────────────────────────────────
+# Disable directory listing
+# ──────────────────────────────────────────────────────────────
+Options -Indexes
+
+# ──────────────────────────────────────────────────────────────
+# Cache control for HTML files (always revalidate)
+# ──────────────────────────────────────────────────────────────
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
