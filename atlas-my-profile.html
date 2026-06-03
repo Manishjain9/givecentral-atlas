@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GiveCentral Atlas — My profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:        #0E1E35;
+      --navy-2:      #152844;
+      --navy-3:      #1E3A5F;
+      --blue:        #2563EB;
+      --blue-mid:    #3B82F6;
+      --blue-light:  #DBEAFE;
+      --blue-pale:   #EFF6FF;
+      --teal:        #0D9488;
+      --teal-light:  #CCFBF1;
+      --green:       #15803D;
+      --green-light: #DCFCE7;
+      --amber:       #D97706;
+      --amber-light: #FEF3C7;
+      --rose:        #BE185D;
+      --rose-light:  #FCE7F3;
+      --purple:      #7C3AED;
+      --purple-light:#EDE9FE;
+      --gold:        #B45309;
+      --gold-light:  #FEF3C7;
+      --text:        #0F172A;
+      --text-2:      #334155;
+      --text-3:      #64748B;
+      --border:      #E2E8F0;
+      --surface:     #F8FAFC;
+      --white:       #FFFFFF;
+      --sidebar-w:   220px;
+    }
+
+    html { font-size: 14px; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+
+    /* ══ CANONICAL SIDEBAR ══ */
+    .sidebar { width: var(--sidebar-w); background: var(--navy); min-height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+    .sidebar-logo { padding: 18px 18px 14px; display: flex; align-items: center; gap: 9px; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .logo-mark { width: 30px; height: 30px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .logo-mark svg { width: 15px; height: 15px; }
+    .logo-text-wrap { display: flex; flex-direction: column; }
+    .logo-name { font-family: 'DM Serif Display', serif; font-size: 15px; color: white; line-height: 1; }
+    .logo-sub { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-top: 3px; }
+    .sidebar-search { margin: 12px 12px 6px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; }
+    .sidebar-search svg { width: 13px; height: 13px; color: rgba(255,255,255,.3); flex-shrink: 0; }
+    .sidebar-search input { background: none; border: none; outline: none; width: 100%; font-size: 12px; color: rgba(255,255,255,.6); font-family: 'DM Sans', sans-serif; }
+    .sidebar-search input::placeholder { color: rgba(255,255,255,.3); }
+    .nav-group { padding: 8px 8px 0; }
+    .nav-label { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.28); padding: 0 10px; margin-bottom: 4px; }
+    .nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,.55); cursor: pointer; transition: all .15s; margin-bottom: 1px; text-decoration: none; }
+    .nav-item:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.85); }
+    .nav-item.active { background: var(--blue); color: white; }
+    .nav-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .nav-badge { margin-left: auto; background: rgba(255,255,255,.12); color: rgba(255,255,255,.6); border-radius: 10px; padding: 1px 7px; font-size: 10px; font-weight: 600; }
+    .nav-item.active .nav-badge { background: rgba(255,255,255,.2); color: white; }
+    .nav-badge.alert { background: #EF4444; color: white; }
+    .sidebar-user { margin-top: auto; padding: 12px; border-top: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; gap: 9px; cursor: pointer; transition: background .14s; }
+    .sidebar-user:hover { background: rgba(255,255,255,.04); }
+    .sidebar-user.active { background: rgba(37,99,235,.18); border-top-color: var(--blue); }
+    .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; }
+    .user-name { font-size: 12px; font-weight: 500; color: rgba(255,255,255,.75); }
+    .user-role { font-size: 10px; color: rgba(255,255,255,.35); margin-top: 1px; }
+
+    /* ══ MAIN ══ */
+    .main { flex: 1; min-width: 0; padding: 24px 32px 48px; }
+
+    .page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    .crumb { font-size: 12px; color: var(--text-3); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .crumb a { color: var(--blue); text-decoration: none; }
+    .crumb a:hover { text-decoration: underline; }
+    .crumb svg { width: 10px; height: 10px; }
+    .page-title { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text); font-weight: 400; letter-spacing: -.01em; }
+    .page-sub { color: var(--text-3); font-size: 13px; margin-top: 4px; }
+
+    .btn { padding: 8px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; display: inline-flex; align-items: center; gap: 7px; transition: all .14s; border: 1px solid transparent; }
+    .btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .btn-ghost { background: white; border-color: var(--border); color: var(--text-2); }
+    .btn-ghost:hover { border-color: #94A3B8; background: var(--surface); }
+    .btn-primary { background: var(--blue); color: white; border-color: var(--blue); box-shadow: 0 1px 4px rgba(37,99,235,.3); }
+    .btn-primary:hover { background: #1D4ED8; }
+    .btn-danger { background: white; border-color: #FEE2E2; color: var(--rose); }
+    .btn-danger:hover { background: #FEF2F2; border-color: #FECACA; }
+
+    /* Hero card */
+    .profile-hero {
+      background: white; border: 1px solid var(--border); border-radius: 16px;
+      padding: 0; margin-bottom: 22px; overflow: hidden;
+    }
+    .ph-banner {
+      height: 96px;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-3) 60%, var(--blue) 140%);
+      position: relative;
+    }
+    .ph-banner::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at 80% 30%, rgba(124,58,237,.30) 0%, transparent 55%),
+                  radial-gradient(circle at 15% 80%, rgba(13,148,136,.25) 0%, transparent 55%);
+    }
+    .ph-body { padding: 20px 26px 24px; display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap; margin-top: -48px; position: relative; }
+    .ph-photo {
+      width: 96px; height: 96px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--rose), #9F1239);
+      border: 4px solid white;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-family: 'DM Serif Display', serif; font-size: 32px;
+      box-shadow: 0 4px 12px rgba(15,23,42,.18);
+      flex-shrink: 0; position: relative;
+    }
+    .ph-photo .change {
+      position: absolute; bottom: 2px; right: 2px;
+      width: 26px; height: 26px; border-radius: 50%; background: var(--blue);
+      border: 2px solid white;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      transition: background .14s;
+    }
+    .ph-photo .change:hover { background: #1D4ED8; }
+    .ph-photo .change svg { width: 11px; height: 11px; color: white; }
+    .ph-name-wrap { flex: 1; min-width: 0; padding-bottom: 6px; }
+    .ph-name { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--text); line-height: 1.15; }
+    .ph-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 6px; font-size: 12px; color: var(--text-3); }
+    .ph-meta .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--text-3); opacity: .5; }
+    .ph-tag {
+      background: var(--rose-light); color: var(--rose);
+      padding: 2px 9px; border-radius: 99px;
+      font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    }
+    .ph-actions { padding-bottom: 6px; display: flex; gap: 8px; }
+
+    /* Grid */
+    .profile-grid { display: grid; grid-template-columns: 1fr 320px; gap: 22px; align-items: start; }
+    @media (max-width: 1100px) { .profile-grid { grid-template-columns: 1fr; } }
+
+    /* Cards */
+    .card { background: white; border: 1px solid var(--border); border-radius: 13px; padding: 22px 24px; margin-bottom: 16px; }
+    .card-h { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .card-h .ico { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .card-h .ico svg { width: 14px; height: 14px; }
+    .card-h h3 { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: .02em; text-transform: uppercase; }
+    .card-h .h-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; font-weight: 500; letter-spacing: 0; text-transform: none; }
+    .card-h .right { margin-left: auto; font-size: 11.5px; color: var(--blue); cursor: pointer; }
+    .card-h .right:hover { text-decoration: underline; }
+
+    /* Form fields */
+    .lbl { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+    .lbl .req { color: var(--rose); }
+    .fld { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; background: white; transition: border-color .14s, box-shadow .14s; box-sizing: border-box; }
+    .fld:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
+    .fld[readonly], .fld:disabled { background: var(--surface); color: var(--text-3); cursor: not-allowed; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .fld-grp { margin-bottom: 14px; }
+    .fld-help { font-size: 11px; color: var(--text-3); margin-top: 4px; line-height: 1.4; }
+
+    /* Toggle rows */
+    .toggle-row {
+      display: flex; align-items: center; gap: 12px; padding: 12px 0;
+      border-bottom: 1px solid #F1F5F9;
+    }
+    .toggle-row:last-child { border-bottom: none; }
+    .tr-body { flex: 1; min-width: 0; }
+    .tr-t { font-size: 13px; font-weight: 600; color: var(--text); }
+    .tr-d { font-size: 11.5px; color: var(--text-3); margin-top: 2px; line-height: 1.4; }
+    .switch { width: 36px; height: 20px; background: var(--border); border-radius: 99px; position: relative; cursor: pointer; transition: background .15s; flex-shrink: 0; }
+    .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: white; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.18); transition: transform .15s; }
+    .switch.on { background: var(--blue); }
+    .switch.on::after { transform: translateX(16px); }
+
+    /* Inline channel toggles */
+    .ch-row { display: flex; align-items: center; gap: 4px; }
+    .ch {
+      padding: 4px 9px; font-size: 10.5px; font-weight: 600; letter-spacing: .03em;
+      border-radius: 6px; cursor: pointer;
+      background: var(--surface); color: var(--text-3); border: 1px solid var(--border);
+      transition: all .12s; text-transform: uppercase;
+    }
+    .ch.on { background: var(--blue-pale); border-color: #BFDBFE; color: var(--blue); }
+    .ch.on:hover { background: var(--blue-light); }
+    .ch:hover:not(.on) { color: var(--text-2); border-color: #CBD5E1; }
+
+    /* Security row */
+    .sec-row {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 0; border-bottom: 1px solid #F1F5F9;
+    }
+    .sec-row:last-child { border-bottom: none; }
+    .sec-ico { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .sec-ico svg { width: 14px; height: 14px; }
+    .sec-body { flex: 1; min-width: 0; }
+    .sec-t { font-size: 13px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .sec-status { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; }
+    .ss-ok   { background: var(--green-light); color: var(--green); }
+    .ss-warn { background: var(--amber-light); color: var(--amber); }
+    .sec-d { font-size: 11.5px; color: var(--text-3); margin-top: 3px; line-height: 1.4; }
+
+    /* Signature editor */
+    .sig-frame { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 14px 16px; font-size: 12.5px; color: var(--text-2); line-height: 1.6; }
+    .sig-frame strong { color: var(--text); }
+
+    /* Right rail cards */
+    .rail-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 12px; }
+    .rail-h { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; }
+
+    /* Role + scope tags */
+    .role-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; letter-spacing: .03em; padding: 4px 9px; border-radius: 6px; text-transform: uppercase; }
+    .rt-dev { background: var(--blue-light); color: #1E40AF; }
+    .rt-officer { background: var(--green-light); color: var(--green); }
+    .scope-chip {
+      display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 99px;
+      font-size: 11px; color: var(--text-2); font-weight: 500;
+    }
+    .scope-chip.all { background: var(--blue-pale); border-color: #BFDBFE; color: var(--blue); font-weight: 600; }
+
+    /* Stats */
+    .stat-row { display: flex; align-items: baseline; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #F1F5F9; }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-row .lbl-s { font-size: 12px; color: var(--text-3); text-transform: none; letter-spacing: 0; font-weight: 500; margin: 0; }
+    .stat-row .val { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--text); }
+    .stat-row .delta { font-size: 10.5px; color: var(--green); margin-left: 6px; font-weight: 600; }
+
+    /* Quick links */
+    .ql {
+      display: flex; align-items: center; gap: 9px; padding: 9px 10px;
+      border-radius: 7px; text-decoration: none; color: var(--text-2);
+      font-size: 12.5px; transition: all .12s;
+    }
+    .ql:hover { background: var(--blue-pale); color: var(--blue); }
+    .ql svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--text-3); transition: color .12s; }
+    .ql:hover svg { color: var(--blue); }
+    .ql .arrow { margin-left: auto; opacity: 0; transition: opacity .12s; }
+    .ql:hover .arrow { opacity: 1; }
+
+    /* Out-of-office card highlight */
+    .ooo-card.active { background: linear-gradient(180deg, var(--amber-light) 0%, white 30%); border-color: var(--amber); }
+    .ooo-card.active .card-h .ico { background: var(--amber); color: white; }
+
+    /* Toast */
+    #mp-toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--navy); color: white; padding: 12px 18px; border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(15,23,42,.20); font-size: 13px;
+      font-family: 'DM Sans', sans-serif; z-index: 9000; display: flex; align-items: center; gap: 10px;
+      opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none;
+    }
+    #mp-toast.show { opacity: 1; transform: translateX(-50%); pointer-events: auto; }
+    #mp-toast .ico { width: 22px; height: 22px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+
+    /* Save bar (sticky bottom action) */
+    .save-bar {
+      position: sticky; bottom: 0; background: white;
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 18px; margin-top: 18px;
+      display: flex; align-items: center; gap: 12px; box-shadow: 0 -4px 16px rgba(15,23,42,.04);
+    }
+    .save-bar .body { flex: 1; font-size: 12.5px; color: var(--text-2); }
+    .save-bar .body strong { color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════ SIDEBAR (canonical) ══════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 18 18" fill="none">
+          <circle cx="9" cy="9" r="7.5" stroke="white" stroke-width="1.5"/>
+          <path d="M5.5 9.5C6.5 11.5 9 13 9 13s2.5-1.5 3.5-3.5S12 5 9 5 4.5 7.5 5.5 9.5z" fill="white" fill-opacity=".9"/>
+        </svg>
+      </div>
+      <div class="logo-text-wrap">
+        <span class="logo-name">GiveCentral</span>
+        <span class="logo-sub">Atlas CRM</span>
+      </div>
+    </div>
+
+    <a href="atlas-search.html" style="display:block;text-decoration:none">
+      <div class="sidebar-search">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+        <input type="text" placeholder="Search donors, gifts…" readonly>
+      </div>
+    </a>
+
+    <div class="sidebar-scroll">
+
+    <div class="nav-group">
+      <div class="nav-label">Main</div>
+      <a class="nav-item" href="atlas-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>Dashboard</a>
+      <a class="nav-item" href="atlas-donors-list.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>Donors<span class="nav-badge">3,847</span></a>
+      <a class="nav-item" href="atlas-gifts-pledges.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>Gifts &amp; pledges<span class="nav-badge">142</span></a>
+      <a class="nav-item" href="atlas-campaign-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>Campaigns</a>
+      <a class="nav-item" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>Reports</a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Fundraising</div>
+      <a class="nav-item" href="atlas-pipeline.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>Prospect pipeline<span class="nav-badge">28</span></a>
+      <a class="nav-item" href="atlas-tasks.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>Tasks &amp; reminders<span class="nav-badge alert">7</span></a>
+      <a class="nav-item" href="atlas-communications.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>Communications</a>
+      <a class="nav-item" href="atlas-events-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>Events</a>
+      <a class="nav-item" href="atlas-volunteer-management.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Volunteers</a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Intelligence</div>
+      <a class="nav-item" href="atlas-guru-ai.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>Guru AI</a>
+      <a class="nav-item" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>Analytics</a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Admin</div>
+      <a class="nav-item" href="atlas-users-roles.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Users &amp; roles</a>
+      <a class="nav-item" href="atlas-integrations.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>Integrations</a>
+      <a class="nav-item" href="atlas-sync.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>Sync</a>
+      <a class="nav-item" href="atlas-location-manage.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>Location portal</a>
+    </div>
+
+    </div><!-- /.sidebar-scroll -->
+
+    <div class="sidebar-user active">
+      <div class="user-avatar">SR</div>
+      <div>
+        <div class="user-name">Sarah Reynolds</div>
+        <div class="user-role">Development Director</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══════════════ MAIN ══════════════ -->
+  <main class="main">
+
+    <div class="page-head">
+      <div>
+        <div class="crumb">
+          <a href="atlas-dashboard.html">Atlas</a>
+          <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg>
+          <span>My profile</span>
+        </div>
+        <div class="page-title">My profile &amp; preferences</div>
+        <div class="page-sub">Manage your identity, security, notifications, and how Atlas works for you.</div>
+      </div>
+      <div class="ph-actions">
+        <button class="btn btn-ghost" onclick="mpToast('Discarding unsaved changes…')">Discard</button>
+        <button class="btn btn-primary" onclick="mpToast('Profile saved · changes live across Atlas')">
+          <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M3 7l3 3 5-6"/></svg>
+          Save changes
+        </button>
+      </div>
+    </div>
+
+    <!-- HERO -->
+    <div class="profile-hero">
+      <div class="ph-banner"></div>
+      <div class="ph-body">
+        <div class="ph-photo">
+          SR
+          <span class="change" title="Change photo" onclick="mpToast('Photo picker · drop a JPG or PNG')">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 4.5l1-1.5h6l1 1.5h2v7H1v-7z"/><circle cx="7" cy="8" r="2"/></svg>
+          </span>
+        </div>
+        <div class="ph-name-wrap">
+          <div class="ph-name">Sarah Reynolds</div>
+          <div class="ph-meta">
+            <span class="ph-tag">Development Director</span>
+            <span class="sep"></span>
+            <span>Diocese of Albany</span>
+            <span class="sep"></span>
+            <span>Joined Feb 2018</span>
+            <span class="sep"></span>
+            <span>Last sign-in: Today, 8:14 AM (SSO)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-grid">
+
+      <!-- ═══════════ LEFT MAIN COLUMN ═══════════ -->
+      <div>
+
+        <!-- IDENTITY -->
+        <div class="card">
+          <div class="card-h">
+            <div class="ico" style="background:var(--blue-pale);color:var(--blue)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="5" r="3"/><path d="M2 12.5c0-2.5 2-4.5 5-4.5s5 2 5 4.5"/></svg></div>
+            <div>
+              <h3>Identity</h3>
+              <div class="h-sub">How your name appears on emails, receipts, and audit logs</div>
+            </div>
+          </div>
+
+          <div class="fld-grp row2">
+            <div>
+              <span class="lbl">Full name <span class="req">*</span></span>
+              <input class="fld" value="Sarah Margaret Reynolds">
+            </div>
+            <div>
+              <span class="lbl">Preferred name</span>
+              <input class="fld" value="Sarah" placeholder="Shown across the UI">
+            </div>
+          </div>
+
+          <div class="fld-grp row2">
+            <div>
+              <span class="lbl">Job title</span>
+              <input class="fld" value="Development Director">
+            </div>
+            <div>
+              <span class="lbl">Pronouns</span>
+              <select class="fld">
+                <option selected>she / her</option>
+                <option>he / him</option>
+                <option>they / them</option>
+                <option>Don't display</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="fld-grp row2">
+            <div>
+              <span class="lbl">Work email <span class="req">*</span></span>
+              <input class="fld" value="sarah.reynolds@diocese.org" readonly>
+              <div class="fld-help">Managed by your administrator — contact IT to change.</div>
+            </div>
+            <div>
+              <span class="lbl">Direct phone</span>
+              <input class="fld" value="(518) 555-0142">
+            </div>
+          </div>
+
+          <div class="fld-grp row2">
+            <div>
+              <span class="lbl">Time zone</span>
+              <select class="fld">
+                <option selected>Eastern (ET) — America/New_York</option>
+                <option>Central (CT) — America/Chicago</option>
+                <option>Mountain (MT) — America/Denver</option>
+                <option>Pacific (PT) — America/Los_Angeles</option>
+              </select>
+            </div>
+            <div>
+              <span class="lbl">Date format</span>
+              <select class="fld">
+                <option selected>May 16, 2026  (US)</option>
+                <option>16 May 2026  (UK / EU)</option>
+                <option>2026-05-16  (ISO)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECURITY -->
+        <div class="card">
+          <div class="card-h">
+            <div class="ico" style="background:var(--green-light);color:var(--green)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M5 6V4a2 2 0 014 0v2"/></svg></div>
+            <div>
+              <h3>Security</h3>
+              <div class="h-sub">How you sign in and protect your account</div>
+            </div>
+          </div>
+
+          <div class="sec-row">
+            <div class="sec-ico" style="background:var(--blue-pale);color:var(--blue)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="10" height="10" rx="2"/><path d="M5 7l1.5 1.5L9 5.5"/></svg></div>
+            <div class="sec-body">
+              <div class="sec-t">Single sign-on <span class="sec-status ss-ok">Connected</span></div>
+              <div class="sec-d">Microsoft 365 · sarah.reynolds@diocese.org · synced 8 minutes ago. You sign in with your work email.</div>
+            </div>
+            <button class="btn btn-ghost" onclick="mpToast('Test SSO sign-in · attempting handshake…')">Test SSO</button>
+          </div>
+
+          <div class="sec-row">
+            <div class="sec-ico" style="background:var(--amber-light);color:var(--amber)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2" width="8" height="10" rx="1.5"/><path d="M5 10h4"/></svg></div>
+            <div class="sec-body">
+              <div class="sec-t">Multi-factor authentication <span class="sec-status ss-ok">On</span></div>
+              <div class="sec-d">Microsoft Authenticator · enrolled May 2025 · also receives SMS to (518) 555-0142 as backup.</div>
+            </div>
+            <button class="btn btn-ghost" onclick="mpToast('MFA settings · manage backup codes')">Manage</button>
+          </div>
+
+          <div class="sec-row">
+            <div class="sec-ico" style="background:var(--rose-light);color:var(--rose)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M5 8.5l1.5 1.5L9 7.5M7 5v1.5"/></svg></div>
+            <div class="sec-body">
+              <div class="sec-t">Password <span class="sec-status ss-warn">SSO managed</span></div>
+              <div class="sec-d">Your password is managed by Microsoft 365. To rotate it, sign in to portal.office.com → My Account.</div>
+            </div>
+            <button class="btn btn-ghost" onclick="window.open('https://portal.office.com','_blank')">Open Office</button>
+          </div>
+
+          <div class="sec-row">
+            <div class="sec-ico" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="10" height="6" rx="1"/><path d="M5 9v2h4V9"/></svg></div>
+            <div class="sec-body">
+              <div class="sec-t">Trusted devices <span class="sec-status ss-ok">3 active</span></div>
+              <div class="sec-d">MacBook Pro · iPhone 15 · Office desktop. Sign out of all sessions if you suspect anything's off.</div>
+            </div>
+            <button class="btn btn-danger" onclick="if(confirm('Sign out of all 3 devices and end every session?')) mpToast('All sessions ended · you will be signed out shortly')">Sign out all</button>
+          </div>
+        </div>
+
+        <!-- NOTIFICATIONS -->
+        <div class="card">
+          <div class="card-h">
+            <div class="ico" style="background:var(--amber-light);color:var(--amber)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2a4 4 0 014 4v2.5l1 1.5H2l1-1.5V6a4 4 0 014-4zM5.5 12.5a1.5 1.5 0 003 0"/></svg></div>
+            <div>
+              <h3>Notifications</h3>
+              <div class="h-sub">Choose which channels each kind of alert reaches you on</div>
+            </div>
+            <span class="right" onclick="mpToast('All notifications muted for 1 hour · turn back on anytime')">Snooze all · 1h</span>
+          </div>
+
+          <div class="toggle-row">
+            <div class="tr-body">
+              <div class="tr-t">Tasks assigned to me</div>
+              <div class="tr-d">When a teammate assigns or reassigns a task to you.</div>
+            </div>
+            <div class="ch-row">
+              <span class="ch on" data-ch="email">Email</span>
+              <span class="ch on" data-ch="app">In-app</span>
+              <span class="ch" data-ch="slack">Slack</span>
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <div class="tr-body">
+              <div class="tr-t">@mentions</div>
+              <div class="tr-d">Comments on donor records, activities, or pledges where you're @mentioned.</div>
+            </div>
+            <div class="ch-row">
+              <span class="ch on" data-ch="email">Email</span>
+              <span class="ch on" data-ch="app">In-app</span>
+              <span class="ch on" data-ch="slack">Slack</span>
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <div class="tr-body">
+              <div class="tr-t">Daily morning brief</div>
+              <div class="tr-d">7:00 AM ET summary of today's tasks, overdue items, and Guru AI suggestions.</div>
+            </div>
+            <div class="ch-row">
+              <span class="ch on" data-ch="email">Email</span>
+              <span class="ch" data-ch="app">In-app</span>
+              <span class="ch" data-ch="slack">Slack</span>
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <div class="tr-body">
+              <div class="tr-t">Weekly performance digest</div>
+              <div class="tr-d">Monday 8:00 AM ET — your pipeline health, gifts logged, prospects moved.</div>
+            </div>
+            <div class="ch-row">
+              <span class="ch on" data-ch="email">Email</span>
+              <span class="ch" data-ch="app">In-app</span>
+              <span class="ch" data-ch="slack">Slack</span>
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <div class="tr-body">
+              <div class="tr-t">Major gifts to my portfolio</div>
+              <div class="tr-d">Immediate alert when a gift ≥ $5,000 arrives from a prospect you steward.</div>
+            </div>
+            <div class="ch-row">
+              <span class="ch on" data-ch="email">Email</span>
+              <span class="ch on" data-ch="app">In-app</span>
+              <span class="ch on" data-ch="slack">Slack</span>
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <div class="tr-body">
+              <div class="tr-t">Pledge installment overdue</div>
+              <div class="tr-d">When any pledge in your portfolio crosses its installment due date.</div>
+            </div>
+            <div class="ch-row">
+              <span class="ch on" data-ch="email">Email</span>
+              <span class="ch on" data-ch="app">In-app</span>
+              <span class="ch" data-ch="slack">Slack</span>
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <div class="tr-body">
+              <div class="tr-t">System maintenance</div>
+              <div class="tr-d">Scheduled downtime, sync failures, integration health alerts.</div>
+            </div>
+            <div class="ch-row">
+              <span class="ch on" data-ch="email">Email</span>
+              <span class="ch on" data-ch="app">In-app</span>
+              <span class="ch" data-ch="slack">Slack</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- EMAIL SIGNATURE -->
+        <div class="card">
+          <div class="card-h">
+            <div class="ico" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="10" height="8" rx="1.5"/><path d="M2 5l5 3 5-3"/></svg></div>
+            <div>
+              <h3>Email signature &amp; sender identity</h3>
+              <div class="h-sub">Auto-appended to every email you send through Atlas Compose</div>
+            </div>
+          </div>
+
+          <div class="fld-grp row2">
+            <div>
+              <span class="lbl">Default From address</span>
+              <select class="fld">
+                <option selected>Sarah Reynolds &lt;sarah.reynolds@diocese.org&gt;</option>
+                <option>Diocese of Albany Development &lt;giving@diocese.org&gt;</option>
+                <option>St. Mary's Cathedral &lt;cathedral@diocese.org&gt;</option>
+              </select>
+            </div>
+            <div>
+              <span class="lbl">Reply-to</span>
+              <select class="fld">
+                <option selected>Same as From</option>
+                <option>giving@diocese.org (general inbox)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="fld-grp">
+            <span class="lbl">Signature</span>
+            <textarea class="fld" rows="6" style="resize:vertical;font-family:'DM Sans',sans-serif">Warmly,
+
+Sarah Reynolds
+Development Director · Diocese of Albany
+sarah.reynolds@diocese.org · (518) 555-0142
+40 N Main Avenue, Albany NY 12203</textarea>
+            <div class="fld-help">Plain text only. HTML signatures coming in Phase 2.</div>
+          </div>
+
+          <div>
+            <span class="lbl">Live preview</span>
+            <div class="sig-frame">
+              Warmly,<br><br>
+              <strong>Sarah Reynolds</strong><br>
+              Development Director · Diocese of Albany<br>
+              sarah.reynolds@diocese.org · (518) 555-0142<br>
+              40 N Main Avenue, Albany NY 12203
+            </div>
+          </div>
+        </div>
+
+        <!-- WORKING PREFERENCES -->
+        <div class="card">
+          <div class="card-h">
+            <div class="ico" style="background:var(--teal-light);color:var(--teal)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="2.5"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3 3l1.5 1.5M9.5 9.5l1.5 1.5M11 3L9.5 4.5M4.5 9.5L3 11"/></svg></div>
+            <div>
+              <h3>Working preferences</h3>
+              <div class="h-sub">How Atlas looks and what it shows you by default</div>
+            </div>
+          </div>
+
+          <div class="fld-grp row2">
+            <div>
+              <span class="lbl">Default landing page</span>
+              <select class="fld">
+                <option selected>Dashboard (smart — morning brief)</option>
+                <option>My tasks</option>
+                <option>My pipeline</option>
+                <option>Donors list</option>
+              </select>
+            </div>
+            <div>
+              <span class="lbl">Theme</span>
+              <select class="fld">
+                <option selected>Light</option>
+                <option>Dark (Phase 2)</option>
+                <option>Match system</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="fld-grp row2">
+            <div>
+              <span class="lbl">Currency display</span>
+              <select class="fld">
+                <option selected>$1,250.00 (USD)</option>
+                <option>$1,250 (no cents)</option>
+                <option>$1.25K (abbreviated)</option>
+              </select>
+            </div>
+            <div>
+              <span class="lbl">Table density</span>
+              <select class="fld">
+                <option>Comfortable</option>
+                <option selected>Compact</option>
+                <option>Dense</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="toggle-row" style="margin-top:6px">
+            <div class="tr-body">
+              <div class="tr-t">Show Guru AI suggestions</div>
+              <div class="tr-d">Display proactive AI recommendations on dashboard, donor records, and pipeline.</div>
+            </div>
+            <div class="switch on" onclick="mpToggle(this)"></div>
+          </div>
+
+          <div class="toggle-row">
+            <div class="tr-body">
+              <div class="tr-t">Keyboard shortcuts</div>
+              <div class="tr-d">Enable global shortcuts (J / K to navigate, / to search, ⌘+K command bar).</div>
+            </div>
+            <div class="switch on" onclick="mpToggle(this)"></div>
+          </div>
+
+          <div class="toggle-row">
+            <div class="tr-body">
+              <div class="tr-t">Auto-log activities</div>
+              <div class="tr-d">When you send an email or schedule a meeting, log it automatically to the donor timeline.</div>
+            </div>
+            <div class="switch on" onclick="mpToggle(this)"></div>
+          </div>
+
+          <div class="toggle-row">
+            <div class="tr-body">
+              <div class="tr-t">Onboarding tips</div>
+              <div class="tr-d">Show contextual help bubbles for new features (you can replay the full tour anytime).</div>
+            </div>
+            <div class="switch" onclick="mpToggle(this)"></div>
+          </div>
+        </div>
+
+        <!-- OUT OF OFFICE -->
+        <div class="card ooo-card" id="ooo-card">
+          <div class="card-h">
+            <div class="ico" style="background:var(--amber-light);color:var(--amber)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 7c2-4 8-4 10 0M7 7l-2 4M7 7l2 4"/></svg></div>
+            <div>
+              <h3>Out of office / vacation</h3>
+              <div class="h-sub">Auto-reassign tasks and set an away message while you're out</div>
+            </div>
+            <div class="switch" id="ooo-switch" onclick="mpToggleOOO(this)" style="margin-left:auto"></div>
+          </div>
+
+          <div id="ooo-fields" style="display:none">
+            <div class="fld-grp row2">
+              <div>
+                <span class="lbl">Away from</span>
+                <input class="fld" type="date">
+              </div>
+              <div>
+                <span class="lbl">Back on</span>
+                <input class="fld" type="date">
+              </div>
+            </div>
+
+            <div class="fld-grp">
+              <span class="lbl">Cover officer</span>
+              <select class="fld">
+                <option selected>Bridget McCarthy · Dev Director</option>
+                <option>Julia Kelleher · Gift Officer</option>
+                <option>Daniel Cho · Database Admin</option>
+                <option>Don't reassign — leave with me</option>
+              </select>
+              <div class="fld-help">Tasks due during your time off will be reassigned to this person.</div>
+            </div>
+
+            <div class="fld-grp">
+              <span class="lbl">Auto-reply message <small style="color:var(--text-3);font-weight:500;text-transform:none">(optional)</small></span>
+              <textarea class="fld" rows="3" style="resize:vertical;font-family:'DM Sans',sans-serif" placeholder="Hi, I'm out of office until Monday Jun 9. For urgent matters please contact Bridget McCarthy at bridget@diocese.org. Otherwise I'll respond when I return.">Hi — I'm out of office through next Monday. For anything urgent please reach out to Bridget McCarthy (bridget@diocese.org). I'll respond when I return.</textarea>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══════════ RIGHT RAIL ═══════════ -->
+      <aside>
+
+        <!-- My role + access -->
+        <div class="rail-card">
+          <div class="rail-h">My role &amp; access</div>
+          <div style="margin-bottom:14px">
+            <span class="role-tag rt-dev">Dev Director</span>
+          </div>
+          <div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px;font-weight:600;letter-spacing:.02em;text-transform:uppercase">Entity scope</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px">
+            <span class="scope-chip all">All entities</span>
+            <span class="scope-chip">Diocese</span>
+            <span class="scope-chip">Catholic Charities</span>
+            <span class="scope-chip">Foundation</span>
+            <span class="scope-chip">Scholarship Fund</span>
+          </div>
+          <a href="atlas-users-roles.html" style="font-size:12px;color:var(--blue);text-decoration:none;font-weight:500">Request a change →</a>
+        </div>
+
+        <!-- My activity -->
+        <div class="rail-card">
+          <div class="rail-h">My activity · this week</div>
+          <div class="stat-row">
+            <span class="lbl-s">Gifts logged</span>
+            <span><span class="val">24</span><span class="delta">+8</span></span>
+          </div>
+          <div class="stat-row">
+            <span class="lbl-s">Tasks completed</span>
+            <span><span class="val">17</span><span class="delta">+3</span></span>
+          </div>
+          <div class="stat-row">
+            <span class="lbl-s">Prospects in portfolio</span>
+            <span><span class="val">18</span></span>
+          </div>
+          <div class="stat-row">
+            <span class="lbl-s">Active pledges</span>
+            <span><span class="val">42</span></span>
+          </div>
+          <div class="stat-row">
+            <span class="lbl-s">Pipeline value</span>
+            <span><span class="val">$1.84M</span></span>
+          </div>
+        </div>
+
+        <!-- Quick links -->
+        <div class="rail-card">
+          <div class="rail-h">Quick links</div>
+          <a class="ql" href="atlas-tasks.html">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>
+            My tasks <span class="arrow">→</span>
+          </a>
+          <a class="ql" href="atlas-pipeline.html">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
+            My pipeline <span class="arrow">→</span>
+          </a>
+          <a class="ql" href="atlas-solicitor-performance.html">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>
+            My performance <span class="arrow">→</span>
+          </a>
+          <a class="ql" href="atlas-guided-tour.html">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v.5M6 7h1v3h1"/></svg>
+            Replay onboarding tour <span class="arrow">→</span>
+          </a>
+          <a class="ql" href="atlas-notifications.html">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 2a4 4 0 014 4v2.5l1 1.5H2l1-1.5V6a4 4 0 014-4zM5.5 12.5a1.5 1.5 0 003 0"/></svg>
+            Notification inbox <span class="arrow">→</span>
+          </a>
+          <a class="ql" href="atlas-component-library.html">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="2" width="10" height="10" rx="2"/><path d="M5 5l4 4M9 5l-4 4"/></svg>
+            Atlas component library <span class="arrow">→</span>
+          </a>
+        </div>
+
+        <!-- Sign out -->
+        <div class="rail-card" style="background:linear-gradient(180deg,#FFF1F2 0%,white 100%);border-color:#FECACA">
+          <div class="rail-h" style="color:var(--rose)">End your session</div>
+          <p style="font-size:12px;color:var(--text-2);margin-bottom:14px;line-height:1.5">Signing out ends this device only. Use <strong>Sign out all</strong> in the Security card to end every active session.</p>
+          <button class="btn btn-danger" style="width:100%;justify-content:center" onclick="if(confirm('Sign out of Atlas?')) window.location='atlas-login.html'">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 11.5H2.5V2.5H6M9 4l3 3-3 3M5 7h7"/></svg>
+            Sign out of Atlas
+          </button>
+        </div>
+
+      </aside>
+    </div>
+
+  </main>
+
+  <!-- Toast -->
+  <div id="mp-toast"><span class="ico">✓</span><span class="msg"></span></div>
+
+  <script>
+  (function(){
+    // Toast helper
+    var t = document.getElementById('mp-toast');
+    window.mpToast = function(msg){
+      t.querySelector('.msg').textContent = msg;
+      t.classList.add('show');
+      clearTimeout(window._mpToastT);
+      window._mpToastT = setTimeout(function(){ t.classList.remove('show'); }, 2400);
+    };
+
+    // Switch toggle
+    window.mpToggle = function(el){
+      el.classList.toggle('on');
+      mpToast(el.classList.contains('on') ? 'Preference enabled' : 'Preference disabled');
+    };
+
+    // Out-of-office toggle reveals fields and decorates the card
+    window.mpToggleOOO = function(el){
+      el.classList.toggle('on');
+      var on = el.classList.contains('on');
+      var card = document.getElementById('ooo-card');
+      var fields = document.getElementById('ooo-fields');
+      card.classList.toggle('active', on);
+      fields.style.display = on ? 'block' : 'none';
+      mpToast(on ? 'Out-of-office turned on · cover officer notified' : 'Out-of-office turned off');
+    };
+
+    // Notification channel chips (Email / In-app / Slack)
+    document.querySelectorAll('.ch').forEach(function(ch){
+      ch.addEventListener('click', function(){
+        ch.classList.toggle('on');
+        var row = ch.closest('.toggle-row');
+        var label = row ? (row.querySelector('.tr-t') || {}).textContent : '';
+        mpToast((ch.classList.contains('on') ? 'Enabled ' : 'Muted ') + ch.dataset.ch + ' for: ' + (label || 'this alert'));
+      });
+    });
+
+    // Sidebar user click — already on the profile page, so noop unless they want to sign out
+    var su = document.querySelector('.sidebar-user');
+    if (su) su.addEventListener('click', function(){
+      // Already here — confirm sign out
+      if (confirm('Sign out of Atlas?')) window.location = 'atlas-login.html';
+    });
+  })();
+  </script>
+
+</body>
+</html>

@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GiveCentral Atlas — Reports</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -436,15 +435,6 @@ body {
 </style>
 </head>
 <body>
-<div id="prototype-banner" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#7c3aed;color:#fff;font-family:sans-serif;font-size:13px;font-weight:500;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.25);">
-  <span style="display:flex;align-items:center;gap:8px;">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><circle cx="8" cy="8" r="7" stroke="white" stroke-width="1.5"/><path d="M8 5v3.5M8 10.5v.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-    <strong>UI DESIGN PROTOTYPE</strong> — For demonstration purposes only. No real data.
-  </span>
-  <span style="opacity:.75;font-size:12px;">Built by <a href="https://givecentral.com" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">GiveCentral</a> &nbsp;·&nbsp;<a href="https://givecentral.com/privacy" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">Privacy Policy</a></span>
-  <button onclick="document.getElementById('prototype-banner').style.display='none'" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;font-family:inherit;flex-shrink:0;">✕ Dismiss</button>
-</div>
-<div style="height:50px"></div>
 
 
 <aside class="sidebar">
@@ -1528,6 +1518,183 @@ body {
 })();
 </script>
 <!-- end Atlas Dead-CTA Rescue -->
+
+<!-- ════════════════════════════════════════════════════════
+     Reports · page-specific wiring
+     Wires category rail (left) as filters over the right-hand
+     report cards + sections. Uses document-level delegation.
+     ════════════════════════════════════════════════════════ -->
+<style id="rp-wire-css">
+  .cat-row { cursor: pointer; transition: all .14s; }
+  .cat-row:hover:not(.on) { background: rgba(37,99,235,.06); color: var(--blue, #2563EB); }
+  .r-card { cursor: pointer; transition: transform .14s, box-shadow .14s, border-color .14s; }
+  .r-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(15,23,42,.08); border-color: #BFDBFE; }
+  .r-section.hide { display: none; }
+  .r-card.hide { display: none; }
+
+  /* Filter banner that appears when a category is active */
+  #rp-filter-banner {
+    margin: 0 0 16px; padding: 10px 14px;
+    background: var(--blue-pale, #EFF6FF); border: 1px solid #BFDBFE; border-radius: 9px;
+    display: none; align-items: center; gap: 10px;
+    font-size: 12.5px; color: #1E40AF;
+  }
+  #rp-filter-banner.show { display: flex; }
+  #rp-filter-banner svg { flex-shrink: 0; }
+  #rp-filter-banner .x {
+    margin-left: auto; cursor: pointer; padding: 4px 10px; border-radius: 6px;
+    background: white; border: 1px solid #BFDBFE; color: #1E40AF; font-weight: 500;
+    font-family: 'DM Sans', sans-serif; font-size: 11.5px;
+  }
+  #rp-filter-banner .x:hover { background: #DBEAFE; }
+</style>
+
+<script id="rp-wire">
+(function(){
+  if (window.__rpWired) return; window.__rpWired = true;
+
+  function toast(msg){
+    var t = document.getElementById('atlas-rescue-toast');
+    if (!t) { console.log(msg); return; }
+    t.querySelector('.msg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(window.__rpToastT);
+    window.__rpToastT = setTimeout(function(){ t.classList.remove('show'); }, 2400);
+  }
+
+  // ── Inject filter banner above the main column ──
+  var mainCol = document.querySelector('.reports-grid > main');
+  if (mainCol) {
+    var banner = document.createElement('div');
+    banner.id = 'rp-filter-banner';
+    banner.innerHTML =
+      '<svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0"><path d="M1.5 2.5h9l-3.5 4v4l-2-1V6.5z"/></svg>' +
+      '<span>Filtering by <strong id="rp-filter-name">category</strong></span>' +
+      '<span class="x" id="rp-filter-clear">Clear filter</span>';
+    mainCol.insertBefore(banner, mainCol.firstChild);
+  }
+  var fBanner = document.getElementById('rp-filter-banner');
+  var fName   = document.getElementById('rp-filter-name');
+
+  // ── Map cat-row label → which sections + which keywords to keep ──
+  // We use textContent matching against report name + description.
+  var FILTERS = {
+    'all reports':   null,             // show everything
+    'just added':    'new-section',    // show ONLY the Just-Added section
+    'gifts':         /\bgift|donation\b/i,
+    'constituents':  /\bconstituent|donor|giving\b/i,
+    'pledges':       /\bpledge\b/i,
+    'receipting':    /\breceipt|tax|acknowledg/i,
+    'campaigns':     /\bcampaign|appeal\b/i,
+    'operations':    /\bsync|reconcil|audit|operation|exception\b/i,
+    'saved by me':   'saved-by-me',    // show the Saved-by-me section
+    'scheduled':     /\bscheduled|recurring|auto\b/i
+  };
+
+  function getCatLabel(el){
+    // The cat-row has text + a count chip; strip the chip
+    var copy = el.cloneNode(true);
+    var ct = copy.querySelector('.ct'); if (ct) ct.remove();
+    return copy.textContent.trim().toLowerCase().replace(/\s+/g,' ');
+  }
+
+  var cats = document.querySelectorAll('.cat-row');
+  var allCards = document.querySelectorAll('.r-card');
+  var allSections = document.querySelectorAll('.r-section');
+
+  function clearFilter(){
+    cats.forEach(function(c){ c.classList.remove('on'); });
+    var defaultCat = document.querySelector('.cat-row'); // first = "All reports"
+    if (defaultCat) defaultCat.classList.add('on');
+    allCards.forEach(function(c){ c.classList.remove('hide'); });
+    allSections.forEach(function(s){ s.classList.remove('hide'); });
+    if (fBanner) fBanner.classList.remove('show');
+  }
+
+  function applyFilter(label){
+    var spec = FILTERS[label];
+    var displayName = label.replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+
+    if (spec === null) {
+      // All reports — clear
+      clearFilter();
+      return;
+    }
+
+    if (typeof spec === 'string') {
+      // Show only the named section (Just added or Saved by me)
+      allSections.forEach(function(s){ s.classList.add('hide'); });
+      allCards.forEach(function(c){ c.classList.remove('hide'); });
+      var sec = null;
+      if (spec === 'new-section') sec = document.querySelector('.r-section.new-section');
+      else if (spec === 'saved-by-me') {
+        // Find the h3 'Saved by me' and toggle its parent .r-section
+        document.querySelectorAll('.r-section').forEach(function(s){
+          var h = s.querySelector('h3');
+          if (h && h.textContent.trim().toLowerCase() === 'saved by me') sec = s;
+        });
+      }
+      if (sec) sec.classList.remove('hide');
+    } else if (spec instanceof RegExp) {
+      // Filter individual cards across all sections
+      var visibleBySection = new Map();
+      allCards.forEach(function(card){
+        var txt = card.textContent.toLowerCase();
+        var match = spec.test(txt);
+        card.classList.toggle('hide', !match);
+        var sec = card.closest('.r-section');
+        if (sec) {
+          visibleBySection.set(sec, (visibleBySection.get(sec) || 0) + (match ? 1 : 0));
+        }
+      });
+      // Hide sections with no visible cards
+      allSections.forEach(function(s){
+        s.classList.toggle('hide', (visibleBySection.get(s) || 0) === 0);
+      });
+    }
+
+    if (fBanner) {
+      if (fName) fName.textContent = displayName;
+      fBanner.classList.add('show');
+    }
+  }
+
+  cats.forEach(function(c){
+    c.addEventListener('click', function(e){
+      e.preventDefault();
+      var label = getCatLabel(c);
+      // Toggle off if already on
+      if (c.classList.contains('on') && label !== 'all reports') {
+        clearFilter();
+        return;
+      }
+      cats.forEach(function(x){ x.classList.remove('on'); });
+      c.classList.add('on');
+      applyFilter(label);
+    });
+  });
+
+  // Clear-filter button in banner
+  document.addEventListener('click', function(e){
+    if (e.target && e.target.id === 'rp-filter-clear') {
+      clearFilter();
+    }
+  });
+
+  // Also wire the secondary "Schedule a recurring report" topbar button if it doesn't already route
+  document.querySelectorAll('button.btn-ghost, button.btn-primary').forEach(function(b){
+    var t = (b.textContent || '').trim().toLowerCase();
+    if (t.indexOf('schedule a recurring report') !== -1 && !b.dataset.rpWired) {
+      b.dataset.rpWired = '1';
+      b.addEventListener('click', function(e){
+        e.preventDefault();
+        toast('Scheduling · opening the queue & schedule manager');
+        setTimeout(function(){ window.location = 'atlas-report-queue-scheduler.html'; }, 250);
+      });
+    }
+  });
+})();
+</script>
 
 </body>
 </html>

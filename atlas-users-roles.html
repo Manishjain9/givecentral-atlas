@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GiveCentral Atlas — Users & roles</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -456,15 +455,6 @@ body {
 </style>
 </head>
 <body>
-<div id="prototype-banner" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#7c3aed;color:#fff;font-family:sans-serif;font-size:13px;font-weight:500;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.25);">
-  <span style="display:flex;align-items:center;gap:8px;">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><circle cx="8" cy="8" r="7" stroke="white" stroke-width="1.5"/><path d="M8 5v3.5M8 10.5v.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-    <strong>UI DESIGN PROTOTYPE</strong> — For demonstration purposes only. No real data.
-  </span>
-  <span style="opacity:.75;font-size:12px;">Built by <a href="https://givecentral.com" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">GiveCentral</a> &nbsp;·&nbsp;<a href="https://givecentral.com/privacy" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">Privacy Policy</a></span>
-  <button onclick="document.getElementById('prototype-banner').style.display='none'" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;font-family:inherit;flex-shrink:0;">✕ Dismiss</button>
-</div>
-<div style="height:50px"></div>
 
 
 <aside class="sidebar">
@@ -1628,6 +1618,291 @@ body {
 })();
 </script>
 <!-- end Atlas Dead-CTA Rescue -->
+
+<!-- ════════════════════════════════════════════════════════
+     Users & Roles · page-specific wiring
+     Wires tabs, kebab menus on each user row, and role-cards.
+     Uses document-level delegation so any DOM re-renders survive.
+     ════════════════════════════════════════════════════════ -->
+<style id="ur-wire-css">
+  .tab { cursor: pointer; transition: all .14s; }
+  .ut-row { cursor: pointer; transition: background .12s; }
+  .ut-row:hover { background: rgba(37,99,235,.04); }
+  .ut-row.dim { opacity: .35; pointer-events: none; }
+  .role-card { cursor: pointer; transition: all .14s; border: 1.5px solid transparent; }
+  .role-card:hover { border-color: #BFDBFE; background: #F0F9FF; }
+  .role-card.on { border-color: #2563EB; background: #EFF6FF; box-shadow: 0 0 0 3px rgba(37,99,235,.10); }
+  .kebab { cursor: pointer; transition: background .14s; border-radius: 6px; }
+  .kebab:hover { background: rgba(37,99,235,.08); color: #2563EB !important; }
+  #ur-kebab-menu {
+    position: absolute; z-index: 10100; background: white;
+    border: 1px solid #E2E8F0; border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(15,23,42,.14);
+    padding: 6px; min-width: 210px; font-family: 'DM Sans', sans-serif; font-size: 13px;
+    opacity: 0; transform: translateY(-4px); transition: opacity .14s, transform .14s;
+  }
+  #ur-kebab-menu.show { opacity: 1; transform: translateY(0); }
+  #ur-kebab-menu a {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; color: #334155; text-decoration: none;
+    border-radius: 6px; cursor: pointer;
+  }
+  #ur-kebab-menu a:hover { background: #EFF6FF; color: #2563EB; }
+  #ur-kebab-menu a.danger { color: #BE185D; border-top: 1px solid #EDF2F7; margin-top: 4px; padding-top: 10px; }
+  #ur-kebab-menu a.danger:hover { background: #FEF2F2; color: #9F1239; }
+  #ur-kebab-menu a svg { width: 13px; height: 13px; color: #64748B; flex-shrink: 0; }
+  #ur-kebab-menu a:hover svg { color: currentColor; }
+  #ur-kebab-menu a.danger svg { color: #BE185D; }
+
+  .role-filter-bar {
+    margin: 12px 0; padding: 9px 14px; background: #EFF6FF;
+    border: 1px solid #BFDBFE; border-radius: 9px;
+    display: none; align-items: center; gap: 10px; font-size: 12px; color: #1E40AF;
+  }
+  .role-filter-bar.show { display: flex; }
+  .role-filter-bar .x {
+    margin-left: auto; cursor: pointer; padding: 4px 10px; border-radius: 6px;
+    background: white; border: 1px solid #BFDBFE; color: #1E40AF; font-weight: 500;
+    font-family: 'DM Sans', sans-serif; font-size: 11.5px;
+  }
+  .role-filter-bar .x:hover { background: #DBEAFE; }
+
+  /* Tab panel content */
+  .tab-panel { display: none; padding: 26px; background: white; border: 1px solid var(--border, #E2E8F0); border-radius: 12px; margin-top: 14px; }
+  .tab-panel.on { display: block; }
+  .tab-panel h3 { font-family: 'DM Serif Display', serif; font-size: 20px; color: #0F172A; margin: 0 0 6px; font-weight: 400; }
+  .tab-panel .sub { font-size: 12.5px; color: #64748B; margin-bottom: 18px; line-height: 1.5; }
+  .tp-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #F1F5F9; gap: 14px; }
+  .tp-row:last-child { border-bottom: none; }
+  .tp-row .av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .tp-row .body { flex: 1; min-width: 0; }
+  .tp-row .body .t { font-size: 13px; font-weight: 600; color: #0F172A; }
+  .tp-row .body .d { font-size: 11.5px; color: #64748B; margin-top: 2px; }
+  .tp-act { padding: 6px 12px; background: white; border: 1px solid #E2E8F0; border-radius: 7px; font-size: 11.5px; color: #475569; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+  .tp-act:hover { border-color: #2563EB; color: #2563EB; }
+  .tp-act.primary { background: #2563EB; border-color: #2563EB; color: white; }
+  .tp-act.primary:hover { background: #1D4ED8; }
+</style>
+
+<!-- Role filter bar (shown when a role-card is clicked) -->
+<div class="role-filter-bar" id="ur-role-filter">
+  <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0"><path d="M1.5 2.5h9l-3.5 4v4l-2-1V6.5z"/></svg>
+  <span>Filtering by <strong id="ur-role-filter-name">role</strong></span>
+  <span class="x" onclick="urClearRoleFilter()">Clear filter</span>
+</div>
+
+<!-- Hidden tab content panels — shown when those tabs are clicked -->
+<div class="tab-panel" id="ur-pane-invites" data-pane="invites">
+  <h3>Pending invitations</h3>
+  <p class="sub">Magic-link invitations expire 7 days after they're sent. Resend or revoke before they expire.</p>
+  <div class="tp-row">
+    <div class="av" style="background:#94A3B8">JM</div>
+    <div class="body"><div class="t">Jamie Morrison</div><div class="d">jamie.morrison@diocese.org · Gift Officer · invited May 2 · 4 days left</div></div>
+    <button class="tp-act" onclick="urToast('Invite resent · Jamie should receive the magic link in seconds')">Resend</button>
+    <button class="tp-act" onclick="urToast('Invitation revoked · removed from pending list')">Revoke</button>
+  </div>
+  <div class="tp-row">
+    <div class="av" style="background:#94A3B8">EK</div>
+    <div class="body"><div class="t">Emma Kowalski</div><div class="d">emma.k@diocese.org · Database Admin · invited Apr 28 · 1 day left</div></div>
+    <button class="tp-act" onclick="urToast('Invite resent · 7-day expiry reset')">Resend</button>
+    <button class="tp-act" onclick="urToast('Invitation revoked · removed from pending list')">Revoke</button>
+  </div>
+</div>
+
+<div class="tab-panel" id="ur-pane-sso" data-pane="sso">
+  <h3>SSO &amp; SAML</h3>
+  <p class="sub">Currently using Microsoft 365 single sign-on. Configure additional identity providers below.</p>
+  <div class="tp-row">
+    <div class="av" style="background:#2563EB">M</div>
+    <div class="body"><div class="t">Microsoft 365 · Diocese of Albany</div><div class="d">Connected · 9 of 12 users signing in via SSO · auto-provisioned</div></div>
+    <button class="tp-act" onclick="urToast('Opening Microsoft 365 admin · sync settings')">Configure</button>
+  </div>
+  <div class="tp-row">
+    <div class="av" style="background:#15803D">G</div>
+    <div class="body"><div class="t">Google Workspace</div><div class="d">Not connected · connect to sync 8 catholiccharitiesalbany.org accounts</div></div>
+    <button class="tp-act primary" onclick="urToast('Google Workspace connection wizard opening…')">Connect</button>
+  </div>
+  <div class="tp-row">
+    <div class="av" style="background:#7C3AED">O</div>
+    <div class="body"><div class="t">Okta · custom SAML</div><div class="d">Not connected · upload metadata XML and map attributes</div></div>
+    <button class="tp-act" onclick="urToast('SAML metadata upload · drop or paste your IdP metadata')">Upload metadata</button>
+  </div>
+</div>
+
+<div class="tab-panel" id="ur-pane-audit" data-pane="audit">
+  <h3>Audit log</h3>
+  <p class="sub">Every user, role, scope, and authentication event — retained 7 years for compliance.</p>
+  <div class="tp-row">
+    <div class="av" style="background:#7C3AED">SR</div>
+    <div class="body"><div class="t">Sarah Reynolds · invited new user</div><div class="d">Jamie Morrison invited as Gift Officer · scope: Diocese · today 10:14 AM</div></div>
+  </div>
+  <div class="tp-row">
+    <div class="av" style="background:#2563EB">SR</div>
+    <div class="body"><div class="t">Sarah Reynolds · changed scope</div><div class="d">Julia Kelleher scope expanded to Foundation · today 9:08 AM</div></div>
+  </div>
+  <div class="tp-row">
+    <div class="av" style="background:#0D9488">DC</div>
+    <div class="body"><div class="t">Daniel Cho · ran data export</div><div class="d">Donor list CSV export · 3,847 records · yesterday 5:32 PM</div></div>
+  </div>
+  <div class="tp-row">
+    <div class="av" style="background:#BE185D">BM</div>
+    <div class="body"><div class="t">Bridget McCarthy · suspended user</div><div class="d">Former volunteer "Tom Walsh" suspended · scope removed · yesterday 2:14 PM</div></div>
+  </div>
+  <div class="tp-row">
+    <div class="av" style="background:#15803D">SR</div>
+    <div class="body"><div class="t">Sarah Reynolds · accepted consent terms</div><div class="d">Updated GDPR data-processing policy v3.2 · 3 days ago 8:01 AM</div></div>
+  </div>
+  <button class="tp-act primary" style="margin-top:14px" onclick="urToast('Full audit log CSV export queued · ready in 30 seconds')">Export full log</button>
+</div>
+
+<!-- Floating kebab menu -->
+<div id="ur-kebab-menu" style="display:none"></div>
+
+<script id="ur-wire">
+(function(){
+  if (window.__urWired) return; window.__urWired = true;
+
+  function toast(msg){
+    var t = document.getElementById('atlas-rescue-toast');
+    if (!t) { console.log(msg); return; }
+    t.querySelector('.msg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(window.__urToastT);
+    window.__urToastT = setTimeout(function(){ t.classList.remove('show'); }, 2400);
+  }
+  window.urToast = toast;
+
+  function go(url){ window.location = url; }
+
+  // ─── 1. TABS ───────────────────────────────────────
+  var mainEl = document.querySelector('.users-grid');
+  var tabs   = document.querySelectorAll('.tabs .tab');
+  var TAB_MAP = ['users','roles','invites','sso','audit'];
+  tabs.forEach(function(t, i){
+    t.addEventListener('click', function(){
+      tabs.forEach(function(x){ x.classList.remove('on'); });
+      t.classList.add('on');
+      var key = TAB_MAP[i];
+      // Hide all panes
+      document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('on'); });
+      // Show / hide the main users grid
+      if (mainEl) mainEl.style.display = (key === 'users' || key === 'roles') ? '' : 'none';
+      // Scroll-target a specific pane
+      if (key === 'invites') document.getElementById('ur-pane-invites').classList.add('on');
+      else if (key === 'sso') document.getElementById('ur-pane-sso').classList.add('on');
+      else if (key === 'audit') document.getElementById('ur-pane-audit').classList.add('on');
+      else if (key === 'roles') {
+        // Spotlight the role rail — scroll to it on small screens
+        if (window.innerWidth < 1100) {
+          var rail = document.querySelector('.role-rail');
+          if (rail) rail.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+      }
+    });
+  });
+
+  // ─── 2. ROLE-CARD click → filter user table by role ──
+  var roleCards = document.querySelectorAll('.role-card');
+  var bar  = document.getElementById('ur-role-filter');
+  var barNm = document.getElementById('ur-role-filter-name');
+
+  function filterByRole(roleName){
+    var key = roleName.toLowerCase();
+    document.querySelectorAll('.ut-row').forEach(function(r){
+      var role = (r.querySelector('.role-tag') || {}).textContent || '';
+      var ok = role.toLowerCase().indexOf(key) !== -1;
+      r.classList.toggle('dim', !ok);
+    });
+    if (barNm) barNm.textContent = roleName;
+    if (bar)   bar.classList.add('show');
+  }
+  window.urClearRoleFilter = function(){
+    document.querySelectorAll('.ut-row.dim').forEach(function(r){ r.classList.remove('dim'); });
+    roleCards.forEach(function(c){ c.classList.remove('on'); });
+    if (bar) bar.classList.remove('show');
+  };
+  roleCards.forEach(function(c){
+    c.addEventListener('click', function(){
+      var nm = (c.querySelector('.role-tag') || {}).textContent || 'role';
+      var alreadyOn = c.classList.contains('on');
+      roleCards.forEach(function(x){ x.classList.remove('on'); });
+      if (alreadyOn) { window.urClearRoleFilter(); return; }
+      c.classList.add('on');
+      filterByRole(nm);
+      // Switch to Users tab if not already
+      var firstTab = document.querySelector('.tabs .tab');
+      if (firstTab && !firstTab.classList.contains('on')) firstTab.click();
+    });
+  });
+
+  // ─── 3. KEBAB menus on user rows ───────────────────
+  var menuEl = document.getElementById('ur-kebab-menu');
+  function closeKebab(){
+    if (!menuEl) return;
+    menuEl.classList.remove('show');
+    setTimeout(function(){ menuEl.style.display = 'none'; }, 140);
+  }
+  document.addEventListener('click', function(e){
+    if (e.target.closest('#ur-kebab-menu')) return;
+    if (e.target.closest('.kebab')) return; // handled below
+    closeKebab();
+  });
+
+  document.querySelectorAll('.kebab').forEach(function(k){
+    k.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var row = k.closest('.ut-row');
+      if (!row) return;
+      var nameEl = row.querySelector('.nm');
+      var name = nameEl ? (nameEl.firstChild.textContent || '').trim() : 'user';
+      var emailEl = row.querySelector('.sub');
+      var email = emailEl ? emailEl.textContent.trim() : '';
+      var isPending = row.style.opacity && parseFloat(row.style.opacity) < 1;
+
+      var menu = [
+        { label: 'View profile',    icon: 'M6 6.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM2 13c0-2.5 1.8-4.5 4-4.5s4 2 4 4.5', action: function(){ go('atlas-donor-360.html'); } },
+        { label: 'Edit role',       icon: 'M3 9.5l5-5 2 2-5 5h-2v-2zM7 4.5l2 2', action: function(){ go('atlas-role-builder.html'); } },
+        { label: 'Change scope',    icon: 'M2 6h10M6 2v8M3.5 4l-1.5 2 1.5 2M10.5 4l1.5 2-1.5 2', action: function(){ toast('Scope picker · choose entities for ' + name); } }
+      ];
+      if (isPending) {
+        menu.push({ label: 'Resend invite', icon: 'M2 5l5 4 5-4M2 5v6h10V5l-5 4z', action: function(){ toast('Invite resent to ' + email); } });
+        menu.push({ label: 'Revoke invite', icon: 'M3 3l8 8M11 3l-8 8', action: function(){ toast('Invite revoked'); }, danger: true });
+      } else {
+        menu.push({ label: 'Reset password', icon: 'M3 7v3h6V7M4 7V5a2 2 0 014 0v2', action: function(){ toast('Reset link sent to ' + email); } });
+        menu.push({ label: 'Send magic link', icon: 'M2 6h8l-3-3M2 6l3 3', action: function(){ toast('Magic link sent to ' + email); } });
+        menu.push({ label: 'Suspend user', icon: 'M2 6h10M2 6a4 4 0 008 0', action: function(){ toast(name + ' suspended · their sessions ended'); }, danger: true });
+      }
+
+      // Render menu HTML
+      menuEl.innerHTML = menu.map(function(m){
+        return '<a href="#" class="' + (m.danger ? 'danger' : '') + '"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="'+m.icon+'"/></svg>'+ m.label +'</a>';
+      }).join('');
+      menuEl.querySelectorAll('a').forEach(function(a, i){
+        a.addEventListener('click', function(ev){
+          ev.preventDefault(); ev.stopPropagation();
+          closeKebab();
+          menu[i].action();
+        });
+      });
+
+      // Position the menu under the kebab dot
+      var rect = k.getBoundingClientRect();
+      menuEl.style.display = 'block';
+      menuEl.style.top = (window.scrollY + rect.bottom + 6) + 'px';
+      menuEl.style.left = (window.scrollX + rect.right - 210) + 'px';
+      requestAnimationFrame(function(){ menuEl.classList.add('show'); });
+    });
+  });
+
+  // ─── 4. Make user rows clickable → donor-360 (since users have a donor record) ──
+  document.querySelectorAll('.ut-row').forEach(function(r){
+    r.addEventListener('click', function(e){
+      if (e.target.closest('.kebab')) return;
+      go('atlas-donor-360.html');
+    });
+  });
+})();
+</script>
 
 </body>
 </html>

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GiveCentral Atlas — Walkthrough</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:        #0E1E35;
+      --navy-2:      #152844;
+      --navy-3:      #1E3A5F;
+      --blue:        #2563EB;
+      --blue-mid:    #3B82F6;
+      --blue-light:  #DBEAFE;
+      --blue-pale:   #EFF6FF;
+      --teal:        #0D9488;
+      --teal-light:  #CCFBF1;
+      --green:       #15803D;
+      --green-light: #DCFCE7;
+      --amber:       #D97706;
+      --amber-light: #FEF3C7;
+      --rose:        #BE185D;
+      --rose-light:  #FCE7F3;
+      --purple:      #7C3AED;
+      --purple-light:#EDE9FE;
+      --gold:        #B45309;
+      --gold-light:  #FEF3C7;
+      --text:        #0F172A;
+      --text-2:      #334155;
+      --text-3:      #64748B;
+      --border:      #E2E8F0;
+      --surface:     #F8FAFC;
+      --white:       #FFFFFF;
+      --sidebar-w:   220px;
+    }
+
+    html { font-size: 14px; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+
+    /* ══ CANONICAL SIDEBAR ══ */
+    .sidebar { width: var(--sidebar-w); background: var(--navy); min-height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+    .sidebar-logo { padding: 18px 18px 14px; display: flex; align-items: center; gap: 9px; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .logo-mark { width: 30px; height: 30px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .logo-mark svg { width: 15px; height: 15px; }
+    .logo-text-wrap { display: flex; flex-direction: column; }
+    .logo-name { font-family: 'DM Serif Display', serif; font-size: 15px; color: white; line-height: 1; }
+    .logo-sub { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-top: 3px; }
+    .sidebar-search { margin: 12px 12px 6px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; }
+    .sidebar-search svg { width: 13px; height: 13px; color: rgba(255,255,255,.3); flex-shrink: 0; }
+    .sidebar-search input { background: none; border: none; outline: none; width: 100%; font-size: 12px; color: rgba(255,255,255,.6); font-family: 'DM Sans', sans-serif; }
+    .sidebar-search input::placeholder { color: rgba(255,255,255,.3); }
+    .nav-group { padding: 8px 8px 0; }
+    .nav-label { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.28); padding: 0 10px; margin-bottom: 4px; }
+    .nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,.55); cursor: pointer; transition: all .15s; margin-bottom: 1px; text-decoration: none; }
+    .nav-item:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.85); }
+    .nav-item.active { background: var(--blue); color: white; }
+    .nav-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .nav-badge { margin-left: auto; background: rgba(255,255,255,.12); color: rgba(255,255,255,.6); border-radius: 10px; padding: 1px 7px; font-size: 10px; font-weight: 600; }
+    .nav-item.active .nav-badge { background: rgba(255,255,255,.2); color: white; }
+    .nav-badge.alert { background: #EF4444; color: white; }
+    .sidebar-user { margin-top: auto; padding: 12px; border-top: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; gap: 9px; }
+    .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; }
+    .user-name { font-size: 12px; font-weight: 500; color: rgba(255,255,255,.75); }
+    .user-role { font-size: 10px; color: rgba(255,255,255,.35); margin-top: 1px; }
+
+    /* ══ MAIN ══ */
+    .main { flex: 1; min-width: 0; padding: 28px 36px 48px; }
+
+    /* Hero band */
+    .hero {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-3) 60%, var(--blue) 140%);
+      border-radius: 16px; padding: 28px 32px;
+      color: white; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+      margin-bottom: 28px; position: relative; overflow: hidden;
+    }
+    .hero::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at 90% 20%, rgba(59,130,246,.35) 0%, transparent 50%),
+                  radial-gradient(circle at 10% 100%, rgba(124,58,237,.20) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .hero > * { position: relative; z-index: 1; }
+    .hero h1 { font-family: 'DM Serif Display', serif; font-size: 30px; letter-spacing: -.01em; line-height: 1.1; font-weight: 400; }
+    .hero .sub { margin-top: 8px; font-size: 13.5px; color: rgba(255,255,255,.78); max-width: 560px; line-height: 1.55; }
+    .hero .stats { display: flex; gap: 20px; }
+    .hero .st { text-align: right; }
+    .hero .st .v { font-family: 'DM Serif Display', serif; font-size: 28px; color: white; line-height: 1; }
+    .hero .st .l { font-size: 11px; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .06em; margin-top: 4px; font-weight: 600; }
+
+    /* Section heading */
+    .section-h { display: flex; align-items: baseline; gap: 12px; margin: 36px 0 16px; }
+    .section-h:first-of-type { margin-top: 4px; }
+    .section-h h2 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text); font-weight: 400; letter-spacing: -.01em; }
+    .section-h .ct { font-size: 11.5px; color: var(--text-3); font-weight: 500; }
+    .section-h .hint { margin-left: auto; font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+
+    /* Search bar */
+    .search-bar { position: relative; margin-bottom: 16px; }
+    .search-bar svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--text-3); }
+    .search-bar input {
+      width: 100%; padding: 12px 14px 12px 38px;
+      border: 1.5px solid var(--border); border-radius: 11px;
+      font-size: 13.5px; color: var(--text); font-family: 'DM Sans', sans-serif;
+      background: white; outline: none; transition: border-color .14s, box-shadow .14s;
+    }
+    .search-bar input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.10); }
+    .search-bar .kbd {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      font-size: 11px; color: var(--text-3); background: var(--surface); border: 1px solid var(--border); border-radius: 5px; padding: 2px 7px;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* ── Journey cards ── */
+    .journeys { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px; }
+    .journey {
+      background: white; border: 1px solid var(--border); border-radius: 14px; padding: 22px;
+      display: flex; flex-direction: column; gap: 14px; transition: transform .15s, box-shadow .15s, border-color .15s;
+    }
+    .journey:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15,23,42,.08); border-color: #BFDBFE; }
+    .journey-head { display: flex; align-items: flex-start; gap: 12px; }
+    .journey-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .journey-icon svg { width: 19px; height: 19px; }
+    .journey .t { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); line-height: 1.2; font-weight: 400; }
+    .journey .d { font-size: 12px; color: var(--text-3); margin-top: 4px; line-height: 1.5; }
+    .journey-steps { display: flex; flex-direction: column; gap: 2px; }
+    .jstep {
+      display: flex; align-items: center; gap: 10px; padding: 7px 10px;
+      border-radius: 7px; font-size: 12.5px; color: var(--text-2);
+      text-decoration: none; transition: all .12s;
+      position: relative;
+    }
+    .jstep:hover { background: var(--blue-pale); color: var(--blue); }
+    .jstep .n {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--surface); border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: var(--text-3); flex-shrink: 0;
+      transition: all .12s;
+    }
+    .jstep:hover .n { background: var(--blue); border-color: var(--blue); color: white; }
+    .jstep .nm { flex: 1; }
+    .jstep .arr { font-size: 11px; color: var(--text-3); opacity: 0; transition: opacity .12s; }
+    .jstep:hover .arr { opacity: 1; color: var(--blue); }
+
+    /* Color variants for journey icons */
+    .ji-blue   { background: var(--blue-pale);   color: var(--blue);   }
+    .ji-amber  { background: var(--amber-light); color: var(--amber);  }
+    .ji-green  { background: var(--green-light); color: var(--green);  }
+    .ji-rose   { background: var(--rose-light);  color: var(--rose);   }
+    .ji-purple { background: var(--purple-light);color: var(--purple); }
+    .ji-teal   { background: var(--teal-light);  color: var(--teal);   }
+
+    /* ── Sitemap ── */
+    .sitemap-section {
+      background: white; border: 1px solid var(--border); border-radius: 14px;
+      padding: 22px 24px; margin-bottom: 14px;
+    }
+    .sitemap-section-h {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+    }
+    .ss-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ss-icon svg { width: 14px; height: 14px; }
+    .ss-title { font-size: 13px; font-weight: 700; color: var(--text); }
+    .ss-count { font-size: 11px; color: var(--text-3); margin-left: auto; font-weight: 500; }
+    .sitemap-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; }
+    .tile {
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 11px; border-radius: 8px; border: 1px solid transparent;
+      text-decoration: none; color: var(--text-2); font-size: 12.5px;
+      transition: all .12s; background: transparent;
+    }
+    .tile:hover { background: var(--blue-pale); color: var(--blue); border-color: #BFDBFE; }
+    .tile .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; transition: background .12s; }
+    .tile:hover .dot { background: var(--blue); }
+    .tile .nm { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tile .file { font-size: 10.5px; color: var(--text-3); opacity: 0; transition: opacity .12s; font-family: monospace; }
+    .tile:hover .file { opacity: .8; }
+
+    .tile.is-new::after { content: 'NEW'; font-size: 8.5px; font-weight: 700; color: var(--gold); background: var(--gold-light); padding: 1px 5px; border-radius: 3px; letter-spacing: .04em; margin-left: 4px; }
+
+    /* Hidden (filtered out by search) */
+    .tile.hide, .sitemap-section.hide { display: none; }
+
+    /* Bottom CTA */
+    .bottom-cta {
+      margin-top: 28px; padding: 20px 24px; border-radius: 12px;
+      background: var(--blue-pale); border: 1px solid #BFDBFE;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .bottom-cta .body { flex: 1; font-size: 12.5px; color: #1E3A8A; line-height: 1.5; }
+    .bottom-cta strong { color: #1E40AF; }
+    .bottom-cta a { color: var(--blue); text-decoration: none; font-weight: 600; }
+
+    /* Empty state */
+    .empty-state {
+      padding: 40px 20px; text-align: center; color: var(--text-3);
+      background: white; border: 1px dashed var(--border); border-radius: 12px;
+      font-size: 13px;
+    }
+    .empty-state.hidden { display: none; }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .hero { flex-direction: column; align-items: flex-start; }
+      .hero .stats { width: 100%; justify-content: space-between; }
+    }
+    @media (max-width: 820px) {
+      .main { padding: 18px; }
+      .hero { padding: 22px; }
+      .hero h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════ SIDEBAR (canonical) ══════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 18 18" fill="none">
+          <circle cx="9" cy="9" r="7.5" stroke="white" stroke-width="1.5"/>
+          <path d="M5.5 9.5C6.5 11.5 9 13 9 13s2.5-1.5 3.5-3.5S12 5 9 5 4.5 7.5 5.5 9.5z" fill="white" fill-opacity=".9"/>
+        </svg>
+      </div>
+      <div class="logo-text-wrap">
+        <span class="logo-name">GiveCentral</span>
+        <span class="logo-sub">Atlas CRM</span>
+      </div>
+    </div>
+
+    <a href="atlas-search.html" style="display:block;text-decoration:none">
+      <div class="sidebar-search">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+        <input type="text" placeholder="Search donors, gifts…" readonly>
+      </div>
+    </a>
+
+    <div class="sidebar-scroll">
+
+    <div class="nav-group">
+      <div class="nav-label">Main</div>
+      <a class="nav-item" href="atlas-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="atlas-donors-list.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>
+        Donors
+        <span class="nav-badge">3,847</span>
+      </a>
+      <a class="nav-item" href="atlas-gifts-pledges.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>
+        Gifts &amp; pledges
+        <span class="nav-badge">142</span>
+      </a>
+      <a class="nav-item" href="atlas-campaign-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>
+        Campaigns
+      </a>
+      <a class="nav-item" href="atlas-reports.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>
+        Reports
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Fundraising</div>
+      <a class="nav-item" href="atlas-pipeline.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
+        Prospect pipeline
+        <span class="nav-badge">28</span>
+      </a>
+      <a class="nav-item" href="atlas-tasks.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>
+        Tasks &amp; reminders
+        <span class="nav-badge alert">7</span>
+      </a>
+      <a class="nav-item" href="atlas-communications.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>
+        Communications
+      </a>
+      <a class="nav-item" href="atlas-events-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>
+        Events
+      </a>
+      <a class="nav-item" href="atlas-volunteer-management.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
+        Volunteers
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Intelligence</div>
+      <a class="nav-item" href="atlas-guru-ai.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>
+        Guru AI
+      </a>
+      <a class="nav-item" href="atlas-reports.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>
+        Analytics
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Admin</div>
+      <a class="nav-item" href="atlas-users-roles.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
+        Users &amp; roles
+      </a>
+      <a class="nav-item" href="atlas-integrations.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>
+        Integrations
+      </a>
+      <a class="nav-item" href="atlas-sync.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>
+        Sync
+      </a>
+      <a class="nav-item" href="atlas-location-manage.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>
+        Location portal
+      </a>
+    </div>
+
+    </div><!-- /.sidebar-scroll -->
+
+    <div class="sidebar-user">
+      <div class="user-avatar">SR</div>
+      <div>
+        <div class="user-name">Sarah Reynolds</div>
+        <div class="user-role">Development Director</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══════════════ MAIN ══════════════ -->
+  <main class="main">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div>
+        <h1>Atlas walkthrough</h1>
+        <div class="sub">A single entry-point into the full GiveCentral Atlas prototype — Phase 1, end of June 2026. Use the curated journeys below to demo a flow, or browse the full sitemap to jump to any screen.</div>
+      </div>
+      <div class="stats">
+        <div class="st"><div class="v">72</div><div class="l">Screens</div></div>
+        <div class="st"><div class="v">6</div><div class="l">Journeys</div></div>
+        <div class="st"><div class="v">10</div><div class="l">Sections</div></div>
+      </div>
+    </div>
+
+    <!-- Search filter -->
+    <div class="search-bar">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+      <input id="wt-search" type="text" placeholder="Filter screens — type donor, gift, event, pledge…" autocomplete="off">
+      <span class="kbd">/</span>
+    </div>
+
+    <!-- ───────── CURATED JOURNEYS ───────── -->
+    <div class="section-h">
+      <h2>Curated journeys</h2>
+      <span class="ct">6 user flows</span>
+      <span class="hint">Click any step to jump in</span>
+    </div>
+
+    <div class="journeys">
+
+      <!-- 1. Major-donor cultivation -->
+      <div class="journey">
+        <div class="journey-head">
+          <div class="journey-icon ji-purple">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2l2.5 5 5.5.8L14 12l1 5.5L10 15l-5 2.5 1-5.5-4-4.2 5.5-.8z"/></svg>
+          </div>
+          <div>
+            <div class="t">Major-donor cultivation</div>
+            <div class="d">Identify a prospect, brief yourself, log a visit, send a thank-you, close the gift.</div>
+          </div>
+        </div>
+        <div class="journey-steps">
+          <a class="jstep" href="atlas-pipeline.html"><span class="n">1</span><span class="nm">Open the prospect pipeline</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-donor-360.html"><span class="n">2</span><span class="nm">View the donor 360 record</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-wealth-screening.html"><span class="n">3</span><span class="nm">Check wealth screening + capacity</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-meeting-brief.html"><span class="n">4</span><span class="nm">Read the AI meeting brief</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-log-activity.html"><span class="n">5</span><span class="nm">Log the visit / call</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-pledge-create.html"><span class="n">6</span><span class="nm">Create the pledge</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-email-compose.html"><span class="n">7</span><span class="nm">Send a personalised thank-you</span><span class="arr">→</span></a>
+        </div>
+      </div>
+
+      <!-- 2. Daily gift entry -->
+      <div class="journey">
+        <div class="journey-head">
+          <div class="journey-icon ji-blue">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h14v14H3z"/><path d="M3 7h14M7 3v14"/></svg>
+          </div>
+          <div>
+            <div class="t">Daily gift entry</div>
+            <div class="d">A DBA's start-of-day batch flow: import, post, reconcile, send receipts.</div>
+          </div>
+        </div>
+        <div class="journey-steps">
+          <a class="jstep" href="atlas-login.html"><span class="n">1</span><span class="nm">Sign in to Atlas</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-dashboard.html"><span class="n">2</span><span class="nm">Check the dashboard alerts</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-gifts-pledges.html"><span class="n">3</span><span class="nm">Open Gifts &amp; Pledges hub</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-batch-entry.html"><span class="n">4</span><span class="nm">Start a new batch</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-batch-exceptions.html"><span class="n">5</span><span class="nm">Resolve duplicate / exception rows</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-receipt-preview.html"><span class="n">6</span><span class="nm">Preview &amp; send tax receipts</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-sync.html"><span class="n">7</span><span class="nm">Confirm GL sync to accounting</span><span class="arr">→</span></a>
+        </div>
+      </div>
+
+      <!-- 3. Event lifecycle -->
+      <div class="journey">
+        <div class="journey-head">
+          <div class="journey-icon ji-amber">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="1.5"/><path d="M3 8h14M7 3v3M13 3v3"/></svg>
+          </div>
+          <div>
+            <div class="t">Event lifecycle</div>
+            <div class="d">Plan a gala, sell tables, run check-in on the night, send post-event reports.</div>
+          </div>
+        </div>
+        <div class="journey-steps">
+          <a class="jstep" href="atlas-events-dashboard.html"><span class="n">1</span><span class="nm">Open the events dashboard</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-event-create.html"><span class="n">2</span><span class="nm">Run the 5-step event wizard</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-gala-management.html"><span class="n">3</span><span class="nm">Manage tables &amp; sponsors</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-email-compose.html"><span class="n">4</span><span class="nm">Send invites / save-the-dates</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-checkin.html"><span class="n">5</span><span class="nm">Day-of guest check-in</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-report-detail.html"><span class="n">6</span><span class="nm">Post-event revenue report</span><span class="arr">→</span></a>
+        </div>
+      </div>
+
+      <!-- 4. Donor portal experience -->
+      <div class="journey">
+        <div class="journey-head">
+          <div class="journey-icon ji-rose">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17.5s-7-4.5-7-10a4 4 0 017-2.5A4 4 0 0117 7.5c0 5.5-7 10-7 10z"/></svg>
+          </div>
+          <div>
+            <div class="t">Donor portal experience</div>
+            <div class="d">What a donor sees: claim account, give, manage recurring, view receipts.</div>
+          </div>
+        </div>
+        <div class="journey-steps">
+          <a class="jstep" href="atlas-donor-login.html"><span class="n">1</span><span class="nm">Donor signs in / claims account</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-donor-portal.html"><span class="n">2</span><span class="nm">Personal donor portal</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-donate-onetime.html"><span class="n">3</span><span class="nm">Make a one-time gift</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-donate-recurring.html"><span class="n">4</span><span class="nm">Set up recurring giving</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-donate-confirmation.html"><span class="n">5</span><span class="nm">Gift confirmation + receipt</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-donor-recurring.html"><span class="n">6</span><span class="nm">Manage existing recurring gift</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-donor-profile.html"><span class="n">7</span><span class="nm">Update profile / preferences</span><span class="arr">→</span></a>
+        </div>
+      </div>
+
+      <!-- 5. Reports & analytics -->
+      <div class="journey">
+        <div class="journey-head">
+          <div class="journey-icon ji-green">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l4-4 3 3 5-6 2 2"/><rect x="3" y="3" width="14" height="14" rx="1.5"/></svg>
+          </div>
+          <div>
+            <div class="t">Reports &amp; analytics</div>
+            <div class="d">Find a saved report, build a custom one, or schedule a recurring digest.</div>
+          </div>
+        </div>
+        <div class="journey-steps">
+          <a class="jstep" href="atlas-reports.html"><span class="n">1</span><span class="nm">Open the reports hub</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-report-detail.html"><span class="n">2</span><span class="nm">View a standard report</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-tribute-report.html"><span class="n">3</span><span class="nm">Tribute &amp; in-honor-of report</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-pledge-reports.html"><span class="n">4</span><span class="nm">Pledge progress report</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-solicitor-performance.html"><span class="n">5</span><span class="nm">Solicitor leaderboard</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-report-queue-scheduler.html"><span class="n">6</span><span class="nm">Schedule a recurring report</span><span class="arr">→</span></a>
+        </div>
+      </div>
+
+      <!-- 6. Admin setup -->
+      <div class="journey">
+        <div class="journey-head">
+          <div class="journey-icon ji-teal">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="12" height="9" rx="1.5"/><path d="M7 9V6a3 3 0 016 0v3"/></svg>
+          </div>
+          <div>
+            <div class="t">Admin &amp; access setup</div>
+            <div class="d">Invite a teammate, build a custom role, audit who did what.</div>
+          </div>
+        </div>
+        <div class="journey-steps">
+          <a class="jstep" href="atlas-users-roles.html"><span class="n">1</span><span class="nm">Open Users &amp; Roles</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-invite-user.html"><span class="n">2</span><span class="nm">Invite a new user</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-role-builder.html"><span class="n">3</span><span class="nm">Define a custom role</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-location-manage.html"><span class="n">4</span><span class="nm">Manage locations / parishes</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-integrations.html"><span class="n">5</span><span class="nm">Connect integrations</span><span class="arr">→</span></a>
+          <a class="jstep" href="atlas-sync.html"><span class="n">6</span><span class="nm">Configure data sync</span><span class="arr">→</span></a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ───────── FULL SITEMAP ───────── -->
+    <div class="section-h" style="margin-top:42px">
+      <h2>Full sitemap</h2>
+      <span class="ct">All 72 screens grouped by section</span>
+      <span class="hint" id="result-count">72 screens</span>
+    </div>
+
+    <div id="sitemap-wrap">
+
+      <!-- Daily / Core -->
+      <div class="sitemap-section" data-cat="daily">
+        <div class="sitemap-section-h">
+          <div class="ss-icon ji-blue"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1"/><rect x="8.5" y="1.5" width="4" height="4" rx="1"/><rect x="1.5" y="8.5" width="4" height="4" rx="1"/><rect x="8.5" y="8.5" width="4" height="4" rx="1"/></svg></div>
+          <div class="ss-title">Daily &amp; core</div>
+          <div class="ss-count">7 screens</div>
+        </div>
+        <div class="sitemap-tiles">
+          <a class="tile" href="atlas-dashboard.html"><span class="dot"></span><span class="nm">Dashboard</span><span class="file">atlas-dashboard</span></a>
+          <a class="tile" href="atlas-tasks.html"><span class="dot"></span><span class="nm">Tasks &amp; reminders</span><span class="file">atlas-tasks</span></a>
+          <a class="tile" href="atlas-task-modal.html"><span class="dot"></span><span class="nm">Add task modal</span><span class="file">atlas-task-modal</span></a>
+          <a class="tile" href="atlas-search.html"><span class="dot"></span><span class="nm">Global search</span><span class="file">atlas-search</span></a>
+          <a class="tile" href="atlas-notifications.html"><span class="dot"></span><span class="nm">Notifications</span><span class="file">atlas-notifications</span></a>
+          <a class="tile" href="atlas-meeting-brief.html"><span class="dot"></span><span class="nm">Meeting brief (AI)</span><span class="file">atlas-meeting-brief</span></a>
+          <a class="tile" href="atlas-guru-ai.html"><span class="dot"></span><span class="nm">Guru AI workspace</span><span class="file">atlas-guru-ai</span></a>
+        </div>
+      </div>
+
+      <!-- Donors -->
+      <div class="sitemap-section" data-cat="donors">
+        <div class="sitemap-section-h">
+          <div class="ss-icon ji-rose"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg></div>
+          <div class="ss-title">Donors</div>
+          <div class="ss-count">8 screens</div>
+        </div>
+        <div class="sitemap-tiles">
+          <a class="tile" href="atlas-donors-list.html"><span class="dot"></span><span class="nm">Donors list</span><span class="file">atlas-donors-list</span></a>
+          <a class="tile" href="atlas-donor-360.html"><span class="dot"></span><span class="nm">Donor 360 profile</span><span class="file">atlas-donor-360</span></a>
+          <a class="tile" href="atlas-add-constituent.html"><span class="dot"></span><span class="nm">Add constituent wizard</span><span class="file">atlas-add-constituent</span></a>
+          <a class="tile" href="atlas-edit-constituent.html"><span class="dot"></span><span class="nm">Edit constituent</span><span class="file">atlas-edit-constituent</span></a>
+          <a class="tile" href="atlas-duplicates.html"><span class="dot"></span><span class="nm">Duplicate review</span><span class="file">atlas-duplicates</span></a>
+          <a class="tile" href="atlas-merge.html"><span class="dot"></span><span class="nm">Merge records</span><span class="file">atlas-merge</span></a>
+          <a class="tile" href="atlas-segment-builder.html"><span class="dot"></span><span class="nm">Segment builder</span><span class="file">atlas-segment-builder</span></a>
+          <a class="tile" href="atlas-wealth-screening.html"><span class="dot"></span><span class="nm">Wealth screening</span><span class="file">atlas-wealth-screening</span></a>
+        </div>
+      </div>
+
+      <!-- Gifts & Pledges -->
+      <div class="sitemap-section" data-cat="gifts">
+        <div class="sitemap-section-h">
+          <div class="ss-icon ji-green"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg></div>
+          <div class="ss-title">Gifts &amp; pledges</div>
+          <div class="ss-count">12 screens</div>
+        </div>
+        <div class="sitemap-tiles">
+          <a class="tile" href="atlas-gifts-pledges.html"><span class="dot"></span><span class="nm">Gifts &amp; Pledges hub</span><span class="file">atlas-gifts-pledges</span></a>
+          <a class="tile" href="atlas-gift-entry.html"><span class="dot"></span><span class="nm">Single gift entry</span><span class="file">atlas-gift-entry</span></a>
+          <a class="tile" href="atlas-gift-type-guide.html"><span class="dot"></span><span class="nm">Gift type reference</span><span class="file">atlas-gift-type-guide</span></a>
+          <a class="tile" href="atlas-batch-entry.html"><span class="dot"></span><span class="nm">Batch entry</span><span class="file">atlas-batch-entry</span></a>
+          <a class="tile" href="atlas-batch-exceptions.html"><span class="dot"></span><span class="nm">Batch exceptions</span><span class="file">atlas-batch-exceptions</span></a>
+          <a class="tile" href="atlas-stock-gift.html"><span class="dot"></span><span class="nm">Stock gift</span><span class="file">atlas-stock-gift</span></a>
+          <a class="tile" href="atlas-pledges-list.html"><span class="dot"></span><span class="nm">Pledges list</span><span class="file">atlas-pledges-list</span></a>
+          <a class="tile" href="atlas-pledge-create.html"><span class="dot"></span><span class="nm">Create pledge</span><span class="file">atlas-pledge-create</span></a>
+          <a class="tile" href="atlas-pledge-detail.html"><span class="dot"></span><span class="nm">Pledge detail</span><span class="file">atlas-pledge-detail</span></a>
+          <a class="tile" href="atlas-pledge-payment.html"><span class="dot"></span><span class="nm">Pledge payment</span><span class="file">atlas-pledge-payment</span></a>
+          <a class="tile" href="atlas-log-activity.html"><span class="dot"></span><span class="nm">Log activity</span><span class="file">atlas-log-activity</span></a>
+          <a class="tile" href="atlas-receipt-preview.html"><span class="dot"></span><span class="nm">Receipt preview</span><span class="file">atlas-receipt-preview</span></a>
+        </div>
+      </div>
+
+      <!-- Campaigns -->
+      <div class="sitemap-section" data-cat="campaigns">
+        <div class="sitemap-section-h">
+          <div class="ss-icon ji-amber"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg></div>
+          <div class="ss-title">Campaigns</div>
+          <div class="ss-count">3 screens</div>
+        </div>
+        <div class="sitemap-tiles">
+          <a class="tile" href="atlas-campaign-dashboard.html"><span class="dot"></span><span class="nm">Campaigns hub</span><span class="file">atlas-campaign-dashboard</span></a>
+          <a class="tile" href="atlas-campaign-create.html"><span class="dot"></span><span class="nm">Create campaign wizard</span><span class="file">atlas-campaign-create</span></a>
+          <a class="tile" href="atlas-campaign-detail.html"><span class="dot"></span><span class="nm">Campaign detail</span><span class="file">atlas-campaign-detail</span></a>
+        </div>
+      </div>
+
+      <!-- Pipeline -->
+      <div class="sitemap-section" data-cat="pipeline">
+        <div class="sitemap-section-h">
+          <div class="ss-icon ji-purple"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg></div>
+          <div class="ss-title">Pipeline</div>
+          <div class="ss-count">6 screens</div>
+        </div>
+        <div class="sitemap-tiles">
+          <a class="tile" href="atlas-pipeline.html"><span class="dot"></span><span class="nm">Prospect pipeline board</span><span class="file">atlas-pipeline</span></a>
+          <a class="tile" href="atlas-pipeline-flow.html"><span class="dot"></span><span class="nm">Full lifecycle view</span><span class="file">atlas-pipeline-flow</span></a>
+          <a class="tile" href="atlas-pipeline-forecast.html"><span class="dot"></span><span class="nm">Pipeline forecast</span><span class="file">atlas-pipeline-forecast</span></a>
+          <a class="tile" href="atlas-add-prospect.html"><span class="dot"></span><span class="nm">Add prospect</span><span class="file">atlas-add-prospect</span></a>
+          <a class="tile" href="atlas-portfolio-assign.html"><span class="dot"></span><span class="nm">Portfolio assign</span><span class="file">atlas-portfolio-assign</span></a>
+          <a class="tile" href="atlas-solicitor-performance.html"><span class="dot"></span><span class="nm">Solicitor leaderboard</span><span class="file">atlas-solicitor-performance</span></a>
+        </div>
+      </div>
+
+      <!-- Events & Volunteers -->
+      <div class="sitemap-section" data-cat="events">
+        <div class="sitemap-section-h">
+          <div class="ss-icon ji-amber"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg></div>
+          <div class="ss-title">Events &amp; volunteers</div>
+          <div class="ss-count">6 screens</div>
+        </div>
+        <div class="sitemap-tiles">
+          <a class="tile" href="atlas-events-dashboard.html"><span class="dot"></span><span class="nm">Events dashboard</span><span class="file">atlas-events-dashboard</span></a>
+          <a class="tile is-new" href="atlas-event-create.html"><span class="dot"></span><span class="nm">Create event wizard</span><span class="file">atlas-event-create</span></a>
+          <a class="tile" href="atlas-gala-management.html"><span class="dot"></span><span class="nm">Gala management</span><span class="file">atlas-gala-management</span></a>
+          <a class="tile" href="atlas-retreat.html"><span class="dot"></span><span class="nm">Retreat management</span><span class="file">atlas-retreat</span></a>
+          <a class="tile" href="atlas-checkin.html"><span class="dot"></span><span class="nm">Day-of check-in</span><span class="file">atlas-checkin</span></a>
+          <a class="tile" href="atlas-volunteer-management.html"><span class="dot"></span><span class="nm">Volunteer management</span><span class="file">atlas-volunteer-management</span></a>
+        </div>
+      </div>
+
+      <!-- Communications -->
+      <div class="sitemap-section" data-cat="comms">
+        <div class="sitemap-section-h">
+          <div class="ss-icon ji-blue"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg></div>
+          <div class="ss-title">Communications</div>
+          <div class="ss-count">3 screens</div>
+        </div>
+        <div class="sitemap-tiles">
+          <a class="tile" href="atlas-communications.html"><span class="dot"></span><span class="nm">Communications hub</span><span class="file">atlas-communications</span></a>
+          <a class="tile" href="atlas-email-compose.html"><span class="dot"></span><span class="nm">Compose email</span><span class="file">atlas-email-compose</span></a>
+          <a class="tile" href="atlas-docusign-agreements.html"><span class="dot"></span><span class="nm">DocuSign agreements</span><span class="file">atlas-docusign-agreements</span></a>
+        </div>
+      </div>
+
+      <!-- Reports -->
+      <div class="sitemap-section" data-cat="reports">
+        <div class="sitemap-section-h">
+          <div class="ss-icon ji-green"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg></div>
+          <div class="ss-title">Reports &amp; analytics</div>
+          <div class="ss-count">5 screens</div>
+        </div>
+        <div class="sitemap-tiles">
+          <a class="tile" href="atlas-reports.html"><span class="dot"></span><span class="nm">Reports hub</span><span class="file">atlas-reports</span></a>
+          <a class="tile" href="atlas-report-detail.html"><span class="dot"></span><span class="nm">Report detail</span><span class="file">atlas-report-detail</span></a>
+          <a class="tile is-new" href="atlas-tribute-report.html"><span class="dot"></span><span class="nm">Tribute report</span><span class="file">atlas-tribute-report</span></a>
+          <a class="tile is-new" href="atlas-pledge-reports.html"><span class="dot"></span><span class="nm">Pledge reports</span><span class="file">atlas-pledge-reports</span></a>
+          <a class="tile is-new" href="atlas-report-queue-scheduler.html"><span class="dot"></span><span class="nm">Report queue scheduler</span><span class="file">atlas-report-queue-scheduler</span></a>
+        </div>
+      </div>
+
+      <!-- Donor-facing -->
+      <div class="sitemap-section" data-cat="donor-portal">
+        <div class="sitemap-section-h">
+          <div class="ss-icon ji-rose"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 12s5-3 5-7a4 4 0 00-5-2A4 4 0 002 5c0 4 5 7 5 7z"/></svg></div>
+          <div class="ss-title">Donor-facing</div>
+          <div class="ss-count">9 screens</div>
+        </div>
+        <div class="sitemap-tiles">
+          <a class="tile" href="atlas-donor-login.html"><span class="dot"></span><span class="nm">Donor login</span><span class="file">atlas-donor-login</span></a>
+          <a class="tile" href="atlas-donor-portal.html"><span class="dot"></span><span class="nm">Donor portal</span><span class="file">atlas-donor-portal</span></a>
+          <a class="tile" href="atlas-donor-profile.html"><span class="dot"></span><span class="nm">Donor profile (donor view)</span><span class="file">atlas-donor-profile</span></a>
+          <a class="tile" href="atlas-donor-recurring.html"><span class="dot"></span><span class="nm">My recurring gifts</span><span class="file">atlas-donor-recurring</span></a>
+          <a class="tile" href="atlas-donate-onetime.html"><span class="dot"></span><span class="nm">Donate one-time</span><span class="file">atlas-donate-onetime</span></a>
+          <a class="tile" href="atlas-donate-recurring.html"><span class="dot"></span><span class="nm">Donate recurring</span><span class="file">atlas-donate-recurring</span></a>
+          <a class="tile" href="atlas-donate-confirmation.html"><span class="dot"></span><span class="nm">Donate confirmation</span><span class="file">atlas-donate-confirmation</span></a>
+          <a class="tile" href="atlas-location-portal.html"><span class="dot"></span><span class="nm">Parish / location portal</span><span class="file">atlas-location-portal</span></a>
+          <a class="tile" href="atlas-visit-map.html"><span class="dot"></span><span class="nm">Visit map</span><span class="file">atlas-visit-map</span></a>
+        </div>
+      </div>
+
+      <!-- Admin & Settings -->
+      <div class="sitemap-section" data-cat="admin">
+        <div class="sitemap-section-h">
+          <div class="ss-icon ji-teal"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg></div>
+          <div class="ss-title">Admin &amp; settings</div>
+          <div class="ss-count">8 screens</div>
+        </div>
+        <div class="sitemap-tiles">
+          <a class="tile" href="atlas-login.html"><span class="dot"></span><span class="nm">Staff login</span><span class="file">atlas-login</span></a>
+          <a class="tile" href="atlas-users-roles.html"><span class="dot"></span><span class="nm">Users &amp; roles</span><span class="file">atlas-users-roles</span></a>
+          <a class="tile" href="atlas-invite-user.html"><span class="dot"></span><span class="nm">Invite user</span><span class="file">atlas-invite-user</span></a>
+          <a class="tile" href="atlas-role-builder.html"><span class="dot"></span><span class="nm">Role builder</span><span class="file">atlas-role-builder</span></a>
+          <a class="tile" href="atlas-integrations.html"><span class="dot"></span><span class="nm">Integrations</span><span class="file">atlas-integrations</span></a>
+          <a class="tile" href="atlas-add-integration.html"><span class="dot"></span><span class="nm">Add integration</span><span class="file">atlas-add-integration</span></a>
+          <a class="tile" href="atlas-location-manage.html"><span class="dot"></span><span class="nm">Locations &amp; parishes</span><span class="file">atlas-location-manage</span></a>
+          <a class="tile" href="atlas-sync.html"><span class="dot"></span><span class="nm">Sync &amp; reconciliation</span><span class="file">atlas-sync</span></a>
+        </div>
+      </div>
+
+      <!-- Design / meta -->
+      <div class="sitemap-section" data-cat="meta">
+        <div class="sitemap-section-h">
+          <div class="ss-icon ji-purple"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="10" height="10" rx="2"/><path d="M5 5l4 4M9 5l-4 4"/></svg></div>
+          <div class="ss-title">Design &amp; meta</div>
+          <div class="ss-count">5 screens</div>
+        </div>
+        <div class="sitemap-tiles">
+          <a class="tile" href="atlas-component-library.html"><span class="dot"></span><span class="nm">Component library</span><span class="file">atlas-component-library</span></a>
+          <a class="tile" href="atlas-guided-tour.html"><span class="dot"></span><span class="nm">Onboarding tour</span><span class="file">atlas-guided-tour</span></a>
+          <a class="tile" href="atlas-logo-concepts.html"><span class="dot"></span><span class="nm">Logo concepts</span><span class="file">atlas-logo-concepts</span></a>
+          <a class="tile" href="atlas-gap-audit.html"><span class="dot"></span><span class="nm">Phase 1 gap audit</span><span class="file">atlas-gap-audit</span></a>
+          <a class="tile" href="atlas-walkthrough.html"><span class="dot"></span><span class="nm">This walkthrough (you're here)</span><span class="file">atlas-walkthrough</span></a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="empty-state hidden" id="empty">
+      No screens match your search. Try a different keyword.
+    </div>
+
+    <!-- Footer note -->
+    <div class="bottom-cta">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16v.5"/></svg>
+      <div class="body">
+        <strong>Prototype walkthrough</strong> — these screens are interactive HTML prototypes, not a working backend. Toasts and modals simulate the real flow. Sidebar nav works on every page so you can keep exploring after jumping in.
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+  (function(){
+    // Filter sitemap tiles by search input
+    var input = document.getElementById('wt-search');
+    var allTiles = document.querySelectorAll('.tile');
+    var allSections = document.querySelectorAll('.sitemap-section');
+    var empty = document.getElementById('empty');
+    var resultCount = document.getElementById('result-count');
+
+    function filter(q){
+      q = (q || '').trim().toLowerCase();
+      var visible = 0;
+      allTiles.forEach(function(t){
+        var hay = (t.textContent + ' ' + (t.getAttribute('href') || '')).toLowerCase();
+        var match = !q || hay.indexOf(q) !== -1;
+        t.classList.toggle('hide', !match);
+        if (match) visible++;
+      });
+      // Hide sections that have no visible tiles
+      allSections.forEach(function(s){
+        var anyVisible = s.querySelectorAll('.tile:not(.hide)').length > 0;
+        s.classList.toggle('hide', !anyVisible);
+      });
+      empty.classList.toggle('hidden', visible > 0);
+      resultCount.textContent = q ? (visible + ' screen' + (visible === 1 ? '' : 's') + ' match') : '72 screens';
+    }
+
+    input.addEventListener('input', function(){ filter(this.value); });
+
+    // Keyboard "/" to focus search
+    document.addEventListener('keydown', function(e){
+      if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        input.focus();
+        input.select();
+      }
+      if (e.key === 'Escape' && document.activeElement === input) {
+        input.value = '';
+        filter('');
+        input.blur();
+      }
+    });
+  })();
+  </script>
+
+</body>
+</html>

@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-<meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GiveCentral Atlas — Campaign Overview</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -377,15 +376,6 @@ body {
 </style>
 </head>
 <body>
-<div id="prototype-banner" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#7c3aed;color:#fff;font-family:sans-serif;font-size:13px;font-weight:500;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.25);">
-  <span style="display:flex;align-items:center;gap:8px;">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><circle cx="8" cy="8" r="7" stroke="white" stroke-width="1.5"/><path d="M8 5v3.5M8 10.5v.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-    <strong>UI DESIGN PROTOTYPE</strong> — For demonstration purposes only. No real data.
-  </span>
-  <span style="opacity:.75;font-size:12px;">Built by <a href="https://givecentral.com" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">GiveCentral</a> &nbsp;·&nbsp;<a href="https://givecentral.com/privacy" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">Privacy Policy</a></span>
-  <button onclick="document.getElementById('prototype-banner').style.display='none'" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;font-family:inherit;flex-shrink:0;">✕ Dismiss</button>
-</div>
-<div style="height:50px"></div>
 
 <!-- ── SIDEBAR ── -->
 <aside class="sidebar">
@@ -827,7 +817,7 @@ function openDrawer(id) {
       <div class="gauge-wrap">
         <svg class="gauge-svg" viewBox="0 0 140 78">
           <path d="M 18 74 A 52 52 0 0 1 122 74" fill="none" stroke="var(--border)" stroke-width="10" stroke-linecap="round"/>
-          <path d="M 18 74 A 52 52 0 0 1 ${18 + Math.cos(Math.PI - (c.pct/100)*Math.PI)*104} ${74 - Math.sin((c.pct/100)*Math.PI)*104}" fill="none" stroke="${c.iconStroke}" stroke-width="10" stroke-linecap="round"/>
+          <path d="M 18 74 A 52 52 0 0 1 ${(70 + Math.cos(Math.PI - (c.pct/100)*Math.PI)*52).toFixed(2)} ${(74 - Math.sin((c.pct/100)*Math.PI)*52).toFixed(2)}" fill="none" stroke="${c.iconStroke}" stroke-width="10" stroke-linecap="round"/>
           <text x="70" y="52" text-anchor="middle" font-family="DM Serif Display,serif" font-size="18" fill="var(--text)">${c.pct}%</text>
         </svg>
         <div class="gauge-sub">${raised} of $${(c.goal/1000).toFixed(0)}K goal</div>
@@ -1249,9 +1239,66 @@ setTimeout(() => openDrawer(1), 600);
 
   // 5) Quick affordances on user avatar block
   var su = document.querySelector('.sidebar-user');
-  if (su) su.addEventListener('click', function(){
-    if (confirm('Sign out of Atlas?')) window.location = 'atlas-login.html';
-  });
+  if (su) {
+    su.style.cursor = 'pointer';
+    su.addEventListener('click', function(e){
+      e.stopPropagation();
+      // Close any existing menu
+      var prev = document.getElementById('atlas-user-menu');
+      if (prev) { prev.remove(); return; }
+      // Build the popover
+      var m = document.createElement('div');
+      m.id = 'atlas-user-menu';
+      m.style.cssText = 'position:fixed;z-index:10100;background:white;border:1px solid #E2E8F0;border-radius:11px;box-shadow:0 12px 32px rgba(15,23,42,.16);padding:6px;min-width:220px;font-family:DM Sans,sans-serif;font-size:13px;animation:auMenuIn .14s ease;';
+      m.innerHTML =
+        '<div style="padding:10px 12px 8px;border-bottom:1px solid #F1F5F9;margin-bottom:4px">' +
+          '<div style="font-size:13px;font-weight:600;color:#0F172A">Sarah Reynolds</div>' +
+          '<div style="font-size:11.5px;color:#64748B;margin-top:1px">sarah.reynolds@diocese.org</div>' +
+        '</div>' +
+        '<a href="atlas-my-profile.html" class="au-item" style="display:flex;align-items:center;gap:9px;padding:8px 10px;color:#334155;text-decoration:none;border-radius:6px"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="width:13px;height:13px;color:#64748B;flex-shrink:0"><circle cx="7" cy="5" r="3"/><path d="M2 12.5c0-2.5 2-4.5 5-4.5s5 2 5 4.5"/></svg>My profile &amp; preferences</a>' +
+        '<a href="atlas-notifications.html" class="au-item" style="display:flex;align-items:center;gap:9px;padding:8px 10px;color:#334155;text-decoration:none;border-radius:6px"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="width:13px;height:13px;color:#64748B;flex-shrink:0"><path d="M7 2a4 4 0 014 4v2.5l1 1.5H2l1-1.5V6a4 4 0 014-4zM5.5 12.5a1.5 1.5 0 003 0"/></svg>Notifications</a>' +
+        '<a href="atlas-guided-tour.html" class="au-item" style="display:flex;align-items:center;gap:9px;padding:8px 10px;color:#334155;text-decoration:none;border-radius:6px"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="width:13px;height:13px;color:#64748B;flex-shrink:0"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v.5M6 7h1v3h1"/></svg>Help &amp; product tour</a>' +
+        '<div style="border-top:1px solid #F1F5F9;margin-top:4px;padding-top:4px">' +
+          '<a href="#" id="au-signout" class="au-item" style="display:flex;align-items:center;gap:9px;padding:8px 10px;color:#BE185D;text-decoration:none;border-radius:6px"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="width:13px;height:13px;flex-shrink:0"><path d="M6 11.5H2.5V2.5H6M9 4l3 3-3 3M5 7h7"/></svg>Sign out</a>' +
+        '</div>';
+      document.body.appendChild(m);
+      // Position to the right of the sidebar, near the avatar
+      var rect = su.getBoundingClientRect();
+      m.style.left = (rect.right + 8) + 'px';
+      m.style.bottom = (window.innerHeight - rect.bottom) + 'px';
+      // Hover style
+      m.querySelectorAll('.au-item').forEach(function(a){
+        a.addEventListener('mouseenter', function(){ a.style.background = a.id === 'au-signout' ? '#FEF2F2' : '#EFF6FF'; if (a.id !== 'au-signout') a.style.color = '#2563EB'; });
+        a.addEventListener('mouseleave', function(){ a.style.background = 'transparent'; if (a.id !== 'au-signout') a.style.color = '#334155'; });
+      });
+      m.querySelector('#au-signout').addEventListener('click', function(ev){
+        ev.preventDefault();
+        if (confirm('Sign out of Atlas?')) window.location = 'atlas-login.html';
+      });
+      // Close on outside click / Esc
+      setTimeout(function(){
+        document.addEventListener('click', function close(ev){
+          if (!ev.target.closest('#atlas-user-menu')) {
+            m.remove();
+            document.removeEventListener('click', close);
+          }
+        });
+        document.addEventListener('keydown', function esc(ev){
+          if (ev.key === 'Escape') {
+            m.remove();
+            document.removeEventListener('keydown', esc);
+          }
+        });
+      }, 50);
+    });
+    // Inject keyframes once
+    if (!document.getElementById('au-menu-style')) {
+      var st = document.createElement('style');
+      st.id = 'au-menu-style';
+      st.textContent = '@keyframes auMenuIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }';
+      document.head.appendChild(st);
+    }
+  }
 
   // 6) Add a footer banner so the wiring is visible to reviewers
   // (intentionally subtle; designed to be removed easily once the prototype goes to dev)
