@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GiveCentral Atlas — Add constituent</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -381,10 +380,153 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 /* Soft credit recipient picker */
 .sc-recipient { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--surface); border:1px solid var(--border); border-radius:9px; margin-bottom:6px; }
 .sc-recipient .av { width:28px; height:28px; border-radius:50%; background:var(--green); color:white; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
-.sc-recipient .nm { flex:1; font-size:13px; color:var(--text); }
+.sc-recipient .nm { flex:1; font-size:13px; color:var(--text); min-width: 0; }
 .sc-recipient .nm small { display:block; color:var(--text-3); font-size:11px; }
-.sc-recipient .x { color:var(--text-3); cursor:pointer; padding:4px 6px; }
+.sc-recipient .pct-wrap { display:flex; align-items:center; gap:4px; background:white; border:1.5px solid var(--border); border-radius:7px; padding:3px 8px 3px 10px; }
+.sc-recipient .pct-wrap input { border:none; outline:none; width:38px; font-size:12.5px; font-weight:600; color:var(--text); font-family:'DM Sans',sans-serif; text-align:right; }
+.sc-recipient .pct-wrap span { font-size:11.5px; color:var(--text-3); }
+.sc-recipient .x { color:var(--text-3); cursor:pointer; padding:4px 6px; font-size:16px; }
 .sc-recipient .x:hover { color:var(--rose); }
+
+/* Soft-credit picker results */
+#sc-results .sc-result {
+  display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:7px; cursor:pointer;
+  background:var(--surface); border:1.5px solid transparent; transition: all .12s;
+}
+#sc-results .sc-result:hover { background:var(--blue-pale); border-color:#BFDBFE; }
+#sc-results .sc-result .av { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:700; color:white; flex-shrink:0; }
+#sc-results .sc-result .nm { flex:1; font-size:12.5px; font-weight:600; color:var(--text); min-width:0; }
+#sc-results .sc-result .nm small { display:block; font-weight:400; color:var(--text-3); margin-top:1px; }
+#sc-results .sc-empty { padding:14px 10px; text-align:center; color:var(--text-3); font-size:12px; }
+
+/* Parish address card under each parish select */
+.parish-addr-card {
+  margin-top: 6px; padding: 8px 12px;
+  background: var(--surface); border-left: 3px solid var(--blue);
+  border-radius: 6px; font-size: 11.5px; color: var(--text-2); line-height: 1.5;
+  display: none;
+}
+.parish-addr-card.show { display: block; }
+.parish-addr-card svg { width: 11px; height: 11px; color: var(--blue); margin-right: 4px; vertical-align: -1px; flex-shrink: 0; }
+
+/* Soft-credit picker drawer */
+#sc-picker .fld:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
+
+/* Sum warnings */
+#sc-sum.warn { background: var(--amber-light) !important; border-color: var(--amber) !important; color: var(--amber) !important; }
+#sc-sum.warn #sc-sum-val { color: var(--amber) !important; }
+#sc-sum.ok { background: var(--green-light) !important; border-color: #86EFAC !important; color: var(--green) !important; }
+#sc-sum.ok #sc-sum-val { color: var(--green) !important; }
+
+/* Household members repeater */
+.hh-member-row {
+  display: flex; align-items: center; gap: 10px;
+  background: white; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 10px 12px; margin-bottom: 8px;
+}
+.hh-member-row:focus-within { border-color: #BFDBFE; box-shadow: 0 0 0 3px rgba(37,99,235,.06); }
+.hh-member-row .hh-av {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--purple-light));
+  color: white; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 11.5px; flex-shrink: 0;
+}
+.hh-member-row .fld { padding: 7px 10px; font-size: 12.5px; }
+.hh-primary {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--text-3); cursor: pointer; flex-shrink: 0;
+  padding: 4px 9px; border-radius: 6px; background: var(--surface);
+  user-select: none;
+}
+.hh-primary:has(input:checked) { background: var(--blue-pale); color: var(--blue); font-weight: 600; }
+.hh-primary input { accent-color: var(--blue); cursor: pointer; }
+.hh-x {
+  width: 26px; height: 26px; border-radius: 6px;
+  background: transparent; color: var(--text-3); cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+  transition: all .12s;
+}
+.hh-x:hover { background: #FEF2F2; color: var(--rose); }
+
+/* Step 3 — per-member contact cards (Household only) */
+.member-contact-card {
+  background: white; border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 16px 18px; margin-bottom: 10px; transition: border-color .14s;
+}
+.member-contact-card:focus-within { border-color: #BFDBFE; box-shadow: 0 0 0 3px rgba(37,99,235,.06); }
+.member-contact-card .mcc-head {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+  padding-bottom: 12px; border-bottom: 1px dashed var(--border);
+}
+.member-contact-card .mcc-av {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), #6D28D9);
+  color: white; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 12px; flex-shrink: 0;
+}
+.member-contact-card .mcc-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.member-contact-card .mcc-rel { font-size: 11.5px; color: var(--text-3); margin-top: 1px; }
+.member-contact-card .mcc-primary-tag {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 4px;
+  background: var(--blue-pale); color: var(--blue); margin-left: auto;
+}
+.member-contact-card .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.member-contact-card .lbl { font-size: 10.5px; }
+.member-contact-card .mcc-addr-toggle {
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  margin-top: 10px; font-size: 12px; color: var(--text-2);
+}
+.member-contact-card .mcc-addr-toggle input { accent-color: var(--blue); cursor: pointer; }
+.member-contact-card .mcc-addr-fields {
+  display: none; margin-top: 10px; padding: 12px 14px;
+  background: var(--blue-pale); border: 1px solid #BFDBFE; border-radius: 9px;
+}
+.member-contact-card.expanded .mcc-addr-fields { display: block; }
+.member-contact-card .mcc-prefs {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px;
+}
+
+/* Dup-check search (used in Household + Org contact) */
+.dup-search-wrap {
+  position: relative; margin-bottom: 8px;
+}
+.dup-search-wrap svg {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--text-3); pointer-events: none;
+}
+.dup-search-wrap input.fld { padding-left: 34px; background: white; }
+.dup-search-wrap input.fld:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
+
+/* Dup-check result cards */
+#hh-dup-results, #org-contact-results {
+  background: white; border: 1.5px solid #BFDBFE; border-radius: 10px;
+  padding: 6px; margin-bottom: 12px; max-height: 220px; overflow-y: auto;
+  box-shadow: 0 4px 14px rgba(37,99,235,.08);
+}
+.dup-result {
+  display: flex; align-items: center; gap: 10px; padding: 9px 11px;
+  border-radius: 7px; cursor: pointer; transition: all .12s;
+  border: 1.5px solid transparent;
+}
+.dup-result:hover { background: var(--blue-pale); border-color: #BFDBFE; }
+.dup-result .av {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.dup-result .nm { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 600; color: var(--text); }
+.dup-result .nm small { display: block; font-weight: 400; color: var(--text-3); margin-top: 1px; }
+.dup-result .pick {
+  font-size: 10.5px; font-weight: 700; color: var(--blue);
+  background: var(--blue-pale); padding: 4px 9px; border-radius: 99px;
+  letter-spacing: .04em; text-transform: uppercase;
+}
+.dup-empty {
+  padding: 12px 14px; text-align: center; color: var(--text-3); font-size: 12px;
+}
+.dup-empty a { color: var(--blue); text-decoration: none; font-weight: 600; }
 
 /* Review summary */
 .review-block { background:var(--surface); border:1px solid var(--border); border-radius:11px; padding:18px 22px; margin-bottom:14px; }
@@ -521,15 +663,6 @@ body {
 </style>
 </head>
 <body>
-<div id="prototype-banner" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#7c3aed;color:#fff;font-family:sans-serif;font-size:13px;font-weight:500;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.25);">
-  <span style="display:flex;align-items:center;gap:8px;">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><circle cx="8" cy="8" r="7" stroke="white" stroke-width="1.5"/><path d="M8 5v3.5M8 10.5v.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-    <strong>UI DESIGN PROTOTYPE</strong> — For demonstration purposes only. No real data.
-  </span>
-  <span style="opacity:.75;font-size:12px;">Built by <a href="https://givecentral.com" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">GiveCentral</a> &nbsp;·&nbsp;<a href="https://givecentral.com/privacy" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">Privacy Policy</a></span>
-  <button onclick="document.getElementById('prototype-banner').style.display='none'" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;font-family:inherit;flex-shrink:0;">✕ Dismiss</button>
-</div>
-<div style="height:50px"></div>
 
 
 <aside class="sidebar">
@@ -731,39 +864,290 @@ body {
         </div>
       </section>
 
-      <!-- ── STEP 2: BASIC INFO ───────────────────────────────── -->
+      <!-- ── STEP 2: BASIC INFO (type-aware) ──────────────────── -->
       <section class="wiz-panel active" data-panel="2">
-        <h2 class="wiz-h">Tell us about this person</h2>
-        <p class="wiz-sub">Just the basics. We'll handle linking them to a household, parish, or employer in step 4.</p>
+        <h2 class="wiz-h" id="step2-h">Tell us about this person</h2>
+        <p class="wiz-sub" id="step2-sub">Just the basics. We'll handle linking them to a household, parish, or employer in step 4.</p>
 
-        <div class="section-h">Identity</div>
-        <div class="row3">
-          <div><span class="lbl">First name<span class="req">*</span></span><input class="fld" placeholder="e.g. Margaret" value="Catherine"></div>
-          <div><span class="lbl">Middle / preferred</span><input class="fld" placeholder="optional"></div>
-          <div><span class="lbl">Last name<span class="req">*</span></span><input class="fld" placeholder="e.g. O'Brien" value="Romano"></div>
-        </div>
-        <div class="row3 mt-12" style="margin-top:12px">
-          <div>
-            <span class="lbl">Title / prefix</span>
-            <select class="fld"><option>—</option><option>Mr.</option><option selected>Ms.</option><option>Mrs.</option><option>Dr.</option><option>Rev.</option><option>Sr.</option><option>Br.</option></select>
+        <!-- ═══ INDIVIDUAL fields ═══ -->
+        <div class="type-fields" data-tf="Individual">
+          <div class="section-h">Identity</div>
+          <div class="row3">
+            <div><span class="lbl">First name<span class="req">*</span></span><input class="fld" placeholder="e.g. Margaret" value="Catherine"></div>
+            <div><span class="lbl">Middle / preferred</span><input class="fld" placeholder="optional"></div>
+            <div><span class="lbl">Last name<span class="req">*</span></span><input class="fld" placeholder="e.g. O'Brien" value="Romano"></div>
           </div>
-          <div><span class="lbl">Suffix</span><input class="fld" placeholder="Jr., III, Esq."></div>
-          <div><span class="lbl">Salutation in letters</span><input class="fld" value="Catherine"></div>
+          <div class="row3 mt-12" style="margin-top:12px">
+            <div>
+              <span class="lbl">Title / prefix</span>
+              <select class="fld"><option>—</option><option>Mr.</option><option selected>Ms.</option><option>Mrs.</option><option>Dr.</option><option>Rev.</option><option>Sr.</option><option>Br.</option></select>
+            </div>
+            <div><span class="lbl">Suffix</span><input class="fld" placeholder="Jr., III, Esq."></div>
+            <div><span class="lbl">Salutation in letters</span><input class="fld" value="Catherine"></div>
+          </div>
+
+          <div class="section-h">Personal</div>
+          <div class="row3">
+            <div><span class="lbl">Date of birth</span><input class="fld" type="date"></div>
+            <div>
+              <span class="lbl">Gender</span>
+              <select class="fld"><option>—</option><option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select>
+            </div>
+            <div>
+              <span class="lbl">Marital status</span>
+              <select class="fld">
+                <option>—</option>
+                <option>Single</option>
+                <option>Married</option>
+                <option>Domestic partnership</option>
+                <option>Separated</option>
+                <option>Divorced</option>
+                <option>Widowed</option>
+                <option>Prefer not to say</option>
+              </select>
+            </div>
+          </div>
+          <div class="row3 mt-12" style="margin-top:12px">
+            <div>
+              <span class="lbl">Deceased?</span>
+              <select class="fld"><option selected>No</option><option>Yes — date known</option><option>Yes — date unknown</option></select>
+            </div>
+            <div>
+              <span class="lbl">Wedding anniversary <small style="color:var(--text-3);font-weight:500;text-transform:none;letter-spacing:0">(optional)</small></span>
+              <input class="fld" type="date">
+            </div>
+            <div>
+              <span class="lbl">Linked household</span>
+              <select class="fld">
+                <option selected>— Not in a household</option>
+                <option>Sullivan Family Household</option>
+                <option>Smith Family Household</option>
+                <option>+ Create new household</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div class="section-h">Personal</div>
-        <div class="row3">
-          <div><span class="lbl">Date of birth</span><input class="fld" placeholder="MM / DD / YYYY"></div>
-          <div>
-            <span class="lbl">Gender</span>
-            <select class="fld"><option>—</option><option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select>
+        <!-- ═══ HOUSEHOLD fields ═══ -->
+        <div class="type-fields" data-tf="Household" style="display:none">
+          <div class="section-h">Household identity</div>
+          <div class="row2">
+            <div>
+              <span class="lbl">Family / household name<span class="req">*</span></span>
+              <input class="fld" placeholder="e.g. Sullivan" value="Sullivan">
+            </div>
+            <div>
+              <span class="lbl">Household label</span>
+              <input class="fld" placeholder="e.g. The Sullivan Family" value="The Sullivan Family">
+              <div class="muted" style="font-size:11px;margin-top:4px">Displayed in lists, receipts, and the donor portal.</div>
+            </div>
           </div>
-          <div>
-            <span class="lbl">Deceased?</span>
-            <select class="fld"><option selected>No</option><option>Yes — date known</option><option>Yes — date unknown</option></select>
+          <div class="row2 mt-12" style="margin-top:12px">
+            <div>
+              <span class="lbl">Household type<span class="req">*</span></span>
+              <select class="fld">
+                <option selected>Married couple</option>
+                <option>Family (with children)</option>
+                <option>Domestic partnership</option>
+                <option>Multi-generational</option>
+                <option>Estate</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <span class="lbl">Salutation in letters</span>
+              <input class="fld" value="Thomas &amp; Margaret Sullivan">
+              <div class="muted" style="font-size:11px;margin-top:4px">"Dear ___" — defaults to "[Primary] &amp; [Partner] [Last]"</div>
+            </div>
+          </div>
+
+          <div class="section-h">Household members</div>
+          <p class="muted" style="font-size:12px;margin-bottom:10px;margin-top:-6px">Add each person. The first member is the primary contact. Atlas creates linked individual records for each. Email, phone, and personal mailing addresses for each member are captured on the next step (Address &amp; contact methods).</p>
+
+          <!-- Search existing constituents to prevent duplicates -->
+          <div class="dup-search-wrap">
+            <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M8 8l3 3"/></svg>
+            <input class="fld" id="hh-dup-search" placeholder="Search by name or email — check if this person already exists…" autocomplete="off">
+          </div>
+          <div id="hh-dup-results" style="display:none"></div>
+
+          <div id="hh-members"></div>
+
+          <div class="add-row" id="hh-add-member">
+            <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0"><path d="M7 3v8M3 7h8"/></svg>
+            Add another household member
+          </div>
+
+          <div class="section-h">Mailing &amp; envelope preferences</div>
+          <div class="row2">
+            <div>
+              <span class="lbl">Envelope addressee</span>
+              <input class="fld" value="Mr. &amp; Mrs. Thomas Sullivan">
+              <div class="muted" style="font-size:11px;margin-top:4px">Formal — appears on outer envelope</div>
+            </div>
+            <div>
+              <span class="lbl">Receipt addressee</span>
+              <select class="fld">
+                <option selected>One combined receipt — to household</option>
+                <option>Separate receipts per gift-maker</option>
+                <option>Anonymous receipt</option>
+              </select>
+            </div>
           </div>
         </div>
 
+        <!-- ═══ ORGANIZATION fields ═══ -->
+        <div class="type-fields" data-tf="Organization" style="display:none">
+          <div class="section-h">Organization identity</div>
+          <div class="row2">
+            <div>
+              <span class="lbl">Legal name<span class="req">*</span></span>
+              <input class="fld" placeholder="e.g. St. Mary's Cathedral Foundation" value="St. Mary's Cathedral Foundation">
+            </div>
+            <div>
+              <span class="lbl">Doing-business-as (DBA)</span>
+              <input class="fld" placeholder="optional alias">
+            </div>
+          </div>
+          <div class="row2 mt-12" style="margin-top:12px">
+            <div>
+              <span class="lbl">Organization type<span class="req">*</span></span>
+              <select class="fld" id="org-subtype">
+                <option selected>Parish</option>
+                <option>Diocese / Archdiocese</option>
+                <option>School (K-12)</option>
+                <option>University / college</option>
+                <option>Religious order</option>
+                <option>Catholic charity / nonprofit</option>
+                <option>For-profit company (matching gifts)</option>
+                <option>Donor-Advised Fund (DAF)</option>
+                <option>Family foundation</option>
+                <option>Community foundation</option>
+                <option>Estate / trust</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <span class="lbl">Sub-type / specialty <small style="color:var(--text-3);font-weight:500;text-transform:none;letter-spacing:0">(optional)</small></span>
+              <input class="fld" placeholder="e.g. Roman Catholic, Jesuit, K–8…">
+            </div>
+          </div>
+
+          <div class="section-h">Tax &amp; receipt info</div>
+          <div class="row3">
+            <div>
+              <span class="lbl">EIN / tax ID</span>
+              <input class="fld" placeholder="14-•••8847" value="14-•••8847">
+              <div class="muted" style="font-size:11px;margin-top:4px">9 digits — formatted automatically</div>
+            </div>
+            <div>
+              <span class="lbl">Tax status</span>
+              <select class="fld">
+                <option selected>501(c)(3) — public charity</option>
+                <option>501(c)(3) — private foundation</option>
+                <option>For-profit (matching only)</option>
+                <option>Estate</option>
+                <option>Not applicable</option>
+              </select>
+            </div>
+            <div>
+              <span class="lbl">Receipt language</span>
+              <select class="fld">
+                <option selected>Standard nonprofit acknowledgement</option>
+                <option>Estate / trust acknowledgement</option>
+                <option>DAF disclaimer (no benefits)</option>
+                <option>Matching-gift confirmation</option>
+              </select>
+            </div>
+          </div>
+          <div class="row2 mt-12" style="margin-top:12px">
+            <div>
+              <span class="lbl">Fiscal year end</span>
+              <select class="fld">
+                <option selected>December 31 (calendar)</option>
+                <option>June 30</option>
+                <option>September 30</option>
+                <option>Other…</option>
+              </select>
+            </div>
+            <div>
+              <span class="lbl">Founded</span>
+              <input class="fld" type="number" min="1700" max="2026" placeholder="YYYY" value="1888">
+            </div>
+          </div>
+
+          <div class="section-h">Primary contact at the organization</div>
+          <p class="muted" style="font-size:12px;margin-bottom:10px;margin-top:-6px">Who do you reach when this org gives or has questions? Atlas will let you add more authorized contacts on Step 4.</p>
+
+          <!-- Search existing constituent before creating new -->
+          <div class="dup-search-wrap" style="margin-bottom:12px">
+            <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M8 8l3 3"/></svg>
+            <input class="fld" id="org-contact-search" placeholder="Search by name or email — does this person already have a record?" autocomplete="off">
+          </div>
+          <div id="org-contact-results" style="display:none"></div>
+
+          <div class="row3">
+            <div><span class="lbl">First name<span class="req">*</span></span><input class="fld" id="org-contact-first" placeholder="e.g. Patricia"></div>
+            <div><span class="lbl">Last name<span class="req">*</span></span><input class="fld" id="org-contact-last" placeholder="e.g. Mathias"></div>
+            <div><span class="lbl">Title</span><input class="fld" placeholder="e.g. Trustee, Executive Director"></div>
+          </div>
+          <div class="row2 mt-12" style="margin-top:12px">
+            <div><span class="lbl">Contact email</span><input class="fld" type="email" placeholder="contact@foundation.org"></div>
+            <div><span class="lbl">Contact phone</span><input class="fld" type="tel" placeholder="(518) 555-…"></div>
+          </div>
+
+          <!-- Personal address (separate from org address — for direct mailings to this contact) -->
+          <div style="margin-top:14px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <span style="font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3)">Personal mailing address <small style="color:var(--text-3);font-weight:500;letter-spacing:0;text-transform:none">(if different from org)</small></span>
+              <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-2);cursor:pointer">
+                <input type="checkbox" id="org-contact-same-addr" checked style="accent-color:var(--blue)">
+                <span>Same as organization HQ</span>
+              </label>
+            </div>
+            <div id="org-contact-addr-fields" style="display:none">
+              <input class="fld" placeholder="Street address" style="margin-bottom:8px">
+              <div class="row3">
+                <input class="fld" placeholder="City">
+                <select class="fld"><option>NY</option><option>NJ</option><option>CT</option><option>MA</option><option>PA</option><option>FL</option><option>Other…</option></select>
+                <input class="fld" placeholder="ZIP">
+              </div>
+              <div class="row2 mt-12" style="margin-top:10px">
+                <select class="fld"><option selected>Home</option><option>Work</option><option>Seasonal</option><option>Other</option></select>
+                <select class="fld"><option selected>Mailable</option><option>Do not mail</option><option>Returned mail · verify</option></select>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-h">Matching-gift program <small style="color:var(--text-3);font-weight:500;text-transform:none;letter-spacing:0;margin-left:6px">(if applicable)</small></div>
+          <div class="row3">
+            <div>
+              <span class="lbl">Matching ratio</span>
+              <select class="fld">
+                <option selected>None / not applicable</option>
+                <option>1:1 (dollar for dollar)</option>
+                <option>2:1 (double match)</option>
+                <option>3:1 (triple match)</option>
+                <option>0.5:1 (half match)</option>
+              </select>
+            </div>
+            <div>
+              <span class="lbl">Annual cap per employee</span>
+              <input class="fld" placeholder="$5,000">
+            </div>
+            <div>
+              <span class="lbl">Submission deadline</span>
+              <select class="fld">
+                <option selected>Within 12 months of gift</option>
+                <option>Within 6 months</option>
+                <option>Within 90 days</option>
+                <option>Calendar year-end</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Source (shared across all types) -->
         <div class="section-h">Source</div>
         <div class="row2">
           <div>
@@ -776,13 +1160,7 @@ body {
           </div>
         </div>
 
-        <!-- Duplicate detection notice -->
-        <div style="margin-top:18px;padding:14px 16px;border-radius:10px;background:var(--blue-pale);border:1px solid var(--blue-light);display:flex;gap:12px;align-items:flex-start;">
-          <div style="width:30px;height:30px;border-radius:8px;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700">i</div>
-          <div style="flex:1;font-size:12.5px;color:var(--navy);line-height:1.5">
-            <strong>No duplicates detected so far.</strong> Atlas checks for matches on name, email and address as you type. If a match is found, you'll see a side-by-side <a href="atlas-merge.html" style="color:var(--blue);font-weight:600">merge prompt</a> before saving.
-          </div>
-        </div>
+        <!-- Duplicate detection notice moved to Review step (Step 5) — keeps Basic Info focused on data entry -->
 
         <div class="wiz-foot">
           <div class="left">
@@ -797,14 +1175,15 @@ body {
 
       <!-- ── STEP 3: ADDRESS & CONTACT (multi-row) ────────────── -->
       <section class="wiz-panel" data-panel="3">
-        <h2 class="wiz-h">Address &amp; contact methods</h2>
-        <p class="wiz-sub">Add as many addresses, emails, and phone numbers as you need. Mark one of each as primary.</p>
+        <h2 class="wiz-h" id="step3-h">Address &amp; contact methods</h2>
+        <p class="wiz-sub" id="step3-sub">Add as many addresses, emails, and phone numbers as you need. Mark one of each as primary.</p>
 
-        <div class="section-h">Mailing addresses</div>
+        <div id="shared-contact-block">
+        <div class="section-h" id="step3-addresses-h">Mailing addresses</div>
 
         <div class="contact-card">
           <div class="contact-card-head">
-            <select class="fld"><option selected>Home</option><option>Work</option><option>Seasonal</option><option>Estate</option><option>Other</option></select>
+            <select class="fld addr-type-select"><option selected>Home</option><option>Work</option><option>Seasonal</option><option>Estate</option><option>Other</option></select>
             <span class="pri-toggle on"><span class="star">★</span> Primary</span>
             <span class="dnc-toggle"><span class="cb"></span> Do not mail</span>
             <button class="x-btn" disabled style="opacity:.3">×</button>
@@ -875,6 +1254,14 @@ body {
           <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg>
           Add another phone
         </div>
+        </div><!-- /#shared-contact-block -->
+
+        <!-- ═══ Household-only: per-member contact details ═══ -->
+        <div id="member-contacts-block" style="display:none">
+          <div class="section-h">Member contact details</div>
+          <p class="muted" style="font-size:12px;margin-bottom:10px;margin-top:-6px">Email, phone, and personal mailing address for each household member. By default everyone shares the household address above — uncheck "Use household address" on any card to override.</p>
+          <div id="member-contact-cards"></div>
+        </div>
 
         <div class="wiz-foot">
           <div class="left">
@@ -889,39 +1276,189 @@ body {
 
       <!-- ── STEP 4: AFFILIATIONS ─────────────────────────────── -->
       <section class="wiz-panel" data-panel="4">
-        <h2 class="wiz-h">Affiliations, interests &amp; soft credits</h2>
+        <h2 class="wiz-h" id="step4-h">Affiliations, interests &amp; soft credits</h2>
         <p class="wiz-sub">Link this person to a parish, employer, household, or to other constituents who should receive soft credit when they give.</p>
 
+        <!-- ═══ Org-only sections (hidden for Individual / Household) ═══ -->
+        <div class="step4-org-only" style="display:none">
+          <div class="section-h">Parent organization &amp; affiliated entities</div>
+          <p class="muted" style="font-size:12px;margin-bottom:10px;margin-top:-6px">Where does this organization sit in the diocesan hierarchy? Atlas uses this to roll up giving in board and Bishop's reports.</p>
+
+          <div class="row2">
+            <div>
+              <span class="lbl">Parent organization</span>
+              <select class="fld">
+                <option selected>Diocese of Albany</option>
+                <option>Catholic Charities of Albany</option>
+                <option>Diocesan Foundation</option>
+                <option>Standalone — no parent</option>
+              </select>
+              <div class="muted" style="font-size:11px;margin-top:4px">Giving and reporting roll up to this entity.</div>
+            </div>
+            <div>
+              <span class="lbl">Affiliated parishes / schools <small style="color:var(--text-3);font-weight:500;text-transform:none;letter-spacing:0">(optional)</small></span>
+              <select class="fld" multiple size="3" style="height:auto">
+                <option selected>St. Mary's Cathedral</option>
+                <option>St. Catherine of Siena</option>
+                <option>St. Joseph's</option>
+                <option>St. Anthony</option>
+                <option>Our Lady of Mercy</option>
+                <option>Diocesan school network</option>
+              </select>
+              <div class="muted" style="font-size:11px;margin-top:4px">Hold Ctrl/Cmd to select multiple. Used for shared appeals.</div>
+            </div>
+          </div>
+
+          <div class="row2 mt-12" style="margin-top:12px">
+            <div>
+              <span class="lbl">Restricted-use only?</span>
+              <select class="fld">
+                <option selected>No — gifts can be unrestricted</option>
+                <option>Yes — gifts must be designated to a specific fund</option>
+                <option>Donor-Advised Fund — distributions only</option>
+              </select>
+            </div>
+            <div>
+              <span class="lbl">Default restricted fund <small style="color:var(--text-3);font-weight:500;text-transform:none;letter-spacing:0">(if any)</small></span>
+              <select class="fld">
+                <option selected>—</option>
+                <option>Cathedral Restoration · GL 4001</option>
+                <option>Scholarship Endowment · GL 4101</option>
+                <option>Diocesan Operations · GL 4500</option>
+                <option>Music Ministry · GL 4002</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section-h">Authorized contacts &amp; signers</div>
+          <p class="muted" style="font-size:12px;margin-bottom:10px;margin-top:-6px">People who can give on behalf of this organization, approve pledges, or sign grant agreements. They&rsquo;ll receive copies of receipts and steward communications.</p>
+
+          <!-- Dup-check before adding new authorized contact -->
+          <div class="dup-search-wrap">
+            <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M8 8l3 3"/></svg>
+            <input class="fld" id="org-auth-search" placeholder="Search by name — does this person already have a record?" autocomplete="off">
+          </div>
+          <div id="org-auth-results" style="display:none"></div>
+
+          <div id="org-auth-list"></div>
+
+          <div class="add-row" id="org-auth-add">
+            <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0"><path d="M7 3v8M3 7h8"/></svg>
+            Add an authorized contact
+          </div>
+
+          <div class="section-h">Org-level preferences</div>
+          <div class="row3">
+            <div>
+              <span class="lbl">Preferred giving method</span>
+              <select class="fld">
+                <option selected>Check (mailed)</option>
+                <option>ACH / wire transfer</option>
+                <option>Credit card</option>
+                <option>DAF distribution</option>
+                <option>Securities / stock</option>
+              </select>
+            </div>
+            <div>
+              <span class="lbl">Acknowledgement preference</span>
+              <select class="fld">
+                <option selected>Mailed letter on letterhead</option>
+                <option>Email only</option>
+                <option>Bishop-signed (gifts ≥ $25k)</option>
+                <option>No acknowledgement needed</option>
+              </select>
+            </div>
+            <div>
+              <span class="lbl">Public listing</span>
+              <select class="fld">
+                <option selected>Listed in annual report</option>
+                <option>Anonymous — exclude</option>
+                <option>Listed but no amount</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Parish affiliation (Individual + Household) ═══ -->
+        <div class="step4-individual-household">
         <div class="section-h">Parish affiliation</div>
         <div class="row2">
           <div>
             <span class="lbl">Primary parish</span>
-            <select class="fld"><option selected>St. Mary's Cathedral</option><option>St. Catherine of Siena</option><option>St. Joseph's</option><option>St. Anthony</option><option>—</option></select>
+            <select class="fld parish-select" data-target="parish-1-addr">
+              <option value="" data-addr="">—</option>
+              <option value="st-marys" data-addr="40 N Main Avenue · Albany, NY 12203 · (518) 555-0142" selected>St. Mary's Cathedral</option>
+              <option value="st-catherine" data-addr="1850 Western Avenue · Albany, NY 12203 · (518) 555-0188">St. Catherine of Siena</option>
+              <option value="st-josephs" data-addr="270 Central Avenue · Albany, NY 12206 · (518) 555-0301">St. Joseph's</option>
+              <option value="st-anthony" data-addr="55 Watt Street · Schenectady, NY 12307 · (518) 555-0419">St. Anthony</option>
+              <option value="st-pius" data-addr="23 Crannell Avenue · Loudonville, NY 12211 · (518) 555-0552">St. Pius X</option>
+              <option value="our-lady" data-addr="1 Our Lady's Drive · Newtonville, NY 12128 · (518) 555-0623">Our Lady of Mercy</option>
+            </select>
+            <div class="parish-addr-card" id="parish-1-addr"></div>
           </div>
           <div>
             <span class="lbl">Member since</span>
-            <input class="fld" placeholder="MM / YYYY" value="03 / 2024">
+            <input class="fld" type="date" value="2024-03-15" max="2026-06-30">
           </div>
         </div>
         <div class="row2 mt-12" style="margin-top:12px">
           <div>
             <span class="lbl">Secondary parish (optional)</span>
-            <select class="fld"><option selected>—</option><option>St. Catherine of Siena</option><option>St. Joseph's</option></select>
+            <select class="fld parish-select" data-target="parish-2-addr">
+              <option value="" data-addr="" selected>—</option>
+              <option value="st-marys" data-addr="40 N Main Avenue · Albany, NY 12203 · (518) 555-0142">St. Mary's Cathedral</option>
+              <option value="st-catherine" data-addr="1850 Western Avenue · Albany, NY 12203 · (518) 555-0188">St. Catherine of Siena</option>
+              <option value="st-josephs" data-addr="270 Central Avenue · Albany, NY 12206 · (518) 555-0301">St. Joseph's</option>
+              <option value="st-anthony" data-addr="55 Watt Street · Schenectady, NY 12307 · (518) 555-0419">St. Anthony</option>
+              <option value="st-pius" data-addr="23 Crannell Avenue · Loudonville, NY 12211 · (518) 555-0552">St. Pius X</option>
+              <option value="our-lady" data-addr="1 Our Lady's Drive · Newtonville, NY 12128 · (518) 555-0623">Our Lady of Mercy</option>
+            </select>
+            <div class="parish-addr-card" id="parish-2-addr"></div>
           </div>
           <div>
             <span class="lbl">Tertiary parish (optional)</span>
-            <select class="fld"><option selected>—</option><option>St. Catherine of Siena</option><option>St. Joseph's</option></select>
+            <select class="fld parish-select" data-target="parish-3-addr">
+              <option value="" data-addr="" selected>—</option>
+              <option value="st-marys" data-addr="40 N Main Avenue · Albany, NY 12203 · (518) 555-0142">St. Mary's Cathedral</option>
+              <option value="st-catherine" data-addr="1850 Western Avenue · Albany, NY 12203 · (518) 555-0188">St. Catherine of Siena</option>
+              <option value="st-josephs" data-addr="270 Central Avenue · Albany, NY 12206 · (518) 555-0301">St. Joseph's</option>
+              <option value="st-anthony" data-addr="55 Watt Street · Schenectady, NY 12307 · (518) 555-0419">St. Anthony</option>
+              <option value="st-pius" data-addr="23 Crannell Avenue · Loudonville, NY 12211 · (518) 555-0552">St. Pius X</option>
+              <option value="our-lady" data-addr="1 Our Lady's Drive · Newtonville, NY 12128 · (518) 555-0623">Our Lady of Mercy</option>
+            </select>
+            <div class="parish-addr-card" id="parish-3-addr"></div>
           </div>
         </div>
 
         <div class="section-h">Employer / school</div>
         <div class="row2">
-          <div><span class="lbl">Employer</span><input class="fld" placeholder="Company name (e.g. Acme Construction)"></div>
-          <div><span class="lbl">Title / role</span><input class="fld"></div>
+          <div>
+            <span class="lbl">Employer</span>
+            <input class="fld" id="employer-input" placeholder="Type to search — e.g. State Farm, Stewart's Shops…" autocomplete="off" list="employer-presets">
+            <datalist id="employer-presets">
+              <option value="State Farm Insurance">State Farm Insurance · Matching 2:1 · Albany office</option>
+              <option value="Stewart's Shops">Stewart's Shops · Matching 1:1 · cap $5k</option>
+              <option value="GE Power (General Electric)">GE Power (General Electric) · Matching 1:1 · Schenectady</option>
+              <option value="Albany Medical Center">Albany Medical Center · Matching for healthcare gifts</option>
+              <option value="Pricewaterhouse­Coopers (PwC)">Pricewaterhouse­Coopers (PwC) · Matching 1:1</option>
+              <option value="MVP Health Care">MVP Health Care · Matching for healthcare nonprofits</option>
+              <option value="The College of Saint Rose">The College of Saint Rose · Education</option>
+              <option value="Siena College">Siena College · Education</option>
+              <option value="Diocese of Albany">Diocese of Albany · Internal</option>
+              <option value="Catholic Charities of Albany">Catholic Charities of Albany · Internal</option>
+              <option value="Self-employed">Self-employed</option>
+              <option value="Retired">Retired</option>
+              <option value="Homemaker">Homemaker</option>
+              <option value="Other / not listed">Other / not listed — Atlas will add it to the directory</option>
+            </datalist>
+            <div class="muted" style="font-size:11px;margin-top:5px;color:var(--text-3)">Matching-gift eligibility, parent company, and gift cap will auto-fill on selection.</div>
+          </div>
+          <div><span class="lbl">Title / role</span><input class="fld" placeholder="e.g. Senior Analyst, Principal, Owner…"></div>
         </div>
         <p class="muted" style="font-size:11.5px;margin-top:8px">Atlas will check the employer for matching-gift eligibility on each gift.</p>
+        </div><!-- /.step4-individual-household -->
 
-        <div class="section-h">Interests &amp; codes</div>
+        <div class="section-h" id="step4-interests-h">Interests &amp; codes</div>
         <p class="muted" style="font-size:12px;margin-bottom:10px;margin-top:-6px">Tag what this donor cares about. Used for segmentation, appeals, and Guru AI relevance.</p>
         <div class="chip-input focused">
           <span class="chip">Cathedral capital <span class="x">×</span></span>
@@ -942,16 +1479,30 @@ body {
         </div>
 
         <div class="section-h">Default soft-credit recipients <span class="muted" style="font-size:11px;font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px">(optional)</span></div>
-        <p class="muted" style="font-size:12px;margin-bottom:10px;margin-top:-6px">When this donor gives, Atlas will pre-fill these recipients on the gift's soft-credit panel.</p>
+        <p class="muted" style="font-size:12px;margin-bottom:10px;margin-top:-6px">When this donor gives, Atlas will pre-fill these recipients on the gift's soft-credit panel. The percentages must sum to 100% (or less — the remainder stays with the primary donor).</p>
 
-        <div class="sc-recipient">
-          <div class="av">PS</div>
-          <div class="nm">Peter Smith <small>Smith Family Household · spouse</small></div>
-          <span class="x">×</span>
+        <!-- Soft-credit recipients list -->
+        <div id="sc-list"></div>
+
+        <!-- Sum + Add button row -->
+        <div id="sc-sum-row" style="display:flex;align-items:center;gap:12px;margin-top:10px">
+          <div class="add-row" id="sc-add-btn" style="flex:1">
+            <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0"><path d="M7 3v8M3 7h8"/></svg>
+            Add a soft-credit recipient
+          </div>
+          <div id="sc-sum" style="padding:8px 14px;border-radius:8px;background:var(--surface);border:1.5px solid var(--border);font-size:12px;font-weight:600;color:var(--text-2);min-width:130px;text-align:center">
+            Total: <span id="sc-sum-val" style="color:var(--blue)">0%</span>
+          </div>
         </div>
-        <div class="add-row">
-          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg>
-          Add another soft-credit recipient
+
+        <!-- Soft-credit picker drawer (hidden by default) -->
+        <div id="sc-picker" style="display:none;margin-top:10px;background:white;border:1.5px solid #BFDBFE;border-radius:11px;padding:14px 16px;box-shadow:0 4px 14px rgba(37,99,235,.08)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <strong style="font-size:13px;color:var(--text)">Add a soft-credit recipient</strong>
+            <span style="margin-left:auto;font-size:11px;color:var(--text-3);cursor:pointer" id="sc-cancel">Cancel ×</span>
+          </div>
+          <input class="fld" id="sc-search" placeholder="Search by name, household, or organization…" autocomplete="off">
+          <div id="sc-results" style="margin-top:8px;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
         </div>
 
         <div class="section-h">Initial note</div>
@@ -1064,23 +1615,535 @@ body {
       });
     });
 
+    // ════════════════════════════════════════════════════════
+    // TYPE-AWARE STEP 2 + STEP 4 + REVIEW SUMMARY
+    // ════════════════════════════════════════════════════════
+    function applyType(t){
+      // Top-of-wizard summary chips
+      var sum = document.getElementById('type-summary'); if (sum) sum.textContent = t;
+      var s1  = document.getElementById('step1-sub');    if (s1)  s1.textContent = t;
+
+      // Swap Step 2 heading + sub
+      var h2 = document.getElementById('step2-h');
+      var s2 = document.getElementById('step2-sub');
+      if (t === 'Household') {
+        if (h2) h2.textContent = 'Set up the household';
+        if (s2) s2.textContent = "Capture the household identity and members. Each member becomes a linked individual record you can navigate to.";
+      } else if (t === 'Organization') {
+        if (h2) h2.textContent = 'Tell us about this organization';
+        if (s2) s2.textContent = 'Legal name, tax ID, receipt rules, and a primary contact. Sub-type drives the right acknowledgement language.';
+      } else {
+        if (h2) h2.textContent = 'Tell us about this person';
+        if (s2) s2.textContent = "Just the basics. We'll handle linking them to a household, parish, or employer in step 4.";
+      }
+
+      // Show ONLY the matching type-fields block
+      document.querySelectorAll('.type-fields').forEach(function(el){
+        el.style.display = (el.dataset.tf === t) ? '' : 'none';
+      });
+
+      // ── Step 3 (Address & Contact) — labels reflect type ──
+      var step3H   = document.getElementById('step3-h');
+      var step3Sub = document.getElementById('step3-sub');
+      var step3AddrH = document.getElementById('step3-addresses-h');
+      var addrSelect = document.querySelector('.addr-type-select');
+      if (t === 'Organization') {
+        if (step3H)   step3H.textContent = 'Organization addresses & contact methods';
+        if (step3Sub) step3Sub.textContent = 'Add the HQ, billing, and any satellite or storage locations for this organization. Mark one of each as primary.';
+        if (step3AddrH) step3AddrH.textContent = 'Organization addresses (HQ, billing, satellites)';
+        if (addrSelect) addrSelect.innerHTML = '<option selected>Headquarters</option><option>Billing / mailing</option><option>Satellite office</option><option>Storage / warehouse</option><option>Other</option>';
+      } else if (t === 'Household') {
+        if (step3H)   step3H.textContent = 'Household addresses & contact methods';
+        if (step3Sub) step3Sub.textContent = 'The household mailing address is shared by all members by default — individual members can opt for their own personal address on Step 2.';
+        if (step3AddrH) step3AddrH.textContent = 'Household mailing addresses';
+        if (addrSelect) addrSelect.innerHTML = '<option selected>Home</option><option>Seasonal</option><option>Estate</option><option>Vacation</option><option>Other</option>';
+      } else {
+        if (step3H)   step3H.textContent = 'Address & contact methods';
+        if (step3Sub) step3Sub.textContent = 'Add as many addresses, emails, and phone numbers as you need. Mark one of each as primary.';
+        if (step3AddrH) step3AddrH.textContent = 'Mailing addresses';
+        if (addrSelect) addrSelect.innerHTML = '<option selected>Home</option><option>Work</option><option>Seasonal</option><option>Estate</option><option>Other</option>';
+      }
+
+      // ── Step 4 (Affiliations) — heading + section visibility ──
+      var step4H = document.getElementById('step4-h');
+      var step4Wiz = document.querySelector('section[data-panel="4"] .wiz-sub');
+      var orgOnly = document.querySelectorAll('.step4-org-only');
+      var ihOnly  = document.querySelectorAll('.step4-individual-household');
+      if (t === 'Organization') {
+        if (step4H) step4H.textContent = 'Affiliations, restrictions & authorized contacts';
+        if (step4Wiz) step4Wiz.textContent = "Set the parent organization, restricted-fund rules, and authorized signers. Atlas uses these to enforce gift handling and roll up reporting.";
+        orgOnly.forEach(function(el){ el.style.display = ''; });
+        ihOnly.forEach(function(el){ el.style.display = 'none'; });
+      } else {
+        if (step4H) step4H.textContent = 'Affiliations, interests & soft credits';
+        if (step4Wiz) step4Wiz.textContent = (t === 'Household')
+          ? "Link this household to a parish, employer, and default soft-credit recipients."
+          : "Link this person to a parish, employer, household, or to other constituents who should receive soft credit when they give.";
+        orgOnly.forEach(function(el){ el.style.display = 'none'; });
+        ihOnly.forEach(function(el){ el.style.display = ''; });
+      }
+
+      // Step 4 — interests heading stays "Interests & codes" for I/H, becomes "Tags & restricted funds" for Org
+      var s4ih = document.getElementById('step4-interests-h');
+      if (s4ih) s4ih.textContent = (t === 'Organization') ? 'Tags, restricted funds & internal codes' : 'Interests & codes';
+
+      // Step 3 — for Household, hide the shared address/email/phone sections and show only member cards
+      var sharedBlock = document.getElementById('shared-contact-block');
+      var mcb = document.getElementById('member-contacts-block');
+      if (t === 'Household') {
+        if (sharedBlock) sharedBlock.style.display = 'none';
+        if (mcb) {
+          mcb.style.display = 'block';
+          if (typeof renderMemberContactCards === 'function') renderMemberContactCards();
+        }
+      } else {
+        if (sharedBlock) sharedBlock.style.display = '';
+        if (mcb) mcb.style.display = 'none';
+      }
+    }
+
     typeCards.forEach(function(c){
       c.addEventListener('click', function(){
         typeCards.forEach(function(x){ x.classList.remove('on'); });
         c.classList.add('on');
-        var t = c.dataset.type;
-        document.getElementById('type-summary').textContent = t;
-        document.getElementById('step1-sub').textContent = t;
+        applyType(c.dataset.type);
       });
     });
 
-    // Soft-credit & address remove demos
-    document.querySelectorAll('.contact-card .x-btn:not([disabled]), .sc-recipient .x').forEach(function(el){
+    // Initial apply — in case any card starts with .on (default Individual)
+    var initial = document.querySelector('.type-card.on');
+    if (initial) applyType(initial.dataset.type);
+
+    // ════════════════════════════════════════════════════════
+    // HOUSEHOLD MEMBERS — add / remove / set primary
+    // ════════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════════
+    // DUP-CHECK SEARCH (shared catalog for Household + Org contact)
+    // ════════════════════════════════════════════════════════
+    var EXISTING_CONSTITUENTS = [
+      { name:'Margaret O\'Brien',  sub:"St. Mary's Cathedral · Donor since 2018 · $24,500 lifetime",  avBg:'#BE185D' },
+      { name:'Peter Smith',         sub:"Smith Family Household · Spouse",                              avBg:'#15803D' },
+      { name:'Thomas Sullivan',     sub:"Sullivan Household · Trustee · $84,250 lifetime",              avBg:'#1D4ED8' },
+      { name:'Margaret Sullivan',   sub:"Sullivan Household · $84,250 lifetime",                        avBg:'#7C3AED' },
+      { name:'Jennifer Sullivan',   sub:"Sullivan Household · Daughter · Soft-credited",                avBg:'#B45309' },
+      { name:'Patricia Mathias',    sub:"St. Mary's Cathedral Foundation · Trustee",                    avBg:'#0D9488' },
+      { name:'James Patterson',     sub:"Lapsed · last gift Jun 2024",                                  avBg:'#94A3B8' },
+      { name:'Sarah Lin-Walsh',     sub:"Lin-Walsh Family · Major prospect · $80k capacity",            avBg:'#2563EB' },
+      { name:'Catherine Romano',    sub:"First-time donor · Mar 2026",                                  avBg:'#D97706' },
+      { name:'Father Michael Reilly', sub:"St. Mary's Cathedral · Rector",                              avBg:'#1E3A5F' }
+    ];
+
+    function initials(name){
+      return name.split(/\s+/).map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
+    }
+
+    function renderDupResults(query, container, onPick){
+      var q = (query || '').toLowerCase().trim();
+      container.style.display = q ? 'block' : 'none';
+      if (!q) { container.innerHTML = ''; return; }
+      var matches = EXISTING_CONSTITUENTS.filter(function(c){
+        return (c.name + ' ' + c.sub).toLowerCase().indexOf(q) !== -1;
+      });
+      if (!matches.length) {
+        container.innerHTML = '<div class="dup-empty">No existing record matches "<strong style="color:var(--text-2)">'+query+'</strong>" — proceed to create new constituent, or <a href="#" data-create-new>add details below</a></div>';
+        return;
+      }
+      container.innerHTML = matches.slice(0, 6).map(function(c){
+        return '<div class="dup-result" data-name="'+c.name+'">'+
+          '<div class="av" style="background:'+c.avBg+'">'+initials(c.name)+'</div>'+
+          '<div class="nm">'+c.name+'<small>'+c.sub+'</small></div>'+
+          '<span class="pick">Use this →</span>'+
+        '</div>';
+      }).join('');
+      container.querySelectorAll('.dup-result').forEach(function(el){
+        el.addEventListener('click', function(){
+          if (onPick) onPick(el.dataset.name);
+        });
+      });
+    }
+
+    // ── Household dup search ──
+    var hhSearch = document.getElementById('hh-dup-search');
+    var hhResults = document.getElementById('hh-dup-results');
+    if (hhSearch) hhSearch.addEventListener('input', function(){
+      renderDupResults(hhSearch.value, hhResults, function(name){
+        var parts = name.split(/\s+/);
+        HH_MEMBERS.push({
+          first: parts[0] || '', last: parts.slice(1).join(' '), rel: 'Spouse',
+          primary: false, age: null, email:'', phone:'', sameAddr:true
+        });
+        renderMembers();
+        hhSearch.value = '';
+        hhResults.style.display = 'none';
+        if (window.atlasToast) window.atlasToast('Linked existing constituent · ' + name);
+      });
+    });
+
+    // ── Org primary-contact dup search ──
+    var orgSearch = document.getElementById('org-contact-search');
+    var orgResults = document.getElementById('org-contact-results');
+    if (orgSearch) orgSearch.addEventListener('input', function(){
+      renderDupResults(orgSearch.value, orgResults, function(name){
+        var parts = name.split(/\s+/);
+        var firstIn = document.getElementById('org-contact-first');
+        var lastIn  = document.getElementById('org-contact-last');
+        if (firstIn) firstIn.value = parts[0] || '';
+        if (lastIn)  lastIn.value = parts.slice(1).join(' ');
+        orgSearch.value = '';
+        orgResults.style.display = 'none';
+        if (window.atlasToast) window.atlasToast('Linked existing constituent · ' + name);
+      });
+    });
+
+    // ── Org contact's personal-address toggle ──
+    var orgSameAddr = document.getElementById('org-contact-same-addr');
+    var orgAddrFields = document.getElementById('org-contact-addr-fields');
+    if (orgSameAddr) {
+      orgSameAddr.addEventListener('change', function(){
+        if (orgAddrFields) orgAddrFields.style.display = orgSameAddr.checked ? 'none' : 'block';
+      });
+    }
+
+    // ════════════════════════════════════════════════════════
+    // HOUSEHOLD MEMBERS — each row now expands to show personal contact
+    // ════════════════════════════════════════════════════════
+    var HH_MEMBERS = [
+      { first:'Thomas',   last:'Sullivan',  rel:'Spouse',   primary:true,  email:'tom.sullivan@gmail.com',     phone:'(727) 555-0142', sameAddr:true },
+      { first:'Margaret', last:'Sullivan',  rel:'Spouse',   primary:false, email:'margaret.sullivan@gmail.com', phone:'(727) 555-0143', sameAddr:true },
+      { first:'Jennifer', last:'Sullivan',  rel:'Daughter', primary:false, email:'',                            phone:'',               sameAddr:false }
+    ];
+    var hhWrap = document.getElementById('hh-members');
+
+    function renderMembers(){
+      if (!hhWrap) return;
+      hhWrap.innerHTML = '';
+      HH_MEMBERS.forEach(function(m, i){
+        var row = document.createElement('div');
+        row.className = 'hh-member-row';
+
+        row.innerHTML =
+          '<div class="hh-av">'+(((m.first||'?')[0])+((m.last||'?')[0])).toUpperCase()+'</div>'+
+          '<div class="row3" style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'+
+            '<input class="fld" data-k="first" value="'+(m.first||'')+'" placeholder="First name">'+
+            '<input class="fld" data-k="last" value="'+(m.last||'')+'" placeholder="Last name">'+
+            '<select class="fld" data-k="rel">'+
+              ['Spouse','Domestic partner','Parent','Child','Daughter','Son','Sibling','Grandchild','Other'].map(function(r){
+                return '<option '+(m.rel===r?'selected':'')+'>'+r+'</option>';
+              }).join('')+
+            '</select>'+
+          '</div>'+
+          '<label class="hh-primary" title="Set primary contact"><input type="radio" name="hh-primary" '+(m.primary?'checked':'')+'><span>Primary</span></label>'+
+          '<span class="hh-x" title="Remove">×</span>';
+
+        // Wire identity inputs
+        row.querySelectorAll('input[data-k], select[data-k]').forEach(function(el){
+          el.addEventListener('input', function(){
+            m[el.dataset.k] = el.value;
+            // Re-render Step-3 member cards if name changes (avatar/title need refresh)
+            if (typeof renderMemberContactCards === 'function') renderMemberContactCards();
+          });
+        });
+
+        // Primary radio
+        var pri = row.querySelector('input[type=radio]');
+        pri.addEventListener('change', function(){
+          HH_MEMBERS.forEach(function(x){ x.primary = false; });
+          m.primary = true;
+          if (typeof renderMemberContactCards === 'function') renderMemberContactCards();
+        });
+
+        // Remove
+        row.querySelector('.hh-x').addEventListener('click', function(){
+          if (HH_MEMBERS.length <= 1) { alert('A household needs at least one member.'); return; }
+          HH_MEMBERS.splice(i, 1);
+          if (!HH_MEMBERS.some(function(x){return x.primary;})) HH_MEMBERS[0].primary = true;
+          renderMembers();
+          if (typeof renderMemberContactCards === 'function') renderMemberContactCards();
+        });
+
+        hhWrap.appendChild(row);
+      });
+    }
+
+    // ════════════════════════════════════════════════════════
+    // STEP 3 — per-member contact cards (Household only)
+    // ════════════════════════════════════════════════════════
+    var mccWrap = document.getElementById('member-contact-cards');
+    function renderMemberContactCards(){
+      if (!mccWrap) return;
+      mccWrap.innerHTML = '';
+      HH_MEMBERS.forEach(function(m, i){
+        var card = document.createElement('div');
+        card.className = 'member-contact-card' + (m.sameAddr === false ? ' expanded' : '');
+        var avInitials = (((m.first || '?')[0]) + ((m.last || '?')[0])).toUpperCase();
+        var displayName = ((m.first || '') + ' ' + (m.last || '')).trim() || '(unnamed member)';
+        var primaryTag = m.primary ? '<span class="mcc-primary-tag">Primary</span>' : '';
+
+        card.innerHTML =
+          '<div class="mcc-head">' +
+            '<div class="mcc-av">' + avInitials + '</div>' +
+            '<div>' +
+              '<div class="mcc-name">' + displayName + '</div>' +
+              '<div class="mcc-rel">' + (m.rel || 'Member') + '</div>' +
+            '</div>' +
+            primaryTag +
+          '</div>' +
+          '<div class="row2">' +
+            '<div><span class="lbl">Personal email</span><input class="fld" type="email" value="' + (m.email || '') + '" placeholder="name@domain.com" data-mc="email"></div>' +
+            '<div><span class="lbl">Personal phone</span><input class="fld" type="tel" value="' + (m.phone || '') + '" placeholder="(518) 555-…" data-mc="phone"></div>' +
+          '</div>' +
+          '<label class="mcc-addr-toggle">' +
+            '<input type="checkbox" ' + (m.sameAddr !== false ? 'checked' : '') + ' data-mc="sameAddr">' +
+            '<span style="flex:1">Uses the household mailing address above</span>' +
+            '<span style="font-size:11px;color:var(--text-3)">Uncheck to add a personal address</span>' +
+          '</label>' +
+          '<div class="mcc-addr-fields">' +
+            '<input class="fld" placeholder="Street address" value="' + (m.addr || '') + '" data-mc="addr" style="margin-bottom:8px">' +
+            '<div class="row3" style="display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:8px">' +
+              '<input class="fld" placeholder="City" value="' + (m.city || '') + '" data-mc="city">' +
+              '<select class="fld" data-mc="state">' +
+                ['NY','NJ','CT','MA','PA','FL','Other'].map(function(s){
+                  return '<option ' + (m.state === s ? 'selected' : '') + '>' + s + '</option>';
+                }).join('') +
+              '</select>' +
+              '<input class="fld" placeholder="ZIP" value="' + (m.zip || '') + '" data-mc="zip">' +
+            '</div>' +
+            '<div style="margin-top:10px;display:flex;gap:8px;align-items:center">' +
+              '<select class="fld" style="flex:1"><option selected>Home</option><option>Work</option><option>Seasonal</option><option>Estate</option></select>' +
+              '<select class="fld" style="flex:1"><option selected>Mailable</option><option>Do not mail (member request)</option><option>Returned · verify</option></select>' +
+            '</div>' +
+          '</div>' +
+          '<div class="mcc-prefs">' +
+            '<select class="fld"><option selected>Can email</option><option>Do not email</option><option>Email digest only</option></select>' +
+            '<select class="fld"><option selected>Can call</option><option>Do not call</option></select>' +
+            '<select class="fld"><option selected>Can text</option><option>Do not text</option></select>' +
+          '</div>';
+
+        // Wire inputs
+        card.querySelectorAll('[data-mc]').forEach(function(el){
+          el.addEventListener('input', function(){
+            if (el.type === 'checkbox') {
+              m.sameAddr = el.checked;
+              card.classList.toggle('expanded', !el.checked);
+            } else {
+              m[el.dataset.mc] = el.value;
+            }
+          });
+          el.addEventListener('change', function(){
+            if (el.type !== 'checkbox') m[el.dataset.mc] = el.value;
+          });
+        });
+
+        mccWrap.appendChild(card);
+      });
+    }
+    // Expose for renderMembers
+    window.renderMemberContactCards = renderMemberContactCards;
+    renderMemberContactCards();
+
+    var hhAdd = document.getElementById('hh-add-member');
+    if (hhAdd) hhAdd.addEventListener('click', function(){
+      HH_MEMBERS.push({ first:'', last:'', rel:'Child', primary:false, email:'', phone:'', sameAddr:true });
+      renderMembers();
+      var rows = hhWrap.querySelectorAll('.hh-member-row');
+      var last = rows[rows.length - 1];
+      if (last) last.querySelector('input').focus();
+    });
+    renderMembers();
+
+    // ════════════════════════════════════════════════════════
+    // ORG: AUTHORIZED CONTACTS list
+    // ════════════════════════════════════════════════════════
+    var ORG_AUTH = [
+      { name:'Patricia Mathias', role:'Trustee · primary signer', authLevel:'Full · sign + give' },
+      { name:'James Walker',     role:'Board chair',              authLevel:'Sign agreements only' }
+    ];
+    var orgAuthList = document.getElementById('org-auth-list');
+    function renderOrgAuth(){
+      if (!orgAuthList) return;
+      orgAuthList.innerHTML = '';
+      ORG_AUTH.forEach(function(a, i){
+        var row = document.createElement('div');
+        row.className = 'sc-recipient';
+        row.innerHTML =
+          '<div class="av" style="background:'+(i % 2 === 0 ? '#0D9488' : '#7C3AED')+'">'+initials(a.name)+'</div>'+
+          '<div class="nm">'+a.name+'<small>'+a.role+'</small></div>'+
+          '<select class="fld" style="width:auto;padding:5px 8px;font-size:11.5px">'+
+            ['Full · sign + give','Sign agreements only','Receipts only','Co-signer'].map(function(o){
+              return '<option '+(a.authLevel===o?'selected':'')+'>'+o+'</option>';
+            }).join('')+
+          '</select>'+
+          '<span class="x" title="Remove">×</span>';
+        row.querySelector('select').addEventListener('change', function(e){ a.authLevel = e.target.value; });
+        row.querySelector('.x').addEventListener('click', function(){
+          ORG_AUTH.splice(i, 1); renderOrgAuth();
+        });
+        orgAuthList.appendChild(row);
+      });
+    }
+    var orgAuthAdd = document.getElementById('org-auth-add');
+    if (orgAuthAdd) orgAuthAdd.addEventListener('click', function(){
+      ORG_AUTH.push({ name:'New contact', role:'—', authLevel:'Receipts only' });
+      renderOrgAuth();
+    });
+    var orgAuthSearch = document.getElementById('org-auth-search');
+    var orgAuthResults = document.getElementById('org-auth-results');
+    if (orgAuthSearch) orgAuthSearch.addEventListener('input', function(){
+      renderDupResults(orgAuthSearch.value, orgAuthResults, function(name){
+        var sub = (EXISTING_CONSTITUENTS.find(function(c){return c.name===name;})||{}).sub || '—';
+        ORG_AUTH.push({ name:name, role:sub.split('·')[0].trim() || 'Authorized contact', authLevel:'Sign agreements only' });
+        renderOrgAuth();
+        orgAuthSearch.value = '';
+        orgAuthResults.style.display = 'none';
+        if (window.atlasToast) window.atlasToast('Linked existing constituent · ' + name);
+      });
+    });
+    renderOrgAuth();
+
+    // Address remove demo (only contact cards now — soft-credit handled by its own wiring below)
+    document.querySelectorAll('.contact-card .x-btn:not([disabled])').forEach(function(el){
       el.addEventListener('click', function(){
-        var card = el.closest('.contact-card, .sc-recipient');
+        var card = el.closest('.contact-card');
         if (card) card.style.display = 'none';
       });
     });
+
+    // ════════════════════════════════════════════════════════
+    // PARISH ADDRESS PREVIEW — show full address on selection
+    // ════════════════════════════════════════════════════════
+    function updateParishAddr(sel){
+      var card = document.getElementById(sel.dataset.target);
+      if (!card) return;
+      var opt = sel.options[sel.selectedIndex];
+      var addr = opt ? opt.dataset.addr : '';
+      if (addr) {
+        card.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 1.5C4 1.5 2.5 3 2.5 5c0 2.7 3.5 6.5 3.5 6.5s3.5-3.8 3.5-6.5C9.5 3 8 1.5 6 1.5z"/><circle cx="6" cy="5" r="1.3"/></svg>' + addr;
+        card.classList.add('show');
+      } else {
+        card.classList.remove('show');
+        card.innerHTML = '';
+      }
+    }
+    document.querySelectorAll('.parish-select').forEach(function(sel){
+      sel.addEventListener('change', function(){ updateParishAddr(sel); });
+      updateParishAddr(sel); // initial render
+    });
+
+    // ════════════════════════════════════════════════════════
+    // SOFT-CREDIT RECIPIENTS — list with % shares, picker drawer
+    // ════════════════════════════════════════════════════════
+    var SC_PRESET = [
+      { id:'peter-s', name:'Peter Smith', sub:"Smith Family Household · spouse", avBg:'#15803D' },
+      { id:'mary-l',  name:'Mary Lin',    sub:"Lin Family Household · sister-in-law", avBg:'#BE185D' },
+      { id:'tom-w',   name:'Thomas Walsh', sub:"Walsh Household · son", avBg:'#2563EB' },
+      { id:'sff',     name:'Smith Family Foundation', sub:"Foundation · 501(c)(3) · EIN 14-•••8847", avBg:'#7C3AED' },
+      { id:'cathedral-trust', name:'Cathedral Memorial Trust', sub:"Trust · Margaret as trustee", avBg:'#0D9488' },
+      { id:'st-mary', name:"St. Mary's Cathedral Foundation", sub:"Foundation · diocesan", avBg:'#B45309' },
+      { id:'kevin-s', name:'Kevin Sullivan', sub:"Sullivan Household · brother", avBg:'#1D4ED8' }
+    ];
+    var SC_LIST = []; // active recipients
+
+    var scList   = document.getElementById('sc-list');
+    var scSumVal = document.getElementById('sc-sum-val');
+    var scSum    = document.getElementById('sc-sum');
+    var scAddBtn = document.getElementById('sc-add-btn');
+    var scPicker = document.getElementById('sc-picker');
+    var scSearch = document.getElementById('sc-search');
+    var scResults= document.getElementById('sc-results');
+    var scCancel = document.getElementById('sc-cancel');
+
+    function initials(name){
+      return name.split(/\s+/).map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
+    }
+
+    function renderSCList(){
+      if (!scList) return;
+      scList.innerHTML = '';
+      SC_LIST.forEach(function(r, i){
+        var row = document.createElement('div');
+        row.className = 'sc-recipient';
+        row.innerHTML =
+          '<div class="av" style="background:'+r.avBg+'">'+initials(r.name)+'</div>'+
+          '<div class="nm">'+r.name+'<small>'+r.sub+'</small></div>'+
+          '<div class="pct-wrap"><input type="number" min="0" max="100" value="'+r.share+'" aria-label="Share %"><span>%</span></div>'+
+          '<span class="x" title="Remove">×</span>';
+        // Wire % input
+        row.querySelector('input').addEventListener('input', function(e){
+          var v = parseInt(e.target.value, 10);
+          if (isNaN(v) || v < 0) v = 0; if (v > 100) v = 100;
+          SC_LIST[i].share = v;
+          updateSum();
+        });
+        row.querySelector('.x').addEventListener('click', function(){
+          SC_LIST.splice(i, 1);
+          renderSCList();
+          updateSum();
+        });
+        scList.appendChild(row);
+      });
+    }
+
+    function updateSum(){
+      var total = SC_LIST.reduce(function(s, r){ return s + (Number(r.share) || 0); }, 0);
+      scSumVal.textContent = total + '%';
+      scSum.classList.remove('warn','ok');
+      if (total > 100) scSum.classList.add('warn');
+      else if (total === 100) scSum.classList.add('ok');
+    }
+
+    function renderResults(filter){
+      var q = (filter || '').toLowerCase().trim();
+      var pickedIds = SC_LIST.map(function(r){ return r.id; });
+      var rows = SC_PRESET.filter(function(r){
+        if (pickedIds.indexOf(r.id) !== -1) return false;
+        if (!q) return true;
+        return (r.name + ' ' + r.sub).toLowerCase().indexOf(q) !== -1;
+      });
+      scResults.innerHTML = '';
+      if (!rows.length) {
+        scResults.innerHTML = '<div class="sc-empty">No matching constituents · <a href="atlas-add-constituent.html" style="color:var(--blue);text-decoration:none">create a new one →</a></div>';
+        return;
+      }
+      rows.forEach(function(r){
+        var div = document.createElement('div');
+        div.className = 'sc-result';
+        div.innerHTML =
+          '<div class="av" style="background:'+r.avBg+'">'+initials(r.name)+'</div>'+
+          '<div class="nm">'+r.name+'<small>'+r.sub+'</small></div>'+
+          '<svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="#2563EB" stroke-width="1.6" stroke-linecap="round" style="flex-shrink:0"><path d="M7 3v8M3 7h8"/></svg>';
+        div.addEventListener('click', function(){
+          // Auto-divide share — if first recipient give 100, else split equally
+          var defaultShare = SC_LIST.length === 0 ? 100 : Math.floor(100 / (SC_LIST.length + 1));
+          // Re-balance existing
+          if (SC_LIST.length > 0) {
+            var totalNow = SC_LIST.reduce(function(s,x){return s+x.share;},0);
+            if (totalNow + defaultShare > 100) defaultShare = Math.max(0, 100 - totalNow);
+          }
+          SC_LIST.push({ id:r.id, name:r.name, sub:r.sub, avBg:r.avBg, share:defaultShare });
+          renderSCList(); updateSum();
+          closePicker();
+        });
+        scResults.appendChild(div);
+      });
+    }
+
+    function openPicker(){
+      scPicker.style.display = 'block';
+      scSearch.value = '';
+      renderResults('');
+      setTimeout(function(){ scSearch.focus(); }, 30);
+    }
+    function closePicker(){
+      scPicker.style.display = 'none';
+    }
+
+    if (scAddBtn) scAddBtn.addEventListener('click', openPicker);
+    if (scCancel) scCancel.addEventListener('click', closePicker);
+    if (scSearch) scSearch.addEventListener('input', function(){ renderResults(scSearch.value); });
+
+    // Initial: seed with one default recipient (Peter Smith) at 100%
+    SC_LIST.push({ id:'peter-s', name:'Peter Smith', sub:"Smith Family Household · spouse", avBg:'#15803D', share:100 });
+    renderSCList(); updateSum();
 
     // Tag chip add/remove demo
     document.querySelectorAll('.chip-input .chip .x').forEach(function(x){
