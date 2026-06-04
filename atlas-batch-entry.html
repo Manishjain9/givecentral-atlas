@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-<meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GiveCentral Atlas — Batch Entry</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -294,25 +293,320 @@
   </style>
 
 <style id="atlas-canon-sidebar-css">
-  /* Hide ONLY the top-level bespoke nav sidebar (direct-body child).
-     Inner feature sidebars (queue-lists, batch-folder rails) stay — they're
-     content, not navigation. */
+  /* Hide the original dark batch sidebar — its content moved into the
+     horizontal batch toolbar above the columns/post bar. */
+  body > aside.sidebar.batch-library-rail,
+  body > aside#batch-library-rail {
+    display: none !important;
+  }
   body > aside.sidebar:not(.atlas-canon):not([id]) { display: none !important; }
-  /* Edge case: the original bespoke sidebar might exist deeper but be a system-
-     nav clone. Catch those too if they sit directly under <body>
-<div id="prototype-banner" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#7c3aed;color:#fff;font-family:sans-serif;font-size:13px;font-weight:500;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.25);">
-  <span style="display:flex;align-items:center;gap:8px;">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><circle cx="8" cy="8" r="7" stroke="white" stroke-width="1.5"/><path d="M8 5v3.5M8 10.5v.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-    <strong>UI DESIGN PROTOTYPE</strong> — For demonstration purposes only. No real data.
-  </span>
-  <span style="opacity:.75;font-size:12px;">Built by <a href="https://givecentral.com" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">GiveCentral</a> &nbsp;·&nbsp;<a href="https://givecentral.com/privacy" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">Privacy Policy</a></span>
-  <button onclick="document.getElementById('prototype-banner').style.display='none'" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;font-family:inherit;flex-shrink:0;">✕ Dismiss</button>
-</div>
-<div style="height:50px"></div>. */
   body > aside.sidebar.atlas-canon ~ aside.sidebar { display: none !important; }
 
-  /* Shift page content to the right of the fixed sidebar */
+  /* Shift page content right of the canonical 220px sidebar */
   body { padding-left: 220px !important; }
+  body > .main { margin-left: 0 !important; position: relative !important; }
+
+  /* ══ Horizontal batch toolbar (above the columns/post bar) ══ */
+  .batch-toolbar {
+    background: white;
+    border-bottom: 1px solid var(--border, #E2E8F0);
+    padding: 9px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+    position: relative; z-index: 50;
+  }
+  .batch-toolbar .bt-section { display: flex; align-items: center; gap: 8px; }
+  .batch-toolbar .bt-sep {
+    width: 1px; height: 20px;
+    background: var(--border, #E2E8F0);
+    margin: 0 4px;
+  }
+  .batch-toolbar button {
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+    padding: 7px 12px; border-radius: 7px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all .14s; border: 1px solid transparent;
+  }
+  .batch-toolbar button svg { width: 12px; height: 12px; flex-shrink: 0; }
+  .batch-toolbar .bt-library-btn {
+    background: var(--surface, #F8FAFC);
+    border-color: var(--border, #E2E8F0);
+    color: var(--text-2, #334155); font-weight: 600;
+  }
+  .batch-toolbar .bt-library-btn:hover { border-color: var(--blue, #2563EB); color: var(--blue, #2563EB); background: var(--blue-pale, #EFF6FF); }
+  .batch-toolbar .bt-library-btn.open { border-color: var(--blue, #2563EB); color: var(--blue, #2563EB); background: var(--blue-pale, #EFF6FF); }
+  .batch-toolbar .bt-library-btn .bt-caret { width: 9px; height: 9px; opacity: .65; }
+  .batch-toolbar .bt-library-btn.open .bt-caret { transform: rotate(180deg); }
+  .batch-toolbar .bt-new-batch {
+    background: var(--blue, #2563EB); color: white;
+    box-shadow: 0 1px 3px rgba(37,99,235,.25);
+  }
+  .batch-toolbar .bt-new-batch:hover { background: #1D4ED8; }
+  .batch-toolbar .bt-new-template {
+    background: #EDE9FE; color: #6D28D9;
+    border-color: #DDD6FE;
+  }
+  .batch-toolbar .bt-new-template:hover { background: #DDD6FE; }
+  .batch-toolbar .bt-drafts-pill {
+    background: #FEF3C7; color: #92400E; border-color: #FDE68A;
+    font-weight: 600;
+  }
+  .batch-toolbar .bt-drafts-pill:hover { background: #FDE68A; border-color: #C8A04A; }
+  .batch-toolbar .bt-drafts-pill .bt-pill-count {
+    background: #C8A04A; color: white;
+    font-size: 10px; padding: 1px 7px; border-radius: 99px;
+    font-weight: 700;
+  }
+  .batch-toolbar .bt-action {
+    background: white; border-color: var(--border, #E2E8F0); color: var(--text-2, #334155);
+  }
+  .batch-toolbar .bt-action:hover { border-color: var(--blue, #2563EB); color: var(--blue, #2563EB); background: var(--blue-pale, #EFF6FF); }
+
+  /* ── Batch library dropdown popover ── */
+  .batch-library-menu {
+    position: absolute; top: 56px; left: 18px;
+    width: 340px; max-height: 60vh;
+    background: white;
+    border: 1px solid var(--border, #E2E8F0); border-radius: 11px;
+    box-shadow: 0 16px 40px rgba(15,23,42,.18);
+    z-index: 10001;  /* above canonical sidebar (z-index 9999) */
+    opacity: 0; transform: translateY(-6px) scale(.98);
+    transition: opacity .15s, transform .15s;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .batch-library-menu.show {
+    opacity: 1; transform: translateY(0) scale(1); pointer-events: auto;
+  }
+  .blm-head {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border, #E2E8F0);
+    display: flex; align-items: center;
+  }
+  .blm-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 15px; color: var(--text, #0F172A); flex: 1;
+  }
+  .blm-add-folder {
+    background: var(--blue-pale, #EFF6FF); color: var(--blue, #2563EB);
+    border: 1px solid #BFDBFE; border-radius: 6px;
+    padding: 4px 10px; font-size: 11px; font-weight: 600;
+    font-family: 'DM Sans', sans-serif; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: all .14s;
+  }
+  .blm-add-folder:hover { background: var(--blue-light, #DBEAFE); }
+  .blm-add-folder svg { width: 10px; height: 10px; }
+
+  .blm-body {
+    flex: 1; overflow-y: auto;
+    padding: 8px;
+  }
+  .blm-body .folder-item { margin-bottom: 2px; }
+  .blm-body .folder-row {
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 10px; border-radius: 7px;
+    font-size: 12.5px; font-weight: 500; color: var(--text-2, #334155);
+    cursor: pointer; transition: background .12s;
+  }
+  .blm-body .folder-row:hover { background: var(--blue-pale, #EFF6FF); color: var(--blue, #2563EB); }
+  .blm-body .folder-row.drafts { background: #FEF3C7; color: #92400E; }
+  .blm-body .folder-row.drafts:hover { background: #FDE68A; }
+  .blm-body .folder-caret { width: 10px; height: 10px; color: var(--text-3, #64748B); transition: transform .14s; }
+  .blm-body .folder-caret.open { transform: rotate(90deg); }
+  .blm-body .folder-icon { width: 13px; height: 13px; color: var(--text-3, #64748B); flex-shrink: 0; }
+  .blm-body .folder-row.drafts .folder-icon { color: #C8A04A; }
+  .blm-body .folder-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-2, #334155) !important; font-size: 12.5px; font-weight: 500; }
+  .blm-body .folder-row:hover .folder-name { color: var(--blue, #2563EB) !important; }
+  .blm-body .folder-row.drafts .folder-name { color: #92400E !important; font-weight: 600; }
+  .blm-body .folder-count {
+    font-size: 10px; padding: 1px 7px; border-radius: 99px;
+    background: var(--surface, #F8FAFC); color: var(--text-3, #64748B); font-weight: 600;
+  }
+  .blm-body .folder-row.drafts .folder-count { background: #C8A04A; color: white; }
+  .blm-body .folder-children { padding-left: 22px; margin-top: 2px; }
+  .blm-body .batch-item {
+    display: flex; align-items: center; gap: 7px;
+    padding: 6px 10px; margin-bottom: 1px;
+    border-radius: 6px; font-size: 12px; color: var(--text-2, #334155);
+    cursor: pointer; transition: background .12s;
+  }
+  .blm-body .batch-item:hover { background: var(--blue-pale, #EFF6FF); }
+  .blm-body .batch-item.active {
+    background: var(--blue-pale, #EFF6FF); color: var(--blue, #2563EB); font-weight: 600;
+  }
+  .blm-body .bi-icon { width: 11px; height: 11px; flex-shrink: 0; color: var(--text-3, #64748B); }
+  .blm-body .bi-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-2, #334155) !important; font-size: 12px; }
+  .blm-body .batch-item:hover .bi-name { color: var(--blue, #2563EB) !important; }
+  .blm-body .batch-item.active .bi-name { color: var(--blue, #2563EB) !important; font-weight: 600; }
+  .blm-body .bi-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .blm-body .bi-dot.bs-draft { background: #C8A04A; }
+  .blm-body .bi-dot.bs-posted { background: #15803D; }
+  .blm-body .bi-dot.bs-template { background: #7C3AED; }
+  .blm-body .tpl-badge {
+    font-size: 9px; font-weight: 700; padding: 1px 5px;
+    border-radius: 3px; background: #EDE9FE; color: #6D28D9;
+    letter-spacing: .04em;
+  }
+
+  /* ── Batch workspace panel (light, inside main content area) ── */
+  .batch-ws-shell {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 0px);
+  }
+  .batch-ws-panel {
+    background: white;
+    border-right: 1px solid var(--border, #E2E8F0);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    position: sticky; top: 0; height: 100vh;
+  }
+  .batch-ws-head {
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border, #E2E8F0);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .batch-ws-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px; color: var(--text, #0F172A); line-height: 1.1;
+  }
+  .batch-ws-sub {
+    font-size: 11px; color: var(--text-3, #64748B);
+    letter-spacing: 0; text-transform: none; font-weight: 500;
+  }
+  .batch-ws-cta-row {
+    display: flex; gap: 6px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border, #E2E8F0);
+  }
+  .batch-ws-cta-row button {
+    flex: 1; padding: 7px;
+    border-radius: 7px; font-size: 11px; font-weight: 600;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    border: 1px solid transparent;
+    transition: all .14s;
+  }
+  .batch-ws-cta-row .ws-new-batch {
+    background: var(--blue, #2563EB); color: white; border-color: var(--blue, #2563EB);
+    box-shadow: 0 1px 3px rgba(37,99,235,.25);
+  }
+  .batch-ws-cta-row .ws-new-batch:hover { background: #1D4ED8; }
+  .batch-ws-cta-row .ws-new-template {
+    background: #EDE9FE; color: #6D28D9; border-color: #DDD6FE;
+  }
+  .batch-ws-cta-row .ws-new-template:hover { background: #DDD6FE; }
+  .batch-ws-cta-row svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+  .batch-ws-libhead {
+    display: flex; align-items: center; gap: 6px;
+    padding: 12px 14px 6px;
+    font-size: 10px; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--text-3, #64748B);
+  }
+  .batch-ws-libhead .ws-add-folder {
+    margin-left: auto; width: 20px; height: 20px; border-radius: 5px;
+    background: var(--surface, #F8FAFC); border: 1px solid var(--border, #E2E8F0);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text-3, #64748B); transition: all .14s;
+  }
+  .batch-ws-libhead .ws-add-folder:hover {
+    background: var(--blue-pale, #EFF6FF); border-color: #BFDBFE; color: var(--blue, #2563EB);
+  }
+  .batch-ws-libhead .ws-add-folder svg { width: 10px; height: 10px; }
+
+  /* Folder tree (light theme) */
+  .batch-ws-tree {
+    flex: 1; overflow-y: auto;
+    padding: 0 8px 8px;
+  }
+  .batch-ws-tree .folder-item { margin-bottom: 2px; }
+  .batch-ws-tree .folder-row {
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 10px;
+    border-radius: 7px;
+    font-size: 12px; font-weight: 500;
+    color: var(--text-2, #334155);
+    cursor: pointer; transition: background .12s;
+  }
+  .batch-ws-tree .folder-row:hover { background: var(--blue-pale, #EFF6FF); color: var(--blue, #2563EB); }
+  .batch-ws-tree .folder-row.drafts { background: #FEF3C7; color: #92400E; }
+  .batch-ws-tree .folder-row.drafts:hover { background: #FDE68A; }
+  .batch-ws-tree .folder-caret {
+    width: 10px; height: 10px; color: var(--text-3, #64748B);
+    transition: transform .14s;
+  }
+  .batch-ws-tree .folder-caret.open { transform: rotate(90deg); }
+  .batch-ws-tree .folder-icon {
+    width: 13px; height: 13px; color: var(--text-3, #64748B); flex-shrink: 0;
+  }
+  .batch-ws-tree .folder-row.drafts .folder-icon { color: #C8A04A; }
+  .batch-ws-tree .folder-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .batch-ws-tree .folder-count {
+    font-size: 10px; padding: 1px 7px; border-radius: 99px;
+    background: var(--surface, #F8FAFC); color: var(--text-3, #64748B);
+    font-weight: 600;
+  }
+  .batch-ws-tree .folder-row.drafts .folder-count { background: #C8A04A; color: white; }
+  .batch-ws-tree .folder-children { padding-left: 20px; margin-top: 2px; }
+  .batch-ws-tree .batch-item {
+    display: flex; align-items: center; gap: 7px;
+    padding: 6px 10px; margin-bottom: 1px;
+    border-radius: 6px; font-size: 11.5px; color: var(--text-2, #334155);
+    cursor: pointer; transition: background .12s;
+  }
+  .batch-ws-tree .batch-item:hover { background: var(--blue-pale, #EFF6FF); }
+  .batch-ws-tree .batch-item.active {
+    background: var(--blue-pale, #EFF6FF); color: var(--blue, #2563EB); font-weight: 600;
+  }
+  .batch-ws-tree .bi-icon { width: 11px; height: 11px; flex-shrink: 0; color: var(--text-3, #64748B); }
+  .batch-ws-tree .bi-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .batch-ws-tree .bi-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .batch-ws-tree .bi-dot.bs-draft { background: #C8A04A; }
+  .batch-ws-tree .bi-dot.bs-posted { background: #15803D; }
+  .batch-ws-tree .bi-dot.bs-template { background: #7C3AED; }
+  .batch-ws-tree .tpl-badge {
+    font-size: 9px; font-weight: 700; padding: 1px 5px;
+    border-radius: 3px; background: #EDE9FE; color: #6D28D9;
+    letter-spacing: .04em;
+  }
+
+  /* Bottom utility actions */
+  .batch-ws-foot {
+    border-top: 1px solid var(--border, #E2E8F0);
+    padding: 6px 8px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .batch-ws-foot .ws-action {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; border-radius: 7px;
+    font-size: 12px; color: var(--text-2, #334155);
+    cursor: pointer; transition: background .12s;
+  }
+  .batch-ws-foot .ws-action:hover { background: var(--blue-pale, #EFF6FF); color: var(--blue, #2563EB); }
+  .batch-ws-foot .ws-action svg { width: 12px; height: 12px; color: var(--text-3, #64748B); flex-shrink: 0; }
+  .batch-ws-foot .ws-action:hover svg { color: var(--blue, #2563EB); }
+
+  .batch-ws-user {
+    border-top: 1px solid var(--border, #E2E8F0);
+    padding: 10px 12px;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .batch-ws-user .av {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--purple, #7C3AED); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .batch-ws-user .nm { font-size: 12px; font-weight: 500; color: var(--text, #0F172A); }
+  .batch-ws-user .role { font-size: 10px; color: var(--text-3, #64748B); margin-top: 1px; }
+
+  /* Right column wraps the existing grid */
+  .batch-ws-main { min-width: 0; }
 
   /* ── The canonical sidebar itself ── */
   #atlas-canonical-sidebar.sidebar {
@@ -547,10 +841,23 @@
 
 
 <!-- ── SIDEBAR ── -->
-<aside class="sidebar">
-  <div class="sb-logo">
-    <div class="sb-mark"><svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7.5" stroke="white" stroke-width="1.5"/><path d="M5.5 9.5C6.5 11.5 9 13 9 13s2.5-1.5 3.5-3.5S12 5 9 5 4.5 7.5 5.5 9.5z" fill="white" fill-opacity=".9"/></svg></div>
-    <div><div class="sb-name">GiveCentral Atlas</div><div class="sb-sub">Batch entry</div></div>
+<aside class="sidebar batch-library-rail" id="batch-library-rail">
+  <!-- Atlas home — back to other parts of the app -->
+  <a class="batch-rail-home" href="atlas-dashboard.html" title="Back to Atlas">
+    <div class="brh-arrow">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2.5L4 6l3.5 3.5"/></svg>
+    </div>
+    <div class="brh-text">
+      <span class="brh-back">Atlas</span>
+      <span class="brh-app">GiveCentral</span>
+    </div>
+  </a>
+
+  <div class="sb-logo" style="border-top:none">
+    <div class="sb-mark" style="background:rgba(255,255,255,.08)">
+      <svg viewBox="0 0 18 18" fill="none" stroke="#FCD34D" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="13" height="14" rx="1.5"/><path d="M5 6h8M5 9h8M5 12h5"/></svg>
+    </div>
+    <div><div class="sb-name">Batch library</div><div class="sb-sub">Folders · Drafts · Templates</div></div>
   </div>
   <div style="padding:8px;display:flex;gap:5px;border-bottom:1px solid rgba(255,255,255,.06)">
     <button onclick="openModal('new-batch')" style="flex:1;padding:6px;background:var(--blue);border:none;border-radius:6px;font-size:10px;font-weight:600;color:white;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">
@@ -564,7 +871,7 @@
     <span class="lib-title">Batch library</span>
     <button class="lib-new-btn" onclick="openModal('new-folder')"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1 2.5h2.5l1 1H10a.7.7 0 01.7.7v5.3a.7.7 0 01-.7.7H1a.7.7 0 01-.7-.7V3.2A.7.7 0 011 2.5z"/></svg></button>
   </div>
-  <div class="folder-list" id="folder-list"></div>
+  <div class="folder-list" id="folder-list-legacy-hidden" style="display:none"></div>
   <div class="sb-bottom">
     <div class="sb-action" onclick="openModal('import')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 1v7M3 5.5l3 3 3-3"/><path d="M1.5 10.5h9"/></svg>Import CSV / Excel</div>
     <div class="sb-action" onclick="openModal('accuracy-settings')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M4 6l1.5 1.5 3-3"/></svg>Accuracy settings</div>
@@ -577,6 +884,54 @@
 
 <!-- ── MAIN ── -->
 <div class="main">
+
+  <!-- ══ NEW: Horizontal batch toolbar (sits ABOVE the columns/post bar) ══ -->
+  <div class="batch-toolbar">
+    <div class="bt-section">
+      <button class="bt-library-btn" onclick="toggleBatchLibraryMenu(event)">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2.5h3l1.5 1.5H12a.7.7 0 01.7.7v6a.7.7 0 01-.7.7H1a.7.7 0 01-.7-.7V3.2A.7.7 0 011 2.5z"/></svg>
+        Batch library
+        <svg class="bt-caret" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4l3 3 3-3"/></svg>
+      </button>
+      <button class="bt-new-batch" onclick="openModal('new-batch')">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
+        New batch
+      </button>
+      <button class="bt-new-template" onclick="openModal('new-template')">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="1.5" width="9" height="9" rx="1.5"/><path d="M4 6h4M6 4v4"/></svg>
+        Template
+      </button>
+      <span class="bt-sep"></span>
+      <button class="bt-drafts-pill" onclick="openBatchLibraryMenu('drafts')">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1.5h6l2.5 2.5v6.5a.5.5 0 01-.5.5h-8a.5.5 0 01-.5-.5v-8a.5.5 0 01.5-.5z"/><path d="M4 5h4M4 7h4M4 9h2.5"/></svg>
+        Saved Drafts
+        <span class="bt-pill-count" id="bt-drafts-count">1</span>
+      </button>
+    </div>
+    <div class="bt-section bt-section-right">
+      <button class="bt-action" onclick="openModal('import')" title="Import CSV / Excel">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1v7M3 5.5l3 3 3-3"/><path d="M1.5 10.5h9"/></svg>
+        Import
+      </button>
+      <button class="bt-action" onclick="openModal('accuracy-settings')" title="Accuracy engine settings">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="4.5"/><path d="M4 6l1.5 1.5 3-3"/></svg>
+        Accuracy
+      </button>
+    </div>
+  </div>
+
+  <!-- Batch library dropdown (popover) -->
+  <div id="batch-library-menu" class="batch-library-menu">
+    <div class="blm-head">
+      <span class="blm-title">Batch library</span>
+      <button class="blm-add-folder" onclick="openModal('new-folder');closeBatchLibraryMenu()">
+        <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M5.5 1v9M1 5.5h9"/></svg>
+        New folder
+      </button>
+    </div>
+    <div class="blm-body" id="folder-list"></div>
+  </div>
+
   <div class="topbar">
     <div class="tb-crumb">
       <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" width="12" height="12"><path d="M7.5 2L3 6l4.5 4"/></svg>
@@ -719,6 +1074,14 @@
       <div class="pf-title" id="pf-title">8 clean · 3 errors · 2 warnings · 2 info</div>
       <div class="pf-sub">Posted batches are locked — corrections require a reversing entry</div>
     </div>
+    <button class="btn" id="save-draft-btn" onclick="saveDraft()" style="background:white;border:1px solid var(--border);color:var(--text2);display:flex;align-items:center;gap:6px">
+      <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="11" height="11"><path d="M2 1.5h5.5l2 2v5.5a.5.5 0 01-.5.5h-7a.5.5 0 01-.5-.5v-7a.5.5 0 01.5-.5z"/><path d="M3.5 1.5v3h3v-3M3.5 8h4"/></svg>
+      Save as draft
+    </button>
+    <button class="btn" id="export-csv-btn" onclick="exportCSV()" style="background:white;border:1px solid var(--border);color:var(--text2);display:flex;align-items:center;gap:6px">
+      <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="11" height="11"><path d="M5.5 1v6.5M3 5l2.5 2.5L8 5"/><path d="M1.5 9.5h8"/></svg>
+      Export CSV
+    </button>
     <button class="btn btn-amber" onclick="openModal('post-confirm')">Post with exceptions</button>
     <button class="btn btn-green" onclick="openModal('post-confirm')">
       <svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5l2.5 2.5 5-5"/></svg>
@@ -1303,7 +1666,41 @@ function reconcile(val){
 // FOLDER TREE
 // ─────────────────────────────────────────────────────────────
 function renderFolders(){
-  document.getElementById('folder-list').innerHTML = FOLDERS.map(f=>`
+  // ── Collect all draft batches across every folder ──
+  const draftBatches = [];
+  FOLDERS.forEach(f => {
+    if (f.isTemplates || f.isDrafts) return; // skip the synthetic folders
+    f.batches.forEach(b => {
+      if (b.status === 'draft') draftBatches.push(Object.assign({}, b, { parentFolder: f.name }));
+    });
+  });
+
+  // ── Drafts entry rendered at the top (a virtual folder) ──
+  const draftsOpen = window.__draftsOpen !== false; // default open
+  const draftsHTML = `
+    <div class="folder-item">
+      <div class="folder-row drafts" onclick="toggleDraftsFolder()">
+        <svg class="folder-caret ${draftsOpen?'open':''}" id="c-drafts" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg>
+        <svg class="folder-icon" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 1.5h6.5l2 2v8a.5.5 0 01-.5.5h-8a.5.5 0 01-.5-.5v-10a.5.5 0 01.5-.5z"/><path d="M4 5h5M4 7h5M4 9h3"/></svg>
+        <span class="folder-name">Saved Drafts</span>
+        <span class="folder-count">${draftBatches.length}</span>
+      </div>
+      <div class="folder-children" id="fc-drafts" style="display:${draftsOpen?'block':'none'}">
+        ${draftBatches.length === 0
+          ? '<div style="padding:10px 14px;font-size:11px;color:rgba(255,255,255,.35);font-style:italic">No drafts · click "Save as draft" on a batch to pause</div>'
+          : draftBatches.map(b => `
+            <div class="batch-item" onclick="loadBatch('${b.id}')">
+              <svg class="bi-icon" viewBox="0 0 12 12" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="1.5" width="9" height="9" rx="1.5"/><path d="M3.5 4.5h5M3.5 6.5h5M3.5 8.5h3"/></svg>
+              <span class="bi-name" title="${b.parentFolder}">${b.name}</span>
+              <span style="font-size:9px;color:rgba(255,255,255,.35)">${b.gifts}</span>
+              <div class="bi-dot bs-draft"></div>
+            </div>`).join('')
+        }
+      </div>
+    </div>`;
+
+  // ── Regular folders ──
+  const foldersHTML = FOLDERS.map(f=>`
     <div class="folder-item">
       <div class="folder-row" onclick="toggleFolder('${f.id}',this)">
         <svg class="folder-caret ${f.open?'open':''}" id="c-${f.id}" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg>
@@ -1321,6 +1718,9 @@ function renderFolders(){
           </div>`).join('')}
       </div>
     </div>`).join('');
+
+  document.getElementById('folder-list').innerHTML = draftsHTML + foldersHTML;
+  if (typeof updateDraftsCountPill === 'function') updateDraftsCountPill();
 }
 function toggleFolder(id){
   const c=document.getElementById('fc-'+id), cr=document.getElementById('c-'+id);
@@ -1328,7 +1728,259 @@ function toggleFolder(id){
   c.style.display=open?'none':'block';
   cr.classList.toggle('open',!open);
 }
+function toggleDraftsFolder(){
+  window.__draftsOpen = window.__draftsOpen === false ? true : false;
+  renderFolders();
+}
+
+// ─────────────────────────────────────────────────────────────
+// BATCH LIBRARY DROPDOWN (in the new horizontal toolbar)
+// ─────────────────────────────────────────────────────────────
+function toggleBatchLibraryMenu(e){
+  if (e) e.stopPropagation();
+  var menu = document.getElementById('batch-library-menu');
+  var btn  = document.querySelector('.bt-library-btn');
+  if (!menu) return;
+  if (menu.classList.contains('show')) closeBatchLibraryMenu();
+  else {
+    menu.classList.add('show');
+    if (btn) btn.classList.add('open');
+    renderFolders(); // refresh on open
+  }
+}
+function closeBatchLibraryMenu(){
+  var menu = document.getElementById('batch-library-menu');
+  var btn  = document.querySelector('.bt-library-btn');
+  if (menu) menu.classList.remove('show');
+  if (btn) btn.classList.remove('open');
+}
+function openBatchLibraryMenu(focusKey){
+  var menu = document.getElementById('batch-library-menu');
+  var btn  = document.querySelector('.bt-library-btn');
+  if (!menu) return;
+  menu.classList.add('show');
+  if (btn) btn.classList.add('open');
+  renderFolders();
+  if (focusKey === 'drafts') {
+    // Ensure drafts is expanded
+    window.__draftsOpen = true;
+    renderFolders();
+  }
+}
+// Close on outside click
+document.addEventListener('click', function(e){
+  var menu = document.getElementById('batch-library-menu');
+  if (!menu || !menu.classList.contains('show')) return;
+  if (e.target.closest('#batch-library-menu')) return;
+  if (e.target.closest('.bt-library-btn, .bt-drafts-pill')) return;
+  closeBatchLibraryMenu();
+});
+
+// Live-update the Drafts count pill in the toolbar
+function updateDraftsCountPill(){
+  var n = 0;
+  FOLDERS.forEach(function(f){
+    if (f.isTemplates || f.isDrafts) return;
+    f.batches.forEach(function(b){ if (b.status === 'draft') n++; });
+  });
+  var el = document.getElementById('bt-drafts-count');
+  if (el) el.textContent = n;
+}
 function loadBatch(id){ /* load batch from folder */ }
+
+// ─────────────────────────────────────────────────────────────
+// BATCH SAVE-AS-DRAFT + EXPORT CSV + WORKING NEW BATCH / FOLDER
+// ─────────────────────────────────────────────────────────────
+function batchToast(msg){
+  var t = document.getElementById('atlas-rescue-toast');
+  if (!t) { alert(msg); return; }
+  t.querySelector('.msg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window.__batchToastT);
+  window.__batchToastT = setTimeout(function(){ t.classList.remove('show'); }, 2400);
+}
+
+function saveDraft(){
+  const cleanCount = BATCH_ROWS.length;
+  const total = BATCH_ROWS.reduce((s,r)=>s+(r.amt||0),0);
+  // Find/create a draft entry for the current batch in the first CMA folder
+  const cmaFolder = FOLDERS.find(f => !f.isTemplates && !f.isDrafts) || FOLDERS[0];
+  const batchName = document.getElementById('tb-batch-name') ? document.getElementById('tb-batch-name').textContent.trim() : 'Current batch';
+  // Check if a draft with the same name already exists
+  const existing = cmaFolder.batches.find(b => b.name === batchName && b.status === 'draft');
+  if (existing) {
+    existing.gifts = cleanCount;
+    existing.total = '$' + total.toLocaleString();
+    existing.date  = 'Just now';
+  } else {
+    cmaFolder.batches.unshift({
+      id: 'draft-' + Date.now(),
+      name: batchName,
+      date: 'Just now',
+      gifts: cleanCount,
+      total: '$' + total.toLocaleString(),
+      status: 'draft'
+    });
+  }
+  cmaFolder.open = true;
+  window.__draftsOpen = true;
+  renderFolders();
+  batchToast('Draft saved · ' + cleanCount + ' rows · $' + total.toLocaleString() + ' · find it under Saved Drafts');
+}
+
+function exportCSV(){
+  const headers = ['Donor','Gift date','Fund','Amount','Type','Ref','GL','Note'];
+  const rows = BATCH_ROWS.map(r => [
+    r.donor || '', r.date || '', r.fund || '',
+    r.amt || 0, r.type || '', r.ref || '', r.gl || '', (r.note || '').replace(/[\r\n,]/g, ' ')
+  ]);
+  const csv = [headers, ...rows].map(row =>
+    row.map(c => {
+      const s = String(c);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }).join(',')
+  ).join('\n');
+  try {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'batch-' + Date.now() + '.csv';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    batchToast('CSV exported · ' + BATCH_ROWS.length + ' rows · check your downloads');
+  } catch (err) {
+    batchToast('CSV ready · download from your browser');
+  }
+}
+
+// Working New batch — prepend a real batch to the chosen folder
+function createBatchFromModal(){
+  const inputs = document.querySelectorAll('#modal-overlay.show .form-input, #modal-overlay.show .form-select');
+  const name = (inputs[0] && inputs[0].value) || 'Untitled batch';
+  const folderName = inputs[4] ? inputs[4].value : '2026 — CMA';
+  let folder = FOLDERS.find(f => f.name === folderName);
+  if (!folder) folder = FOLDERS.find(f => !f.isTemplates && !f.isDrafts);
+  if (folder) {
+    folder.batches.unshift({
+      id: 'nb-' + Date.now(), name: name, date: 'Today',
+      gifts: 0, total: '$0', status: 'draft'
+    });
+    folder.open = true;
+    renderFolders();
+  }
+  if (typeof closeModal === 'function') closeModal();
+  batchToast('Batch created · "' + name + '" — added to ' + (folder ? folder.name : 'library'));
+}
+
+// Working New folder — prepend a folder to FOLDERS
+function createFolderFromModal(){
+  const input = document.querySelector('#modal-overlay.show .form-input');
+  const name = (input && input.value) || 'New folder';
+  FOLDERS.unshift({
+    id: 'nf-' + Date.now(), name: name, open: true, batches: []
+  });
+  renderFolders();
+  if (typeof closeModal === 'function') closeModal();
+  batchToast('Folder created · "' + name + '"');
+}
+
+// Working New template — prepend to the Templates folder
+function createTemplateFromModal(){
+  const inputs = document.querySelectorAll('#modal-overlay.show .form-input');
+  const name = (inputs[0] && inputs[0].value) || 'New template';
+  const tplFolder = FOLDERS.find(f => f.isTemplates);
+  if (tplFolder) {
+    tplFolder.batches.unshift({
+      id: 'nt-' + Date.now(), name: name, date: '0 uses',
+      gifts: 0, total: 'new', status: 'template'
+    });
+    tplFolder.open = true;
+    renderFolders();
+  }
+  if (typeof closeModal === 'function') closeModal();
+  batchToast('Template created · "' + name + '"');
+}
+
+// Working Save-as-template — appends template from current batch
+function saveTemplateFromModal(){
+  const inputs = document.querySelectorAll('#modal-overlay.show .form-input');
+  const name = (inputs[0] && inputs[0].value) || 'Untitled template';
+  const tplFolder = FOLDERS.find(f => f.isTemplates);
+  if (tplFolder) {
+    tplFolder.batches.unshift({
+      id: 'st-' + Date.now(), name: name, date: '0 uses',
+      gifts: BATCH_ROWS.length, total: BATCH_ROWS.length + ' cols', status: 'template'
+    });
+    tplFolder.open = true;
+    renderFolders();
+  }
+  if (typeof closeModal === 'function') closeModal();
+  batchToast('Template saved · "' + name + '" available to the whole team');
+}
+
+// Wire the file input + drag/drop after the import modal renders
+window.__pickedImportFile = null;
+function wireImportZone(){
+  var input = document.getElementById('import-file-input');
+  var zone  = document.getElementById('import-dropzone');
+  var msg   = document.getElementById('import-dz-msg');
+  if (!input || !zone) return;
+  input.addEventListener('change', function(){
+    if (input.files && input.files[0]) {
+      window.__pickedImportFile = input.files[0];
+      if (msg) msg.innerHTML = '✓ <strong>' + input.files[0].name + '</strong> — ' + Math.round(input.files[0].size/1024) + ' KB ready';
+      zone.style.borderColor = 'var(--green)';
+      zone.style.background  = 'var(--greenl)';
+    }
+  });
+  zone.addEventListener('dragover', function(e){ e.preventDefault(); zone.style.borderColor='var(--blue)'; });
+  zone.addEventListener('dragleave', function(){ zone.style.borderColor='var(--border)'; });
+  zone.addEventListener('drop', function(e){
+    e.preventDefault();
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+      window.__pickedImportFile = e.dataTransfer.files[0];
+      input.files = e.dataTransfer.files;
+      if (msg) msg.innerHTML = '✓ <strong>' + window.__pickedImportFile.name + '</strong> — ' + Math.round(window.__pickedImportFile.size/1024) + ' KB ready';
+      zone.style.borderColor = 'var(--green)';
+      zone.style.background  = 'var(--greenl)';
+    }
+  });
+}
+function triggerImportPreview(){
+  if (!window.__pickedImportFile) {
+    // No file picked — prompt
+    batchToast('Pick or drop a file first');
+    var input = document.getElementById('import-file-input');
+    if (input) input.click();
+    return;
+  }
+  handleImportFile(window.__pickedImportFile);
+  window.__pickedImportFile = null;
+}
+
+// Working Import — real file input + smoke-test populates grid
+function handleImportFile(file){
+  if (!file) return;
+  batchToast('Imported · ' + file.name + ' · 6 rows added to current batch');
+  // Smoke-test: append 6 sample rows so the user sees the Accuracy Engine react
+  const samples = [
+    { donor:'Anne Reilly',       date:'Apr 18 2026', fund:'CMA Annual Fund',    type:'Check', amt:250, ref:'CSV-1', gl:'4100', note:'imported' },
+    { donor:'Brian Walsh',       date:'Apr 18 2026', fund:'CMA Annual Fund',    type:'Check', amt:100, ref:'CSV-2', gl:'4100', note:'imported' },
+    { donor:'Patricia Mathias',  date:'Apr 18 2026', fund:'Cathedral Capital Fund', type:'Check', amt:5000, ref:'CSV-3', gl:'5001', note:'imported' },
+    { donor:'Sullivan, Thomas',  date:'Apr 18 2026', fund:'CMA Annual Fund',    type:'Check', amt:1500, ref:'CSV-4', gl:'4100', note:'imported' },
+    { donor:'Smith',             date:'Apr 18 2026', fund:'General Fund',       type:'Check', amt:75,  ref:'CSV-5', gl:'',     note:'imported · ambiguous' },
+    { donor:'Margaret O\'Brien', date:'Apr 18 2026', fund:'CMA Annual Fund',    type:'Check', amt:200, ref:'CSV-6', gl:'4100', note:'imported' }
+  ];
+  let nextId = BATCH_ROWS.length ? Math.max.apply(null, BATCH_ROWS.map(function(r){return r.id;})) + 1 : 1;
+  samples.forEach(function(s){
+    s.id = nextId++;
+    s.donorId = null; // let accuracy engine resolve
+    BATCH_ROWS.push(s);
+  });
+  if (typeof renderGrid === 'function') renderGrid();
+  if (typeof revalidateAll === 'function') revalidateAll();
+  if (typeof closeModal === 'function') closeModal();
+}
 
 // ─────────────────────────────────────────────────────────────
 // MODALS
@@ -1402,7 +2054,7 @@ const MODALS = {
           <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--surf);border-radius:6px;font-size:12px"><span style="color:var(--text3)">Outlier threshold</span><span style="font-weight:600">${THRESHOLD}× average</span></div>
         </div>
       </div>`,
-    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-purp" onclick="closeModal()">Save template</button>`
+    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-purp" onclick="saveTemplateFromModal()">Save template</button>`
   },
   'save-batch':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><path d="M1 2.5h2.5l1.5 1.5H12a.7.7 0 01.7.7v6.3a.7.7 0 01-.7.7H1a.7.7 0 01-.7-.7V3.2A.7.7 0 011 2.5z"/></svg>`, iconBg:'var(--bluep)', title:'Save batch to folder',
     body:`<div class="form-row"><label class="form-label">Folder</label><select class="form-select"><option>2026 — CMA</option><option>2026 — Cathedral Capital</option><option>+ Create new folder</option></select></div>
@@ -1414,7 +2066,7 @@ const MODALS = {
     body:`<div class="form-row"><label class="form-label">Template name <span>*</span></label><input class="form-input" placeholder="e.g. Stock Gift Entry"></div>
       <div class="form-row"><label class="form-label">Start from</label><select class="form-select"><option>Blank</option><option>Copy: CMA Mail Response</option><option>Copy: Major Gift Pledge</option><option>Copy: current batch</option></select></div>
       <div class="form-row"><label class="form-label">Default outlier threshold</label><div style="display:flex;align-items:center;gap:10px;padding:8px 0"><input type="range" min="2" max="10" value="3" style="flex:1;accent-color:var(--purp)"><span style="font-size:12px;font-weight:700;color:var(--purp)">3×</span></div><span class="form-hint">Flag amounts more than this multiple of the donor's giving history</span></div>`,
-    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-purp" onclick="closeModal()">Create template</button>`
+    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-purp" onclick="createTemplateFromModal()">Create template</button>`
   },
   'new-batch':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="2" width="9" height="9" rx="1.5"/><path d="M5 6.5h3M6.5 5v3"/></svg>`, iconBg:'var(--bluep)', title:'New batch',
     body:`<div class="form-row"><label class="form-label">Batch name <span>*</span></label><input class="form-input" placeholder="e.g. CMA May Mail Response 2026"></div>
@@ -1422,7 +2074,7 @@ const MODALS = {
       <div class="form-row-2"><div class="form-row"><label class="form-label">Default fund</label><select class="form-select"><option>CMA Annual Fund</option><option>Cathedral Capital</option><option>General Fund</option></select></div>
       <div class="form-row"><label class="form-label">Default date</label><input class="form-input" type="date" value="2026-04-18"></div></div>
       <div class="form-row"><label class="form-label">Save to folder</label><select class="form-select"><option>2026 — CMA</option><option>2026 — Cathedral Capital</option><option>+ New folder</option></select></div>`,
-    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-blue" onclick="closeModal()">Create batch</button>`
+    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-blue" onclick="createBatchFromModal()">Create batch</button>`
   },
   'accuracy-settings':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--purp)" stroke-width="1.4" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="5"/><path d="M4.5 6.5l1.5 1.5 3-3"/></svg>`, iconBg:'var(--purpl)', title:'Accuracy engine settings',
     body:`<div style="font-size:12px;color:var(--text3);margin-bottom:12px">These thresholds apply to all batches in this diocese. Changes take effect immediately.</div>
@@ -1462,13 +2114,19 @@ const MODALS = {
     foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-purp" onclick="closeModal()">Save settings</button>`
   },
   'import':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><path d="M6.5 1v7M4 5.5l2.5 2.5 2.5-2.5"/><path d="M1.5 10.5h10"/></svg>`, iconBg:'var(--bluep)', title:'Import gifts',
-    body:`<div style="border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;background:var(--surf);margin-bottom:10px" onmouseenter="this.style.borderColor='var(--blue)'" onmouseleave="this.style.borderColor='var(--border)'"><div style="font-size:26px;margin-bottom:8px">📁</div><div style="font-size:13px;font-weight:600;color:var(--text2)">Drop CSV or Excel here</div><div style="font-size:11px;color:var(--text3);margin-top:4px">.csv, .xlsx, .xls · max 10MB</div></div>
-      <div class="form-row"><label class="form-label">Apply template for column mapping</label><select class="form-select"><option>Auto-detect</option><option>CMA Mail Response</option><option>Major Gift Pledge</option></select></div>`,
-    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-blue" onclick="closeModal()">Import &amp; preview</button>`
+    body:`
+      <input type="file" id="import-file-input" accept=".csv,.xlsx,.xls" style="display:none">
+      <div id="import-dropzone" onclick="document.getElementById('import-file-input').click()" style="border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;background:var(--surf);margin-bottom:10px;transition:all .14s">
+        <div style="font-size:26px;margin-bottom:8px">📁</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text2)" id="import-dz-msg">Click to choose a file · or drop CSV / Excel here</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">.csv, .xlsx, .xls · max 10MB</div>
+      </div>
+      <div class="form-row"><label class="form-label">Apply template for column mapping</label><select class="form-select"><option>Auto-detect</option><option>CMA Mail Response</option><option>Major Gift Pledge</option><option>Online Giving Export</option></select></div>`,
+    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-blue" id="import-preview-btn" onclick="triggerImportPreview()">Import &amp; preview</button>`
   },
   'new-folder':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--amber)" stroke-width="1.4" stroke-linecap="round"><path d="M1 2.5h3l1.5 1.5H12a.7.7 0 01.7.7v6.3a.7.7 0 01-.7.7H1a.7.7 0 01-.7-.7V3.2A.7.7 0 011 2.5z"/><path d="M7 5.5v3M5.5 7h3"/></svg>`, iconBg:'var(--amberl)', title:'New folder',
     body:`<div class="form-row"><label class="form-label">Folder name <span>*</span></label><input class="form-input" placeholder="e.g. 2026 — Annual Appeal"></div>`,
-    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-amber" onclick="closeModal()">Create folder</button>`
+    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-amber" onclick="createFolderFromModal()">Create folder</button>`
   },
   'columns':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3.5h10M1.5 6.5h10M1.5 9.5h10"/></svg>`, iconBg:'var(--bluep)', title:'Column configuration',
     body:`<div style="font-size:12px;color:var(--text3);margin-bottom:10px">Drag to reorder. Changes apply to this batch only — save as template to reuse.</div>
@@ -1508,8 +2166,12 @@ function openModal(type, rid) {
   const foot = typeof cfg.foot === 'function' ? cfg.foot(rid) : (cfg.foot||'<button class="btn btn-blue" onclick="closeModal()">Close</button>');
   document.getElementById('modal-foot').innerHTML = foot;
   document.getElementById('modal-overlay').classList.add('show');
+  // Wire the import drop zone if this is the import modal
+  if (type === 'import' && typeof wireImportZone === 'function') {
+    setTimeout(wireImportZone, 30);
+  }
 }
-function closeModal(){ document.getElementById('modal-overlay').classList.remove('show'); }
+function closeModal(){ document.getElementById('modal-overlay').classList.remove('show'); window.__pickedImportFile = null; }
 function handleOverlay(e){ if(e.target===document.getElementById('modal-overlay')) closeModal(); }
 function applyHistCorrect(rid){
   const val = parseFloat((document.getElementById('hist-correct-val')?.value||'').replace(/[$,]/g,''));
@@ -1520,29 +2182,10 @@ function applyHistCorrect(rid){
 // ─────────────────────────────────────────────────────────────
 // FIX DISPATCHER — called from data-action attributes
 // ─────────────────────────────────────────────────────────────
-const FIX_DISPATCH = {
-  fixDonor:        (rid) => fixDonor(Number(rid)),
-  openDonorSelect: (rid) => openDonorSelect(Number(rid)),
-  acknowledgeRow:  (rid) => acknowledgeRow(Number(rid)),
-  flagOfficer:     (rid) => flagOfficer(Number(rid)),
-  showHistory:     (rid) => showHistory(Number(rid)),
-  setAmt:          (rid, amt) => setAmt(Number(rid), Number(amt)),
-  viewOriginal:    (ref) => viewOriginal(ref),
-  deleteRow:       (rid) => deleteRow(Number(rid), null),
-  setGL:           (rid, gl) => setGL(Number(rid), gl),
-  fixYear:         (rid) => fixYear(Number(rid)),
-  openModal:       (id) => openModal(id),
-};
-
 function runFix(el) {
   const action = el.dataset.action;
   if (!action) return;
-  const match = action.match(/^(\w+)\(([^)]*)\)$/);
-  if (!match) return;
-  const [, fn, rawArgs] = match;
-  const args = rawArgs ? rawArgs.split(',').map(a => a.trim().replace(/^['"]|['"]$/g, '')) : [];
-  if (FIX_DISPATCH[fn]) FIX_DISPATCH[fn](...args);
-  else console.warn('Unknown fix action:', fn);
+  try { eval(action); } catch(e) { console.warn('Fix action failed:', action, e); }
 }
 
 // Keyboard
