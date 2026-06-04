@@ -1558,5 +1558,320 @@ body {
 </script>
 <!-- end Atlas Dead-CTA Rescue -->
 
+<!-- ════════════════════════════════════════════════════════
+     Donor List · page-specific CTA wiring
+     Saved views, filter chips, sort, kebab menus, pager.
+     Uses document-level delegation so dynamic rows still work.
+     ════════════════════════════════════════════════════════ -->
+<style id="dl-wire-css">
+  .view-chip { cursor: pointer; transition: all .14s; }
+  .view-chip:hover:not(.active) { background: var(--blue-pale, #EFF6FF); border-color: #BFDBFE; color: var(--blue, #2563EB); }
+  .filter-chip { cursor: pointer; transition: all .14s; }
+  .filter-chip.add:hover { border-color: var(--blue, #2563EB); color: var(--blue, #2563EB); }
+  .filter-chip .x { cursor: pointer; padding: 0 4px; opacity: .5; transition: opacity .12s; }
+  .filter-chip .x:hover { opacity: 1; color: var(--rose, #BE185D); }
+  .filterbar .right span:nth-child(3) { cursor: pointer; }
+  .filterbar .right span:nth-child(3):hover strong { color: var(--blue, #2563EB) !important; }
+  .pager button { cursor: pointer; transition: all .14s; }
+  .pager button:hover:not(:disabled) { background: var(--blue-pale, #EFF6FF); color: var(--blue, #2563EB); border-color: #BFDBFE; }
+  .kebab { cursor: pointer; transition: all .14s; border-radius: 6px; }
+  .kebab:hover { background: rgba(37,99,235,.10); color: var(--blue, #2563EB) !important; }
+
+  /* Kebab dropdown */
+  #dl-kebab-menu {
+    position: absolute; z-index: 10500; background: white;
+    border: 1px solid #E2E8F0; border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(15,23,42,.16);
+    padding: 6px; min-width: 220px; font-family: 'DM Sans', sans-serif;
+    opacity: 0; transform: translateY(-4px); transition: opacity .14s, transform .14s;
+    display: none;
+  }
+  #dl-kebab-menu.show { opacity: 1; transform: translateY(0); display: block; }
+  #dl-kebab-menu a {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; color: #334155; text-decoration: none;
+    border-radius: 6px; cursor: pointer; font-size: 13px;
+  }
+  #dl-kebab-menu a:hover { background: #EFF6FF; color: var(--blue, #2563EB); }
+  #dl-kebab-menu a.danger { color: var(--rose, #BE185D); border-top: 1px solid #EDF2F7; margin-top: 4px; padding-top: 10px; }
+  #dl-kebab-menu a.danger:hover { background: #FEF2F2; color: #9F1239; }
+  #dl-kebab-menu a svg { width: 13px; height: 13px; color: var(--text-3, #64748B); flex-shrink: 0; }
+  #dl-kebab-menu a:hover svg { color: currentColor; }
+  #dl-kebab-menu a.danger svg { color: var(--rose, #BE185D); }
+  #dl-kebab-menu .nm-head {
+    padding: 8px 12px 6px; border-bottom: 1px solid #F1F5F9;
+    margin-bottom: 4px; font-size: 12px; color: var(--text-3);
+  }
+  #dl-kebab-menu .nm-head strong { color: var(--text); font-weight: 600; }
+
+  /* Modal scrim */
+  #dl-scrim { position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 10400; opacity: 0; pointer-events: none; transition: opacity .18s; }
+  #dl-scrim.show { opacity: 1; pointer-events: auto; }
+
+  /* Save view modal */
+  #dl-save-view {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(.96);
+    background: white; border-radius: 14px;
+    width: min(460px, 92vw); padding: 22px 24px;
+    box-shadow: 0 24px 48px rgba(15,23,42,.24);
+    z-index: 10410; opacity: 0; pointer-events: none;
+    transition: opacity .18s, transform .18s; font-family: 'DM Sans', sans-serif;
+  }
+  #dl-save-view.show { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+  #dl-save-view h3 { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); font-weight: 400; margin-bottom: 4px; }
+  #dl-save-view .sub { font-size: 12px; color: var(--text-3); margin-bottom: 16px; }
+  #dl-save-view label { display: block; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); margin-bottom: 5px; }
+  #dl-save-view input, #dl-save-view textarea {
+    width: 100%; padding: 9px 11px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--text);
+    outline: none; box-sizing: border-box; margin-bottom: 14px;
+  }
+  #dl-save-view input:focus, #dl-save-view textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
+  #dl-save-view .preview {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 9px;
+    padding: 11px 14px; font-size: 12px; color: var(--text-2);
+    margin-bottom: 16px; line-height: 1.5;
+  }
+  #dl-save-view .preview strong { color: var(--text); }
+  #dl-save-view .preview .chip {
+    display: inline-block; padding: 2px 8px; background: white;
+    border: 1px solid var(--border); border-radius: 99px;
+    font-size: 11px; margin-right: 4px; margin-top: 4px;
+  }
+  #dl-save-view .foot { display: flex; gap: 8px; justify-content: flex-end; }
+  #dl-save-view .foot button {
+    padding: 9px 16px; border-radius: 8px; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; border: 1.5px solid transparent;
+  }
+  #dl-save-view .foot .cancel { background: white; border-color: var(--border); color: var(--text-2); }
+  #dl-save-view .foot .cancel:hover { background: var(--surface); }
+  #dl-save-view .foot .save { background: var(--blue); color: white; }
+  #dl-save-view .foot .save:hover { background: #1D4ED8; }
+
+  .dt-row.dim { opacity: .25; pointer-events: none; transition: opacity .15s; }
+</style>
+
+<!-- Floating kebab menu -->
+<div id="dl-kebab-menu"></div>
+
+<!-- Save-view scrim + modal -->
+<div id="dl-scrim"></div>
+<div id="dl-save-view">
+  <h3>Save this view</h3>
+  <div class="sub">Save the current filter combination so you can jump back to it from the view chips above.</div>
+  <label>View name</label>
+  <input id="dl-sv-name" placeholder="e.g. Major prospects · capacity $1k+" autofocus>
+  <label>Description <small style="color:var(--text-3);font-weight:500;letter-spacing:0;text-transform:none">(optional)</small></label>
+  <textarea id="dl-sv-desc" rows="2" placeholder="What is this view for?"></textarea>
+  <div class="preview" id="dl-sv-preview"></div>
+  <div class="foot">
+    <button class="cancel" id="dl-sv-cancel">Cancel</button>
+    <button class="save" id="dl-sv-save">Save view</button>
+  </div>
+</div>
+
+<script id="dl-wire">
+(function(){
+  if (window.__dlWired) return; window.__dlWired = true;
+
+  function toast(msg){
+    var t = document.getElementById('atlas-rescue-toast');
+    if (!t) { console.log(msg); return; }
+    t.querySelector('.msg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(window.__dlToastT);
+    window.__dlToastT = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  }
+
+  // ═══ 1. SAVED VIEW chips (LYBUNT / SYBUNT / etc.) ═══
+  document.querySelectorAll('.view-chip:not(:last-child)').forEach(function(chip){
+    chip.addEventListener('click', function(e){
+      // Skip if user clicked the "+Saved view" chip
+      if (chip.querySelector('.new')) return;
+      document.querySelectorAll('.view-chip').forEach(function(x){ x.classList.remove('active'); });
+      chip.classList.add('active');
+      var label = chip.firstChild ? chip.firstChild.textContent.trim() : 'view';
+      toast('Switched to view · ' + label);
+    });
+  });
+
+  // ═══ 2. + SAVED VIEW chip → open save modal ═══
+  var newChip = document.querySelector('.view-chip .new');
+  var scrim   = document.getElementById('dl-scrim');
+  var modal   = document.getElementById('dl-save-view');
+  var nameIn  = document.getElementById('dl-sv-name');
+  var descIn  = document.getElementById('dl-sv-desc');
+  var preview = document.getElementById('dl-sv-preview');
+  var btnSave = document.getElementById('dl-sv-save');
+  var btnCancel = document.getElementById('dl-sv-cancel');
+
+  function buildPreview(){
+    var chips = Array.prototype.slice.call(document.querySelectorAll('.filter-chip.applied'))
+      .map(function(c){ return c.firstChild.textContent.trim().replace(/\s+×$/,''); });
+    if (!chips.length) {
+      preview.innerHTML = '<strong>No active filters</strong> · this view will show all donors';
+      return;
+    }
+    preview.innerHTML = '<strong>Including '+chips.length+' filter'+(chips.length===1?'':'s')+':</strong>' +
+      chips.map(function(c){ return '<span class="chip">'+c+'</span>'; }).join('');
+  }
+  function openSave(){
+    buildPreview();
+    nameIn.value = '';
+    descIn.value = '';
+    scrim.classList.add('show');
+    modal.classList.add('show');
+    setTimeout(function(){ nameIn.focus(); }, 100);
+  }
+  function closeSave(){
+    scrim.classList.remove('show');
+    modal.classList.remove('show');
+  }
+  if (newChip && newChip.parentElement) {
+    newChip.parentElement.addEventListener('click', openSave);
+  }
+  scrim.addEventListener('click', closeSave);
+  btnCancel.addEventListener('click', closeSave);
+  btnSave.addEventListener('click', function(){
+    var name = (nameIn.value || '').trim();
+    if (!name) { nameIn.style.borderColor = '#BE185D'; nameIn.focus(); return; }
+    // Insert new chip before "+Saved view"
+    var row = document.querySelector('.views');
+    var addChip = row.querySelector('.view-chip .new').parentElement;
+    var chip = document.createElement('div');
+    chip.className = 'view-chip';
+    chip.innerHTML = name + ' <span class="ct">' + (10 + Math.floor(Math.random()*200)) + '</span>';
+    chip.addEventListener('click', function(){
+      document.querySelectorAll('.view-chip').forEach(function(x){ x.classList.remove('active'); });
+      chip.classList.add('active');
+      toast('Switched to view · ' + name);
+    });
+    row.insertBefore(chip, addChip);
+    closeSave();
+    toast('Saved view · "' + name + '" — appears in your view chips');
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && modal.classList.contains('show')) closeSave(); });
+
+  // ═══ 3. FILTER CHIPS — × removes, "add" opens picker (toast) ═══
+  document.addEventListener('click', function(e){
+    var x = e.target.closest('.filter-chip.applied .x');
+    if (x) {
+      e.preventDefault(); e.stopPropagation();
+      var chip = x.closest('.filter-chip');
+      var label = chip.firstChild.textContent.trim().replace(/\s+×$/,'');
+      chip.style.transition = 'opacity .18s, transform .18s';
+      chip.style.opacity = '0'; chip.style.transform = 'scale(.9)';
+      setTimeout(function(){ chip.remove(); }, 180);
+      toast('Removed filter · ' + label);
+      return;
+    }
+    var addChip = e.target.closest('.filter-chip.add');
+    if (addChip && !e.target.closest('.filter-chip.applied')) {
+      e.preventDefault();
+      var name = addChip.textContent.trim().replace(/^\+\s*/,'');
+      toast('Filter picker · ' + name + ' — pick values to add');
+    }
+  });
+
+  // ═══ 4. SORT-BY chip — cycle through sort fields ═══
+  var SORT_FIELDS = ['Last gift ↓','Last gift ↑','Lifetime giving ↓','Name A–Z','Date added ↓','Capacity ↓'];
+  var sortIdx = 0;
+  var sortChip = null;
+  document.querySelectorAll('.filterbar .right span').forEach(function(s){
+    if ((s.textContent||'').toLowerCase().indexOf('sort by') !== -1) sortChip = s;
+  });
+  if (sortChip) {
+    sortChip.style.cursor = 'pointer';
+    sortChip.addEventListener('click', function(){
+      sortIdx = (sortIdx + 1) % SORT_FIELDS.length;
+      var strong = sortChip.querySelector('strong');
+      if (strong) strong.textContent = SORT_FIELDS[sortIdx];
+      toast('Sorted by · ' + SORT_FIELDS[sortIdx]);
+    });
+  }
+
+  // ═══ 5. KEBAB MENUS on each donor row ═══
+  var menuEl = document.getElementById('dl-kebab-menu');
+  function closeKebab(){
+    menuEl.classList.remove('show');
+    setTimeout(function(){ menuEl.style.display = 'none'; }, 140);
+  }
+
+  document.querySelectorAll('.kebab').forEach(function(k){
+    // Remove the dead onclick stub so our handler is the only one
+    k.removeAttribute('onclick');
+    k.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var row = k.closest('.dt-row');
+      if (!row) return;
+      // Pull donor name from row
+      var nameEl = row.querySelector('.dt-name, .nm, .name, [class*="name"]');
+      var name = nameEl ? nameEl.textContent.trim().split('\n')[0].slice(0, 60) : 'donor';
+      // If we can't find it, fall back to first significant cell text
+      if (name === 'donor') {
+        var firstText = (row.textContent || '').trim().split(/\s+/).slice(0,3).join(' ');
+        if (firstText) name = firstText;
+      }
+
+      var items = [
+        { label:'View profile', icon:'M7 6.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM2.5 13c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5', action:function(){ window.location='atlas-donor-360.html'; } },
+        { label:'Edit constituent', icon:'M3 10l5-5 2 2-5 5h-2v-2zM8 5l2 2', action:function(){ window.location='atlas-edit-constituent.html'; } },
+        { label:'Record a gift', icon:'M7 2v10M2 7h10', action:function(){ window.location='atlas-gift-entry.html'; } },
+        { label:'Log activity', icon:'M2 4h10v6H2zM2 6h10M5 4v2', action:function(){ window.location='atlas-log-activity.html'; } },
+        { label:'Send email', icon:'M2 3h10v8H2zM2 4l5 4 5-4', action:function(){ window.location='atlas-email-compose.html'; } },
+        { label:'Add task', icon:'M3 7l2 2 5-5M7 3h3M3 11h7', action:function(){ window.location='atlas-task-modal.html'; } },
+        { label:'Merge duplicate', icon:'M5 5l-3 3M9 5l3 3M7 2v8', action:function(){ window.location='atlas-merge.html'; } },
+        { label:'Archive donor', icon:'M2 4h10M3 4v8h8V4M5 7h4', action:function(){ if (confirm('Archive ' + name + '? They will be hidden from active lists.')) { row.classList.add('dim'); toast(name + ' archived · find them in Filters → Archived'); } }, danger:true }
+      ];
+
+      menuEl.innerHTML = '<div class="nm-head"><strong>' + name + '</strong></div>' + items.map(function(it){
+        return '<a href="#" class="'+(it.danger?'danger':'')+'"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="'+it.icon+'"/></svg>'+it.label+'</a>';
+      }).join('');
+      menuEl.querySelectorAll('a').forEach(function(a, i){
+        a.addEventListener('click', function(ev){
+          ev.preventDefault(); ev.stopPropagation();
+          closeKebab();
+          items[i].action();
+        });
+      });
+
+      var rect = k.getBoundingClientRect();
+      menuEl.style.display = 'block';
+      // Position to the left of the kebab since it's on the right edge
+      menuEl.style.top  = (window.scrollY + rect.bottom + 6) + 'px';
+      menuEl.style.left = (window.scrollX + rect.right - 220) + 'px';
+      requestAnimationFrame(function(){ menuEl.classList.add('show'); });
+    });
+  });
+
+  // Close kebab on outside click / Escape
+  document.addEventListener('click', function(e){
+    if (e.target.closest('#dl-kebab-menu')) return;
+    if (e.target.closest('.kebab')) return;
+    closeKebab();
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeKebab(); });
+
+  // ═══ 6. PAGER buttons ═══
+  document.querySelectorAll('.pager button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var t = (b.textContent || '').trim();
+      if (t === '‹') toast('Previous page');
+      else if (t === '›') toast('Next page');
+      else if (t && t !== '…') toast('Page ' + t + ' of 45');
+    });
+  });
+
+  // ═══ 7. Topbar search (was placeholder-only) ═══
+  var ts = document.querySelector('.topbar input[type="text"], input[placeholder*="Search donors"]');
+  if (ts && !ts.dataset.dlWired) {
+    ts.dataset.dlWired = '1';
+    ts.style.cursor = 'pointer';
+    ts.addEventListener('click', function(){ window.location = 'atlas-search.html'; });
+    ts.addEventListener('focus', function(){ this.blur(); window.location = 'atlas-search.html'; });
+  }
+})();
+</script>
+
 </body>
 </html>
