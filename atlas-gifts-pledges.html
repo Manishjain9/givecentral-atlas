@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GiveCentral Atlas — Gifts & pledges</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,14 +53,15 @@ a { color: inherit; text-decoration: none; }
   flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;
 }
 .sidebar-logo {
-  padding: 18px 18px 14px; display: flex; align-items: center; gap: 9px;
+  padding: 18px 18px 14px; display: flex; align-items: center; gap: 11px;
   border-bottom: 1px solid rgba(255,255,255,.08);
 }
 .logo-mark {
-  width: 30px; height: 30px; background: var(--blue); border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-}
-.logo-mark svg { width: 15px; height: 15px; }
+      width: 40px; height: 40px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border-radius: 0;
+    }
+.logo-mark svg { width: 40px; height: 40px; }
 .logo-text-wrap { display: flex; flex-direction: column; }
 .logo-name { font-family: 'DM Serif Display', serif; font-size: 15px; color: white; line-height: 1; }
 .logo-sub  { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-top: 3px; }
@@ -409,13 +409,15 @@ body {
 }
 /* Logo mark sizing — same fix prevents the brand SVG from ballooning */
 .sidebar-logo .logo-mark {
-  width: 30px !important;
-  height: 30px !important;
+  width: 40px !important;
+  height: 40px !important;
   flex-shrink: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
 }
 .sidebar-logo .logo-mark svg {
-  width: 15px !important;
-  height: 15px !important;
+  width: 40px !important;
+  height: 40px !important;
 }
 
 /* The MIDDLE area is the only scrollable child */
@@ -444,28 +446,22 @@ body {
 </style>
 </head>
 <body>
-<div id="prototype-banner" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#7c3aed;color:#fff;font-family:sans-serif;font-size:13px;font-weight:500;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.25);">
-  <span style="display:flex;align-items:center;gap:8px;">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><circle cx="8" cy="8" r="7" stroke="white" stroke-width="1.5"/><path d="M8 5v3.5M8 10.5v.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-    <strong>UI DESIGN PROTOTYPE</strong> — For demonstration purposes only. No real data.
-  </span>
-  <span style="opacity:.75;font-size:12px;">Built by <a href="https://givecentral.com" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">GiveCentral</a> &nbsp;·&nbsp;<a href="https://givecentral.com/privacy" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">Privacy Policy</a></span>
-  <button onclick="document.getElementById('prototype-banner').style.display='none'" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;font-family:inherit;flex-shrink:0;">✕ Dismiss</button>
-</div>
-<div style="height:50px"></div>
 
 
 <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-mark">
-        <svg viewBox="0 0 18 18" fill="none">
-          <circle cx="9" cy="9" r="7.5" stroke="white" stroke-width="1.5"/>
-          <path d="M5.5 9.5C6.5 11.5 9 13 9 13s2.5-1.5 3.5-3.5S12 5 9 5 4.5 7.5 5.5 9.5z" fill="white" fill-opacity=".9"/>
+        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="14" y="22" width="92" height="8" rx="2" fill="white"/>
+          <rect x="22" y="38" width="14" height="64" rx="2" fill="white"/>
+          <rect x="53" y="38" width="14" height="64" rx="2" fill="white"/>
+          <rect x="84" y="38" width="14" height="64" rx="2" fill="#C8A04A"/>
+          <rect x="14" y="106" width="92" height="6" rx="2" fill="white"/>
         </svg>
       </div>
       <div class="logo-text-wrap">
-        <span class="logo-name">GiveCentral</span>
-        <span class="logo-sub">Atlas CRM</span>
+        <span class="logo-name">Atlas</span>
+        <span class="logo-sub">By GiveCentral</span>
       </div>
     </div>
 
@@ -652,16 +648,16 @@ body {
   </div>
 
   <!-- Tabs -->
-  <div class="tabs">
-    <div class="tab on">Recent gifts <span class="ct">142</span></div>
-    <a class="tab" href="atlas-pledges-list.html">Open pledges <span class="ct">28</span></a>
-    <div class="tab">Recurring <span class="ct">412</span></div>
-    <a class="tab" href="atlas-duplicates.html">Posted history <span class="ct">36</span></a>
-    <a class="tab" href="atlas-duplicates.html">Pending review <span class="ct" style="background:var(--rose-light);color:var(--rose)">9</span></a>
+  <div class="tabs" id="gp-tabs">
+    <div class="tab on" data-gp="recent">Recent gifts <span class="ct">142</span></div>
+    <div class="tab" data-gp="pledges">Open pledges <span class="ct">28</span></div>
+    <div class="tab" data-gp="recurring">Recurring <span class="ct">412</span></div>
+    <div class="tab" data-gp="posted">Posted history <span class="ct">36</span></div>
+    <div class="tab" data-gp="pending">Pending review <span class="ct" style="background:var(--rose-light);color:var(--rose)">9</span></div>
   </div>
 
   <!-- Recent gifts table -->
-  <div class="gift-table">
+  <div class="gift-table" data-gp-view="recent">
 
     <div class="gt-head">
       <div>Donor</div>
@@ -750,7 +746,173 @@ body {
 
   </div>
 
+  <!-- ═══ Open Pledges view ═══ -->
+  <div class="gift-table" data-gp-view="pledges" style="display:none">
+    <div class="gt-head">
+      <div>Donor</div><div>Started</div><div>Designation</div><div>Schedule</div><div>Status</div><div style="text-align:right">Balance / Total</div><div></div>
+    </div>
+    <a class="gt-row" href="atlas-pledge-detail.html">
+      <div class="name"><span class="av" style="background:var(--rose)">M</span><div class="nm-text"><div class="nm">Margaret O'Brien</div><div class="sub">CMA 2026 · monthly</div></div></div>
+      <div>Jan 15, 2026</div>
+      <div>CMA Annual Fund · 2026</div>
+      <div><span class="tag blue">3/12 paid</span></div>
+      <div><span class="tag green">On schedule</span></div>
+      <div class="amt"><strong>$2,250</strong><br><small style="color:var(--text-3);font-weight:400">of $9,000</small></div>
+      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+    <a class="gt-row" href="atlas-pledge-detail.html">
+      <div class="name"><span class="av" style="background:var(--purple)">R</span><div class="nm-text"><div class="nm">Robert &amp; Susan Lin</div><div class="sub">Cathedral Capital · quarterly</div></div></div>
+      <div>Mar 10, 2026</div>
+      <div>Cathedral Restoration</div>
+      <div><span class="tag blue">1/4 paid</span></div>
+      <div><span class="tag amber">Reminder due May 15</span></div>
+      <div class="amt"><strong>$5,000</strong><br><small style="color:var(--text-3);font-weight:400">of $20,000</small></div>
+      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+    <a class="gt-row" href="atlas-pledge-detail.html">
+      <div class="name"><span class="av" style="background:var(--green)">T</span><div class="nm-text"><div class="nm">Thomas Walsh</div><div class="sub">Capital · 5-yr · annual</div></div></div>
+      <div>Jan 2, 2024</div>
+      <div>Cathedral Capital Fund</div>
+      <div><span class="tag blue">2/5 paid</span></div>
+      <div><span class="tag rose">Overdue 28d</span></div>
+      <div class="amt"><strong>$50,000</strong><br><small style="color:var(--text-3);font-weight:400">of $125,000</small></div>
+      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+    <div class="pager">
+      <span>Showing <strong style="color:var(--text)">1–3</strong> of <strong style="color:var(--text)">28</strong> · <a href="atlas-pledges-list.html" style="color:var(--blue);font-weight:500;text-decoration:none">Open full pledges screen →</a></span>
+    </div>
+  </div>
+
+  <!-- ═══ Recurring view ═══ -->
+  <div class="gift-table" data-gp-view="recurring" style="display:none">
+    <div class="gt-head">
+      <div>Donor</div><div>Active since</div><div>Designation</div><div>Cadence</div><div>Method</div><div style="text-align:right">Monthly · YTD</div><div></div>
+    </div>
+    <a class="gt-row" href="atlas-donor-360.html">
+      <div class="name"><span class="av" style="background:var(--rose)">M</span><div class="nm-text"><div class="nm">Margaret O'Brien</div><div class="sub">$50/month · since Aug 2024</div></div></div>
+      <div>Aug 1, 2024</div>
+      <div>Catholic Ministry Appeal</div>
+      <div><span class="tag blue">Monthly · 1st</span></div>
+      <div><span class="tag green">Card · ending 4242</span></div>
+      <div class="amt"><strong>$50</strong><br><small style="color:var(--text-3);font-weight:400">$200 YTD</small></div>
+      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+    <a class="gt-row" href="atlas-donor-360.html">
+      <div class="name"><span class="av" style="background:#1D4ED8">J</span><div class="nm-text"><div class="nm">James Patterson</div><div class="sub">$25/month · since 2022</div></div></div>
+      <div>Feb 12, 2022</div>
+      <div>General Fund</div>
+      <div><span class="tag blue">Monthly · 15th</span></div>
+      <div><span class="tag amber">ACH · expires Jun 2026</span></div>
+      <div class="amt"><strong>$25</strong><br><small style="color:var(--text-3);font-weight:400">$100 YTD</small></div>
+      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+    <a class="gt-row" href="atlas-donor-360.html">
+      <div class="name"><span class="av" style="background:var(--green)">C</span><div class="nm-text"><div class="nm">Catherine Romano</div><div class="sub">$100/month · since Mar 2026</div></div></div>
+      <div>Mar 1, 2026</div>
+      <div>Cathedral Restoration</div>
+      <div><span class="tag blue">Monthly · 1st</span></div>
+      <div><span class="tag green">Card · ending 5544</span></div>
+      <div class="amt"><strong>$100</strong><br><small style="color:var(--text-3);font-weight:400">$200 YTD</small></div>
+      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+    <div class="pager">
+      <span>Showing <strong style="color:var(--text)">1–3</strong> of <strong style="color:var(--text)">412</strong> active recurring givers · MRR <strong style="color:var(--green)">$8,420</strong></span>
+    </div>
+  </div>
+
+  <!-- ═══ Posted history view ═══ -->
+  <div class="gift-table" data-gp-view="posted" style="display:none">
+    <div class="gt-head">
+      <div>Batch</div><div>Posted</div><div>Posted by</div><div>Gifts · Total</div><div>Status</div><div style="text-align:right">Reconciled</div><div></div>
+    </div>
+    <a class="gt-row" href="atlas-batch-entry.html">
+      <div class="name"><span class="av" style="background:#0D9488">B</span><div class="nm-text"><div class="nm">April Mail Response</div><div class="sub">BATCH-2026-042 · 2026 — CMA folder</div></div></div>
+      <div>Apr 18, 2026</div>
+      <div>Janet Williams</div>
+      <div><strong style="color:var(--text)">14</strong> gifts · <strong>$14,975</strong></div>
+      <div><span class="tag green">Posted · locked</span></div>
+      <div class="amt"><span class="tag green">✓ Reconciled</span></div>
+      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+    <a class="gt-row" href="atlas-batch-entry.html">
+      <div class="name"><span class="av" style="background:#0D9488">B</span><div class="nm-text"><div class="nm">March Mail Response</div><div class="sub">BATCH-2026-031 · 2026 — CMA folder</div></div></div>
+      <div>Mar 15, 2026</div>
+      <div>Janet Williams</div>
+      <div><strong style="color:var(--text)">22</strong> gifts · <strong>$28,450</strong></div>
+      <div><span class="tag green">Posted · locked</span></div>
+      <div class="amt"><span class="tag green">✓ Reconciled</span></div>
+      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+    <a class="gt-row" href="atlas-batch-entry.html">
+      <div class="name"><span class="av" style="background:#0D9488">B</span><div class="nm-text"><div class="nm">Q1 Major Gifts</div><div class="sub">BATCH-2026-021 · Cathedral Capital folder</div></div></div>
+      <div>Mar 31, 2026</div>
+      <div>Daniel Cho</div>
+      <div><strong style="color:var(--text)">8</strong> gifts · <strong>$185,000</strong></div>
+      <div><span class="tag green">Posted · locked</span></div>
+      <div class="amt"><span class="tag amber">Pending reconcile</span></div>
+      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+    <div class="pager">
+      <span>Showing <strong style="color:var(--text)">1–3</strong> of <strong style="color:var(--text)">36</strong> posted batches · last 90 days</span>
+    </div>
+  </div>
+
+  <!-- ═══ Pending review view ═══ -->
+  <div class="gift-table" data-gp-view="pending" style="display:none">
+    <div class="gt-head">
+      <div>Issue</div><div>Donor / batch</div><div>Detected</div><div>Type</div><div>Confidence</div><div style="text-align:right">Amount at risk</div><div></div>
+    </div>
+    <a class="gt-row" href="atlas-duplicates.html">
+      <div class="name"><span class="av" style="background:var(--rose)">!</span><div class="nm-text"><div class="nm">Likely duplicate gift</div><div class="sub">Same donor + amount + 14-day window</div></div></div>
+      <div>Margaret O'Brien · CSV-3</div>
+      <div>Apr 18, 2026</div>
+      <div><span class="tag rose">Duplicate</span></div>
+      <div><span class="tag amber">94% match</span></div>
+      <div class="amt">$2,500.00</div>
+      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+    <a class="gt-row" href="atlas-duplicates.html">
+      <div class="name"><span class="av" style="background:var(--amber)">!</span><div class="nm-text"><div class="nm">Ambiguous donor name</div><div class="sub">"Smith" matches 3 records</div></div></div>
+      <div>Row 5 · April batch</div>
+      <div>Apr 18, 2026</div>
+      <div><span class="tag amber">Ambiguous</span></div>
+      <div><span class="tag amber">3 matches</span></div>
+      <div class="amt">$75.00</div>
+      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+    <a class="gt-row" href="atlas-duplicates.html">
+      <div class="name"><span class="av" style="background:var(--rose)">!</span><div class="nm-text"><div class="nm">Missing GL code</div><div class="sub">General Fund needs GL for accounting</div></div></div>
+      <div>Row 11 · April batch</div>
+      <div>Apr 18, 2026</div>
+      <div><span class="tag rose">Validation</span></div>
+      <div><span class="tag green">Blocking</span></div>
+      <div class="amt">$500.00</div>
+      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+    <div class="pager">
+      <span>Showing <strong style="color:var(--text)">1–3</strong> of <strong style="color:var(--rose)">9</strong> exceptions · <a href="atlas-duplicates.html" style="color:var(--blue);font-weight:500;text-decoration:none">Open full review queue →</a></span>
+    </div>
+  </div>
+
 </div>
+
+<!-- ═══ Gifts & Pledges tab wiring ═══ -->
+<script id="gp-tabs-wire">
+(function(){
+  if (window.__gpTabsWired) return; window.__gpTabsWired = true;
+  var tabs = document.querySelectorAll('#gp-tabs .tab');
+  var views = document.querySelectorAll('[data-gp-view]');
+  tabs.forEach(function(t){
+    t.style.cursor = 'pointer';
+    t.addEventListener('click', function(){
+      tabs.forEach(function(x){ x.classList.remove('on'); });
+      t.classList.add('on');
+      var key = t.dataset.gp;
+      views.forEach(function(v){ v.style.display = (v.dataset.gpView === key) ? '' : 'none'; });
+    });
+  });
+})();
+</script>
 
 </div>
 

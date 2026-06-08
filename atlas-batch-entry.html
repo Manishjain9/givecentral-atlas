@@ -67,6 +67,11 @@
     .topbar{background:white;border-bottom:1px solid var(--border);height:50px;display:flex;align-items:center;gap:10px;padding:0 18px;flex-shrink:0}
     .tb-crumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)}
     .tb-crumb b{color:var(--text);font-weight:600}
+    .tb-crumb a{cursor:pointer}
+    #batch-back:hover{background:var(--bluep);color:var(--blue)}
+    #batch-back:hover svg{transform:translateX(-1px)}
+    #batch-back svg{transition:transform .14s}
+    .tb-crumb a[href]:hover:not(#batch-back){color:var(--blue);text-decoration:underline}
     .tb-pill{display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
     .tp-draft{background:var(--amberl);color:var(--amber)}
     .tb-save{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px}
@@ -363,6 +368,232 @@
   }
   .batch-toolbar .bt-action:hover { border-color: var(--blue, #2563EB); color: var(--blue, #2563EB); background: var(--blue-pale, #EFF6FF); }
 
+  /* ═══ Top-bar visual distinction ═══ */
+  /* The two stacked bars do different jobs — make that legible at a glance:
+     • Bar 1 (.batch-toolbar) = LIBRARY scope: open library, import, settings, +Template, +New batch
+     • Bar 2 (.topbar)        = THIS BATCH scope: breadcrumb, status, columns, save-as-template, Post
+     We tint bar 1 (surf/grey-blue) and keep bar 2 white, plus tiny scope labels and a
+     thin blue accent stripe on bar 2 to "claim" the active batch. */
+  .batch-toolbar {
+    background: linear-gradient(180deg,#F1F5F9 0%,#F8FAFC 100%) !important;
+    border-bottom: 1px solid #D7DEEA !important;
+    flex-shrink: 0 !important;
+    position: relative;
+    box-shadow: inset 0 -1px 0 rgba(15,23,42,.02);
+  }
+  .batch-toolbar::before {
+    content: 'Library · all batches';
+    position: absolute; left: 18px; top: -2px;
+    font-size: 8.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--text3); opacity: .65; pointer-events: none;
+    background: var(--surf, #F8FAFC); padding: 0 5px;
+  }
+  .main > .topbar {
+    background: white !important;
+    border-bottom: 1px solid var(--border) !important;
+    flex-shrink: 0 !important;
+    position: relative;
+    box-shadow: inset 3px 0 0 var(--blue);  /* blue accent: "you're inside this batch" */
+  }
+  .main > .topbar::after {
+    content: 'This batch · April Mail Response';
+    position: absolute; right: 18px; top: -2px;
+    font-size: 8.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--blue); opacity: .75; pointer-events: none;
+    background: white; padding: 0 5px;
+  }
+
+  /* ═══ Two-column workspace: gift grid (left) + Accuracy rail (right) ═══ */
+  /* Layout contract — bulletproof flex chain:
+     .main          = flex-column / height:100vh / overflow:hidden — never scrolls.
+        ├── chrome bars (toolbar, topbar, config, tips, stats) — all flex-shrink:0
+        ├── .be-content-grid — flex:1 1 auto + min-height:0 (eats remaining height)
+        │      ├── .be-content-left — flex-column / overflow:hidden / height:100%
+        │      │      ├── .batch-wrap (flex:1 + overflow-y:auto)  ← THE ONLY SCROLLER
+        │      │      └── .add-bar (flex-shrink:0)                ← pinned to col bottom
+        │      └── .be-content-right (sticky)
+        └── .post-footer — flex-shrink:0, full width, ALWAYS visible at viewport bottom
+  */
+  .be-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 14px;
+    padding: 12px 18px 0;
+    align-items: stretch;
+    flex: 1 1 0%;             /* 0% basis forces grid to use remaining flex space, not content */
+    min-height: 0;            /* critical — lets the grid actually shrink in flex */
+    overflow: hidden;
+  }
+  .be-content-left {
+    min-width: 0;
+    display: flex; flex-direction: column;
+    overflow: hidden;         /* trap scroll inside the wrap */
+    min-height: 0;
+    height: 100%;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(15,23,42,.04);
+  }
+  /* The table wrap is the ONLY scrolling region */
+  .be-content-left .batch-wrap {
+    flex: 1 1 0%;
+    overflow-y: auto;
+    overflow-x: auto;
+    min-height: 0;
+    border-radius: 10px 10px 0 0;
+  }
+  /* Sticky table header — keep the original navy + white-text styling
+     (just add position:sticky on top of what's already in .batch-table thead th) */
+  .be-content-left .batch-table thead th {
+    position: sticky; top: 0; z-index: 4;
+    /* background + color inherit from the base .batch-table thead th rule (navy / white) */
+  }
+  /* Round the outermost corners of the sticky header so it sits flush with the card */
+  .be-content-left .batch-table thead th:first-child { border-top-left-radius: 10px; }
+  .be-content-left .batch-table thead th:last-child  { border-top-right-radius: 10px; }
+  /* Add-row bar — flex sibling, always pinned at bottom of left column */
+  .be-content-left .add-bar {
+    flex-shrink: 0;
+    background: white;
+    border-top: 1px solid var(--border);
+    border-radius: 0 0 10px 10px;
+  }
+  /* Right rail matches the left card's height exactly — grid's align-items: stretch
+     does this naturally as long as we don't put position:sticky or an artificial
+     max-height on the column. */
+  .be-content-right {
+    min-width: 0;
+    display: flex;
+    align-self: stretch;     /* fill the grid row height */
+    min-height: 0;
+  }
+  .be-acc-rail {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
+    /* Defeat the older .acc-panel cap (max-height:220px) that was clipping the rail */
+    max-height: none !important;
+    box-shadow: 0 1px 3px rgba(15,23,42,.05);
+  }
+  /* The signals list inside takes all remaining rail height & scrolls if overflowing */
+  .be-acc-rail .acc-items-scroll {
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow-y: auto;
+    max-height: none !important;
+  }
+  /* ═══ Post-footer — direct flex child of .main, ALWAYS visible at viewport bottom ═══ */
+  .main > .post-footer {
+    flex-shrink: 0 !important;
+    background: white !important;
+    border-top: 1.5px solid var(--border) !important;
+    padding: 10px 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    box-shadow: 0 -4px 14px rgba(15,23,42,.08) !important;
+    z-index: 10;
+    position: relative;
+  }
+  .be-acc-rail .acc-head {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 6px;
+    background: var(--surf, #F8FAFC);
+  }
+  .be-acc-rail .acc-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 14px; font-weight: 400; color: var(--text);
+  }
+  .be-acc-rail .acc-counts {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    font-size: 10.5px; line-height: 1;
+  }
+  .be-acc-rail .acc-counts > span {
+    padding: 3px 8px; border-radius: 99px;
+    font-weight: 600; letter-spacing: .02em;
+  }
+  .be-acc-rail .acc-items-scroll {
+    overflow-y: auto;
+    flex: 1; min-height: 200px;
+    padding: 4px 0;
+  }
+  .be-acc-rail .acc-item {
+    border-bottom: 1px solid #F1F5F9;
+    padding: 11px 14px;
+  }
+  .be-acc-rail .acc-item:last-child { border-bottom: none; }
+  .be-acc-foot {
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    background: var(--surf, #F8FAFC);
+  }
+  /* Narrow viewport — single column.
+     In stacked mode the rail can use a reasonable cap so it doesn't push the table
+     off-screen on narrow viewports. In side-by-side mode (default) it matches the
+     table height exactly via the grid stretch. */
+  @media (max-width: 1100px) {
+    .be-content-grid { grid-template-columns: 1fr; }
+    .be-content-right { position: static; max-height: none; }
+    .be-acc-rail { max-height: 360px !important; }
+  }
+
+  /* ═══ Accuracy rail collapse/expand ═══
+     Expanded: 320px wide, full panel. Collapsed: 48px thin strip with just severity counts.
+     A floating chevron pill on the rail edge toggles the state. */
+  .be-content-grid.acc-collapsed { grid-template-columns: 1fr 48px; }
+  .be-acc-rail .acc-collapse-btn {
+    position: absolute; top: 12px; right: 12px;
+    width: 26px; height: 26px; border-radius: 6px;
+    background: white; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all .14s;
+    z-index: 5;
+  }
+  .be-acc-rail .acc-collapse-btn:hover { background: var(--bluep, #EFF6FF); border-color: var(--blue, #2563EB); color: var(--blue, #2563EB); }
+  .be-acc-rail .acc-collapse-btn svg { width: 12px; height: 12px; transition: transform .18s; }
+  .be-acc-rail.collapsed .acc-collapse-btn svg { transform: rotate(180deg); }
+  .be-acc-rail { position: relative; }
+  /* When collapsed: hide title/counts/items/foot, show a vertical "Accuracy" label + severity dots */
+  .be-acc-rail.collapsed .acc-head .acc-title,
+  .be-acc-rail.collapsed .acc-head .acc-counts,
+  .be-acc-rail.collapsed .acc-items-scroll,
+  .be-acc-rail.collapsed .be-acc-foot { display: none; }
+  .be-acc-rail.collapsed { width: 48px; }
+  .be-acc-rail.collapsed .acc-head { padding: 50px 0 14px; border-bottom: none; align-items: center; }
+  .be-acc-rail .acc-collapsed-label {
+    display: none;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 10px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--text2);
+    margin-top: 8px;
+  }
+  .be-acc-rail.collapsed .acc-collapsed-label { display: block; }
+  .be-acc-rail .acc-collapsed-dots {
+    display: none;
+    flex-direction: column; gap: 6px; align-items: center;
+    margin-top: 14px;
+  }
+  .be-acc-rail.collapsed .acc-collapsed-dots { display: flex; }
+  .acc-collapsed-dot {
+    width: 24px; min-height: 24px; padding: 4px 6px;
+    border-radius: 6px; font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: transform .12s;
+  }
+  .acc-collapsed-dot:hover { transform: scale(1.08); }
+  .acc-collapsed-dot.err  { background: var(--rosel); color: var(--rose); }
+  .acc-collapsed-dot.warn { background: var(--amberl); color: var(--amber); }
+  .acc-collapsed-dot.info { background: var(--bluel); color: var(--blue); }
+  .acc-collapsed-dot.ok   { background: var(--greenl); color: var(--green); }
+
   /* ── Batch library dropdown popover ── */
   .batch-library-menu {
     position: absolute; top: 56px; left: 18px;
@@ -402,7 +633,54 @@
 
   .blm-body {
     flex: 1; overflow-y: auto;
-    padding: 8px;
+    padding: 4px 8px 8px;
+  }
+  /* Search box at the top of the library dropdown */
+  .blm-search {
+    padding: 8px 10px; margin-bottom: 4px;
+    position: sticky; top: 0; z-index: 2;
+    background: white;
+    border-bottom: 1px solid var(--border, #E2E8F0);
+  }
+  .blm-search input {
+    width: 100%; padding: 7px 10px 7px 28px;
+    border: 1px solid var(--border, #E2E8F0); border-radius: 7px;
+    font-size: 12px; font-family: 'DM Sans', sans-serif;
+    background: var(--surf, #F8FAFC) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%2364748B' stroke-width='1.4' stroke-linecap='round'><circle cx='6' cy='6' r='4'/><path d='M9 9l3 3'/></svg>") no-repeat 9px center / 13px 13px;
+    outline: none; color: var(--text, #0F172A);
+  }
+  .blm-search input:focus { border-color: var(--blue, #2563EB); background-color: white; }
+  /* Section headers grouping Drafts / Folders / Templates */
+  .blm-section-head {
+    display: flex; align-items: center; gap: 6px;
+    padding: 11px 12px 4px;
+    font-size: 9.5px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--text-3, #64748B);
+  }
+  .blm-section-head .blm-sh-count {
+    font-size: 9px; padding: 1px 6px; border-radius: 99px;
+    background: var(--surf, #F8FAFC); color: var(--text-3, #64748B);
+    letter-spacing: 0;
+  }
+  .blm-section-head .blm-sh-spacer { flex: 1; }
+  .blm-section-head .blm-sh-action {
+    font-size: 10px; font-weight: 600; letter-spacing: 0; text-transform: none;
+    color: var(--blue, #2563EB); cursor: pointer; padding: 2px 6px; border-radius: 4px;
+  }
+  .blm-section-head .blm-sh-action:hover { background: var(--blue-pale, #EFF6FF); }
+  /* Visual divider between sections */
+  .blm-section + .blm-section { border-top: 1px dashed #E5EAF2; margin-top: 6px; padding-top: 2px; }
+  .blm-section-tpl .folder-row .folder-icon { color: #7C3AED; }
+  .blm-section-tpl .folder-row.tpl-row {
+    background: rgba(124,58,237,.04);
+  }
+  .blm-section-tpl .folder-row.tpl-row:hover {
+    background: rgba(124,58,237,.10); color: #6D28D9;
+  }
+  .blm-section-tpl .folder-row.tpl-row .folder-name { color: #5B21B6 !important; font-weight: 600; }
+  .blm-empty {
+    padding: 14px 12px; font-size: 11.5px; color: var(--text-3, #64748B);
+    font-style: italic; text-align: center;
   }
   .blm-body .folder-item { margin-bottom: 2px; }
   .blm-body .folder-row {
@@ -632,12 +910,12 @@
     flex-shrink: 0 !important;
   }
   #atlas-canonical-sidebar .logo-mark {
-    width: 30px !important; height: 30px !important;
-    background: #2563EB !important; border-radius: 8px !important;
+    width: 40px !important; height: 40px !important;
+    background: transparent !important; border-radius: 0 !important;
     display: flex !important; align-items: center !important; justify-content: center !important;
     flex-shrink: 0 !important;
   }
-  #atlas-canonical-sidebar .logo-mark svg { width: 15px !important; height: 15px !important; }
+  #atlas-canonical-sidebar .logo-mark svg { width: 40px !important; height: 40px !important; }
   #atlas-canonical-sidebar .logo-text-wrap { display: flex !important; flex-direction: column !important; }
   #atlas-canonical-sidebar .logo-name { font-family: 'DM Serif Display', serif !important; font-size: 15px !important; color: white !important; line-height: 1 !important; }
   #atlas-canonical-sidebar .logo-sub  { font-size: 9px !important; font-weight: 600 !important; letter-spacing: .1em !important; text-transform: uppercase !important; color: rgba(255,255,255,.3) !important; margin-top: 3px !important; }
@@ -728,14 +1006,17 @@
 <aside class="sidebar atlas-canon" id="atlas-canonical-sidebar">
   <div class="sidebar-logo">
     <div class="logo-mark">
-      <svg viewBox="0 0 18 18" fill="none">
-        <circle cx="9" cy="9" r="7.5" stroke="white" stroke-width="1.5"/>
-        <path d="M5.5 9.5C6.5 11.5 9 13 9 13s2.5-1.5 3.5-3.5S12 5 9 5 4.5 7.5 5.5 9.5z" fill="white" fill-opacity=".9"/>
-      </svg>
-    </div>
+        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="14" y="22" width="92" height="8" rx="2" fill="white"/>
+          <rect x="22" y="38" width="14" height="64" rx="2" fill="white"/>
+          <rect x="53" y="38" width="14" height="64" rx="2" fill="white"/>
+          <rect x="84" y="38" width="14" height="64" rx="2" fill="#C8A04A"/>
+          <rect x="14" y="106" width="92" height="6" rx="2" fill="white"/>
+        </svg>
+      </div>
     <div class="logo-text-wrap">
-      <span class="logo-name">GiveCentral</span>
-      <span class="logo-sub">Atlas CRM</span>
+      <span class="logo-name">Atlas</span>
+      <span class="logo-sub">By GiveCentral</span>
     </div>
   </div>
 
@@ -893,20 +1174,6 @@
         Batch library
         <svg class="bt-caret" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4l3 3 3-3"/></svg>
       </button>
-      <button class="bt-new-batch" onclick="openModal('new-batch')">
-        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
-        New batch
-      </button>
-      <button class="bt-new-template" onclick="openModal('new-template')">
-        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="1.5" width="9" height="9" rx="1.5"/><path d="M4 6h4M6 4v4"/></svg>
-        Template
-      </button>
-      <span class="bt-sep"></span>
-      <button class="bt-drafts-pill" onclick="openBatchLibraryMenu('drafts')">
-        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1.5h6l2.5 2.5v6.5a.5.5 0 01-.5.5h-8a.5.5 0 01-.5-.5v-8a.5.5 0 01.5-.5z"/><path d="M4 5h4M4 7h4M4 9h2.5"/></svg>
-        Saved Drafts
-        <span class="bt-pill-count" id="bt-drafts-count">1</span>
-      </button>
     </div>
     <div class="bt-section bt-section-right">
       <button class="bt-action" onclick="openModal('import')" title="Import CSV / Excel">
@@ -916,6 +1183,15 @@
       <button class="bt-action" onclick="openModal('accuracy-settings')" title="Accuracy engine settings">
         <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="4.5"/><path d="M4 6l1.5 1.5 3-3"/></svg>
         Accuracy
+      </button>
+      <span class="bt-sep"></span>
+      <button class="bt-new-template" onclick="openModal('new-template')">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="1.5" width="9" height="9" rx="1.5"/><path d="M4 6h4M6 4v4"/></svg>
+        Template
+      </button>
+      <button class="bt-new-batch" onclick="openModal('new-batch')">
+        <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
+        New batch
       </button>
     </div>
   </div>
@@ -929,13 +1205,18 @@
         New folder
       </button>
     </div>
+    <div class="blm-search">
+      <input type="text" id="blm-search-input" placeholder="Search batches, drafts, templates…" oninput="filterBatchLibrary(this.value)">
+    </div>
     <div class="blm-body" id="folder-list"></div>
   </div>
 
   <div class="topbar">
     <div class="tb-crumb">
-      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" width="12" height="12"><path d="M7.5 2L3 6l4.5 4"/></svg>
-      2026 — CMA / <b id="tb-batch-name">April Mail Response 2026</b>
+      <a href="atlas-gifts-pledges.html" id="batch-back" title="Back to Gifts & Pledges (Esc)" style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;color:var(--text2);text-decoration:none;transition:all .14s;flex-shrink:0">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="M7.5 2L3 6l4.5 4"/></svg>
+      </a>
+      <a href="atlas-gifts-pledges.html" style="color:inherit;text-decoration:none">2026 — CMA</a> / <b id="tb-batch-name">April Mail Response 2026</b>
     </div>
     <div class="tb-pill tp-draft"><div style="width:5px;height:5px;border-radius:50%;background:var(--amber)"></div>Draft</div>
     <div class="tb-save" id="tb-save">
@@ -1027,6 +1308,11 @@
     </div>
   </div>
 
+  <!-- ═══ Two-column workspace: grid (left) + Accuracy rail (right) ═══ -->
+  <div class="be-content-grid">
+
+  <div class="be-content-left">
+
   <!-- Batch table -->
   <div class="batch-wrap">
     <table class="batch-table">
@@ -1058,17 +1344,34 @@
     <span style="font-size:10px;color:var(--text3);margin-left:4px">or <kbd style="background:var(--surf);border:1px solid var(--border);border-radius:3px;padding:0 4px;font-size:9px">Ctrl+V</kbd> in any cell</span>
   </div>
 
-  <!-- Accuracy panel -->
-  <div class="acc-panel" id="acc-panel">
-    <div class="acc-head">
-      <span class="acc-title" id="acc-panel-title">Accuracy engine</span>
-      <div class="acc-counts" id="acc-counts"></div>
-      <button class="btn btn-green" style="font-size:10px;padding:3px 10px" onclick="openModal('post-confirm')">Post clean gifts →</button>
-    </div>
-    <div id="acc-items"></div>
-  </div>
+  </div><!-- /.be-content-left -->
 
-  <!-- Post footer -->
+  <!-- Right rail: Accuracy panel — collapsible to give the table more room -->
+  <aside class="be-content-right">
+    <div class="acc-panel be-acc-rail" id="acc-panel">
+      <button class="acc-collapse-btn" id="acc-collapse-btn" onclick="toggleAccuracyRail()" title="Collapse panel">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2l4 4-4 4"/></svg>
+      </button>
+      <div class="acc-head">
+        <span class="acc-title" id="acc-panel-title">Accuracy engine</span>
+        <div class="acc-counts" id="acc-counts"></div>
+        <!-- Collapsed-state pieces (shown only when .collapsed) -->
+        <div class="acc-collapsed-label">Accuracy</div>
+        <div class="acc-collapsed-dots" id="acc-collapsed-dots"></div>
+      </div>
+      <div id="acc-items" class="acc-items-scroll"></div>
+      <div class="be-acc-foot">
+        <button class="btn btn-green" style="width:100%;justify-content:center" onclick="openModal('post-confirm')">
+          <svg viewBox="0 0 11 11" width="11" height="11" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" style="flex-shrink:0"><path d="M2 5.5l2.5 2.5 5-5"/></svg>
+          Post clean gifts →
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  </div><!-- /.be-content-grid -->
+
+  <!-- Post footer — moved OUT of grid so it's a direct flex child of .main and reliably pins to viewport bottom -->
   <div class="post-footer">
     <div class="pf-sum">
       <div class="pf-title" id="pf-title">8 clean · 3 errors · 2 warnings · 2 info</div>
@@ -1545,7 +1848,40 @@ function renderAccuracyPanel() {
   // Footer
   document.getElementById('pf-title').textContent = `${clean} clean · ${errors.length} error${errors.length!==1?'s':''} · ${warnings.length} warning${warnings.length!==1?'s':''} · ${infos.length} info`;
   updateStats();
+
+  // ── Collapsed-rail mini summary (severity dots, click to expand) ──
+  const dotsEl = document.getElementById('acc-collapsed-dots');
+  if (dotsEl) {
+    dotsEl.innerHTML = '' +
+      (errors.length   > 0 ? `<div class="acc-collapsed-dot err"  title="${errors.length} error${errors.length>1?'s':''}"  onclick="toggleAccuracyRail(true)">${errors.length}</div>` : '') +
+      (warnings.length > 0 ? `<div class="acc-collapsed-dot warn" title="${warnings.length} warning${warnings.length>1?'s':''}" onclick="toggleAccuracyRail(true)">${warnings.length}</div>` : '') +
+      (infos.length    > 0 ? `<div class="acc-collapsed-dot info" title="${infos.length} info"   onclick="toggleAccuracyRail(true)">${infos.length}</div>` : '') +
+      `<div class="acc-collapsed-dot ok" title="${clean} clean" onclick="toggleAccuracyRail(true)">${clean}</div>`;
+  }
 }
+
+/* ═══ Accuracy rail toggle — collapse for more table width, expand to view all signals ═══ */
+function toggleAccuracyRail(forceExpand) {
+  const rail = document.getElementById('acc-panel');
+  const grid = document.querySelector('.be-content-grid');
+  const btn  = document.getElementById('acc-collapse-btn');
+  if (!rail || !grid) return;
+  const isCollapsed = rail.classList.contains('collapsed');
+  const willCollapse = forceExpand === true ? false : !isCollapsed;
+  rail.classList.toggle('collapsed', willCollapse);
+  grid.classList.toggle('acc-collapsed', willCollapse);
+  if (btn) btn.title = willCollapse ? 'Expand panel' : 'Collapse panel';
+  // Persist choice so it sticks across page reloads
+  try { localStorage.setItem('atlas-acc-collapsed', willCollapse ? '1' : '0'); } catch(_){}
+}
+// Restore prior choice on load
+(function restoreAccCollapse(){
+  try {
+    if (localStorage.getItem('atlas-acc-collapsed') === '1') {
+      document.addEventListener('DOMContentLoaded', () => toggleAccuracyRail(false));
+    }
+  } catch(_){}
+})();
 
 function updateStats() {
   const total = BATCH_ROWS.reduce((s,r)=>s+r.amt,0);
@@ -1601,7 +1937,19 @@ function setGL(rid,gl){ const r=BATCH_ROWS.find(x=>x.id===rid); if(r){r.gl=gl; r
 function fixYear(rid){ const r=BATCH_ROWS.find(x=>x.id===rid); if(r){r.date=r.date.replace('2025','2026'); revalidateAll();} }
 function fixDonor(rid){ openModal('donor-lookup',rid); }
 function openDonorSelect(rid){ openModal('donor-lookup',rid); }
-function flagOfficer(rid){ /* create officer task */ }
+function flagOfficer(rid){
+  // Create a follow-up task assigned to the donor's gift officer
+  const r = BATCH_ROWS.find(x => x.id === rid);
+  if (!r) return;
+  const donor = DONOR_DB.find(d => d.id === r.donorId);
+  const donorName = (donor && donor.name) || r.donor || 'donor';
+  const officer = (donor && donor.officer) || 'Sarah Reynolds';
+  // Suppress the signal for this row so it doesn't fire again until next change
+  if (typeof acknowledgeRow === 'function') acknowledgeRow(rid);
+  if (typeof batchToast === 'function') {
+    batchToast('Officer flagged · ' + officer + ' will see a "Re-engagement: ' + donorName + '" task in their inbox.');
+  }
+}
 function viewOriginal(ref){ openModal('view-original'); }
 function showHistory(rid){ openModal('donor-history',rid); }
 
@@ -1665,62 +2013,144 @@ function reconcile(val){
 // ─────────────────────────────────────────────────────────────
 // FOLDER TREE
 // ─────────────────────────────────────────────────────────────
+// Current search filter applied to the library dropdown
+window.__blmFilter = '';
+function filterBatchLibrary(q){
+  window.__blmFilter = (q || '').trim().toLowerCase();
+  renderFolders();
+}
+
+function _matchBatch(b, q){
+  if (!q) return true;
+  return (b.name || '').toLowerCase().indexOf(q) !== -1;
+}
+
 function renderFolders(){
-  // ── Collect all draft batches across every folder ──
+  const q = window.__blmFilter || '';
+
+  // ── Collect drafts across every regular folder ──
   const draftBatches = [];
   FOLDERS.forEach(f => {
-    if (f.isTemplates || f.isDrafts) return; // skip the synthetic folders
+    if (f.isTemplates || f.isDrafts) return;
     f.batches.forEach(b => {
       if (b.status === 'draft') draftBatches.push(Object.assign({}, b, { parentFolder: f.name }));
     });
   });
+  const filteredDrafts = draftBatches.filter(b => _matchBatch(b, q));
 
-  // ── Drafts entry rendered at the top (a virtual folder) ──
-  const draftsOpen = window.__draftsOpen !== false; // default open
+  // ── Real folders (not Templates) ──
+  const regularFolders = FOLDERS.filter(f => !f.isTemplates && !f.isDrafts);
+
+  // ── Templates folder (singleton) ──
+  const tplFolder = FOLDERS.find(f => f.isTemplates);
+
+  // Count totals for section header counts (post-filter)
+  const draftsCount = filteredDrafts.length;
+  const foldersCount = regularFolders.reduce((sum,f) => sum + f.batches.filter(b => _matchBatch(b,q)).length, 0);
+  const tplCount = tplFolder ? tplFolder.batches.filter(b => _matchBatch(b,q)).length : 0;
+
+  // ── SECTION 1 · DRAFTS ──────────────────────────────────────
+  const draftsOpen = window.__draftsOpen !== false;
   const draftsHTML = `
-    <div class="folder-item">
-      <div class="folder-row drafts" onclick="toggleDraftsFolder()">
-        <svg class="folder-caret ${draftsOpen?'open':''}" id="c-drafts" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg>
-        <svg class="folder-icon" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 1.5h6.5l2 2v8a.5.5 0 01-.5.5h-8a.5.5 0 01-.5-.5v-10a.5.5 0 01.5-.5z"/><path d="M4 5h5M4 7h5M4 9h3"/></svg>
-        <span class="folder-name">Saved Drafts</span>
-        <span class="folder-count">${draftBatches.length}</span>
+    <div class="blm-section blm-section-drafts">
+      <div class="blm-section-head">
+        <svg viewBox="0 0 12 12" fill="none" stroke="#C8A04A" stroke-width="1.5" stroke-linecap="round" width="11" height="11"><path d="M2 1.5h6l2 2v7a.5.5 0 01-.5.5h-7.5a.5.5 0 01-.5-.5v-9a.5.5 0 01.5-.5z"/><path d="M3.5 5h4M3.5 7h4M3.5 9h2.5"/></svg>
+        Drafts
+        <span class="blm-sh-count">${draftsCount}</span>
+        <span class="blm-sh-spacer"></span>
+        ${draftBatches.length > 0 ? `<span class="blm-sh-action" onclick="toggleDraftsFolder()">${draftsOpen?'Hide':'Show'}</span>` : ''}
       </div>
-      <div class="folder-children" id="fc-drafts" style="display:${draftsOpen?'block':'none'}">
-        ${draftBatches.length === 0
-          ? '<div style="padding:10px 14px;font-size:11px;color:rgba(255,255,255,.35);font-style:italic">No drafts · click "Save as draft" on a batch to pause</div>'
-          : draftBatches.map(b => `
-            <div class="batch-item" onclick="loadBatch('${b.id}')">
-              <svg class="bi-icon" viewBox="0 0 12 12" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="1.5" width="9" height="9" rx="1.5"/><path d="M3.5 4.5h5M3.5 6.5h5M3.5 8.5h3"/></svg>
-              <span class="bi-name" title="${b.parentFolder}">${b.name}</span>
-              <span style="font-size:9px;color:rgba(255,255,255,.35)">${b.gifts}</span>
-              <div class="bi-dot bs-draft"></div>
-            </div>`).join('')
-        }
-      </div>
+      ${draftsOpen ? `
+        <div class="folder-children" style="padding-left:8px">
+          ${filteredDrafts.length === 0
+            ? `<div class="blm-empty">${q ? 'No drafts match “'+q+'”' : 'No drafts yet — click "Save as draft" on any batch to pause it'}</div>`
+            : filteredDrafts.map(b => `
+              <div class="batch-item" onclick="loadBatch('${b.id}')" title="In folder: ${b.parentFolder}">
+                <svg class="bi-icon" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="1.5" width="9" height="9" rx="1.5"/><path d="M3.5 4.5h5M3.5 6.5h5M3.5 8.5h3"/></svg>
+                <span class="bi-name">${b.name}</span>
+                <span style="font-size:9px;color:var(--text-3,#64748B)">${b.gifts}</span>
+                <div class="bi-dot bs-draft"></div>
+              </div>`).join('')
+          }
+        </div>` : ''}
     </div>`;
 
-  // ── Regular folders ──
-  const foldersHTML = FOLDERS.map(f=>`
-    <div class="folder-item">
-      <div class="folder-row" onclick="toggleFolder('${f.id}',this)">
-        <svg class="folder-caret ${f.open?'open':''}" id="c-${f.id}" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg>
-        <svg class="folder-icon" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1 2.5h3l1.5 1.5H12a.7.7 0 01.7.7v6a.7.7 0 01-.7.7H1a.7.7 0 01-.7-.7V3.2A.7.7 0 011 2.5z"/></svg>
-        <span class="folder-name">${f.name}</span>
-        <span class="folder-count">${f.batches.length}</span>
+  // ── SECTION 2 · FOLDERS ─────────────────────────────────────
+  const foldersHTML = `
+    <div class="blm-section blm-section-folders">
+      <div class="blm-section-head">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" width="11" height="11" style="color:var(--text-3,#64748B)"><path d="M1 3h3l1.5 1.5H11a.5.5 0 01.5.5v5.5a.5.5 0 01-.5.5H1a.5.5 0 01-.5-.5V3.5A.5.5 0 011 3z"/></svg>
+        Folders
+        <span class="blm-sh-count">${regularFolders.length}</span>
+        <span class="blm-sh-spacer"></span>
+        <span class="blm-sh-action" onclick="openModal('new-folder');closeBatchLibraryMenu()">+ New folder</span>
       </div>
-      <div class="folder-children" id="fc-${f.id}" style="display:${f.open?'block':'none'}">
-        ${f.batches.map(b=>`
-          <div class="batch-item ${b.id==='b1'?'active':''}" onclick="loadBatch('${b.id}')">
-            <svg class="bi-icon" viewBox="0 0 12 12" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="1.5" width="9" height="9" rx="1.5"/><path d="M3.5 4.5h5M3.5 6.5h5M3.5 8.5h3"/></svg>
-            <span class="bi-name">${b.name}</span>
-            ${b.status==='template'?'<span class="tpl-badge">TPL</span>':''}
-            <div class="bi-dot bs-${b.status}"></div>
-          </div>`).join('')}
-      </div>
-    </div>`).join('');
+      ${regularFolders.length === 0
+        ? '<div class="blm-empty">No folders yet — group batches by campaign or season</div>'
+        : regularFolders.map(f => {
+          const filteredBatches = f.batches.filter(b => _matchBatch(b, q));
+          if (q && filteredBatches.length === 0) return ''; // hide folder if search has no hits in it
+          const showOpen = q ? true : !!f.open; // force-open while searching
+          return `
+            <div class="folder-item">
+              <div class="folder-row" onclick="toggleFolder('${f.id}',this)">
+                <svg class="folder-caret ${showOpen?'open':''}" id="c-${f.id}" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg>
+                <svg class="folder-icon" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1 2.5h3l1.5 1.5H12a.7.7 0 01.7.7v6a.7.7 0 01-.7.7H1a.7.7 0 01-.7-.7V3.2A.7.7 0 011 2.5z"/></svg>
+                <span class="folder-name">${f.name}</span>
+                <span class="folder-count">${filteredBatches.length}</span>
+              </div>
+              <div class="folder-children" id="fc-${f.id}" style="display:${showOpen?'block':'none'}">
+                ${filteredBatches.map(b=>`
+                  <div class="batch-item ${b.id==='b1'?'active':''}" onclick="loadBatch('${b.id}')">
+                    <svg class="bi-icon" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="1.5" width="9" height="9" rx="1.5"/><path d="M3.5 4.5h5M3.5 6.5h5M3.5 8.5h3"/></svg>
+                    <span class="bi-name">${b.name}</span>
+                    <div class="bi-dot bs-${b.status}"></div>
+                  </div>`).join('')}
+              </div>
+            </div>`;
+        }).join('')}
+    </div>`;
 
-  document.getElementById('folder-list').innerHTML = draftsHTML + foldersHTML;
+  // ── SECTION 3 · TEMPLATES ───────────────────────────────────
+  const filteredTpl = tplFolder ? tplFolder.batches.filter(b => _matchBatch(b, q)) : [];
+  const tplOpen = window.__tplOpen !== false;
+  const showTplOpen = q ? true : tplOpen;
+  const templatesHTML = tplFolder ? `
+    <div class="blm-section blm-section-tpl">
+      <div class="blm-section-head">
+        <svg viewBox="0 0 12 12" fill="none" stroke="#7C3AED" stroke-width="1.5" stroke-linecap="round" width="11" height="11"><rect x="1.5" y="1.5" width="9" height="9" rx="1.5"/><path d="M4 6h4M6 4v4"/></svg>
+        <span style="color:#6D28D9">Templates</span>
+        <span class="blm-sh-count" style="background:#EDE9FE;color:#6D28D9">${tplCount}</span>
+        <span class="blm-sh-spacer"></span>
+        <span class="blm-sh-action" style="color:#7C3AED" onclick="openModal('new-template');closeBatchLibraryMenu()">+ New template</span>
+      </div>
+      <div class="folder-item">
+        <div class="folder-row tpl-row" onclick="toggleTplFolder()">
+          <svg class="folder-caret ${showTplOpen?'open':''}" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg>
+          <svg class="folder-icon" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="9.5" height="9.5" rx="1.5"/><path d="M3.5 5h6M3.5 7h6M3.5 9h3.5"/></svg>
+          <span class="folder-name">Reusable column layouts</span>
+          <span class="folder-count">${filteredTpl.length}</span>
+        </div>
+        <div class="folder-children" style="display:${showTplOpen?'block':'none'}">
+          ${filteredTpl.length === 0
+            ? `<div class="blm-empty">${q ? 'No templates match' : 'Save a batch as template to reuse the column layout'}</div>`
+            : filteredTpl.map(b => `
+              <div class="batch-item" onclick="loadBatch('${b.id}')" title="${b.date}">
+                <svg class="bi-icon" viewBox="0 0 12 12" fill="none" stroke="#7C3AED" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="1.5" width="9" height="9" rx="1.5"/><path d="M3.5 4.5h5M3.5 6.5h5M3.5 8.5h3"/></svg>
+                <span class="bi-name">${b.name}</span>
+                <span style="font-size:9px;color:#7C3AED;font-weight:600">${b.date}</span>
+                <span class="tpl-badge">TPL</span>
+              </div>`).join('')}
+        </div>
+      </div>
+    </div>` : '';
+
+  document.getElementById('folder-list').innerHTML = draftsHTML + foldersHTML + templatesHTML;
   if (typeof updateDraftsCountPill === 'function') updateDraftsCountPill();
+}
+function toggleTplFolder(){
+  window.__tplOpen = window.__tplOpen === false ? true : false;
+  renderFolders();
 }
 function toggleFolder(id){
   const c=document.getElementById('fc-'+id), cr=document.getElementById('c-'+id);
@@ -1920,6 +2350,29 @@ function saveTemplateFromModal(){
 
 // Wire the file input + drag/drop after the import modal renders
 window.__pickedImportFile = null;
+// Back arrow + Esc key handler — prefer browser history if available
+(function(){
+  var backLink = document.getElementById('batch-back');
+  if (backLink) {
+    backLink.addEventListener('click', function(e){
+      // If the user has prior history within Atlas, go back instead of always
+      // hard-routing to atlas-gifts-pledges.html. Falls through to href otherwise.
+      var ref = document.referrer || '';
+      if (ref && ref.indexOf(window.location.origin) !== -1 && ref.indexOf('atlas-') !== -1) {
+        e.preventDefault();
+        history.back();
+      }
+    });
+  }
+  // Esc key closes the batch (after confirming if there are unsaved changes)
+  document.addEventListener('keydown', function(e){
+    if (e.key !== 'Escape') return;
+    if (document.querySelector('#modal-overlay.show, #atlas-user-menu')) return; // ignore if a modal is open
+    if (document.activeElement && /input|textarea|select/i.test(document.activeElement.tagName)) return;
+    if (backLink) backLink.click();
+  });
+})();
+
 function wireImportZone(){
   var input = document.getElementById('import-file-input');
   var zone  = document.getElementById('import-dropzone');

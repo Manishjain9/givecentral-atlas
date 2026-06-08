@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GiveCentral Atlas — Tasks & reminders</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,14 +53,15 @@ a { color: inherit; text-decoration: none; }
   flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;
 }
 .sidebar-logo {
-  padding: 18px 18px 14px; display: flex; align-items: center; gap: 9px;
+  padding: 18px 18px 14px; display: flex; align-items: center; gap: 11px;
   border-bottom: 1px solid rgba(255,255,255,.08);
 }
 .logo-mark {
-  width: 30px; height: 30px; background: var(--blue); border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-}
-.logo-mark svg { width: 15px; height: 15px; }
+      width: 40px; height: 40px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border-radius: 0;
+    }
+.logo-mark svg { width: 40px; height: 40px; }
 .logo-text-wrap { display: flex; flex-direction: column; }
 .logo-name { font-family: 'DM Serif Display', serif; font-size: 15px; color: white; line-height: 1; }
 .logo-sub  { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-top: 3px; }
@@ -449,13 +449,15 @@ body {
 }
 /* Logo mark sizing — same fix prevents the brand SVG from ballooning */
 .sidebar-logo .logo-mark {
-  width: 30px !important;
-  height: 30px !important;
+  width: 40px !important;
+  height: 40px !important;
   flex-shrink: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
 }
 .sidebar-logo .logo-mark svg {
-  width: 15px !important;
-  height: 15px !important;
+  width: 40px !important;
+  height: 40px !important;
 }
 
 /* The MIDDLE area is the only scrollable child */
@@ -484,28 +486,22 @@ body {
 </style>
 </head>
 <body>
-<div id="prototype-banner" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#7c3aed;color:#fff;font-family:sans-serif;font-size:13px;font-weight:500;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.25);">
-  <span style="display:flex;align-items:center;gap:8px;">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><circle cx="8" cy="8" r="7" stroke="white" stroke-width="1.5"/><path d="M8 5v3.5M8 10.5v.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-    <strong>UI DESIGN PROTOTYPE</strong> — For demonstration purposes only. No real data.
-  </span>
-  <span style="opacity:.75;font-size:12px;">Built by <a href="https://givecentral.com" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">GiveCentral</a> &nbsp;·&nbsp;<a href="https://givecentral.com/privacy" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">Privacy Policy</a></span>
-  <button onclick="document.getElementById('prototype-banner').style.display='none'" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;font-family:inherit;flex-shrink:0;">✕ Dismiss</button>
-</div>
-<div style="height:50px"></div>
 
 
 <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-mark">
-        <svg viewBox="0 0 18 18" fill="none">
-          <circle cx="9" cy="9" r="7.5" stroke="white" stroke-width="1.5"/>
-          <path d="M5.5 9.5C6.5 11.5 9 13 9 13s2.5-1.5 3.5-3.5S12 5 9 5 4.5 7.5 5.5 9.5z" fill="white" fill-opacity=".9"/>
+        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="14" y="22" width="92" height="8" rx="2" fill="white"/>
+          <rect x="22" y="38" width="14" height="64" rx="2" fill="white"/>
+          <rect x="53" y="38" width="14" height="64" rx="2" fill="white"/>
+          <rect x="84" y="38" width="14" height="64" rx="2" fill="#C8A04A"/>
+          <rect x="14" y="106" width="92" height="6" rx="2" fill="white"/>
         </svg>
       </div>
       <div class="logo-text-wrap">
-        <span class="logo-name">GiveCentral</span>
-        <span class="logo-sub">Atlas CRM</span>
+        <span class="logo-name">Atlas</span>
+        <span class="logo-sub">By GiveCentral</span>
       </div>
     </div>
 
@@ -2867,6 +2863,858 @@ body {
 })();
 </script>
 <!-- end Atlas Dead-CTA Rescue -->
+
+<!-- ════════════════════════════════════════════════════════
+     Tasks UX v3
+     1) Clickable donor + campaign names
+     2) Inline donor brief preview pane
+     3) Bulk select + floating action bar
+     4) Keyboard shortcuts + help sheet
+     5) End-of-day wrap-up moment
+     6) Donor clustering callouts (Group-by-donor)
+     7) Ride-along suggestions on completion
+     8) Focus mode
+     ════════════════════════════════════════════════════════ -->
+<style id="tk-uxv3-css">
+  /* ── 1. Clickable donor / campaign / record links inside .meta ── */
+  .tk-row .meta .donor, .tk-row .meta .campaign-link, .tk-row .meta .record-link {
+    color: var(--text-2); cursor: pointer; transition: color .12s; position: relative;
+  }
+  .tk-row .meta .donor:hover, .tk-row .meta .campaign-link:hover, .tk-row .meta .record-link:hover {
+    color: #2563EB; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px;
+  }
+
+  /* ── 2. Inline donor brief preview pane (slides over Guru rail) ── */
+  #tk-preview {
+    position: fixed; top: 80px; right: 24px; width: 360px;
+    background: white; border: 1px solid var(--border); border-radius: 14px;
+    box-shadow: 0 16px 48px rgba(15,23,42,.18); z-index: 105;
+    font-family: 'DM Sans', sans-serif; transform: translateX(20px); opacity: 0;
+    pointer-events: none; transition: transform .22s, opacity .18s;
+    max-height: calc(100vh - 120px); overflow: hidden; display: flex; flex-direction: column;
+  }
+  #tk-preview.show { transform: none; opacity: 1; pointer-events: auto; }
+  #tk-preview .pv-head {
+    padding: 16px 18px 14px; background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
+    color: white; display: flex; align-items: center; gap: 12px;
+  }
+  #tk-preview .pv-av {
+    width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,.20);
+  }
+  #tk-preview .pv-name { font-family: 'DM Serif Display', serif; font-size: 17px; line-height: 1.15; letter-spacing: -.01em; }
+  #tk-preview .pv-role { font-size: 11px; opacity: .82; margin-top: 1px; }
+  #tk-preview .pv-x { margin-left: auto; width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,.18); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  #tk-preview .pv-x svg { width: 12px; height: 12px; }
+  #tk-preview .pv-body { padding: 14px 18px; overflow-y: auto; flex: 1; }
+  #tk-preview .pv-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  #tk-preview .pv-stat { background: var(--surface); border-radius: 8px; padding: 8px 10px; }
+  #tk-preview .pv-stat .l { font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+  #tk-preview .pv-stat .v { font-size: 13.5px; font-weight: 600; color: var(--text); margin-top: 2px; }
+  #tk-preview .pv-stat .v.green { color: #15803D; }
+  #tk-preview .pv-stat .v.amber { color: #92400E; }
+  #tk-preview .pv-section { margin-bottom: 14px; }
+  #tk-preview .pv-section .h {
+    font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--text-3); margin-bottom: 7px; display: flex; align-items: center; gap: 6px;
+  }
+  #tk-preview .pv-section .h::after { content: ''; flex: 1; height: 1px; background: #E2E8F0; }
+  #tk-preview .pv-contact {
+    display: flex; gap: 9px; align-items: flex-start; padding: 6px 0;
+    font-size: 12px; color: var(--text-2); line-height: 1.4;
+  }
+  #tk-preview .pv-contact .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+  #tk-preview .pv-contact .dot.call { background: #F59E0B; }
+  #tk-preview .pv-contact .dot.email { background: #2563EB; }
+  #tk-preview .pv-contact .dot.visit { background: #15803D; }
+  #tk-preview .pv-contact .when { color: var(--text-3); font-size: 11px; margin-top: 1px; }
+  #tk-preview .pv-guru {
+    background: linear-gradient(135deg, #FAF5FF, #F3E8FF);
+    border: 1px solid #DDD6FE; border-radius: 9px; padding: 10px 12px;
+    font-size: 12px; line-height: 1.5; color: #5B21B6; margin-bottom: 12px;
+  }
+  #tk-preview .pv-guru .badge {
+    font-size: 9px; font-weight: 700; background: #7C3AED; color: white;
+    padding: 2px 6px; border-radius: 4px; letter-spacing: .04em; margin-right: 6px;
+  }
+  #tk-preview .pv-actions { display: flex; gap: 8px; padding: 12px 18px; border-top: 1px solid #F1F5F9; background: #FAFAFA; border-radius: 0 0 14px 14px; }
+  #tk-preview .pv-complete {
+    flex: 1; padding: 9px 14px; background: linear-gradient(135deg, #15803D, #16A34A);
+    color: white; border: none; border-radius: 8px; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; justify-content: center; gap: 6px;
+    box-shadow: 0 4px 12px rgba(21,128,61,.25); transition: all .12s;
+  }
+  #tk-preview .pv-complete:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(21,128,61,.32); }
+  #tk-preview .pv-open {
+    padding: 9px 14px; background: white; border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text-2); font-size: 12px; font-weight: 500; cursor: pointer; text-decoration: none;
+    display: flex; align-items: center; gap: 5px;
+  }
+  #tk-preview .pv-open:hover { border-color: #94A3B8; color: var(--text); }
+
+  /* When preview is showing, hide guru panel */
+  body.tk-preview-open #guru-panel { opacity: 0; pointer-events: none; transform: translateX(20px); transition: all .2s; }
+
+  /* ── 3. Bulk select + floating action bar ── */
+  .tk-row.selected { background: linear-gradient(90deg, #EFF6FF, white) !important; border-color: #93C5FD !important; box-shadow: inset 3px 0 0 #2563EB; }
+  .tk-row .cb { user-select: none; }
+  #bulk-bar {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #0F172A; color: white; border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(15,23,42,.40); z-index: 1100;
+    padding: 10px 14px; display: flex; align-items: center; gap: 14px;
+    font-family: 'DM Sans', sans-serif; opacity: 0; transition: transform .22s cubic-bezier(.22,.61,.36,1), opacity .18s;
+    pointer-events: none;
+  }
+  #bulk-bar.show { opacity: 1; transform: translateX(-50%); pointer-events: auto; }
+  #bulk-bar .count {
+    background: linear-gradient(135deg, #2563EB, #1E40AF);
+    padding: 5px 11px; border-radius: 99px; font-size: 12.5px; font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
+  }
+  #bulk-bar .count strong { font-family: 'DM Serif Display', serif; font-size: 15px; }
+  #bulk-bar .bb-btn {
+    background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.14);
+    color: white; padding: 7px 13px; border-radius: 8px; font-size: 12.5px;
+    font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; gap: 6px; transition: all .12s;
+  }
+  #bulk-bar .bb-btn:hover { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.30); }
+  #bulk-bar .bb-btn.complete { background: linear-gradient(135deg, #15803D, #16A34A); border-color: transparent; }
+  #bulk-bar .bb-btn.complete:hover { box-shadow: 0 4px 14px rgba(22,163,74,.40); }
+  #bulk-bar .bb-btn svg { width: 12px; height: 12px; }
+  #bulk-bar .sep { width: 1px; height: 18px; background: rgba(255,255,255,.18); }
+  #bulk-bar .clear { color: rgba(255,255,255,.6); font-size: 11.5px; cursor: pointer; padding-left: 4px; }
+  #bulk-bar .clear:hover { color: white; }
+
+  /* ── 4. Keyboard shortcuts ── */
+  .tk-row.kb-focused { outline: 2px solid #2563EB; outline-offset: 2px; }
+  #kb-hint {
+    position: fixed; bottom: 24px; right: 24px;
+    background: white; border: 1px solid var(--border); border-radius: 10px;
+    padding: 7px 11px; font-size: 11.5px; color: var(--text-3); font-weight: 500;
+    cursor: pointer; display: flex; align-items: center; gap: 7px; z-index: 90;
+    font-family: 'DM Sans', sans-serif; box-shadow: 0 2px 8px rgba(15,23,42,.06);
+    transition: all .12s;
+  }
+  #kb-hint:hover { border-color: #2563EB; color: #2563EB; box-shadow: 0 4px 12px rgba(37,99,235,.15); }
+  #kb-hint kbd {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+    padding: 0 5px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text);
+  }
+  #kb-scrim { position: fixed; inset: 0; background: rgba(15,23,42,.50); z-index: 1200; opacity: 0; pointer-events: none; transition: opacity .18s; }
+  #kb-scrim.show { opacity: 1; pointer-events: auto; }
+  #kb-sheet {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(.96);
+    width: min(480px, 92vw); background: white; border-radius: 14px;
+    box-shadow: 0 28px 80px rgba(15,23,42,.30); z-index: 1201;
+    opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s;
+    font-family: 'DM Sans', sans-serif; overflow: hidden;
+  }
+  #kb-sheet.show { opacity: 1; transform: translate(-50%,-50%) scale(1); pointer-events: auto; }
+  #kb-sheet .kh {
+    padding: 16px 20px; background: linear-gradient(135deg, #0F172A, #1E3A8A);
+    color: white; display: flex; align-items: center; gap: 10px;
+  }
+  #kb-sheet .kh h3 { margin: 0; font-family: 'DM Serif Display', serif; font-size: 18px; font-weight: 400; }
+  #kb-sheet .kh .sub { font-size: 11.5px; opacity: .8; margin-top: 2px; }
+  #kb-sheet .kh .x { margin-left: auto; width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,.18); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  #kb-sheet .kb-grid { padding: 16px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 22px; }
+  #kb-sheet .kb-grid .row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 4px 0; font-size: 12.5px; color: var(--text); }
+  #kb-sheet .kb-grid .row .lbl { color: var(--text-2); }
+  #kb-sheet .kb-grid .row .ks { display: flex; gap: 4px; }
+  #kb-sheet .kb-grid .row .ks kbd {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text);
+  }
+  #kb-sheet .kb-grid .row .ks .sep { color: var(--text-3); font-size: 10px; line-height: 18px; }
+
+  /* ── 5. End-of-day wrap-up morph ── */
+  .brief-band.eod {
+    background: linear-gradient(135deg, #14532D 0%, #15803D 60%, #16A34A 100%);
+    box-shadow: 0 16px 40px rgba(21,128,61,.25);
+  }
+  .brief-band.eod .brief-subtitle strong { color: #DCFCE7; }
+  .brief-band.eod .bs-card::before { background: linear-gradient(180deg, #15803D, #16A34A); }
+  .brief-band.eod .bs-tag { color: #15803D; }
+  .brief-band.eod .bs-rationale { background: #DCFCE7; border-color: #86EFAC; color: #14532D; }
+  .brief-band.eod .bs-cta { background: linear-gradient(135deg, #15803D, #16A34A); box-shadow: 0 6px 16px rgba(21,128,61,.30); }
+
+  /* ── 6. Donor clustering callout ── */
+  .donor-cluster-cta {
+    display: flex; align-items: center; gap: 12px; padding: 11px 14px;
+    background: linear-gradient(135deg, #EDE9FE, #FAF5FF);
+    border: 1px solid #DDD6FE; border-radius: 10px; margin-bottom: 8px;
+    font-size: 12.5px; color: #5B21B6;
+  }
+  .donor-cluster-cta .dc-icon {
+    width: 22px; height: 22px; border-radius: 50%; background: #7C3AED;
+    color: white; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .donor-cluster-cta strong { color: #5B21B6; font-weight: 700; }
+  .donor-cluster-cta .dc-cta {
+    margin-left: auto; padding: 6px 12px; background: white; border: 1px solid #C4B5FD;
+    border-radius: 6px; font-size: 11.5px; color: #7C3AED; font-weight: 600; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all .12s;
+  }
+  .donor-cluster-cta .dc-cta:hover { background: #7C3AED; color: white; }
+
+  /* ── 7. Ride-along popover ── */
+  #ride-along {
+    position: fixed; bottom: 24px; right: 24px;
+    width: 320px; background: white; border-radius: 12px;
+    box-shadow: 0 16px 40px rgba(15,23,42,.18); border: 1px solid var(--border);
+    z-index: 1050; padding: 14px 16px; opacity: 0; transform: translateY(20px);
+    transition: opacity .22s, transform .22s; pointer-events: none; font-family: 'DM Sans', sans-serif;
+  }
+  #ride-along.show { opacity: 1; transform: none; pointer-events: auto; }
+  #ride-along .ra-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  #ride-along .ra-head .ico { font-size: 18px; }
+  #ride-along .ra-head .ttl { font-size: 13px; font-weight: 700; color: var(--text); }
+  #ride-along .ra-head .sub { font-size: 11px; color: var(--text-3); }
+  #ride-along .ra-body { font-size: 12.5px; color: var(--text-2); line-height: 1.5; margin-bottom: 12px; }
+  #ride-along .ra-body strong { color: var(--text); font-weight: 700; }
+  #ride-along .ra-actions { display: flex; gap: 8px; }
+  #ride-along .ra-stack {
+    flex: 1; padding: 7px 12px; background: linear-gradient(135deg, #7C3AED, #6D28D9);
+    color: white; border: none; border-radius: 7px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  #ride-along .ra-stack:hover { box-shadow: 0 4px 12px rgba(124,58,237,.30); }
+  #ride-along .ra-dismiss {
+    padding: 7px 12px; background: white; border: 1px solid var(--border);
+    border-radius: 7px; font-size: 12px; color: var(--text-3); cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+  #ride-along .ra-dismiss:hover { color: var(--text); border-color: #94A3B8; }
+  #ride-along .ra-x {
+    position: absolute; top: 8px; right: 10px; width: 18px; height: 18px;
+    border-radius: 50%; color: var(--text-3); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
+  }
+  #ride-along .ra-x:hover { color: var(--text); }
+
+  /* ── 8. Focus mode ── */
+  body.focus-mode .sidebar, body.focus-mode .topbar,
+  body.focus-mode #guru-panel, body.focus-mode .brief-band,
+  body.focus-mode .page-actions, body.focus-mode .tk-stats,
+  body.focus-mode .tabs, body.focus-mode .smart-pills,
+  body.focus-mode .tk-toolbar, body.focus-mode #tk-cal-view,
+  body.focus-mode .crumb, body.focus-mode #kb-hint, body.focus-mode .group-h:not(.focus-show) {
+    display: none !important;
+  }
+  body.focus-mode { background: #0F172A; }
+  body.focus-mode .main { background: #0F172A; }
+  body.focus-mode .dash { padding: 80px 24px; max-width: 720px; margin: 0 auto; }
+  body.focus-mode #focus-header {
+    text-align: center; color: white; margin-bottom: 40px;
+    font-family: 'DM Serif Display', serif;
+  }
+  body.focus-mode #focus-header h2 { font-size: 28px; margin: 0; letter-spacing: -.01em; }
+  body.focus-mode #focus-header .sub { font-size: 14px; opacity: .65; margin-top: 8px; font-family: 'DM Sans', sans-serif; }
+  body.focus-mode #tk-list-view { background: transparent !important; }
+  body.focus-mode .tk-row {
+    background: rgba(255,255,255,.06) !important; border: 1px solid rgba(255,255,255,.10) !important;
+    border-radius: 16px !important; padding: 20px 24px !important; margin-bottom: 14px !important;
+    color: white !important;
+  }
+  body.focus-mode .tk-row .ttl { color: white !important; font-size: 16px !important; }
+  body.focus-mode .tk-row .meta, body.focus-mode .tk-row .due .d { color: rgba(255,255,255,.65) !important; }
+  body.focus-mode .tk-row .cb { background: rgba(255,255,255,.08) !important; border-color: rgba(255,255,255,.20) !important; }
+  body.focus-mode .tk-row .cb.checked { background: #15803D !important; border-color: #15803D !important; }
+  body.focus-mode .tk-row.focus-hidden { display: none !important; }
+  body.focus-mode #focus-exit {
+    position: fixed; top: 24px; right: 24px;
+    padding: 8px 14px; background: rgba(255,255,255,.10); color: white;
+    border: 1px solid rgba(255,255,255,.18); border-radius: 8px;
+    font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500;
+    display: flex; align-items: center; gap: 6px;
+  }
+  body.focus-mode #focus-exit:hover { background: rgba(255,255,255,.18); }
+  #focus-header, #focus-exit { display: none; }
+  body.focus-mode #focus-header, body.focus-mode #focus-exit { display: block; }
+  body.focus-mode #focus-exit { display: flex; }
+</style>
+
+<!-- ── Inline donor brief preview pane ── -->
+<aside id="tk-preview">
+  <div class="pv-head">
+    <div class="pv-av" id="pv-av">??</div>
+    <div>
+      <div class="pv-name" id="pv-name">Donor name</div>
+      <div class="pv-role" id="pv-role">Major donor · $95k lifetime</div>
+    </div>
+    <div class="pv-x" id="pv-x">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg>
+    </div>
+  </div>
+  <div class="pv-body">
+    <div class="pv-stats">
+      <div class="pv-stat"><div class="l">Pipeline stage</div><div class="v" id="pv-stage">Solicitation</div></div>
+      <div class="pv-stat"><div class="l">Active ask</div><div class="v green" id="pv-ask">$25,000</div></div>
+      <div class="pv-stat"><div class="l">Last contact</div><div class="v" id="pv-last">8 days ago</div></div>
+      <div class="pv-stat"><div class="l">Officer</div><div class="v" id="pv-officer">Sarah Reynolds</div></div>
+    </div>
+
+    <div class="pv-section">
+      <div class="h">Guru's read</div>
+      <div class="pv-guru">
+        <span class="badge">AI</span>
+        <span id="pv-guru">Strong upgrade candidate · Bishop's personal call would close this within 14 days. Confidence 92%.</span>
+      </div>
+    </div>
+
+    <div class="pv-section">
+      <div class="h">Last 3 contacts</div>
+      <div id="pv-contacts">
+        <div class="pv-contact"><div class="dot call"></div><div>Cultivation call · 22 min · pledge interest confirmed<div class="when">Apr 26</div></div></div>
+        <div class="pv-contact"><div class="dot email"></div><div>Sent Cathedral proposal PDF<div class="when">Apr 18</div></div></div>
+        <div class="pv-contact"><div class="dot visit"></div><div>Cathedral site walk with Bishop · 90 min<div class="when">Apr 3</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="pv-actions">
+    <button class="pv-complete" id="pv-complete">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7l3 3L11 5"/></svg>
+      Complete this task
+    </button>
+    <a class="pv-open" id="pv-open" href="atlas-meeting-brief.html">Full brief →</a>
+  </div>
+</aside>
+
+<!-- ── Bulk action bar ── -->
+<div id="bulk-bar">
+  <div class="count"><strong id="bb-count">0</strong> selected</div>
+  <button class="bb-btn complete" id="bb-complete">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7l3 3L11 5"/></svg>
+    Complete
+  </button>
+  <button class="bb-btn" id="bb-snooze">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="5"/><path d="M7 4v3.5l2 1.5"/></svg>
+    Snooze 1 day
+  </button>
+  <button class="bb-btn" id="bb-reassign">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="5" r="2.5"/><path d="M3 12c0-2.5 1.8-4 4-4M9 9l2.5 2.5M9 11.5h2.5V9"/></svg>
+    Reassign
+  </button>
+  <button class="bb-btn" id="bb-tag">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 7l5-5h5v5l-5 5z"/><circle cx="9.5" cy="4.5" r=".8"/></svg>
+    Tag
+  </button>
+  <div class="sep"></div>
+  <span class="clear" id="bb-clear">Clear (Esc)</span>
+</div>
+
+<!-- ── Keyboard hint chip + help sheet ── -->
+<div id="kb-hint" title="Keyboard shortcuts (?)"><kbd>?</kbd>shortcuts</div>
+<div id="kb-scrim"></div>
+<div id="kb-sheet" role="dialog" aria-modal="true">
+  <div class="kh">
+    <div>
+      <h3>Keyboard shortcuts</h3>
+      <div class="sub">Work faster — no mouse needed</div>
+    </div>
+    <div class="x" id="kb-close">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg>
+    </div>
+  </div>
+  <div class="kb-grid">
+    <div class="row"><span class="lbl">Next task</span><span class="ks"><kbd>J</kbd></span></div>
+    <div class="row"><span class="lbl">Complete</span><span class="ks"><kbd>Space</kbd></span></div>
+    <div class="row"><span class="lbl">Previous task</span><span class="ks"><kbd>K</kbd></span></div>
+    <div class="row"><span class="lbl">Edit task</span><span class="ks"><kbd>E</kbd></span></div>
+    <div class="row"><span class="lbl">Open preview</span><span class="ks"><kbd>Enter</kbd></span></div>
+    <div class="row"><span class="lbl">Snooze 1 day</span><span class="ks"><kbd>S</kbd></span></div>
+    <div class="row"><span class="lbl">Multi-select</span><span class="ks"><kbd>X</kbd></span></div>
+    <div class="row"><span class="lbl">Reassign</span><span class="ks"><kbd>R</kbd></span></div>
+    <div class="row"><span class="lbl">Focus mode</span><span class="ks"><kbd>F</kbd></span></div>
+    <div class="row"><span class="lbl">Search</span><span class="ks"><kbd>/</kbd></span></div>
+    <div class="row"><span class="lbl">Show shortcuts</span><span class="ks"><kbd>?</kbd></span></div>
+    <div class="row"><span class="lbl">Close / cancel</span><span class="ks"><kbd>Esc</kbd></span></div>
+  </div>
+</div>
+
+<!-- ── Ride-along popover ── -->
+<div id="ride-along">
+  <div class="ra-x" id="ra-x">×</div>
+  <div class="ra-head">
+    <div class="ico">🤝</div>
+    <div>
+      <div class="ttl">While you're at it</div>
+      <div class="sub" id="ra-sub">Another quick win for the same donor</div>
+    </div>
+  </div>
+  <div class="ra-body" id="ra-body">
+    <strong>Send Margaret the photo from the Cathedral site walk.</strong>
+    Adds ~3 min to your day, but turns yesterday's visit into a stewardship moment.
+  </div>
+  <div class="ra-actions">
+    <button class="ra-stack" id="ra-stack">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 6h6M6 4l2 2-2 2"/></svg>
+      Stack with this one
+    </button>
+    <button class="ra-dismiss" id="ra-dismiss">Maybe later</button>
+  </div>
+</div>
+
+<!-- ── Focus mode chrome ── -->
+<div id="focus-header">
+  <h2 id="focus-title">Focus mode</h2>
+  <div class="sub" id="focus-sub">Three things. Nothing else.</div>
+</div>
+<button id="focus-exit">
+  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg>
+  Exit focus (Esc)
+</button>
+
+<script id="tk-uxv3">
+(function(){
+  // ──────── DONOR CATALOG ────────
+  // Pulled from existing Pipeline data so donor previews match the rest of Atlas.
+  var DONORS = {
+    "robert & susan lin": {
+      avBg:'#FEE2E2', avFg:'#BE185D', initials:'RL',
+      role:'Cathedral major prospect · $80k lifetime',
+      stage:'Solicitation', ask:'$30,000', last:'12 days ago', officer:'Sarah Reynolds',
+      guru:'Highest-EV action right now. Commitment letter was ready 4 days ago — each day slip raises drop-off risk. 95% propensity.'
+    },
+    "margaret o'brien": {
+      avBg:'#EDE9FE', avFg:'#7C3AED', initials:'MO',
+      role:'Cathedral benefactor · $95k lifetime · Major donor',
+      stage:'Solicitation', ask:'$25,000', last:'8 days ago', officer:'Sarah Reynolds',
+      guru:'Strong upgrade candidate · Bishop\'s personal call would likely close this within 14 days. Confidence 92%.'
+    },
+    "james & patricia o'brien": {
+      avBg:'#EDE9FE', avFg:'#7C3AED', initials:'JO',
+      role:'Cathedral benefactor · $95k lifetime',
+      stage:'Solicitation', ask:'$25,000', last:'2 days ago · cultivation call', officer:'Sarah Reynolds',
+      guru:'Call scheduled today at 2 PM. Last contact mentioned interest in Cathedral chapel naming.'
+    },
+    "the morrison foundation": {
+      avBg:'#DCFCE7', avFg:'#15803D', initials:'MF',
+      role:'Corporate matching gift · $100k just received',
+      stage:'Closed · Won', ask:'$100,000 (received)', last:'Closed Mar 28', officer:'Sarah Reynolds',
+      guru:'First corporate major gift in 5 years. Thank-you call overdue 1 day — clear this today to lock in recognition.'
+    },
+    "catherine romano": {
+      avBg:'#CCFBF1', avFg:'#0D9488', initials:'CR',
+      role:'New $500/year donor · welcome cadence #2',
+      stage:'Cultivation', ask:'—', last:'23 days ago', officer:'Sarah Reynolds',
+      guru:'Quick-win opportunity. A warm "checking in" email keeps her engaged before renewal lapse window opens.'
+    },
+    "dr. thomas nguyen": {
+      avBg:'#CCFBF1', avFg:'#0D9488', initials:'TN',
+      role:'New major gift prospect · proposal sent',
+      stage:'Solicitation', ask:'$20,000', last:'4 days ago', officer:'Sarah Reynolds',
+      guru:'Proposal sent Apr 1, no response yet. A follow-up call this week keeps momentum without seeming pushy.'
+    },
+    "victor & maria montoya": {
+      avBg:'#FCE7F3', avFg:'#BE185D', initials:'VM',
+      role:'Holy Cross Parish · major prospect',
+      stage:'Solicitation · stalled', ask:'$30,000', last:'14 days ago · overdue', officer:'Mark Collins',
+      guru:'14 days in stage with no movement. Either re-pitch this week or move them back to Cultivation — don\'t let it rot.'
+    }
+  };
+
+  function lookupDonor(name){
+    if (!name) return null;
+    var k = name.toLowerCase().replace(/\s+/g,' ').trim();
+    if (DONORS[k]) return DONORS[k];
+    // partial match (last name)
+    for (var d in DONORS) if (d.indexOf(k) >= 0 || k.indexOf(d) >= 0) return DONORS[d];
+    return null;
+  }
+
+  // ──────── 1. CLICKABLE DONOR/CAMPAIGN NAMES ────────
+  // Wrap each .donor span in a clickable affordance + add campaign/record links inside meta
+  document.querySelectorAll('.tk-row').forEach(function(row){
+    var donorEl = row.querySelector('.donor');
+    if (donorEl && !donorEl.dataset.linked) {
+      donorEl.dataset.linked = '1';
+      donorEl.style.fontWeight = '600';
+      donorEl.title = 'Click to peek at donor 360 · Cmd-click to open in full page';
+      donorEl.addEventListener('click', function(e){
+        e.stopPropagation();
+        if (e.metaKey || e.ctrlKey) { window.location = 'atlas-donor-360.html'; return; }
+        openPreviewForRow(row);
+      });
+    }
+    // Find any span in .meta that mentions a campaign and make it a link
+    var meta = row.querySelector('.meta');
+    if (meta && !meta.dataset.linked) {
+      meta.dataset.linked = '1';
+      Array.from(meta.querySelectorAll('span')).forEach(function(s){
+        var t = s.textContent.trim();
+        if (/cathedral|campaign|annual appeal|gala|capital/i.test(t) && t.length < 80) {
+          s.classList.add('campaign-link');
+          s.addEventListener('click', function(e){ e.stopPropagation(); window.location = 'atlas-campaign-detail.html'; });
+        } else if (/^Linked:/i.test(t)) {
+          s.classList.add('record-link');
+          s.addEventListener('click', function(e){ e.stopPropagation(); window.location = 'atlas-meeting-brief.html'; });
+        }
+      });
+    }
+  });
+
+  // ──────── 2. INLINE DONOR PREVIEW PANE ────────
+  var preview = document.getElementById('tk-preview');
+  var pvComplete = document.getElementById('pv-complete');
+  var pvOpen = document.getElementById('pv-open');
+  var pvX = document.getElementById('pv-x');
+  var currentRow = null;
+
+  function openPreviewForRow(row){
+    currentRow = row;
+    var ttl = (row.querySelector('.ttl') || {}).textContent || 'Task';
+    var donor = ((row.querySelector('.donor') || {}).textContent || '').trim();
+    var data = lookupDonor(donor) || {
+      avBg:'#E2E8F0', avFg:'#475569',
+      initials: (donor.split(/\s+/).map(function(p){return p[0]||'';}).join('').slice(0,2).toUpperCase() || 'DR'),
+      role: donor || 'Donor record',
+      stage: '—', ask: '—', last: '—', officer: 'Sarah Reynolds',
+      guru: 'No insights yet for this donor — building profile from recent interactions.'
+    };
+    document.getElementById('pv-av').style.background = data.avBg;
+    document.getElementById('pv-av').style.color = data.avFg;
+    document.getElementById('pv-av').textContent = data.initials;
+    document.getElementById('pv-name').textContent = donor || ttl;
+    document.getElementById('pv-role').textContent = data.role;
+    document.getElementById('pv-stage').textContent = data.stage;
+    document.getElementById('pv-ask').textContent = data.ask;
+    document.getElementById('pv-last').textContent = data.last;
+    document.getElementById('pv-officer').textContent = data.officer;
+    document.getElementById('pv-guru').textContent = data.guru;
+    preview.classList.add('show');
+    document.body.classList.add('tk-preview-open');
+  }
+  function closePreview(){
+    preview.classList.remove('show');
+    document.body.classList.remove('tk-preview-open');
+    currentRow = null;
+  }
+  pvX.addEventListener('click', closePreview);
+  pvComplete.addEventListener('click', function(){
+    if (currentRow && currentRow.querySelector('.cb')) {
+      currentRow.querySelector('.cb').click();
+    }
+    closePreview();
+  });
+
+  // Wire row title click → preview
+  document.querySelectorAll('.tk-row .body .ttl').forEach(function(t){
+    t.style.cursor = 'pointer';
+    t.title = 'Click for donor preview';
+    t.addEventListener('click', function(e){
+      e.stopPropagation();
+      openPreviewForRow(t.closest('.tk-row'));
+    });
+  });
+
+  // ──────── 3. BULK SELECT + ACTION BAR ────────
+  var bulkBar = document.getElementById('bulk-bar');
+  var bbCount = document.getElementById('bb-count');
+  var bbClear = document.getElementById('bb-clear');
+  var selected = new Set();
+
+  function updateBulkBar(){
+    if (selected.size === 0) { bulkBar.classList.remove('show'); return; }
+    bbCount.textContent = selected.size;
+    bulkBar.classList.add('show');
+  }
+  function toggleSelect(row){
+    if (selected.has(row)) { selected.delete(row); row.classList.remove('selected'); }
+    else { selected.add(row); row.classList.add('selected'); }
+    updateBulkBar();
+  }
+  function clearSelection(){
+    selected.forEach(function(r){ r.classList.remove('selected'); });
+    selected.clear();
+    updateBulkBar();
+  }
+  bbClear.addEventListener('click', clearSelection);
+
+  // Shift-click on row toggles selection. Plain click on checkbox completes (existing).
+  document.querySelectorAll('.tk-row').forEach(function(row){
+    row.addEventListener('click', function(e){
+      // Only on bare row clicks (not nested controls)
+      if (e.target.closest('.tk-action, .cb, .ttl, .donor, .campaign-link, .record-link, .kebab, a, button')) return;
+      if (e.shiftKey || selected.size > 0) {
+        toggleSelect(row);
+      }
+    });
+  });
+
+  // Bulk actions
+  document.getElementById('bb-complete').addEventListener('click', function(){
+    var n = selected.size;
+    selected.forEach(function(r){
+      var cb = r.querySelector('.cb');
+      if (cb) cb.click();
+    });
+    showToast(n + ' tasks completed · nice sweep');
+    clearSelection();
+  });
+  document.getElementById('bb-snooze').addEventListener('click', function(){
+    var n = selected.size;
+    selected.forEach(function(r){
+      r.style.transition = 'opacity .25s, transform .25s';
+      r.style.opacity = '.4';
+      r.style.transform = 'translateX(20px)';
+      setTimeout(function(){ r.style.display = 'none'; }, 250);
+    });
+    showToast(n + ' tasks snoozed 1 day');
+    clearSelection();
+  });
+  document.getElementById('bb-reassign').addEventListener('click', function(){
+    showToast(selected.size + ' tasks reassigned · pick teammate in next step');
+    clearSelection();
+    setTimeout(function(){ window.location = 'atlas-task-modal.html'; }, 400);
+  });
+  document.getElementById('bb-tag').addEventListener('click', function(){
+    showToast(selected.size + ' tasks tagged "Q2 outreach"');
+    clearSelection();
+  });
+
+  // ──────── 4. KEYBOARD SHORTCUTS ────────
+  var kbScrim = document.getElementById('kb-scrim');
+  var kbSheet = document.getElementById('kb-sheet');
+  var kbHint = document.getElementById('kb-hint');
+  var kbClose = document.getElementById('kb-close');
+  function openKB(){ kbScrim.classList.add('show'); kbSheet.classList.add('show'); }
+  function closeKB(){ kbScrim.classList.remove('show'); kbSheet.classList.remove('show'); }
+  kbHint.addEventListener('click', openKB);
+  kbClose.addEventListener('click', closeKB);
+  kbScrim.addEventListener('click', closeKB);
+
+  var focusedRow = null;
+  function getVisibleRows(){
+    return Array.from(document.querySelectorAll('#tk-list-view .tk-row')).filter(function(r){
+      return r.offsetParent !== null && !r.classList.contains('completing') && !r.classList.contains('fading');
+    });
+  }
+  function setFocusedRow(idx){
+    var rows = getVisibleRows();
+    if (!rows.length) return;
+    if (idx < 0) idx = 0;
+    if (idx >= rows.length) idx = rows.length - 1;
+    rows.forEach(function(r){ r.classList.remove('kb-focused'); });
+    focusedRow = rows[idx];
+    focusedRow.classList.add('kb-focused');
+    focusedRow.scrollIntoView({block:'nearest', behavior:'smooth'});
+  }
+  function focusedIdx(){
+    var rows = getVisibleRows();
+    return rows.indexOf(focusedRow);
+  }
+
+  document.addEventListener('keydown', function(e){
+    // Skip if user is typing in an input
+    var t = e.target.tagName.toLowerCase();
+    if (t === 'input' || t === 'textarea' || e.target.isContentEditable) return;
+    // Skip if any modal/scrim is open
+    var modalOpen = document.querySelector('.iu-drawer.show, #rpt-drawer, .rw-overlay, #kb-sheet.show, #cal-qa-modal.show');
+
+    if (e.key === '?') { e.preventDefault(); openKB(); return; }
+    if (e.key === 'Escape') {
+      if (kbSheet.classList.contains('show')) { closeKB(); return; }
+      if (preview.classList.contains('show')) { closePreview(); return; }
+      if (selected.size > 0) { clearSelection(); return; }
+      if (document.body.classList.contains('focus-mode')) { exitFocus(); return; }
+      return;
+    }
+    if (modalOpen) return;
+
+    if (e.key === 'j' || e.key === 'J') { e.preventDefault(); setFocusedRow(focusedIdx() < 0 ? 0 : focusedIdx() + 1); }
+    else if (e.key === 'k' || e.key === 'K') { e.preventDefault(); setFocusedRow(Math.max(0, focusedIdx() - 1)); }
+    else if (e.key === ' ' && focusedRow) {
+      e.preventDefault();
+      var cb = focusedRow.querySelector('.cb'); if (cb) cb.click();
+      setTimeout(function(){ setFocusedRow(focusedIdx() + 1); }, 100);
+    }
+    else if (e.key === 'Enter' && focusedRow) { e.preventDefault(); openPreviewForRow(focusedRow); }
+    else if ((e.key === 'e' || e.key === 'E') && focusedRow) { e.preventDefault(); window.location = 'atlas-task-modal.html'; }
+    else if ((e.key === 's' || e.key === 'S') && focusedRow) {
+      e.preventDefault();
+      focusedRow.style.transition = 'opacity .25s, transform .25s';
+      focusedRow.style.opacity = '.4'; focusedRow.style.transform = 'translateX(20px)';
+      setTimeout(function(){ focusedRow.style.display = 'none'; setFocusedRow(focusedIdx() + 1); }, 250);
+      showToast('Snoozed 1 day');
+    }
+    else if ((e.key === 'x' || e.key === 'X') && focusedRow) { e.preventDefault(); toggleSelect(focusedRow); }
+    else if ((e.key === 'r' || e.key === 'R') && focusedRow) { e.preventDefault(); window.location = 'atlas-task-modal.html'; }
+    else if ((e.key === 'f' || e.key === 'F')) { e.preventDefault(); enterFocus(); }
+    else if (e.key === '/') {
+      e.preventDefault();
+      var sb = document.getElementById('search-tasks-btn'); if (sb) sb.click();
+    }
+  });
+
+  // ──────── 5. END-OF-DAY WRAP-UP MOMENT ────────
+  function checkEOD(){
+    // EOD = no Overdue items remaining (their count) AND today completed >= today total
+    var overdueRows = Array.from(document.querySelectorAll('#tk-list-view .tk-row.overdue')).filter(function(r){ return r.offsetParent !== null; });
+    var todayDone = parseInt((document.getElementById('today-done')||{}).textContent || '0', 10);
+    var todayTotal = parseInt((document.getElementById('today-total')||{}).textContent || '0', 10);
+    if (overdueRows.length === 0 && todayDone >= todayTotal && todayTotal > 0) {
+      morphToEOD();
+    }
+  }
+  function morphToEOD(){
+    var band = document.querySelector('.brief-band');
+    if (!band || band.classList.contains('eod')) return;
+    band.classList.add('eod');
+    var g = document.getElementById('brief-greeting');
+    var sub = document.getElementById('brief-subtitle');
+    if (g) g.textContent = 'Day cleared';
+    if (sub) sub.innerHTML = 'You closed <strong>all 7 high-impact items</strong>. <strong>$84k</strong> in pipeline impact. See you tomorrow.';
+    // Replace "Start here" card with celebration card
+    var bs = band.querySelector('.bs-card');
+    if (bs) {
+      bs.querySelector('.bs-tag').innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 6l3 3 5-6"/></svg> Day complete';
+      bs.querySelector('.bs-title').textContent = "You earned tomorrow";
+      var meta = bs.querySelector('.bs-meta');
+      if (meta) meta.innerHTML = '<span class="bs-amt">12 tasks · 94% on-time · 6-day streak</span><span class="bs-overdue" style="color:#15803D">Personal best this quarter</span>';
+      var rat = bs.querySelector('.bs-rationale');
+      if (rat) rat.textContent = 'Tomorrow opens light: a 10 AM Cathedral site walk and your weekly pipeline review. Plan it now while the momentum is fresh.';
+      var cta = bs.querySelector('.bs-cta');
+      if (cta) {
+        cta.innerHTML = '<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.2"/><path d="M2 6h10M5 3v2M9 3v2"/></svg> Plan tomorrow →';
+        cta.onclick = function(){ document.querySelector('.vt-btn[data-view="calendar"]').click(); };
+      }
+      var sn = document.getElementById('bs-snooze');
+      if (sn) sn.style.display = 'none';
+    }
+    // Confetti-ish flourish
+    showToast('Day complete — well done. 🎉');
+  }
+
+  // ──────── 6. DONOR CLUSTERING CALLOUTS (Group-by-donor) ────────
+  // Observe when #donor-grouped is rendered and insert clustering CTAs for donors with 3+ tasks
+  var clusterObs = new MutationObserver(function(muts){
+    muts.forEach(function(mu){
+      mu.addedNodes.forEach(function(n){
+        if (n.nodeType !== 1) return;
+        if (n.id === 'donor-grouped' || n.querySelector && n.querySelector('.donor-h')) {
+          addClusterCTAs(n);
+        }
+      });
+    });
+  });
+  clusterObs.observe(document.body, {childList:true, subtree:true});
+  function addClusterCTAs(wrap){
+    wrap.querySelectorAll('.donor-h').forEach(function(h){
+      var list = h.nextElementSibling;
+      if (!list || !list.classList.contains('tk-list')) return;
+      var rows = list.querySelectorAll('.tk-row');
+      if (rows.length < 3) return;
+      // Build a cluster CTA
+      var donor = h.textContent.trim().split('·')[0].trim();
+      var cta = document.createElement('div');
+      cta.className = 'donor-cluster-cta';
+      cta.innerHTML =
+        '<div class="dc-icon">★</div>' +
+        '<div><strong>' + donor + '</strong> · ' + rows.length + ' open tasks · batch them in one call?</div>' +
+        '<button class="dc-cta">Stack →</button>';
+      cta.querySelector('.dc-cta').addEventListener('click', function(){
+        showToast('Calendar slot suggested · Thu 11 AM (45 min) for ' + donor);
+      });
+      list.parentNode.insertBefore(cta, list);
+    });
+  }
+
+  // ──────── 7. RIDE-ALONG SUGGESTIONS ON COMPLETION ────────
+  var rideAlong = document.getElementById('ride-along');
+  var raStack = document.getElementById('ra-stack');
+  var raDismiss = document.getElementById('ra-dismiss');
+  var raX = document.getElementById('ra-x');
+  raX.addEventListener('click', function(){ rideAlong.classList.remove('show'); });
+  raDismiss.addEventListener('click', function(){ rideAlong.classList.remove('show'); });
+  raStack.addEventListener('click', function(){
+    showToast('Stacked · added to today’s queue');
+    rideAlong.classList.remove('show');
+  });
+
+  // Hook into completion: monitor checkbox class changes
+  function watchForCompletions(){
+    var cbs = document.querySelectorAll('.tk-row .cb');
+    cbs.forEach(function(cb){
+      if (cb.dataset.raWatched) return;
+      cb.dataset.raWatched = '1';
+      cb.addEventListener('click', function(){
+        setTimeout(function(){
+          var row = cb.closest('.tk-row');
+          if (!row) return;
+          var donor = ((row.querySelector('.donor')||{}).textContent || '').trim();
+          if (!donor) return;
+          // Find another open row with same donor
+          var others = Array.from(document.querySelectorAll('.tk-row')).filter(function(r){
+            if (r === row) return false;
+            if (r.offsetParent === null) return false;
+            if (r.classList.contains('completing') || r.classList.contains('fading')) return false;
+            var d = (r.querySelector('.donor')||{}).textContent;
+            return d && d.trim().toLowerCase() === donor.toLowerCase();
+          });
+          if (others.length === 0) return;
+          // Only fire 50% of the time and not more than once per minute
+          if (window._lastRA && Date.now() - window._lastRA < 60000) return;
+          window._lastRA = Date.now();
+          // Build the ride-along message
+          var other = others[0];
+          var otherTitle = ((other.querySelector('.ttl')||{}).textContent || 'another task').trim();
+          document.getElementById('ra-sub').textContent = 'Another quick win for ' + donor;
+          document.getElementById('ra-body').innerHTML = '<strong>' + otherTitle + '</strong><br>Adds ~3 min to your day, but turns one outreach into two touches.';
+          raStack.onclick = function(){
+            // Highlight the other row and scroll to it
+            other.scrollIntoView({block:'center', behavior:'smooth'});
+            other.style.transition = 'box-shadow .3s';
+            other.style.boxShadow = '0 0 0 3px rgba(124,58,237,.30)';
+            setTimeout(function(){ other.style.boxShadow = ''; }, 1800);
+            rideAlong.classList.remove('show');
+            showToast('Stacked · ' + otherTitle + ' queued next');
+          };
+          rideAlong.classList.add('show');
+          setTimeout(function(){ rideAlong.classList.remove('show'); }, 9000);
+        }, 700);
+        // EOD check after every completion
+        setTimeout(checkEOD, 900);
+      });
+    });
+  }
+  watchForCompletions();
+  // Re-run when DOM changes (group-by-donor remixes rows)
+  setInterval(watchForCompletions, 3000);
+
+  // ──────── 8. FOCUS MODE ────────
+  function enterFocus(){
+    if (document.body.classList.contains('focus-mode')) return;
+    // Hide all rows except top 3 unhidden in list view
+    var rows = getVisibleRows();
+    rows.forEach(function(r, i){ if (i >= 3) r.classList.add('focus-hidden'); });
+    document.body.classList.add('focus-mode');
+    var top3 = rows.slice(0, 3);
+    document.getElementById('focus-title').textContent = 'Three things · then breathe';
+    document.getElementById('focus-sub').textContent = top3.length + ' high-priority items · ' + new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  }
+  function exitFocus(){
+    document.body.classList.remove('focus-mode');
+    document.querySelectorAll('.tk-row.focus-hidden').forEach(function(r){ r.classList.remove('focus-hidden'); });
+  }
+  document.getElementById('focus-exit').addEventListener('click', exitFocus);
+
+  // ──────── Helpers ────────
+  function showToast(msg){
+    if (window.atlasToast) { window.atlasToast(msg); return; }
+    var t = document.getElementById('atlas-rescue-toast');
+    if (!t) return;
+    t.querySelector('.msg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function(){ t.classList.remove('show'); }, 3200);
+  }
+})();
+</script>
 
 </body>
 </html>

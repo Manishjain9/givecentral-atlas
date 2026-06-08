@@ -215,19 +215,99 @@
     .section-action:hover { color: #1D4ED8; }
     .section-action svg { width: 11px; height: 11px; }
 
-    /* Giving chart */
-    .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
-    .chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 80px; margin-bottom: 6px; }
-    .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-    .chart-bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 3px; transition: opacity .15s; cursor: pointer; }
-    .chart-bar:hover { opacity: .75; }
+    /* Giving chart — upgraded with interactive KPIs + hover tooltip */
+    .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px 16px; }
+    /* KPI strip above the chart — clickable to filter Recent gifts */
+    .chart-kpis {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 10px; margin-bottom: 14px;
+    }
+    .chart-kpi {
+      background: white; border: 1px solid var(--border); border-radius: 8px;
+      padding: 9px 12px; cursor: pointer; transition: all .14s;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .chart-kpi:hover { border-color: var(--blue-mid, #93C5FD); background: var(--blue-pale, #EFF6FF); transform: translateY(-1px); }
+    .chart-kpi.active { border-color: var(--blue); background: var(--blue-pale); box-shadow: 0 2px 6px rgba(37,99,235,.12); }
+    .chart-kpi-label { font-size: 9px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); }
+    .chart-kpi-value { font-size: 17px; font-weight: 700; color: var(--text); font-family: 'DM Serif Display', serif; line-height: 1.1; }
+    .chart-kpi-trend { font-size: 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; }
+    .chart-kpi-trend.up { color: var(--green); }
+    .chart-kpi-trend.down { color: var(--rose); }
+    .chart-kpi-trend.flat { color: var(--text-3); }
+
+    .chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 110px; margin-bottom: 8px; padding-top: 14px; position: relative; }
+    .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; height: 100%; justify-content: flex-end; cursor: pointer; position: relative; }
+    .chart-bar-amount {
+      font-size: 9.5px; font-weight: 600; color: var(--text-2);
+      opacity: 0; transition: opacity .14s;
+      white-space: nowrap;
+    }
+    .chart-bar-wrap:hover .chart-bar-amount,
+    .chart-bar-wrap.selected .chart-bar-amount { opacity: 1; }
+    .chart-bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 3px; transition: all .15s; }
+    .chart-bar-wrap:hover .chart-bar,
+    .chart-bar-wrap.selected .chart-bar { filter: brightness(1.08); transform: scaleY(1.04); transform-origin: bottom; }
+    .chart-bar-wrap.selected .chart-bar { box-shadow: 0 2px 8px rgba(37,99,235,.3); }
     .chart-bar.current { background: var(--blue); }
     .chart-bar.past { background: var(--blue-light); }
     .chart-bar.zero { background: #F1F5F9; min-height: 6px; border-radius: 3px; }
-    .chart-label { font-size: 10px; color: var(--text-3); }
-    .chart-legend { display: flex; gap: 14px; font-size: 10px; color: var(--text-3); margin-top: 4px; }
+    .chart-label { font-size: 10px; color: var(--text-3); transition: color .14s, font-weight .14s; }
+    .chart-bar-wrap.selected .chart-label { color: var(--blue); font-weight: 700; }
+    .chart-legend { display: flex; gap: 14px; font-size: 10px; color: var(--text-3); margin-top: 4px; align-items: center; }
     .chart-legend-item { display: flex; align-items: center; gap: 5px; }
     .chart-legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+    .chart-legend-spacer { flex: 1; }
+    .chart-clear-btn {
+      font-size: 10px; color: var(--blue); cursor: pointer; padding: 2px 7px;
+      border: 1px solid var(--blue-light); border-radius: 4px; background: white;
+      display: none;
+    }
+    .chart-clear-btn.show { display: inline-flex; }
+    .chart-clear-btn:hover { background: var(--blue-pale); }
+
+    /* Hover tooltip for the bars */
+    .chart-tooltip {
+      position: absolute; pointer-events: none;
+      background: var(--navy, #0F172A); color: white;
+      padding: 8px 11px; border-radius: 7px;
+      font-size: 11px; line-height: 1.4;
+      opacity: 0; transition: opacity .14s;
+      transform: translateX(-50%) translateY(-100%);
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,.18);
+      z-index: 10;
+    }
+    .chart-tooltip.show { opacity: 1; }
+    .chart-tooltip .ct-year { font-weight: 700; font-size: 12px; color: white; }
+    .chart-tooltip .ct-amt { font-size: 14px; font-weight: 700; color: #93C5FD; margin: 3px 0; font-family: 'DM Serif Display', serif; }
+    .chart-tooltip .ct-meta { font-size: 10px; color: rgba(255,255,255,.65); }
+    .chart-tooltip .ct-meta strong { color: white; font-weight: 600; }
+    .chart-tooltip::after {
+      content: ''; position: absolute; left: 50%; bottom: -5px;
+      width: 0; height: 0;
+      border-left: 5px solid transparent; border-right: 5px solid transparent;
+      border-top: 5px solid var(--navy, #0F172A);
+      transform: translateX(-50%);
+    }
+
+    /* Year-detail card shown below chart when a year is selected */
+    .year-detail-card {
+      margin-top: 12px; padding: 12px 14px;
+      background: var(--blue-pale, #EFF6FF);
+      border: 1px solid var(--blue-light, #DBEAFE);
+      border-radius: 8px;
+      display: none;
+    }
+    .year-detail-card.show { display: block; }
+    .ydc-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+    .ydc-year { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--blue); }
+    .ydc-amt { font-size: 14px; font-weight: 700; color: var(--text); }
+    .ydc-vs-prior { font-size: 11px; font-weight: 600; margin-left: auto; }
+    .ydc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 11px; }
+    .ydc-grid-cell .lbl { font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+    .ydc-grid-cell .val { font-size: 12px; font-weight: 600; color: var(--text); margin-top: 2px; }
+    .ydc-grid-cell .val .sub { font-weight: 400; color: var(--text-3); font-size: 10.5px; }
 
     /* Gift table */
     .gift-table { width: 100%; border-collapse: collapse; }
@@ -690,19 +770,70 @@ body {
         <!-- OVERVIEW TAB -->
         <div class="tab-content active" id="tab-overview">
 
-          <!-- Giving history chart -->
+          <!-- Giving history chart — KPIs above, interactive bars, year-detail card below -->
           <div class="section">
             <div class="section-header">
-              <span class="section-title">Giving history</span>
-              <span class="section-action">View all gifts <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5h7M6 2.5l3 3-3 3"/></svg></span>
+              <span class="section-title">Giving history · 10-year view</span>
+              <span class="section-action" onclick="switchTabById('gifts')">View full ledger <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5h7M6 2.5l3 3-3 3"/></svg></span>
             </div>
             <div class="chart-wrap">
-              <div class="chart-bars" id="giving-chart">
-                <!-- JS fills this -->
+              <!-- Clickable KPI strip — filters the table + chart focus -->
+              <div class="chart-kpis" id="chart-kpis">
+                <div class="chart-kpi" data-kpi="lifetime" title="Click to view all lifetime gifts">
+                  <span class="chart-kpi-label">Lifetime</span>
+                  <span class="chart-kpi-value">$84,250</span>
+                  <span class="chart-kpi-trend up">17 years · 47 gifts</span>
+                </div>
+                <div class="chart-kpi" data-kpi="ytd" title="Click to see 2026 gifts">
+                  <span class="chart-kpi-label">2026 YTD</span>
+                  <span class="chart-kpi-value">$12,500</span>
+                  <span class="chart-kpi-trend up">
+                    <svg viewBox="0 0 10 10" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 7l3-4 3 4"/></svg>
+                    +19% vs 2025
+                  </span>
+                </div>
+                <div class="chart-kpi" data-kpi="avg" title="Average across all years">
+                  <span class="chart-kpi-label">Avg gift</span>
+                  <span class="chart-kpi-value">$1,793</span>
+                  <span class="chart-kpi-trend flat">47 gifts total</span>
+                </div>
+                <div class="chart-kpi" data-kpi="largest" title="Largest single gift">
+                  <span class="chart-kpi-label">Largest</span>
+                  <span class="chart-kpi-value">$10,000</span>
+                  <span class="chart-kpi-trend flat">Apr 2 · CMA</span>
+                </div>
               </div>
+              <div class="chart-bars" id="giving-chart"><!-- JS fills this --></div>
+              <!-- Tooltip absolutely positioned over chart -->
+              <div class="chart-tooltip" id="chart-tooltip"></div>
               <div class="chart-legend">
                 <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--blue)"></div>This year</div>
                 <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--blue-light)"></div>Prior years</div>
+                <span class="chart-legend-spacer"></span>
+                <span class="chart-legend-item" style="color:var(--text-3)">Click any bar for breakdown</span>
+                <button class="chart-clear-btn" id="chart-clear-btn" onclick="clearYearSelection()">Clear selection</button>
+              </div>
+              <!-- Detail card revealed when a year is clicked -->
+              <div class="year-detail-card" id="year-detail-card">
+                <div class="ydc-head">
+                  <span class="ydc-year" id="ydc-year">—</span>
+                  <span class="ydc-amt" id="ydc-amt">—</span>
+                  <span class="ydc-vs-prior" id="ydc-vs-prior">—</span>
+                </div>
+                <div class="ydc-grid">
+                  <div class="ydc-grid-cell">
+                    <div class="lbl">Gifts</div>
+                    <div class="val" id="ydc-gifts">—</div>
+                  </div>
+                  <div class="ydc-grid-cell">
+                    <div class="lbl">Top fund</div>
+                    <div class="val" id="ydc-fund">—</div>
+                  </div>
+                  <div class="ydc-grid-cell">
+                    <div class="lbl">Largest gift</div>
+                    <div class="val" id="ydc-largest">—</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -840,15 +971,280 @@ body {
 
         </div><!-- /tab-overview -->
 
-        <!-- GIFTS TAB (stub) -->
+        <!-- ═══ GIFTS & PLEDGES TAB ═══ -->
         <div class="tab-content" id="tab-gifts">
-          <div style="padding:20px;text-align:center;color:var(--text-3);font-size:13px">Full gift & pledge ledger — click Overview to see the preview</div>
+          <!-- Filter strip -->
+          <div class="section">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:12px">
+              <span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin-right:6px">FILTER</span>
+              <select id="gifts-filter-year" onchange="renderGiftLedger()" style="padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:11.5px;font-family:'DM Sans',sans-serif;background:white;cursor:pointer">
+                <option value="all">All years</option>
+                <option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option>
+                <option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option>
+              </select>
+              <select id="gifts-filter-type" onchange="renderGiftLedger()" style="padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:11.5px;font-family:'DM Sans',sans-serif;background:white;cursor:pointer">
+                <option value="all">All types</option>
+                <option>Online gift</option><option>Check</option><option>Credit card</option>
+                <option>Pledge</option><option>Pledge payment</option><option>Matching gift</option><option>Stock</option>
+              </select>
+              <select id="gifts-filter-fund" onchange="renderGiftLedger()" style="padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:11.5px;font-family:'DM Sans',sans-serif;background:white;cursor:pointer">
+                <option value="all">All funds</option>
+                <option>Catholic Ministry Appeal</option><option>St. Michael's Parish</option>
+                <option>Cathedral Capital</option><option>Marian Congress</option><option>Giving Tuesday</option>
+              </select>
+              <div style="margin-left:auto;display:flex;gap:6px;align-items:center;font-size:11px;color:var(--text-3)">
+                <span id="gifts-ledger-count">—</span>
+                <button onclick="exportGiftLedger()" style="padding:5px 11px;border:1px solid var(--border);border-radius:6px;background:white;font-size:11px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;color:var(--text-2);display:inline-flex;align-items:center;gap:4px">
+                  <svg viewBox="0 0 11 11" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5.5 1v6.5M3 5l2.5 2.5L8 5"/><path d="M1.5 9.5h8"/></svg>
+                  Export CSV
+                </button>
+              </div>
+            </div>
+            <div class="section-header">
+              <span class="section-title">Gift ledger</span>
+              <span class="section-action" id="gifts-totals-line">$84,250 total</span>
+            </div>
+            <table class="gift-table" id="gifts-ledger-table">
+              <thead>
+                <tr>
+                  <th>Date</th><th>Campaign / fund</th><th>Type</th><th>Amount</th><th>Status</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="gifts-ledger-tbody"></tbody>
+            </table>
+          </div>
+
+          <!-- Open pledges section -->
+          <div class="section">
+            <div class="section-header">
+              <span class="section-title">Open pledges</span>
+              <a class="section-action" href="atlas-pledges-list.html">Manage all pledges <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5h7M6 2.5l3 3-3 3"/></svg></a>
+            </div>
+            <div class="pledge-row" style="cursor:pointer" onclick="window.location.href='atlas-pledge-detail.html'">
+              <div class="pledge-header">
+                <div class="pledge-name">Catholic Ministry Appeal 2026</div>
+                <div style="font-size:12px;font-weight:600;color:var(--text)">$3,100 / $5,000</div>
+              </div>
+              <div class="pledge-progress"><div class="pledge-fill" style="width:62%"></div></div>
+              <div class="pledge-footer">
+                <span>62% paid · 2 installments remaining · Next due Jun 15</span>
+                <span style="color:var(--blue)">View pledge →</span>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- ═══ COMMUNICATIONS TAB ═══ -->
         <div class="tab-content" id="tab-comms">
-          <div style="padding:20px;text-align:center;color:var(--text-3);font-size:13px">Full communication history — click Overview to see the preview</div>
+          <!-- Summary KPIs -->
+          <div class="section">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+              <div style="background:var(--blue-pale);border:1px solid var(--blue-light);border-radius:8px;padding:10px 12px">
+                <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#1D4ED8">Email</div>
+                <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);line-height:1.1;margin-top:2px">28</div>
+                <div style="font-size:10.5px;color:var(--text-3);margin-top:2px">22 opened (78%)</div>
+              </div>
+              <div style="background:var(--teal-light);border:1px solid rgba(13,148,136,.2);border-radius:8px;padding:10px 12px">
+                <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal)">Calls</div>
+                <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);line-height:1.1;margin-top:2px">6</div>
+                <div style="font-size:10.5px;color:var(--text-3);margin-top:2px">Last: Apr 8 · 18min</div>
+              </div>
+              <div style="background:var(--amber-light);border:1px solid rgba(217,119,6,.2);border-radius:8px;padding:10px 12px">
+                <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber)">Meetings</div>
+                <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);line-height:1.1;margin-top:2px">3</div>
+                <div style="font-size:10.5px;color:var(--text-3);margin-top:2px">Last: Mar 22</div>
+              </div>
+              <div style="background:var(--green-light);border:1px solid rgba(21,128,61,.2);border-radius:8px;padding:10px 12px">
+                <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green)">Letters</div>
+                <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);line-height:1.1;margin-top:2px">12</div>
+                <div style="font-size:10.5px;color:var(--text-3);margin-top:2px">All ack sent</div>
+              </div>
+            </div>
+
+            <div class="section-header">
+              <span class="section-title">Full timeline</span>
+              <a class="section-action" href="atlas-email-compose.html">+ New email <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5h7M6 2.5l3 3-3 3"/></svg></a>
+            </div>
+
+            <div class="activity-feed">
+              <div class="activity-item">
+                <div class="activity-icon ai-email"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="2.5" width="10" height="8" rx="1.2"/><path d="M2 3l4.5 3.5L11 3"/></svg></div>
+                <div class="activity-body">
+                  <div class="activity-text"><strong>Thank you · CMA Mar gift</strong> — opened 3 times, clicked the donor portal link</div>
+                  <div class="activity-meta">Mar 16, 2026 · Auto-sent · Receipt #R-2026-0345 · From Sarah K.</div>
+                </div>
+                <span style="font-size:10px;font-weight:700;color:var(--green);background:var(--green-light);padding:2px 8px;border-radius:20px">Opened ×3</span>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon ai-task"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="5"/><path d="M4 6.5l2 2 3.5-3.5"/></svg></div>
+                <div class="activity-body">
+                  <div class="activity-text"><strong>Phone call</strong> — discussed Cathedral capital campaign; Margaret committed verbally to $25k pledge</div>
+                  <div class="activity-meta">Apr 8, 2026 · 18 min · Logged by Fr. Patrick · Follow-up task created</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon ai-email"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="2.5" width="10" height="8" rx="1.2"/><path d="M2 3l4.5 3.5L11 3"/></svg></div>
+                <div class="activity-body">
+                  <div class="activity-text"><strong>Easter 2026 invitation</strong> — campaign email, no individual response yet</div>
+                  <div class="activity-meta">Mar 28, 2026 · Bulk campaign · 1,240 recipients</div>
+                </div>
+                <span style="font-size:10px;font-weight:700;color:var(--text-3);background:var(--surface);padding:2px 8px;border-radius:20px">Unopened</span>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon ai-note"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 1.5h7l2 2v8a.5.5 0 01-.5.5H2.5a.5.5 0 01-.5-.5v-10z"/><path d="M3.5 4.5h6M3.5 6.5h6M3.5 8.5h4"/></svg></div>
+                <div class="activity-body">
+                  <div class="activity-text"><strong>Meeting note</strong> — quarterly board meeting; discussed Cathedral capital campaign timeline. Margaret asked about naming opportunities.</div>
+                  <div class="activity-meta">Mar 22, 2026 · In-person at parish office · Logged by Fr. Patrick</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon ai-gift"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 5.5h8v6.5h-8z"/><path d="M2.5 5.5L4 2.5h5L10.5 5.5"/><path d="M6.5 5.5v6.5"/></svg></div>
+                <div class="activity-body">
+                  <div class="activity-text"><strong>$2,500 CMA gift</strong> — online via portal; acknowledgement auto-sent</div>
+                  <div class="activity-meta">Mar 15, 2026 · Receipt #R-2026-0345</div>
+                </div>
+                <span class="activity-amount">+$2,500</span>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon ai-email"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="2.5" width="10" height="8" rx="1.2"/><path d="M2 3l4.5 3.5L11 3"/></svg></div>
+                <div class="activity-body">
+                  <div class="activity-text"><strong>CMA 2026 launch appeal</strong> — opened, clicked "Pledge Now"</div>
+                  <div class="activity-meta">Feb 14, 2026 · Bulk · 4,200 recipients · CTR 8.4%</div>
+                </div>
+                <span style="font-size:10px;font-weight:700;color:var(--green);background:var(--green-light);padding:2px 8px;border-radius:20px">Clicked</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preferences -->
+          <div class="section">
+            <div class="section-header">
+              <span class="section-title">Contact preferences</span>
+              <a class="section-action" href="atlas-edit-constituent.html">Edit preferences <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5h7M6 2.5l3 3-3 3"/></svg></a>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:12px">
+              <div><span style="font-size:10px;color:var(--text-3);display:block;margin-bottom:2px">Preferred channel</span><strong>Email</strong></div>
+              <div><span style="font-size:10px;color:var(--text-3);display:block;margin-bottom:2px">Best time to reach</span><strong>Mornings · weekdays</strong></div>
+              <div><span style="font-size:10px;color:var(--text-3);display:block;margin-bottom:2px">Mailing frequency</span><strong>Quarterly · paper newsletter</strong></div>
+              <div><span style="font-size:10px;color:var(--text-3);display:block;margin-bottom:2px">Solicitation opt-out</span><strong style="color:var(--green)">None</strong></div>
+            </div>
+          </div>
         </div>
+
+        <!-- ═══ RELATIONSHIPS TAB ═══ -->
         <div class="tab-content" id="tab-relationships">
-          <div style="padding:20px;text-align:center;color:var(--text-3);font-size:13px">Full relationship map — click Overview to see the preview</div>
+          <!-- Summary cards -->
+          <div class="section">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+                <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)">Household</div>
+                <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);line-height:1.1;margin-top:2px">3</div>
+                <div style="font-size:10.5px;color:var(--text-3);margin-top:2px">Spouse + 1 child</div>
+              </div>
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+                <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)">Parish</div>
+                <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);line-height:1.1;margin-top:2px">St. Michael's</div>
+                <div style="font-size:10.5px;color:var(--text-3);margin-top:2px">Member 18 yrs</div>
+              </div>
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+                <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)">Employer</div>
+                <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);line-height:1.1;margin-top:2px">State Farm</div>
+                <div style="font-size:10.5px;color:var(--green);margin-top:2px">2:1 match · $5k cap</div>
+              </div>
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+                <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)">Affiliations</div>
+                <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);line-height:1.1;margin-top:2px">2</div>
+                <div style="font-size:10.5px;color:var(--text-3);margin-top:2px">Board · Volunteer</div>
+              </div>
+            </div>
+
+            <!-- Household -->
+            <div class="section-header">
+              <span class="section-title">Household members</span>
+              <a class="section-action" href="atlas-edit-constituent.html">+ Add member <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5h7M6 2.5l3 3-3 3"/></svg></a>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
+              <div class="rel-item" style="cursor:pointer" onclick="window.location.href='atlas-donor-360.html?id=2'">
+                <div class="rel-avatar" style="background:var(--blue);color:white">JO</div>
+                <div style="flex:1">
+                  <div class="rel-name">James O'Brien</div>
+                  <div class="rel-type">Spouse · Co-donor · $42,150 lifetime</div>
+                </div>
+                <span style="font-size:10px;font-weight:600;color:var(--green);background:var(--green-light);padding:2px 7px;border-radius:20px">Active</span>
+              </div>
+              <div class="rel-item" style="cursor:pointer" onclick="window.location.href='atlas-donor-360.html?id=3'">
+                <div class="rel-avatar" style="background:var(--teal);color:white">CO</div>
+                <div style="flex:1">
+                  <div class="rel-name">Claire O'Brien</div>
+                  <div class="rel-type">Daughter · Age 24 · Young donor (0 gifts yet)</div>
+                </div>
+                <span style="font-size:10px;font-weight:600;color:var(--text-3);background:var(--surface);padding:2px 7px;border-radius:20px">Prospect</span>
+              </div>
+            </div>
+
+            <!-- Professional / Civic affiliations -->
+            <div class="section-header">
+              <span class="section-title">Affiliations &amp; organizations</span>
+              <span class="section-action" onclick="alert('Link organization modal would open here')">+ Link org <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5h7M6 2.5l3 3-3 3"/></svg></span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
+              <div class="rel-item">
+                <div class="rel-avatar" style="background:#7C3AED;color:white">SF</div>
+                <div style="flex:1">
+                  <div class="rel-name">State Farm Insurance</div>
+                  <div class="rel-type">Employer · Senior claims adjuster · <span style="color:var(--green);font-weight:600">2:1 match available</span></div>
+                </div>
+                <a href="atlas-gift-entry.html" style="font-size:10px;font-weight:600;color:var(--blue);text-decoration:none">Request match →</a>
+              </div>
+              <div class="rel-item">
+                <div class="rel-avatar" style="background:var(--gold,#B45309);color:white">SM</div>
+                <div style="flex:1">
+                  <div class="rel-name">St. Michael's Parish Council</div>
+                  <div class="rel-type">Board member · since 2021 · Finance committee chair</div>
+                </div>
+                <span style="font-size:10px;font-weight:600;color:var(--gold);background:var(--gold-light);padding:2px 7px;border-radius:20px">Board</span>
+              </div>
+              <div class="rel-item">
+                <div class="rel-avatar" style="background:var(--teal);color:white">KC</div>
+                <div style="flex:1">
+                  <div class="rel-name">Knights of Columbus · Council 1284</div>
+                  <div class="rel-type">Member · Active volunteer · 12 hrs/month</div>
+                </div>
+                <span style="font-size:10px;font-weight:600;color:var(--teal);background:var(--teal-light);padding:2px 7px;border-radius:20px">Volunteer</span>
+              </div>
+            </div>
+
+            <!-- Soft-credit chain -->
+            <div class="section-header">
+              <span class="section-title">Soft-credit chain</span>
+              <span class="section-action" style="cursor:default;color:var(--text-3)">Gifts credited to Margaret from others</span>
+            </div>
+            <table class="gift-table">
+              <thead>
+                <tr><th>Date</th><th>Hard donor</th><th>Soft credit reason</th><th>Amount</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Apr 2, 2026</td>
+                  <td>State Farm Insurance</td>
+                  <td>Employer match (2:1)</td>
+                  <td style="font-weight:600;color:var(--text)">$5,000</td>
+                </tr>
+                <tr>
+                  <td>Mar 8, 2026</td>
+                  <td>James O'Brien</td>
+                  <td>Spouse · joint household</td>
+                  <td style="font-weight:600;color:var(--text)">$1,200</td>
+                </tr>
+                <tr>
+                  <td>Dec 12, 2025</td>
+                  <td>Knights of Columbus #1284</td>
+                  <td>Fundraiser organized by Margaret</td>
+                  <td style="font-weight:600;color:var(--text)">$3,400</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
       </div><!-- /profile-main -->
@@ -1005,35 +1401,232 @@ body {
   </div><!-- /main -->
 
   <script>
-    /* ── Giving history chart ── */
-    const years = ['2017','2018','2019','2020','2021','2022','2023','2024','2025','2026'];
-    const amounts = [3200, 4500, 5000, 2800, 6500, 7200, 9000, 11200, 10500, 12500];
-    const maxAmt = Math.max(...amounts);
-    const chartEl = document.getElementById('giving-chart');
+    /* ═══════ Giving history — year-by-year data (drives chart + ledger + year-detail) ═══════ */
+    const GIVING_DATA = [
+      { year:2017, total:3200,  gifts:4,  topFund:"St. Michael's Parish",  largest:1500 },
+      { year:2018, total:4500,  gifts:5,  topFund:"Catholic Ministry Appeal", largest:2000 },
+      { year:2019, total:5000,  gifts:6,  topFund:"Catholic Ministry Appeal", largest:2500 },
+      { year:2020, total:2800,  gifts:3,  topFund:"COVID Emergency Fund",     largest:1500 },
+      { year:2021, total:6500,  gifts:6,  topFund:"Catholic Ministry Appeal", largest:3000 },
+      { year:2022, total:7200,  gifts:7,  topFund:"Catholic Ministry Appeal", largest:3500 },
+      { year:2023, total:9000,  gifts:5,  topFund:"Cathedral Capital",        largest:5000 },
+      { year:2024, total:11200, gifts:6,  topFund:"Cathedral Capital",        largest:5000 },
+      { year:2025, total:10500, gifts:5,  topFund:"Catholic Ministry Appeal", largest:4500 },
+      { year:2026, total:12500, gifts:5,  topFund:"Catholic Ministry Appeal", largest:10000 }
+    ];
 
-    years.forEach((yr, i) => {
-      const pct = (amounts[i] / maxAmt) * 100;
-      const isCurrent = i === years.length - 1;
+    /* ── Render interactive bar chart ── */
+    function fmtMoney(n){ return '$' + Math.round(n).toLocaleString(); }
+    const chartEl = document.getElementById('giving-chart');
+    const tooltipEl = document.getElementById('chart-tooltip');
+    const maxAmt = Math.max(...GIVING_DATA.map(d => d.total));
+
+    GIVING_DATA.forEach((d, i) => {
+      const pct = (d.total / maxAmt) * 100;
+      const isCurrent = i === GIVING_DATA.length - 1;
       const wrap = document.createElement('div');
       wrap.className = 'chart-bar-wrap';
-      wrap.title = `${yr}: $${amounts[i].toLocaleString()}`;
+      wrap.dataset.year = d.year;
+
+      const amtLabel = document.createElement('div');
+      amtLabel.className = 'chart-bar-amount';
+      amtLabel.textContent = d.total >= 1000 ? ('$' + (d.total/1000).toFixed(1) + 'k') : ('$' + d.total);
+
       const bar = document.createElement('div');
       bar.className = 'chart-bar ' + (pct < 5 ? 'zero' : isCurrent ? 'current' : 'past');
       bar.style.height = Math.max(pct, 4) + '%';
+
       const lbl = document.createElement('div');
       lbl.className = 'chart-label';
-      lbl.textContent = yr.slice(2);
+      lbl.textContent = "'" + String(d.year).slice(2);
+
+      wrap.appendChild(amtLabel);
       wrap.appendChild(bar);
       wrap.appendChild(lbl);
+
+      // Hover tooltip with year breakdown
+      wrap.addEventListener('mouseenter', (e) => {
+        const prior = i > 0 ? GIVING_DATA[i-1].total : null;
+        const delta = prior ? Math.round(((d.total - prior) / prior) * 100) : null;
+        const deltaTxt = delta === null
+          ? '<span class="ct-meta">First year</span>'
+          : (delta >= 0
+              ? '<span class="ct-meta" style="color:#86EFAC">▲ +' + delta + '% vs ' + GIVING_DATA[i-1].year + '</span>'
+              : '<span class="ct-meta" style="color:#FCA5A5">▼ ' + delta + '% vs ' + GIVING_DATA[i-1].year + '</span>');
+        tooltipEl.innerHTML =
+          '<div class="ct-year">' + d.year + '</div>' +
+          '<div class="ct-amt">' + fmtMoney(d.total) + '</div>' +
+          '<div class="ct-meta"><strong>' + d.gifts + '</strong> gifts · top fund <strong>' + d.topFund + '</strong></div>' +
+          '<div class="ct-meta">Largest: <strong>' + fmtMoney(d.largest) + '</strong></div>' +
+          deltaTxt;
+        const wrapRect = chartEl.getBoundingClientRect();
+        const barRect = wrap.getBoundingClientRect();
+        const left = barRect.left - wrapRect.left + barRect.width / 2;
+        const top = barRect.top - wrapRect.top - 6;
+        tooltipEl.style.left = left + 'px';
+        tooltipEl.style.top = top + 'px';
+        tooltipEl.classList.add('show');
+      });
+      wrap.addEventListener('mouseleave', () => tooltipEl.classList.remove('show'));
+      wrap.addEventListener('click', () => selectYear(d.year));
+
       chartEl.appendChild(wrap);
     });
 
-    /* ── Tab switcher ── */
+    /* ── Year selection: highlight bar + show detail card + scroll Recent gifts ── */
+    function selectYear(yr){
+      // Toggle off if same year clicked
+      const currentlySelected = chartEl.querySelector('.chart-bar-wrap.selected');
+      if (currentlySelected && parseInt(currentlySelected.dataset.year) === yr) {
+        clearYearSelection();
+        return;
+      }
+      chartEl.querySelectorAll('.chart-bar-wrap').forEach(w => w.classList.remove('selected'));
+      const target = chartEl.querySelector('[data-year="' + yr + '"]');
+      if (target) target.classList.add('selected');
+
+      const d = GIVING_DATA.find(x => x.year === yr);
+      if (!d) return;
+      const i = GIVING_DATA.indexOf(d);
+      const prior = i > 0 ? GIVING_DATA[i-1].total : null;
+      const delta = prior ? Math.round(((d.total - prior) / prior) * 100) : null;
+
+      document.getElementById('ydc-year').textContent = yr;
+      document.getElementById('ydc-amt').textContent = fmtMoney(d.total) + ' raised';
+      const vsPrior = document.getElementById('ydc-vs-prior');
+      if (delta === null) { vsPrior.textContent = 'First year on file'; vsPrior.style.color = 'var(--text-3)'; }
+      else if (delta >= 0) { vsPrior.innerHTML = '▲ +' + delta + '% vs ' + GIVING_DATA[i-1].year; vsPrior.style.color = 'var(--green)'; }
+      else { vsPrior.innerHTML = '▼ ' + delta + '% vs ' + GIVING_DATA[i-1].year; vsPrior.style.color = 'var(--rose)'; }
+      document.getElementById('ydc-gifts').innerHTML = d.gifts + ' <span class="sub">· avg ' + fmtMoney(d.total/d.gifts) + '</span>';
+      document.getElementById('ydc-fund').textContent = d.topFund;
+      document.getElementById('ydc-largest').textContent = fmtMoney(d.largest);
+      document.getElementById('year-detail-card').classList.add('show');
+      document.getElementById('chart-clear-btn').classList.add('show');
+
+      // Also pre-select the year in the Gift ledger so jumping to the tab shows that year
+      const yearSel = document.getElementById('gifts-filter-year');
+      if (yearSel) { yearSel.value = String(yr); renderGiftLedger(); }
+    }
+    function clearYearSelection(){
+      chartEl.querySelectorAll('.chart-bar-wrap').forEach(w => w.classList.remove('selected'));
+      document.getElementById('year-detail-card').classList.remove('show');
+      document.getElementById('chart-clear-btn').classList.remove('show');
+      const yearSel = document.getElementById('gifts-filter-year');
+      if (yearSel) { yearSel.value = 'all'; renderGiftLedger(); }
+    }
+
+    /* ── KPI cards: clicking jumps to Gifts ledger with appropriate filter ── */
+    document.querySelectorAll('.chart-kpi').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.chart-kpi').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        const kpi = card.dataset.kpi;
+        // Switch to Gifts tab
+        switchTabById('gifts');
+        // Apply quick filter
+        const yearSel = document.getElementById('gifts-filter-year');
+        if (kpi === 'ytd' && yearSel) { yearSel.value = '2026'; renderGiftLedger(); }
+        else if (kpi === 'lifetime' && yearSel) { yearSel.value = 'all'; renderGiftLedger(); }
+        // 'avg' and 'largest' just show all
+        else if (yearSel) { yearSel.value = 'all'; renderGiftLedger(); }
+      });
+    });
+
+    /* ═══════ Tab switcher ═══════ */
     function switchTab(id, el) {
       document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
-      el.classList.add('active');
+      if (el) el.classList.add('active');
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.getElementById('tab-' + id).classList.add('active');
+      const target = document.getElementById('tab-' + id);
+      if (target) target.classList.add('active');
+      if (id === 'gifts') renderGiftLedger();
+      // Scroll to top of profile-main
+      const main = document.querySelector('.profile-main');
+      if (main) main.scrollTop = 0;
+    }
+    function switchTabById(id){
+      const tabEl = document.querySelector('.profile-tab[onclick*="\'' + id + '\'"]');
+      switchTab(id, tabEl);
+    }
+
+    /* ═══════ Gifts & Pledges ledger (Tab 2) ═══════ */
+    const GIFT_LEDGER = [
+      { date:'Jun 15, 2026', year:2026, fund:"Catholic Ministry Appeal",   type:'Pledge',          amount:1900,  status:'Pending'  },
+      { date:'Apr 2, 2026',  year:2026, fund:"Catholic Ministry Appeal",   type:'Check',           amount:10000, status:'Received' },
+      { date:'Mar 15, 2026', year:2026, fund:"Catholic Ministry Appeal",   type:'Online gift',     amount:2500,  status:'Received' },
+      { date:'Jan 3, 2026',  year:2026, fund:"Catholic Ministry Appeal",   type:'Pledge payment',  amount:1000,  status:'Received' },
+      { date:'Apr 2, 2026',  year:2026, fund:"Catholic Ministry Appeal",   type:'Matching gift',   amount:5000,  status:'Received' },
+      { date:'Nov 28, 2025', year:2025, fund:"St. Michael's Parish",       type:'Online gift',     amount:500,   status:'Received' },
+      { date:'Sep 10, 2025', year:2025, fund:"Catholic Ministry Appeal",   type:'Pledge payment',  amount:2100,  status:'Received' },
+      { date:'Jun 5, 2025',  year:2025, fund:"Cathedral Capital",          type:'Check',           amount:4500,  status:'Received' },
+      { date:'Apr 1, 2025',  year:2025, fund:"Catholic Ministry Appeal",   type:'Online gift',     amount:2400,  status:'Received' },
+      { date:'Feb 14, 2025', year:2025, fund:"Marian Congress",            type:'Online gift',     amount:1000,  status:'Received' },
+      { date:'Dec 12, 2024', year:2024, fund:"Giving Tuesday",             type:'Online gift',     amount:1200,  status:'Received' },
+      { date:'Oct 8, 2024',  year:2024, fund:"Cathedral Capital",          type:'Stock',           amount:5000,  status:'Received' },
+      { date:'Jun 21, 2024', year:2024, fund:"Catholic Ministry Appeal",   type:'Online gift',     amount:2500,  status:'Received' },
+      { date:'Mar 12, 2024', year:2024, fund:"Catholic Ministry Appeal",   type:'Check',           amount:2500,  status:'Received' },
+      { date:'Apr 18, 2023', year:2023, fund:"Cathedral Capital",          type:'Check',           amount:5000,  status:'Received' },
+      { date:'Mar 22, 2023', year:2023, fund:"Catholic Ministry Appeal",   type:'Online gift',     amount:2500,  status:'Received' },
+      { date:'Nov 30, 2022', year:2022, fund:"Catholic Ministry Appeal",   type:'Online gift',     amount:3500,  status:'Received' },
+      { date:'Apr 5, 2022',  year:2022, fund:"Catholic Ministry Appeal",   type:'Check',           amount:2000,  status:'Received' },
+      { date:'Sep 14, 2021', year:2021, fund:"Catholic Ministry Appeal",   type:'Online gift',     amount:3000,  status:'Received' },
+      { date:'May 2, 2021',  year:2021, fund:"St. Michael's Parish",       type:'Check',           amount:1500,  status:'Received' }
+    ];
+
+    function statusBadge(s){
+      if (s === 'Received') return '<span class="gift-status status-received"><span class="status-dot" style="background:var(--green)"></span>Received</span>';
+      if (s === 'Pending')  return '<span class="gift-status status-pledge"><span class="status-dot" style="background:var(--amber)"></span>Pending</span>';
+      return '<span class="gift-status status-recurring"><span class="status-dot" style="background:var(--blue)"></span>Recurring</span>';
+    }
+
+    function renderGiftLedger(){
+      const ySel = document.getElementById('gifts-filter-year');
+      const tSel = document.getElementById('gifts-filter-type');
+      const fSel = document.getElementById('gifts-filter-fund');
+      if (!ySel) return;
+      const y = ySel.value, t = tSel.value, f = fSel.value;
+      const filtered = GIFT_LEDGER.filter(g =>
+        (y === 'all' || String(g.year) === y) &&
+        (t === 'all' || g.type === t) &&
+        (f === 'all' || g.fund === f)
+      );
+      const tbody = document.getElementById('gifts-ledger-tbody');
+      tbody.innerHTML = filtered.length === 0
+        ? '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:24px;font-style:italic">No gifts match the current filters</td></tr>'
+        : filtered.map(g => `
+          <tr style="cursor:pointer" onclick="alert('Open gift detail for ${g.date} · ${g.fund}')">
+            <td>${g.date}</td>
+            <td>${g.fund}</td>
+            <td>${g.type}</td>
+            <td style="font-weight:600;color:${g.status === 'Pending' ? 'var(--amber)' : 'var(--text)'}">${fmtMoney(g.amount)}</td>
+            <td>${statusBadge(g.status)}</td>
+            <td style="text-align:right;color:var(--text-3);font-size:11px">→</td>
+          </tr>`).join('');
+      const total = filtered.reduce((s,g) => g.status !== 'Pending' ? s + g.amount : s, 0);
+      document.getElementById('gifts-ledger-count').textContent = filtered.length + ' gift' + (filtered.length === 1 ? '' : 's');
+      document.getElementById('gifts-totals-line').textContent = fmtMoney(total) + ' total';
+    }
+
+    function exportGiftLedger(){
+      const ySel = document.getElementById('gifts-filter-year');
+      const tSel = document.getElementById('gifts-filter-type');
+      const fSel = document.getElementById('gifts-filter-fund');
+      const y = ySel.value, t = tSel.value, f = fSel.value;
+      const filtered = GIFT_LEDGER.filter(g =>
+        (y === 'all' || String(g.year) === y) &&
+        (t === 'all' || g.type === t) &&
+        (f === 'all' || g.fund === f)
+      );
+      const rows = [['Date','Fund','Type','Amount','Status']].concat(
+        filtered.map(g => [g.date, g.fund, g.type, g.amount, g.status])
+      );
+      const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = "margaret-obrien-gifts.csv";
+      a.click();
+      URL.revokeObjectURL(url);
     }
 
     /* ── Task check toggle ── */

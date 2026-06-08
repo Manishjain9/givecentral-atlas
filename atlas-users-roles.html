@@ -53,14 +53,15 @@ a { color: inherit; text-decoration: none; }
   flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;
 }
 .sidebar-logo {
-  padding: 18px 18px 14px; display: flex; align-items: center; gap: 9px;
+  padding: 18px 18px 14px; display: flex; align-items: center; gap: 11px;
   border-bottom: 1px solid rgba(255,255,255,.08);
 }
 .logo-mark {
-  width: 30px; height: 30px; background: var(--blue); border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-}
-.logo-mark svg { width: 15px; height: 15px; }
+      width: 40px; height: 40px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border-radius: 0;
+    }
+.logo-mark svg { width: 40px; height: 40px; }
 .logo-text-wrap { display: flex; flex-direction: column; }
 .logo-name { font-family: 'DM Serif Display', serif; font-size: 15px; color: white; line-height: 1; }
 .logo-sub  { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-top: 3px; }
@@ -278,17 +279,65 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 
 .users-grid { display:grid; grid-template-columns: 1fr 280px; gap:24px; align-items:start; }
 
-.tabs { display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:18px; }
-.tab { padding:10px 14px; cursor:pointer; font-size:13px; font-weight:500; color:var(--text-3); border-bottom:2px solid transparent; }
-.tab.on { color:var(--blue); border-color:var(--blue); font-weight:600; }
-.tab .ct { font-size:10.5px; padding:1px 7px; border-radius:99px; background:var(--surface); margin-left:6px; }
-.tab.on .ct { background:var(--blue-pale); color:var(--blue); }
+.tabs {
+  display:flex; gap:2px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:18px;
+  /* Single row · horizontal scroll if container is narrow · never wrap */
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
+}
+.tabs::-webkit-scrollbar { height: 4px; }
+.tabs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.tab {
+  padding:11px 14px; cursor:pointer;
+  font-size:13px; font-weight:500;
+  color:var(--text-2);  /* slightly darker than --text-3 for readability */
+  border-bottom:2px solid transparent;
+  margin-bottom:-1px;  /* sit on the row's bottom border */
+  transition: color .14s, border-color .14s, background .14s;
+  display:inline-flex; align-items:center; gap:7px;
+  user-select:none;
+  position:relative;
+  white-space:nowrap;  /* never let tab labels wrap */
+  flex-shrink:0;        /* never let flex squeeze a tab to truncate */
+}
+.tab:hover { color:var(--text); border-bottom-color:#CBD5E1; background:rgba(15,23,42,.025); }
+.tab.on { color:var(--blue); border-bottom-color:var(--blue); font-weight:600; background:transparent; }
+.tab.on:hover { background:transparent; }
+.tab .ct {
+  font-size:11px;
+  min-width:20px; height:18px;
+  padding:0 7px;
+  border-radius:99px;
+  background:#E2E8F0;        /* more visible — slate-200 */
+  color:var(--text-2);
+  font-weight:600;
+  display:inline-flex; align-items:center; justify-content:center;
+  line-height:1;
+}
+.tab:hover .ct { background:#CBD5E1; color:var(--text); }
+.tab.on .ct { background:var(--blue); color:white; }
 
 .user-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
-.us { background:white; border:1px solid var(--border); border-radius:12px; padding:14px 18px; }
-.us .l { font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); margin-bottom:6px; }
-.us .v { font-family:'DM Serif Display',serif; font-size:22px; line-height:1; color:var(--navy); }
-.us .d { font-size:11.5px; color:var(--text-3); margin-top:4px; }
+.us { background:white; border:1px solid var(--border); border-radius:12px; padding:14px 18px; transition: all .14s; }
+.us .l { font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+.us .v { font-family:'DM Serif Display',serif; font-size:22px; line-height:1; color:var(--navy); display:flex; align-items:baseline; gap:8px; }
+.us .v .urgent-chip { font-family:'DM Sans',sans-serif; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:99px; letter-spacing:.04em; text-transform:uppercase; }
+.us .v .urgent-chip.warn { background:#FEF3C7; color:#92400E; }
+.us .v .urgent-chip.rose { background:#FCE7F3; color:#BE185D; }
+.us .d { font-size:11.5px; color:var(--text-3); margin-top:6px; line-height:1.4; }
+.us .d .breakdown { display:flex; gap:8px; margin-top:4px; flex-wrap:wrap; }
+.us .d .breakdown span { display:inline-flex; align-items:center; gap:4px; }
+.us .d .breakdown .dot { width:6px; height:6px; border-radius:50%; }
+.us.clickable { cursor:pointer; }
+.us.clickable:hover { border-color:#BFDBFE; box-shadow:0 4px 14px rgba(15,23,42,.06); transform:translateY(-1px); }
+.us.urgent { background: linear-gradient(180deg, #FFF7ED 0%, white 60%); border-color: #FDE68A; }
+.us.urgent .l { color: #92400E; }
+.us.urgent .v { color: var(--navy); }
 
 .user-table { background:white; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
 .ut-head, .ut-row {
@@ -420,13 +469,15 @@ body {
 }
 /* Logo mark sizing — same fix prevents the brand SVG from ballooning */
 .sidebar-logo .logo-mark {
-  width: 30px !important;
-  height: 30px !important;
+  width: 40px !important;
+  height: 40px !important;
   flex-shrink: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
 }
 .sidebar-logo .logo-mark svg {
-  width: 15px !important;
-  height: 15px !important;
+  width: 40px !important;
+  height: 40px !important;
 }
 
 /* The MIDDLE area is the only scrollable child */
@@ -460,14 +511,17 @@ body {
 <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-mark">
-        <svg viewBox="0 0 18 18" fill="none">
-          <circle cx="9" cy="9" r="7.5" stroke="white" stroke-width="1.5"/>
-          <path d="M5.5 9.5C6.5 11.5 9 13 9 13s2.5-1.5 3.5-3.5S12 5 9 5 4.5 7.5 5.5 9.5z" fill="white" fill-opacity=".9"/>
+        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="14" y="22" width="92" height="8" rx="2" fill="white"/>
+          <rect x="22" y="38" width="14" height="64" rx="2" fill="white"/>
+          <rect x="53" y="38" width="14" height="64" rx="2" fill="white"/>
+          <rect x="84" y="38" width="14" height="64" rx="2" fill="#C8A04A"/>
+          <rect x="14" y="106" width="92" height="6" rx="2" fill="white"/>
         </svg>
       </div>
       <div class="logo-text-wrap">
-        <span class="logo-name">GiveCentral</span>
-        <span class="logo-sub">Atlas CRM</span>
+        <span class="logo-name">Atlas</span>
+        <span class="logo-sub">By GiveCentral</span>
       </div>
     </div>
 
@@ -612,10 +666,61 @@ body {
   </div>
 
   <div class="user-stats">
-    <div class="us"><div class="l">Active users</div><div class="v">12</div><div class="d">7 staff · 4 parish admins · 1 IT</div></div>
-    <div class="us"><div class="l">Pending invites</div><div class="v">2</div><div class="d">Expire in 7 days</div></div>
-    <div class="us"><div class="l">Roles defined</div><div class="v">5</div><div class="d">+ 1 custom role</div></div>
-    <div class="us"><div class="l">Legal entities</div><div class="v">4</div><div class="d">Diocese · CC · Foundation · Schol.</div></div>
+    <div class="us clickable" onclick="jumpToUsersTab()" title="Open Users tab">
+      <div class="l">
+        <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--blue);flex-shrink:0"><circle cx="6" cy="4.5" r="2.5"/><path d="M1.5 11c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5"/></svg>
+        Active users
+      </div>
+      <div class="v">12</div>
+      <div class="d">
+        <div class="breakdown">
+          <span><span class="dot" style="background:#B91C1C"></span><strong style="color:var(--text-2)">1</strong>&nbsp;Admin</span>
+          <span><span class="dot" style="background:#92400E"></span><strong style="color:var(--text-2)">2</strong>&nbsp;DBA</span>
+          <span><span class="dot" style="background:#1E40AF"></span><strong style="color:var(--text-2)">2</strong>&nbsp;Dev Director</span>
+          <span><span class="dot" style="background:#15803D"></span><strong style="color:var(--text-2)">5</strong>&nbsp;Gift Officer</span>
+          <span><span class="dot" style="background:#475569"></span><strong style="color:var(--text-2)">1</strong>&nbsp;Bishop (read-only)</span>
+          <span><span class="dot" style="background:#94A3B8"></span><strong style="color:var(--text-2)">1</strong>&nbsp;Read-only</span>
+        </div>
+        <div style="margin-top:5px;font-size:11px;color:var(--text-3)">+ 1 Parish Admin pending (Phase 2)</div>
+      </div>
+    </div>
+    <div class="us clickable urgent" id="us-pending-invites" onclick="jumpToPendingInvitesTab()" title="Open Pending invites tab">
+      <div class="l">
+        <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;color:#92400E"><circle cx="6" cy="6" r="5"/><path d="M6 3.5v3M6 8v.5"/></svg>
+        Pending invites
+      </div>
+      <div class="v">
+        2
+        <span class="urgent-chip rose" id="us-urgent-chip" title="Emma Kowalski's magic link expires in less than 24 hours">1 expires today</span>
+      </div>
+      <div class="d">
+        <div>Soonest: <strong style="color:var(--rose)">Emma Kowalski · &lt; 24h</strong></div>
+        <div class="breakdown">
+          <span><span class="dot" style="background:var(--rose)"></span><strong style="color:var(--text-2)">1</strong> urgent (≤ 1 day)</span>
+          <span><span class="dot" style="background:#C8A04A"></span><strong style="color:var(--text-2)">1</strong> active (4 days left)</span>
+        </div>
+      </div>
+    </div>
+    <div class="us clickable" onclick="jumpToRolesTab()" title="Open Roles tab">
+      <div class="l">
+        <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--purple);flex-shrink:0"><rect x="1.5" y="2" width="9" height="8" rx="1.2"/><path d="M1.5 5h9M3 7h2M3 8.5h3"/></svg>
+        Roles defined
+      </div>
+      <div class="v">5 <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:var(--text-3);letter-spacing:0">built-in</span></div>
+      <div class="d">Admin · DBA · Dev Director · Gift Officer · Read-only
+        <div style="margin-top:5px;font-size:11px;color:var(--blue);font-weight:500;cursor:pointer">+ Define custom role →</div>
+      </div>
+    </div>
+    <div class="us">
+      <div class="l">
+        <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:#0D9488;flex-shrink:0"><path d="M2 4l4-2 4 2v6H2z"/><path d="M4.5 10V7h3v3"/></svg>
+        Legal entities
+      </div>
+      <div class="v">4</div>
+      <div class="d">
+        Diocese of Albany · Catholic Charities ·<br>Diocesan Foundation · Scholarship Fund
+      </div>
+    </div>
   </div>
 
   <div class="tabs">
@@ -625,6 +730,9 @@ body {
     <div class="tab">SSO &amp; SAML</div>
     <div class="tab">Audit log</div>
   </div>
+
+  <!-- ═ Tab panels sit BELOW the tabs strip and STACKED in .dash so they fill the full content width ═ -->
+  <div id="ur-tab-panel-host"></div>
 
   <div class="users-grid">
 
@@ -855,7 +963,12 @@ body {
   #iu-drawer .iu-note { padding: 12px 14px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 9px; display: flex; gap: 10px; font-size: 12px; color: #1E40AF; line-height: 1.5; }
   #iu-drawer .iu-note .i { width: 22px; height: 22px; border-radius: 50%; background: #2563EB; color: white; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; }
   #iu-drawer .iu-foot { padding: 14px 22px; border-top: 1px solid #F1F5F9; display: flex; gap: 10px; align-items: center; background: #FAFAFA; }
-  #iu-drawer .iu-foot .left { font-size: 11.5px; color: #64748B; display: flex; align-items: center; gap: 6px; }
+  #iu-drawer .iu-foot .left { font-size: 11.5px; color: #64748B; display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+  #iu-drawer .iu-foot .left span { line-height: 1.35; }
+  #iu-drawer .iu-foot svg { width: 14px; height: 14px; flex-shrink: 0; }
+  #iu-drawer .iu-foot .iu-send svg { width: 13px; height: 13px; }
+  /* Safety: cap any SVG inside the invite drawer that lacks explicit sizing */
+  #iu-drawer svg:not([width]) { width: 14px; height: 14px; flex-shrink: 0; }
   #iu-drawer .iu-cancel { padding: 9px 16px; font-size: 13px; background: white; border: 1.5px solid #E2E8F0; border-radius: 8px; color: #475569; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; }
   #iu-drawer .iu-send { padding: 9px 18px; font-size: 13px; background: linear-gradient(135deg, #2563EB, #1E40AF); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; margin-left: auto; box-shadow: 0 4px 12px rgba(37,99,235,.25); display: flex; align-items: center; gap: 7px; }
   #iu-drawer .iu-send:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,.32); }
@@ -961,12 +1074,12 @@ body {
 
   <div class="iu-foot">
     <div class="left">
-      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:#15803D"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg>
-      Auto-saved · audit active
+      <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:#15803D;flex-shrink:0"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg>
+      <span>Auto-saved · audit active</span>
     </div>
     <button class="iu-cancel" onclick="closeInviteDrawer()">Cancel</button>
     <button class="iu-send" id="iu-send">
-      <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M2 7l11-5-3 11-3-4-5-2z"/></svg>
+      <svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" style="flex-shrink:0"><path d="M2 7l11-5-3 11-3-4-5-2z"/></svg>
       Send invitation
     </button>
   </div>
@@ -1655,9 +1768,15 @@ body {
   #ur-kebab-menu a.danger svg { color: #BE185D; }
 
   .role-filter-bar {
-    margin: 12px 0; padding: 9px 14px; background: #EFF6FF;
+    margin: 12px 0; padding: 10px 14px; background: #EFF6FF;
     border: 1px solid #BFDBFE; border-radius: 9px;
-    display: none; align-items: center; gap: 10px; font-size: 12px; color: #1E40AF;
+    display: none; align-items: center; gap: 10px;
+    font-size: 12px; color: #1E40AF;
+    /* Safety: never stretch vertically even if mis-positioned */
+    align-self: flex-start;
+    flex-shrink: 0;
+    min-height: 0; max-height: 44px;
+    width: 100%; box-sizing: border-box;
   }
   .role-filter-bar.show { display: flex; }
   .role-filter-bar .x {
@@ -1692,6 +1811,281 @@ body {
 </div>
 
 <!-- Hidden tab content panels — shown when those tabs are clicked -->
+<style id="ur-roles-pane-css">
+  #ur-pane-roles .roles-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; flex-wrap: wrap; }
+  #ur-pane-roles .roles-head h3 { margin: 0; }
+  #ur-pane-roles .roles-head .define-btn {
+    padding: 8px 14px; border-radius: 8px;
+    background: var(--blue); color: white; border: none;
+    font-size: 12.5px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: 0 1px 3px rgba(37,99,235,.25); transition: background .14s;
+  }
+  #ur-pane-roles .roles-head .define-btn:hover { background: #1D4ED8; }
+  #ur-pane-roles .roles-head .define-btn svg { width: 11px; height: 11px; }
+  #ur-pane-roles .roles-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 14px; margin-top: 16px;
+  }
+  #ur-pane-roles .role-detail {
+    background: white; border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;
+    transition: border-color .14s, box-shadow .14s;
+  }
+  #ur-pane-roles .role-detail:hover { border-color: #BFDBFE; box-shadow: 0 4px 14px rgba(15,23,42,.06); }
+  #ur-pane-roles .rd-head { display: flex; align-items: flex-start; gap: 10px; }
+  #ur-pane-roles .rd-head .role-tag {
+    flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700; letter-spacing: .03em; padding: 4px 9px;
+    border-radius: 6px; text-transform: uppercase;
+  }
+  #ur-pane-roles .rd-head .role-tag.admin   { background: #FEE2E2; color: #B91C1C; }
+  #ur-pane-roles .rd-head .role-tag.dba     { background: #FEF3C7; color: #92400E; }
+  #ur-pane-roles .rd-head .role-tag.dev     { background: #DBEAFE; color: #1E40AF; }
+  #ur-pane-roles .rd-head .role-tag.officer { background: #DCFCE7; color: #15803D; }
+  #ur-pane-roles .rd-head .role-tag.read    { background: #F1F5F9; color: #475569; }
+  #ur-pane-roles .rd-head .rd-name { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--text); font-weight: 400; line-height: 1.15; }
+  #ur-pane-roles .rd-count { margin-left: auto; font-size: 11px; color: var(--text-3); font-weight: 600; }
+  #ur-pane-roles .rd-desc { font-size: 12.5px; color: var(--text-2); line-height: 1.55; }
+  #ur-pane-roles .rd-section { margin-top: 4px; }
+  #ur-pane-roles .rd-section-title {
+    font-size: 10px; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--text-3); margin-bottom: 6px;
+  }
+  #ur-pane-roles .rd-list { display: flex; flex-direction: column; gap: 4px; }
+  #ur-pane-roles .rd-item {
+    font-size: 12px; color: var(--text-2); line-height: 1.4;
+    display: flex; align-items: flex-start; gap: 7px;
+  }
+  #ur-pane-roles .rd-item .dot { width: 5px; height: 5px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+  #ur-pane-roles .rd-item.can .dot  { background: var(--green); }
+  #ur-pane-roles .rd-item.cant .dot { background: var(--rose); }
+  #ur-pane-roles .rd-foot {
+    border-top: 1px solid var(--border);
+    padding-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  #ur-pane-roles .rd-foot button {
+    background: white; border: 1px solid var(--border); color: var(--text-2);
+    padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 500;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .12s;
+  }
+  #ur-pane-roles .rd-foot button:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-pale); }
+  #ur-pane-roles .rd-foot .users-with { font-size: 11px; color: var(--text-3); margin-left: auto; align-self: center; }
+</style>
+
+<div class="tab-panel" id="ur-pane-roles" data-pane="roles">
+  <div class="roles-head">
+    <div>
+      <h3>Roles in this tenant</h3>
+      <p class="sub" style="margin-bottom:0">Five built-in roles plus any custom roles you define. Hover a role for actions.</p>
+    </div>
+    <button class="define-btn" onclick="window.location='atlas-role-builder.html'">
+      <svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M5.5 1v9M1 5.5h9"/></svg>
+      Define a custom role
+    </button>
+  </div>
+
+  <div class="roles-grid">
+    <!-- Admin -->
+    <div class="role-detail">
+      <div class="rd-head">
+        <span class="role-tag admin">Admin</span>
+        <div class="rd-name">Administrator</div>
+        <span class="rd-count">1 user</span>
+      </div>
+      <div class="rd-desc">Full access to the tenant — users, billing, integrations, audit log. The Bishop's account is read-only Admin by default.</div>
+      <div class="rd-section">
+        <div class="rd-section-title">Can do</div>
+        <div class="rd-list">
+          <div class="rd-item can"><span class="dot"></span>Create / edit / delete any record (donors, gifts, pledges, campaigns)</div>
+          <div class="rd-item can"><span class="dot"></span>Invite users, assign roles, change entity scope</div>
+          <div class="rd-item can"><span class="dot"></span>Configure SSO / SAML and manage integrations</div>
+          <div class="rd-item can"><span class="dot"></span>View 7-year audit log + export full log</div>
+          <div class="rd-item can"><span class="dot"></span>Edit billing &amp; subscription plan</div>
+        </div>
+      </div>
+      <div class="rd-section">
+        <div class="rd-section-title">Cannot do</div>
+        <div class="rd-list">
+          <div class="rd-item cant"><span class="dot"></span>Nothing — Admin sits at the top. Read-only Admin variant blocks all write actions.</div>
+        </div>
+      </div>
+      <div class="rd-foot">
+        <button onclick="urToast('Editing Admin role')">Edit role</button>
+        <button onclick="urToast('Duplicating Admin role as a starting point')">Duplicate</button>
+        <span class="users-with">Bishop Quinn (read-only)</span>
+      </div>
+    </div>
+
+    <!-- Database Admin -->
+    <div class="role-detail">
+      <div class="rd-head">
+        <span class="role-tag dba">Database Admin</span>
+        <div class="rd-name">DBA · gift entry &amp; data quality</div>
+        <span class="rd-count">2 users</span>
+      </div>
+      <div class="rd-desc">The Phase 1 primary persona. Owns the integrity of the donor file and the gift ledger.</div>
+      <div class="rd-section">
+        <div class="rd-section-title">Can do</div>
+        <div class="rd-list">
+          <div class="rd-item can"><span class="dot"></span>Enter single &amp; batch gifts · post batches</div>
+          <div class="rd-item can"><span class="dot"></span>Run Accuracy Engine · resolve exceptions &amp; duplicates</div>
+          <div class="rd-item can"><span class="dot"></span>Send acknowledgements + tax receipts</div>
+          <div class="rd-item can"><span class="dot"></span>Edit constituent records (address, contact methods, household)</div>
+          <div class="rd-item can"><span class="dot"></span>Import CSV / Excel · manage parish rosters</div>
+          <div class="rd-item can"><span class="dot"></span>Run any standard report</div>
+        </div>
+      </div>
+      <div class="rd-section">
+        <div class="rd-section-title">Cannot do</div>
+        <div class="rd-list">
+          <div class="rd-item cant"><span class="dot"></span>Invite or remove users · change role assignments</div>
+          <div class="rd-item cant"><span class="dot"></span>Modify integrations / billing / SSO</div>
+          <div class="rd-item cant"><span class="dot"></span>View audit log</div>
+          <div class="rd-item cant"><span class="dot"></span>Cultivate prospects (no pipeline edit access)</div>
+        </div>
+      </div>
+      <div class="rd-foot">
+        <button onclick="urToast('Editing Database Admin role')">Edit role</button>
+        <button onclick="urToast('Duplicating Database Admin role')">Duplicate</button>
+        <span class="users-with">Daniel Cho · Patricia Souza</span>
+      </div>
+    </div>
+
+    <!-- Dev Director / CFO -->
+    <div class="role-detail">
+      <div class="rd-head">
+        <span class="role-tag dev">Dev Director</span>
+        <div class="rd-name">Development Director / CFO</div>
+        <span class="rd-count">2 users</span>
+      </div>
+      <div class="rd-desc">Accountable for fundraising performance, GL accuracy, receipt compliance, and board reporting.</div>
+      <div class="rd-section">
+        <div class="rd-section-title">Can do</div>
+        <div class="rd-list">
+          <div class="rd-item can"><span class="dot"></span>Everything DBA + Gift Officer can do</div>
+          <div class="rd-item can"><span class="dot"></span>Full reports library (board, GL roll-ups, campaign perf.)</div>
+          <div class="rd-item can"><span class="dot"></span>Edit fund / GL hierarchy &amp; receipt templates</div>
+          <div class="rd-item can"><span class="dot"></span>Create &amp; edit campaigns (Cathedral Capital, CMA, etc.)</div>
+          <div class="rd-item can"><span class="dot"></span>Reassign prospect portfolios across officers</div>
+          <div class="rd-item can"><span class="dot"></span>Use Guru AI strategic prompts</div>
+        </div>
+      </div>
+      <div class="rd-section">
+        <div class="rd-section-title">Cannot do</div>
+        <div class="rd-list">
+          <div class="rd-item cant"><span class="dot"></span>Edit users &amp; roles (separation of duties — Admin only)</div>
+          <div class="rd-item cant"><span class="dot"></span>Modify integrations or SSO config</div>
+          <div class="rd-item cant"><span class="dot"></span>Edit billing</div>
+        </div>
+      </div>
+      <div class="rd-foot">
+        <button onclick="urToast('Editing Dev Director role')">Edit role</button>
+        <button onclick="urToast('Duplicating Dev Director role')">Duplicate</button>
+        <span class="users-with">Sarah Reynolds · Bridget McCarthy</span>
+      </div>
+    </div>
+
+    <!-- Gift Officer -->
+    <div class="role-detail">
+      <div class="rd-head">
+        <span class="role-tag officer">Gift Officer</span>
+        <div class="rd-name">Major-gift portfolio officer</div>
+        <span class="rd-count">2 users</span>
+      </div>
+      <div class="rd-desc">Carries a portfolio of 75–150 prospects. Lives in the Prospect Pipeline daily.</div>
+      <div class="rd-section">
+        <div class="rd-section-title">Can do</div>
+        <div class="rd-list">
+          <div class="rd-item can"><span class="dot"></span>View their portfolio + any donor in their entity scope</div>
+          <div class="rd-item can"><span class="dot"></span>Drag prospect cards through pipeline stages</div>
+          <div class="rd-item can"><span class="dot"></span>Log activity (calls, visits, emails)</div>
+          <div class="rd-item can"><span class="dot"></span>Create &amp; complete tasks · run AI pre-meeting briefs</div>
+          <div class="rd-item can"><span class="dot"></span>Compose individual emails · create pledges</div>
+          <div class="rd-item can"><span class="dot"></span>View their own performance leaderboard</div>
+        </div>
+      </div>
+      <div class="rd-section">
+        <div class="rd-section-title">Cannot do</div>
+        <div class="rd-list">
+          <div class="rd-item cant"><span class="dot"></span>Enter gifts directly (request from DBA)</div>
+          <div class="rd-item cant"><span class="dot"></span>Post batches · run mass communications</div>
+          <div class="rd-item cant"><span class="dot"></span>Edit other officers' portfolios</div>
+          <div class="rd-item cant"><span class="dot"></span>See fund / GL mapping or campaign hierarchy</div>
+        </div>
+      </div>
+      <div class="rd-foot">
+        <button onclick="urToast('Editing Gift Officer role')">Edit role</button>
+        <button onclick="urToast('Duplicating Gift Officer role')">Duplicate</button>
+        <span class="users-with">Julia Kelleher · Jamie Morrison (pending)</span>
+      </div>
+    </div>
+
+    <!-- Read-only -->
+    <div class="role-detail">
+      <div class="rd-head">
+        <span class="role-tag read">Read-only</span>
+        <div class="rd-name">Observer / auditor / board</div>
+        <span class="rd-count">1 user</span>
+      </div>
+      <div class="rd-desc">View-only across the system. Used for board members, external auditors, observers during training.</div>
+      <div class="rd-section">
+        <div class="rd-section-title">Can do</div>
+        <div class="rd-list">
+          <div class="rd-item can"><span class="dot"></span>Navigate the whole app · search any donor</div>
+          <div class="rd-item can"><span class="dot"></span>View profiles, gifts, pledges, campaigns, reports</div>
+          <div class="rd-item can"><span class="dot"></span>Read but not export reports</div>
+        </div>
+      </div>
+      <div class="rd-section">
+        <div class="rd-section-title">Cannot do</div>
+        <div class="rd-list">
+          <div class="rd-item cant"><span class="dot"></span>Save / Send / Edit / Create anything</div>
+          <div class="rd-item cant"><span class="dot"></span>See audit log or settings</div>
+          <div class="rd-item cant"><span class="dot"></span>Send emails or print receipts</div>
+        </div>
+      </div>
+      <div class="rd-foot">
+        <button onclick="urToast('Editing Read-only role')">Edit role</button>
+        <button onclick="urToast('Duplicating Read-only role')">Duplicate</button>
+        <span class="users-with">Mary Rodriguez</span>
+      </div>
+    </div>
+
+    <!-- Parish Admin (Phase 2) -->
+    <div class="role-detail" style="opacity:.78;border-style:dashed">
+      <div class="rd-head">
+        <span class="role-tag read">Parish Admin</span>
+        <div class="rd-name">Parish-scoped admin <small style="color:var(--amber);font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-left:6px">Phase 2</small></div>
+        <span class="rd-count">1 pending</span>
+      </div>
+      <div class="rd-desc">Full admin control within a single parish — no visibility into other parishes or diocesan rollups. Ships with the Parish Portal.</div>
+      <div class="rd-section">
+        <div class="rd-section-title">Will be able to</div>
+        <div class="rd-list">
+          <div class="rd-item can"><span class="dot"></span>Manage their parish roster + parishioner gifts</div>
+          <div class="rd-item can"><span class="dot"></span>Send parish-letterhead thank-yous</div>
+          <div class="rd-item can"><span class="dot"></span>Run parish-only reports + Guru AI prompts</div>
+          <div class="rd-item can"><span class="dot"></span>Invite parish staff with scoped roles</div>
+        </div>
+      </div>
+      <div class="rd-section">
+        <div class="rd-section-title">Will not be able to</div>
+        <div class="rd-list">
+          <div class="rd-item cant"><span class="dot"></span>See other parishes' rosters or gifts</div>
+          <div class="rd-item cant"><span class="dot"></span>Post to diocesan funds (request from DBA)</div>
+          <div class="rd-item cant"><span class="dot"></span>Access audit / billing / SSO</div>
+        </div>
+      </div>
+      <div class="rd-foot">
+        <button disabled style="opacity:.5;cursor:not-allowed">Edit role · Phase 2</button>
+        <span class="users-with">Fr. Michael Reilly (pending)</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <div class="tab-panel" id="ur-pane-invites" data-pane="invites">
   <h3>Pending invitations</h3>
   <p class="sub">Magic-link invitations expire 7 days after they're sent. Resend or revoke before they expire.</p>
@@ -1774,6 +2168,42 @@ body {
 
   function go(url){ window.location = url; }
 
+  // ─── Click handlers for stat cards → jump to the right tab ──
+  window.jumpToPendingInvitesTab = function(){
+    var t = document.querySelectorAll('.tabs .tab');
+    var idx = ['users','roles','invites','sso','audit'].indexOf('invites');
+    if (t[idx]) t[idx].click();
+    var pane = document.getElementById('ur-pane-invites');
+    if (pane) pane.scrollIntoView({behavior:'smooth', block:'start'});
+  };
+  window.jumpToUsersTab = function(){
+    var t = document.querySelectorAll('.tabs .tab');
+    if (t[0]) t[0].click();
+    var users = document.querySelector('.users-grid');
+    if (users) users.scrollIntoView({behavior:'smooth', block:'start'});
+  };
+  window.jumpToRolesTab = function(){
+    var t = document.querySelectorAll('.tabs .tab');
+    if (t[1]) t[1].click();
+    var pane = document.getElementById('ur-pane-roles');
+    if (pane) pane.scrollIntoView({behavior:'smooth', block:'start'});
+  };
+
+  // ─── 0. Relocate orphan tab panels into the host inside .dash ──
+  // The tab-panel divs were inserted outside .dash, which caused them
+  // to render as siblings of the canonical sidebar in the body flex.
+  // Move them into the in-page host so they sit below the tabs strip.
+  var panelHost = document.getElementById('ur-tab-panel-host');
+  if (panelHost) {
+    ['ur-pane-roles','ur-pane-invites','ur-pane-sso','ur-pane-audit'].forEach(function(id){
+      var p = document.getElementById(id);
+      if (p && p.parentNode !== panelHost) panelHost.appendChild(p);
+    });
+    // Role-filter bar has the same body-level orphan problem — move it too
+    var rfb = document.getElementById('ur-role-filter');
+    if (rfb && rfb.parentNode !== panelHost) panelHost.insertBefore(rfb, panelHost.firstChild);
+  }
+
   // ─── 1. TABS ───────────────────────────────────────
   var mainEl = document.querySelector('.users-grid');
   var tabs   = document.querySelectorAll('.tabs .tab');
@@ -1785,19 +2215,16 @@ body {
       var key = TAB_MAP[i];
       // Hide all panes
       document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('on'); });
-      // Show / hide the main users grid
-      if (mainEl) mainEl.style.display = (key === 'users' || key === 'roles') ? '' : 'none';
-      // Scroll-target a specific pane
-      if (key === 'invites') document.getElementById('ur-pane-invites').classList.add('on');
-      else if (key === 'sso') document.getElementById('ur-pane-sso').classList.add('on');
-      else if (key === 'audit') document.getElementById('ur-pane-audit').classList.add('on');
-      else if (key === 'roles') {
-        // Spotlight the role rail — scroll to it on small screens
-        if (window.innerWidth < 1100) {
-          var rail = document.querySelector('.role-rail');
-          if (rail) rail.scrollIntoView({behavior:'smooth', block:'start'});
-        }
-      }
+      // Users tab is the only one that keeps the main user grid visible
+      if (mainEl) mainEl.style.display = (key === 'users') ? '' : 'none';
+      // Show the matching pane
+      if      (key === 'roles')   document.getElementById('ur-pane-roles').classList.add('on');
+      else if (key === 'invites') document.getElementById('ur-pane-invites').classList.add('on');
+      else if (key === 'sso')     document.getElementById('ur-pane-sso').classList.add('on');
+      else if (key === 'audit')   document.getElementById('ur-pane-audit').classList.add('on');
+      // Smooth scroll the panel into view
+      var pane = document.querySelector('.tab-panel.on');
+      if (pane) pane.scrollIntoView({behavior:'smooth', block:'nearest'});
     });
   });
 

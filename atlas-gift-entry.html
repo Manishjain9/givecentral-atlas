@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GiveCentral Atlas — Record gift</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,14 +53,15 @@ a { color: inherit; text-decoration: none; }
   flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;
 }
 .sidebar-logo {
-  padding: 18px 18px 14px; display: flex; align-items: center; gap: 9px;
+  padding: 18px 18px 14px; display: flex; align-items: center; gap: 11px;
   border-bottom: 1px solid rgba(255,255,255,.08);
 }
 .logo-mark {
-  width: 30px; height: 30px; background: var(--blue); border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-}
-.logo-mark svg { width: 15px; height: 15px; }
+      width: 40px; height: 40px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border-radius: 0;
+    }
+.logo-mark svg { width: 40px; height: 40px; }
 .logo-text-wrap { display: flex; flex-direction: column; }
 .logo-name { font-family: 'DM Serif Display', serif; font-size: 15px; color: white; line-height: 1; }
 .logo-sub  { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-top: 3px; }
@@ -286,6 +286,126 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .entry-grid { display:grid; grid-template-columns: 1fr 360px; gap:22px; align-items:start; }
 .entry-card { background:white; border:1px solid var(--border); border-radius:14px; padding:22px 26px; }
 .entry-card + .entry-card { margin-top:14px; }
+
+/* ═══ Matching-gift nudge banner ═══ */
+.mg-nudge {
+  margin-top: 16px;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DCFCE7 100%);
+  border: 1px solid #BBF7D0;
+  border-radius: 12px;
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  animation: mgFadeIn .25s ease both;
+}
+@keyframes mgFadeIn { from { opacity:0; transform:translateY(-4px) } to { opacity:1; transform:translateY(0) } }
+.mg-nudge::before {
+  content: ''; position: absolute; top: -20px; right: -20px;
+  width: 120px; height: 120px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(21,128,61,.12), transparent 70%);
+  pointer-events: none;
+}
+.mg-nudge > * { position: relative; z-index: 1; }
+.mg-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.mg-ico {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--green, #15803D); color: white;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.mg-ico svg { width: 17px; height: 17px; }
+.mg-head-body { flex: 1; min-width: 0; }
+.mg-title {
+  font-family: 'DM Serif Display', serif; font-size: 16px;
+  color: var(--text, #0F172A); line-height: 1.15;
+}
+.mg-sub { font-size: 12px; color: var(--text-2, #334155); margin-top: 3px; line-height: 1.45; }
+.mg-sub strong { color: var(--text, #0F172A); font-weight: 600; }
+.mg-dismiss {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: rgba(15,23,42,.06); color: var(--text-3, #64748B);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; flex-shrink: 0;
+  transition: all .12s;
+}
+.mg-dismiss:hover { background: rgba(15,23,42,.12); color: var(--text, #0F172A); }
+
+.mg-calc-grid {
+  display: flex; align-items: center; gap: 8px;
+  background: white; border: 1px solid rgba(21,128,61,.16);
+  border-radius: 10px; padding: 12px 14px; margin-bottom: 12px;
+}
+.mg-calc-cell { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.mg-calc-cell.mg-arrow {
+  flex: 0; font-family: 'DM Serif Display', serif; font-size: 19px;
+  color: var(--text-3, #64748B); padding: 0 4px; opacity: .65;
+}
+.mg-calc-lbl {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--text-3, #64748B);
+}
+.mg-calc-val {
+  font-family: 'DM Serif Display', serif; font-size: 18px;
+  color: var(--text, #0F172A); line-height: 1.1; font-variant-numeric: tabular-nums;
+}
+.mg-ratio { color: var(--blue, #2563EB); }
+.mg-eligible .mg-calc-lbl { color: var(--green, #15803D); }
+.mg-eligible-val { color: var(--green, #15803D); font-weight: 600; }
+
+.mg-meta-row {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  padding: 8px 0 12px;
+  font-size: 11.5px; color: var(--text-2, #334155);
+}
+.mg-meta-item { display: flex; align-items: center; gap: 6px; }
+.mg-meta-item svg { color: var(--text-3, #64748B); flex-shrink: 0; }
+.mg-meta-lbl { color: var(--text-3, #64748B); }
+.mg-meta-item strong { color: var(--text, #0F172A); font-weight: 600; }
+.mg-total-val { color: var(--green, #15803D) !important; }
+
+.mg-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.mg-primary {
+  background: var(--green, #15803D); color: white;
+  border: none; border-radius: 8px;
+  padding: 8px 14px; font-size: 12.5px; font-weight: 600;
+  font-family: 'DM Sans', sans-serif; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  box-shadow: 0 1px 3px rgba(21,128,61,.25); transition: all .14s;
+}
+.mg-primary:hover { background: #126E31; }
+.mg-primary svg { flex-shrink: 0; }
+.mg-secondary {
+  background: white; color: var(--text-2, #334155);
+  border: 1px solid var(--border, #E2E8F0); border-radius: 8px;
+  padding: 8px 14px; font-size: 12.5px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all .14s;
+}
+.mg-secondary:hover { border-color: #94A3B8; background: var(--surface, #F8FAFC); }
+.mg-note {
+  font-size: 11px; color: var(--text-3, #64748B);
+  flex: 1; min-width: 200px; line-height: 1.4;
+}
+
+/* Capped state — cap warning when match exceeds remaining */
+.mg-nudge.capped {
+  background: linear-gradient(135deg, #EFF6FF 0%, #FEF3C7 100%);
+  border-color: #FDE68A;
+}
+.mg-nudge.capped .mg-ico { background: var(--amber, #D97706); }
+.mg-nudge.capped .mg-eligible-val { color: var(--amber, #D97706); }
+.mg-nudge.capped .mg-primary { background: var(--amber, #D97706); }
+.mg-nudge.capped .mg-primary:hover { background: #B45309; }
+.mg-nudge.capped .mg-total-val { color: var(--amber, #D97706) !important; }
+
+/* Completed state — match already submitted */
+.mg-nudge.submitted { background: var(--green-light, #DCFCE7); border-color: #86EFAC; }
+/* Brief "checking…" state shown right after amount entered, before resolution */
+.mg-nudge.checking { background: #EFF6FF; border-color: #BFDBFE; }
+.mg-spin { animation: mg-spin-anim 0.9s linear infinite; transform-origin: 50% 50%; }
+@keyframes mg-spin-anim { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+/* "No employer on file" state — neutral grey */
+.mg-nudge.no-employer { background: #F8FAFC; border-color: #E2E8F0; }
+.mg-nudge.no-employer .mg-primary { background: var(--blue, #2563EB); color: white; }
+.mg-nudge.no-employer .mg-primary:hover { background: #1D4ED8; }
 .entry-card h3 { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-3); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
 .entry-card h3 .step { background:var(--blue); color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; letter-spacing:0; }
 .row2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
@@ -453,13 +573,15 @@ body {
 }
 /* Logo mark sizing — same fix prevents the brand SVG from ballooning */
 .sidebar-logo .logo-mark {
-  width: 30px !important;
-  height: 30px !important;
+  width: 40px !important;
+  height: 40px !important;
   flex-shrink: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
 }
 .sidebar-logo .logo-mark svg {
-  width: 15px !important;
-  height: 15px !important;
+  width: 40px !important;
+  height: 40px !important;
 }
 
 /* The MIDDLE area is the only scrollable child */
@@ -488,28 +610,22 @@ body {
 </style>
 </head>
 <body>
-<div id="prototype-banner" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#7c3aed;color:#fff;font-family:sans-serif;font-size:13px;font-weight:500;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.25);">
-  <span style="display:flex;align-items:center;gap:8px;">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><circle cx="8" cy="8" r="7" stroke="white" stroke-width="1.5"/><path d="M8 5v3.5M8 10.5v.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-    <strong>UI DESIGN PROTOTYPE</strong> — For demonstration purposes only. No real data.
-  </span>
-  <span style="opacity:.75;font-size:12px;">Built by <a href="https://givecentral.com" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">GiveCentral</a> &nbsp;·&nbsp;<a href="https://givecentral.com/privacy" target="_blank" rel="noopener noreferrer" style="color:#ddd6fe;text-decoration:underline;">Privacy Policy</a></span>
-  <button onclick="document.getElementById('prototype-banner').style.display='none'" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;font-family:inherit;flex-shrink:0;">✕ Dismiss</button>
-</div>
-<div style="height:50px"></div>
 
 
 <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-mark">
-        <svg viewBox="0 0 18 18" fill="none">
-          <circle cx="9" cy="9" r="7.5" stroke="white" stroke-width="1.5"/>
-          <path d="M5.5 9.5C6.5 11.5 9 13 9 13s2.5-1.5 3.5-3.5S12 5 9 5 4.5 7.5 5.5 9.5z" fill="white" fill-opacity=".9"/>
+        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="14" y="22" width="92" height="8" rx="2" fill="white"/>
+          <rect x="22" y="38" width="14" height="64" rx="2" fill="white"/>
+          <rect x="53" y="38" width="14" height="64" rx="2" fill="white"/>
+          <rect x="84" y="38" width="14" height="64" rx="2" fill="#C8A04A"/>
+          <rect x="14" y="106" width="92" height="6" rx="2" fill="white"/>
         </svg>
       </div>
       <div class="logo-text-wrap">
-        <span class="logo-name">GiveCentral</span>
-        <span class="logo-sub">Atlas CRM</span>
+        <span class="logo-name">Atlas</span>
+        <span class="logo-sub">By GiveCentral</span>
       </div>
     </div>
 
@@ -692,6 +808,61 @@ body {
               Last gift Apr 2 · $10k
             </div>
             <span class="change">Change</span>
+          </div>
+        </div>
+
+        <!-- ═══ Matching-gift nudge (auto-detected from donor's employer) ═══ -->
+        <div id="mg-nudge" class="mg-nudge" style="display:none">
+          <div class="mg-head">
+            <div class="mg-ico">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h12v8H2z"/><path d="M5 6V4a3 3 0 016 0v2M8 9v2"/></svg>
+            </div>
+            <div class="mg-head-body">
+              <div class="mg-title">Matching gift eligible</div>
+              <div class="mg-sub" id="mg-employer-line">—</div>
+            </div>
+            <span class="mg-dismiss" id="mg-dismiss" title="Hide this nudge">×</span>
+          </div>
+
+          <div class="mg-calc-grid">
+            <div class="mg-calc-cell">
+              <div class="mg-calc-lbl">Donor's gift</div>
+              <div class="mg-calc-val" id="mg-original">$0</div>
+            </div>
+            <div class="mg-calc-cell mg-arrow">×</div>
+            <div class="mg-calc-cell">
+              <div class="mg-calc-lbl">Match ratio</div>
+              <div class="mg-calc-val mg-ratio" id="mg-ratio">2:1</div>
+            </div>
+            <div class="mg-calc-cell mg-arrow">=</div>
+            <div class="mg-calc-cell mg-eligible">
+              <div class="mg-calc-lbl">Eligible match</div>
+              <div class="mg-calc-val mg-eligible-val" id="mg-eligible">$0</div>
+            </div>
+          </div>
+
+          <div class="mg-meta-row">
+            <div class="mg-meta-item" id="mg-cap-item">
+              <svg viewBox="0 0 11 11" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="3.5" width="8" height="5" rx="1"/><path d="M3 3.5V2.5a2.5 2.5 0 015 0v1"/></svg>
+              <span><span class="mg-meta-lbl">Cap remaining</span> <strong id="mg-cap">$0 of $0</strong></span>
+            </div>
+            <div class="mg-meta-item">
+              <svg viewBox="0 0 11 11" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="2" width="8" height="8" rx="1.2"/><path d="M1.5 4.5h8M3.5 1v2M7.5 1v2"/></svg>
+              <span><span class="mg-meta-lbl">Submit by</span> <strong id="mg-deadline">—</strong></span>
+            </div>
+            <div class="mg-meta-item">
+              <svg viewBox="0 0 11 11" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5.5" cy="5.5" r="4"/><path d="M5.5 3v3l2 1"/></svg>
+              <span><span class="mg-meta-lbl">Total impact</span> <strong class="mg-total-val" id="mg-total">$0</strong></span>
+            </div>
+          </div>
+
+          <div class="mg-actions">
+            <button class="mg-primary" id="mg-create-btn">
+              <svg viewBox="0 0 11 11" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 5.5l2.5 2.5 5-5"/></svg>
+              Create match request
+            </button>
+            <button class="mg-secondary" id="mg-later-btn">Maybe later</button>
+            <span class="mg-note">Atlas will pre-fill the State Farm employer portal form and create a follow-up task.</span>
           </div>
         </div>
       </div>
@@ -1587,6 +1758,283 @@ body {
 })();
 </script>
 <!-- end Atlas Dead-CTA Rescue -->
+
+<!-- ════════════════════════════════════════════════════════
+     Matching-gift inline nudge
+     Detects donor's employer, calculates eligible match,
+     reacts to amount changes in real time.
+     ════════════════════════════════════════════════════════ -->
+<script id="mg-nudge-js">
+(function(){
+  if (window.__mgWired) return; window.__mgWired = true;
+
+  // Employer matching-gift catalog (mirrors atlas-add-constituent.html presets)
+  var EMPLOYER_MATCH = {
+    'State Farm Insurance':      { ratio: 2,   cap: 5000,  deadline: '12 months from gift', portal: 'matchinggifts.statefarm.com' },
+    "Stewart's Shops":           { ratio: 1,   cap: 5000,  deadline: 'Calendar year-end',   portal: 'stewartsshops.com/giving' },
+    'GE Power':                  { ratio: 1,   cap: 5000,  deadline: '12 months from gift', portal: 'gefoundation.com/match' },
+    'Albany Medical Center':     { ratio: 1,   cap: 1000,  deadline: '90 days from gift',   portal: 'amc.edu/giving/match' },
+    'PwC':                       { ratio: 1,   cap: 10000, deadline: '12 months from gift', portal: 'pwc.com/foundation' },
+    'MVP Health Care':           { ratio: 1,   cap: 2500,  deadline: 'Calendar year-end',   portal: 'mvphealthcare.com/community' },
+    'Acme Construction LLC':     { ratio: 1,   cap: 5000,  deadline: '12 months from gift', portal: 'acmecorp.com/match' }
+  };
+
+  // Donor → employer lookup (in real Atlas this reads from the constituent record)
+  // For the demo, Margaret O'Brien works at State Farm with $1,500 already matched this year.
+  var DONOR_EMPLOYER = {
+    "Margaret O'Brien": {
+      employer: 'State Farm Insurance',
+      titleAtCo: 'Senior claims adjuster',
+      capUsedYTD: 1500
+    }
+  };
+
+  // Pull DOM refs
+  var nudge = document.getElementById('mg-nudge');
+  var amtFld = document.getElementById('amt-fld');
+  var donorNameEl = document.querySelector('.donor-lookup-result .name');
+  if (!nudge || !amtFld) return;
+
+  var elEmployerLine = document.getElementById('mg-employer-line');
+  var elOriginal = document.getElementById('mg-original');
+  var elRatio    = document.getElementById('mg-ratio');
+  var elEligible = document.getElementById('mg-eligible');
+  var elCap      = document.getElementById('mg-cap');
+  var elDeadline = document.getElementById('mg-deadline');
+  var elTotal    = document.getElementById('mg-total');
+  var btnCreate  = document.getElementById('mg-create-btn');
+  var btnLater   = document.getElementById('mg-later-btn');
+  var btnDismiss = document.getElementById('mg-dismiss');
+
+  function parseAmt(v){
+    if (!v) return 0;
+    var n = parseFloat(String(v).replace(/[^0-9.\-]/g, ''));
+    return isNaN(n) ? 0 : n;
+  }
+  function fmt(n){
+    return '$' + Math.round(n).toLocaleString();
+  }
+  function deadlineFromGift(rule){
+    var today = new Date();
+    if (/12 months/i.test(rule)) {
+      var d = new Date(today); d.setFullYear(d.getFullYear() + 1);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    if (/90 days/i.test(rule)) {
+      var d2 = new Date(today); d2.setDate(d2.getDate() + 90);
+      return d2.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    if (/year-end/i.test(rule)) {
+      return 'Dec 31, ' + today.getFullYear();
+    }
+    return rule;
+  }
+
+  // Build a "no employer on file" inline card prompting user to link one
+  function renderNoEmployerState(donorName, gift){
+    nudge.style.display = 'block';
+    nudge.classList.remove('capped', 'submitted', 'checking');
+    nudge.classList.add('no-employer');
+    nudge.innerHTML =
+      '<div class="mg-head" style="margin-bottom:0">' +
+        '<div class="mg-ico" style="background:#E2E8F0;color:#64748B">' +
+          '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 6h12v8H2z"/><path d="M5 6V4a3 3 0 016 0v2"/></svg>' +
+        '</div>' +
+        '<div class="mg-head-body">' +
+          '<div class="mg-title" style="color:#334155">No employer on file for matching</div>' +
+          '<div class="mg-sub">' +
+            (gift > 0
+              ? '<strong>' + donorName + '</strong> isn\'t linked to a company yet. Many ' + fmt(gift) + ' gifts double via employer matching — worth a quick check.'
+              : '<strong>' + donorName + '</strong> isn\'t linked to a company yet. Add employer to auto-detect future matches.'
+            ) +
+          '</div>' +
+        '</div>' +
+        '<span class="mg-dismiss" id="mg-dismiss-noemp" title="Hide">×</span>' +
+      '</div>' +
+      '<div class="mg-actions" style="margin-top:10px">' +
+        '<button class="mg-primary" id="mg-link-emp-btn" style="background:#2563EB">' +
+          '<svg viewBox="0 0 11 11" width="11" height="11" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M5.5 1v9M1 5.5h9"/></svg>' +
+          'Link employer' +
+        '</button>' +
+        '<button class="mg-secondary" id="mg-skip-emp-btn">Skip for this gift</button>' +
+        '<span class="mg-note">Atlas checks 4,200+ corporate match programs.</span>' +
+      '</div>';
+
+    var d = document.getElementById('mg-dismiss-noemp');
+    if (d) d.onclick = function(){ nudge.style.display = 'none'; };
+    var skipBtn = document.getElementById('mg-skip-emp-btn');
+    if (skipBtn) skipBtn.onclick = function(){ nudge.style.display = 'none'; };
+    var linkBtn = document.getElementById('mg-link-emp-btn');
+    if (linkBtn) linkBtn.onclick = function(){
+      toast('Opening donor record · Employment section');
+      // In real Atlas this would deep-link to constituent edit. For demo:
+      setTimeout(function(){ window.location.href = 'atlas-edit-constituent.html#employment'; }, 600);
+    };
+  }
+
+  // Brief "checking..." spinner state shown while we resolve donor → employer
+  function renderCheckingState(donorName){
+    nudge.style.display = 'block';
+    nudge.classList.remove('capped','submitted','no-employer');
+    nudge.classList.add('checking');
+    nudge.innerHTML =
+      '<div class="mg-head" style="margin-bottom:0">' +
+        '<div class="mg-ico" style="background:#DBEAFE;color:#2563EB">' +
+          '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="mg-spin"><path d="M14 8a6 6 0 11-1.8-4.3"/></svg>' +
+        '</div>' +
+        '<div class="mg-head-body">' +
+          '<div class="mg-title" style="color:#1D4ED8">Checking employer match…</div>' +
+          '<div class="mg-sub">Looking up <strong>' + donorName + '</strong> in 4,200+ corporate match programs.</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  // Track latest input so we can show the checking → result sequence
+  window.__mgPendingCheck = null;
+
+  function refreshNudge(){
+    var donorName = donorNameEl ? donorNameEl.textContent.trim() : '';
+    var gift = parseAmt(amtFld.value);
+
+    // ─ Gate 1: don't show anything until amount is entered
+    if (gift <= 0) { nudge.style.display = 'none'; return; }
+
+    // ─ Gate 2: amount entered → kick off the check
+    //   Brief 350ms "checking..." spinner so the org-resolution step is visible.
+    if (window.__mgPendingCheck) clearTimeout(window.__mgPendingCheck);
+    renderCheckingState(donorName);
+    window.__mgPendingCheck = setTimeout(function(){ resolveNudge(donorName, gift); }, 350);
+  }
+
+  function resolveNudge(donorName, gift){
+    var profile = DONOR_EMPLOYER[donorName];
+    // ─ Gate 3: donor not linked to any organization
+    if (!profile) { renderNoEmployerState(donorName, gift); return; }
+
+    var prog = EMPLOYER_MATCH[profile.employer];
+    // ─ Gate 4: org exists but isn't in the matching catalog
+    if (!prog) {
+      nudge.style.display = 'block';
+      nudge.classList.remove('capped','submitted','checking','no-employer');
+      nudge.innerHTML =
+        '<div class="mg-head" style="margin-bottom:0">' +
+          '<div class="mg-ico" style="background:#E2E8F0;color:#64748B">' +
+            '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 6h12v8H2z"/></svg>' +
+          '</div>' +
+          '<div class="mg-head-body">' +
+            '<div class="mg-title" style="color:#334155">' + profile.employer + ' doesn\'t offer matching</div>' +
+            '<div class="mg-sub">No corporate match program on file. Skipping match request.</div>' +
+          '</div>' +
+          '<span class="mg-dismiss" onclick="document.getElementById(\'mg-nudge\').style.display=\'none\'">×</span>' +
+        '</div>';
+      return;
+    }
+
+    // ─ Gate 5: match found! Restore the original calc UI and fill it in.
+    // (innerHTML was overwritten during "checking" — rebuild from the original DOM)
+    nudge.classList.remove('checking','no-employer');
+    nudge.innerHTML = window.__mgOriginalHTML || nudge.innerHTML;
+    // Re-acquire DOM refs after rebuild
+    elEmployerLine = document.getElementById('mg-employer-line');
+    elOriginal = document.getElementById('mg-original');
+    elRatio = document.getElementById('mg-ratio');
+    elEligible = document.getElementById('mg-eligible');
+    elCap = document.getElementById('mg-cap');
+    elDeadline = document.getElementById('mg-deadline');
+    elTotal = document.getElementById('mg-total');
+    btnCreate = document.getElementById('mg-create-btn');
+    btnLater = document.getElementById('mg-later-btn');
+    btnDismiss = document.getElementById('mg-dismiss');
+    if (btnCreate) btnCreate.addEventListener('click', handleCreateMatch);
+    if (btnLater) btnLater.addEventListener('click', handleLaterMatch);
+    if (btnDismiss) btnDismiss.addEventListener('click', function(){ nudge.style.display = 'none'; });
+
+    var remainingCap = Math.max(0, prog.cap - profile.capUsedYTD);
+    var rawMatch = gift * prog.ratio;
+    var eligibleMatch = Math.min(rawMatch, remainingCap);
+    var capped = rawMatch > remainingCap;
+    var allUsed = remainingCap <= 0;
+
+    nudge.style.display = 'block';
+    nudge.classList.toggle('capped', capped && !allUsed);
+
+    elEmployerLine.innerHTML =
+      '<strong>' + profile.employer + '</strong> matches <strong>' + prog.ratio + ':1</strong> ' +
+      '(' + fmt(prog.cap) + ' annual cap · ' + (donorName.split(/\s+/)[0]) + ' has used ' + fmt(profile.capUsedYTD) + ' so far this year).' +
+      (allUsed
+        ? ' <span style="color:var(--amber);font-weight:600">⚠ Annual cap reached for ' + (new Date().getFullYear()) + ' — match request will be queued for January.</span>'
+        : ''
+      );
+    elOriginal.textContent = fmt(gift);
+    elRatio.textContent    = prog.ratio + ':1';
+    elEligible.textContent = fmt(eligibleMatch);
+    elCap.textContent      = fmt(remainingCap) + ' of ' + fmt(prog.cap);
+    elDeadline.textContent = deadlineFromGift(prog.deadline);
+    elTotal.textContent    = fmt(gift + eligibleMatch);
+
+    // Refresh primary button label
+    btnCreate.innerHTML =
+      '<svg viewBox="0 0 11 11" width="11" height="11" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" style="flex-shrink:0"><path d="M2 5.5l2.5 2.5 5-5"/></svg>' +
+      (allUsed ? 'Queue for next year' : ('Create match request · ' + fmt(eligibleMatch)));
+  }
+
+  // Snapshot the original nudge HTML before any manipulation so we can restore it after the "checking..." state
+  window.__mgOriginalHTML = nudge.innerHTML;
+
+  // Wire amount input — react to typing
+  amtFld.addEventListener('input', refreshNudge);
+  amtFld.addEventListener('change', refreshNudge);
+
+  // Wire create / later / dismiss
+  function toast(msg){
+    var t = document.getElementById('atlas-rescue-toast');
+    if (!t) { alert(msg); return; }
+    t.querySelector('.msg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(window.__mgToastT);
+    window.__mgToastT = setTimeout(function(){ t.classList.remove('show'); }, 2800);
+  }
+  function handleCreateMatch(){
+    var donorName = donorNameEl ? donorNameEl.textContent.trim() : '';
+    var profile = DONOR_EMPLOYER[donorName];
+    var prog = profile ? EMPLOYER_MATCH[profile.employer] : null;
+    if (!profile || !prog) return;
+
+    nudge.classList.add('submitted');
+    nudge.classList.remove('capped');
+    nudge.innerHTML =
+      '<div class="mg-head" style="margin-bottom:0">' +
+        '<div class="mg-ico" style="background:#15803D"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 8l3.5 3.5L13 5"/></svg></div>' +
+        '<div class="mg-head-body">' +
+          '<div class="mg-title" style="color:#15803D">Match request created</div>' +
+          '<div class="mg-sub">Pre-filled <strong>' + prog.portal + '</strong> portal form generated · saved to <strong>' + donorName + '\'s</strong> timeline · follow-up task created for <strong>' + (new Date(Date.now()+30*86400000)).toLocaleDateString('en-US', { month:'short', day:'numeric' }) + '</strong> if not yet submitted. <a href="atlas-tasks.html" style="color:#15803D;font-weight:600">View task →</a></div>' +
+        '</div>' +
+      '</div>';
+    toast('Match request created · ' + profile.employer + ' · ' + (parseAmt(elEligible.textContent)).toLocaleString() + ' eligible · follow-up task added');
+  }
+  function handleLaterMatch(){
+    nudge.style.display = 'none';
+    toast('Reminder saved · Atlas will re-surface this on next gift entry');
+  }
+  btnCreate.addEventListener('click', handleCreateMatch);
+  btnLater.addEventListener('click', function(){
+    nudge.style.display = 'none';
+    toast('Reminder saved · Atlas will re-surface this on Margaret\'s next gift entry');
+  });
+  btnDismiss.addEventListener('click', function(){
+    nudge.style.display = 'none';
+  });
+
+  // Initial render
+  refreshNudge();
+
+  // Also refresh whenever the donor changes (in case the page later supports switching)
+  if (donorNameEl) {
+    var observer = new MutationObserver(refreshNudge);
+    observer.observe(donorNameEl, { childList: true, characterData: true, subtree: true });
+  }
+})();
+</script>
 
 </body>
 </html>

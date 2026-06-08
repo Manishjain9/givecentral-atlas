@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Update payment · GiveCentral</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0E1E35;--navy-2:#152844;--navy-3:#1E3A5F;
+  --blue:#2563EB;--blue-mid:#3B82F6;--blue-light:#DBEAFE;--blue-pale:#EFF6FF;
+  --green:#15803D;--green-light:#DCFCE7;
+  --amber:#D97706;--amber-light:#FEF3C7;
+  --rose:#BE185D;--rose-light:#FCE7F3;
+  --gold:#C4973A;--gold-light:#FBF4E8;
+  --text:#0F172A;--text-2:#334155;--text-3:#64748B;
+  --border:#E2E8F0;--surface:#F8FAFC;
+}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);min-height:100vh;line-height:1.5}
+a{color:inherit;text-decoration:none}
+
+/* Top bar */
+.bar{background:white;border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:14px}
+.bar .logo{display:flex;align-items:center;gap:9px}
+.bar .mark{width:30px;height:30px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.bar .mark svg{width:15px;height:15px}
+.bar .name{font-family:'Lora',serif;font-size:16px;color:var(--navy);font-weight:600}
+.bar .sep{width:1px;height:22px;background:var(--border);margin:0 8px}
+.bar .org{font-size:12.5px;color:var(--text-3)}
+.bar .org strong{color:var(--text-2);font-weight:600}
+.bar .right{margin-left:auto;display:flex;align-items:center;gap:18px;font-size:12px;color:var(--text-3)}
+.bar .secure{display:flex;align-items:center;gap:6px}
+.bar .secure svg{width:14px;height:14px;color:var(--green)}
+.bar .help{color:var(--blue);font-weight:500;cursor:pointer}
+.bar .help:hover{text-decoration:underline}
+
+/* Hero — payment-failed context */
+.hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-3) 100%);color:white;padding:32px 0 100px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 88% 25%,rgba(217,119,6,.22),transparent 55%),
+             radial-gradient(circle at 12% 78%,rgba(37,99,235,.18),transparent 60%);
+  pointer-events:none}
+.hero-inner{position:relative;max-width:980px;margin:0 auto;padding:0 28px}
+.crumb{font-size:11.5px;color:rgba(255,255,255,.55);margin-bottom:18px;display:flex;gap:8px;align-items:center}
+.crumb a{color:rgba(255,255,255,.7)}
+.crumb a:hover{color:white;text-decoration:underline}
+.hero-tag{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:99px;background:rgba(217,119,6,.18);border:1px solid rgba(217,119,6,.4);color:#FBBF24;font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:14px}
+.hero-tag svg{width:13px;height:13px}
+.hero-h{font-family:'Lora',serif;font-size:32px;line-height:1.15;letter-spacing:-.4px;max-width:680px}
+.hero-d{color:rgba(219,234,254,.78);font-size:14.5px;max-width:600px;margin-top:10px;line-height:1.55}
+.hero-d a{color:#93C5FD;font-weight:500;border-bottom:1px solid rgba(147,197,253,.4)}
+
+/* Main layout: 2-column on desktop */
+.wrap{max-width:980px;margin:-72px auto 60px;padding:0 28px;display:grid;grid-template-columns:1fr 340px;gap:22px;align-items:start;position:relative;z-index:2}
+.col-main{display:flex;flex-direction:column;gap:16px}
+.col-side{display:flex;flex-direction:column;gap:14px;position:sticky;top:18px}
+
+/* Cards */
+.card{background:white;border:1px solid var(--border);border-radius:16px;padding:24px 26px;box-shadow:0 1px 3px rgba(15,23,42,.04)}
+.card h3{font-family:'Lora',serif;font-size:18px;font-weight:600;color:var(--text);margin-bottom:6px}
+.card .sub{font-size:13px;color:var(--text-3);margin-bottom:18px;line-height:1.55}
+
+/* Failure context card — first card the donor sees */
+.fail-card{background:linear-gradient(180deg,#FFFBEB 0%,#FFF 60%);border-color:#FEE5B0;padding:22px 24px}
+.fail-head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.fail-icon{width:44px;height:44px;border-radius:50%;background:var(--amber-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid #FEE5B0}
+.fail-icon svg{width:22px;height:22px;color:var(--amber)}
+.fail-head-text h4{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--text);margin-bottom:2px}
+.fail-head-text .small{font-size:12.5px;color:var(--amber);font-weight:600}
+.fail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:10px}
+.fc-cell{display:flex;flex-direction:column;gap:3px}
+.fc-cell .lbl{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
+.fc-cell .val{font-size:13.5px;color:var(--text);font-weight:600}
+.fc-cell .val.amt{font-family:'Lora',serif;font-size:18px;color:var(--text)}
+.fc-cell .val.fund{color:var(--blue);font-weight:600}
+.fc-cell .sub-val{font-size:11.5px;color:var(--text-3);margin-top:1px}
+.fc-card-info{margin-top:12px;display:flex;align-items:center;gap:10px;padding:11px 14px;background:white;border:1px solid var(--border);border-radius:10px}
+.fc-card-info .card-brand{width:34px;height:22px;background:var(--surface);border-radius:4px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);font-size:9px;font-weight:700;color:var(--text-2);letter-spacing:.03em}
+.fc-card-info .ci-text{font-size:13px;color:var(--text-2)}
+.fc-card-info .ci-text strong{color:var(--text);font-weight:600}
+.fc-card-info .ci-status{margin-left:auto;font-size:11px;font-weight:600;color:var(--rose);background:var(--rose-light);padding:3px 9px;border-radius:99px}
+
+/* Path-selector — 3 options the donor can take */
+.paths{display:grid;grid-template-columns:1fr;gap:10px;margin-top:6px}
+.path{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;cursor:pointer;transition:all .14s;position:relative;background:white}
+.path:hover{border-color:var(--blue-mid);background:var(--blue-pale)}
+.path.on{border-color:var(--blue);background:var(--blue-pale);box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.path-radio{width:18px;height:18px;border:2px solid var(--border);border-radius:50%;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;background:white}
+.path.on .path-radio{border-color:var(--blue)}
+.path.on .path-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--blue)}
+.path-body{flex:1;min-width:0}
+.path-title{font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+.path-title .rec{font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:var(--green-light);color:var(--green);padding:2px 7px;border-radius:99px}
+.path-desc{font-size:12.5px;color:var(--text-3);margin-top:3px;line-height:1.5}
+
+/* Form fields */
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+label{font-size:12px;font-weight:600;color:var(--text-2);display:flex;align-items:center;gap:5px}
+label .req{color:var(--rose);font-weight:700}
+label .hint{margin-left:auto;font-size:10.5px;font-weight:500;color:var(--text-3)}
+input.in,select.in{
+  padding:11px 13px;border:1.5px solid var(--border);border-radius:9px;
+  font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);
+  background:white;outline:none;transition:border-color .14s,box-shadow .14s;
+  width:100%;
+}
+input.in:focus,select.in:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+input.in.has-icon{padding-left:38px}
+.in-wrap{position:relative}
+.in-wrap .icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--text-3);pointer-events:none}
+.in-wrap .card-detect{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--text-2);background:var(--surface);padding:3px 7px;border-radius:5px;border:1px solid var(--border);display:none}
+.in-wrap .card-detect.show{display:inline-flex}
+input::placeholder{color:#94A3B8}
+
+/* Method toggle (Card / Bank) */
+.method-toggle{display:flex;gap:8px;padding:5px;background:var(--surface);border:1px solid var(--border);border-radius:11px;margin-bottom:18px}
+.mt-btn{flex:1;padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;color:var(--text-3);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .14s;background:transparent;border:none;font-family:inherit}
+.mt-btn:hover{color:var(--text-2)}
+.mt-btn.on{background:white;color:var(--blue);box-shadow:0 1px 3px rgba(15,23,42,.06)}
+.mt-btn svg{width:16px;height:16px}
+
+/* Card brand row */
+.brands{display:flex;gap:7px;margin-top:6px;flex-wrap:wrap}
+.brand{width:42px;height:28px;border:1.5px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;background:white;font-size:9px;font-weight:700;letter-spacing:.02em;color:var(--text-3);transition:all .14s}
+.brand.match{border-color:var(--blue);color:var(--blue);background:var(--blue-pale);box-shadow:0 0 0 2px rgba(37,99,235,.08)}
+.brand.dim{opacity:.4}
+
+/* Submit summary card */
+.summary{background:linear-gradient(180deg,var(--blue-pale) 0%,white 100%);border-color:var(--blue-light)}
+.sum-row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--border)}
+.sum-row:last-child{border-bottom:none}
+.sum-lbl{font-size:12.5px;color:var(--text-2)}
+.sum-val{font-size:13.5px;font-weight:600;color:var(--text)}
+.sum-row.total{padding-top:12px;border-top:1.5px solid var(--blue-light);border-bottom:none;margin-top:6px}
+.sum-row.total .sum-lbl{font-size:13px;font-weight:600;color:var(--text)}
+.sum-row.total .sum-val{font-family:'Lora',serif;font-size:22px;color:var(--blue)}
+
+/* Big primary CTA */
+.cta-primary{
+  width:100%;padding:15px 20px;border:none;border-radius:12px;
+  background:linear-gradient(180deg,var(--blue),#1D4ED8);color:white;
+  font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 14px rgba(37,99,235,.3);transition:transform .12s,box-shadow .12s;
+  margin-top:6px;
+}
+.cta-primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(37,99,235,.4)}
+.cta-primary svg{width:16px;height:16px}
+.cta-secondary{width:100%;padding:12px 20px;border:1.5px solid var(--border);border-radius:11px;background:white;color:var(--text-2);font-size:13.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px;transition:all .14s}
+.cta-secondary:hover{border-color:var(--text-3);background:var(--surface)}
+.cancel-link{display:block;text-align:center;color:var(--text-3);font-size:12px;margin-top:12px;cursor:pointer}
+.cancel-link:hover{color:var(--rose);text-decoration:underline}
+
+/* Trust band */
+.trust{display:flex;align-items:center;justify-content:center;gap:18px;padding:14px 20px;background:white;border:1px solid var(--border);border-radius:12px;font-size:11.5px;color:var(--text-3);flex-wrap:wrap}
+.trust-item{display:flex;align-items:center;gap:6px}
+.trust-item svg{width:13px;height:13px;color:var(--green)}
+.trust-item strong{color:var(--text-2);font-weight:600}
+
+/* Side: gift summary */
+.gift-summary{background:white}
+.gs-org{display:flex;align-items:center;gap:11px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.gs-org .av{width:44px;height:44px;border-radius:11px;background:var(--navy);color:white;display:flex;align-items:center;justify-content:center;font-family:'Lora',serif;font-size:18px;font-weight:600;flex-shrink:0}
+.gs-org .name{font-family:'Lora',serif;font-size:15px;color:var(--text);font-weight:600;line-height:1.25}
+.gs-org .sub-line{font-size:11.5px;color:var(--text-3);margin-top:1px}
+.gs-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;font-size:12.5px}
+.gs-row .lbl{color:var(--text-3)}
+.gs-row .val{color:var(--text-2);font-weight:500}
+.gs-recurring{margin-top:10px;padding:11px 12px;background:var(--blue-pale);border:1px solid var(--blue-light);border-radius:9px;font-size:11.5px;color:#1D4ED8;line-height:1.5}
+.gs-recurring strong{font-weight:600}
+.gs-history{margin-top:12px}
+.gs-h-title{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px}
+.gs-h-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:12px;border-bottom:1px dashed var(--border)}
+.gs-h-item:last-child{border-bottom:none}
+.gs-h-item .h-date{color:var(--text-3)}
+.gs-h-item .h-amt{font-weight:600;color:var(--text)}
+.gs-h-item.failed .h-amt{color:var(--rose)}
+.gs-h-status{font-size:10px;font-weight:700;padding:2px 6px;border-radius:99px;margin-left:6px}
+.gs-h-status.ok{background:var(--green-light);color:var(--green)}
+.gs-h-status.bad{background:var(--rose-light);color:var(--rose)}
+
+/* Support card */
+.support-card{padding:18px 20px;background:linear-gradient(135deg,var(--surface),#fff)}
+.sc-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sc-head .av{width:34px;height:34px;border-radius:50%;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center}
+.sc-head .av svg{width:16px;height:16px}
+.sc-head-text{font-size:13px;font-weight:600;color:var(--text)}
+.sc-head-text .small{font-size:11px;font-weight:400;color:var(--text-3)}
+.sc-actions{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.sc-actions a{display:flex;align-items:center;gap:8px;padding:9px 12px;background:white;border:1px solid var(--border);border-radius:8px;font-size:12.5px;color:var(--text-2);font-weight:500;transition:all .14s;cursor:pointer}
+.sc-actions a:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-pale)}
+.sc-actions a svg{width:13px;height:13px;color:var(--text-3)}
+.sc-actions a:hover svg{color:var(--blue)}
+
+/* Form section conditional show */
+.method-pane{display:none}
+.method-pane.on{display:block}
+
+/* Mobile */
+@media (max-width:860px){
+  .wrap{grid-template-columns:1fr;margin:-72px auto 40px}
+  .col-side{position:static}
+  .fail-grid{grid-template-columns:1fr 1fr}
+  .field-row,.field-row-3{grid-template-columns:1fr}
+  .hero-h{font-size:26px}
+  .bar{padding:12px 18px}
+  .bar .org{display:none}
+}
+
+/* Processing state */
+.processing{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+.processing.show{display:flex}
+.proc-box{background:white;border-radius:16px;padding:32px 40px;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:0 12px 40px rgba(0,0,0,.2);max-width:340px;text-align:center}
+.spin{width:36px;height:36px;border:3px solid var(--blue-light);border-top-color:var(--blue);border-radius:50%;animation:spin 0.85s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proc-title{font-family:'Lora',serif;font-size:17px;color:var(--text);font-weight:600}
+.proc-sub{font-size:12.5px;color:var(--text-3);line-height:1.5}
+
+/* Success / decline toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:white;padding:14px 22px;border-radius:11px;font-size:13px;display:flex;align-items:center;gap:9px;box-shadow:0 12px 32px rgba(0,0,0,.25);opacity:0;transition:all .22s;z-index:200;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast svg{width:16px;height:16px}
+.toast.success{background:var(--green)}
+.toast.error{background:var(--rose)}
+
+</style>
+</head>
+<body>
+
+<!-- ═══ TOP BAR ═══ -->
+<div class="bar">
+  <div class="logo">
+    <div class="mark">
+      <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1L2 4v5c0 3 2.5 5 6 6 3.5-1 6-3 6-6V4L8 1z"/></svg>
+    </div>
+    <span class="name">GiveCentral</span>
+  </div>
+  <span class="sep"></span>
+  <span class="org">Supporting <strong>St. Michael's Parish</strong></span>
+  <div class="right">
+    <span class="secure">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2.5" y="6" width="9" height="6" rx="1"/><path d="M4.5 6V4.5a2.5 2.5 0 015 0V6"/></svg>
+      Secure 256-bit · PCI Level 1
+    </span>
+    <span class="help" onclick="alert('Support modal would open')">Need help?</span>
+  </div>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="crumb">
+      <a href="atlas-donor-portal.html">My giving</a>
+      <span>›</span>
+      <a href="atlas-donor-recurring.html">Recurring gifts</a>
+      <span>›</span>
+      <span>Update payment</span>
+    </div>
+    <span class="hero-tag">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v6M6 9.5v.3"/><circle cx="6" cy="6" r="5"/></svg>
+      Payment couldn't be processed
+    </span>
+    <h1 class="hero-h">Let's get your gift back on track, <em>Margaret</em>.</h1>
+    <p class="hero-d">Your June 6 payment for <strong>Catholic Ministry Appeal</strong> couldn't be processed because your card on file expired. Update your details below — it takes about 60 seconds. <a href="#help">Talk to a real person instead.</a></p>
+  </div>
+</div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="wrap">
+
+  <div class="col-main">
+
+    <!-- ─── 1. FAILURE CONTEXT ─── -->
+    <div class="card fail-card">
+      <div class="fail-head">
+        <div class="fail-icon">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2" y="5" width="16" height="11" rx="1.5"/><path d="M2 9h16M6 13h2"/></svg>
+        </div>
+        <div class="fail-head-text">
+          <h4>Card expired</h4>
+          <div class="small">Visa ending 4242 · expired 04/26</div>
+        </div>
+      </div>
+      <div class="fail-grid">
+        <div class="fc-cell">
+          <span class="lbl">Missed payment</span>
+          <span class="val amt">$25.00</span>
+          <span class="sub-val">Scheduled Jun 6, 2026</span>
+        </div>
+        <div class="fc-cell">
+          <span class="lbl">Going to</span>
+          <span class="val fund">Catholic Ministry Appeal 2026</span>
+          <span class="sub-val">Monthly recurring · installment 6 of 12</span>
+        </div>
+      </div>
+      <div class="fc-card-info">
+        <div class="card-brand">VISA</div>
+        <div class="ci-text">Card on file · <strong>•••• 4242</strong> · Margaret O'Brien</div>
+        <span class="ci-status">Expired</span>
+      </div>
+    </div>
+
+    <!-- ─── 2. WHAT WOULD YOU LIKE TO DO ─── -->
+    <div class="card">
+      <h3>What would you like to do?</h3>
+      <div class="sub">Pick one — you can always change this later from your donor account.</div>
+
+      <div class="paths">
+        <div class="path on" data-path="retry-now" onclick="selectPath(this)">
+          <div class="path-radio"></div>
+          <div class="path-body">
+            <div class="path-title">Update card &amp; charge the missed $25 now <span class="rec">Recommended</span></div>
+            <div class="path-desc">Save your new card, retry the failed payment immediately, and resume your normal monthly schedule on July 6.</div>
+          </div>
+        </div>
+        <div class="path" data-path="future-only" onclick="selectPath(this)">
+          <div class="path-radio"></div>
+          <div class="path-body">
+            <div class="path-title">Update card for future payments only</div>
+            <div class="path-desc">Skip the June 6 payment. New card will be charged starting July 6.</div>
+          </div>
+        </div>
+        <div class="path" data-path="pause" onclick="selectPath(this)">
+          <div class="path-radio"></div>
+          <div class="path-body">
+            <div class="path-title">Pause this recurring gift</div>
+            <div class="path-desc">Stop charges temporarily. You'll receive a reminder in 30 days to resume or cancel.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── 3. PAYMENT METHOD (only when path is retry-now or future-only) ─── -->
+    <div class="card" id="payment-card">
+      <h3>Payment details</h3>
+      <div class="sub">Your information is encrypted and never stored on GiveCentral servers.</div>
+
+      <!-- Method toggle -->
+      <div class="method-toggle">
+        <button type="button" class="mt-btn on" data-method="card" onclick="selectMethod('card')">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="1.5" y="4" width="13" height="9" rx="1.3"/><path d="M1.5 7h13M4 11h2"/></svg>
+          Credit or debit card
+        </button>
+        <button type="button" class="mt-btn" data-method="bank" onclick="selectMethod('bank')">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 1.5L1.5 4.5h13L8 1.5z"/><path d="M3 6.5V12M6 6.5V12M10 6.5V12M13 6.5V12M1.5 13.5h13"/></svg>
+          Bank account (ACH · lower fees)
+        </button>
+      </div>
+
+      <!-- CARD METHOD -->
+      <div class="method-pane on" data-pane="card">
+        <div class="field">
+          <label for="card-name">Name on card <span class="req">*</span></label>
+          <input class="in" id="card-name" placeholder="Margaret O'Brien" value="Margaret O'Brien" autocomplete="cc-name">
+        </div>
+
+        <div class="field">
+          <label for="card-num">Card number <span class="req">*</span></label>
+          <div class="in-wrap">
+            <svg class="icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="4" width="15" height="10" rx="1.5"/><path d="M1.5 7.5h15"/></svg>
+            <input class="in has-icon" id="card-num" placeholder="1234 5678 9012 3456" inputmode="numeric" autocomplete="cc-number" oninput="detectBrand(this.value)" maxlength="23">
+            <span class="card-detect" id="card-detect">VISA</span>
+          </div>
+          <div class="brands" id="brand-row">
+            <div class="brand" data-brand="visa">VISA</div>
+            <div class="brand" data-brand="mc">MC</div>
+            <div class="brand" data-brand="amex">AMEX</div>
+            <div class="brand" data-brand="discover">DISC</div>
+          </div>
+        </div>
+
+        <div class="field-row-3">
+          <div class="field" style="margin-bottom:0">
+            <label for="card-exp">Expiry <span class="req">*</span></label>
+            <input class="in" id="card-exp" placeholder="MM / YY" inputmode="numeric" autocomplete="cc-exp" maxlength="7" oninput="formatExpiry(this)">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label for="card-cvc">
+              CVC <span class="req">*</span>
+              <span class="hint" title="3 digits on the back · 4 for Amex">?</span>
+            </label>
+            <input class="in" id="card-cvc" placeholder="123" inputmode="numeric" autocomplete="cc-csc" maxlength="4">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label for="card-zip">Billing ZIP <span class="req">*</span></label>
+            <input class="in" id="card-zip" placeholder="12345" inputmode="numeric" autocomplete="postal-code" maxlength="10" value="12203">
+          </div>
+        </div>
+      </div>
+
+      <!-- BANK METHOD -->
+      <div class="method-pane" data-pane="bank">
+        <div class="field">
+          <label for="bank-name">Name on account <span class="req">*</span></label>
+          <input class="in" id="bank-name" placeholder="Margaret O'Brien" autocomplete="name">
+        </div>
+        <div class="field-row">
+          <div class="field" style="margin-bottom:0">
+            <label for="bank-routing">Routing number <span class="req">*</span></label>
+            <input class="in" id="bank-routing" placeholder="9-digit ABA" inputmode="numeric" maxlength="9">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label for="bank-acct-type">Account type <span class="req">*</span></label>
+            <select class="in" id="bank-acct-type">
+              <option>Checking</option>
+              <option>Savings</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field" style="margin-bottom:0">
+            <label for="bank-acct">Account number <span class="req">*</span></label>
+            <input class="in" id="bank-acct" placeholder="Account number" inputmode="numeric">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label for="bank-acct-confirm">Re-enter account number <span class="req">*</span></label>
+            <input class="in" id="bank-acct-confirm" placeholder="Re-enter to confirm" inputmode="numeric">
+          </div>
+        </div>
+        <div style="padding:12px 14px;background:var(--blue-pale);border:1px solid var(--blue-light);border-radius:9px;font-size:12px;color:#1D4ED8;display:flex;gap:9px;align-items:flex-start">
+          <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><circle cx="7" cy="7" r="5.5"/><path d="M7 4.5v3M7 9.5v.3"/></svg>
+          <span>ACH transfers take 3–5 business days to clear. Your first payment will be processed immediately upon submission.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── 4. TRUST BAND ─── -->
+    <div class="trust">
+      <div class="trust-item">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2.5" y="6" width="9" height="6" rx="1"/><path d="M4.5 6V4.5a2.5 2.5 0 015 0V6"/></svg>
+        <span><strong>256-bit</strong> SSL encryption</span>
+      </div>
+      <div class="trust-item">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M4 7l2 2 4-4"/></svg>
+        <span><strong>PCI Level 1</strong> validated</span>
+      </div>
+      <div class="trust-item">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2 4h10v6H2zM2 7h10"/></svg>
+        <span>Processed by <strong>Stripe</strong></span>
+      </div>
+      <div class="trust-item">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 1L2 3v4c0 2.5 2 4.5 5 5 3-.5 5-2.5 5-5V3L7 1z"/></svg>
+        <span>Card details <strong>never stored</strong></span>
+      </div>
+    </div>
+
+  </div><!-- /.col-main -->
+
+  <!-- ═══ SIDE COLUMN ═══ -->
+  <aside class="col-side">
+
+    <!-- Summary card with primary CTA -->
+    <div class="card summary">
+      <div class="gs-org" style="margin-bottom:14px">
+        <div class="av">SM</div>
+        <div style="min-width:0">
+          <div class="name">St. Michael's Parish</div>
+          <div class="sub-line">Albany, NY · Diocese of Albany</div>
+        </div>
+      </div>
+
+      <div class="sum-row">
+        <span class="sum-lbl">Missed payment (Jun 6)</span>
+        <span class="sum-val">$25.00</span>
+      </div>
+      <div class="sum-row">
+        <span class="sum-lbl">Next charge (Jul 6)</span>
+        <span class="sum-val">$25.00</span>
+      </div>
+      <div class="sum-row">
+        <span class="sum-lbl">Processing fee</span>
+        <span class="sum-val" style="color:var(--green)">$0.00</span>
+      </div>
+      <div class="sum-row total">
+        <span class="sum-lbl">Today's charge</span>
+        <span class="sum-val" id="today-charge">$25.00</span>
+      </div>
+
+      <button class="cta-primary" onclick="submitRetry()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><rect x="2.5" y="6" width="9" height="6" rx="1"/><path d="M4.5 6V4.5a2.5 2.5 0 015 0V6"/></svg>
+        <span id="cta-label">Update card &amp; pay $25.00</span>
+      </button>
+      <span class="cancel-link" onclick="if(confirm('Cancel without saving changes?')) history.back()">Cancel and return to my account</span>
+    </div>
+
+    <!-- Recurring schedule preview -->
+    <div class="card gift-summary">
+      <div style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px">Your CMA 2026 recurring</div>
+      <div class="gs-row"><span class="lbl">Started</span><span class="val">Jan 6, 2026</span></div>
+      <div class="gs-row"><span class="lbl">Schedule</span><span class="val">Monthly · 6th</span></div>
+      <div class="gs-row"><span class="lbl">Amount</span><span class="val">$25.00 / month</span></div>
+      <div class="gs-row"><span class="lbl">Installments left</span><span class="val">7 of 12</span></div>
+      <div class="gs-recurring">
+        <strong>What happens next:</strong> Once you save, $25 will be charged today. Your normal Jul 6 payment will proceed automatically on the new card.
+      </div>
+
+      <div class="gs-history">
+        <div class="gs-h-title">Recent payments</div>
+        <div class="gs-h-item failed">
+          <span class="h-date">Jun 6, 2026</span>
+          <span><span class="h-amt">$25.00</span><span class="gs-h-status bad">Failed</span></span>
+        </div>
+        <div class="gs-h-item">
+          <span class="h-date">May 6, 2026</span>
+          <span><span class="h-amt">$25.00</span><span class="gs-h-status ok">Paid</span></span>
+        </div>
+        <div class="gs-h-item">
+          <span class="h-date">Apr 6, 2026</span>
+          <span><span class="h-amt">$25.00</span><span class="gs-h-status ok">Paid</span></span>
+        </div>
+        <div class="gs-h-item">
+          <span class="h-date">Mar 6, 2026</span>
+          <span><span class="h-amt">$25.00</span><span class="gs-h-status ok">Paid</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Support / fallback -->
+    <div class="card support-card" id="help">
+      <div class="sc-head">
+        <div class="av">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="5" r="3"/><path d="M2.5 14c0-3 2.5-4.5 5.5-4.5s5.5 1.5 5.5 4.5"/></svg>
+        </div>
+        <div class="sc-head-text">
+          Prefer to talk to someone?
+          <div class="small">Mon–Fri · 9am–5pm ET</div>
+        </div>
+      </div>
+      <div class="sc-actions">
+        <a onclick="window.location.href='tel:5183334456'">
+          <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1.5 2.5h2.5l1.5 3-1.5 1c1 2 2.5 3.5 4.5 4.5l1-1.5 3 1.5v2.5a.5.5 0 01-.5.5C6 13 .5 7 .5 3a.5.5 0 01.5-.5z"/></svg>
+          Call parish office · (518) 333-4456
+        </a>
+        <a onclick="window.location.href='mailto:giving@stmichaels.org'">
+          <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="1.5" y="2.5" width="10" height="8" rx="1.2"/><path d="M2 3l4.5 3.5L11 3"/></svg>
+          Email giving@stmichaels.org
+        </a>
+        <a onclick="alert('Live chat would open')">
+          <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1.5 3h10v6h-5l-3 2v-2h-2z"/></svg>
+          Chat with a real person
+        </a>
+      </div>
+    </div>
+  </aside>
+
+</div><!-- /.wrap -->
+
+<!-- ═══ PROCESSING OVERLAY ═══ -->
+<div class="processing" id="processing">
+  <div class="proc-box">
+    <div class="spin"></div>
+    <div class="proc-title">Processing your payment…</div>
+    <div class="proc-sub">Don't close this window. We're securely contacting your bank.</div>
+  </div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><path d="M3 8l3.5 3.5L13 4"/></svg>
+  <span id="toast-msg">Saved</span>
+</div>
+
+<script>
+let currentPath = 'retry-now';
+let currentMethod = 'card';
+
+function selectPath(el){
+  document.querySelectorAll('.path').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+  currentPath = el.dataset.path;
+  updateUI();
+}
+function selectMethod(m){
+  currentMethod = m;
+  document.querySelectorAll('.mt-btn').forEach(b => b.classList.toggle('on', b.dataset.method === m));
+  document.querySelectorAll('.method-pane').forEach(p => p.classList.toggle('on', p.dataset.pane === m));
+}
+
+function updateUI(){
+  const paymentCard = document.getElementById('payment-card');
+  const ctaLabel = document.getElementById('cta-label');
+  const todayCharge = document.getElementById('today-charge');
+
+  if (currentPath === 'pause') {
+    paymentCard.style.display = 'none';
+    ctaLabel.textContent = 'Pause my recurring gift';
+    todayCharge.textContent = '$0.00';
+    todayCharge.style.color = 'var(--text-3)';
+  } else if (currentPath === 'future-only') {
+    paymentCard.style.display = 'block';
+    ctaLabel.textContent = 'Save card for future payments';
+    todayCharge.textContent = '$0.00';
+    todayCharge.style.color = 'var(--text-3)';
+  } else {
+    paymentCard.style.display = 'block';
+    ctaLabel.textContent = 'Update card & pay $25.00';
+    todayCharge.textContent = '$25.00';
+    todayCharge.style.color = 'var(--blue)';
+  }
+}
+
+/* Card-number formatter + brand detection (visual only — Stripe handles real validation) */
+function detectBrand(v){
+  const num = v.replace(/\s/g, '');
+  const input = document.getElementById('card-num');
+  // Insert spaces every 4 digits
+  const formatted = num.replace(/(.{4})/g, '$1 ').trim();
+  if (formatted !== v) input.value = formatted;
+  const brands = document.querySelectorAll('.brand');
+  const detect = document.getElementById('card-detect');
+  let matched = null;
+  if (/^4/.test(num)) matched = 'visa';
+  else if (/^(5[1-5]|2[2-7])/.test(num)) matched = 'mc';
+  else if (/^3[47]/.test(num)) matched = 'amex';
+  else if (/^6(011|5)/.test(num)) matched = 'discover';
+  brands.forEach(b => {
+    b.classList.toggle('match', b.dataset.brand === matched);
+    b.classList.toggle('dim', matched && b.dataset.brand !== matched);
+  });
+  if (matched) {
+    detect.textContent = matched.toUpperCase();
+    detect.classList.add('show');
+  } else {
+    detect.classList.remove('show');
+  }
+}
+
+/* Expiry MM/YY formatter */
+function formatExpiry(el){
+  let v = el.value.replace(/[^\d]/g, '');
+  if (v.length >= 3) v = v.slice(0,2) + ' / ' + v.slice(2,4);
+  el.value = v;
+}
+
+/* Submit handler — fakes Stripe → success */
+function submitRetry(){
+  if (currentPath === 'pause') {
+    if (!confirm('Pause your monthly $25 gift to Catholic Ministry Appeal? You can resume anytime from your donor account.')) return;
+    showProcessing('Pausing your recurring gift…');
+    setTimeout(() => {
+      hideProcessing();
+      showToast('Your recurring gift is paused. We\'ll email you in 30 days.', 'success');
+      setTimeout(() => window.location.href = 'atlas-donor-portal.html', 1800);
+    }, 1200);
+    return;
+  }
+  // Basic validation when method is card
+  if (currentMethod === 'card') {
+    const cardNum = document.getElementById('card-num').value.replace(/\s/g,'');
+    const cardExp = document.getElementById('card-exp').value;
+    const cardCvc = document.getElementById('card-cvc').value;
+    if (cardNum.length < 13 || !cardExp || cardCvc.length < 3) {
+      showToast('Please fill in all card details', 'error');
+      return;
+    }
+  }
+  showProcessing(currentPath === 'future-only' ? 'Saving your card…' : 'Processing $25.00…');
+  setTimeout(() => {
+    hideProcessing();
+    const msg = currentPath === 'future-only'
+      ? 'New card saved. Next charge: Jul 6'
+      : '✓ $25.00 received · Thank you, Margaret!';
+    showToast(msg, 'success');
+    setTimeout(() => window.location.href = 'atlas-donate-confirmation.html', 1800);
+  }, 1500);
+}
+
+function showProcessing(title){
+  const p = document.getElementById('processing');
+  p.querySelector('.proc-title').textContent = title || 'Processing your payment…';
+  p.classList.add('show');
+}
+function hideProcessing(){
+  document.getElementById('processing').classList.remove('show');
+}
+function showToast(msg, type){
+  const t = document.getElementById('toast');
+  t.querySelector('#toast-msg').textContent = msg;
+  t.classList.remove('success','error');
+  if (type) t.classList.add(type);
+  t.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Init
+updateUI();
+</script>
+
+</body>
+</html>
