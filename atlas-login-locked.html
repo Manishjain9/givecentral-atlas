@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Atlas — Account locked</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:#0E1E35; --navy-2:#152844; --navy-3:#1E3A5F;
+  --blue:#2563EB; --blue-mid:#3B82F6; --blue-light:#DBEAFE; --blue-pale:#EFF6FF;
+  --green:#15803D; --green-light:#DCFCE7;
+  --amber:#D97706; --amber-light:#FEF3C7; --amber-bg:#FFFBEB;
+  --rose:#BE185D; --red:#DC2626; --red-light:#FEE2E2;
+  --gold:#C8A04A;
+  --text:#0F172A; --text-2:#334155; --text-3:#64748B;
+  --border:#E2E8F0; --surface:#F8FAFC; --white:#FFFFFF;
+}
+html { font-size:14px; -webkit-font-smoothing:antialiased; }
+body {
+  font-family:'DM Sans',sans-serif; background:var(--surface); color:var(--text);
+  min-height:100vh; display:flex;
+}
+a { color:inherit; text-decoration:none; }
+
+/* ===== Left: brand panel ===== */
+.brand {
+  flex:1.05; min-width:0; background:linear-gradient(135deg, var(--navy) 0%, var(--navy-3) 100%);
+  color:white; padding:48px 56px; position:relative; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.brand::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(217,119,6,.15), transparent 55%),
+    radial-gradient(circle at 10% 90%, rgba(200,160,74,.12), transparent 60%),
+    radial-gradient(circle at 60% 70%, rgba(59,130,246,.10), transparent 50%);
+}
+.brand-logo { position:relative; display:flex; align-items:center; gap:20px; }
+.brand-logo .mark {
+  width:78px; height:60px;
+  display:flex; align-items:center; justify-content:center;
+  filter:drop-shadow(0 0 22px rgba(200,160,74,.18));
+}
+.brand-logo .mark svg { width:78px; height:60px; }
+.brand-logo .name { font-family:'DM Serif Display',serif; font-size:36px; line-height:1; color:#fff; letter-spacing:-.01em; }
+.brand-logo .sub { font-size:11px; font-weight:700; letter-spacing:.34em; text-transform:uppercase; color:rgba(255,255,255,.58); margin-top:7px; }
+
+.brand-body { position:relative; margin-top:auto; max-width:520px; }
+.brand-eyebrow { font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#FCD34D; font-weight:600; margin-bottom:14px; }
+.brand-title { font-family:'DM Serif Display',serif; font-size:42px; line-height:1.08; letter-spacing:-.5px; margin-bottom:14px; }
+.brand-title em { font-style:italic; color:#FCD34D; }
+.brand-desc { font-size:15px; color:rgba(255,255,255,.72); line-height:1.55; }
+
+.brand-trust { display:flex; flex-direction:column; gap:14px; margin-top:32px; padding-top:28px; border-top:1px solid rgba(255,255,255,.10); }
+.brand-trust .tr-item { display:flex; align-items:flex-start; gap:12px; font-size:13px; color:rgba(255,255,255,.78); line-height:1.45; }
+.brand-trust .tr-item .ic { width:18px; height:18px; flex-shrink:0; margin-top:1px; color:#FCD34D; }
+.brand-trust .tr-item strong { color:#fff; font-weight:600; }
+
+.brand-foot { position:relative; margin-top:36px; display:flex; gap:18px; font-size:11px; color:rgba(255,255,255,.4); }
+.brand-foot a:hover { color:rgba(255,255,255,.7); }
+
+/* ===== Right: locked panel ===== */
+.signin { flex:1; min-width:0; padding:48px 56px; display:flex; flex-direction:column; }
+.signin-top { display:flex; align-items:center; justify-content:flex-end; gap:8px; font-size:12px; color:var(--text-3); }
+.signin-top a { color:var(--blue); font-weight:500; }
+
+.locked-body { margin:auto 0; max-width:460px; width:100%; align-self:center; transition:opacity .4s, transform .4s; }
+.locked-body.fade-out { opacity:0; transform:translateY(-12px); pointer-events:none; }
+
+/* lock icon halo */
+.lock-icon {
+  width:84px; height:84px;
+  margin:0 auto 24px;
+  border-radius:50%;
+  background:radial-gradient(circle, var(--amber-light) 0%, var(--amber-bg) 70%);
+  display:flex; align-items:center; justify-content:center;
+  position:relative;
+  animation:halo-pulse 2.4s ease-in-out infinite;
+}
+.lock-icon::before {
+  content:''; position:absolute; inset:-6px; border-radius:50%;
+  border:1px solid rgba(217,119,6,.25);
+}
+.lock-icon svg { width:38px; height:38px; color:var(--amber); }
+
+@keyframes halo-pulse {
+  0%,100% { box-shadow:0 0 0 0 rgba(217,119,6,0); }
+  50%     { box-shadow:0 0 0 14px rgba(217,119,6,.08); }
+}
+
+.locked-body h1 {
+  font-family:'DM Serif Display',serif; font-size:30px; letter-spacing:-.3px;
+  margin-bottom:8px; text-align:center;
+}
+.locked-body .lead {
+  color:var(--text-3); font-size:14px; margin-bottom:24px; text-align:center; line-height:1.5;
+}
+.locked-body .lead strong { color:var(--text); font-weight:600; }
+
+/* lockout meta card */
+.lock-meta {
+  background:var(--amber-bg);
+  border:1px solid #FDE68A;
+  border-radius:12px;
+  padding:16px 18px;
+  margin-bottom:20px;
+}
+.lock-meta-row { display:flex; align-items:flex-start; gap:10px; font-size:12.5px; color:var(--text-2); line-height:1.45; }
+.lock-meta-row + .lock-meta-row { margin-top:10px; padding-top:10px; border-top:1px solid #FDE68A; }
+.lock-meta-row .ic {
+  width:18px; height:18px; flex-shrink:0; color:var(--amber); margin-top:1px;
+}
+.lock-meta-row strong { color:var(--text); font-weight:600; }
+.lock-meta-row .mono { font-family:'JetBrains Mono', ui-monospace, monospace; font-weight:500; }
+
+/* Big countdown display */
+.countdown-card {
+  background:linear-gradient(180deg, #FFFFFF 0%, #FFFBEB 100%);
+  border:1px solid #FDE68A;
+  border-radius:14px;
+  padding:24px 22px 22px;
+  margin-bottom:22px;
+  text-align:center;
+}
+.countdown-eyebrow {
+  font-size:10.5px; font-weight:700; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--amber);
+  margin-bottom:10px;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.countdown-eyebrow .pulse { width:7px; height:7px; border-radius:50%; background:var(--amber); animation:tick 1s ease-in-out infinite; }
+@keyframes tick { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.35; transform:scale(.7); } }
+
+.countdown {
+  font-family:'JetBrains Mono', ui-monospace, monospace;
+  font-size:54px; font-weight:700;
+  color:var(--text);
+  letter-spacing:-.02em;
+  line-height:1;
+  margin-bottom:8px;
+  font-variant-numeric:tabular-nums;
+}
+.countdown .sep { color:var(--amber); margin:0 2px; }
+.countdown-hint { font-size:12px; color:var(--text-3); }
+
+/* Escape hatches */
+.escapes { display:grid; gap:10px; margin-bottom:18px; }
+.escape-btn {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 14px;
+  border:1px solid var(--border); border-radius:10px;
+  background:white; color:var(--text); font-size:13.5px; font-weight:500;
+  cursor:pointer; transition:background .15s, border-color .15s;
+  text-align:left;
+}
+.escape-btn:hover { background:var(--surface); border-color:#94A3B8; }
+.escape-btn.primary { background:var(--blue-pale); border-color:#BFDBFE; color:var(--blue); }
+.escape-btn.primary:hover { background:#DBEAFE; border-color:var(--blue); }
+.escape-btn .ic { width:18px; height:18px; flex-shrink:0; }
+.escape-btn .arrow { margin-left:auto; opacity:.5; }
+
+/* Security tip */
+.security-tip {
+  display:flex; gap:10px; padding:12px 14px;
+  background:var(--blue-pale); border:1px solid #BFDBFE; border-radius:10px;
+  font-size:12.5px; color:var(--text-2); line-height:1.5;
+}
+.security-tip .ic { width:18px; height:18px; flex-shrink:0; color:var(--blue); margin-top:1px; }
+.security-tip strong { color:var(--text); font-weight:600; }
+
+/* Demo helper */
+.demo-skip {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:11px; color:var(--text-3);
+  background:#F1F5F9; padding:5px 10px; border-radius:6px;
+  cursor:pointer; margin-top:14px;
+  transition:background .15s;
+}
+.demo-skip:hover { background:#E2E8F0; color:var(--text-2); }
+.demo-skip .dot { width:5px; height:5px; border-radius:50%; background:var(--rose); }
+
+/* ===== Sign-in form (revealed after countdown ends) ===== */
+.signin-form {
+  margin:auto 0; max-width:420px; width:100%; align-self:center;
+  display:none; opacity:0;
+  transition:opacity .5s;
+}
+.signin-form.show { display:block; }
+.signin-form.fade-in { opacity:1; }
+
+.signin-form h1 { font-family:'DM Serif Display',serif; font-size:30px; letter-spacing:-.3px; margin-bottom:6px; }
+.signin-form .lead { color:var(--text-3); font-size:14px; margin-bottom:24px; line-height:1.5; }
+.field { margin-bottom:14px; }
+.field label { display:block; font-size:12px; font-weight:600; color:var(--text-2); margin-bottom:6px; }
+.field input {
+  width:100%; font-size:14px; font-family:'DM Sans',sans-serif;
+  padding:11px 14px; border-radius:10px; border:1px solid var(--border); background:white;
+}
+.field input:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.10); }
+
+.signin-cta {
+  width:100%; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600;
+  padding:13px 16px; border-radius:10px; cursor:pointer;
+  background:var(--blue); color:white; border:none; box-shadow:0 1px 6px rgba(37,99,235,.25);
+  margin-top:8px;
+}
+.signin-cta:hover { background:#1D4ED8; }
+
+.signin-foot {
+  margin-top:auto; display:flex; align-items:center; gap:14px; font-size:11px; color:var(--text-3);
+}
+.signin-foot .dot { width:5px; height:5px; background:var(--green); border-radius:50%; }
+.signin-foot a:hover { color:var(--text-2); }
+
+/* ===== Toast (success at 0:00) ===== */
+#unlock-toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:#0F172A; color:white; padding:13px 18px; border-radius:10px;
+  box-shadow:0 12px 32px rgba(15,23,42,.30); font-size:13px;
+  z-index:100010; display:flex; align-items:center; gap:10px; max-width:480px;
+  opacity:0; transition:opacity .25s, transform .25s; pointer-events:none;
+}
+#unlock-toast.show { opacity:1; transform:translateX(-50%); pointer-events:auto; }
+#unlock-toast .ic { width:24px; height:24px; border-radius:50%; background:var(--green); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0; }
+
+@media (max-width: 920px) {
+  body { flex-direction:column; }
+  .brand { padding:32px 28px; }
+  .signin { padding:32px 28px; }
+  .brand-title { font-size:30px; }
+  .countdown { font-size:46px; }
+}
+</style>
+</head>
+<body>
+
+  <!-- ===================== Left: brand panel ===================== -->
+  <section class="brand">
+    <div class="brand-logo">
+      <div class="mark">
+        <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
+          <circle cx="22"  cy="92" r="4"   fill="white"/>
+          <circle cx="58"  cy="58" r="5"   fill="white"/>
+          <circle cx="98"  cy="38" r="5.5" fill="white"/>
+          <circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
+          <circle cx="138" cy="24" r="7"  fill="#C8A04A"/>
+          <circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div>
+        <div class="name">Atlas</div>
+        <div class="sub">By GiveCentral</div>
+      </div>
+    </div>
+
+    <div class="brand-body">
+      <div class="brand-eyebrow">Security shield</div>
+      <h1 class="brand-title">Protecting<br><em>donor data</em> takes vigilance.</h1>
+      <p class="brand-desc">Atlas locks any account after five consecutive failed sign-in attempts. We log the source IP, notify your diocesan admin, and hold the lockout for thirty minutes — long enough to stop most credential-stuffing attacks.</p>
+
+      <div class="brand-trust">
+        <div class="tr-item">
+          <svg class="ic" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 6l7-4 7 4v6a7 7 0 01-7 5 7 7 0 01-7-5V6z"/>
+          </svg>
+          <span><strong>Brute-force protection.</strong> Failed attempts are tracked per account and per IP, with exponential back-off.</span>
+        </div>
+        <div class="tr-item">
+          <svg class="ic" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="9" r="7"/>
+            <path d="M9 5v4l2.5 1.5"/>
+          </svg>
+          <span><strong>Audit logged.</strong> Every lockout writes to the immutable seven-year audit trail for compliance reviews.</span>
+        </div>
+        <div class="tr-item">
+          <svg class="ic" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2.5 9l3 3 7-7"/>
+            <path d="M15.5 9l-3 3-7-7"/>
+          </svg>
+          <span><strong>Admin override.</strong> Diocesan admins can clear a lockout instantly from Users &amp; Roles if it's a false positive.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="brand-foot">
+      <a href="#">Status — operational</a>
+      <a href="#">Privacy</a>
+      <a href="#">Security · SOC 2</a>
+      <span style="margin-left:auto">© GiveCentral 2026</span>
+    </div>
+  </section>
+
+  <!-- ===================== Right: locked card ===================== -->
+  <section class="signin">
+    <div class="signin-top">
+      <span>Need help right now?</span>
+      <a href="#">Contact your administrator</a>
+    </div>
+
+    <!-- LOCKED state -->
+    <div id="lockedBody" class="locked-body">
+
+      <div class="lock-icon">
+        <!-- Lock SVG -->
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="8" width="12" height="8" rx="1.5"/>
+          <path d="M5.5 8V5.5a3.5 3.5 0 117 0V8"/>
+          <circle cx="9" cy="12" r="1.2" fill="currentColor"/>
+        </svg>
+      </div>
+
+      <h1>Account temporarily locked</h1>
+      <p class="lead">For your security we paused sign-in to <strong>patricia.souza@diocese.org</strong> after multiple failed attempts. Access will restore automatically when the timer ends.</p>
+
+      <!-- Lockout meta -->
+      <div class="lock-meta">
+        <div class="lock-meta-row">
+          <svg class="ic" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="6" r="3"/>
+            <path d="M2.5 16c.8-3 3.5-5 6.5-5s5.7 2 6.5 5"/>
+          </svg>
+          <span><strong>p***@diocese.org</strong> · Database Admin · Catholic Charities</span>
+        </div>
+        <div class="lock-meta-row">
+          <svg class="ic" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 1v2M9 15v2M1 9h2M15 9h2M3.5 3.5l1.4 1.4M13.1 13.1l1.4 1.4M3.5 14.5l1.4-1.4M13.1 4.9l1.4-1.4"/>
+            <circle cx="9" cy="9" r="3"/>
+          </svg>
+          <span>5 failed attempts · last at <span class="mono">11:42 AM</span> from <span class="mono">208.54.16.91</span></span>
+        </div>
+        <div class="lock-meta-row">
+          <svg class="ic" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 2L2 5v4c0 4 3 7 7 8 4-1 7-4 7-8V5l-7-3z"/>
+          </svg>
+          <span>Your diocesan admin <strong>Sarah Reynolds</strong> has been notified.</span>
+        </div>
+      </div>
+
+      <!-- Big countdown -->
+      <div class="countdown-card">
+        <div class="countdown-eyebrow">
+          <span class="pulse"></span>
+          Sign-in restores in
+        </div>
+        <div class="countdown" id="countdown">
+          <span id="cd-min">30</span><span class="sep">:</span><span id="cd-sec">00</span>
+        </div>
+        <div class="countdown-hint">Lockout ends at <span class="mono" id="cd-eta">12:12 PM</span></div>
+      </div>
+
+      <!-- Escape hatches -->
+      <div class="escapes">
+        <a class="escape-btn primary" href="atlas-forgot-password.html">
+          <svg class="ic" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2.5 9a6.5 6.5 0 0111-4.6L15 6"/>
+            <path d="M15 2v4h-4"/>
+          </svg>
+          <span>Reset password instead</span>
+          <span class="arrow">→</span>
+        </a>
+        <a class="escape-btn" href="#" onclick="alert('Diocesan admin contact opened · sarah.reynolds@diocese.org');return false;">
+          <svg class="ic" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3.5" width="14" height="11" rx="1.5"/>
+            <path d="M2 4.5l7 5 7-5"/>
+          </svg>
+          <span>Contact your diocesan administrator</span>
+          <span class="arrow">→</span>
+        </a>
+      </div>
+
+      <!-- Security tip -->
+      <div class="security-tip">
+        <svg class="ic" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="9" r="7"/>
+          <path d="M9 5.5v4.5"/>
+          <circle cx="9" cy="12.5" r=".5" fill="currentColor"/>
+        </svg>
+        <span><strong>Wasn't you?</strong> If you didn't try signing in, someone may have your email. Reset your password and notify your admin — your gift records weren't accessed.</span>
+      </div>
+
+      <!-- Demo helper -->
+      <div style="text-align:center;">
+        <span class="demo-skip" onclick="skipToEnd()">
+          <span class="dot"></span>
+          Demo · skip to 0:10
+        </span>
+      </div>
+
+    </div>
+
+    <!-- UNLOCKED state (revealed at 0:00) -->
+    <div id="signinForm" class="signin-form">
+      <h1>You're back in.</h1>
+      <p class="lead">Lockout cleared. Sign in below to continue. If you've forgotten your password, choose <a href="#" style="color:var(--blue);font-weight:500">Reset password</a>.</p>
+
+      <form action="atlas-dashboard.html" method="get" autocomplete="off">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" value="patricia.souza@diocese.org" readonly>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" placeholder="Enter your password">
+        </div>
+        <button type="submit" class="signin-cta">Sign in to Atlas →</button>
+      </form>
+    </div>
+
+    <div class="signin-foot">
+      <span class="dot"></span>
+      <span>All systems operational</span>
+      <a href="#" style="margin-left:auto">English (US)</a>
+      <a href="#">Español</a>
+    </div>
+  </section>
+
+  <!-- Unlock toast -->
+  <div id="unlock-toast"><span class="ic">✓</span><span class="msg">Lockout cleared. You can sign in now.</span></div>
+
+<script>
+(function(){
+  // ── Countdown logic ──
+  // Production lockout is 30 minutes. The demo helper "skip to 0:10" lets you
+  // see the unlock transition without waiting.
+  var totalSec = 30 * 60;              // 1800s
+  var remaining = totalSec;
+
+  var minEl = document.getElementById('cd-min');
+  var secEl = document.getElementById('cd-sec');
+  var etaEl = document.getElementById('cd-eta');
+
+  // ETA = now + 30 min, formatted h:mm AM/PM
+  function fmtETA(d){
+    var h = d.getHours(); var m = d.getMinutes();
+    var ampm = h>=12 ? 'PM' : 'AM';
+    h = h % 12; if (h===0) h = 12;
+    return h + ':' + (m<10 ? '0'+m : m) + ' ' + ampm;
+  }
+  var eta = new Date(Date.now() + totalSec*1000);
+  etaEl.textContent = fmtETA(eta);
+
+  function render(){
+    var m = Math.floor(remaining / 60);
+    var s = remaining % 60;
+    minEl.textContent = m < 10 ? '0'+m : ''+m;
+    secEl.textContent = s < 10 ? '0'+s : ''+s;
+  }
+  render();
+
+  var tickId = setInterval(function(){
+    remaining -= 1;
+    if (remaining <= 0) {
+      remaining = 0; render();
+      clearInterval(tickId);
+      unlock();
+      return;
+    }
+    render();
+  }, 1000);
+
+  // Demo skip — jump to last 10 seconds so you can see the unlock transition
+  window.skipToEnd = function(){
+    remaining = 10;
+    render();
+  };
+
+  // ── Unlock transition ──
+  function unlock(){
+    var locked = document.getElementById('lockedBody');
+    var form   = document.getElementById('signinForm');
+    var toast  = document.getElementById('unlock-toast');
+
+    locked.classList.add('fade-out');
+    setTimeout(function(){
+      locked.style.display = 'none';
+      form.classList.add('show');
+      requestAnimationFrame(function(){
+        form.classList.add('fade-in');
+      });
+      toast.classList.add('show');
+      setTimeout(function(){ toast.classList.remove('show'); }, 5500);
+    }, 400);
+  }
+})();
+</script>
+</body>
+</html>
