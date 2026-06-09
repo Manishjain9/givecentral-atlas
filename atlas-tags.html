@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Atlas — Tag management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:#0E1E35; --navy-2:#152844;
+  --blue:#2563EB; --blue-mid:#3B82F6; --blue-light:#DBEAFE; --blue-pale:#EFF6FF;
+  --teal:#0D9488; --teal-light:#CCFBF1;
+  --green:#15803D; --green-light:#DCFCE7;
+  --amber:#D97706; --amber-light:#FEF3C7;
+  --rose:#BE185D; --rose-light:#FCE7F3;
+  --purple:#7C3AED; --purple-light:#EDE9FE;
+  --gold:#B45309; --gold-light:#FEF3C7;
+  --text:#0F172A; --text-2:#334155; --text-3:#64748B;
+  --border:#E2E8F0; --border-soft:#EDF2F7;
+  --surface:#F8FAFC; --white:#FFFFFF;
+  --sidebar-w:220px;
+}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+
+/* ══ Sidebar (canonical, abbreviated) ══ */
+.sidebar{width:var(--sidebar-w);background:var(--navy);min-height:100vh;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-logo{padding:18px 18px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo-mark{width: 52px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.logo-mark svg{width: 52px;height:40px}
+.logo-text-wrap{display:flex;flex-direction:column}
+.logo-name{font-family:'DM Serif Display',serif;font-size: 20px;color:white;line-height:1}
+.logo-sub{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:3px}
+.sidebar-search{margin:12px 12px 6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer}
+.sidebar-search svg{width:13px;height:13px;color:rgba(255,255,255,.3);flex-shrink:0}
+.sidebar-search input{background:none;border:none;outline:none;width:100%;font-size:12px;color:rgba(255,255,255,.6);font-family:'DM Sans',sans-serif;cursor:pointer}
+.sidebar-scroll{flex:1;overflow-y:auto;padding:6px 8px}
+.nav-group{padding-top:4px}
+.nav-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:6px 12px 4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 12px;margin-bottom:1px;border-radius:7px;font-size:12.5px;color:rgba(255,255,255,.7);cursor:pointer}
+.nav-item svg{width:14px;height:14px;flex-shrink:0;color:rgba(255,255,255,.45)}
+.nav-item:hover{background:rgba(255,255,255,.06);color:white}
+.nav-item:hover svg{color:rgba(255,255,255,.85)}
+.nav-item.active{background:rgba(37,99,235,.18);color:white}
+.nav-item.active svg{color:var(--blue-mid)}
+.nav-badge{margin-left:auto;font-size:10px;font-weight:600;color:rgba(255,255,255,.55)}
+.nav-badge.alert{background:var(--amber);color:white;padding:1px 7px;border-radius:99px}
+.sidebar-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:var(--rose);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.user-name{font-size:11.5px;color:white;font-weight:500}
+.user-role{font-size:10px;color:rgba(255,255,255,.45);margin-top:1px}
+
+/* ══ Main ══ */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{background:white;border-bottom:1px solid var(--border);padding:13px 28px;display:flex;align-items:center;gap:14px;flex-shrink:0;min-height:56px}
+.topbar-title{font-size:14px;font-weight:600;color:var(--text)}
+.topbar-date{font-size:11.5px;color:var(--text-3)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:9px}
+.tb-btn{padding:6px 12px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:white;color:var(--text-2);font-family:'DM Sans',sans-serif}
+.tb-btn:hover{background:var(--surface)}
+
+.page-head{background:white;border-bottom:1px solid var(--border);padding:22px 28px 18px}
+.ph-row{display:flex;align-items:center;gap:14px}
+.ph-title{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text)}
+.ph-count{font-size:13px;color:var(--text-3);margin-left:4px}
+.ph-actions{margin-left:auto;display:flex;gap:8px}
+.btn{padding:8px 14px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;border:none}
+.btn svg{width:12px;height:12px}
+.btn-ghost{background:white;border:1px solid var(--border);color:var(--text-2)}
+.btn-ghost:hover{background:var(--surface)}
+.btn-blue{background:var(--blue);color:white}
+.btn-blue:hover{background:#1D4ED8}
+.ph-desc{font-size:13px;color:var(--text-3);margin-top:7px;line-height:1.55;max-width:680px}
+
+/* ══ KPIs ══ */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:20px 28px 12px;background:white}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 16px}
+.kpi .lbl{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
+.kpi .val{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);line-height:1;margin-top:5px}
+.kpi .val.green{color:var(--green)}
+.kpi .meta{font-size:11px;color:var(--text-3);margin-top:5px}
+
+/* ══ Tags grid ══ */
+.tags-wrap{padding:18px 28px 40px}
+.tags-search-row{background:white;border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:11px;margin-bottom:14px}
+.tags-search-row input{flex:1;border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:transparent}
+.tags-search-row svg{width:14px;height:14px;color:var(--text-3)}
+.tags-search-row select{padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:white;cursor:pointer;font-family:'DM Sans',sans-serif}
+
+.tags-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.tag-card{background:white;border:1px solid var(--border);border-radius:11px;padding:14px 16px;cursor:pointer;transition:all .14s;display:flex;flex-direction:column;gap:8px}
+.tag-card:hover{border-color:var(--blue-mid);box-shadow:0 4px 12px rgba(15,23,42,.06);transform:translateY(-1px)}
+.tag-card-head{display:flex;align-items:center;gap:9px}
+.tag-swatch{width:24px;height:24px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700}
+.tag-name{flex:1;font-size:13.5px;font-weight:600;color:var(--text)}
+.tag-kebab{width:24px;height:24px;border-radius:5px;border:none;background:transparent;cursor:pointer;color:var(--text-3);display:inline-flex;align-items:center;justify-content:center}
+.tag-kebab:hover{background:var(--surface);color:var(--text)}
+.tag-kebab svg{width:12px;height:12px}
+.tag-desc{font-size:11.5px;color:var(--text-3);line-height:1.45}
+.tag-meta-row{display:flex;align-items:center;gap:11px;margin-top:auto;padding-top:9px;border-top:1px dashed var(--border)}
+.tag-count{font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);font-weight:500}
+.tag-count-lbl{font-size:10.5px;color:var(--text-3);margin-left:-6px}
+.tag-owner{margin-left:auto;font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px}
+.tag-owner-av{width:18px;height:18px;border-radius:50%;background:var(--blue);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+
+/* ══ Modal ══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(3px)}
+.modal-overlay.show{display:flex}
+.modal{background:white;border-radius:14px;width:480px;max-width:calc(100vw - 32px);box-shadow:0 16px 40px rgba(15,23,42,.18);overflow:hidden}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px}
+.modal-title{flex:1;font-family:'DM Serif Display',serif;font-size:18px}
+.modal-close{width:28px;height:28px;border-radius:6px;border:none;background:transparent;cursor:pointer;font-size:22px;color:var(--text-3)}
+.modal-close:hover{background:var(--surface);color:var(--text)}
+.modal-body{padding:18px 20px}
+.modal-foot{padding:14px 20px;background:var(--surface);display:flex;justify-content:flex-end;gap:8px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font-size:11.5px;font-weight:600;color:var(--text-2)}
+.field input,.field textarea{padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none}
+.field input:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.color-row{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.color-opt{height:32px;border-radius:7px;cursor:pointer;border:2px solid transparent;transition:all .12s;position:relative}
+.color-opt:hover{transform:scale(1.06)}
+.color-opt.on{border-color:var(--text);box-shadow:0 0 0 2px white inset}
+.color-opt.on::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-weight:700;font-size:13px}
+
+/* ══ Toast ══ */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:white;padding:12px 20px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:9px;box-shadow:0 12px 32px rgba(0,0,0,.25);opacity:0;transition:all .22s;z-index:300;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{background:var(--green)}
+.toast svg{width:14px;height:14px}
+</style>
+
+<style id="atlas-sidebar-logo-canon">
+  /* Atlas sidebar logo — canonical styling injected to guarantee
+     consistent stacking (Atlas above, By GiveCentral below) across every screen. */
+  .sidebar-logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: 11px !important;
+    padding: 18px 18px 14px !important;
+    border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  }
+  .sidebar-logo .logo-mark {
+    width: 52px !important;
+    height: 40px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+  }
+  .sidebar-logo .logo-mark svg {
+    width: 52px !important;
+    height: 40px !important;
+  }
+  .sidebar-logo .logo-text-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 3px !important;
+  }
+  .sidebar-logo .logo-name {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 20px !important;
+    color: white !important;
+    line-height: 1 !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+  }
+  .sidebar-logo .logo-sub {
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    letter-spacing: .1em !important;
+    text-transform: uppercase !important;
+    color: rgba(255,255,255,.35) !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+        <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
+          <circle cx="22" cy="92" r="4" fill="white"/>
+          <circle cx="58" cy="58" r="5" fill="white"/>
+          <circle cx="98" cy="38" r="5.5" fill="white"/>
+          <circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
+          <circle cx="138" cy="24" r="7" fill="#C8A04A"/>
+          <circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
+        </svg>
+      </div>
+    <div class="logo-text-wrap"><span class="logo-name">Atlas</span><span class="logo-sub">By GiveCentral</span></div>
+  </div>
+  <a href="atlas-search.html" style="display:block;text-decoration:none">
+    <div class="sidebar-search">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+      <input type="text" placeholder="Search donors, gifts…" readonly>
+    </div>
+  </a>
+  <div class="sidebar-scroll">
+    <div class="nav-group">
+      <div class="nav-label">Main</div>
+      <a class="nav-item" href="atlas-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>Dashboard</a>
+      <a class="nav-item active" href="atlas-donors-list.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>Donors<span class="nav-badge">3,847</span></a>
+      <a class="nav-item" href="atlas-gifts-pledges.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>Gifts &amp; pledges<span class="nav-badge">142</span></a>
+      <a class="nav-item" href="atlas-campaign-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>Campaigns</a>
+      <a class="nav-item" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>Reports</a>
+    </div>
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Fundraising</div>
+      <a class="nav-item" href="atlas-pipeline.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>Prospect pipeline<span class="nav-badge">28</span></a>
+      <a class="nav-item" href="atlas-tasks.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>Tasks &amp; reminders<span class="nav-badge alert">7</span></a>
+      <a class="nav-item" href="atlas-communications.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>Communications</a>
+    </div>
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Admin</div>
+      <a class="nav-item" href="atlas-users-roles.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5"/></svg>Users &amp; roles</a>
+      <a class="nav-item" href="atlas-tags.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/></svg>Tags</a>
+      <a class="nav-item" href="atlas-integrations.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>Integrations</a>
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar">SR</div>
+    <div><div class="user-name">Sarah Reynolds</div><div class="user-role">Development Director</div></div>
+  </div>
+</aside>
+
+<div class="main">
+
+<div class="topbar">
+  <span class="topbar-title">Tags</span>
+  <span class="topbar-date">Monday, May 4, 2026</span>
+  <div class="topbar-right">
+    <button class="tb-btn" onclick="window.location='atlas-donors-list.html'">← Donors</button>
+  </div>
+</div>
+
+<div class="page-head">
+  <div class="ph-row">
+    <h1 class="ph-title">Tags</h1>
+    <span class="ph-count" id="tags-count">12 tags · used on 2,847 donor records</span>
+    <div class="ph-actions">
+      <button class="btn btn-blue" onclick="openTagModal()">
+        <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
+        New tag
+      </button>
+    </div>
+  </div>
+  <p class="ph-desc">Tags are flexible labels you can apply to donors for segmentation, recognition, or workflow routing. Use them to mark major prospects, board members, volunteer status, capital campaign participants, or any custom criterion your diocese cares about.</p>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi"><div class="lbl">Total tags</div><div class="val">12</div><div class="meta">8 owner-managed · 4 system</div></div>
+  <div class="kpi"><div class="lbl">Tagged donors</div><div class="val">2,847</div><div class="meta">74% of constituents have ≥1 tag</div></div>
+  <div class="kpi"><div class="lbl">Most-used tag</div><div class="val green">Lapsed</div><div class="meta">412 donors · auto-applied</div></div>
+  <div class="kpi"><div class="lbl">Created this month</div><div class="val">2</div><div class="meta">Easter prospects · Capital 2026</div></div>
+</div>
+
+<div class="tags-wrap">
+  <div class="tags-search-row">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+    <input id="tag-filter" placeholder="Search tags by name or description…" oninput="renderTags()">
+    <select id="tag-sort" onchange="renderTags()">
+      <option value="usage">Sort: Most used</option>
+      <option value="name">Sort: Name (A-Z)</option>
+      <option value="created">Sort: Recently created</option>
+    </select>
+  </div>
+
+  <div class="tags-grid" id="tags-grid"></div>
+</div>
+
+</div><!-- /.main -->
+
+<!-- New tag modal -->
+<div class="modal-overlay" id="tag-modal" onclick="if(event.target===this) closeTagModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">Create new tag</div>
+      <button class="modal-close" onclick="closeTagModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Tag name <span style="color:var(--rose)">*</span></label>
+        <input id="t-name" placeholder="e.g. Easter 2026 prospects" maxlength="40">
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <textarea id="t-desc" placeholder="Optional — explain what this tag means and when to apply it" rows="2"></textarea>
+      </div>
+      <div class="field">
+        <label>Color</label>
+        <div class="color-row" id="color-picker">
+          <div class="color-opt on" data-color="blue"   style="background:var(--blue)"></div>
+          <div class="color-opt"    data-color="green"  style="background:var(--green)"></div>
+          <div class="color-opt"    data-color="amber"  style="background:var(--amber)"></div>
+          <div class="color-opt"    data-color="rose"   style="background:var(--rose)"></div>
+          <div class="color-opt"    data-color="purple" style="background:var(--purple)"></div>
+          <div class="color-opt"    data-color="teal"   style="background:var(--teal)"></div>
+          <div class="color-opt"    data-color="gold"   style="background:var(--gold)"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeTagModal()">Cancel</button>
+      <button class="btn btn-blue" onclick="saveTag()">Save tag</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 7l3 3 7-7"/></svg><span id="toast-msg"></span></div>
+
+<script>
+/* ─── Tag data ─── */
+const COLOR_MAP = {
+  blue:   { bg:'var(--blue)',   light:'var(--blue-pale)' },
+  green:  { bg:'var(--green)',  light:'var(--green-light)' },
+  amber:  { bg:'var(--amber)',  light:'var(--amber-light)' },
+  rose:   { bg:'var(--rose)',   light:'var(--rose-light)' },
+  purple: { bg:'var(--purple)', light:'var(--purple-light)' },
+  teal:   { bg:'var(--teal)',   light:'var(--teal-light)' },
+  gold:   { bg:'var(--gold)',   light:'var(--gold-light)' }
+};
+
+const TAGS = [
+  { id:'T1',  name:'Major donor',           color:'gold',   desc:'Donors with lifetime giving above $25,000 or capacity above $50,000.', count:142, owner:'Sarah Reynolds', ownerAv:'SR', created:'2024-01-15', system:false },
+  { id:'T2',  name:'Recurring giver',       color:'blue',   desc:'Active monthly, quarterly, or annual recurring donors.',             count:412, owner:'(system)',       ownerAv:'AT', created:'2023-06-01', system:true },
+  { id:'T3',  name:'Board member',          color:'purple', desc:'Current diocesan board or council members. Excluded from solicitations.', count:24,  owner:'Fr. Patrick',    ownerAv:'FP', created:'2023-06-01', system:false },
+  { id:'T4',  name:'Parish council',        color:'purple', desc:'Active parish council members across all sites in the diocese.',     count:31,  owner:'Fr. Patrick',    ownerAv:'FP', created:'2023-06-01', system:false },
+  { id:'T5',  name:'Volunteer',             color:'teal',   desc:'Active volunteers tracked in the volunteer module — auto-synced.',   count:63,  owner:'(system)',       ownerAv:'AT', created:'2023-06-01', system:true },
+  { id:'T6',  name:'Capital campaign 2026', color:'gold',   desc:'Donors who pledged or gave to the cathedral capital campaign.',      count:156, owner:'Sarah Reynolds', ownerAv:'SR', created:'2026-01-08', system:false },
+  { id:'T7',  name:'Lapsed',                color:'rose',   desc:'No gift in 24+ months. Auto-applied based on giving history.',       count:412, owner:'(system)',       ownerAv:'AT', created:'2023-06-01', system:true },
+  { id:'T8',  name:'At-risk',               color:'rose',   desc:'Recurring donor whose card has expired or last 2 attempts failed.',  count:38,  owner:'(system)',       ownerAv:'AT', created:'2024-03-12', system:true },
+  { id:'T9',  name:'Faith leader',          color:'purple', desc:'Clergy, religious, or pastoral staff. Influences network and giving.', count:19,  owner:'Fr. Patrick',    ownerAv:'FP', created:'2023-11-20', system:false },
+  { id:'T10', name:'Q2 2026 outreach',      color:'blue',   desc:'Active list for the spring solicitation series.',                    count:87,  owner:'Sarah Reynolds', ownerAv:'SR', created:'2026-04-01', system:false },
+  { id:'T11', name:'Easter 2026 prospects', color:'amber',  desc:'Easter-only donors from prior years targeted for spring follow-up.', count:64,  owner:'Bridget McCarthy', ownerAv:'BM', created:'2026-04-22', system:false },
+  { id:'T12', name:'DAF intermediary',      color:'teal',   desc:'Donor-advised fund accounts — soft-credit the recommending donor.',  count:8,   owner:'Sarah Reynolds', ownerAv:'SR', created:'2025-09-10', system:false }
+];
+
+/* ─── Render ─── */
+function renderTags(){
+  const filter = (document.getElementById('tag-filter').value || '').toLowerCase().trim();
+  const sort = document.getElementById('tag-sort').value;
+  let rows = TAGS.slice();
+  if (filter) rows = rows.filter(t => (t.name + ' ' + t.desc).toLowerCase().includes(filter));
+  if (sort === 'usage') rows.sort((a,b) => b.count - a.count);
+  else if (sort === 'name') rows.sort((a,b) => a.name.localeCompare(b.name));
+  else if (sort === 'created') rows.sort((a,b) => b.created.localeCompare(a.created));
+
+  const grid = document.getElementById('tags-grid');
+  if (rows.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--text-3);background:white;border:1px dashed var(--border);border-radius:11px;font-style:italic">No tags match your search</div>';
+    return;
+  }
+  grid.innerHTML = rows.map(t => {
+    const color = COLOR_MAP[t.color] || COLOR_MAP.blue;
+    const initial = t.name[0].toUpperCase();
+    return `<div class="tag-card" onclick="viewTag('${t.id}')">
+      <div class="tag-card-head">
+        <span class="tag-swatch" style="background:${color.bg}">${initial}</span>
+        <span class="tag-name">${t.name}</span>
+        <button class="tag-kebab" onclick="event.stopPropagation();showKebab('${t.id}')" aria-label="Tag actions">
+          <svg viewBox="0 0 12 12" fill="currentColor"><circle cx="2.5" cy="6" r="1.1"/><circle cx="6" cy="6" r="1.1"/><circle cx="9.5" cy="6" r="1.1"/></svg>
+        </button>
+      </div>
+      <div class="tag-desc">${t.desc}</div>
+      <div class="tag-meta-row">
+        <span class="tag-count">${t.count.toLocaleString()}</span>
+        <span class="tag-count-lbl">donors</span>
+        <span class="tag-owner">${t.system ? '<span style="background:var(--surface);border:1px solid var(--border);padding:2px 7px;border-radius:99px;font-size:10px;font-weight:600;color:var(--text-2)">SYSTEM</span>' : '<span class="tag-owner-av">' + t.ownerAv + '</span>' + t.owner}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function viewTag(id){
+  const tag = TAGS.find(t => t.id === id);
+  toast('Opening "' + tag.name + '" → ' + tag.count + ' tagged donors on the Donors list');
+  setTimeout(() => window.location = 'atlas-donors-list.html', 700);
+}
+
+function showKebab(id){
+  const tag = TAGS.find(t => t.id === id);
+  toast('Tag actions for "' + tag.name + '": Edit · Duplicate · Merge with… · ' + (tag.system ? 'System tags cannot be deleted' : 'Delete'));
+}
+
+/* ─── New tag modal ─── */
+let pickedColor = 'blue';
+function openTagModal(){
+  document.getElementById('tag-modal').classList.add('show');
+  setTimeout(() => document.getElementById('t-name').focus(), 100);
+}
+function closeTagModal(){
+  document.getElementById('tag-modal').classList.remove('show');
+}
+document.querySelectorAll('#color-picker .color-opt').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('#color-picker .color-opt').forEach(o => o.classList.remove('on'));
+    c.classList.add('on');
+    pickedColor = c.dataset.color;
+  });
+});
+function saveTag(){
+  const name = (document.getElementById('t-name').value || '').trim();
+  const desc = (document.getElementById('t-desc').value || '').trim();
+  if (!name) { document.getElementById('t-name').focus(); return; }
+  TAGS.unshift({
+    id: 'T' + (TAGS.length + 1),
+    name, color: pickedColor,
+    desc: desc || 'No description',
+    count: 0, owner: 'Sarah Reynolds', ownerAv: 'SR',
+    created: new Date().toISOString().slice(0,10), system: false
+  });
+  closeTagModal();
+  document.getElementById('t-name').value = '';
+  document.getElementById('t-desc').value = '';
+  renderTags();
+  toast('Tag "' + name + '" created · ready to apply', 'success');
+}
+
+/* ─── Toast ─── */
+function toast(msg, type){
+  const t = document.getElementById('toast');
+  t.querySelector('#toast-msg').textContent = msg;
+  t.classList.remove('success');
+  if (type) t.classList.add(type);
+  t.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('tag-modal').classList.contains('show')) closeTagModal();
+});
+
+renderTags();
+</script>
+
+</body>
+</html>
