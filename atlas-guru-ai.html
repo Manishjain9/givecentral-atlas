@@ -640,11 +640,11 @@ body {
       </div>
       <div class="topbar-sub">Natural language donor intelligence</div>
       <div class="topbar-right">
-        <button class="tb-btn">
+        <button class="tb-btn" onclick="event.preventDefault();showQueryHistory(event)">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M6 4v3M6 9v.5"/></svg>
           Query history
         </button>
-        <button class="tb-btn">
+        <button class="tb-btn" onclick="event.preventDefault();showSavedQueries(event)">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M2 3.5h8M2 6h5M2 8.5h6"/></svg>
           Saved queries
         </button>
@@ -759,15 +759,15 @@ body {
             </div>
             <span class="results-meta" id="results-count">47 donors found</span>
             <div class="results-export">
-              <button class="export-btn">
+              <button class="export-btn" onclick="event.preventDefault();exportResults('csv')">
                 <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M5.5 1v7M2.5 5.5l3 3 3-3"/><path d="M1.5 9.5h8"/></svg>
                 CSV
               </button>
-              <button class="export-btn">
+              <button class="export-btn" onclick="event.preventDefault();exportResults('report')">
                 <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="1.5" width="8" height="8" rx="1.2"/><path d="M3.5 5.5h4M3.5 3.5h2M3.5 7.5h3"/></svg>
                 Report
               </button>
-              <button class="export-btn primary">
+              <button class="export-btn primary" onclick="event.preventDefault();openOutreachListModal()">
                 <svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h7v7H2zM2 6h7M5 3.5v7"/></svg>
                 Create outreach list
               </button>
@@ -809,10 +809,10 @@ body {
               <thead>
                 <tr>
                   <th><input type="checkbox" id="select-all" style="accent-color:var(--purple)"></th>
-                  <th class="sortable sorted">Donor <span class="sort-arrow">↓</span></th>
-                  <th class="sortable">Last gift <span class="sort-arrow"></span></th>
-                  <th class="sortable">Last gift amt <span class="sort-arrow"></span></th>
-                  <th class="sortable">FY2025 total <span class="sort-arrow"></span></th>
+                  <th class="sortable sorted" data-sort="name" onclick="sortColumn(this)">Donor <span class="sort-arrow">↓</span></th>
+                  <th class="sortable" data-sort="last" onclick="sortColumn(this)">Last gift <span class="sort-arrow"></span></th>
+                  <th class="sortable" data-sort="amt" onclick="sortColumn(this)">Last gift amt <span class="sort-arrow"></span></th>
+                  <th class="sortable" data-sort="fy" onclick="sortColumn(this)">FY2025 total <span class="sort-arrow"></span></th>
                   <th>Segment</th>
                   <th>AI score</th>
                   <th>Action</th>
@@ -1038,7 +1038,7 @@ body {
         const q = QUERIES[key];
         const guruMsg = document.createElement('div');
         guruMsg.className = 'msg';
-        guruMsg.innerHTML = `<div class="msg-guru-header"><div class="guru-avatar"><svg width="12" height="12" viewBox="0 0 13 13" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round"><circle cx="6.5" cy="4.5" r="3.5"/><path d="M4.5 9c0 2 4 2 4 0M3.5 8c-2 1-3 3.5-3 4.5M9.5 8c2 1 3 3.5 3 4.5"/></svg></div><span class="guru-name">Guru AI</span><span class="guru-time">Just now</span></div><div class="msg-guru-bubble">Found <span class="highlight">${q.count}</span> matching your query. Results displayed on the right.</div><div class="msg-actions"><button class="msg-action-btn primary">Create outreach list</button><button class="msg-action-btn">Export CSV</button></div>`;
+        guruMsg.innerHTML = `<div class="msg-guru-header"><div class="guru-avatar"><svg width="12" height="12" viewBox="0 0 13 13" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round"><circle cx="6.5" cy="4.5" r="3.5"/><path d="M4.5 9c0 2 4 2 4 0M3.5 8c-2 1-3 3.5-3 4.5M9.5 8c2 1 3 3.5 3 4.5"/></svg></div><span class="guru-name">Guru AI</span><span class="guru-time">Just now</span></div><div class="msg-guru-bubble">Found <span class="highlight">${q.count}</span> matching your query. Results displayed on the right.</div><div class="msg-actions"><button class="msg-action-btn primary" onclick="event.preventDefault();createList('${key}')">Create outreach list</button><button class="msg-action-btn" onclick="event.preventDefault();exportCSV('${key}')">Export CSV</button><button class="msg-action-btn" onclick="event.preventDefault();refineQuery()">Refine query</button></div>`;
         conv.appendChild(guruMsg);
         scrollChat();
         renderResults(key);
@@ -1083,11 +1083,13 @@ body {
       const tbody = document.getElementById('table-body');
       const q = QUERIES[key];
       const isLastGift = key === 'parish';
-      tbody.innerHTML = donors.map((d, i) => `
+      tbody.innerHTML = donors.map((d, i) => {
+        const safeName = (d.name || '').replace(/'/g, "&apos;");
+        return `
         <tr class="${i===0?'highlighted':''}">
           <td><input type="checkbox" style="accent-color:var(--purple)"></td>
           <td>
-            <div class="donor-name-cell">
+            <div class="donor-name-cell" style="cursor:pointer" onclick="openDonor('${safeName}')">
               <div class="d-avatar" style="background:${d.color};color:${d.tcolor}">${d.init}</div>
               <div>
                 <div class="d-name d-link">${d.name}</div>
@@ -1101,12 +1103,13 @@ body {
           <td><span class="tag-pill tag-${d.tag}">${d.tagLabel}</span></td>
           <td><span class="score-pill ${d.scoreCls}">${d.score}</span></td>
           <td>
-            <button class="row-action">
+            <button class="row-action" onclick="contactDonor('${safeName}', event)">
               <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="2" width="7" height="6.5" rx="1.2"/><path d="M1.5 4.5h7"/></svg>
               Contact
             </button>
           </td>
-        </tr>`).join('');
+        </tr>`;
+      }).join('');
 
       document.getElementById('filter-result-count').textContent = `Showing all ${donors.length}`;
     }
@@ -1140,8 +1143,226 @@ body {
       document.getElementById('query-input').focus();
       document.getElementById('query-input').placeholder = 'Refine your query…';
     }
-    function createList(key) {}
-    function exportCSV(key) {}
+
+    // ═══════════════════════════════════════════════════════
+    // Functional CTAs
+    // ═══════════════════════════════════════════════════════
+
+    // Current query key + visible result count (used by exports + modal)
+    let __currentKey = null;
+    function setCurrentKey(k) { __currentKey = k; }
+
+    function visibleCount() {
+      const cnt = document.getElementById('filter-result-count');
+      if (!cnt) return 0;
+      const m = (cnt.textContent || '').match(/\d+/);
+      return m ? parseInt(m[0]) : 0;
+    }
+    function queryLabel() {
+      const el = document.getElementById('results-query-text');
+      return el ? el.textContent.trim() : 'Ask Guru AI';
+    }
+
+    // ── Guru toast (dedupes against double-fire from the wire script) ──
+    function guruToast(msg, type) {
+      const now = Date.now();
+      if (window.__lastToastMsg === msg && (now - (window.__lastToastAt || 0)) < 350) return;
+      window.__lastToastMsg = msg;
+      window.__lastToastAt = now;
+
+      let t = document.getElementById('guru-toast');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'guru-toast';
+        t.innerHTML = '<span class="gt-ic">✓</span><span class="gt-msg"></span>';
+        document.body.appendChild(t);
+      }
+      t.className = 'show' + (type === 'err' ? ' err' : '');
+      t.querySelector('.gt-msg').textContent = msg;
+      clearTimeout(window.__guruToastT);
+      window.__guruToastT = setTimeout(() => t.classList.remove('show'), 3400);
+    }
+
+    // ── Result exports (results-header buttons) ──
+    function exportResults(type) {
+      const n = visibleCount();
+      if (type === 'csv') {
+        guruToast(n + ' donors exported to CSV · file ready in your Downloads');
+      } else if (type === 'report') {
+        guruToast('Report queued · PDF will land in your inbox within 30 seconds');
+      }
+    }
+
+    // chat-message buttons (older API)
+    function createList(key) {
+      setCurrentKey(key);
+      openOutreachListModal();
+    }
+    function exportCSV(key) {
+      setCurrentKey(key);
+      exportResults('csv');
+    }
+
+    // ── Donor row interactions ──
+    function openDonor(name) {
+      guruToast('Opening ' + name + '\'s donor profile…');
+      setTimeout(() => window.location = 'atlas-donor-360.html', 350);
+    }
+    function contactDonor(name, ev) {
+      if (ev) ev.stopPropagation();
+      guruToast('Opening email composer · pre-loading ' + name + '\'s contact info');
+      setTimeout(() => window.location = 'atlas-email-compose.html', 350);
+    }
+
+    // ── Sortable column headers ──
+    function sortColumn(th) {
+      const wasSorted = th.classList.contains('sorted');
+      document.querySelectorAll('.donor-table th.sortable').forEach(h => {
+        h.classList.remove('sorted');
+        const a = h.querySelector('.sort-arrow'); if (a) a.textContent = '';
+      });
+      th.classList.add('sorted');
+      const dir = wasSorted && th.dataset._dir === 'desc' ? 'asc' : 'desc';
+      th.dataset._dir = dir;
+      const arrow = th.querySelector('.sort-arrow');
+      if (arrow) arrow.textContent = dir === 'desc' ? '↓' : '↑';
+      guruToast('Sorted by ' + th.textContent.trim().replace(/[↓↑]/,'').trim() + ' · ' + (dir==='desc'?'high to low':'low to high'));
+    }
+
+    // ── Query history + Saved queries popovers ──
+    const HISTORY = [
+      { q: 'Monthly donors whose giving has stayed flat for 2+ years', when: '14m ago', n: 31 },
+      { q: 'Donors who gave last year but not yet this year',           when: '32m ago', n: 47 },
+      { q: 'Top 10 donors by parish with no contact in 90 days',        when: '2h ago',  n: 56 },
+      { q: 'High upgrade-propensity donors giving under $1,000',        when: 'Yesterday',n: 28 },
+      { q: 'Unfulfilled pledges over $500 from FY2025',                  when: '2d ago',  n: 19 },
+      { q: 'New donors this fiscal year by acquisition channel',         when: '3d ago',  n: 64 },
+      { q: 'Donors with capacity over $50k who gave under $5k',          when: '5d ago',  n: 12 },
+      { q: 'Lapsed donors who attended a parish event in last 12 mo',    when: 'Apr 26',  n: 41 }
+    ];
+    const SAVED = [
+      { name: 'Spring appeal · LYBUNT followups',     desc: 'LYBUNT donors with last gift under $500',  n: 27 },
+      { name: 'Major gift candidates this quarter',   desc: 'Upgrade propensity ≥ 80, FY giving < $1k', n: 18 },
+      { name: 'Recurring · 24-month flat',             desc: 'Same monthly amount 2+ years',             n: 31 },
+      { name: 'Bishop\'s briefing — top 20 by parish',  desc: 'Highest LTV per parish, no recent contact',n: 20 },
+      { name: 'Capital campaign Phase 2 prospects',   desc: 'Open pledge balance + capacity score high', n: 8  },
+      { name: 'Estate planning cultivation',          desc: 'Age 65+, no spouse, $25k+ lifetime',       n: 22 },
+      { name: 'Volunteer-to-donor crossover',          desc: 'Active volunteers, no gift FY2026',        n: 15 },
+      { name: 'At-risk recurring rescue',              desc: 'Card expiring next 30 days, $25+/mo',      n: 9  }
+    ];
+
+    function closePops() {
+      document.querySelectorAll('.guru-pop').forEach(p => p.remove());
+    }
+
+    function showQueryHistory(ev) {
+      if (ev) ev.stopPropagation();
+      closePops();
+      const btn = ev.currentTarget;
+      const rect = btn.getBoundingClientRect();
+      const pop = document.createElement('div');
+      pop.className = 'guru-pop';
+      pop.innerHTML =
+        '<div class="gp-head">Recent queries</div>' +
+        HISTORY.map((h, i) =>
+          '<div class="gp-row" onclick="rerunQuery(' + i + ',\'history\')">' +
+            '<div class="gp-row-main">' +
+              '<div class="gp-row-q">' + h.q + '</div>' +
+              '<div class="gp-row-sub">' + h.n + ' donors · ' + h.when + '</div>' +
+            '</div>' +
+            '<svg class="gp-arr" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 2l3 3-3 3"/></svg>' +
+          '</div>'
+        ).join('') +
+        '<div class="gp-foot">Showing last ' + HISTORY.length + ' of 87 queries this month</div>';
+      document.body.appendChild(pop);
+      pop.style.top = (rect.bottom + 8) + 'px';
+      pop.style.right = (window.innerWidth - rect.right) + 'px';
+      setTimeout(() => document.addEventListener('click', closePops, { once: true }), 0);
+    }
+
+    function showSavedQueries(ev) {
+      if (ev) ev.stopPropagation();
+      closePops();
+      const btn = ev.currentTarget;
+      const rect = btn.getBoundingClientRect();
+      const pop = document.createElement('div');
+      pop.className = 'guru-pop';
+      pop.innerHTML =
+        '<div class="gp-head">Saved queries · 8</div>' +
+        SAVED.map((s, i) =>
+          '<div class="gp-row" onclick="rerunQuery(' + i + ',\'saved\')">' +
+            '<div class="gp-row-main">' +
+              '<div class="gp-row-q"><span class="gp-bookmark">★</span> ' + s.name + '</div>' +
+              '<div class="gp-row-sub">' + s.desc + ' · ' + s.n + ' matches</div>' +
+            '</div>' +
+            '<svg class="gp-arr" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 2l3 3-3 3"/></svg>' +
+          '</div>'
+        ).join('') +
+        '<div class="gp-foot">Saved queries refresh automatically · last sync 4m ago</div>';
+      document.body.appendChild(pop);
+      pop.style.top = (rect.bottom + 8) + 'px';
+      pop.style.right = (window.innerWidth - rect.right) + 'px';
+      setTimeout(() => document.addEventListener('click', closePops, { once: true }), 0);
+    }
+
+    function rerunQuery(i, src) {
+      const item = (src === 'saved' ? SAVED : HISTORY)[i];
+      closePops();
+      guruToast('Re-running: "' + (item.q || item.name) + '"');
+      // Map to one of the demo datasets by keyword
+      const txt = (item.q || item.name).toLowerCase();
+      let key = 'lybunt';
+      if (txt.includes('flat') || txt.includes('recurring')) key = 'recurring';
+      else if (txt.includes('pledge')) key = 'pledge';
+      else if (txt.includes('parish')) key = 'parish';
+      else if (txt.includes('upgrade') || txt.includes('major')) key = 'upgrade';
+      // Find the suggestion chip and trigger it
+      const allChips = document.querySelectorAll('.suggestion-chips .chip');
+      const chipMap = { lybunt:0, upgrade:1, recurring:2, parish:3, pledge:4 };
+      const chip = allChips[chipMap[key] || 0];
+      if (chip) chip.click();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // Outreach list modal
+    // ═══════════════════════════════════════════════════════
+    function openOutreachListModal() {
+      const overlay = document.getElementById('ol-modal-overlay');
+      if (!overlay) return;
+      const count = visibleCount();
+      const label = queryLabel();
+      // Pre-fill name with cleaned query label
+      const cleanName = label.replace(/[?.]$/, '').replace(/^\w/, c => c.toUpperCase());
+      document.getElementById('ol-list-name').value = cleanName.length > 50
+        ? cleanName.slice(0, 47) + '…'
+        : cleanName;
+      document.getElementById('ol-count').textContent = count.toLocaleString();
+      document.getElementById('ol-query-text').textContent = label;
+      document.getElementById('ol-error').textContent = '';
+      document.body.classList.add('ol-modal-open');
+      overlay.classList.add('show');
+      setTimeout(() => document.getElementById('ol-list-name').select(), 220);
+    }
+    function closeOutreachListModal() {
+      const overlay = document.getElementById('ol-modal-overlay');
+      if (overlay) overlay.classList.remove('show');
+      document.body.classList.remove('ol-modal-open');
+    }
+    function saveOutreachList() {
+      const nameEl = document.getElementById('ol-list-name');
+      const name = (nameEl.value || '').trim();
+      const err = document.getElementById('ol-error');
+      if (!name) {
+        err.textContent = 'Give the list a name before saving.';
+        nameEl.focus();
+        return;
+      }
+      const count = visibleCount();
+      closeOutreachListModal();
+      guruToast('Outreach list "' + name + '" created · ' + count + ' donors added · syncs nightly');
+      setTimeout(() => window.location = 'atlas-outreach-lists.html', 1100);
+    }
+
 
     // Select all checkbox
     document.addEventListener('change', e => {
@@ -2072,6 +2293,219 @@ body {
 })();
 </script>
 <!-- end Atlas Dead-CTA Rescue -->
+
+<!-- ═══════════════════════════════════════════════════════
+     Guru AI · CTA support (toast, popovers, outreach modal)
+     ═══════════════════════════════════════════════════════ -->
+<style>
+  /* Guru toast */
+  #guru-toast {
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:#0F172A; color:white; padding:12px 18px; border-radius:10px;
+    box-shadow:0 12px 32px rgba(15,23,42,.25); font-family:'DM Sans',sans-serif; font-size:13px;
+    display:flex; align-items:center; gap:10px; z-index:9000;
+    opacity:0; transition:opacity .22s, transform .22s; pointer-events:none;
+    max-width:480px;
+  }
+  #guru-toast.show { opacity:1; transform:translateX(-50%); }
+  #guru-toast .gt-ic {
+    width:22px; height:22px; border-radius:50%;
+    background:#15803D; color:white; font-weight:700; font-size:12px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  #guru-toast.err .gt-ic { background:#BE185D; }
+
+  /* History / Saved query popovers */
+  .guru-pop {
+    position:fixed;
+    background:white; border:1px solid #E2E8F0; border-radius:12px;
+    box-shadow:0 16px 40px rgba(15,23,42,.18), 0 0 0 1px rgba(15,23,42,.04);
+    min-width:380px; max-width:420px;
+    padding:6px;
+    font-family:'DM Sans',sans-serif;
+    z-index:8000;
+    max-height:520px; overflow-y:auto;
+  }
+  .guru-pop .gp-head {
+    font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    color:#64748B; padding:8px 12px 6px;
+  }
+  .guru-pop .gp-row {
+    display:flex; align-items:center; gap:10px;
+    padding:9px 12px; border-radius:8px; cursor:pointer;
+    transition:background .12s;
+  }
+  .guru-pop .gp-row:hover { background:#F8FAFC; }
+  .gp-row-main { flex:1; min-width:0; }
+  .gp-row-q { font-size:13px; color:#0F172A; font-weight:500; line-height:1.35; }
+  .gp-row-sub { font-size:11.5px; color:#64748B; margin-top:2px; }
+  .gp-bookmark { color:#7C3AED; font-size:11px; vertical-align:1px; }
+  .gp-arr { width:11px; height:11px; color:#94A3B8; flex-shrink:0; }
+  .guru-pop .gp-foot {
+    font-size:10.5px; color:#94A3B8; padding:8px 12px 6px;
+    border-top:1px solid #F1F5F9; margin-top:4px;
+  }
+
+  /* Outreach list modal */
+  .ol-modal-overlay {
+    position:fixed; inset:0; background:rgba(15,23,42,.5); backdrop-filter:blur(3px);
+    display:none; align-items:center; justify-content:center;
+    z-index:9500; font-family:'DM Sans',sans-serif;
+    opacity:0; transition:opacity .18s;
+  }
+  .ol-modal-overlay.show { display:flex; opacity:1; }
+  .ol-modal {
+    background:white; border-radius:14px; width:520px; max-width:calc(100vw - 32px);
+    max-height:calc(100vh - 48px); overflow-y:auto;
+    box-shadow:0 24px 56px rgba(15,23,42,.22);
+    transform:translateY(8px) scale(.985); transition:transform .22s cubic-bezier(.16,1,.3,1);
+  }
+  .ol-modal-overlay.show .ol-modal { transform:translateY(0) scale(1); }
+  body.ol-modal-open { overflow:hidden; }
+  .ol-modal-head {
+    padding:18px 22px; border-bottom:1px solid #E2E8F0;
+    display:flex; align-items:center; gap:12px;
+  }
+  .ol-modal-icon {
+    width:36px; height:36px; border-radius:9px; background:#EDE9FE;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .ol-modal-icon svg { width:18px; height:18px; color:#7C3AED; }
+  .ol-modal-head-text { flex:1; min-width:0; }
+  .ol-modal-title { font-family:'DM Serif Display',serif; font-size:19px; color:#0F172A; line-height:1.2; }
+  .ol-modal-sub { font-size:12px; color:#64748B; margin-top:3px; }
+  .ol-modal-close {
+    width:30px; height:30px; border-radius:7px; border:none;
+    background:transparent; color:#64748B; font-size:22px;
+    cursor:pointer; line-height:1;
+  }
+  .ol-modal-close:hover { background:#F8FAFC; color:#0F172A; }
+
+  .ol-modal-body { padding:18px 22px; }
+  .ol-field { margin-bottom:14px; }
+  .ol-field label {
+    display:block; font-size:11.5px; font-weight:600; color:#334155; margin-bottom:6px;
+  }
+  .ol-field input, .ol-field textarea {
+    width:100%; padding:10px 12px; border:1.5px solid #E2E8F0; border-radius:8px;
+    font-size:13.5px; font-family:'DM Sans',sans-serif; color:#0F172A;
+    outline:none; transition:border-color .12s, box-shadow .12s;
+  }
+  .ol-field input:focus, .ol-field textarea:focus {
+    border-color:#7C3AED; box-shadow:0 0 0 3px rgba(124,58,237,.12);
+  }
+  .ol-field textarea { resize:vertical; min-height:60px; }
+
+  .ol-summary-card {
+    background:#FAF5FF; border:1px solid #E9D5FF; border-radius:10px;
+    padding:13px 15px; margin-bottom:14px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .ol-summary-count {
+    font-family:'DM Serif Display',serif; font-size:30px; line-height:1;
+    color:#7C3AED;
+  }
+  .ol-summary-meta { flex:1; min-width:0; }
+  .ol-summary-meta .l { font-size:11.5px; font-weight:600; color:#7C3AED; text-transform:uppercase; letter-spacing:.06em; }
+  .ol-summary-meta .q { font-size:13px; color:#0F172A; margin-top:2px; line-height:1.4; }
+
+  .ol-checks { display:flex; flex-direction:column; gap:8px; margin-bottom:6px; }
+  .ol-check { display:flex; align-items:flex-start; gap:8px; font-size:12.5px; color:#334155; line-height:1.45; }
+  .ol-check svg { width:14px; height:14px; color:#15803D; flex-shrink:0; margin-top:2px; }
+
+  .ol-error {
+    font-size:12px; color:#BE185D; min-height:18px; margin-top:6px;
+  }
+
+  .ol-modal-foot {
+    padding:14px 22px; background:#F8FAFC; display:flex; justify-content:flex-end; gap:8px;
+    border-top:1px solid #E2E8F0;
+  }
+  .ol-btn {
+    padding:10px 16px; border-radius:8px; font-size:13px; font-weight:500;
+    font-family:'DM Sans',sans-serif; cursor:pointer; border:none;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .ol-btn svg { width:12px; height:12px; flex-shrink:0; }
+  .ol-btn-ghost { background:white; border:1px solid #E2E8F0; color:#334155; }
+  .ol-btn-ghost:hover { background:#F8FAFC; }
+  .ol-btn-primary { background:#7C3AED; color:white; box-shadow:0 1px 6px rgba(124,58,237,.25); }
+  .ol-btn-primary:hover { background:#6D28D9; }
+</style>
+
+<!-- Outreach list modal -->
+<div class="ol-modal-overlay" id="ol-modal-overlay" onclick="if(event.target===this) closeOutreachListModal()">
+  <div class="ol-modal">
+    <div class="ol-modal-head">
+      <div class="ol-modal-icon">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 5h12M3 9h12M3 13h7"/>
+          <circle cx="14" cy="13" r="2.5"/>
+          <path d="M14 11.5v3M12.5 13h3"/>
+        </svg>
+      </div>
+      <div class="ol-modal-head-text">
+        <div class="ol-modal-title">Create outreach list</div>
+        <div class="ol-modal-sub">From your current Guru AI query</div>
+      </div>
+      <button class="ol-modal-close" onclick="closeOutreachListModal()" aria-label="Close">×</button>
+    </div>
+    <div class="ol-modal-body">
+
+      <div class="ol-summary-card">
+        <div class="ol-summary-count" id="ol-count">0</div>
+        <div class="ol-summary-meta">
+          <div class="l">Donors to be added</div>
+          <div class="q" id="ol-query-text">Ask Guru AI</div>
+        </div>
+      </div>
+
+      <div class="ol-field">
+        <label for="ol-list-name">List name</label>
+        <input id="ol-list-name" type="text" maxlength="80" placeholder="e.g. Spring appeal · LYBUNT followups">
+      </div>
+
+      <div class="ol-field">
+        <label for="ol-list-desc">Description <span style="font-weight:400;color:#94A3B8">— optional</span></label>
+        <textarea id="ol-list-desc" maxlength="240" placeholder="What's this list for? E.g. Used by Sarah for the April mail-house segment."></textarea>
+      </div>
+
+      <div class="ol-checks">
+        <div class="ol-check">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 7l3 3 5-6"/></svg>
+          <span><strong style="color:#0F172A">Auto-sync nightly</strong> — donors matching the same criteria are added automatically as records change.</span>
+        </div>
+        <div class="ol-check">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 7l3 3 5-6"/></svg>
+          <span><strong style="color:#0F172A">Available to your team</strong> — picks up the diocesan permission scope of the creator.</span>
+        </div>
+        <div class="ol-check">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 7l3 3 5-6"/></svg>
+          <span><strong style="color:#0F172A">Bulk-action ready</strong> — usable from Email composer, Tag picker, Tasks, and Reports.</span>
+        </div>
+      </div>
+
+      <div class="ol-error" id="ol-error"></div>
+    </div>
+    <div class="ol-modal-foot">
+      <button class="ol-btn ol-btn-ghost" onclick="closeOutreachListModal()">Cancel</button>
+      <button class="ol-btn ol-btn-primary" onclick="saveOutreachList()">
+        <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M2 6l3 3 5-7"/></svg>
+        Create list
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Close modal / popovers on Escape
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') {
+      closeOutreachListModal();
+      closePops();
+    }
+  });
+</script>
 
 </body>
 </html>
