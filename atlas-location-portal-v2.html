@@ -1,0 +1,2715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas — Campaign Location Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0B1929;--navy2:#112236;--navy3:#183350;
+  --blue:#1A62C8;--bluep:#E8F0FD;--bluel:#C0D6FA;
+  --gold:#C68B14;--golda:#E8A820;--goldl:#FBF2DC;--goldb:#F5DFA0;--goldd:#7A5208;
+  --green:#167A4A;--greenl:#DFF2E8;--greend:#0A4028;
+  --red:#BC2828;--redl:#FDE8E8;--redd:#7A1414;
+  --amber:#C07810;--amberl:#FEF3DC;--amberd:#7A4A08;
+  --teal:#0A7878;--teall:#D0F0F0;
+  --purp:#6830D8;--purpl:#EDE8FD;
+  --border:#D8E4F0;--border2:#B8CCDE;--surf:#F4F8FC;--white:#FFFFFF;
+  --text:#0B1929;--text2:#1E3A58;--text3:#4A6880;--text4:#7A98B0;
+  --shadow:0 2px 12px rgba(11,25,41,.08);--shadow-lg:0 8px 32px rgba(11,25,41,.12);
+}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#EBF0F8;color:var(--text);min-height:100vh}
+
+/* ── TOPBAR ── */
+.topbar{height:54px;background:var(--navy);display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:80;border-bottom:1px solid rgba(255,255,255,.05)}
+.tb-logo{display:flex;align-items:center;gap:10px}
+.tb-mark{width:36px;height:27px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 0 10px rgba(200,160,74,.18))}
+.tb-mark svg{width:36px;height:27px}
+.tb-name-wrap{display:flex;flex-direction:column;line-height:1}
+.tb-name{font-family:'Libre Baskerville',serif;font-size:17px;color:white;line-height:1;letter-spacing:-.005em}
+.tb-sub{font-size:7.5px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:3px}
+.tb-divider{width:1px;height:18px;background:rgba(255,255,255,.12)}
+.tb-campaign{font-size:12px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:6px}
+.tb-campaign b{color:rgba(255,255,255,.8);font-weight:600}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.tb-role-toggle{display:flex;gap:0;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:8px;overflow:hidden}
+.trt{padding:5px 13px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;background:none;border:none;color:rgba(255,255,255,.45);transition:all .13s;letter-spacing:.03em}
+.trt.active{background:var(--blue);color:white}
+.tb-user{display:flex;align-items:center;gap:7px;font-size:12px;color:rgba(255,255,255,.5)}
+.tb-av{width:26px;height:26px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white}
+
+/* ── HERO BANNER ── */
+.hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 55%,#1A2E48 100%);padding:24px 28px;border-bottom:2px solid var(--gold);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-80px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(26,98,200,.12) 0%,transparent 70%);pointer-events:none}
+.hero-inner{max-width:1280px;margin:0 auto;display:flex;align-items:flex-start;gap:20px}
+.hero-parish{flex:1}
+.hero-eyebrow{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.hero-eyebrow span{background:rgba(198,139,20,.2);border:1px solid rgba(198,139,20,.35);border-radius:20px;padding:2px 9px;color:var(--golda)}
+.hero-name{font-family:'Libre Baskerville',serif;font-size:26px;color:white;margin-bottom:4px;font-weight:700}
+.hero-campaign{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:14px}
+.hero-prog{display:flex;align-items:center;gap:12px}
+.hero-bar-wrap{flex:1;height:7px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;max-width:340px}
+.hero-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold),var(--golda));transition:width .8s ease}
+.hero-pct{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;color:var(--golda)}
+.hero-days{font-size:12px;color:rgba(255,255,255,.4);margin-left:8px}
+.hero-stats{display:flex;gap:0;background:rgba(0,0,0,.3);border-radius:12px;overflow:hidden;flex-shrink:0;align-self:center}
+.hstat{padding:12px 18px;border-right:1px solid rgba(255,255,255,.06);text-align:center}
+.hstat:last-child{border-right:none}
+.hstat-val{font-family:'Libre Baskerville',serif;font-size:19px;color:white;line-height:1;margin-bottom:2px}
+.hstat-val.gold{color:var(--golda)}
+.hstat-val.green{color:#72DFA8}
+.hstat-val.red{color:#F09090}
+.hstat-lbl{font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.28)}
+
+/* ── ROLE BANNER ── */
+.role-banner{padding:8px 28px;display:flex;align-items:center;gap:8px;font-size:12px;border-bottom:1px solid var(--border)}
+.rb-pastor{background:var(--goldl);color:var(--goldd);border-bottom-color:var(--goldb)}
+.rb-admin{background:var(--bluep);color:var(--blue);border-bottom-color:var(--bluel)}
+.rb-icon{width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rb-icon svg{width:10px;height:10px}
+.rb-pastor .rb-icon{background:var(--goldb)}
+.rb-admin .rb-icon{background:var(--bluel)}
+
+/* ── TAB NAV ── */
+.tab-nav{background:white;border-bottom:1px solid var(--border);padding:0 28px;display:flex;gap:0;overflow-x:auto;max-width:none}
+.tn-tab{padding:11px 16px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font-family:'Plus Jakarta Sans',sans-serif;background:none;border-top:none;border-left:none;border-right:none;transition:all .12s}
+.tn-tab:hover{color:var(--text2)}
+.tn-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+
+/* ── MAIN ── */
+.main{max-width:1280px;margin:0 auto;padding:24px 28px 80px;display:flex;flex-direction:column;gap:20px}
+
+/* ── VIEWS ── */
+.view{display:none;flex-direction:column;gap:20px}
+.view.active{display:flex}
+
+/* ── SECTION LABEL ── */
+.sec-label{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:-8px;display:flex;align-items:center;gap:8px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── CARD ── */
+.card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.card-head{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--surf)}
+.ch-icon{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ch-icon svg{width:11px;height:11px}
+.ch-title{font-size:12px;font-weight:700;color:var(--text);flex:1;text-transform:uppercase;letter-spacing:.04em}
+.ch-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.card-body{padding:16px 18px}
+
+/* ── KPI GRID ── */
+.kpi-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kpi-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.kpi{background:white;border:1px solid var(--border);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+.kpi.highlight-gold{border-left:3px solid var(--gold)}
+.kpi.highlight-green{border-left:3px solid var(--green)}
+.kpi.highlight-blue{border-left:3px solid var(--blue)}
+.kpi.highlight-red{border-left:3px solid var(--red)}
+.kpi-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text4);margin-bottom:6px}
+.kpi-val{font-family:'Libre Baskerville',serif;font-size:26px;color:var(--text);line-height:1;margin-bottom:4px}
+.kpi-sub{font-size:11px;color:var(--text3)}
+.kpi-sub.up{color:var(--green)}
+.kpi-sub.down{color:var(--red)}
+.kpi-sub.warn{color:var(--amber)}
+.kpi-bar{height:4px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden}
+.kpi-bar-fill{height:100%;border-radius:2px}
+
+/* ── COMMITTED VS PAID ── */
+.committed-paid-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.cp-half{padding:20px 22px}
+.cp-half:first-child{border-right:1px solid var(--border)}
+.cp-eyebrow{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text4);margin-bottom:8px}
+.cp-pct{font-family:'Libre Baskerville',serif;font-size:48px;line-height:1;margin-bottom:4px}
+.cp-committed .cp-pct{color:var(--gold)}
+.cp-paid .cp-pct{color:var(--green)}
+.cp-amounts{display:flex;align-items:baseline;gap:6px;margin-bottom:10px}
+.cp-raised{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;color:var(--text)}
+.cp-of{font-size:12px;color:var(--text3)}
+.cp-goal{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text3)}
+.cp-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.cp-committed .cp-bar-fill{background:linear-gradient(90deg,var(--gold),var(--golda));height:100%;border-radius:4px}
+.cp-paid .cp-bar-fill{background:linear-gradient(90deg,var(--green),#22A86A);height:100%;border-radius:4px}
+.cp-sub-row{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--text3)}
+
+/* ── GIFT TYPE CHART ── */
+.gift-type-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:.5px solid var(--border)}
+.gift-type-row:last-child{border-bottom:none}
+.gtr-label{width:130px;font-size:12px;color:var(--text2);flex-shrink:0;font-weight:500}
+.gtr-bar-wrap{flex:1;height:18px;background:var(--surf);border-radius:4px;overflow:hidden;position:relative}
+.gtr-bar{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:6px;min-width:30px;transition:width .6s ease}
+.gtr-bar-label{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;color:white;white-space:nowrap}
+.gtr-donors{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);width:60px;text-align:right;flex-shrink:0}
+.gtr-amount{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--text);width:95px;text-align:right;flex-shrink:0}
+
+/* ── DUAL BAR ── */
+.dual-bar-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:.5px solid var(--border)}
+.dual-bar-row:last-child{border-bottom:none}
+.dbr-label{width:130px;font-size:12px;color:var(--text2);flex-shrink:0;font-weight:500}
+.dbr-bars{flex:1;display:flex;flex-direction:column;gap:3px}
+.dbr-bar{height:10px;border-radius:3px;min-width:4px;transition:width .6s ease}
+.dbr-committed{background:var(--gold)}
+.dbr-paid{background:var(--green)}
+.dbr-val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);width:90px;text-align:right;flex-shrink:0}
+
+/* ── FUND SUMMARY TABLE ── */
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:white;background:var(--navy);padding:8px 12px;border-right:1px solid rgba(255,255,255,.07);text-align:left;white-space:nowrap}
+.data-table th:last-child{border-right:none;text-align:right}
+.data-table th.num{text-align:right}
+.data-table td{padding:9px 12px;border-bottom:.5px solid var(--border);vertical-align:middle;color:var(--text2)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr.sum-row td{background:var(--surf);font-weight:700;color:var(--text)}
+.data-table tr:hover td{background:var(--surf)}
+.td-num{font-family:'JetBrains Mono',monospace;text-align:right;font-size:12px}
+.td-name{font-weight:500;color:var(--text)}
+.badge-ot{background:var(--bluep);color:var(--blue)}
+.badge-pl{background:var(--goldl);color:var(--goldd)}
+.badge-st{background:var(--teall);color:var(--teal)}
+.badge-mg{background:var(--greenl);color:var(--greend)}
+.badge-ira{background:var(--purpl);color:var(--purp)}
+.badge-daf{background:var(--amberl);color:var(--amberd)}
+.status-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.sp-track{background:var(--greenl);color:var(--greend)}
+.sp-late{background:var(--redl);color:var(--redd)}
+.sp-due{background:var(--amberl);color:var(--amberd)}
+.sp-done{background:var(--surf);color:var(--text3)}
+.sp-writeoff{background:var(--redl);color:var(--redd)}
+.fulfill-bar{width:60px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;display:inline-block;margin-right:4px;vertical-align:middle}
+.fulfill-fill{height:100%;border-radius:3px}
+
+/* ── CASH FLOW ── */
+.cf-month-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:.5px solid var(--border)}
+.cf-month-row:last-child{border-bottom:none}
+.cfmr-month{width:80px;font-size:12px;font-weight:600;color:var(--text);flex-shrink:0}
+.cfmr-bar-wrap{flex:1;height:20px;background:var(--surf);border-radius:4px;overflow:hidden}
+.cfmr-bar{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;min-width:20px}
+.cfmr-bar-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:white;white-space:nowrap}
+.cfmr-val{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--text);width:90px;text-align:right;flex-shrink:0}
+.cfmr-type{font-size:10px;color:var(--text3);width:70px;text-align:right;flex-shrink:0}
+
+/* ── PLEDGE FULFILLMENT ── */
+.pf-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+.pfs{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:11px 14px;text-align:center}
+.pfs-val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;color:var(--text);margin-bottom:2px}
+.pfs-lbl{font-size:10px;color:var(--text4);text-transform:uppercase;letter-spacing:.05em}
+
+/* ── DONOR SEGMENTS ── */
+.seg-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.seg-card{background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:13px 15px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .12s}
+.seg-card:hover{background:var(--bluep);border-color:var(--bluel)}
+.seg-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.seg-icon svg{width:16px;height:16px}
+.seg-num{font-family:'Libre Baskerville',serif;font-size:22px;color:var(--text);line-height:1;margin-bottom:2px}
+.seg-lbl{font-size:11px;color:var(--text3);font-weight:500}
+.seg-sub{font-size:10px;color:var(--text4);margin-top:1px}
+.seg-avg{margin-left:auto;text-align:right;flex-shrink:0}
+.seg-avg-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:var(--text)}
+.seg-avg-lbl{font-size:9px;color:var(--text4)}
+
+/* ── PARTICIPATION ── */
+.part-meter{display:flex;align-items:center;gap:14px;background:var(--navy);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.pm-left{flex:1}
+.pm-rate{font-family:'Libre Baskerville',serif;font-size:40px;color:var(--golda);line-height:1;margin-bottom:3px}
+.pm-label{font-size:12px;color:rgba(255,255,255,.5)}
+.pm-calc{font-size:11px;color:rgba(255,255,255,.3);margin-top:3px}
+.pm-right{text-align:right}
+.pm-stat{margin-bottom:6px}
+.pm-stat-val{font-family:'JetBrains Mono',monospace;font-size:14px;color:white;font-weight:500}
+.pm-stat-lbl{font-size:10px;color:rgba(255,255,255,.35)}
+
+/* ── RECENT ACTIVITY ── */
+.act-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:.5px solid var(--border)}
+.act-row:last-child{border-bottom:none}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.act-body{flex:1}
+.act-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.act-detail{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.act-time{font-size:11px;color:var(--text4)}
+.act-amt{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;margin-left:auto;flex-shrink:0}
+.act-type{font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px}
+
+/* ── PIE (CSS) ── */
+.donut-wrap{display:flex;align-items:center;gap:20px}
+.donut{width:100px;height:100px;border-radius:50%;flex-shrink:0;background:conic-gradient(var(--gold) 0% 59%,var(--blue) 59% 100%);position:relative}
+.donut::after{content:'';position:absolute;inset:22px;border-radius:50%;background:white}
+.donut-legend{display:flex;flex-direction:column;gap:7px}
+.dl-item{display:flex;align-items:center;gap:7px;font-size:12px}
+.dl-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.dl-val{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:var(--text)}
+
+/* ── RANK BADGE ── */
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-size:11px;font-weight:700;flex-shrink:0}
+.rank-1{background:var(--gold);color:white}
+.rank-2{background:var(--text3);color:white}
+.rank-3{background:var(--amber);color:white}
+.rank-n{background:var(--surf);color:var(--text3);border:1px solid var(--border)}
+.rank-you{background:var(--blue);color:white}
+
+/* ── LEADERBOARD ── */
+.lb-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:.5px solid var(--border)}
+.lb-row:last-child{border-bottom:none}
+.lb-row.you{background:var(--bluep);margin:0 -18px;padding:9px 18px;border-bottom:.5px solid var(--bluel)}
+.lb-name{flex:1;font-size:13px;font-weight:500;color:var(--text)}
+.lb-parish{font-size:11px;color:var(--text3)}
+.lb-bar-wrap{width:120px;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.lb-bar-fill{height:100%;border-radius:3px;background:var(--blue)}
+.lb-row.you .lb-bar-fill{background:var(--gold)}
+.lb-pct{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);width:35px;text-align:right}
+.lb-amt{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--text);width:80px;text-align:right}
+
+/* ── ACTIONS ── */
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.action-btn{display:flex;align-items:center;gap:10px;padding:13px 16px;background:white;border:1px solid var(--border);border-radius:11px;cursor:pointer;transition:all .13s;font-family:'Plus Jakarta Sans',sans-serif}
+.action-btn:hover{border-color:var(--blue);background:var(--bluep)}
+.ab-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ab-icon svg{width:14px;height:14px;color:white}
+.ab-title{font-size:13px;font-weight:600;color:var(--text)}
+.ab-sub{font-size:11px;color:var(--text3)}
+.ab-arrow{margin-left:auto;color:var(--text4);font-size:14px}
+
+/* ── WARNING BANNER ── */
+.warn-banner{background:var(--redl);border:1px solid #F5C8C8;border-left:3px solid var(--red);border-radius:0 10px 10px 0;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--redd);line-height:1.65}
+.wb-icon{width:20px;height:20px;background:var(--red);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.wb-icon svg{width:10px;height:10px;color:white}
+
+.info-banner{background:var(--goldl);border:1px solid var(--goldb);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--goldd);line-height:1.65}
+
+/* ── TWO-COL ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* ── SNACK ── */
+.snack{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--navy);border:1px solid rgba(255,255,255,.1);color:white;padding:10px 20px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:8px;opacity:0;transition:all .25s;pointer-events:none;z-index:300}
+.snack.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.snack.g{background:var(--green)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:fadeUp .3s ease both}
+.a1{animation-delay:.04s}.a2{animation-delay:.09s}.a3{animation-delay:.14s}.a4{animation-delay:.19s}
+
+/* ── DATA MANAGEMENT TAB ── */
+.dm-intro{background:linear-gradient(135deg,var(--navy),var(--navy2));border-radius:14px;padding:20px 24px;display:flex;align-items:flex-start;gap:16px}
+.dmi-icon{width:44px;height:44px;background:rgba(255,255,255,.1);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dmi-icon svg{width:22px;height:22px;color:white}
+.dmi-title{font-family:'Libre Baskerville',serif;font-size:18px;color:white;margin-bottom:4px;font-style:italic;font-weight:400}
+.dmi-sub{font-size:13px;color:rgba(255,255,255,.5);line-height:1.65;max-width:580px}
+.dmi-badge{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap}
+.dmi-pill{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+.dmi-pill-amber{background:rgba(192,120,16,.3);border:1px solid rgba(192,120,16,.4);color:#F5C84A}
+.dmi-pill-blue{background:rgba(26,98,200,.3);border:1px solid rgba(26,98,200,.4);color:#93C5FD}
+.dmi-pill-green{background:rgba(22,122,74,.3);border:1px solid rgba(22,122,74,.4);color:#6EE7A8}
+
+/* Change proposal form */
+.change-proposal-card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.cpc-head{background:var(--surf);border-bottom:1px solid var(--border);padding:12px 18px;display:flex;align-items:center;gap:8px}
+.cpc-head-title{font-size:12px;font-weight:700;color:var(--text);flex:1;text-transform:uppercase;letter-spacing:.04em}
+.cpc-steps{display:flex;align-items:center;gap:0;padding:16px 20px;border-bottom:1px solid var(--border);overflow-x:auto}
+.cpc-step{display:flex;align-items:center;gap:0;flex-shrink:0}
+.cpc-step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;transition:all .15s}
+.cpc-step-dot.done{background:var(--green);color:white}
+.cpc-step-dot.active{background:var(--blue);color:white;box-shadow:0 0 0 3px rgba(26,98,200,.15)}
+.cpc-step-dot.todo{background:var(--surf);border:1.5px solid var(--border);color:var(--text4)}
+.cpc-step-label{font-size:11px;color:var(--text3);margin-left:7px;white-space:nowrap;font-weight:500}
+.cpc-step-label.active{color:var(--blue);font-weight:600}
+.cpc-step-line{width:32px;height:1.5px;background:var(--border);margin:0 6px;flex-shrink:0}
+.cpc-step-line.done{background:var(--green)}
+.cpc-body{padding:20px}
+.f-label-sm{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px;display:block}
+.f-input-sm{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);background:var(--surf);outline:none;transition:border-color .12s}
+.f-input-sm:focus{border-color:var(--blue);background:white}
+.f-select-sm{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);background:var(--surf);outline:none;cursor:pointer}
+.f-select-sm:focus{border-color:var(--blue)}
+.f-textarea-sm{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);background:var(--surf);outline:none;resize:vertical;min-height:70px}
+.f-textarea-sm:focus{border-color:var(--blue)}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* Before/after diff inline */
+.inline-diff{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:8px}
+.id-before{background:var(--redl);padding:11px 14px;border-right:1px solid var(--border)}
+.id-after{background:var(--greenl);padding:11px 14px}
+.id-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+.id-before .id-label{color:var(--redd)}
+.id-after .id-label{color:var(--greend)}
+.id-val{font-size:13px;font-weight:500}
+.id-before .id-val{color:var(--redd);text-decoration:line-through;opacity:.7}
+.id-after .id-val{color:var(--greend)}
+
+/* Pending proposals queue — parish side */
+.proposal-row{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:.5px solid var(--border)}
+.proposal-row:last-child{border-bottom:none}
+.pr-status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.pr-body{flex:1}
+.pr-type{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;display:flex;align-items:center;gap:7px}
+.pr-donor{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:3px}
+.pr-change{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pr-time{font-size:11px;color:var(--text4);font-family:'JetBrains Mono',monospace}
+.pr-status-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0;align-self:flex-start;margin-top:3px}
+.psb-pending{background:var(--amberl);color:var(--amberd);border:1px solid var(--goldb)}
+.psb-approved{background:var(--greenl);color:var(--greend)}
+.psb-rejected{background:var(--redl);color:var(--redd)}
+.psb-new{background:var(--bluep);color:var(--blue);border:1px solid var(--bluel)}
+
+/* New donor staging card */
+.new-donor-stages{display:flex;flex-direction:column;gap:0}
+.nds-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:.5px solid var(--border)}
+.nds-row:last-child{border-bottom:none}
+.nds-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px}
+.nds-body{flex:1}
+.nds-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.nds-fields{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--text3)}
+.nds-stage{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;flex-shrink:0}
+.nds-stage-staging{background:var(--amberl);color:var(--amberd)}
+.nds-stage-pending{background:var(--bluep);color:var(--blue)}
+.nds-stage-committed{background:var(--greenl);color:var(--greend)}
+.nds-stage-rejected{background:var(--redl);color:var(--redd)}
+
+/* ── PLEDGE SUB-NAV ── */
+.pledge-subnav{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;background:white;border:1.5px solid var(--border);color:var(--text3);transition:all .13s;display:inline-flex;align-items:center}
+.pledge-subnav:hover{border-color:var(--blue);color:var(--blue)}
+.pledge-subnav.active{background:var(--navy);color:white;border-color:var(--navy)}
+
+/* ── CAMPAIGN TOGGLE ── */
+.campaign-switcher{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.cs-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);flex-shrink:0}
+.cs-pills{display:flex;gap:0;background:rgba(0,0,0,.3);border-radius:9px;overflow:hidden;flex-shrink:0}
+.cs-pill{padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;background:none;border:none;color:rgba(255,255,255,.45);transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.cs-pill:hover{color:rgba(255,255,255,.75);background:rgba(255,255,255,.05)}
+.cs-pill.active{background:var(--gold);color:var(--navy)}
+.cs-pill-pct{font-size:10px;font-weight:700;padding:1px 5px;border-radius:20px;background:rgba(0,0,0,.2)}
+.cs-pill.active .cs-pill-pct{background:rgba(0,0,0,.15);color:var(--navy)}
+.cs-add{padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.2);border-radius:7px;color:rgba(255,255,255,.4);transition:all .13s}
+.cs-add:hover{background:rgba(255,255,255,.12);color:rgba(255,255,255,.6)}
+
+/* Campaign selector dropdown */
+.campaign-dropdown{position:absolute;top:calc(100% + 8px);left:0;background:var(--navy2);border:1px solid rgba(255,255,255,.12);border-radius:14px;overflow:hidden;z-index:100;min-width:420px;box-shadow:0 12px 40px rgba(0,0,0,.4);display:none}
+.campaign-dropdown.open{display:block;animation:fadeUp .18s ease}
+.cd-header{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.cd-campaign{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;transition:all .12s;border-bottom:1px solid rgba(255,255,255,.06)}
+.cd-campaign:last-child{border-bottom:none}
+.cd-campaign:hover{background:rgba(255,255,255,.06)}
+.cd-campaign.active{background:rgba(198,139,20,.15);border-left:3px solid var(--gold)}
+.cd-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cd-info{flex:1}
+.cd-name{font-size:13px;font-weight:600;color:white;margin-bottom:3px}
+.cd-meta{font-size:11px;color:rgba(255,255,255,.4);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cd-meta-sep{color:rgba(255,255,255,.2)}
+.cd-stats{display:flex;gap:0;flex-shrink:0}
+.cd-stat{text-align:center;padding:0 10px;border-right:1px solid rgba(255,255,255,.08)}
+.cd-stat:last-child{border-right:none}
+.cd-stat-val{font-family:'JetBrains Mono',monospace;font-size:13px;color:white;line-height:1}
+.cd-stat-lbl{font-size:9px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+
+/* 2028 pathway banner */
+.pathway-banner{background:linear-gradient(135deg,var(--navy3),#1A2D50);border:1px solid rgba(26,98,200,.3);border-radius:12px;padding:16px 20px;display:flex;align-items:flex-start;gap:12px}
+.pb-icon{width:36px;height:36px;background:rgba(26,98,200,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pb-icon svg{width:18px;height:18px;color:#93C5FD}
+.pb-title{font-size:13px;font-weight:700;color:white;margin-bottom:4px}
+.pb-sub{font-size:12px;color:rgba(255,255,255,.5);line-height:1.65}
+.pb-badge{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;background:rgba(26,98,200,.25);border:1px solid rgba(26,98,200,.35);color:#93C5FD}
+
+/* ── DIOCESE REVIEW QUEUE TAB ── */
+.dq-hero{background:linear-gradient(135deg,#3A0A0A,#5A1414);border-radius:14px;padding:20px 24px;display:flex;align-items:center;gap:16px}
+.dq-hero-icon{width:44px;height:44px;background:rgba(255,255,255,.1);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dq-hero-icon svg{width:22px;height:22px;color:white}
+.dq-hero-title{font-family:'Libre Baskerville',serif;font-size:18px;color:white;margin-bottom:3px;font-style:italic}
+.dq-hero-sub{font-size:13px;color:rgba(255,255,255,.5);line-height:1.6}
+.dq-stats{display:flex;gap:0;background:rgba(0,0,0,.3);border-radius:10px;overflow:hidden;margin-left:auto;flex-shrink:0}
+.dqs{padding:10px 18px;border-right:1px solid rgba(255,255,255,.06);text-align:center}
+.dqs:last-child{border-right:none}
+.dqs-val{font-family:'Libre Baskerville',serif;font-size:20px;color:white;line-height:1}
+.dqs-val.red{color:#F09090}
+.dqs-val.amber{color:#FCD34D}
+.dqs-val.green{color:#86EFAC}
+.dqs-lbl{font-size:9px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+
+/* Review queue cards */
+.rq-card{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:10px;transition:all .13s}
+.rq-card:hover{box-shadow:var(--shadow-lg)}
+.rq-card.expanded .rq-body{display:block}
+.rq-head{padding:13px 18px;display:flex;align-items:flex-start;gap:12px;cursor:pointer}
+.rq-type-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.rq-type-icon svg{width:14px;height:14px;color:white}
+.rq-meta{flex:1}
+.rq-parish{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text4);margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.rq-donor-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
+.rq-change-summary{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.rq-submitted{font-size:11px;color:var(--text4);font-family:'JetBrains Mono',monospace;margin-top:3px}
+.rq-priority{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0;align-self:flex-start}
+.rqp-high{background:var(--redl);color:var(--redd);border:1px solid #F5C8C8}
+.rqp-normal{background:var(--amberl);color:var(--amberd);border:1px solid var(--goldb)}
+.rqp-low{background:var(--surf);color:var(--text3);border:1px solid var(--border)}
+.rqp-new{background:var(--bluep);color:var(--blue);border:1px solid var(--bluel)}
+.rq-body{display:none;border-top:1px solid var(--border)}
+.rq-diff{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.rq-diff-before{background:rgba(188,40,40,.04);padding:14px 18px;border-right:1px solid var(--border)}
+.rq-diff-after{background:rgba(22,122,74,.04);padding:14px 18px}
+.rq-diff-label{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.rq-diff-before .rq-diff-label{color:var(--redd)}
+.rq-diff-after .rq-diff-label{color:var(--greend)}
+.rq-diff-field{display:flex;flex-direction:column;gap:2px;margin-bottom:8px;padding-bottom:8px;border-bottom:.5px solid var(--border)}
+.rq-diff-field:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.rq-diff-key{font-size:10px;color:var(--text4);font-family:'JetBrains Mono',monospace;letter-spacing:.03em}
+.rq-diff-val{font-size:13px;font-weight:600}
+.rq-diff-before .rq-diff-val{color:var(--redd);text-decoration:line-through;opacity:.7}
+.rq-diff-after .rq-diff-val{color:var(--greend)}
+.rq-context{background:var(--surf);border-top:1px solid var(--border);padding:12px 18px;font-size:12px;color:var(--text3);line-height:1.65;display:flex;gap:10px;align-items:flex-start}
+.rq-context-icon{width:16px;height:16px;flex-shrink:0;margin-top:1px;color:var(--text4)}
+.rq-actions{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;background:rgba(0,0,0,.015)}
+.rq-actions-left{flex:1;font-size:12px;color:var(--text3)}
+.rq-btn{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .12s;border:1px solid var(--border);display:flex;align-items:center;gap:5px}
+.rq-btn svg{width:11px;height:11px}
+.rq-btn-approve{background:var(--green);color:white;border-color:var(--green)}
+.rq-btn-approve:hover{background:var(--greend)}
+.rq-btn-modify{background:var(--amberl);color:var(--amberd);border-color:var(--goldb)}
+.rq-btn-modify:hover{background:var(--goldb)}
+.rq-btn-reject{background:var(--redl);color:var(--redd);border-color:#F5C8C8}
+.rq-btn-reject:hover{background:#FAD4D4}
+.rq-btn-ghost{background:none;color:var(--text3)}
+.rq-btn-ghost:hover{background:var(--surf)}
+
+/* New donor review card */
+.nd-review{display:flex;flex-direction:column;gap:0}
+.ndr-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:.5px solid var(--border);font-size:12px}
+.ndr-row:last-child{border-bottom:none}
+.ndr-key{color:var(--text3)}
+.ndr-val{color:var(--text);font-weight:500;text-align:right}
+.ndr-val.new{color:var(--blue);font-weight:700}
+
+/* Audit trail mini */
+.audit-mini-row{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:.5px solid var(--border);font-size:11px}
+.audit-mini-row:last-child{border-bottom:none}
+.amr-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.amr-body{flex:1;color:var(--text2);line-height:1.5}
+.amr-time{color:var(--text4);flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:10px}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-logo">
+    <div class="tb-mark">
+      <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Connecting move-lines (gold-tinted) -->
+        <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
+        <!-- Donor stars -->
+        <circle cx="22"  cy="92" r="4"   fill="white"/>
+        <circle cx="58"  cy="58" r="5"   fill="white"/>
+        <circle cx="98"  cy="38" r="5.5" fill="white"/>
+        <circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
+        <!-- Closed/won prospect — gold accent star with halo ring -->
+        <circle cx="138" cy="24" r="7"  fill="#C8A04A"/>
+        <circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
+      </svg>
+    </div>
+    <div class="tb-name-wrap">
+      <span class="tb-name">Atlas</span>
+      <span class="tb-sub">By GiveCentral</span>
+    </div>
+  </div>
+  <div class="tb-divider"></div>
+  <div class="tb-campaign">Diocese of Fort Worth <span style="color:rgba(255,255,255,.2)">›</span> <b>Catholic Ministry Appeal 2026</b></div>
+  <div class="tb-right">
+    <div class="tb-role-toggle">
+      <button class="trt active" id="btn-pastor" onclick="setRole('pastor')">Pastor view</button>
+      <button class="trt" id="btn-admin" onclick="setRole('admin')">Admin view</button>
+    </div>
+    <div class="tb-user"><div class="tb-av">FR</div>Fr. Robert Malloy</div>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-parish">
+      <div class="hero-eyebrow">Campaign location portal <span>St. Michael's Parish, Tampa</span></div>
+
+      <!-- CAMPAIGN TOGGLE — always visible, switches all data on the page -->
+      <div class="campaign-switcher" style="position:relative">
+        <span class="cs-label">Campaign</span>
+        <div class="cs-pills" id="cs-pills">
+          <button class="cs-pill active" onclick="switchCampaign('cma',this)">
+            CMA 2026 <span class="cs-pill-pct">69%</span>
+          </button>
+          <button class="cs-pill" onclick="switchCampaign('capital',this)">
+            Cathedral Capital <span class="cs-pill-pct">41%</span>
+          </button>
+          <button class="cs-pill" onclick="switchCampaign('school',this)">
+            School Fund 2026 <span class="cs-pill-pct">88%</span>
+          </button>
+        </div>
+        <button class="cs-add" onclick="toggleCampaignDropdown()" title="Switch campaign or view all">
+          ▾ All campaigns
+        </button>
+
+        <!-- Dropdown picker showing all campaigns with key stats -->
+        <div class="campaign-dropdown" id="campaign-dropdown">
+          <div class="cd-header">St. Michael's Parish — active campaigns</div>
+          <div class="cd-campaign active" onclick="switchCampaign('cma',null);toggleCampaignDropdown()">
+            <div class="cd-dot" style="background:var(--gold)"></div>
+            <div class="cd-info">
+              <div class="cd-name">Catholic Ministry Appeal 2026</div>
+              <div class="cd-meta">
+                <span>Annual appeal</span><span class="cd-meta-sep">·</span>
+                <span>Ends Jun 30, 2026</span><span class="cd-meta-sep">·</span>
+                <span>88 days left</span>
+              </div>
+            </div>
+            <div class="cd-stats">
+              <div class="cd-stat"><div class="cd-stat-val" style="color:var(--golda)">69%</div><div class="cd-stat-lbl">Committed</div></div>
+              <div class="cd-stat"><div class="cd-stat-val" style="color:#86EFAC">57%</div><div class="cd-stat-lbl">Paid</div></div>
+              <div class="cd-stat"><div class="cd-stat-val">$54,200</div><div class="cd-stat-lbl">Raised</div></div>
+            </div>
+          </div>
+          <div class="cd-campaign" onclick="switchCampaign('capital',null);toggleCampaignDropdown()">
+            <div class="cd-dot" style="background:var(--blue)"></div>
+            <div class="cd-info">
+              <div class="cd-name">Cathedral Restoration Capital Campaign</div>
+              <div class="cd-meta">
+                <span>Capital campaign</span><span class="cd-meta-sep">·</span>
+                <span>Multi-year · ends Dec 31, 2027</span><span class="cd-meta-sep">·</span>
+                <span>⚠ Behind pace</span>
+              </div>
+            </div>
+            <div class="cd-stats">
+              <div class="cd-stat"><div class="cd-stat-val" style="color:#FCD34D">41%</div><div class="cd-stat-lbl">Committed</div></div>
+              <div class="cd-stat"><div class="cd-stat-val" style="color:#86EFAC">38%</div><div class="cd-stat-lbl">Paid</div></div>
+              <div class="cd-stat"><div class="cd-stat-val">$82,000</div><div class="cd-stat-lbl">Raised</div></div>
+            </div>
+          </div>
+          <div class="cd-campaign" onclick="switchCampaign('school',null);toggleCampaignDropdown()">
+            <div class="cd-dot" style="background:var(--green)"></div>
+            <div class="cd-info">
+              <div class="cd-name">Parish School Fund 2026</div>
+              <div class="cd-meta">
+                <span>Annual fund</span><span class="cd-meta-sep">·</span>
+                <span>Ends Aug 31, 2026</span><span class="cd-meta-sep">·</span>
+                <span>On pace</span>
+              </div>
+            </div>
+            <div class="cd-stats">
+              <div class="cd-stat"><div class="cd-stat-val" style="color:#86EFAC">88%</div><div class="cd-stat-lbl">Committed</div></div>
+              <div class="cd-stat"><div class="cd-stat-val" style="color:#86EFAC">84%</div><div class="cd-stat-lbl">Paid</div></div>
+              <div class="cd-stat"><div class="cd-stat-val">$44,000</div><div class="cd-stat-lbl">Raised</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-name" id="hero-campaign-name">Catholic Ministry Appeal 2026</div>
+      <div class="hero-campaign" id="hero-campaign-meta">Diocese of Fort Worth · Campaign ends June 30, 2026 · 88 days remaining</div>
+      <div class="hero-prog">
+        <div class="hero-bar-wrap"><div class="hero-bar-fill" id="hero-bar" style="width:69%"></div></div>
+        <span class="hero-pct" id="hero-pct">69%</span>
+        <span class="hero-days" id="hero-days">of $78,000 goal · 88 days left</span>
+      </div>
+    </div>
+    <div class="hero-stats" id="hero-stats">
+      <div class="hstat"><div class="hstat-val gold" id="hs-committed">$54,200</div><div class="hstat-lbl">Committed</div></div>
+      <div class="hstat"><div class="hstat-val green" id="hs-paid">$44,800</div><div class="hstat-lbl">Cash received</div></div>
+      <div class="hstat"><div class="hstat-val" id="hs-donors">247</div><div class="hstat-lbl">Donors</div></div>
+      <div class="hstat"><div class="hstat-val" id="hs-avg">$219</div><div class="hstat-lbl">Avg gift</div></div>
+      <div class="hstat"><div class="hstat-val red" id="hs-pledge">$9,400</div><div class="hstat-lbl">Pledge balance</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ROLE BANNER -->
+<div class="role-banner rb-pastor" id="role-banner-pastor">
+  <div class="rb-icon"><svg viewBox="0 0 10 10" fill="none" stroke="var(--goldd)" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="3.5" r="2"/><path d="M1 9c0-2 1.8-3.5 4-3.5S9 7 9 9"/></svg></div>
+  Pastor view — St. Michael's Parish, Tampa · Read-only · Financial summary and progress data
+</div>
+<div class="role-banner rb-admin" id="role-banner-admin" style="display:none">
+  <div class="rb-icon"><svg viewBox="0 0 10 10" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><path d="M2 8V4.5l3-3 3 3V8M4 8h2V6H4z"/></svg></div>
+  Parish Administrator view — St. Michael's Parish · Full access · Batch entry, pledge management, donor detail enabled
+</div>
+
+<!-- TABS -->
+<div class="tab-nav">
+  <button class="tn-tab active" onclick="setTab('overview',this)">Overview</button>
+  <button class="tn-tab" onclick="setTab('gifttype',this)">Gift type analysis</button>
+  <button class="tn-tab" onclick="setTab('pledges',this)">Pledge management</button>
+  <button class="tn-tab" onclick="setTab('cashflow',this)">Cash flow</button>
+  <button class="tn-tab" onclick="setTab('donors',this)" id="tab-donors">Donor detail</button>
+  <button class="tn-tab" onclick="setTab('diocese',this)">Diocese comparison</button>
+  <button class="tn-tab" id="tab-datamanage" onclick="setTab('datamanage',this)" style="display:none">
+    Data management
+    <span id="dm-badge" style="margin-left:5px;background:var(--amber);color:white;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px">3</span>
+  </button>
+  <button class="tn-tab" id="tab-diocesequeue" onclick="setTab('diocesequeue',this)" style="display:none">
+    Diocese review queue
+    <span id="dq-badge" style="margin-left:5px;background:var(--red);color:white;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px">7</span>
+  </button>
+</div>
+
+<div class="main">
+
+  <!-- ══ OVERVIEW ══ -->
+  <div class="view active" id="view-overview">
+
+    <!-- Committed vs Paid — THE key addition -->
+    <div class="sec-label anim a1">Goal progress — committed vs. cash received</div>
+    <div class="committed-paid-grid anim a1">
+      <div class="cp-half cp-committed">
+        <div class="cp-eyebrow">% goal committed (pledges + gifts)</div>
+        <div class="cp-pct">69%</div>
+        <div class="cp-amounts">
+          <span class="cp-raised">$54,200</span>
+          <span class="cp-of">committed of</span>
+          <span class="cp-goal">$78,000 goal</span>
+        </div>
+        <div class="cp-bar"><div class="cp-bar-fill" style="width:69%"></div></div>
+        <div class="cp-sub-row">
+          <span>Pledges: $28,400 · One-time: $21,800 · Other: $4,000</span>
+          <span>↑ 9% vs 2025</span>
+        </div>
+      </div>
+      <div class="cp-half cp-paid">
+        <div class="cp-eyebrow">% goal paid (cash received)</div>
+        <div class="cp-pct">57%</div>
+        <div class="cp-amounts">
+          <span class="cp-raised">$44,800</span>
+          <span class="cp-of">received of</span>
+          <span class="cp-goal">$78,000 goal</span>
+        </div>
+        <div class="cp-bar"><div class="cp-bar-fill" style="width:57%"></div></div>
+        <div class="cp-sub-row">
+          <span>Pledge balance outstanding: $9,400</span>
+          <span>Fulfillment rate: 83.1%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-grid-4 anim a2">
+      <div class="kpi highlight-gold">
+        <div class="kpi-label">Donor count</div>
+        <div class="kpi-val">247</div>
+        <div class="kpi-sub up">↑ 14 new this campaign</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:30%;background:var(--gold)"></div></div>
+        <div class="kpi-sub" style="margin-top:5px">of 831 households — 29.7% participation</div>
+      </div>
+      <div class="kpi highlight-blue">
+        <div class="kpi-label">Average gift amount</div>
+        <div class="kpi-val">$219</div>
+        <div class="kpi-sub up">↑ $18 vs. 2025 avg ($201)</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:55%;background:var(--blue)"></div></div>
+        <div class="kpi-sub" style="margin-top:5px">Diocese avg: $785 · You are below diocese avg</div>
+      </div>
+      <div class="kpi highlight-red">
+        <div class="kpi-label">Outstanding pledges</div>
+        <div class="kpi-val">$9,400</div>
+        <div class="kpi-sub warn">8 open installments due</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:17%;background:var(--red)"></div></div>
+        <div class="kpi-sub" style="margin-top:5px">1 overdue · $32,514 written off diocese-wide</div>
+      </div>
+      <div class="kpi highlight-green">
+        <div class="kpi-label">Diocese rank</div>
+        <div class="kpi-val">#4 / 72</div>
+        <div class="kpi-sub up">↑ 2 spots vs. last year</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:69%;background:var(--green)"></div></div>
+        <div class="kpi-sub" style="margin-top:5px">Top parish: Cathedral of St. Jude at 94%</div>
+      </div>
+    </div>
+
+    <!-- Pace warning -->
+    <div class="warn-banner anim a3" id="pace-warn-banner">
+      <div class="wb-icon"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M5 2v3M5 7v.5"/><path d="M1 9L5 1l4 8H1z"/></svg></div>
+      <div id="pace-warn-text"><strong>St. Michael's is 12% below goal pace.</strong> At current giving rate, your parish will reach approximately $68,400 by June 30 — your goal is $78,000. 23 donors gave in 2025 but have not yet given this year. A targeted outreach to those 23 households could close a significant portion of the gap. <span style="color:var(--red);font-weight:600;cursor:pointer" onclick="setTab('donors',document.querySelectorAll('.tn-tab')[4])"> View 23 lapsed donors →</span></div>
+    </div>
+
+    <!-- Participation + recent activity side by side -->
+    <div class="two-col anim a4">
+      <div class="card">
+        <div class="card-head">
+          <div class="ch-icon" style="background:var(--navy)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4" r="2.5"/><path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4"/></svg></div>
+          <span class="ch-title">Participation rate</span>
+        </div>
+        <div class="card-body">
+          <div class="part-meter">
+            <div class="pm-left">
+              <div class="pm-rate">29.7%</div>
+              <div class="pm-label">Parish participation rate</div>
+              <div class="pm-calc">247 donors ÷ 831 households × 100</div>
+            </div>
+            <div class="pm-right">
+              <div class="pm-stat"><div class="pm-stat-val">831</div><div class="pm-stat-lbl">Total households</div></div>
+              <div class="pm-stat"><div class="pm-stat-val">247</div><div class="pm-stat-lbl">Have given</div></div>
+              <div class="pm-stat"><div class="pm-stat-val" style="color:#F09090">584</div><div class="pm-stat-lbl">Not yet given</div></div>
+            </div>
+          </div>
+          <div class="seg-grid">
+            <div class="seg-card">
+              <div class="seg-icon" style="background:var(--bluep)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5"/></svg></div>
+              <div><div class="seg-num">247</div><div class="seg-lbl">Active donors</div><div class="seg-sub">Given this campaign</div></div>
+              <div class="seg-avg"><div class="seg-avg-val">$219</div><div class="seg-avg-lbl">Avg gift</div></div>
+            </div>
+            <div class="seg-card">
+              <div class="seg-icon" style="background:var(--amberl)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--amber)" stroke-width="1.4" stroke-linecap="round"><path d="M8 2v8M5 7l3 4 3-4"/></svg></div>
+              <div><div class="seg-num">23</div><div class="seg-lbl">LYBUNT</div><div class="seg-sub">Gave 2025, not yet 2026</div></div>
+              <div class="seg-avg"><div class="seg-avg-val">$284</div><div class="seg-avg-lbl">2025 avg</div></div>
+            </div>
+            <div class="seg-card">
+              <div class="seg-icon" style="background:var(--greenl)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M2 8h12M8 2v12"/></svg></div>
+              <div><div class="seg-num">89</div><div class="seg-lbl">Recurring</div><div class="seg-sub">Monthly auto-givers</div></div>
+              <div class="seg-avg"><div class="seg-avg-val">$156</div><div class="seg-avg-lbl">Avg gift</div></div>
+            </div>
+            <div class="seg-card">
+              <div class="seg-icon" style="background:var(--teall)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--teal)" stroke-width="1.4" stroke-linecap="round"><path d="M8 2l1.5 4.5h4.5l-3.5 2.5 1.5 4.5L8 11l-4 2.5 1.5-4.5L2 6.5h4.5z"/></svg></div>
+              <div><div class="seg-num">14</div><div class="seg-lbl">First-time</div><div class="seg-sub">New this campaign</div></div>
+              <div class="seg-avg"><div class="seg-avg-val">$104</div><div class="seg-avg-lbl">Avg gift</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="ch-icon" style="background:var(--green)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M6 3.5v3l2 1.5"/></svg></div>
+          <span class="ch-title">Recent activity</span>
+        </div>
+        <div class="card-body">
+          <div class="act-row">
+            <div class="act-dot" style="background:var(--green)"></div>
+            <div class="act-body">
+              <div class="act-name">Margaret Sullivan</div>
+              <div class="act-detail"><span class="act-type badge-ot" style="font-size:10px;padding:1px 6px;border-radius:20px">One-time</span> GiveCentral online · Credit card <span class="act-time">Today 9:14 AM</span></div>
+            </div>
+            <div class="act-amt" style="color:var(--green)">+$2,500</div>
+          </div>
+          <div class="act-row">
+            <div class="act-dot" style="background:var(--teal)"></div>
+            <div class="act-body">
+              <div class="act-name">Elena Ramirez-Lopez</div>
+              <div class="act-detail"><span class="act-type badge-ot" style="font-size:10px;padding:1px 6px;border-radius:20px">First gift</span> GiveCentral online · New donor <span class="act-time">Yesterday</span></div>
+            </div>
+            <div class="act-amt" style="color:var(--green)">+$250</div>
+          </div>
+          <div class="act-row">
+            <div class="act-dot" style="background:var(--gold)"></div>
+            <div class="act-body">
+              <div class="act-name">Thomas Kowalski</div>
+              <div class="act-detail"><span class="act-type badge-pl" style="font-size:10px;padding:1px 6px;border-radius:20px">Pledge pmt</span> Installment 2 of 3 · Check #7741 <span class="act-time">Apr 1</span></div>
+            </div>
+            <div class="act-amt" style="color:var(--green)">+$1,500</div>
+          </div>
+          <div class="act-row">
+            <div class="act-dot" style="background:var(--red)"></div>
+            <div class="act-body">
+              <div class="act-name">Robert &amp; Claire Hennessy</div>
+              <div class="act-detail"><span class="act-type" style="font-size:10px;padding:1px 6px;border-radius:20px;background:var(--redl);color:var(--redd)">Overdue</span> Installment due Apr 1 · Reminder sent <span class="act-time">Apr 1</span></div>
+            </div>
+            <div class="act-amt" style="color:var(--red)">$3,500</div>
+          </div>
+          <div class="act-row">
+            <div class="act-dot" style="background:var(--purp)"></div>
+            <div class="act-body">
+              <div class="act-name">David P. Shipman</div>
+              <div class="act-detail"><span class="act-type badge-daf" style="font-size:10px;padding:1px 6px;border-radius:20px">DAF</span> Donor-Advised Fund distribution <span class="act-time">Mar 28</span></div>
+            </div>
+            <div class="act-amt" style="color:var(--green)">+$175,000</div>
+          </div>
+          <div class="act-row">
+            <div class="act-dot" style="background:var(--purp)"></div>
+            <div class="act-body">
+              <div class="act-name">Launa Barboza</div>
+              <div class="act-detail"><span class="act-type badge-ira" style="font-size:10px;padding:1px 6px;border-radius:20px">IRA/QCD</span> IRA distribution · Age 72 <span class="act-time">Mar 25</span></div>
+            </div>
+            <div class="act-amt" style="color:var(--green)">+$40,000</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin-only actions -->
+    <div id="admin-actions" style="display:none">
+      <div class="sec-label">Parish administrator actions</div>
+      <div class="action-grid anim">
+        <div class="action-btn" onclick="showSnack('Offline gift entry opened')">
+          <div class="ab-icon" style="background:var(--green)"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></div>
+          <div><div class="ab-title">Log offline gift</div><div class="ab-sub">Enter check or cash gift</div></div>
+          <div class="ab-arrow">›</div>
+        </div>
+        <div class="action-btn" onclick="setTab('pledges',document.querySelectorAll('.tn-tab')[2])">
+          <div class="ab-icon" style="background:var(--gold)"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="2" width="10" height="10" rx="2"/><path d="M4 7h6M4 5h6M4 9h4"/></svg></div>
+          <div><div class="ab-title">Manage open pledges</div><div class="ab-sub">8 installments · 1 overdue</div></div>
+          <div class="ab-arrow">›</div>
+        </div>
+        <div class="action-btn" onclick="showSnack('Pledge reminder sent to 8 donors','g')">
+          <div class="ab-icon" style="background:var(--blue)"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M2 4h10v7H2z"/><path d="M2 4l5 4 5-4"/></svg></div>
+          <div><div class="ab-title">Send pledge reminders</div><div class="ab-sub">8 open installments</div></div>
+          <div class="ab-arrow">›</div>
+        </div>
+        <div class="action-btn" onclick="showSnack('Parish report PDF generated','g')">
+          <div class="ab-icon" style="background:var(--navy)"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M7 1v8M4 6l3 3 3-3"/><path d="M2 11h10"/></svg></div>
+          <div><div class="ab-title">Download parish report</div><div class="ab-sub">PDF summary for records</div></div>
+          <div class="ab-arrow">›</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /overview -->
+
+  <!-- ══ GIFT TYPE ANALYSIS ══ -->
+  <div class="view" id="view-gifttype">
+
+    <div class="info-banner anim a1">
+      <div class="wb-icon" style="background:var(--gold)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M5 3.5v2M5 7v.3"/></svg></div>
+      This view shows your parish's gift breakdown. Anonymous donations are excluded from donor detail. IRA distributions and Donor-Advised Fund gifts are shown as soft credits where applicable.
+    </div>
+
+    <!-- Committed by gift type -->
+    <div class="card anim a2">
+      <div class="card-head">
+        <div class="ch-icon" style="background:var(--gold)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M2 10l2.5-3 2 2 2.5-3 2.5 3"/><path d="M2 2v10h10"/></svg></div>
+        <span class="ch-title">Goal committed by gift type — committed vs. cash received</span>
+        <div style="display:flex;gap:14px;align-items:center;font-size:11px">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--gold);border-radius:2px;display:inline-block"></span>Committed</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--green);border-radius:2px;display:inline-block"></span>Cash received</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="dual-bar-row">
+          <span class="dbr-label">Pledge</span>
+          <div class="dbr-bars">
+            <div class="dbr-bar dbr-committed" style="width:52%"></div>
+            <div class="dbr-bar dbr-paid" style="width:40%"></div>
+          </div>
+          <span class="dbr-val">$28,400 / $22,000</span>
+        </div>
+        <div class="dual-bar-row">
+          <span class="dbr-label">One-time gift</span>
+          <div class="dbr-bars">
+            <div class="dbr-bar dbr-committed" style="width:40%"></div>
+            <div class="dbr-bar dbr-paid" style="width:40%"></div>
+          </div>
+          <span class="dbr-val">$21,800 / $21,800</span>
+        </div>
+        <div class="dual-bar-row">
+          <span class="dbr-label">IRA / QCD</span>
+          <div class="dbr-bars">
+            <div class="dbr-bar dbr-committed" style="width:10%"></div>
+            <div class="dbr-bar dbr-paid" style="width:10%"></div>
+          </div>
+          <span class="dbr-val">$3,500 / $3,500</span>
+        </div>
+        <div class="dual-bar-row">
+          <span class="dbr-label">Donor-Advised</span>
+          <div class="dbr-bars">
+            <div class="dbr-bar dbr-committed" style="width:3%"></div>
+            <div class="dbr-bar dbr-paid" style="width:3%"></div>
+          </div>
+          <span class="dbr-val">$500 / $500</span>
+        </div>
+        <div class="dual-bar-row">
+          <span class="dbr-label">Matching gift</span>
+          <div class="dbr-bars">
+            <div class="dbr-bar dbr-committed" style="width:2%"></div>
+            <div class="dbr-bar dbr-paid" style="width:0%"></div>
+          </div>
+          <span class="dbr-val">$0 / $0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fund summary table -->
+    <div class="card anim a3">
+      <div class="card-head">
+        <div class="ch-icon" style="background:var(--navy)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2" width="9" height="8" rx="1.5"/><path d="M1.5 5h9"/><path d="M4 2V1M8 2V1"/></svg></div>
+        <span class="ch-title">Fund summary — St. Michael's Parish</span>
+        <button onclick="showSnack('Fund summary exported','g')" style="font-size:11px;padding:4px 10px;border-radius:6px;background:var(--surf);border:1px solid var(--border);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text2)">Export ↓</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Fund</th>
+              <th class="num">Pledge committed</th>
+              <th class="num">Pledge payments</th>
+              <th class="num">One-time gifts</th>
+              <th class="num">Donors</th>
+              <th class="num">Gifts received</th>
+              <th class="num">Goal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-name">CMA-2026-STM-A</td>
+              <td class="td-num">$28,400.00</td>
+              <td class="td-num">$22,000.00</td>
+              <td class="td-num">$21,800.00</td>
+              <td class="td-num">247</td>
+              <td class="td-num">312</td>
+              <td class="td-num">$78,000.00</td>
+            </tr>
+            <tr class="sum-row">
+              <td>Sum</td>
+              <td class="td-num">$28,400.00</td>
+              <td class="td-num">$22,000.00</td>
+              <td class="td-num">$21,800.00</td>
+              <td class="td-num">247</td>
+              <td class="td-num">312</td>
+              <td class="td-num">$78,000.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Donors by gift type + pie -->
+    <div class="two-col anim a4">
+      <div class="card">
+        <div class="card-head">
+          <div class="ch-icon" style="background:var(--blue)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="2.5"/><path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4"/></svg></div>
+          <span class="ch-title">Donors by gift type</span>
+        </div>
+        <div class="card-body">
+          <div class="gift-type-row">
+            <span class="gtr-label">One-time gift</span>
+            <div class="gtr-bar-wrap"><div class="gtr-bar" style="width:67%;background:var(--blue)"><span class="gtr-bar-label">$21,800</span></div></div>
+            <span class="gtr-donors">135</span>
+            <span class="gtr-amount">$21,800</span>
+          </div>
+          <div class="gift-type-row">
+            <span class="gtr-label">Pledge</span>
+            <div class="gtr-bar-wrap"><div class="gtr-bar" style="width:55%;background:var(--gold)"><span class="gtr-bar-label">$28,400</span></div></div>
+            <span class="gtr-donors">98</span>
+            <span class="gtr-amount">$28,400</span>
+          </div>
+          <div class="gift-type-row">
+            <span class="gtr-label">IRA / QCD</span>
+            <div class="gtr-bar-wrap"><div class="gtr-bar" style="width:12%;background:var(--purp)"><span class="gtr-bar-label"></span></div></div>
+            <span class="gtr-donors">8</span>
+            <span class="gtr-amount">$3,500</span>
+          </div>
+          <div class="gift-type-row">
+            <span class="gtr-label">Donor-Advised</span>
+            <div class="gtr-bar-wrap"><div class="gtr-bar" style="width:2%;background:var(--amber)"><span class="gtr-bar-label"></span></div></div>
+            <span class="gtr-donors">3</span>
+            <span class="gtr-amount">$500</span>
+          </div>
+          <div class="gift-type-row">
+            <span class="gtr-label">Matching gift</span>
+            <div class="gtr-bar-wrap"><div class="gtr-bar" style="width:1%;background:var(--teal)"><span class="gtr-bar-label"></span></div></div>
+            <span class="gtr-donors">3</span>
+            <span class="gtr-amount">$0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="ch-icon" style="background:var(--gold)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M6 6L6 1.5"/><path d="M6 6l3.9 2.25"/></svg></div>
+          <span class="ch-title">Commitment breakdown by type</span>
+        </div>
+        <div class="card-body">
+          <div class="donut-wrap" style="margin-bottom:16px">
+            <div class="donut"></div>
+            <div class="donut-legend">
+              <div class="dl-item"><div class="dl-dot" style="background:var(--gold)"></div><span>Pledge commitments</span><span class="dl-val">59.0% · $28,400</span></div>
+              <div class="dl-item"><div class="dl-dot" style="background:var(--blue)"></div><span>One-time gifts</span><span class="dl-val">40.3% · $21,800</span></div>
+              <div class="dl-item"><div class="dl-dot" style="background:var(--purp)"></div><span>IRA / QCD / DAF</span><span class="dl-val">0.7% · $4,000</span></div>
+            </div>
+          </div>
+          <div style="background:var(--surf);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text3);line-height:1.65">
+            <strong style="color:var(--text)">Diocese-wide:</strong> Pledges represent 58.4% of all commitments ($2.48M of $4.24M total). One-time gifts at 40.5% ($1.72M). Stock, matching, and other gift types represent 1.1% ($47K). Your parish breakdown is well-aligned with the diocesan average.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /gifttype -->
+
+  <!-- ══ PLEDGE MANAGEMENT ══ -->
+  <div class="view" id="view-pledges">
+
+    <!-- Pledge summary KPIs -->
+    <div class="pf-summary anim a1">
+      <div class="pfs"><div class="pfs-val">$28,400</div><div class="pfs-lbl">Total pledged</div></div>
+      <div class="pfs"><div class="pfs-val" style="color:var(--green)">$18,600</div><div class="pfs-lbl">Amount paid</div></div>
+      <div class="pfs"><div class="pfs-val" style="color:var(--red)">$9,400</div><div class="pfs-lbl">Pledge balance</div></div>
+      <div class="pfs"><div class="pfs-val" style="color:var(--amber)">$800</div><div class="pfs-lbl">Written off</div></div>
+      <div class="pfs"><div class="pfs-val" style="color:var(--blue)">83.1%</div><div class="pfs-lbl">Fulfillment rate</div></div>
+    </div>
+
+    <!-- Sub-nav for the three pledge reports -->
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" class="anim a1">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Reports:</span>
+      <button class="pledge-subnav active" id="psnav-all" onclick="setPledgeReport('all',this)">
+        All pledges
+        <span style="margin-left:5px;background:var(--navy);color:rgba(255,255,255,.6);font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px">6</span>
+      </button>
+      <button class="pledge-subnav" id="psnav-pastdue" onclick="setPledgeReport('pastdue',this)">
+        Past due
+        <span style="margin-left:5px;background:var(--red);color:white;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px">2</span>
+      </button>
+      <button class="pledge-subnav" id="psnav-writeoffs" onclick="setPledgeReport('writeoffs',this)">
+        Write-offs
+        <span style="margin-left:5px;background:var(--amber);color:white;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px">1</span>
+      </button>
+      <div style="margin-left:auto;display:flex;gap:7px">
+        <button onclick="showSnack('Sending reminders to 2 past due donors…','g')" style="font-size:11px;padding:5px 12px;border-radius:7px;background:var(--amberl);border:1px solid var(--goldb);color:var(--amberd);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600">Send reminders (2)</button>
+        <button onclick="showSnack('Pledge report exported','g')" style="font-size:11px;padding:5px 12px;border-radius:7px;background:var(--surf);border:1px solid var(--border);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text2)">Export ↓</button>
+      </div>
+    </div>
+
+    <!-- ── ALL PLEDGES ── -->
+    <div id="pledge-report-all" class="anim a2">
+      <div class="card">
+        <div class="card-head">
+          <div class="ch-icon" style="background:var(--navy)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2" width="9" height="8" rx="1.5"/><path d="M4 5h4M4 7.5h2.5"/></svg></div>
+          <span class="ch-title">Pledge fulfillment — all pledges · St. Michael's</span>
+          <span style="font-size:11px;color:var(--text3)">6 total · 2 past due · 1 written off · 3 on track</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Donor</th>
+                <th class="num">Total pledged</th>
+                <th class="num">Amount paid</th>
+                <th class="num">Pledge balance</th>
+                <th class="num">Written off</th>
+                <th>Fulfillment</th>
+                <th>Next installment</th>
+                <th>Due date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td-name">Sullivan, Margaret</td>
+                <td class="td-num">$5,000</td>
+                <td class="td-num">$3,100</td>
+                <td class="td-num">$1,900</td>
+                <td class="td-num">$0</td>
+                <td><div class="fulfill-bar"><div class="fulfill-fill" style="width:62%;background:var(--blue)"></div></div>62%</td>
+                <td style="font-size:11px">Installment 3 of 3</td>
+                <td style="font-family:'JetBrains Mono',monospace;font-size:11px">Jun 15</td>
+                <td><span class="status-pill sp-track">On track</span></td>
+              </tr>
+              <tr style="background:var(--redl)">
+                <td class="td-name" style="color:var(--redd)">Hennessy, Robert &amp; Claire</td>
+                <td class="td-num">$10,500</td>
+                <td class="td-num">$7,000</td>
+                <td class="td-num" style="color:var(--red);font-weight:700">$3,500</td>
+                <td class="td-num">$0</td>
+                <td><div class="fulfill-bar"><div class="fulfill-fill" style="width:67%;background:var(--amber)"></div></div>67%</td>
+                <td style="font-size:11px">Installment 2 of 3</td>
+                <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--red)">Apr 1 ⚠</td>
+                <td><span class="status-pill sp-late">2 days late</span></td>
+              </tr>
+              <tr>
+                <td class="td-name">Kowalski, Thomas &amp; Lisa</td>
+                <td class="td-num">$9,000</td>
+                <td class="td-num">$6,000</td>
+                <td class="td-num">$3,000</td>
+                <td class="td-num">$0</td>
+                <td><div class="fulfill-bar"><div class="fulfill-fill" style="width:67%;background:var(--blue)"></div></div>67%</td>
+                <td style="font-size:11px">Installment 3 of 3</td>
+                <td style="font-family:'JetBrains Mono',monospace;font-size:11px">May 1</td>
+                <td><span class="status-pill sp-track">On track</span></td>
+              </tr>
+              <tr style="background:var(--amberl)">
+                <td class="td-name" style="color:var(--amberd)">Walsh, Catherine</td>
+                <td class="td-num">$6,000</td>
+                <td class="td-num">$3,000</td>
+                <td class="td-num" style="color:var(--amber);font-weight:700">$3,000</td>
+                <td class="td-num">$0</td>
+                <td><div class="fulfill-bar"><div class="fulfill-fill" style="width:50%;background:var(--amber)"></div></div>50%</td>
+                <td style="font-size:11px">Installment 2 of 2</td>
+                <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber)">Apr 30 ⚠</td>
+                <td><span class="status-pill sp-due">Due soon</span></td>
+              </tr>
+              <tr>
+                <td class="td-name">O'Brien, James &amp; Patricia</td>
+                <td class="td-num">$25,000</td>
+                <td class="td-num">$12,500</td>
+                <td class="td-num">$12,500</td>
+                <td class="td-num">$0</td>
+                <td><div class="fulfill-bar"><div class="fulfill-fill" style="width:50%;background:var(--blue)"></div></div>50%</td>
+                <td style="font-size:11px">Installments 3–5</td>
+                <td style="font-family:'JetBrains Mono',monospace;font-size:11px">Jun 30</td>
+                <td><span class="status-pill sp-track">On track</span></td>
+              </tr>
+              <tr>
+                <td class="td-name" style="color:var(--text3)">Morrison, David</td>
+                <td class="td-num">$1,000</td>
+                <td class="td-num">$222</td>
+                <td class="td-num">$0</td>
+                <td class="td-num" style="color:var(--red)">$778</td>
+                <td><div class="fulfill-bar"><div class="fulfill-fill" style="width:22%;background:var(--red)"></div></div>22%</td>
+                <td style="font-size:11px">—</td>
+                <td style="font-family:'JetBrains Mono',monospace;font-size:11px">—</td>
+                <td><span class="status-pill sp-writeoff">Written off</span></td>
+              </tr>
+              <tr class="sum-row">
+                <td>Sum</td>
+                <td class="td-num">$56,500</td>
+                <td class="td-num">$31,822</td>
+                <td class="td-num">$23,900</td>
+                <td class="td-num">$778</td>
+                <td colspan="4" style="font-size:11px;color:var(--text3)">Fulfillment rate: 56.5% · Active: 5 · Written off: 1</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PAST DUE REPORT ── -->
+    <div id="pledge-report-pastdue" style="display:none" class="anim">
+
+      <div style="background:var(--redl);border:1px solid #F5C8C8;border-left:3px solid var(--red);border-radius:0 10px 10px 0;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--redd);line-height:1.65;margin-bottom:4px">
+        <div style="width:20px;height:20px;background:var(--red);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" width="10" height="10"><path d="M5 2v3M5 7v.5"/><path d="M1 9L5 1l4 8H1z"/></svg></div>
+        <div><strong>2 past due installments — $6,500 outstanding.</strong> Hennessy (2 days overdue) and Walsh (due Apr 30) are the active past due pledges for this campaign. Pledge reminders can be sent directly from this report. Pledges more than 90 days past due are eligible for write-off review.</div>
+      </div>
+
+      <!-- Past due summary KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:4px">
+        <div class="pfs" style="border-left:3px solid var(--red)"><div class="pfs-val" style="color:var(--red)">2</div><div class="pfs-lbl">Past due pledges</div></div>
+        <div class="pfs" style="border-left:3px solid var(--red)"><div class="pfs-val" style="color:var(--red)">$6,500</div><div class="pfs-lbl">Past due amount</div></div>
+        <div class="pfs" style="border-left:3px solid var(--amber)"><div class="pfs-val" style="color:var(--amber)">2 days</div><div class="pfs-lbl">Most overdue (Hennessy)</div></div>
+        <div class="pfs" style="border-left:3px solid var(--amber)"><div class="pfs-val" style="color:var(--amber)">0</div><div class="pfs-lbl">Reminders sent this week</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="ch-icon" style="background:var(--red)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M6 3.5v3M6 8.5v.3"/></svg></div>
+          <span class="ch-title">Past due pledge report — St. Michael's</span>
+          <span class="ch-badge" style="background:var(--redl);color:var(--redd)">2 past due · $6,500 outstanding</span>
+          <button onclick="showSnack('Past due report exported','g')" style="font-size:11px;padding:4px 10px;border-radius:6px;background:var(--surf);border:1px solid var(--border);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text2);margin-left:8px">Export ↓</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Donor</th>
+                <th>Contact</th>
+                <th class="num">Total pledged</th>
+                <th class="num">Amount paid</th>
+                <th class="num">Past due amount</th>
+                <th>Original due date</th>
+                <th>Days overdue</th>
+                <th>Installment</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background:var(--redl)">
+                <td>
+                  <div class="td-name" style="color:var(--redd)">Hennessy, Robert &amp; Claire</div>
+                  <div style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace">Donor #8812</div>
+                </td>
+                <td style="font-size:11px;color:var(--text3)">hennessy@email.com<br>(817) 555-0288</td>
+                <td class="td-num">$10,500</td>
+                <td class="td-num">$7,000</td>
+                <td class="td-num" style="color:var(--red);font-weight:700">$3,500</td>
+                <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--red)">Apr 1, 2026</td>
+                <td>
+                  <span style="font-size:12px;font-weight:700;color:var(--red)">2 days</span>
+                  <div style="font-size:10px;color:var(--redd)">Last reminder: none sent</div>
+                </td>
+                <td style="font-size:11px">Installment 2 of 3<br><span style="color:var(--text3)">Remaining: $3,500</span></td>
+                <td>
+                  <div style="display:flex;flex-direction:column;gap:4px">
+                    <button onclick="showSnack('Reminder sent to Hennessy household','g')" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:6px;background:var(--amber);color:white;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap">Send reminder</button>
+                    <button onclick="showSnack('Pledge write-off review initiated for Hennessy')" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:6px;background:white;border:1px solid var(--border);color:var(--text2);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap">Mark for review</button>
+                  </div>
+                </td>
+              </tr>
+              <tr style="background:var(--amberl)">
+                <td>
+                  <div class="td-name" style="color:var(--amberd)">Walsh, Catherine</div>
+                  <div style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace">Donor #8821</div>
+                </td>
+                <td style="font-size:11px;color:var(--text3)">cwalsh@newmail.com<br>(817) 555-0144</td>
+                <td class="td-num">$6,000</td>
+                <td class="td-num">$3,000</td>
+                <td class="td-num" style="color:var(--amber);font-weight:700">$3,000</td>
+                <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber)">Apr 30, 2026</td>
+                <td>
+                  <span style="font-size:12px;font-weight:700;color:var(--amber)">Due tomorrow</span>
+                  <div style="font-size:10px;color:var(--amberd)">Last reminder: Apr 25</div>
+                </td>
+                <td style="font-size:11px">Installment 2 of 2<br><span style="color:var(--text3)">Final installment</span></td>
+                <td>
+                  <div style="display:flex;flex-direction:column;gap:4px">
+                    <button onclick="showSnack('Reminder sent to Walsh','g')" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:6px;background:var(--amber);color:white;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap">Send reminder</button>
+                    <button onclick="showSnack('Pledge logged as received for Walsh','g')" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:6px;background:var(--green);color:white;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap">Log payment</button>
+                  </div>
+                </td>
+              </tr>
+              <tr class="sum-row">
+                <td colspan="4">Past due totals</td>
+                <td class="td-num" style="color:var(--red)">$6,500</td>
+                <td colspan="4" style="font-size:11px;color:var(--text3)">2 donors · Hennessy 2 days overdue · Walsh due tomorrow · No reminders sent to Hennessy yet</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Reminder history -->
+        <div style="padding:12px 18px;border-top:1px solid var(--border);background:var(--surf)">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Reminder history</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)">
+              <span style="width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0"></span>
+              <span><strong>Walsh, Catherine</strong> — reminder sent Apr 25, 2026 · email · no response</span>
+              <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text4)">Apr 25</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text4)">
+              <span style="width:6px;height:6px;border-radius:50%;background:var(--border);flex-shrink:0"></span>
+              <span>No reminders sent to Hennessy yet — send reminder to initiate contact</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── WRITE-OFFS REPORT ── -->
+    <div id="pledge-report-writeoffs" style="display:none" class="anim">
+
+      <div style="background:var(--amberl);border:1px solid var(--goldb);border-left:3px solid var(--amber);border-radius:0 10px 10px 0;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--amberd);line-height:1.65;margin-bottom:4px">
+        <div style="width:20px;height:20px;background:var(--amber);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" width="10" height="10"><path d="M5 2v3M5 7v.5"/><path d="M1 9L5 1l4 8H1z"/></svg></div>
+        <div><strong>Write-offs require diocese approval.</strong> Any pledge write-off proposed from this report is submitted to the Diocese data team as a Tier 1 change — it will not be applied until a second approver at the diocese confirms. The donor's record is flagged and their giving history is preserved. Write-offs are irreversible without a formal correction log entry.</div>
+      </div>
+
+      <!-- Write-off summary KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:4px">
+        <div class="pfs" style="border-left:3px solid var(--amber)"><div class="pfs-val" style="color:var(--amber)">1</div><div class="pfs-lbl">Written off this campaign</div></div>
+        <div class="pfs" style="border-left:3px solid var(--amber)"><div class="pfs-val" style="color:var(--amber)">$778</div><div class="pfs-lbl">Total written off</div></div>
+        <div class="pfs" style="border-left:3px solid var(--text3)"><div class="pfs-val" style="color:var(--text3)">22%</div><div class="pfs-lbl">Morrison fulfillment rate</div></div>
+        <div class="pfs" style="border-left:3px solid var(--navy)"><div class="pfs-val" style="color:var(--navy)">$32,514</div><div class="pfs-lbl">Diocese-wide write-offs</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="ch-icon" style="background:var(--amber)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M2 2l8 8M10 2L2 10"/></svg></div>
+          <span class="ch-title">Pledge write-off report — St. Michael's</span>
+          <span class="ch-badge" style="background:var(--amberl);color:var(--amberd)">1 write-off · $778 · this campaign</span>
+          <button onclick="showSnack('Write-off report exported','g')" style="font-size:11px;padding:4px 10px;border-radius:6px;background:var(--surf);border:1px solid var(--border);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text2);margin-left:8px">Export ↓</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Donor</th>
+                <th class="num">Total pledged</th>
+                <th class="num">Amount paid</th>
+                <th class="num">Pledge balance</th>
+                <th class="num">Amount written off</th>
+                <th>Fulfillment %</th>
+                <th>Write-off date</th>
+                <th>Approved by</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="td-name">Morrison, David Sr.</div>
+                  <div style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace">Donor #3301</div>
+                </td>
+                <td class="td-num">$1,000</td>
+                <td class="td-num">$222</td>
+                <td class="td-num" style="color:var(--text3)">$0</td>
+                <td class="td-num" style="color:var(--amber);font-weight:700">$778</td>
+                <td>
+                  <div class="fulfill-bar"><div class="fulfill-fill" style="width:22%;background:var(--amber)"></div></div>22%
+                </td>
+                <td style="font-family:'JetBrains Mono',monospace;font-size:11px">May 22, 2026</td>
+                <td style="font-size:11px;color:var(--text2)">K. Novicky<br><span style="color:var(--text3)">Diocese admin</span></td>
+                <td style="font-size:11px;color:var(--text3)">Donor deceased May 18, 2026 · confirmed by family · balance written off per diocese policy</td>
+              </tr>
+              <tr class="sum-row">
+                <td colspan="3">Write-off totals — this campaign</td>
+                <td class="td-num">$0</td>
+                <td class="td-num" style="color:var(--amber)">$778</td>
+                <td colspan="4" style="font-size:11px;color:var(--text3)">1 write-off · Diocese-wide total: $32,514 · All write-offs approved by diocese admin</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Propose new write-off -->
+        <div style="padding:14px 18px;border-top:1px solid var(--border);background:var(--surf)">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Propose a new write-off — submits to diocese for Tier 1 approval</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end">
+            <div>
+              <label class="f-label-sm">Donor / pledge</label>
+              <select class="f-select-sm">
+                <option>Select a pledge to write off…</option>
+                <option>Hennessy, Robert &amp; Claire — $3,500 balance</option>
+                <option>Walsh, Catherine — $3,000 balance</option>
+              </select>
+            </div>
+            <div>
+              <label class="f-label-sm">Amount to write off</label>
+              <input class="f-input-sm" type="text" placeholder="$0.00">
+            </div>
+            <div>
+              <label class="f-label-sm">Reason</label>
+              <select class="f-select-sm">
+                <option>Donor deceased</option>
+                <option>Donor hardship — approved by pastor</option>
+                <option>Pledge disputed by donor</option>
+                <option>Uncollectable after 90+ days</option>
+                <option>Other — see note</option>
+              </select>
+            </div>
+            <button onclick="showSnack('Write-off proposal submitted to diocese for Tier 1 approval')" style="padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;background:var(--amber);color:white;border:none;white-space:nowrap">Submit for diocese approval →</button>
+          </div>
+        </div>
+
+        <!-- Diocese-wide write-off context -->
+        <div style="padding:12px 18px;border-top:1px solid var(--border);background:var(--navy);display:flex;align-items:center;gap:14px">
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Diocese-wide write-off summary</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.6">Total written off across all parishes: <strong style="color:white">$32,514</strong> · All write-offs require diocese admin approval · Write-off rate: 1.29% of total pledged ($2,515,429)</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:22px;color:#FCD34D;font-weight:500">$32,514</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.05em">Diocese write-offs YTD</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /pledges -->
+
+  <!-- ══ CASH FLOW ══ -->
+  <div class="view" id="view-cashflow">
+
+    <div class="kpi-grid-3 anim a1">
+      <div class="kpi highlight-gold">
+        <div class="kpi-label">Expected through Jun 30</div>
+        <div class="kpi-val">$9,400</div>
+        <div class="kpi-sub">Outstanding pledge balance</div>
+      </div>
+      <div class="kpi highlight-green">
+        <div class="kpi-label">Cash received YTD</div>
+        <div class="kpi-val">$44,800</div>
+        <div class="kpi-sub up">57.4% of goal received in cash</div>
+      </div>
+      <div class="kpi highlight-red">
+        <div class="kpi-label">At-risk pledges</div>
+        <div class="kpi-val">$4,278</div>
+        <div class="kpi-sub warn">Overdue + low fulfillment rate</div>
+      </div>
+    </div>
+
+    <div class="card anim a2">
+      <div class="card-head">
+        <div class="ch-icon" style="background:var(--blue)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M2 9l2.5-3 2 2 2.5-3 2.5 3"/><path d="M2 2v10h10"/></svg></div>
+        <span class="ch-title">Monthly giving trend — 2026 vs. 2025</span>
+        <div style="display:flex;gap:12px;font-size:11px;align-items:center">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:var(--gold);border-radius:2px;display:inline-block"></span>2026</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:var(--border2);border-radius:2px;display:inline-block"></span>2025</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:8px">
+          <div style="text-align:center">
+            <div style="height:80px;display:flex;align-items:flex-end;justify-content:center;gap:3px">
+              <div style="width:14px;background:var(--gold);border-radius:3px 3px 0 0;height:72%"></div>
+              <div style="width:14px;background:var(--border);border-radius:3px 3px 0 0;height:65%"></div>
+            </div>
+            <div style="font-size:10px;color:var(--text4);margin-top:4px">Jan</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">$8.1k</div>
+          </div>
+          <div style="text-align:center">
+            <div style="height:80px;display:flex;align-items:flex-end;justify-content:center;gap:3px">
+              <div style="width:14px;background:var(--gold);border-radius:3px 3px 0 0;height:85%"></div>
+              <div style="width:14px;background:var(--border);border-radius:3px 3px 0 0;height:72%"></div>
+            </div>
+            <div style="font-size:10px;color:var(--text4);margin-top:4px">Feb</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">$9.6k</div>
+          </div>
+          <div style="text-align:center">
+            <div style="height:80px;display:flex;align-items:flex-end;justify-content:center;gap:3px">
+              <div style="width:14px;background:var(--gold);border-radius:3px 3px 0 0;height:100%"></div>
+              <div style="width:14px;background:var(--border);border-radius:3px 3px 0 0;height:80%"></div>
+            </div>
+            <div style="font-size:10px;color:var(--text4);margin-top:4px">Mar</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">$11.3k</div>
+          </div>
+          <div style="text-align:center">
+            <div style="height:80px;display:flex;align-items:flex-end;justify-content:center;gap:3px">
+              <div style="width:14px;background:var(--gold);border-radius:3px 3px 0 0;height:66%"></div>
+              <div style="width:14px;background:var(--border);border-radius:3px 3px 0 0;height:60%"></div>
+            </div>
+            <div style="font-size:10px;color:var(--text4);margin-top:4px">Apr</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">$7.5k</div>
+          </div>
+          <div style="text-align:center">
+            <div style="height:80px;display:flex;align-items:flex-end;justify-content:center;gap:3px">
+              <div style="width:14px;background:var(--border2);border-radius:3px 3px 0 0;height:40%;opacity:.4"></div>
+              <div style="width:14px;background:var(--border);border-radius:3px 3px 0 0;height:55%"></div>
+            </div>
+            <div style="font-size:10px;color:var(--text4);margin-top:4px">May</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text4)">projected</div>
+          </div>
+          <div style="text-align:center">
+            <div style="height:80px;display:flex;align-items:flex-end;justify-content:center;gap:3px">
+              <div style="width:14px;background:var(--border2);border-radius:3px 3px 0 0;height:30%;opacity:.4"></div>
+              <div style="width:14px;background:var(--border);border-radius:3px 3px 0 0;height:45%"></div>
+            </div>
+            <div style="font-size:10px;color:var(--text4);margin-top:4px">Jun</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text4)">projected</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cash flow projection table -->
+    <div class="card anim a3">
+      <div class="card-head">
+        <div class="ch-icon" style="background:var(--green)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M2 10V4.5l4-3 4 3V10"/><path d="M4.5 10V7.5h3V10"/></svg></div>
+        <span class="ch-title">Gift projected amount (cash flow) — open pledges</span>
+        <button onclick="showSnack('Cash flow report exported','g')" style="font-size:11px;padding:4px 10px;border-radius:6px;background:var(--surf);border:1px solid var(--border);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text2)">Export ↓</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Donor</th>
+              <th>City</th>
+              <th>Fund ID</th>
+              <th class="num">Pledge</th>
+              <th class="num">Projected receipt</th>
+              <th>Type</th>
+              <th>Expected date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-name">Sullivan, Margaret</td>
+              <td style="font-size:11px;color:var(--text3)">Tampa, FL</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-STM-A</td>
+              <td class="td-num">$1,900</td>
+              <td class="td-num" style="color:var(--green)">$1,900.00</td>
+              <td><span class="status-pill badge-pl">Pledge pmt</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:11px">Jun 15, 2026</td>
+            </tr>
+            <tr style="background:var(--redl)">
+              <td class="td-name" style="color:var(--redd)">Hennessy, Robert &amp; Claire</td>
+              <td style="font-size:11px;color:var(--text3)">Tampa, FL</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-STM-A</td>
+              <td class="td-num">$3,500</td>
+              <td class="td-num" style="color:var(--red)">$3,500.00 ⚠</td>
+              <td><span class="status-pill sp-late">Overdue</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--red)">Apr 1 (late)</td>
+            </tr>
+            <tr>
+              <td class="td-name">Kowalski, Thomas &amp; Lisa</td>
+              <td style="font-size:11px;color:var(--text3)">Brandon, FL</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-STM-A</td>
+              <td class="td-num">$3,000</td>
+              <td class="td-num" style="color:var(--green)">$3,000.00</td>
+              <td><span class="status-pill badge-pl">Pledge pmt</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:11px">May 1, 2026</td>
+            </tr>
+            <tr>
+              <td class="td-name">Walsh, Catherine</td>
+              <td style="font-size:11px;color:var(--text3)">St. Pete, FL</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-STM-A</td>
+              <td class="td-num">$3,000</td>
+              <td class="td-num" style="color:var(--amber)">$3,000.00</td>
+              <td><span class="status-pill sp-due">Due soon</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:11px">Apr 30, 2026</td>
+            </tr>
+            <tr>
+              <td class="td-name">O'Brien, James &amp; Patricia</td>
+              <td style="font-size:11px;color:var(--text3)">Tampa, FL</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-STM-A</td>
+              <td class="td-num">$12,500</td>
+              <td class="td-num" style="color:var(--green)">$12,500.00</td>
+              <td><span class="status-pill badge-pl">Multi-install</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:11px">Jun 30, 2026</td>
+            </tr>
+            <tr>
+              <td class="td-name">Virostek, Donald</td>
+              <td style="font-size:11px;color:var(--text3)">Mansfield, TX</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-STM-A</td>
+              <td class="td-num">$1,000</td>
+              <td class="td-num" style="color:var(--amber)">$55.48</td>
+              <td><span class="status-pill badge-pl">Projected</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:11px">Jun 30, 2026</td>
+            </tr>
+            <tr class="sum-row">
+              <td colspan="3">Projected total cash receipts through Jun 30</td>
+              <td class="td-num">$24,900</td>
+              <td class="td-num" style="color:var(--green)">$23,955.48</td>
+              <td colspan="2" style="font-size:11px;color:var(--text3)">$944.52 at-risk based on fulfillment rates</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /cashflow -->
+
+  <!-- ══ DONOR DETAIL ══ -->
+  <div class="view" id="view-donors">
+
+    <div class="info-banner anim a1">
+      <div class="wb-icon" style="background:var(--gold)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M5 3.5v2M5 7v.3"/></svg></div>
+      Donor detail reports do not include anonymous donations. Hard credit donors are individuals who made the gift directly. Soft credit reflects IRA distributions and Donor-Advised Fund attributions.
+    </div>
+
+    <!-- Hard credits -->
+    <div class="card anim a2">
+      <div class="card-head">
+        <div class="ch-icon" style="background:var(--navy)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4" r="2.5"/><path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4"/></svg></div>
+        <span class="ch-title">Donor detail — hard credits</span>
+        <div style="display:flex;gap:8px;margin-left:auto">
+          <input style="padding:5px 9px;border:1px solid var(--border);border-radius:7px;font-size:12px;font-family:'Plus Jakarta Sans',sans-serif;width:160px;outline:none;background:var(--surf)" placeholder="Search donors…">
+          <button onclick="showSnack('Donor hard credits exported','g')" style="font-size:11px;padding:4px 10px;border-radius:6px;background:var(--surf);border:1px solid var(--border);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text2)">Export ↓</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Donor name</th>
+              <th>Address</th>
+              <th>City</th>
+              <th>State</th>
+              <th>ZIP</th>
+              <th>Fund</th>
+              <th>Gift type</th>
+              <th class="num">Pledge</th>
+              <th class="num">Paid</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">10003</td>
+              <td class="td-name">Mr. Miguel C. Lozano</td>
+              <td style="font-size:11px;color:var(--text3)">4900 Fort Stockton Dr</td>
+              <td style="font-size:11px">Arlington</td>
+              <td style="font-size:11px">TX</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px">76017-2443</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-A</td>
+              <td><span class="status-pill badge-ot">One-time</span></td>
+              <td class="td-num">—</td>
+              <td class="td-num">$500</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">10779</td>
+              <td class="td-name">Mr. Donald Virostek</td>
+              <td style="font-size:11px;color:var(--text3)">4009 Greenwood Way</td>
+              <td style="font-size:11px">Mansfield</td>
+              <td style="font-size:11px">TX</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px">76063-5561</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-A</td>
+              <td><span class="status-pill badge-pl">Pledge</span></td>
+              <td class="td-num">$1,000</td>
+              <td class="td-num">$222</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">11191</td>
+              <td class="td-name">Mr. Richard Hash</td>
+              <td style="font-size:11px;color:var(--text3)">402 Poppy Dr</td>
+              <td style="font-size:11px">Mansfield</td>
+              <td style="font-size:11px">TX</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px">76063-6815</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-A</td>
+              <td><span class="status-pill badge-ot">One-time</span></td>
+              <td class="td-num">—</td>
+              <td class="td-num">$750</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">11795</td>
+              <td class="td-name">Mr. John Longoria</td>
+              <td style="font-size:11px;color:var(--text3)">2500 Goodnight Trl</td>
+              <td style="font-size:11px">Mansfield</td>
+              <td style="font-size:11px">TX</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px">76063-7565</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-A</td>
+              <td><span class="status-pill badge-pl">Pledge</span></td>
+              <td class="td-num">$1,000</td>
+              <td class="td-num">$0</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">10787</td>
+              <td class="td-name">Mr. Matt Thomas</td>
+              <td style="font-size:11px;color:var(--text3)">125 Wood Dale Dr</td>
+              <td style="font-size:11px">Burleson</td>
+              <td style="font-size:11px">TX</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px">76028</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-A</td>
+              <td><span class="status-pill badge-pl">Pledge</span></td>
+              <td class="td-num">$3,600</td>
+              <td class="td-num">$3,400</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Soft credits -->
+    <div class="card anim a3">
+      <div class="card-head">
+        <div class="ch-icon" style="background:var(--purp)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4" r="2.5"/><path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4"/></svg></div>
+        <span class="ch-title">Donor detail — soft credits (IRA / QCD / Donor-Advised)</span>
+        <button onclick="showSnack('Soft credits exported','g')" style="font-size:11px;padding:4px 10px;border-radius:6px;background:var(--surf);border:1px solid var(--border);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text2)">Export ↓</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Donor name</th>
+              <th>Address</th>
+              <th>City</th>
+              <th>State</th>
+              <th>ZIP</th>
+              <th>Fund</th>
+              <th>Gift subtype</th>
+              <th class="num">Recognition amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">30311</td>
+              <td class="td-name">Mrs. Valerie Crowe</td>
+              <td style="font-size:11px;color:var(--text3)">502 E Broad St</td>
+              <td style="font-size:11px">Mansfield</td>
+              <td style="font-size:11px">TX</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px">76063-1710</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-A</td>
+              <td><span class="status-pill badge-ira">IRA distribution</span></td>
+              <td class="td-num">$7,596.49</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">43547</td>
+              <td class="td-name">Mr. Ben Doskocil, Sr.</td>
+              <td style="font-size:11px;color:var(--text3)">5306 Mansfield Rd</td>
+              <td style="font-size:11px">Arlington</td>
+              <td style="font-size:11px">TX</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px">76017-2754</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-A</td>
+              <td><span class="status-pill badge-ot">(empty value)</span></td>
+              <td class="td-num">$35,000.00</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">4765</td>
+              <td class="td-name">Mrs. Launa Barboza</td>
+              <td style="font-size:11px;color:var(--text3)">715 Glen Abbey Dr</td>
+              <td style="font-size:11px">Mansfield</td>
+              <td style="font-size:11px">TX</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px">76063-3703</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-A</td>
+              <td><span class="status-pill badge-ira">IRA distribution</span></td>
+              <td class="td-num">$40,000.00</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">5972</td>
+              <td class="td-name">Mr. David P. Shipman</td>
+              <td style="font-size:11px;color:var(--text3)">1221 N Walnut Creek Dr</td>
+              <td style="font-size:11px">Mansfield</td>
+              <td style="font-size:11px">TX</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px">76063-2503</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-A</td>
+              <td><span class="status-pill badge-daf">Donor-Advised</span></td>
+              <td class="td-num">$175,000.00</td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">5972</td>
+              <td class="td-name">Mr. David P. Shipman</td>
+              <td style="font-size:11px;color:var(--text3)">1221 N Walnut Creek Dr</td>
+              <td style="font-size:11px">Mansfield</td>
+              <td style="font-size:11px">TX</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px">76063-2503</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">CMA-2026-A</td>
+              <td><span class="status-pill badge-ira">IRA distribution</span></td>
+              <td class="td-num">$37,000.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /donors -->
+
+  <!-- ══ DIOCESE COMPARISON ══ -->
+  <div class="view" id="view-diocese">
+
+    <div class="kpi-grid-4 anim a1">
+      <div class="kpi highlight-gold">
+        <div class="kpi-label">Diocese — % committed</div>
+        <div class="kpi-val">88%</div>
+        <div class="kpi-sub">$4,310,089 of $4,919,656 goal</div>
+      </div>
+      <div class="kpi highlight-green">
+        <div class="kpi-label">Diocese — % paid</div>
+        <div class="kpi-val">81%</div>
+        <div class="kpi-sub">$3,986,007 cash received</div>
+      </div>
+      <div class="kpi highlight-blue">
+        <div class="kpi-label">Total diocese donors</div>
+        <div class="kpi-val">938</div>
+        <div class="kpi-sub">Avg gift: $785 · 72 parishes</div>
+      </div>
+      <div class="kpi highlight-red">
+        <div class="kpi-label">Diocese pledge balance</div>
+        <div class="kpi-val">$299K</div>
+        <div class="kpi-sub">$32,514 written off YTD</div>
+      </div>
+    </div>
+
+    <div class="two-col anim a2">
+      <div class="card">
+        <div class="card-head">
+          <div class="ch-icon" style="background:var(--navy)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M2 10l2.5-3 2 2 2.5-3 2.5 3"/><path d="M2 2v10h10"/></svg></div>
+          <span class="ch-title">Parish leaderboard — all 72 parishes</span>
+          <span class="ch-badge" style="background:var(--bluep);color:var(--blue)">You are #4</span>
+        </div>
+        <div class="card-body">
+          <div class="lb-row">
+            <div class="rank-badge rank-1">1</div>
+            <div><div class="lb-name">Cathedral of St. Jude</div><div class="lb-parish">St. Petersburg</div></div>
+            <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:94%"></div></div>
+            <div class="lb-pct">94%</div>
+            <div class="lb-amt">$184,200</div>
+          </div>
+          <div class="lb-row">
+            <div class="rank-badge rank-2">2</div>
+            <div><div class="lb-name">Holy Cross Parish</div><div class="lb-parish">Brandon</div></div>
+            <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:88%"></div></div>
+            <div class="lb-pct">88%</div>
+            <div class="lb-amt">$96,800</div>
+          </div>
+          <div class="lb-row">
+            <div class="rank-badge rank-3">3</div>
+            <div><div class="lb-name">St. Anthony's</div><div class="lb-parish">St. Petersburg</div></div>
+            <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:82%"></div></div>
+            <div class="lb-pct">82%</div>
+            <div class="lb-amt">$72,100</div>
+          </div>
+          <div class="lb-row you">
+            <div class="rank-badge rank-you">4</div>
+            <div><div class="lb-name" style="color:var(--blue)">St. Michael's ← You</div><div class="lb-parish">Tampa</div></div>
+            <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:69%"></div></div>
+            <div class="lb-pct" style="color:var(--blue)">69%</div>
+            <div class="lb-amt" style="color:var(--blue)">$54,200</div>
+          </div>
+          <div class="lb-row">
+            <div class="rank-badge rank-n">5</div>
+            <div><div class="lb-name">San Juan Diego</div><div class="lb-parish">Tampa</div></div>
+            <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:65%"></div></div>
+            <div class="lb-pct">65%</div>
+            <div class="lb-amt">$48,900</div>
+          </div>
+          <div class="lb-row">
+            <div class="rank-badge rank-n">6</div>
+            <div><div class="lb-name">St. Peter's Parish</div><div class="lb-parish">Clearwater</div></div>
+            <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:59%"></div></div>
+            <div class="lb-pct">59%</div>
+            <div class="lb-amt">$41,300</div>
+          </div>
+          <div style="text-align:center;padding-top:10px;font-size:12px;color:var(--text3)">+ 66 more parishes</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="card">
+          <div class="card-head">
+            <div class="ch-icon" style="background:var(--gold)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M6 1l1.5 3.5L11 5l-2.5 2.5.5 3.5L6 9.5 3 11l.5-3.5L1 5l3.5-.5z"/></svg></div>
+            <span class="ch-title">Your parish vs. diocese</span>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:.5px solid var(--border);font-size:12px">
+                <span style="color:var(--text3)">% goal committed</span>
+                <span><b style="color:var(--blue)">69%</b> <span style="color:var(--text4)">vs. diocese 88%</span></span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:.5px solid var(--border);font-size:12px">
+                <span style="color:var(--text3)">% goal paid</span>
+                <span><b style="color:var(--blue)">57%</b> <span style="color:var(--text4)">vs. diocese 81%</span></span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:.5px solid var(--border);font-size:12px">
+                <span style="color:var(--text3)">Average gift</span>
+                <span><b style="color:var(--blue)">$219</b> <span style="color:var(--text4)">vs. diocese $785</span></span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:.5px solid var(--border);font-size:12px">
+                <span style="color:var(--text3)">Participation rate</span>
+                <span><b style="color:var(--blue)">29.7%</b> <span style="color:var(--text4)">vs. diocese avg 30.0%</span></span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:.5px solid var(--border);font-size:12px">
+                <span style="color:var(--text3)">Pledge fulfillment</span>
+                <span><b style="color:var(--blue)">83.1%</b> <span style="color:var(--text4)">vs. diocese avg 86.7%</span></span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:12px">
+                <span style="color:var(--text3)">Diocese rank</span>
+                <span><b style="color:var(--green)">#4 of 72</b> <span style="color:var(--text4)">↑ 2 from last year</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="ch-icon" style="background:var(--navy)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2" width="9" height="8" rx="1.5"/><path d="M1.5 5h9"/></svg></div>
+            <span class="ch-title">Diocese fund summary</span>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead><tr><th>Fund</th><th class="num">Pledged</th><th class="num">Paid</th><th class="num">Balance</th><th class="num">Written off</th><th class="num">Fulfill %</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td style="font-family:'JetBrains Mono',monospace;font-size:10px">CPCF-212-CONNECT-A</td>
+                  <td class="td-num">$2,515,429</td>
+                  <td class="td-num">$2,183,829</td>
+                  <td class="td-num">$299,086</td>
+                  <td class="td-num" style="color:var(--red)">$32,514</td>
+                  <td class="td-num" style="color:var(--green)">86.7%</td>
+                </tr>
+                <tr class="sum-row">
+                  <td>Sum</td>
+                  <td class="td-num">$2,515,429</td>
+                  <td class="td-num">$2,183,829</td>
+                  <td class="td-num">$299,086</td>
+                  <td class="td-num" style="color:var(--red)">$32,514</td>
+                  <td class="td-num" style="color:var(--green)">86.7%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /diocese -->
+
+  <!-- ══ DATA MANAGEMENT (Parish Admin) ══ -->
+  <div class="view" id="view-datamanage">
+
+    <div class="dm-intro anim a1">
+      <div class="dmi-icon"><svg viewBox="0 0 22 22" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M11 2C6 2 2 6 2 11s4 9 9 9 9-4 9-9-4-9-9-9z"/><path d="M11 7v5l3 3"/></svg></div>
+      <div>
+        <div class="dmi-title">Parish data management — St. Michael's Parish</div>
+        <div class="dmi-sub">Propose address corrections, contact updates, and new donor records for your parish. All changes go to the Diocese data team for review before being committed to the diocesan database. This is your data pathway — records you submit here will automatically become your parish's own database when Parish Atlas launches.</div>
+        <div class="dmi-badge">
+          <span class="dmi-pill dmi-pill-amber">3 changes pending diocese review</span>
+          <span class="dmi-pill dmi-pill-blue">2 new donors in staging</span>
+          <span class="dmi-pill dmi-pill-green">14 approved this campaign</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2028 pathway banner -->
+    <div class="pathway-banner anim a1">
+      <div class="pb-icon"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 9h12M9 3l6 6-6 6"/></svg></div>
+      <div>
+        <div class="pb-title">Parish Atlas 2028 — your data pathway</div>
+        <div class="pb-sub">Every change you propose and every new donor you add through this portal is stored as a parish-attributed record in Atlas. When Parish Atlas launches in 2028, these records automatically become the foundation of your parish's own database — no re-entry, no migration. You are building your parish database right now.</div>
+        <div class="pb-badge"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="10" height="10"><path d="M1.5 5l2 2 5-5"/></svg>Phase 3 — Atlas Parish Edition · estimated Q1 2028</div>
+      </div>
+    </div>
+
+    <!-- Propose a change -->
+    <div class="change-proposal-card anim a2">
+      <div class="cpc-head">
+        <div class="ch-icon" style="background:var(--amber)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M9 2L10 3l-6 6H3V8L9 2z"/><path d="M2 10h8"/></svg></div>
+        <span class="cpc-head-title">Propose a record change</span>
+        <span style="font-size:11px;color:var(--text3)">Changes go to diocese review before taking effect</span>
+      </div>
+
+      <!-- Step indicator -->
+      <div class="cpc-steps">
+        <div class="cpc-step">
+          <div class="cpc-step-dot done">✓</div>
+          <span class="cpc-step-label">Find donor</span>
+        </div>
+        <div class="cpc-step-line done"></div>
+        <div class="cpc-step">
+          <div class="cpc-step-dot active">2</div>
+          <span class="cpc-step-label active">Select field</span>
+        </div>
+        <div class="cpc-step-line"></div>
+        <div class="cpc-step">
+          <div class="cpc-step-dot todo">3</div>
+          <span class="cpc-step-label">Enter correction</span>
+        </div>
+        <div class="cpc-step-line"></div>
+        <div class="cpc-step">
+          <div class="cpc-step-dot todo">4</div>
+          <span class="cpc-step-label">Add context note</span>
+        </div>
+        <div class="cpc-step-line"></div>
+        <div class="cpc-step">
+          <div class="cpc-step-dot todo">5</div>
+          <span class="cpc-step-label">Submit for review</span>
+        </div>
+      </div>
+
+      <div class="cpc-body">
+        <!-- Donor search -->
+        <div style="margin-bottom:16px;padding:14px;background:var(--greenl);border:1px solid #A8DCBC;border-radius:10px;display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1A5FAA,#0D3D78);display:flex;align-items:center;justify-content:center;font-family:'Libre Baskerville',serif;font-size:13px;color:white;font-style:italic;flex-shrink:0">MT</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:700;color:var(--greend)">Mr. Matt Thomas — Donor #10787</div>
+            <div style="font-size:11px;color:var(--green)">125 Wood Dale Dr, Burleson TX 76028 · St. Michael's Parish</div>
+          </div>
+          <button onclick="showSnack('Searching for different donor…')" style="font-size:11px;padding:5px 10px;border-radius:7px;background:white;border:1px solid var(--border);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text2)">Change donor</button>
+        </div>
+
+        <!-- Field selection -->
+        <div class="form-grid-2" style="margin-bottom:14px">
+          <div>
+            <label class="f-label-sm">Field to update</label>
+            <select class="f-select-sm" onchange="updateDiffPreview(this.value)">
+              <option value="">Select a field…</option>
+              <option value="address" selected>Mailing address</option>
+              <option value="email">Email address</option>
+              <option value="phone">Phone number</option>
+              <option value="name">Name / salutation</option>
+              <option value="parish">Parish assignment</option>
+              <option value="deceased">Deceased flag</option>
+              <option value="other">Other — describe below</option>
+            </select>
+          </div>
+          <div>
+            <label class="f-label-sm">Reason for change</label>
+            <select class="f-select-sm">
+              <option>Donor contacted parish directly</option>
+              <option>Returned mail — address undeliverable</option>
+              <option>Verbal update at parish event</option>
+              <option>Duplicate record identified</option>
+              <option>Deceased — confirmed by family</option>
+              <option>Other — see note below</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Before/after -->
+        <div style="margin-bottom:14px">
+          <label class="f-label-sm">Change preview</label>
+          <div class="inline-diff" id="diff-preview">
+            <div class="id-before">
+              <div class="id-label">Current value</div>
+              <div class="id-val">125 Wood Dale Dr<br>Burleson, TX 76028</div>
+            </div>
+            <div class="id-after">
+              <div class="id-label">Proposed new value</div>
+              <div class="id-val">2841 Ridgeview Court<br>Mansfield, TX 76063</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid-3" style="margin-bottom:14px">
+          <div>
+            <label class="f-label-sm">New address line 1</label>
+            <input class="f-input-sm" type="text" value="2841 Ridgeview Court">
+          </div>
+          <div>
+            <label class="f-label-sm">City</label>
+            <input class="f-input-sm" type="text" value="Mansfield">
+          </div>
+          <div>
+            <label class="f-label-sm">State / ZIP</label>
+            <input class="f-input-sm" type="text" value="TX 76063">
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <label class="f-label-sm">Context note for diocese reviewer (optional but recommended)</label>
+          <textarea class="f-textarea-sm" placeholder="e.g. Matt called the parish office on May 28 and confirmed he moved in March. He provided the new address directly.">Matt called the parish office on May 28 and confirmed he moved in March. He provided the new address directly. He mentioned his wife Grace has the same new address.</textarea>
+        </div>
+
+        <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:4px;border-top:1px solid var(--border)">
+          <button style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;border:1px solid var(--border);background:white;color:var(--text2)">Cancel</button>
+          <button onclick="showSnack('Change proposal submitted — diocese reviewer notified','g')" style="padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;background:var(--amber);color:white;border:none">Submit for diocese review →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Your pending proposals -->
+    <div class="card anim a3">
+      <div class="card-head">
+        <div class="ch-icon" style="background:var(--amber)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M6 3.5v3l2 1.5"/></svg></div>
+        <span class="ch-title">Your pending proposals — St. Michael's</span>
+        <span class="ch-badge" style="background:var(--amberl);color:var(--amberd)">3 awaiting diocese review</span>
+      </div>
+      <div class="card-body">
+        <div class="proposal-row">
+          <div class="pr-status-dot" style="background:var(--amber)"></div>
+          <div class="pr-body">
+            <div class="pr-type"><span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;background:var(--amberl);color:var(--amberd)">ADDRESS UPDATE</span> Submitted May 28, 2026</div>
+            <div class="pr-donor">Thomas, Matt — Donor #10787</div>
+            <div class="pr-change">
+              <span style="text-decoration:line-through;color:var(--text4)">125 Wood Dale Dr, Burleson TX 76028</span>
+              <span style="color:var(--text3)">→</span>
+              <span style="color:var(--green);font-weight:600">2841 Ridgeview Court, Mansfield TX 76063</span>
+            </div>
+            <div class="pr-time">Submitted by Sarah Reyes · awaiting diocese review</div>
+          </div>
+          <span class="pr-status-badge psb-pending">Pending</span>
+        </div>
+        <div class="proposal-row">
+          <div class="pr-status-dot" style="background:var(--amber)"></div>
+          <div class="pr-body">
+            <div class="pr-type"><span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;background:var(--bluep);color:var(--blue)">EMAIL UPDATE</span> Submitted May 25, 2026</div>
+            <div class="pr-donor">Walsh, Catherine — Donor #8821</div>
+            <div class="pr-change">
+              <span style="text-decoration:line-through;color:var(--text4)">cwalsh@oldmail.com</span>
+              <span style="color:var(--text3)">→</span>
+              <span style="color:var(--green);font-weight:600">catherine.walsh@newmail.com</span>
+            </div>
+            <div class="pr-time">Submitted by Sarah Reyes · awaiting diocese review</div>
+          </div>
+          <span class="pr-status-badge psb-pending">Pending</span>
+        </div>
+        <div class="proposal-row">
+          <div class="pr-status-dot" style="background:var(--red)"></div>
+          <div class="pr-body">
+            <div class="pr-type"><span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;background:var(--redl);color:var(--redd)">DECEASED FLAG</span> Submitted May 22, 2026</div>
+            <div class="pr-donor">Morrison, David Sr. — Donor #3301</div>
+            <div class="pr-change">
+              <span style="text-decoration:line-through;color:var(--text4)">Active</span>
+              <span style="color:var(--text3)">→</span>
+              <span style="color:var(--redd);font-weight:600">Deceased — May 18, 2026</span>
+            </div>
+            <div class="pr-time">Submitted by Fr. Robert Malloy · high priority · awaiting diocese review</div>
+          </div>
+          <span class="pr-status-badge psb-pending">Pending</span>
+        </div>
+
+        <div style="margin-top:4px;padding-top:12px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Recently approved by diocese</div>
+          <div class="proposal-row" style="padding:8px 0">
+            <div class="pr-status-dot" style="background:var(--green)"></div>
+            <div class="pr-body">
+              <div class="pr-donor">Sullivan, Margaret — address update</div>
+              <div class="pr-time">Approved by K. Novicky (Diocese) · May 20 · applied to record</div>
+            </div>
+            <span class="pr-status-badge psb-approved">Approved</span>
+          </div>
+          <div class="proposal-row" style="padding:8px 0">
+            <div class="pr-status-dot" style="background:var(--green)"></div>
+            <div class="pr-body">
+              <div class="pr-donor">Kowalski, Thomas — phone number update</div>
+              <div class="pr-time">Approved by K. Novicky (Diocese) · May 18 · applied to record</div>
+            </div>
+            <span class="pr-status-badge psb-approved">Approved</span>
+          </div>
+          <div class="proposal-row" style="padding:8px 0;border-bottom:none">
+            <div class="pr-status-dot" style="background:var(--red)"></div>
+            <div class="pr-body">
+              <div class="pr-donor">O'Brien, James — parish transfer to Holy Cross</div>
+              <div class="pr-time">Rejected by Diocese · May 15 · "James attends both parishes — primary remains Cathedral. Added note to record."</div>
+            </div>
+            <span class="pr-status-badge psb-rejected">Rejected</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add new donor -->
+    <div class="card anim a4">
+      <div class="card-head">
+        <div class="ch-icon" style="background:var(--blue)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="4" r="2.5"/><path d="M1 11c0-2.5 1.8-4 4-4M9 7v4M7 9h4"/></svg></div>
+        <span class="ch-title">Add new donor — submit to diocese</span>
+        <span class="ch-badge" style="background:var(--bluep);color:var(--blue)">2 in staging</span>
+      </div>
+      <div class="card-body">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.65">New donors you add here are staged for diocese review. Once the diocese admin confirms and commits the record, the donor is added to the diocesan database and your parish roster. These staged records are also the foundation of your future Parish Atlas database.</div>
+
+        <div class="form-grid-3" style="margin-bottom:12px">
+          <div>
+            <label class="f-label-sm">Prefix</label>
+            <select class="f-select-sm"><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Dr.</option><option>Rev.</option></select>
+          </div>
+          <div>
+            <label class="f-label-sm">First name *</label>
+            <input class="f-input-sm" type="text" placeholder="First name">
+          </div>
+          <div>
+            <label class="f-label-sm">Last name *</label>
+            <input class="f-input-sm" type="text" placeholder="Last name">
+          </div>
+        </div>
+        <div class="form-grid-2" style="margin-bottom:12px">
+          <div>
+            <label class="f-label-sm">Email address</label>
+            <input class="f-input-sm" type="email" placeholder="email@example.com">
+          </div>
+          <div>
+            <label class="f-label-sm">Mobile phone</label>
+            <input class="f-input-sm" type="tel" placeholder="(817) 555-0000">
+          </div>
+        </div>
+        <div class="form-grid-3" style="margin-bottom:12px">
+          <div>
+            <label class="f-label-sm">Street address</label>
+            <input class="f-input-sm" type="text" placeholder="Street address">
+          </div>
+          <div>
+            <label class="f-label-sm">City</label>
+            <input class="f-input-sm" type="text" placeholder="City">
+          </div>
+          <div>
+            <label class="f-label-sm">State / ZIP</label>
+            <input class="f-input-sm" type="text" placeholder="TX 76000">
+          </div>
+        </div>
+        <div class="form-grid-2" style="margin-bottom:12px">
+          <div>
+            <label class="f-label-sm">Household</label>
+            <select class="f-select-sm"><option>Create new household</option><option>Link to existing household…</option></select>
+          </div>
+          <div>
+            <label class="f-label-sm">How did you meet this donor?</label>
+            <select class="f-select-sm">
+              <option>Attended parish event</option>
+              <option>New parishioner registration</option>
+              <option>Gift made at Mass</option>
+              <option>Referral from existing donor</option>
+              <option>Parish ministry involvement</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:16px">
+          <label class="f-label-sm">Notes for diocese reviewer</label>
+          <textarea class="f-textarea-sm" placeholder="Any context about this donor that would help the diocese team verify and commit the record…"></textarea>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:4px;border-top:1px solid var(--border)">
+          <button style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;border:1px solid var(--border);background:white;color:var(--text2)">Cancel</button>
+          <button onclick="showSnack('New donor submitted to diocese staging queue','g')" style="padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;background:var(--blue);color:white;border:none">Submit new donor to diocese →</button>
+        </div>
+
+        <!-- Staging queue -->
+        <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Currently in staging — awaiting diocese commit</div>
+          <div class="new-donor-stages">
+            <div class="nds-row">
+              <div class="nds-num" style="background:var(--amberl);color:var(--amberd)">1</div>
+              <div class="nds-body">
+                <div class="nds-name">Mrs. Teresa Dominguez</div>
+                <div class="nds-fields">
+                  <span>1402 Prairie Wind Dr, Mansfield TX 76063</span>
+                  <span>·</span>
+                  <span>tdominguez@email.com</span>
+                  <span>·</span>
+                  <span>New parishioner</span>
+                  <span>·</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px">Submitted May 26</span>
+                </div>
+              </div>
+              <span class="nds-stage nds-stage-staging">Awaiting review</span>
+            </div>
+            <div class="nds-row">
+              <div class="nds-num" style="background:var(--amberl);color:var(--amberd)">2</div>
+              <div class="nds-body">
+                <div class="nds-name">Mr. Carlos &amp; Mrs. Ana Reyes</div>
+                <div class="nds-fields">
+                  <span>2205 Legacy Ranch Rd, Mansfield TX 76063</span>
+                  <span>·</span>
+                  <span>Attended Easter Mass · gave first gift</span>
+                  <span>·</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px">Submitted May 24</span>
+                </div>
+              </div>
+              <span class="nds-stage nds-stage-staging">Awaiting review</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /datamanage -->
+
+  <!-- ══ DIOCESE REVIEW QUEUE (Diocese Admin) ══ -->
+  <div class="view" id="view-diocesequeue">
+
+    <div class="dq-hero anim a1">
+      <div class="dq-hero-icon"><svg viewBox="0 0 22 22" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M11 3C6.5 3 3 6.5 3 11s3.5 8 8 8 8-3.5 8-8-3.5-8-8-8z"/><path d="M11 7v5l3 2"/></svg></div>
+      <div>
+        <div class="dq-hero-title">Diocese review queue — all parishes</div>
+        <div class="dq-hero-sub">All pending data change proposals and new donor submissions from parishes across the diocese. Review, modify, or reject each change before it is committed to the diocesan database.</div>
+      </div>
+      <div class="dq-stats">
+        <div class="dqs"><div class="dqs-val red">7</div><div class="dqs-lbl">Pending review</div></div>
+        <div class="dqs"><div class="dqs-val amber">2</div><div class="dqs-lbl">High priority</div></div>
+        <div class="dqs"><div class="dqs-val green">47</div><div class="dqs-lbl">Approved YTD</div></div>
+        <div class="dqs"><div class="dqs-val">4</div><div class="dqs-lbl">New donors staged</div></div>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" class="anim a2">
+      <select class="f-select-sm" style="width:auto"><option>All parishes</option><option>St. Michael's, Tampa</option><option>Holy Cross, Brandon</option><option>St. Anthony's, St. Pete</option></select>
+      <select class="f-select-sm" style="width:auto"><option>All change types</option><option>Address update</option><option>Email/phone</option><option>Deceased flag</option><option>New donor</option><option>Parish transfer</option></select>
+      <select class="f-select-sm" style="width:auto"><option>All priorities</option><option>High priority</option><option>Normal</option></select>
+      <button onclick="showSnack('All 7 pending changes exported','g')" style="font-size:12px;padding:6px 12px;border-radius:7px;background:white;border:1px solid var(--border);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text2);margin-left:auto">Export queue ↓</button>
+      <button onclick="showSnack('Batch approve low-risk changes in progress','g')" style="font-size:12px;padding:6px 12px;border-radius:7px;background:var(--green);border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:white;font-weight:600">Batch approve low-risk (5)</button>
+    </div>
+
+    <!-- HIGH PRIORITY: Deceased flag -->
+    <div class="rq-card expanded anim a2" id="rqc1">
+      <div class="rq-head" onclick="toggleRQ('rqc1')">
+        <div class="rq-type-icon" style="background:var(--red)"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3"/><path d="M2 13c0-2.5 2.2-4.5 5-4.5s5 2 5 4.5"/></svg></div>
+        <div class="rq-meta">
+          <div class="rq-parish">
+            <span style="background:var(--amberl);color:var(--amberd);padding:1px 7px;border-radius:20px;font-weight:700">St. Michael's Parish, Tampa</span>
+            <span>Submitted by Fr. Robert Malloy</span>
+          </div>
+          <div class="rq-donor-name">Morrison, David Sr. — Donor #3301</div>
+          <div class="rq-change-summary">
+            <span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;background:var(--redl);color:var(--redd)">DECEASED FLAG</span>
+            Active → Deceased · Date of death: May 18, 2026
+          </div>
+          <div class="rq-submitted">Submitted May 22, 2026 · 7 days ago</div>
+        </div>
+        <span class="rq-priority rqp-high">⚠ High priority</span>
+      </div>
+      <div class="rq-body">
+        <div class="rq-diff">
+          <div class="rq-diff-before">
+            <div class="rq-diff-label"><span style="width:8px;height:8px;border-radius:50%;background:var(--redd);display:inline-block"></span>Current record</div>
+            <div class="rq-diff-field"><div class="rq-diff-key">DeceasedFlag</div><div class="rq-diff-val">false</div></div>
+            <div class="rq-diff-field"><div class="rq-diff-key">DateOfDeath</div><div class="rq-diff-val">null</div></div>
+            <div class="rq-diff-field"><div class="rq-diff-key">ConstituentType</div><div class="rq-diff-val">Active</div></div>
+            <div class="rq-diff-field"><div class="rq-diff-key">LTG</div><div class="rq-diff-val">$3,200 · last gift Nov 2025</div></div>
+          </div>
+          <div class="rq-diff-after">
+            <div class="rq-diff-label"><span style="width:8px;height:8px;border-radius:50%;background:var(--greend);display:inline-block"></span>Proposed change</div>
+            <div class="rq-diff-field"><div class="rq-diff-key">DeceasedFlag</div><div class="rq-diff-val">true</div></div>
+            <div class="rq-diff-field"><div class="rq-diff-key">DateOfDeath</div><div class="rq-diff-val">2026-05-18</div></div>
+            <div class="rq-diff-field"><div class="rq-diff-key">ConstituentType</div><div class="rq-diff-val">Deceased</div></div>
+            <div class="rq-diff-field" style="border-bottom:none"><div class="rq-diff-key">Source</div><div class="rq-diff-val" style="color:var(--blue)">Parish — Fr. Malloy</div></div>
+          </div>
+        </div>
+        <div class="rq-context">
+          <svg class="rq-context-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v4M8 11v.5"/></svg>
+          <div><strong>Parish note from Fr. Malloy:</strong> "David Morrison passed away on May 18 at home. His daughter Maria called the parish office on May 22. She asked that we remove him from mailings. His wife Theresa continues to attend Mass at St. Michael's. LTG: $3,200 over 8 years. No bequest intention on file. Please also check whether Theresa has her own record — if not I can submit a new donor entry for her."</div>
+        </div>
+        <div style="padding:10px 18px;border-top:1px solid var(--border);background:var(--surf);font-size:12px">
+          <div style="font-weight:700;color:var(--text);margin-bottom:6px">Downstream actions on approval:</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <span style="background:var(--greenl);color:var(--greend);font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Mark record deceased</span>
+            <span style="background:var(--greenl);color:var(--greend);font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Remove from email workflows</span>
+            <span style="background:var(--greenl);color:var(--greend);font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Suppress from future mailings</span>
+            <span style="background:var(--amberl);color:var(--amberd);font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Check for surviving spouse record</span>
+            <span style="background:var(--bluep);color:var(--blue);font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Create audit log entry</span>
+          </div>
+        </div>
+        <div class="rq-actions">
+          <div class="rq-actions-left">Tier 1 change — requires second approver. Submitted by Fr. Malloy (Pastor). A second Diocese staff member must confirm.</div>
+          <button class="rq-btn rq-btn-reject" onclick="showSnack('Change rejected — parish notified')">
+            <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="10" height="10"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7"/></svg>Reject
+          </button>
+          <button class="rq-btn rq-btn-modify" onclick="showSnack('Modification mode opened')">
+            <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="10" height="10"><path d="M7.5 1.5l1 1-5.5 5.5H2v-1L7.5 1.5z"/></svg>Modify
+          </button>
+          <button class="rq-btn rq-btn-approve" onclick="showSnack('Deceased flag approved — 5 downstream actions processing','g')">
+            <svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" width="10" height="10"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>Approve &amp; commit
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Address update — Matt Thomas -->
+    <div class="rq-card anim a3" id="rqc2">
+      <div class="rq-head" onclick="toggleRQ('rqc2')">
+        <div class="rq-type-icon" style="background:var(--blue)"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5C4.5 1.5 2.5 3.5 2.5 6c0 3.5 4.5 7 4.5 7s4.5-3.5 4.5-7C11.5 3.5 9.5 1.5 7 1.5z"/><circle cx="7" cy="6" r="1.5"/></svg></div>
+        <div class="rq-meta">
+          <div class="rq-parish"><span style="background:var(--amberl);color:var(--amberd);padding:1px 7px;border-radius:20px;font-weight:700">St. Michael's Parish, Tampa</span> Submitted by Sarah Reyes</div>
+          <div class="rq-donor-name">Thomas, Matt — Donor #10787</div>
+          <div class="rq-change-summary"><span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;background:var(--bluep);color:var(--blue)">ADDRESS UPDATE</span> 125 Wood Dale Dr, Burleson TX 76028 → 2841 Ridgeview Court, Mansfield TX 76063</div>
+          <div class="rq-submitted">Submitted May 28, 2026 · CASS pre-validation: ✓ valid address</div>
+        </div>
+        <span class="rq-priority rqp-normal">Normal</span>
+      </div>
+      <div class="rq-body">
+        <div class="rq-diff">
+          <div class="rq-diff-before">
+            <div class="rq-diff-label"><span style="width:8px;height:8px;border-radius:50%;background:var(--redd);display:inline-block"></span>Current address</div>
+            <div class="rq-diff-field"><div class="rq-diff-key">AddressLine1</div><div class="rq-diff-val">125 Wood Dale Dr</div></div>
+            <div class="rq-diff-field"><div class="rq-diff-key">City</div><div class="rq-diff-val">Burleson</div></div>
+            <div class="rq-diff-field"><div class="rq-diff-key">State</div><div class="rq-diff-val">TX</div></div>
+            <div class="rq-diff-field" style="border-bottom:none"><div class="rq-diff-key">ZipCode</div><div class="rq-diff-val">76028</div></div>
+          </div>
+          <div class="rq-diff-after">
+            <div class="rq-diff-label"><span style="width:8px;height:8px;border-radius:50%;background:var(--greend);display:inline-block"></span>Proposed address</div>
+            <div class="rq-diff-field"><div class="rq-diff-key">AddressLine1</div><div class="rq-diff-val">2841 Ridgeview Court</div></div>
+            <div class="rq-diff-field"><div class="rq-diff-key">City</div><div class="rq-diff-val">Mansfield</div></div>
+            <div class="rq-diff-field"><div class="rq-diff-key">State</div><div class="rq-diff-val">TX</div></div>
+            <div class="rq-diff-field" style="border-bottom:none"><div class="rq-diff-key">ZipCode</div><div class="rq-diff-val">76063 <span style="color:var(--green);font-size:10px">✓ CASS valid</span></div></div>
+          </div>
+        </div>
+        <div class="rq-context">
+          <svg class="rq-context-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v4M8 11v.5"/></svg>
+          "Matt called the parish office on May 28 and confirmed he moved in March. He provided the new address directly. He mentioned his wife Grace has the same new address."
+        </div>
+        <div class="rq-actions">
+          <div class="rq-actions-left">Tier 2 change (address) — single reviewer. CASS validation passed. Parish note supports change.</div>
+          <button class="rq-btn rq-btn-reject" onclick="showSnack('Address change rejected — parish notified')">Reject</button>
+          <button class="rq-btn rq-btn-modify" onclick="showSnack('Modify mode opened')">Modify</button>
+          <button class="rq-btn rq-btn-approve" onclick="showSnack('Address committed to record — audit entry created','g')">
+            <svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" width="10" height="10"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>Approve &amp; commit
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- New donor staging review -->
+    <div class="rq-card anim a4" id="rqc3">
+      <div class="rq-head" onclick="toggleRQ('rqc3')">
+        <div class="rq-type-icon" style="background:var(--green)"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="5" r="3"/><path d="M2 12c0-2.5 1.8-4 4-4M10 8v4M8 10h4"/></svg></div>
+        <div class="rq-meta">
+          <div class="rq-parish"><span style="background:var(--amberl);color:var(--amberd);padding:1px 7px;border-radius:20px;font-weight:700">St. Michael's Parish, Tampa</span> New donor submission</div>
+          <div class="rq-donor-name">Dominguez, Teresa — NEW · not yet in database</div>
+          <div class="rq-change-summary"><span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;background:var(--greenl);color:var(--greend)">NEW DONOR</span> Parish Admin submitted · Staged for diocese commit</div>
+          <div class="rq-submitted">Submitted May 26, 2026 · New parishioner · no existing record found</div>
+        </div>
+        <span class="rq-priority rqp-new">New donor</span>
+      </div>
+      <div class="rq-body">
+        <div style="padding:16px 18px;border-bottom:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Proposed new record</div>
+          <div class="nd-review">
+            <div class="ndr-row"><span class="ndr-key">Full name</span><span class="ndr-val new">Mrs. Teresa Dominguez</span></div>
+            <div class="ndr-row"><span class="ndr-key">Address</span><span class="ndr-val new">1402 Prairie Wind Dr, Mansfield TX 76063</span></div>
+            <div class="ndr-row"><span class="ndr-key">Email</span><span class="ndr-val new">tdominguez@email.com</span></div>
+            <div class="ndr-row"><span class="ndr-key">Phone</span><span class="ndr-val new">(817) 555-0291</span></div>
+            <div class="ndr-row"><span class="ndr-key">Parish</span><span class="ndr-val new">St. Michael's, Tampa</span></div>
+            <div class="ndr-row"><span class="ndr-key">How they were met</span><span class="ndr-val">New parishioner registration · May 2026</span></div>
+            <div class="ndr-row"><span class="ndr-key">Household</span><span class="ndr-val">Create new household</span></div>
+            <div class="ndr-row" style="border-bottom:none"><span class="ndr-key">Duplicate check</span><span class="ndr-val" style="color:var(--green)">✓ No match found in database</span></div>
+          </div>
+        </div>
+        <div class="rq-context">
+          <svg class="rq-context-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v4M8 11v.5"/></svg>
+          "Teresa attended our new parishioner welcome dinner on May 24. She signed our registration card and expressed interest in CMA giving. Parish Admin Sarah Reyes verified her contact details directly."
+        </div>
+        <div style="padding:10px 18px;border-top:1px solid var(--border);background:var(--surf);font-size:12px;color:var(--text3);display:flex;align-items:center;gap:8px">
+          <svg viewBox="0 0 14 14" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round" width="14" height="14"><path d="M7 1.5v5M7 9v.5"/><circle cx="7" cy="7" r="5.5"/></svg>
+          <span><strong style="color:var(--blue)">2028 pathway note:</strong> On commit, this record will be flagged as ParishAtlasOrigin = StMichaels. When Parish Atlas launches, this record automatically becomes part of St. Michael's own database with full attribution to the parish admin who submitted it.</span>
+        </div>
+        <div class="rq-actions">
+          <div class="rq-actions-left">New donor record — assign a Constituent ID and create Household on commit. No Tier 1 approval required.</div>
+          <button class="rq-btn rq-btn-reject" onclick="showSnack('New donor rejected — returned to parish with notes')">Reject / return</button>
+          <button class="rq-btn rq-btn-modify" onclick="showSnack('Edit mode opened — modify before committing')">Edit before commit</button>
+          <button class="rq-btn rq-btn-approve" onclick="showSnack('Teresa Dominguez committed to database — Donor #84313 assigned','g')">
+            <svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" width="10" height="10"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>Commit to database
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit trail of recent commits -->
+    <div class="card anim" style="animation-delay:.22s">
+      <div class="card-head">
+        <div class="ch-icon" style="background:var(--navy)"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2" width="9" height="8" rx="1.5"/><path d="M4 5h4M4 7.5h2.5"/></svg></div>
+        <span class="ch-title">Recent diocese commits — audit trail</span>
+        <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--greenl);color:var(--greend)">Immutable</span>
+      </div>
+      <div class="card-body">
+        <div class="audit-mini-row">
+          <div class="amr-dot" style="background:var(--green)"></div>
+          <div class="amr-body"><strong>ADDRESS COMMITTED</strong> — Sullivan, Margaret (#8810) · St. Michael's · New: 2200 Oak Creek Blvd, Tampa FL 33612. Proposed by Sarah Reyes, approved by K. Novicky (Diocese)</div>
+          <div class="amr-time">May 20 · 09:22</div>
+        </div>
+        <div class="audit-mini-row">
+          <div class="amr-dot" style="background:var(--green)"></div>
+          <div class="amr-body"><strong>PHONE COMMITTED</strong> — Kowalski, Thomas (#7201) · St. Michael's · New mobile: (817) 555-4412. Proposed by Sarah Reyes, approved by K. Novicky (Diocese)</div>
+          <div class="amr-time">May 18 · 14:31</div>
+        </div>
+        <div class="audit-mini-row">
+          <div class="amr-dot" style="background:var(--red)"></div>
+          <div class="amr-body"><strong>REJECTED</strong> — Parish transfer request for O'Brien, James (#4821) to Holy Cross rejected by Diocese. Reason: "James attends both parishes — primary record remains Cathedral. Note added to record." Notified: Sarah Reyes</div>
+          <div class="amr-time">May 15 · 11:08</div>
+        </div>
+        <div class="audit-mini-row">
+          <div class="amr-dot" style="background:var(--green)"></div>
+          <div class="amr-body"><strong>NEW DONOR COMMITTED</strong> — Martinez, Roberto (#84298) · Holy Cross Parish · Submitted by parish admin, committed by K. Novicky. GiveCentral invite queued.</div>
+          <div class="amr-time">May 12 · 10:44</div>
+        </div>
+        <div class="audit-mini-row" style="border-bottom:none">
+          <div class="amr-dot" style="background:var(--green)"></div>
+          <div class="amr-body"><strong>EMAIL COMMITTED</strong> — Walsh, Catherine (#8821) · St. Michael's · Updated email address. CASS/ZeroBounce validation passed. Committed by K. Novicky.</div>
+          <div class="amr-time">May 10 · 15:22</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /diocesequeue -->
+
+</div><!-- /main -->
+
+<div class="snack" id="snack">
+  <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" width="12" height="12"><path d="M2 6l3 3 5-5"/></svg>
+  <span id="snack-text">Done</span>
+</div>
+
+<script>
+let currentRole = 'pastor';
+let currentCampaign = 'cma';
+
+// Campaign data store — each campaign has its own set of hero stats and context
+const campaigns = {
+  cma: {
+    name: 'Catholic Ministry Appeal 2026',
+    meta: 'Diocese of Fort Worth · Campaign ends June 30, 2026 · 88 days remaining',
+    pct: '69%', barWidth: '69%',
+    days: 'of $78,000 goal · 88 days left',
+    committed: '$54,200', paid: '$44,800', donors: '247', avg: '$219', pledge: '$9,400',
+    warnText: "St. Michael's is 12% below goal pace. At current giving rate, your parish will reach approximately $68,400 by June 30 — your goal is $78,000. 23 donors gave in 2025 but have not yet given this year."
+  },
+  capital: {
+    name: 'Cathedral Restoration Capital Campaign',
+    meta: 'Diocese of Fort Worth · Multi-year campaign · ends Dec 31, 2027 · ⚠ Behind pace',
+    pct: '41%', barWidth: '41%',
+    days: 'of $200,000 goal · 579 days left',
+    committed: '$82,000', paid: '$76,000', donors: '88', avg: '$931', pledge: '$31,200',
+    warnText: "Cathedral Capital is significantly behind pace — 41% committed against a $200,000 goal with 19 months remaining. 34 prior-campaign donors have not yet given. Consider a major gift ask to the top 10 donors who gave in the quiet phase."
+  },
+  school: {
+    name: 'Parish School Fund 2026',
+    meta: 'St. Michael\'s Parish · Annual school fund · ends Aug 31, 2026 · On pace',
+    pct: '88%', barWidth: '88%',
+    days: 'of $50,000 goal · 93 days left',
+    committed: '$44,000', paid: '$41,800', donors: '312', avg: '$141', pledge: '$2,200',
+    warnText: null // no warning — on track
+  }
+};
+
+function setPledgeReport(id, btn) {
+  // Toggle sub-nav buttons
+  document.querySelectorAll('.pledge-subnav').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Toggle report sections
+  ['all','pastdue','writeoffs'].forEach(r => {
+    const el = document.getElementById('pledge-report-' + r);
+    if (el) el.style.display = r === id ? 'block' : 'none';
+  });
+}
+
+function switchCampaign(id, btn) {
+  currentCampaign = id;
+  const c = campaigns[id];
+
+  // Update pill buttons
+  document.querySelectorAll('.cs-pill').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else {
+    // Sync pill state when switching from dropdown
+    const pills = document.querySelectorAll('.cs-pill');
+    const order = ['cma','capital','school'];
+    const idx = order.indexOf(id);
+    if (pills[idx]) pills[idx].classList.add('active');
+  }
+
+  // Update dropdown active state
+  document.querySelectorAll('.cd-campaign').forEach((el,i) => {
+    el.classList.toggle('active', ['cma','capital','school'][i] === id);
+  });
+
+  // Animate hero update
+  const heroStats = document.getElementById('hero-stats');
+  heroStats.style.opacity = '0';
+  heroStats.style.transform = 'translateY(6px)';
+
+  setTimeout(() => {
+    document.getElementById('hero-campaign-name').textContent = c.name;
+    document.getElementById('hero-campaign-meta').textContent = c.meta;
+    document.getElementById('hero-bar').style.width = c.barWidth;
+    document.getElementById('hero-pct').textContent = c.pct;
+    document.getElementById('hero-days').textContent = c.days;
+    document.getElementById('hs-committed').textContent = c.committed;
+    document.getElementById('hs-paid').textContent = c.paid;
+    document.getElementById('hs-donors').textContent = c.donors;
+    document.getElementById('hs-avg').textContent = c.avg;
+    document.getElementById('hs-pledge').textContent = c.pledge;
+
+    // Update topbar campaign crumb
+    document.querySelector('.tb-campaign b').textContent = c.name;
+
+    // Update pace warning banner — use IDs to target precisely
+    const warnBanner = document.getElementById('pace-warn-banner');
+    const warnText = document.getElementById('pace-warn-text');
+    if (warnBanner && warnText) {
+      if (c.warnText) {
+        warnBanner.style.display = 'flex';
+        warnText.innerHTML = '<strong>' + c.name + ' — pace alert:</strong> ' + c.warnText;
+      } else {
+        warnBanner.style.display = 'none';
+      }
+    }
+
+    heroStats.style.opacity = '1';
+    heroStats.style.transform = 'translateY(0)';
+    heroStats.style.transition = 'all .25s ease';
+  }, 120);
+
+  showSnack('Switched to ' + c.name);
+}
+
+function toggleCampaignDropdown() {
+  const dd = document.getElementById('campaign-dropdown');
+  dd.classList.toggle('open');
+  // Close on outside click
+  if (dd.classList.contains('open')) {
+    setTimeout(() => {
+      document.addEventListener('click', closeCampaignDropdown, {once:true});
+    }, 10);
+  }
+}
+
+function closeCampaignDropdown(e) {
+  const dd = document.getElementById('campaign-dropdown');
+  if (!dd.contains(e.target)) dd.classList.remove('open');
+}
+
+function setRole(role) {
+  currentRole = role;
+  document.getElementById('btn-pastor').classList.toggle('active', role === 'pastor');
+  document.getElementById('btn-admin').classList.toggle('active', role === 'admin');
+  document.getElementById('role-banner-pastor').style.display = role === 'pastor' ? 'flex' : 'none';
+  document.getElementById('role-banner-admin').style.display = role === 'admin' ? 'flex' : 'none';
+  document.getElementById('admin-actions').style.display = role === 'admin' ? 'block' : 'none';
+  const donorTab = document.getElementById('tab-donors');
+  donorTab.textContent = role === 'admin' ? 'Donor detail' : 'Donor summary';
+  document.getElementById('tab-datamanage').style.display = role === 'admin' ? 'flex' : 'none';
+  document.getElementById('tab-diocesequeue').style.display = role === 'admin' ? 'flex' : 'none';
+  document.querySelector('.tb-av').textContent = role === 'admin' ? 'SR' : 'FR';
+  document.querySelector('.tb-user').lastChild.textContent = role === 'admin' ? ' Sarah Reyes — Parish Admin' : ' Fr. Robert Malloy';
+}
+
+function setTab(id, btn) {
+  document.querySelectorAll('.tn-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function toggleRQ(id) {
+  document.getElementById(id).classList.toggle('expanded');
+}
+
+function showSnack(msg, type='') {
+  const s = document.getElementById('snack');
+  document.getElementById('snack-text').textContent = msg;
+  s.className = 'snack show' + (type === 'g' ? ' g' : '');
+  setTimeout(() => s.classList.remove('show'), 3200);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Location personalisation — reads ?loc=<slug> and swaps the
+// parish name / diocese / parish admin throughout the visible
+// chrome (topbar, hero, role banners, campaign dropdown header).
+// Each row on atlas-location-manage.html passes a unique slug.
+// ═══════════════════════════════════════════════════════════════
+(function(){
+  var LOCATIONS = {
+    'st-marys-cathedral':        { name: "St. Mary's Cathedral",         diocese: "Diocese of Albany",         admin: "Fr. Michael Reilly",   ai: "FR" },
+    'st-catherine-of-siena':     { name: "St. Catherine of Siena",       diocese: "Diocese of Albany",         admin: "Sr. Olivia Cardenas",  ai: "SO" },
+    'st-josephs':                { name: "St. Joseph’s",            diocese: "Diocese of Albany",         admin: "Deacon Thomas Burke",  ai: "DT" },
+    'st-anthony-of-padua':       { name: "St. Anthony of Padua",         diocese: "Diocese of Albany",         admin: null,                   ai: "—"  },
+    'cathedral-of-the-nativity': { name: "Cathedral of the Nativity",    diocese: "Diocese of Albany",         admin: "Fr. William O’Neil",ai: "FW" },
+    'catholic-academy-of-albany':{ name: "Catholic Academy of Albany",   diocese: "Diocese of Albany",         admin: "Joanne Driscoll",      ai: "JD" },
+    'catholic-charities-albany': { name: "Catholic Charities — Albany",  diocese: "Catholic Charities of Albany", admin: "Patricia Souza",    ai: "PS" },
+    'catholic-charities-troy':   { name: "Catholic Charities — Troy",    diocese: "Catholic Charities of Albany", admin: null,                ai: "—"  },
+    'st-rose-of-lima':           { name: "St. Rose of Lima",             diocese: "Diocese of Albany",         admin: null,                   ai: "—"  },
+  };
+
+  var params = new URLSearchParams(window.location.search);
+  var slug = params.get('loc');
+  var loc = LOCATIONS[slug];
+  if (!loc) return; // no slug → keep the default St. Michael's demo content
+
+  window.__currentLoc = loc;
+
+  function swapText(node, from, to) {
+    if (!node) return;
+    if (node.nodeType === 3) {
+      if (node.nodeValue.indexOf(from) !== -1) node.nodeValue = node.nodeValue.replace(from, to);
+    } else {
+      for (var i = 0; i < node.childNodes.length; i++) swapText(node.childNodes[i], from, to);
+    }
+  }
+
+  function patchAll() {
+    var pastor = loc.admin || "No parish admin assigned";
+    var initials = loc.ai;
+
+    // Topbar breadcrumb diocese
+    var tbc = document.querySelector('.tb-campaign');
+    if (tbc) swapText(tbc, 'Diocese of Fort Worth', loc.diocese);
+
+    // Topbar user
+    var tbAv = document.querySelector('.tb-av');
+    if (tbAv) tbAv.textContent = initials;
+    var tbUser = document.querySelector('.tb-user');
+    if (tbUser && tbUser.lastChild) tbUser.lastChild.textContent = pastor;
+
+    // Hero eyebrow parish name
+    var eyebrow = document.querySelector('.hero-eyebrow span');
+    if (eyebrow) eyebrow.textContent = loc.name;
+
+    // Hero campaign meta — diocese name
+    var heroMeta = document.getElementById('hero-campaign-meta');
+    if (heroMeta) swapText(heroMeta, 'Diocese of Fort Worth', loc.diocese);
+
+    // Campaign-switcher dropdown header
+    var cdHeader = document.querySelector('.cd-header');
+    if (cdHeader) cdHeader.textContent = loc.name + ' — active campaigns';
+
+    // Role banners
+    var rbP = document.getElementById('role-banner-pastor');
+    if (rbP) swapText(rbP, "St. Michael's Parish, Tampa", loc.name);
+    var rbA = document.getElementById('role-banner-admin');
+    if (rbA) swapText(rbA, "St. Michael's Parish", loc.name);
+
+    // CAMPAIGNS object (used by switchCampaign) — patch meta to use new diocese
+    if (typeof CAMPAIGNS !== 'undefined') {
+      try {
+        Object.keys(CAMPAIGNS).forEach(function(k){
+          if (CAMPAIGNS[k] && CAMPAIGNS[k].meta) {
+            CAMPAIGNS[k].meta = CAMPAIGNS[k].meta.replace('Diocese of Fort Worth', loc.diocese);
+            if (CAMPAIGNS[k].warnText) {
+              CAMPAIGNS[k].warnText = CAMPAIGNS[k].warnText.replace("St. Michael's", loc.name.replace(/ — .*$/,''));
+            }
+          }
+        });
+      } catch(e){}
+    }
+
+    // Monkey-patch setRole so toggling back to "Pastor view" restores OUR parish admin
+    if (typeof window.setRole === 'function') {
+      var orig = window.setRole;
+      window.setRole = function(role) {
+        orig(role);
+        if (role === 'pastor') {
+          var av = document.querySelector('.tb-av');
+          var us = document.querySelector('.tb-user');
+          if (av) av.textContent = initials;
+          if (us && us.lastChild) us.lastChild.textContent = ' ' + pastor;
+        }
+      };
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', patchAll);
+  } else {
+    patchAll();
+  }
+})();
+</script>
+</body>
+</html>
