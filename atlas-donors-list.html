@@ -732,15 +732,7 @@ body {
 
   <!-- Filter bar -->
   <div class="filterbar">
-    <div class="filter-chip applied">Type: Individual <span class="x">×</span></div>
-    <div class="filter-chip applied">Capacity: $1k+ <span class="x">×</span></div>
-    <div class="filter-chip add">
-      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg>
-      Parish
-    </div>
-    <div class="filter-chip add">Last gift</div>
-    <div class="filter-chip add">Lifecycle</div>
-    <div class="filter-chip add">Tags</div>
+    <div id="filter-chips" class="filter-chips"><!-- chips rendered by dl-wire filter engine --></div>
     <div class="right">
       <span>Showing <strong>14 of 632</strong></span>
       <span style="width:1px;height:14px;background:var(--border)"></span>
@@ -876,6 +868,8 @@ body {
       <div>Ask range</div>
       <div></div>
     </div>
+
+    <div class="dt-empty" id="dt-empty" style="display:none">No donors match these filters.<button class="dt-empty-clear" id="dt-empty-clear">Clear all filters</button></div>
 
     
     <a class="dt-row" href="atlas-donor-360.html">
@@ -2195,6 +2189,25 @@ body {
   </div>
 </div>
 
+<style id="dl-filter-css">
+  .filter-chips{display:contents;}
+  .filter-pop{position:absolute;z-index:100030;min-width:224px;max-width:300px;background:#fff;border:1px solid var(--border,#E2E8F0);border-radius:12px;box-shadow:0 12px 32px rgba(15,23,42,.16);padding:10px;font-size:13px;opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .14s,transform .14s;}
+  .filter-pop.show{opacity:1;transform:none;pointer-events:auto;}
+  .filter-pop .fp-title{font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--text-3,#94A3B8);padding:2px 6px 8px;}
+  .filter-pop .fp-list{max-height:260px;overflow:auto;}
+  .filter-pop .fp-opt{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;cursor:pointer;color:var(--text,#0F172A);}
+  .filter-pop .fp-opt:hover{background:var(--blue-pale,#EFF4FF);}
+  .filter-pop .fp-opt input{accent-color:var(--blue,#2563EB);width:14px;height:14px;cursor:pointer;flex-shrink:0;}
+  .filter-pop .fp-opt .fp-meta{margin-left:auto;font-size:11px;color:var(--text-3,#94A3B8);}
+  .filter-pop .fp-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border,#E2E8F0);}
+  .filter-pop .fp-clear{background:none;border:none;color:var(--text-3,#64748B);font-size:12px;cursor:pointer;padding:4px 6px;}
+  .filter-pop .fp-clear:hover{color:var(--rose,#BE185D);}
+  .filter-pop .fp-apply{background:var(--blue,#2563EB);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;}
+  .filter-pop .fp-apply:hover{filter:brightness(1.06);}
+  .dt-empty{padding:34px 20px;text-align:center;color:var(--text-3,#64748B);font-size:13px;}
+  .dt-empty-clear{margin-left:6px;background:none;border:none;color:var(--blue,#2563EB);font-weight:600;cursor:pointer;font-size:13px;}
+  .dt-empty-clear:hover{text-decoration:underline;}
+</style>
 <script id="dl-wire">
 (function(){
   if (window.__dlWired) return; window.__dlWired = true;
@@ -2277,26 +2290,223 @@ body {
   });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && modal.classList.contains('show')) closeSave(); });
 
-  // ═══ 3. FILTER CHIPS — × removes, "add" opens picker (toast) ═══
-  document.addEventListener('click', function(e){
-    var x = e.target.closest('.filter-chip.applied .x');
-    if (x) {
-      e.preventDefault(); e.stopPropagation();
-      var chip = x.closest('.filter-chip');
-      var label = chip.firstChild.textContent.trim().replace(/\s+×$/,'');
-      chip.style.transition = 'opacity .18s, transform .18s';
-      chip.style.opacity = '0'; chip.style.transform = 'scale(.9)';
-      setTimeout(function(){ chip.remove(); }, 180);
-      toast('Removed filter · ' + label);
-      return;
+  // ═══ 3. FILTER CHIPS — full filter engine (Type · Capacity · Parish · Last gift · Lifecycle · Tags) ═══
+  (function(){
+    var NOW = new Date(2026, 5, 12); // prototype "today" = Jun 12, 2026
+    var PLUS_SVG = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg>';
+    var KNOWN_TAGS = ['Major donor','Q2 2026 outreach','Volunteer','Board member','Parish council','Capital campaign 2026','Lapsed','Faith leader'];
+
+    function addMonths(d, n){ var x = new Date(d.getTime()); x.setMonth(x.getMonth() + n); return x; }
+    function parseGiftDate(txt){
+      var m = (txt || '').match(/([A-Za-z]{3,})\s+(\d{1,2}),\s+(\d{4})/);
+      if (!m) return null;
+      var dt = new Date(m[1] + ' ' + m[2] + ', ' + m[3]);
+      return isNaN(dt.getTime()) ? null : dt;
     }
-    var addChip = e.target.closest('.filter-chip.add');
-    if (addChip && !e.target.closest('.filter-chip.applied')) {
+    function numsIn(txt){ return (txt.match(/\d[\d,]*/g) || []).map(function(s){ return parseInt(s.replace(/,/g,''), 10); }); }
+
+    // ── Derive a data object for every donor row from its existing cells ──
+    var rows = Array.prototype.slice.call(document.querySelectorAll('.donor-table .dt-row'));
+    rows.forEach(function(r){
+      var cells = Array.prototype.slice.call(r.children);
+      var tagEl = r.querySelector('.tag');
+      var subEl = r.querySelector('.sub');
+      var sub   = (subEl ? subEl.textContent : '').toLowerCase();
+      var typeFull = tagEl ? tagEl.textContent.trim() : '';
+      var type = (typeFull.split(/[^A-Za-z]/)[0]) || '';            // Individual / Household / Organization
+      var parish = cells[5] ? cells[5].textContent.trim() : '';
+      if (parish === '—' || parish === '') parish = '';
+      var giftDateTxt = (r.querySelector('.gift .d') || {}).textContent || '';
+      var giftDate = parseGiftDate(giftDateTxt);
+      var askEl = r.querySelector('.ask span');
+      var askNums = askEl ? numsIn(askEl.textContent) : [];
+      var capacity = askNums.length ? Math.max.apply(null, askNums) : 0;
+
+      // lifecycle stages (a row can carry several)
+      var life = [];
+      if (sub.indexOf('major donor') !== -1) life.push('Major donor');
+      if (sub.indexOf('recurring') !== -1 || /recurring/i.test(giftDateTxt)) life.push('Recurring');
+      if (sub.indexOf('first-time') !== -1 || sub.indexOf('new gift') !== -1 || sub.indexOf('new donor') !== -1) life.push('New');
+      if (sub.indexOf('lybunt') !== -1 || sub.indexOf('lapsed') !== -1 || sub.indexOf('sybunt') !== -1) life.push('Lapsed');
+      if (!life.length) life.push('Active');
+
+      // tags present in the row's segment line
+      var tags = KNOWN_TAGS.filter(function(t){ return sub.indexOf(t.toLowerCase()) !== -1; });
+      if (sub.indexOf('lybunt') !== -1 && tags.indexOf('Lapsed') === -1) tags.push('Lapsed');
+
+      r.__data = { type: type, parish: parish, giftDate: giftDate, capacity: capacity, life: life, tags: tags };
+    });
+
+    // Parish options derived from the data (keeps in sync with rows)
+    var parishOpts = [];
+    rows.forEach(function(r){ if (r.__data.parish && parishOpts.indexOf(r.__data.parish) === -1) parishOpts.push(r.__data.parish); });
+    parishOpts.sort();
+
+    // ── Facet definitions ──
+    var FACETS = {
+      type:     { label:'Type',      multi:true,  opts:[{v:'Individual'},{v:'Household'},{v:'Organization'}] },
+      capacity: { label:'Capacity',  multi:false, opts:[{v:'1000',label:'$1k+'},{v:'5000',label:'$5k+'},{v:'10000',label:'$10k+'},{v:'25000',label:'$25k+'}] },
+      parish:   { label:'Parish',    multi:true,  opts: parishOpts.map(function(p){ return {v:p}; }) },
+      lastGift: { label:'Last gift', multi:false, opts:[{v:'90d',label:'Last 90 days'},{v:'6m',label:'Last 6 months'},{v:'12m',label:'Last 12 months'},{v:'over12m',label:'Over 12 months ago'},{v:'2026',label:'This year (2026)'}] },
+      lifecycle:{ label:'Lifecycle', multi:true,  opts:[{v:'New'},{v:'Active'},{v:'Recurring'},{v:'Major donor'},{v:'Lapsed'}] },
+      tags:     { label:'Tags',      multi:true,  opts: KNOWN_TAGS.map(function(t){ return {v:t}; }) }
+    };
+    var ORDER = ['type','capacity','parish','lastGift','lifecycle','tags'];
+
+    // ── Active filter state (pre-applied: Individuals with $1k+ capacity) ──
+    var state = { type:['Individual'], capacity:'1000', parish:[], lastGift:null, lifecycle:[], tags:[] };
+
+    function optLabel(facet, v){
+      var f = FACETS[facet]; for (var i=0;i<f.opts.length;i++){ if (f.opts[i].v === v) return f.opts[i].label || f.opts[i].v; } return v;
+    }
+    function multiLabel(facet){
+      var arr = state[facet]; if (!arr || !arr.length) return '';
+      var first = optLabel(facet, arr[0]);
+      return arr.length === 1 ? first : first + ' +' + (arr.length - 1);
+    }
+    function hasSel(facet){
+      var v = state[facet];
+      return Array.isArray(v) ? v.length > 0 : (v !== null && v !== undefined && v !== '');
+    }
+
+    // ── Match a row against the full state (AND across facets) ──
+    function matchLastGift(date, v){
+      if (!date) return false;
+      if (v === '90d')     return date >= addMonths(NOW, -3);
+      if (v === '6m')      return date >= addMonths(NOW, -6);
+      if (v === '12m')     return date >= addMonths(NOW, -12);
+      if (v === 'over12m') return date <  addMonths(NOW, -12);
+      if (v === '2026')    return date.getFullYear() === 2026;
+      return true;
+    }
+    function intersects(a, b){ for (var i=0;i<a.length;i++){ if (b.indexOf(a[i]) !== -1) return true; } return false; }
+    function rowMatches(d){
+      if (state.type.length     && state.type.indexOf(d.type) === -1) return false;
+      if (state.capacity        && d.capacity < parseInt(state.capacity,10)) return false;
+      if (state.parish.length   && state.parish.indexOf(d.parish) === -1) return false;
+      if (state.lastGift        && !matchLastGift(d.giftDate, state.lastGift)) return false;
+      if (state.lifecycle.length&& !intersects(state.lifecycle, d.life)) return false;
+      if (state.tags.length     && !intersects(state.tags, d.tags)) return false;
+      return true;
+    }
+
+    var emptyEl = document.getElementById('dt-empty');
+    function applyFilters(){
+      var visible = 0;
+      rows.forEach(function(r){
+        var ok = rowMatches(r.__data);
+        r.style.display = ok ? '' : 'none';
+        if (ok) visible++;
+      });
+      if (emptyEl) emptyEl.style.display = visible === 0 ? '' : 'none';
+      var rightStrong = document.querySelector('.filterbar .right strong');
+      if (rightStrong) rightStrong.textContent = visible + ' of 632';
+      var pagerStrong = document.querySelectorAll('.pager strong')[0];
+      if (pagerStrong) pagerStrong.textContent = visible === 0 ? '0' : '1–' + visible;
+    }
+
+    // ── Render the chips from state ──
+    var chipWrap = document.getElementById('filter-chips');
+    function renderChips(){
+      var html = '';
+      ORDER.forEach(function(facet){
+        var f = FACETS[facet];
+        if (hasSel(facet)){
+          var txt = f.multi ? multiLabel(facet) : optLabel(facet, state[facet]);
+          html += '<div class="filter-chip applied" data-facet="'+facet+'">'+f.label+': '+txt+' <span class="x">×</span></div>';
+        } else {
+          html += '<div class="filter-chip add" data-facet="'+facet+'">'+PLUS_SVG+' '+f.label+'</div>';
+        }
+      });
+      chipWrap.innerHTML = html;
+    }
+
+    // ── Picker popover ──
+    var pop = document.createElement('div');
+    pop.className = 'filter-pop';
+    pop.id = 'filter-pop';
+    document.body.appendChild(pop);
+    var popFacet = null;
+
+    function openPop(facet, anchor){
+      popFacet = facet;
+      var f = FACETS[facet];
+      var inputType = f.multi ? 'checkbox' : 'radio';
+      var cur = state[facet];
+      var rowsHtml = f.opts.map(function(o){
+        var checked = f.multi ? (cur.indexOf(o.v) !== -1) : (cur === o.v);
+        var label = o.label || o.v;
+        return '<label class="fp-opt"><input type="'+inputType+'" name="fp-'+facet+'" value="'+o.v+'"'+(checked?' checked':'')+'>'+
+               '<span class="fp-name">'+label+'</span></label>';
+      }).join('');
+      pop.innerHTML = '<div class="fp-title">'+f.label+'</div><div class="fp-list">'+rowsHtml+'</div>'+
+        '<div class="fp-foot"><button class="fp-clear" type="button">Clear</button><button class="fp-apply" type="button">Apply</button></div>';
+      var rect = anchor.getBoundingClientRect();
+      var sx = window.pageXOffset || document.documentElement.scrollLeft;
+      var sy = window.pageYOffset || document.documentElement.scrollTop;
+      pop.style.left = (rect.left + sx) + 'px';
+      pop.style.top  = (rect.bottom + sy + 6) + 'px';
+      pop.classList.add('show');
+      // keep popover within viewport horizontally
+      var pr = pop.getBoundingClientRect();
+      if (pr.right > window.innerWidth - 12){
+        pop.style.left = Math.max(12, (window.innerWidth - pr.width - 12) + sx) + 'px';
+      }
+    }
+    function closePop(){ pop.classList.remove('show'); popFacet = null; }
+
+    pop.addEventListener('click', function(e){
+      if (e.target.closest('.fp-apply')){
+        var fac = popFacet;
+        var f = FACETS[fac];
+        var checked = Array.prototype.slice.call(pop.querySelectorAll('input:checked')).map(function(i){ return i.value; });
+        state[fac] = f.multi ? checked : (checked[0] || null);
+        renderChips(); applyFilters(); closePop();
+        toast(hasSel(fac) ? f.label + ' filter applied' : 'Removed filter · ' + f.label);
+        return;
+      }
+      if (e.target.closest('.fp-clear')){
+        var fac = popFacet;
+        state[fac] = FACETS[fac].multi ? [] : null;
+        renderChips(); applyFilters(); closePop();
+        toast('Removed filter · ' + FACETS[fac].label);
+      }
+    });
+
+    // ── Chip interactions (delegated) ──
+    chipWrap.addEventListener('click', function(e){
+      var chip = e.target.closest('.filter-chip');
+      if (!chip) return;
+      var facet = chip.getAttribute('data-facet');
+      if (e.target.closest('.x')){               // × clears the facet
+        e.preventDefault(); e.stopPropagation();
+        state[facet] = FACETS[facet].multi ? [] : null;
+        renderChips(); applyFilters();
+        toast('Removed filter · ' + FACETS[facet].label);
+        return;
+      }
       e.preventDefault();
-      var name = addChip.textContent.trim().replace(/^\+\s*/,'');
-      toast('Filter picker · ' + name + ' — pick values to add');
-    }
-  });
+      if (popFacet === facet){ closePop(); return; }  // toggle
+      openPop(facet, chip);
+    });
+
+    // close popover on outside click / Escape
+    document.addEventListener('click', function(e){
+      if (pop.classList.contains('show') && !e.target.closest('#filter-pop') && !e.target.closest('#filter-chips')) closePop();
+    });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closePop(); });
+
+    // clear-all from the empty state
+    var emptyClear = document.getElementById('dt-empty-clear');
+    if (emptyClear) emptyClear.addEventListener('click', function(){
+      state = { type:[], capacity:null, parish:[], lastGift:null, lifecycle:[], tags:[] };
+      renderChips(); applyFilters(); toast('All filters cleared');
+    });
+
+    // initial paint (honours the pre-applied Type + Capacity chips)
+    renderChips();
+    applyFilters();
+  })();
 
   // ═══ 4. SORT-BY chip — cycle through sort fields ═══
   var SORT_FIELDS = ['Last gift ↓','Last gift ↑','Lifetime giving ↓','Name A–Z','Date added ↓','Capacity ↓'];
