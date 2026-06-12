@@ -1518,10 +1518,29 @@ const POSTED_GIFTS = [
 ];
 
 // ─────────────────────────────────────────────────────────────
+// OPEN PLEDGES — donorId → array of open pledges (used by inline pledge picker)
+// ─────────────────────────────────────────────────────────────
+const OPEN_PLEDGES = {
+  881:  [{ id:'PL-2026-0042', label:"Cathedral Capital · O'Brien Family", fund:'Cathedral Capital Fund', gl:'5001', total:30000, paid:26000, remaining:4000, dueNext:'May 1, 2026', term:'3-year' }],
+  1044: [{ id:'PL-2025-0118', label:'CMA pledge · Sullivan',              fund:'CMA Annual Fund',         gl:'4100', total:5000,  paid:3500,  remaining:1500, dueNext:'Jul 15, 2026', term:'Annual installments' }],
+  4811: [{ id:'PL-2026-0073', label:'Cathedral Capital · Hennessy',       fund:'Cathedral Capital Fund', gl:'5001', total:10000, paid:7500,  remaining:2500, dueNext:'Sep 1, 2026', term:'2-year' }],
+  3847: [{ id:'PL-2025-0301', label:'CMA pledge · Harrington',            fund:'CMA Annual Fund',         gl:'4100', total:2500,  paid:1500,  remaining:1000, dueNext:'Jun 30, 2026', term:'Annual' }],
+  7721: [{ id:'PL-2026-0011', label:'Marian Congress · Costello',         fund:'Marian Congress',         gl:'4210', total:7500,  paid:5000,  remaining:2500, dueNext:'Aug 15, 2026', term:'3-installment' }],
+};
+function getOpenPledgesFor(donorId){ return (donorId && OPEN_PLEDGES[donorId]) ? OPEN_PLEDGES[donorId] : []; }
+function getPledgeById(pid){
+  for (const k in OPEN_PLEDGES) {
+    const f = OPEN_PLEDGES[k].find(p=>p.id===pid);
+    if (f) return f;
+  }
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────
 // BATCH ROWS
 // ─────────────────────────────────────────────────────────────
 let BATCH_ROWS = [
-  { id:1,  donorId:881,  donor:"O'Brien, James",      date:"04/14/2026",fund:"CMA Annual Fund",  type:"Check",  amt:500,   pay:"Check",  ref:"10441",gl:"4100",note:""},
+  { id:1,  donorId:881,  donor:"O'Brien, James",      date:"04/14/2026",fund:"Cathedral Capital Fund",  type:"Pledge", amt:500,   pay:"Check",  ref:"10441",gl:"5001",note:"", pledgeId:"PL-2026-0042"},
   { id:2,  donorId:1044, donor:"Sullivan, Margaret",  date:"04/14/2026",fund:"CMA Annual Fund",  type:"Check",  amt:2500,  pay:"Check",  ref:"2290", gl:"4100",note:""},
   { id:3,  donorId:2201, donor:"Kim, Patricia",       date:"04/15/2026",fund:"CMA Annual Fund",  type:"Credit", amt:250,   pay:"Credit card",ref:"CC-8842",gl:"4100",note:""},
   { id:4,  donorId:null, donor:"Hennessy, R",         date:"04/15/2026",fund:"CMA Annual Fund",  type:"Check",  amt:125,   pay:"Check",  ref:"0044", gl:"4100",note:""},
@@ -1531,7 +1550,7 @@ let BATCH_ROWS = [
   { id:8,  donorId:7721, donor:"Costello, Barbara",   date:"04/16/2026",fund:"Marian Congress",  type:"Check",  amt:2500,  pay:"Check",  ref:"1108", gl:"4210",note:""},
   { id:9,  donorId:4450, donor:"Mendez, Carlos",      date:"04/16/2026",fund:"CMA Annual Fund",  type:"Credit", amt:5000,  pay:"Credit card",ref:"CC-3344",gl:"4100",note:""},
   { id:10, donorId:8830, donor:"Walsh, Susan",        date:"04/17/2026",fund:"CMA Annual Fund",  type:"Check",  amt:100,   pay:"Check",  ref:"6621", gl:"4100",note:""},
-  { id:11, donorId:4811, donor:"Hennessy, Robert",    date:"04/17/2026",fund:"General Fund",     type:"Credit", amt:1000,  pay:"Credit card",ref:"CC-5599",gl:"",   note:""},
+  { id:11, donorId:4811, donor:"Hennessy, Robert",    date:"04/17/2026",fund:"Cathedral Capital Fund",     type:"Pledge", amt:1000,  pay:"Credit card",ref:"CC-5599",gl:"5001",   note:"", pledgeId:"PL-2026-0073"},
   { id:12, donorId:2231, donor:"Walsh, Susan M.",     date:"04/17/2026",fund:"CMA Annual Fund",  type:"Check",  amt:100,   pay:"Check",  ref:"7700", gl:"4100",note:""},
   { id:13, donorId:9940, donor:"Morrison, Peter",     date:"04/18/2026",fund:"Marian Congress",  type:"Credit", amt:750,   pay:"Credit card",ref:"CC-1122",gl:"4210",note:""},
   { id:14, donorId:1120, donor:"Fitzgerald, Anne",    date:"04/18/2026",fund:"CMA Annual Fund",  type:"Check",  amt:325,   pay:"Check",  ref:"9980", gl:"4100",note:""},
@@ -1738,6 +1757,51 @@ function runAccuracyEngine(rows) {
         sub:'DAF distributions cannot fund personal benefits (ticket value). Split required.',
         fix:'Split gift', fixAction:`openModal('daf-split')` });
     }
+
+    // ── PLEDGE PAYMENT RULES ─────────────────────────────────────
+    // 16. Orphan pledge type — donor matched but no pledge selected
+    if (r.type === 'Pledge' && r.donorId && !r.pledgeId) {
+      const open = getOpenPledgesFor(r.donorId);
+      if (open.length === 0) {
+        signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Pledge',
+          msg:`No open pledges on file for ${r.donor}`,
+          sub:'Gift type is Pledge but this donor has no outstanding pledge. Confirm or change to Check / Credit.',
+          fix:'Change to Check', fixAction:`fixPledgeType(${r.id})` });
+      } else {
+        signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Pledge',
+          msg:`Pledge type selected but no pledge linked`,
+          sub:`${open.length} open pledge${open.length>1?'s':''} available for ${r.donor}. Pick one below the row.`,
+          fix:'Pick pledge', fixAction:`focusPledgePicker(${r.id})` });
+      }
+    }
+
+    // 17. Pledge picked + fund mismatch
+    if (r.pledgeId) {
+      const p = getPledgeById(r.pledgeId);
+      if (p && r.fund && p.fund !== r.fund) {
+        signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Pledge',
+          msg:`Fund mismatch with pledge ${p.id}`,
+          sub:`Pledge is to ${p.fund}; this row reads ${r.fund}. Donor likely intended their pledge.`,
+          fix:`Use ${p.fund.split(' ')[0]}`, fixAction:`fixPledgeFund(${r.id})` });
+      }
+
+      // 18. Over-payment
+      if (p && r.amt > p.remaining + 0.005) {
+        const over = (r.amt - p.remaining).toFixed(2);
+        signals.push({ row:rowNum, rid:r.id, sev:'error', cat:'Pledge',
+          msg:`Payment exceeds remaining balance by $${over}`,
+          sub:`Pledge ${p.id} has $${p.remaining.toLocaleString()} remaining. Split into two rows: $${p.remaining.toLocaleString()} pledge payment + $${over} new gift.`,
+          fix:'Split row', fixAction:`splitOverPledge(${r.id})` });
+      }
+
+      // 19. Pledge will be fulfilled (info — celebratory)
+      if (p && r.amt >= p.remaining - 0.005 && r.amt <= p.remaining + 0.005) {
+        signals.push({ row:rowNum, rid:r.id, sev:'info', cat:'Pledge',
+          msg:`This payment fulfills pledge ${p.id}`,
+          sub:`Pledge will flip to "Fulfilled" status on post · audit entry will be written to the donor record.`,
+          fix:null });
+      }
+    }
   });
 
   return signals;
@@ -1864,8 +1928,197 @@ function renderBatch() {
         <button class="ra" onclick="duplicateRow(${r.id})" title="Duplicate"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><rect x="1" y="2.5" width="6.5" height="6.5" rx="1"/><path d="M3 2.5V1.5h6.5V8H8.5"/></svg></button>
         <button class="ra" onclick="deleteRow(${r.id},null)" title="Delete"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M1.5 3h7M4 3v-.5h2V3M4.5 4.5v3M5.5 4.5v3"/><rect x="2" y="3" width="6" height="6.5" rx="1"/></svg></button>
       </div></td>
-    </tr>`;
+    </tr>${renderPledgeSubRow(r)}`;
   }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────
+// PLEDGE SUB-ROW · inline-reveal when Gift type = Pledge
+// ─────────────────────────────────────────────────────────────
+function renderPledgeSubRow(r){
+  if (r.type !== 'Pledge') return '';
+  const open = getOpenPledgesFor(r.donorId);
+  const selected = r.pledgeId ? getPledgeById(r.pledgeId) : null;
+
+  // Case A: donor not matched yet
+  if (!r.donorId) {
+    return `<tr class="ple-sub-row ple-empty" id="ple-sub-${r.id}">
+      <td></td>
+      <td colspan="11">
+        <div class="ple-bar empty">
+          <svg class="ple-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 7l1.5 1.5L9 6"/><rect x="2" y="2.5" width="10" height="9" rx="1.5"/></svg>
+          <span>Pick a donor first — pledges auto-suggest once the row is matched.</span>
+        </div>
+      </td>
+    </tr>`;
+  }
+
+  // Case B: donor matched, no open pledges
+  if (open.length === 0) {
+    return `<tr class="ple-sub-row ple-warn" id="ple-sub-${r.id}">
+      <td></td>
+      <td colspan="11">
+        <div class="ple-bar warn">
+          <svg class="ple-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 1l6 12H1z"/><path d="M7 5v3M7 10v.5"/></svg>
+          <span><strong>${escapeRowHtml(r.donor)}</strong> has no open pledges on file.</span>
+          <button class="ple-act" onclick="fixPledgeType(${r.id})">Change to Check →</button>
+        </div>
+      </td>
+    </tr>`;
+  }
+
+  // Case C: donor matched, has pledges — picker or selected state
+  const leaves = selected ? Math.max(0, selected.remaining - r.amt) : null;
+  const overpay = selected && r.amt > selected.remaining;
+  const willFulfill = selected && r.amt >= selected.remaining - 0.005 && r.amt <= selected.remaining + 0.005;
+
+  let pickerHtml;
+  if (selected) {
+    pickerHtml = `
+      <div class="ple-pick-grp">
+        <span class="ple-applied">Applying to</span>
+        <span class="ple-pledge-id" title="Pledge ID">${selected.id}</span>
+        <span class="ple-pledge-name">${escapeRowHtml(selected.label)}</span>
+        <button class="ple-change" onclick="openPledgeSwap(${r.id})">Change</button>
+      </div>`;
+  } else {
+    pickerHtml = `
+      <div class="ple-pick-grp">
+        <span class="ple-applied">Apply to pledge:</span>
+        <select class="ple-picker" id="ple-picker-${r.id}" onchange="pickPledge(${r.id},this.value)">
+          <option value="">— Select an open pledge —</option>
+          ${open.map(p=>`<option value="${p.id}">${p.id} · ${escapeRowHtml(p.label)} · $${p.remaining.toLocaleString()} remaining</option>`).join('')}
+        </select>
+        ${open.length === 1 ? `<button class="ple-act" onclick="pickPledge(${r.id},'${open[0].id}')">Auto-apply only pledge →</button>` : ''}
+      </div>`;
+  }
+
+  // Balance chip (only when a pledge is selected)
+  let chipHtml = '';
+  if (selected) {
+    const chipClass = overpay ? 'err' : willFulfill ? 'ful' : leaves < selected.remaining * 0.1 ? 'low' : 'ok';
+    const leftLabel = overpay
+      ? `Over-payment by $${(r.amt - selected.remaining).toLocaleString()}`
+      : willFulfill
+        ? `✓ Fulfills this pledge`
+        : `Leaves $${leaves.toLocaleString()} remaining`;
+    chipHtml = `
+      <div class="ple-balance ${chipClass}">
+        <span class="ple-bal-pre">$${selected.paid.toLocaleString()} <span class="muted">paid</span> · $${selected.remaining.toLocaleString()} <span class="muted">remaining</span></span>
+        <span class="ple-bal-arrow">→</span>
+        <span class="ple-bal-post">${leftLabel}</span>
+      </div>`;
+  }
+
+  return `<tr class="ple-sub-row ple-active" id="ple-sub-${r.id}">
+    <td></td>
+    <td colspan="11">
+      <div class="ple-bar active">
+        <svg class="ple-ic gold" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 2.5h8l2 2.5v6.5a1 1 0 01-1 1H3a1 1 0 01-1-1V3.5a1 1 0 011-1z"/><path d="M5 6l1.5 1.5L9 5"/></svg>
+        ${pickerHtml}
+        ${chipHtml}
+        ${selected ? `<button class="ple-clear" onclick="pickPledge(${r.id},'')" title="Unlink pledge">✕</button>` : ''}
+      </div>
+    </td>
+  </tr>`;
+}
+
+function escapeRowHtml(s){
+  return String(s||'').replace(/[&<>"']/g, function(m){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// PLEDGE PICKER HELPERS
+// ─────────────────────────────────────────────────────────────
+function pickPledge(rid, pledgeId){
+  const r = BATCH_ROWS.find(x=>x.id===rid);
+  if (!r) return;
+  r.pledgeId = pledgeId || null;
+  // When picking a pledge, auto-correct fund + gl if they're empty or inconsistent
+  if (pledgeId) {
+    const p = getPledgeById(pledgeId);
+    if (p) {
+      if (r.fund !== p.fund) r.fund = p.fund;
+      if (!r.gl || r.gl !== p.gl) r.gl = p.gl;
+    }
+  }
+  revalidateAll();
+}
+
+function focusPledgePicker(rid){
+  setTimeout(()=>{
+    const el = document.getElementById('ple-picker-' + rid);
+    if (el) { el.focus(); el.size = 1; }
+  }, 50);
+}
+
+function fixPledgeType(rid){
+  const r = BATCH_ROWS.find(x=>x.id===rid);
+  if (!r) return;
+  r.type = 'Check';
+  r.pledgeId = null;
+  revalidateAll();
+}
+
+function fixPledgeFund(rid){
+  const r = BATCH_ROWS.find(x=>x.id===rid);
+  if (!r || !r.pledgeId) return;
+  const p = getPledgeById(r.pledgeId);
+  if (p) { r.fund = p.fund; r.gl = p.gl; }
+  revalidateAll();
+}
+
+function splitOverPledge(rid){
+  const r = BATCH_ROWS.find(x=>x.id===rid);
+  if (!r || !r.pledgeId) return;
+  const p = getPledgeById(r.pledgeId);
+  if (!p) return;
+  const over = r.amt - p.remaining;
+  r.amt = p.remaining; // first row covers the pledge exactly
+  // Append a second row for the overage as a new gift
+  const newId = Math.max(...BATCH_ROWS.map(x=>x.id))+1;
+  BATCH_ROWS.push({
+    id: newId, donorId: r.donorId, donor: r.donor,
+    date: r.date, fund: r.fund, type: 'Check',
+    amt: over, pay: r.pay, ref: r.ref, gl: r.gl,
+    note: 'Overage from pledge ' + r.pledgeId,
+    pledgeId: null
+  });
+  revalidateAll();
+  if (window.batchToast) batchToast('Row split · pledge fulfilled · $' + over.toFixed(2) + ' moved to new gift row');
+}
+
+function openPledgeSwap(rid){
+  const r = BATCH_ROWS.find(x=>x.id===rid);
+  if (!r) return;
+  r.pledgeId = null;
+  revalidateAll();
+  focusPledgePicker(rid);
+}
+
+// Called when the user confirms "Post clean + create exceptions" — actually decrements
+// each linked pledge in OPEN_PLEDGES, flips any newly-fulfilled pledges, and toasts a summary.
+function applyPledgeUpdates(){
+  let pledgesUpdated = 0;
+  let pledgesFulfilled = 0;
+  BATCH_ROWS.forEach(r=>{
+    if (r.type !== 'Pledge' || !r.pledgeId) return;
+    // Skip rows still flagged with errors
+    if (ALL_SIGNALS.find(s=>s.rid===r.id && s.sev==='error')) return;
+    const p = getPledgeById(r.pledgeId);
+    if (!p) return;
+    p.paid = Math.min(p.total, p.paid + r.amt);
+    p.remaining = Math.max(0, p.total - p.paid);
+    pledgesUpdated++;
+    if (p.remaining === 0) { p.status = 'Fulfilled'; pledgesFulfilled++; }
+  });
+  if (pledgesUpdated > 0 && window.batchToast) {
+    let msg = pledgesUpdated + ' pledge' + (pledgesUpdated>1?'s':'') + ' updated';
+    if (pledgesFulfilled > 0) msg += ' · ' + pledgesFulfilled + ' fulfilled · audit entries written';
+    batchToast(msg);
+  }
 }
 
 function renderAccuracyPanel() {
@@ -1987,7 +2240,7 @@ function handleDonorInput(inp, rid) {
 
 function addRow() {
   const newId = Math.max(...BATCH_ROWS.map(r=>r.id))+1;
-  BATCH_ROWS.push({id:newId,donorId:null,donor:'',date:'04/18/2026',fund:'CMA Annual Fund',type:'Check',amt:0,pay:'Check',ref:'',gl:'4100',note:''});
+  BATCH_ROWS.push({id:newId,donorId:null,donor:'',date:'04/18/2026',fund:'CMA Annual Fund',type:'Check',amt:0,pay:'Check',ref:'',gl:'4100',note:'',pledgeId:null});
   revalidateAll();
   setTimeout(()=>document.querySelector(`#row-${newId} .ci`)?.focus(),50);
 }
@@ -2508,16 +2761,38 @@ const MODALS = {
     body:()=>{
       const clean = BATCH_ROWS.filter(r=>!ALL_SIGNALS.find(s=>s.rid===r.id&&s.sev==='error')).length;
       const err = new Set(ALL_SIGNALS.filter(s=>s.sev==='error').map(s=>s.rid)).size;
+      // Pledge-impact preview: which pledges get debited, which become fulfilled
+      const pledgeRows = BATCH_ROWS.filter(r=>r.type==='Pledge' && r.pledgeId);
+      const pledgeImpacts = pledgeRows.map(r=>{
+        const p = getPledgeById(r.pledgeId);
+        if (!p) return null;
+        const after = Math.max(0, p.remaining - r.amt);
+        return { pid:p.id, label:p.label, before:p.remaining, payment:r.amt, after, fulfilled: after === 0 };
+      }).filter(Boolean);
+      let pledgeBlock = '';
+      if (pledgeImpacts.length > 0) {
+        const fulfilledCount = pledgeImpacts.filter(p=>p.fulfilled).length;
+        pledgeBlock = `<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:11px 14px;margin-top:8px">
+          <div style="font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#92400E;margin-bottom:8px">Pledge impact · ${pledgeImpacts.length} pledge${pledgeImpacts.length>1?'s':''} will be updated${fulfilledCount>0?` · ${fulfilledCount} fulfilled`:''}</div>
+          ${pledgeImpacts.map(pi=>`
+            <div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:11.5px;color:#78350F;border-top:1px dashed #FDE68A">
+              <span style="font-family:'JetBrains Mono',ui-monospace,monospace;background:#FEF3C7;padding:1px 7px;border-radius:99px;font-size:10.5px;font-weight:600">${pi.pid}</span>
+              <span style="flex:1">${pi.label.replace(/[<>&]/g,'')}</span>
+              <span>$${pi.before.toLocaleString()} → <strong style="color:${pi.fulfilled?'#15803D':'#78350F'}">$${pi.after.toLocaleString()}</strong>${pi.fulfilled?' · <span style="color:#15803D">✓ Fulfilled</span>':''}</span>
+            </div>`).join('')}
+        </div>`;
+      }
       return `<div style="background:var(--greenl);border:1px solid #BBF7D0;border-radius:8px;padding:11px 14px;margin-bottom:4px">
         <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:4px">${clean} clean gifts ready to post</div>
         <div style="font-size:12px;color:var(--green)">Posted batches are locked — corrections require a reversing entry.</div>
       </div>
-      ${err>0?`<div style="background:var(--amberl);border:1px solid #FDE68A;border-radius:8px;padding:10px 12px;font-size:12px;color:#78350F">
+      ${err>0?`<div style="background:var(--amberl);border:1px solid #FDE68A;border-radius:8px;padding:10px 12px;font-size:12px;color:#78350F;margin-top:8px">
         <strong>${err} rows have errors</strong> and will be skipped. They'll be moved to an exception batch for resolution.</div>`:''}
+      ${pledgeBlock}
       <div class="form-row"><label class="form-label">Move exception rows to</label>
         <select class="form-select"><option>2026 — CMA (same folder)</option><option>Exception batches</option></select></div>`;
     },
-    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-amber" onclick="closeModal()">Post all including warnings</button><button class="btn btn-green" onclick="closeModal()">Post clean + create exceptions</button>`
+    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-amber" onclick="closeModal()">Post all including warnings</button><button class="btn btn-green" onclick="closeModal();applyPledgeUpdates();">Post clean + create exceptions</button>`
   },
   'donor-history':{
     icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 9.5l2.5-2.5 2 2 2.5-2.5 2 2"/></svg>`, iconBg:'var(--bluep)', title:'Giving history',
@@ -3251,6 +3526,96 @@ revalidateAll();
 })();
 </script>
 <!-- end Atlas Dead-CTA Rescue -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Pledge sub-row styling · inline-reveal under any row with type=Pledge
+     =============================================================== -->
+<style>
+  .ple-sub-row td {
+    padding: 0 !important;
+    border-top: 0 !important;
+    background: transparent !important;
+  }
+  .ple-bar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 7px 10px 7px 8px;
+    margin: -3px 0 4px 4px;
+    font-size: 11.5px; line-height: 1.3;
+    border-left: 3px solid var(--gold, #C8A04A);
+    background: linear-gradient(90deg, #FFFBEB 0%, #FFFEF7 100%);
+    border-radius: 0 6px 6px 0;
+    color: #78350F;
+  }
+  .ple-bar.empty {
+    border-left-color: #94A3B8;
+    background: linear-gradient(90deg, #F8FAFC 0%, white 100%);
+    color: #64748B;
+  }
+  .ple-bar.warn {
+    border-left-color: #D97706;
+    background: linear-gradient(90deg, #FEF3C7 0%, #FFFBEB 100%);
+    color: #92400E;
+  }
+  .ple-bar.active {
+    border-left-color: var(--gold, #C8A04A);
+  }
+  .ple-ic { width: 14px; height: 14px; color: #92400E; flex-shrink: 0; }
+  .ple-ic.gold { color: #B45309; }
+
+  .ple-pick-grp { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ple-applied {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    color: #92400E;
+  }
+  .ple-pledge-id {
+    background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A;
+    padding: 2px 8px; border-radius: 99px; font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px; font-weight: 600;
+  }
+  .ple-pledge-name { font-size: 11.5px; color: #78350F; font-weight: 500; }
+  .ple-change {
+    font-size: 10.5px; padding: 3px 9px; border-radius: 5px; border: 1px solid #FDE68A;
+    background: white; color: #92400E; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  }
+  .ple-change:hover { background: #FEF3C7; }
+
+  .ple-picker {
+    font-family: 'DM Sans', sans-serif; font-size: 11.5px;
+    padding: 4px 8px; border: 1px solid #FDE68A; border-radius: 6px;
+    background: white; color: #78350F; min-width: 280px;
+  }
+  .ple-picker:focus { outline: 2px solid #FDE68A; outline-offset: 1px; }
+
+  .ple-act {
+    font-size: 11px; padding: 4px 10px; border-radius: 6px; border: none;
+    background: #D97706; color: white; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+  }
+  .ple-act:hover { background: #B45309; }
+
+  .ple-balance {
+    display: inline-flex; align-items: center; gap: 8px; margin-left: auto;
+    padding: 4px 10px; border-radius: 6px;
+    font-size: 11px; font-weight: 500;
+  }
+  .ple-balance.ok  { background: #DCFCE7; color: #166534; }
+  .ple-balance.low { background: #FEF3C7; color: #92400E; }
+  .ple-balance.ful { background: #DBEAFE; color: #1E3A8A; }
+  .ple-balance.err { background: #FEE2E2; color: #991B1B; }
+  .ple-balance .muted { color: rgba(0,0,0,.45); font-weight: 400; }
+  .ple-balance .ple-bal-arrow { color: rgba(0,0,0,.35); margin: 0 2px; }
+  .ple-balance .ple-bal-post { font-weight: 600; }
+
+  .ple-clear {
+    border: none; background: transparent; color: #94A3B8;
+    cursor: pointer; padding: 3px 5px; border-radius: 4px;
+    font-size: 13px; line-height: 1;
+  }
+  .ple-clear:hover { background: #FEF3C7; color: #92400E; }
+
+  /* When the parent row has a pledge sub-row, soften its bottom border so they read as a pair */
+  .batch-table tr:has(+ .ple-sub-row) td { border-bottom-color: transparent !important; }
+</style>
 
 </body>
 </html>

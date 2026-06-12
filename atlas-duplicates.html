@@ -662,8 +662,8 @@ body {
       <div class="page-sub">Atlas auto-flags suspected duplicates from GiveCentral sync, batch import, and parish rosters. Resolve them here so receipts route correctly.</div>
     </div>
     <div class="flex gap-8">
-      <button class="btn btn-ghost"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2"/></svg> Re-scan now</button>
-      <button class="btn btn-ghost">Settings</button>
+      <button class="btn btn-ghost" id="dup-rescan-btn" onclick="event.preventDefault();dupRescan()"><svg id="dup-rescan-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2"/></svg> <span id="dup-rescan-lbl">Re-scan now</span></button>
+      <button class="btn btn-ghost" onclick="event.preventDefault();dupOpenSettings()">Settings</button>
     </div>
   </div>
 
@@ -732,7 +732,6 @@ body {
         <span class="left"><strong style="color:var(--text-2)">Recommended:</strong> merge — fields below are field-level customizable.</span>
         <div class="right">
           <button class="btn btn-ghost" style="font-size:12.5px">Keep both as separate</button>
-          <a class="btn btn-ghost" href="atlas-merge.html" style="font-size:12.5px">Open field-level merge</a>
           <a class="btn btn-primary" href="atlas-merge.html" style="font-size:12.5px">Quick-merge with recommendations →</a>
         </div>
       </div>
@@ -786,7 +785,6 @@ body {
         <span class="left"><strong style="color:var(--text-2)">Recommended:</strong> merge — fields below are field-level customizable.</span>
         <div class="right">
           <button class="btn btn-ghost" style="font-size:12.5px">Keep both as separate</button>
-          <a class="btn btn-ghost" href="atlas-merge.html" style="font-size:12.5px">Open field-level merge</a>
           <a class="btn btn-primary" href="atlas-merge.html" style="font-size:12.5px">Quick-merge with recommendations →</a>
         </div>
       </div>
@@ -840,7 +838,6 @@ body {
         <span class="left"><strong style="color:var(--text-2)">Recommended:</strong> merge — fields below are field-level customizable.</span>
         <div class="right">
           <button class="btn btn-ghost" style="font-size:12.5px">Keep both as separate</button>
-          <a class="btn btn-ghost" href="atlas-merge.html" style="font-size:12.5px">Open field-level merge</a>
           <a class="btn btn-primary" href="atlas-merge.html" style="font-size:12.5px">Quick-merge with recommendations →</a>
         </div>
       </div>
@@ -894,7 +891,6 @@ body {
         <span class="left"><strong style="color:var(--text-2)">Recommended:</strong> merge — fields below are field-level customizable.</span>
         <div class="right">
           <button class="btn btn-ghost" style="font-size:12.5px">Keep both as separate</button>
-          <a class="btn btn-ghost" href="atlas-merge.html" style="font-size:12.5px">Open field-level merge</a>
           <a class="btn btn-primary" href="atlas-merge.html" style="font-size:12.5px">Quick-merge with recommendations →</a>
         </div>
       </div>
@@ -1420,6 +1416,366 @@ body {
 })();
 </script>
 <!-- end Atlas Dead-CTA Rescue -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Duplicate-review · functional CTAs
+     ═══════════════════════════════════════════════════════════════
+     • Re-scan now    — animated spinner, toast result
+     • Settings       — modal with confidence-band thresholds
+     • Tabs           — filter cards by data-band
+     • Snooze         — fade out + toast + bump counters
+     • Mark not dup   — fade out + toast + bump counters
+     • Keep both      — fade out + toast + bump counters
+     • Quick-merge    — navigates (already wired via href)
+=============================================================== -->
+<style>
+  /* Spinner animation for Re-scan */
+  @keyframes dup-spin { to { transform: rotate(360deg); } }
+  #dup-rescan-ic.spinning { animation: dup-spin .9s linear infinite; transform-origin: 50% 50%; }
+
+  /* Fade-out for cards being resolved */
+  .dup-card { transition: opacity .35s ease, transform .35s ease, max-height .35s ease, margin .35s ease, padding .35s ease; overflow: hidden; }
+  .dup-card.dup-fading { opacity: 0; transform: translateX(40px); max-height: 0; margin-top: 0 !important; margin-bottom: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; pointer-events: none; }
+
+  /* Empty-state when a tab has 0 cards */
+  .dup-empty {
+    background: white; border: 1px dashed var(--border); border-radius: 12px;
+    padding: 42px 24px; text-align: center; color: var(--text-3);
+    font-size: 13px; line-height: 1.6;
+  }
+  .dup-empty strong { color: var(--text); }
+
+  /* Settings modal */
+  .dup-st-ov {
+    position: fixed; inset: 0; background: rgba(15,23,42,.55); backdrop-filter: blur(3px);
+    display: none; align-items: center; justify-content: center;
+    z-index: 9500; font-family: 'DM Sans', sans-serif;
+    opacity: 0; transition: opacity .18s;
+  }
+  .dup-st-ov.show { display: flex; opacity: 1; }
+  body.dup-st-open { overflow: hidden; }
+  .dup-st {
+    background: white; border-radius: 14px; width: 520px; max-width: calc(100vw - 32px);
+    box-shadow: 0 24px 56px rgba(15,23,42,.25);
+    transform: translateY(10px) scale(.985); opacity: 0;
+    transition: transform .22s cubic-bezier(.16,1,.3,1), opacity .2s;
+  }
+  .dup-st-ov.show .dup-st { transform: translateY(0) scale(1); opacity: 1; }
+  .dup-st-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 11px; }
+  .dup-st-head-ic { width: 32px; height: 32px; border-radius: 8px; background: var(--blue-pale); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .dup-st-head-ic svg { width: 16px; height: 16px; color: var(--blue); }
+  .dup-st-head-text { flex: 1; }
+  .dup-st-title { font-family: 'DM Serif Display', serif; font-size: 18px; line-height: 1.2; color: var(--text); }
+  .dup-st-sub { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+  .dup-st-close { width: 28px; height: 28px; border: none; background: transparent; color: var(--text-3); cursor: pointer; font-size: 20px; line-height: 1; }
+  .dup-st-close:hover { background: var(--surface); border-radius: 6px; color: var(--text); }
+  .dup-st-body { padding: 18px 20px; }
+  .dup-st-section { margin-bottom: 16px; }
+  .dup-st-lbl { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+  .dup-st-band-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 12.5px; }
+  .dup-st-band-pip { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dup-st-band-row.high .dup-st-band-pip { background: var(--green); }
+  .dup-st-band-row.med  .dup-st-band-pip { background: var(--amber); }
+  .dup-st-band-row.low  .dup-st-band-pip { background: var(--rose); }
+  .dup-st-band-name { width: 80px; font-weight: 500; color: var(--text); }
+  .dup-st-band-input { flex: 1; }
+  .dup-st-band-val { font-family: 'JetBrains Mono', ui-monospace, monospace; width: 60px; text-align: right; color: var(--text-2); font-size: 12px; }
+  .dup-st-toggle-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 12.5px; color: var(--text-2); }
+  .dup-st-toggle-row input { accent-color: var(--blue); }
+  .dup-st-foot { padding: 12px 20px; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+  .dup-st-btn { padding: 8px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; }
+  .dup-st-btn.ghost { background: white; border: 1px solid var(--border); color: var(--text-2); }
+  .dup-st-btn.ghost:hover { background: var(--surface); }
+  .dup-st-btn.primary { background: var(--blue); color: white; }
+  .dup-st-btn.primary:hover { background: #1D4ED8; }
+
+  /* Filtered-out card visibility */
+  .dup-card.dup-filtered-out { display: none; }
+</style>
+
+<!-- Settings modal -->
+<div class="dup-st-ov" id="dup-st-ov" onclick="if(event.target===this)dupCloseSettings()">
+  <div class="dup-st">
+    <div class="dup-st-head">
+      <div class="dup-st-head-ic">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="2.5"/><path d="M9 2v2M9 14v2M2 9h2M14 9h2M4 4l1.5 1.5M12.5 12.5L14 14M4 14l1.5-1.5M12.5 5.5L14 4"/></svg>
+      </div>
+      <div class="dup-st-head-text">
+        <div class="dup-st-title">Duplicate detection settings</div>
+        <div class="dup-st-sub">Confidence thresholds, fuzz-matching weights, and notification routing</div>
+      </div>
+      <button class="dup-st-close" onclick="dupCloseSettings()" aria-label="Close">×</button>
+    </div>
+    <div class="dup-st-body">
+      <div class="dup-st-section">
+        <div class="dup-st-lbl">Confidence bands</div>
+        <div class="dup-st-band-row high">
+          <span class="dup-st-band-pip"></span>
+          <span class="dup-st-band-name">High</span>
+          <input class="dup-st-band-input" type="range" min="90" max="100" value="95" oninput="document.getElementById('dup-st-high-v').textContent=this.value+'%+'">
+          <span class="dup-st-band-val" id="dup-st-high-v">95%+</span>
+        </div>
+        <div class="dup-st-band-row med">
+          <span class="dup-st-band-pip"></span>
+          <span class="dup-st-band-name">Medium</span>
+          <input class="dup-st-band-input" type="range" min="75" max="95" value="85" oninput="document.getElementById('dup-st-med-v').textContent=this.value+'%+'">
+          <span class="dup-st-band-val" id="dup-st-med-v">85%+</span>
+        </div>
+        <div class="dup-st-band-row low">
+          <span class="dup-st-band-pip"></span>
+          <span class="dup-st-band-name">Low</span>
+          <input class="dup-st-band-input" type="range" min="60" max="85" value="75" oninput="document.getElementById('dup-st-low-v').textContent=this.value+'%+'">
+          <span class="dup-st-band-val" id="dup-st-low-v">75%+</span>
+        </div>
+      </div>
+      <div class="dup-st-section">
+        <div class="dup-st-lbl">Auto-merge policy</div>
+        <label class="dup-st-toggle-row"><input type="checkbox" checked> Auto-merge candidates above the High band</label>
+        <label class="dup-st-toggle-row"><input type="checkbox"> Email DBA when a Medium-band pair sits unresolved for 48 hours</label>
+        <label class="dup-st-toggle-row"><input type="checkbox" checked> Feed "Not duplicate" decisions back to the matcher weights</label>
+      </div>
+      <div class="dup-st-section">
+        <div class="dup-st-lbl">Matching weights</div>
+        <div class="dup-st-toggle-row"><span style="flex:1">Email</span><span style="color:var(--text-3)">weight 0.35</span></div>
+        <div class="dup-st-toggle-row"><span style="flex:1">Phone</span><span style="color:var(--text-3)">weight 0.25</span></div>
+        <div class="dup-st-toggle-row"><span style="flex:1">Address</span><span style="color:var(--text-3)">weight 0.20</span></div>
+        <div class="dup-st-toggle-row"><span style="flex:1">Name (fuzzy)</span><span style="color:var(--text-3)">weight 0.15</span></div>
+        <div class="dup-st-toggle-row"><span style="flex:1">Parish + birth date</span><span style="color:var(--text-3)">weight 0.05</span></div>
+      </div>
+    </div>
+    <div class="dup-st-foot">
+      <button class="dup-st-btn ghost" onclick="dupCloseSettings()">Cancel</button>
+      <button class="dup-st-btn primary" onclick="dupSaveSettings()">Save thresholds</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ─── Toast (reuse rescue toast) ───
+  function toast(msg) {
+    var t = document.getElementById('atlas-rescue-toast');
+    if (t) {
+      t.querySelector('.msg').textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(function(){ t.classList.remove('show'); }, 3200);
+    } else if (window.atlasToast) { window.atlasToast(msg); }
+  }
+
+  // ─── Tag each card with its band on load ───
+  function bandFromCard(card) {
+    var s = card.querySelector('.dup-score');
+    if (!s) return 'med';
+    if (s.classList.contains('high')) return 'high';
+    if (s.classList.contains('low'))  return 'low';
+    return 'med';
+  }
+  function tagCards() {
+    document.querySelectorAll('.dup-card').forEach(function(c){
+      if (!c.dataset.band) c.dataset.band = bandFromCard(c);
+    });
+  }
+
+  // ─── Active tab map ───
+  // Tab order: All pending · High · Medium · Low · Resolved
+  var TAB_FILTERS = ['all','high','med','low','resolved'];
+  var currentFilter = 'all';
+  var resolved = []; // cards moved aside (snooze / mark-not-dup / keep-both)
+
+  function visibleCardsForFilter(filter) {
+    if (filter === 'resolved') {
+      return resolved;
+    }
+    return Array.from(document.querySelectorAll('.dup-card:not(.dup-resolved)'))
+      .filter(c => filter === 'all' || c.dataset.band === filter);
+  }
+
+  function applyFilter() {
+    document.querySelectorAll('.dup-card').forEach(function(c){
+      c.classList.remove('dup-filtered-out');
+    });
+    var visible;
+    if (currentFilter === 'resolved') {
+      // Hide all live cards; in this prototype, resolved cards are removed,
+      // so show an explanatory empty state.
+      document.querySelectorAll('.dup-card').forEach(function(c){ c.classList.add('dup-filtered-out'); });
+      visible = [];
+    } else if (currentFilter === 'all') {
+      visible = Array.from(document.querySelectorAll('.dup-card:not(.dup-resolved)'));
+    } else {
+      var hits = [];
+      document.querySelectorAll('.dup-card').forEach(function(c){
+        if (c.classList.contains('dup-resolved')) { c.classList.add('dup-filtered-out'); return; }
+        if (c.dataset.band === currentFilter) { hits.push(c); }
+        else c.classList.add('dup-filtered-out');
+      });
+      visible = hits;
+    }
+    renderEmptyState(visible.length);
+  }
+
+  function renderEmptyState(count) {
+    var existing = document.getElementById('dup-empty-state');
+    if (count > 0) { if (existing) existing.remove(); return; }
+    if (existing) return;
+    var lastCard = Array.from(document.querySelectorAll('.dup-card')).pop();
+    if (!lastCard) return;
+    var msg = '';
+    if (currentFilter === 'resolved') {
+      msg = '<strong>' + (resolved.length) + ' resolved pair' + (resolved.length===1?'':'s') + ' this session.</strong><br>Resolved decisions are immutable — view individual decisions from the donor record\'s audit log.';
+    } else if (currentFilter === 'all') {
+      msg = '<strong>Inbox zero on duplicates.</strong><br>Atlas will surface new candidates the moment a sync or import creates a possible match.';
+    } else {
+      msg = 'No ' + ({high:'High',med:'Medium',low:'Low'})[currentFilter] + '-confidence candidates pending.';
+    }
+    var div = document.createElement('div');
+    div.id = 'dup-empty-state';
+    div.className = 'dup-empty';
+    div.innerHTML = msg;
+    lastCard.parentNode.appendChild(div);
+  }
+
+  // ─── Wire the tab strip ───
+  function wireTabs() {
+    var tabs = document.querySelectorAll('.dash .tab');
+    tabs.forEach(function(t, idx){
+      t.style.cursor = 'pointer';
+      t.addEventListener('click', function(){
+        tabs.forEach(function(x){ x.classList.remove('on'); });
+        t.classList.add('on');
+        currentFilter = TAB_FILTERS[idx] || 'all';
+        applyFilter();
+      });
+    });
+  }
+
+  // ─── Card actions (Snooze / Mark not duplicate / Keep both) ───
+  function resolveCard(card, label, msg, kind) {
+    if (!card) return;
+    card.classList.add('dup-fading');
+    setTimeout(function(){
+      card.classList.add('dup-resolved');
+      card.dataset.resolvedAs = kind;
+      resolved.push(card);
+      // Recompute counts & visible state
+      updateTabCounts();
+      applyFilter();
+    }, 360);
+    toast(msg);
+  }
+
+  function findCardForButton(btn) {
+    return btn.closest ? btn.closest('.dup-card') : null;
+  }
+
+  function wireCardActions() {
+    document.querySelectorAll('.dup-card').forEach(function(card){
+      // Snooze
+      Array.from(card.querySelectorAll('.dup-head .btn-ghost')).forEach(function(b){
+        var t = (b.textContent || '').trim().toLowerCase();
+        if (t === 'snooze') {
+          b.onclick = function(e){ e.preventDefault(); e.stopPropagation();
+            resolveCard(card, 'snooze', 'Snoozed for 7 days · we\'ll re-surface next week', 'snoozed'); };
+        } else if (t === 'mark not duplicate') {
+          b.onclick = function(e){ e.preventDefault(); e.stopPropagation();
+            resolveCard(card, 'mark-not-dup', 'Marked as separate records · matcher weights updated', 'not-dup'); };
+        }
+      });
+      // Keep both as separate (in footer)
+      var keepBtn = Array.from(card.querySelectorAll('.dup-foot .btn-ghost')).find(function(b){
+        return (b.textContent||'').trim().toLowerCase() === 'keep both as separate';
+      });
+      if (keepBtn) {
+        keepBtn.onclick = function(e){ e.preventDefault(); e.stopPropagation();
+          resolveCard(card, 'keep-both', 'Records kept separate · removed from queue', 'kept-both'); };
+      }
+    });
+  }
+
+  function updateTabCounts() {
+    var live = Array.from(document.querySelectorAll('.dup-card:not(.dup-resolved)'));
+    var counts = {
+      all:  live.length,
+      high: live.filter(c=>c.dataset.band==='high').length,
+      med:  live.filter(c=>c.dataset.band==='med').length,
+      low:  live.filter(c=>c.dataset.band==='low').length,
+    };
+    var tabs = document.querySelectorAll('.dash .tab');
+    if (tabs[0]) tabs[0].querySelector('.ct').textContent = counts.all;
+    if (tabs[1]) tabs[1].querySelector('.ct').textContent = counts.high;
+    if (tabs[2]) tabs[2].querySelector('.ct').textContent = counts.med;
+    if (tabs[3]) tabs[3].querySelector('.ct').textContent = counts.low;
+    // Resolved tab — accumulate via session counter on top of 42 baseline
+    var baseline = 42;
+    if (tabs[4]) tabs[4].querySelector('.ct').textContent = baseline + resolved.length;
+
+    // Also update KPI strip counts
+    var dsCards = document.querySelectorAll('.dash-strip .ds, .dash-strip .stat-card, .stat-strip .stat-card');
+    // KPI strip uses .ds class
+    var dsHi  = document.querySelector('.ds.high .v');
+    var dsMed = document.querySelector('.ds.med .v');
+    var dsLow = document.querySelector('.ds.low .v');
+    if (dsHi)  dsHi.textContent  = counts.high;
+    if (dsMed) dsMed.textContent = counts.med;
+    if (dsLow) dsLow.textContent = counts.low;
+  }
+
+  // ─── Re-scan now ───
+  window.dupRescan = function(){
+    var ic = document.getElementById('dup-rescan-ic');
+    var lbl = document.getElementById('dup-rescan-lbl');
+    if (!ic) return;
+    ic.classList.add('spinning');
+    if (lbl) lbl.textContent = 'Scanning…';
+    setTimeout(function(){
+      ic.classList.remove('spinning');
+      if (lbl) lbl.textContent = 'Re-scan now';
+      toast('Re-scan complete · scanned 3,847 donor records · 0 new candidates surfaced');
+    }, 1800);
+  };
+
+  // ─── Settings modal ───
+  window.dupOpenSettings = function(){
+    var ov = document.getElementById('dup-st-ov');
+    if (!ov) return;
+    document.body.classList.add('dup-st-open');
+    ov.classList.add('show');
+  };
+  window.dupCloseSettings = function(){
+    var ov = document.getElementById('dup-st-ov');
+    if (ov) ov.classList.remove('show');
+    document.body.classList.remove('dup-st-open');
+  };
+  window.dupSaveSettings = function(){
+    var hi  = document.getElementById('dup-st-high-v').textContent;
+    var med = document.getElementById('dup-st-med-v').textContent;
+    var low = document.getElementById('dup-st-low-v').textContent;
+    dupCloseSettings();
+    toast('Detection thresholds saved · High ≥ ' + hi + ' · Medium ≥ ' + med + ' · Low ≥ ' + low);
+  };
+
+  // ─── Keyboard ───
+  document.addEventListener('keydown', function(e){
+    if (e.key !== 'Escape') return;
+    var ov = document.getElementById('dup-st-ov');
+    if (ov && ov.classList.contains('show')) dupCloseSettings();
+  });
+
+  // ─── Init ───
+  function init(){
+    tagCards();
+    wireTabs();
+    wireCardActions();
+    updateTabCounts();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
 
 </body>
 </html>
