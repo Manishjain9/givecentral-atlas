@@ -1940,6 +1940,64 @@ body {
     </button>
   </div>
 
+  <!-- Role drafts surface — hidden unless localStorage["atlas:role-builder-draft"] exists -->
+  <div id="ur-role-drafts" style="display:none;margin:14px 0 18px">
+    <style>
+      #ur-role-drafts .rd-block {
+        background:linear-gradient(135deg,#FFFBEB 0%,#FEF3C7 100%);
+        border:1px solid #FDE68A; border-radius:12px;
+        padding:14px 16px;
+      }
+      #ur-role-drafts .rd-header {
+        display:flex; align-items:center; gap:10px; margin-bottom:10px;
+      }
+      #ur-role-drafts .rd-eyebrow {
+        font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+        color:#92400E;
+      }
+      #ur-role-drafts .rd-count {
+        background:#D97706; color:white; font-size:10.5px; font-weight:700;
+        padding:1px 7px; border-radius:99px;
+      }
+      #ur-role-drafts .rd-rows {
+        display:flex; flex-direction:column; gap:8px;
+      }
+      #ur-role-drafts .rd-row {
+        background:white; border:1px solid #FDE68A; border-radius:9px;
+        padding:10px 12px;
+        display:flex; align-items:center; gap:12px;
+      }
+      #ur-role-drafts .rd-ic {
+        width:32px; height:32px; border-radius:8px; background:#FEF3C7;
+        display:flex; align-items:center; justify-content:center; flex-shrink:0;
+      }
+      #ur-role-drafts .rd-ic svg { width:14px; height:14px; color:#92400E; }
+      #ur-role-drafts .rd-meta { flex:1; min-width:0; }
+      #ur-role-drafts .rd-name { font-size:13px; font-weight:600; color:#78350F; }
+      #ur-role-drafts .rd-sub { font-size:11px; color:#92400E; margin-top:1px; }
+      #ur-role-drafts .rd-actions { display:flex; gap:6px; flex-shrink:0; }
+      #ur-role-drafts .rd-btn {
+        font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500;
+        padding:6px 12px; border-radius:6px; cursor:pointer; border:none;
+        display:inline-flex; align-items:center; gap:5px;
+      }
+      #ur-role-drafts .rd-btn.primary { background:#D97706; color:white; }
+      #ur-role-drafts .rd-btn.primary:hover { background:#B45309; }
+      #ur-role-drafts .rd-btn.ghost { background:white; border:1px solid #FDE68A; color:#92400E; }
+      #ur-role-drafts .rd-btn.ghost:hover { background:#FEF3C7; }
+    </style>
+    <div class="rd-block">
+      <div class="rd-header">
+        <span class="rd-eyebrow">Role drafts</span>
+        <span class="rd-count" id="ur-role-draft-count">1</span>
+        <span style="font-size:11.5px;color:#92400E">Custom roles you started but haven't finalized yet.</span>
+      </div>
+      <div class="rd-rows" id="ur-role-draft-rows">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </div>
+
   <div class="roles-grid">
     <!-- Admin -->
     <div class="role-detail">
@@ -2339,20 +2397,26 @@ body {
       var name = nameEl ? (nameEl.firstChild.textContent || '').trim() : 'user';
       var emailEl = row.querySelector('.sub');
       var email = emailEl ? emailEl.textContent.trim() : '';
+      var roleEl = row.querySelector('.role-tag');
+      var role = roleEl ? roleEl.textContent.trim() : '';
+      var avEl = row.querySelector('.av');
+      var initials = avEl ? avEl.textContent.trim() : '';
+      var color = avEl && avEl.style.background ? avEl.style.background : 'var(--blue)';
       var isPending = row.style.opacity && parseFloat(row.style.opacity) < 1;
+      var U = { name:name, email:email, role:role, initials:initials, color:color, isPending:isPending, row:row };
 
       var menu = [
         { label: 'View profile',    icon: 'M6 6.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM2 13c0-2.5 1.8-4.5 4-4.5s4 2 4 4.5', action: function(){ go('atlas-donor-360.html'); } },
         { label: 'Edit role',       icon: 'M3 9.5l5-5 2 2-5 5h-2v-2zM7 4.5l2 2', action: function(){ go('atlas-role-builder.html'); } },
-        { label: 'Change scope',    icon: 'M2 6h10M6 2v8M3.5 4l-1.5 2 1.5 2M10.5 4l1.5 2-1.5 2', action: function(){ toast('Scope picker · choose entities for ' + name); } }
+        { label: 'Change scope',    icon: 'M2 6h10M6 2v8M3.5 4l-1.5 2 1.5 2M10.5 4l1.5 2-1.5 2', action: function(){ if(window.URM) URM.scope(U); } }
       ];
       if (isPending) {
         menu.push({ label: 'Resend invite', icon: 'M2 5l5 4 5-4M2 5v6h10V5l-5 4z', action: function(){ toast('Invite resent to ' + email); } });
         menu.push({ label: 'Revoke invite', icon: 'M3 3l8 8M11 3l-8 8', action: function(){ toast('Invite revoked'); }, danger: true });
       } else {
-        menu.push({ label: 'Reset password', icon: 'M3 7v3h6V7M4 7V5a2 2 0 014 0v2', action: function(){ toast('Reset link sent to ' + email); } });
-        menu.push({ label: 'Send magic link', icon: 'M2 6h8l-3-3M2 6l3 3', action: function(){ toast('Magic link sent to ' + email); } });
-        menu.push({ label: 'Suspend user', icon: 'M2 6h10M2 6a4 4 0 008 0', action: function(){ toast(name + ' suspended · their sessions ended'); }, danger: true });
+        menu.push({ label: 'Reset password', icon: 'M3 7v3h6V7M4 7V5a2 2 0 014 0v2', action: function(){ if(window.URM) URM.reset(U); } });
+        menu.push({ label: 'Send magic link', icon: 'M2 6h8l-3-3M2 6l3 3', action: function(){ if(window.URM) URM.magic(U); } });
+        menu.push({ label: 'Suspend user', icon: 'M2 6h10M2 6a4 4 0 008 0', action: function(){ if(window.URM) URM.suspend(U); }, danger: true });
       }
 
       // Render menu HTML
@@ -2383,6 +2447,335 @@ body {
       go('atlas-donor-360.html');
     });
   });
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Users & Roles · Drafts surface (Roles tab)
+     Reads atlas:role-builder-draft and renders a card the user can resume.
+     =============================================================== -->
+<script>
+(function(){
+  var KEY_RB_DRAFT = 'atlas:role-builder-draft';
+  function read(k, fb){
+    try { return JSON.parse(localStorage.getItem(k) || 'null') || fb; }
+    catch(e) { return fb; }
+  }
+  function clear(k){ try { localStorage.removeItem(k); } catch(e){} }
+
+  function relTime(ts){
+    if (!ts) return 'recently';
+    var sec = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+    if (sec < 60)     return sec + 's ago';
+    if (sec < 3600)   return Math.floor(sec/60) + 'm ago';
+    if (sec < 86400)  return Math.floor(sec/3600) + 'h ago';
+    return Math.floor(sec/86400) + 'd ago';
+  }
+
+  function renderDrafts(){
+    var d = read(KEY_RB_DRAFT, null);
+    var wrap = document.getElementById('ur-role-drafts');
+    var rows = document.getElementById('ur-role-draft-rows');
+    var cnt  = document.getElementById('ur-role-draft-count');
+    if (!wrap || !rows) return;
+
+    if (!d) { wrap.style.display = 'none'; return; }
+
+    var modules = Object.keys(d.permissions || {}).length;
+    var when = relTime(d.updatedAt);
+
+    rows.innerHTML =
+      '<div class="rd-row" id="ur-role-draft-row">' +
+        '<div class="rd-ic">' +
+          '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
+            '<rect x="2" y="2" width="10" height="10" rx="1.5"/>' +
+            '<path d="M5 7l1.5 1.5L9 6"/>' +
+          '</svg>' +
+        '</div>' +
+        '<div class="rd-meta">' +
+          '<div class="rd-name">' + escapeHTML(d.name || 'Untitled role') + '</div>' +
+          '<div class="rd-sub">' +
+            modules + ' module' + (modules === 1 ? '' : 's') + ' configured' +
+            (d.template ? ' · started from <strong>' + escapeHTML(d.template) + '</strong>' : '') +
+            ' · last edited <strong>' + when + '</strong>' +
+          '</div>' +
+        '</div>' +
+        '<div class="rd-actions">' +
+          '<button class="rd-btn primary" onclick="window.__urResumeDraft&&window.__urResumeDraft()">Resume editing →</button>' +
+          '<button class="rd-btn ghost" onclick="window.__urDiscardDraft&&window.__urDiscardDraft()">Discard</button>' +
+        '</div>' +
+      '</div>';
+
+    cnt.textContent = '1';
+    wrap.style.display = 'block';
+  }
+
+  function escapeHTML(s){
+    return String(s).replace(/[&<>"']/g, function(m){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
+    });
+  }
+
+  window.__urResumeDraft = function(){
+    window.location = 'atlas-role-builder.html';
+  };
+  window.__urDiscardDraft = function(){
+    if (!confirm('Discard this role draft? Your work cannot be recovered.')) return;
+    clear(KEY_RB_DRAFT);
+    renderDrafts();
+    var t = document.getElementById('atlas-rescue-toast');
+    if (t) {
+      t.querySelector('.msg').textContent = 'Role draft discarded';
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+    }
+  };
+
+  // Refresh every 30s so the "Ns ago" timestamp stays accurate when the user lingers on the page
+  setInterval(renderDrafts, 30000);
+
+  // ── Honour ?tab=roles by clicking the Roles tab on load ──
+  function handleTabParam(){
+    var tab = new URLSearchParams(window.location.search).get('tab');
+    if (tab !== 'roles') return;
+    var t = document.querySelectorAll('.tabs .tab');
+    if (t[1]) t[1].click();
+    // Clean URL
+    if (history.replaceState) history.replaceState({}, '', window.location.pathname);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ renderDrafts(); handleTabParam(); });
+  } else {
+    renderDrafts();
+    handleTabParam();
+  }
+})();
+</script>
+
+<!-- ═══════════════ User-action modals (Suspend · Change scope · Reset password · Magic link) ═══════════════ -->
+<style id="urm-css">
+  .urm-scrim{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;padding:24px;z-index:100050;opacity:0;transition:opacity .18s;}
+  .urm-scrim.show{opacity:1;}
+  .urm{background:#fff;border-radius:16px;width:520px;max-width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(15,23,42,.28);transform:translateY(10px) scale(.98);transition:transform .18s;overflow:hidden;}
+  .urm-scrim.show .urm{transform:none;}
+  .urm-head{display:flex;align-items:flex-start;gap:16px;padding:22px 24px 18px;border-bottom:1px solid var(--border);}
+  .urm-ic{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .urm-ic svg{width:22px;height:22px;}
+  .urm-ic.danger{background:var(--rose-light);color:var(--rose);}
+  .urm-ic.info{background:var(--blue-pale);color:var(--blue);}
+  .urm-ic.key{background:var(--amber-light);color:var(--amber);}
+  .urm-htext{flex:1;min-width:0;}
+  .urm-title{font-family:'DM Serif Display',serif;font-size:23px;line-height:1.15;color:var(--text);}
+  .urm-sub{font-size:13px;color:var(--text-3);margin-top:4px;line-height:1.45;}
+  .urm-x{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:#fff;cursor:pointer;color:var(--text-3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;line-height:1;}
+  .urm-x:hover{background:var(--surface);}
+  .urm-body{padding:20px 24px;overflow-y:auto;}
+  .urm-user{display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 15px;margin-bottom:20px;}
+  .urm-av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;}
+  .urm-uinfo{flex:1;min-width:0;}
+  .urm-uname{font-weight:600;font-size:15px;color:var(--text);}
+  .urm-uemail{font-size:12.5px;color:var(--text-3);margin-top:1px;}
+  .urm-roletag{font-size:11px;font-weight:600;color:var(--purple);background:var(--purple-light);padding:4px 11px;border-radius:7px;white-space:nowrap;}
+  .urm-seclabel{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:11px;}
+  .urm-list{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-direction:column;gap:11px;}
+  .urm-list li{display:flex;align-items:flex-start;gap:11px;font-size:13.5px;color:var(--text-2);line-height:1.4;}
+  .urm-list li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--rose);margin-top:6px;flex-shrink:0;}
+  .urm-list.info li::before{background:var(--blue);}
+  .urm-field{margin-bottom:18px;}
+  .urm-field:last-child{margin-bottom:0;}
+  .urm-lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-2);margin-bottom:8px;}
+  .urm-lbl .req{color:var(--rose);}
+  .urm-lbl .note{color:var(--text-3);font-weight:500;letter-spacing:0;text-transform:none;margin-left:6px;}
+  .urm-input,.urm-select{width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;color:var(--text);background:#fff;}
+  .urm-input:focus,.urm-select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+  .urm-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M3 5l3 3 3-3z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;cursor:pointer;}
+  .urm-hint{background:#FEFCE8;border:1px solid #FDE68A;border-radius:10px;padding:11px 14px;font-size:13px;color:#92400E;margin-bottom:10px;}
+  .urm-hint code{background:#FEF3C7;color:#92400E;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;padding:1px 6px;border-radius:5px;font-weight:700;}
+  .urm-pwd{position:relative;}
+  .urm-pwd .urm-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-3);padding:6px;display:flex;}
+  .urm-pwd .urm-eye svg{width:16px;height:16px;}
+  .urm-pwd .urm-input{padding-right:42px;}
+  .urm-radio{display:flex;align-items:flex-start;gap:11px;padding:13px 14px;border:1px solid var(--border);border-radius:11px;cursor:pointer;margin-bottom:9px;transition:border-color .14s,background .14s;}
+  .urm-radio:hover{border-color:#94A3B8;}
+  .urm-radio.sel{border-color:var(--blue);background:var(--blue-pale);}
+  .urm-radio input{margin-top:2px;accent-color:var(--blue);width:16px;height:16px;flex-shrink:0;}
+  .urm-radio .rt{font-weight:600;font-size:13.5px;color:var(--text);}
+  .urm-radio .rd{font-size:12px;color:var(--text-3);margin-top:2px;line-height:1.4;}
+  .urm-search{margin-bottom:8px;}
+  .urm-checklist{max-height:188px;overflow-y:auto;border:1px solid var(--border);border-radius:11px;padding:5px;}
+  .urm-check{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:8px;cursor:pointer;}
+  .urm-check:hover{background:var(--surface);}
+  .urm-check input{accent-color:var(--blue);width:15px;height:15px;flex-shrink:0;}
+  .urm-check .cn{flex:1;font-size:13.5px;color:var(--text);}
+  .urm-check .ck{font-size:10.5px;font-weight:600;color:var(--text-3);background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:1px 7px;}
+  .urm-foot{display:flex;align-items:center;gap:10px;padding:15px 24px;border-top:1px solid var(--border);background:var(--surface);}
+  .urm-audit{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-3);margin-right:auto;}
+  .urm-audit svg{width:14px;height:14px;}
+  .urm-btn{font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;padding:11px 18px;border-radius:10px;cursor:pointer;border:1px solid transparent;}
+  .urm-cancel{background:#fff;border-color:var(--border);color:var(--text-2);}
+  .urm-cancel:hover{background:#fff;border-color:#94A3B8;}
+  .urm-primary{color:#fff;display:inline-flex;align-items:center;gap:8px;}
+  .urm-primary svg{width:15px;height:15px;}
+  .urm-primary.blue{background:var(--blue);}
+  .urm-primary.blue:hover{background:#1D4ED8;}
+  .urm-primary.danger{background:var(--rose);}
+  .urm-primary.danger:hover{background:#9D174D;}
+  .urm-primary:disabled{opacity:.45;cursor:not-allowed;}
+</style>
+<script id="urm-js">
+(function(){
+  if (window.URM) return;
+  function toast(m){ if (window.atlasToast) window.atlasToast(m); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  var AUDIT = '<span class="urm-audit"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="1.5" width="9" height="11" rx="1.5"/><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3"/></svg>Logged to audit trail</span>';
+
+  function chip(U){
+    return '<div class="urm-user"><div class="urm-av" style="background:'+esc(U.color)+'">'+esc(U.initials)+'</div>'
+      + '<div class="urm-uinfo"><div class="urm-uname">'+esc(U.name)+'</div><div class="urm-uemail">'+esc(U.email)+'</div></div>'
+      + (U.role ? '<span class="urm-roletag">'+esc(U.role)+'</span>' : '') + '</div>';
+  }
+
+  function build(opts){
+    var scrim = document.createElement('div');
+    scrim.className = 'urm-scrim';
+    scrim.innerHTML =
+      '<div class="urm" role="dialog" aria-modal="true">'
+      + '<div class="urm-head"><div class="urm-ic '+opts.ic+'">'+opts.icon+'</div>'
+        + '<div class="urm-htext"><div class="urm-title">'+esc(opts.title)+'</div><div class="urm-sub">'+esc(opts.sub)+'</div></div>'
+        + '<button class="urm-x" aria-label="Close">&times;</button></div>'
+      + '<div class="urm-body">'+opts.body+'</div>'
+      + '<div class="urm-foot">'+(opts.foot||AUDIT)
+        + '<button class="urm-btn urm-cancel">Cancel</button>'
+        + '<button class="urm-btn urm-primary '+(opts.primaryClass||'blue')+'" '+(opts.disabled?'disabled':'')+'>'+(opts.primaryIcon||'')+opts.primaryLabel+'</button>'
+      + '</div></div>';
+    function close(){ scrim.classList.remove('show'); document.removeEventListener('keydown', onKey); setTimeout(function(){ if(scrim.parentNode) scrim.remove(); }, 180); }
+    function onKey(e){ if(e.key==='Escape') close(); }
+    scrim.querySelector('.urm-x').addEventListener('click', close);
+    scrim.querySelector('.urm-cancel').addEventListener('click', close);
+    scrim.addEventListener('click', function(e){ if(e.target===scrim) close(); });
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(scrim);
+    requestAnimationFrame(function(){ scrim.classList.add('show'); });
+    setTimeout(function(){ var f=scrim.querySelector('input,select'); if(f) f.focus(); }, 120);
+    return { scrim:scrim, close:close, primary:scrim.querySelector('.urm-primary') };
+  }
+
+  var ICON = {
+    warn: '<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3L20 19H2L11 3z"/><path d="M11 9v4M11 16v.5"/></svg>',
+    key:  '<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="11" r="3.5"/><path d="M10 11h9M16 11v3M19 11v4"/></svg>',
+    mail: '<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="16" height="12" rx="2"/><path d="M3 7l8 5 8-5"/></svg>',
+    scope:'<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M3 11h16M11 3a13 13 0 010 16M11 3a13 13 0 000 16"/></svg>'
+  };
+
+  // ── Suspend (high-friction destructive) ──
+  function suspend(U){
+    var body = chip(U)
+      + '<div class="urm-seclabel">What will happen</div>'
+      + '<ul class="urm-list">'
+        + '<li>All active sessions are terminated immediately</li>'
+        + '<li>Access to all legal entities is revoked</li>'
+        + '<li>Future logins are blocked until re-enabled by an Admin</li>'
+        + '<li>This action is permanently written to the immutable audit trail</li>'
+      + '</ul>'
+      + '<div class="urm-field"><label class="urm-lbl">Reason for suspension <span class="req">*</span></label>'
+        + '<select class="urm-select" id="urm-reason"><option value="">Select a reason…</option>'
+        + '<option>Policy violation</option><option>Security concern</option><option>Role change / offboarding</option>'
+        + '<option>Extended leave</option><option>Requested by user</option><option>Other</option></select></div>'
+      + '<div class="urm-field"><label class="urm-lbl">Type their full name to confirm <span class="req">*</span></label>'
+        + '<div class="urm-hint">Type <code>'+esc(U.name)+'</code> exactly to enable the button</div>'
+        + '<input class="urm-input" id="urm-confirm" placeholder="'+esc(U.name)+'" autocomplete="off"></div>'
+      + '<div class="urm-field"><label class="urm-lbl">Your password <span class="req">*</span><span class="note">— confirms your identity</span></label>'
+        + '<div class="urm-pwd"><input class="urm-input" id="urm-pwd" type="password" placeholder="Enter your Atlas password">'
+        + '<button class="urm-eye" type="button" aria-label="Show password"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1 8s2.5-4.5 7-4.5S15 8 15 8s-2.5 4.5-7 4.5S1 8 1 8z"/><circle cx="8" cy="8" r="1.8"/></svg></button></div></div>';
+    var m = build({ ic:'danger', icon:ICON.warn, title:'Suspend '+U.name+'?', sub:'Immediately ends all sessions and removes access.',
+      body:body, primaryClass:'danger', primaryLabel:'Suspend access',
+      primaryIcon:'<svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7.5" cy="7.5" r="6"/><path d="M3.5 7.5h8"/></svg>', disabled:true });
+    var reason=m.scrim.querySelector('#urm-reason'), confirm=m.scrim.querySelector('#urm-confirm'), pwd=m.scrim.querySelector('#urm-pwd');
+    function validate(){ m.primary.disabled = !(reason.value && confirm.value.trim()===U.name && pwd.value.length>0); }
+    [reason,confirm,pwd].forEach(function(x){ x.addEventListener('input',validate); x.addEventListener('change',validate); });
+    m.scrim.querySelector('.urm-eye').addEventListener('click', function(){ pwd.type = pwd.type==='password'?'text':'password'; });
+    m.primary.addEventListener('click', function(){ if(m.primary.disabled) return;
+      if(U.row){ var st=U.row.querySelector('.tag'); if(st){ st.textContent='Suspended'; st.className='tag rose'; } U.row.style.opacity='.6'; }
+      m.close(); toast(U.name+' suspended · '+reason.value.toLowerCase()+' · sessions ended'); });
+  }
+
+  // ── Change scope ──
+  var ENTITIES = [
+    {n:'Diocese (HQ)',k:'Entity'},{n:'Cathedral of St. Mary',k:'Parish'},{n:'St. Catherine of Siena',k:'Parish'},
+    {n:"St. Joseph's",k:'Parish'},{n:'St. Anthony',k:'Parish'},{n:'Holy Cross School',k:'School'},
+    {n:'Catholic Charities',k:'Entity'},{n:'Diocesan Foundation',k:'Entity'},{n:'Catholic Schools Office',k:'Office'}
+  ];
+  function scope(U){
+    var checks = ENTITIES.map(function(e,i){
+      return '<label class="urm-check" data-n="'+esc(e.n.toLowerCase())+'"><input type="checkbox" value="'+esc(e.n)+'"'+(i<1?' checked':'')+'><span class="cn">'+esc(e.n)+'</span><span class="ck">'+e.k+'</span></label>';
+    }).join('');
+    var body = chip(U)
+      + '<div class="urm-seclabel">Access scope</div>'
+      + '<label class="urm-radio sel" data-mode="all"><input type="radio" name="urm-mode" value="all" checked><span><span class="rt">All entities (full access)</span><span class="rd">Can view and act across the diocese, all parishes, schools, and entities.</span></span></label>'
+      + '<label class="urm-radio" data-mode="specific"><input type="radio" name="urm-mode" value="specific"><span><span class="rt">Specific entities only</span><span class="rd">Restrict this user to the parishes and entities you select below.</span></span></label>'
+      + '<div id="urm-scopebox" style="margin-top:14px;display:none">'
+        + '<input class="urm-input urm-search" id="urm-scopesearch" placeholder="Search parishes &amp; entities…" autocomplete="off">'
+        + '<div class="urm-checklist">'+checks+'</div></div>';
+    var m = build({ ic:'info', icon:ICON.scope, title:'Change scope', sub:'Control which entities '+U.name+' can access.',
+      body:body, primaryClass:'blue', primaryLabel:'Save scope' });
+    var radios=m.scrim.querySelectorAll('input[name="urm-mode"]'), box=m.scrim.querySelector('#urm-scopebox');
+    var search=m.scrim.querySelector('#urm-scopesearch');
+    function syncMode(){ var mode=m.scrim.querySelector('input[name="urm-mode"]:checked').value;
+      m.scrim.querySelectorAll('.urm-radio').forEach(function(r){ r.classList.toggle('sel', r.dataset.mode===mode); });
+      box.style.display = mode==='specific' ? 'block' : 'none'; }
+    radios.forEach(function(r){ r.addEventListener('change', syncMode); });
+    m.scrim.querySelectorAll('.urm-radio').forEach(function(r){ r.addEventListener('click', function(e){ var inp=r.querySelector('input'); inp.checked=true; syncMode(); }); });
+    search.addEventListener('input', function(){ var q=search.value.toLowerCase();
+      m.scrim.querySelectorAll('.urm-check').forEach(function(c){ c.style.display = c.dataset.n.indexOf(q)===-1?'none':'flex'; }); });
+    m.primary.addEventListener('click', function(){
+      var mode=m.scrim.querySelector('input[name="urm-mode"]:checked').value;
+      if(mode==='all'){
+        if(U.row){ var s=U.row.querySelector('.scope'); if(s) s.innerHTML='<span class="scope-tag all">All entities</span>'; }
+        m.close(); toast('Scope updated for '+U.name+' · All entities');
+      } else {
+        var sel=[].slice.call(m.scrim.querySelectorAll('.urm-checklist input:checked')).map(function(i){return i.value;});
+        if(!sel.length){ toast('Pick at least one entity'); return; }
+        if(U.row){ var s2=U.row.querySelector('.scope'); if(s2){ s2.innerHTML = sel.slice(0,3).map(function(n){return '<span class="scope-tag">'+esc(n.split(' ')[0])+'</span>';}).join('') + (sel.length>3?'<span class="scope-tag">+'+(sel.length-3)+'</span>':''); } }
+        m.close(); toast('Scope updated for '+U.name+' · '+sel.length+' entit'+(sel.length===1?'y':'ies'));
+      }
+    });
+  }
+
+  // ── Reset password (confirmation-only) ──
+  function reset(U){
+    var body = chip(U)
+      + '<div class="urm-seclabel">What happens</div>'
+      + '<ul class="urm-list info">'
+        + '<li>A secure password-reset link is emailed to <strong>'+esc(U.email)+'</strong></li>'
+        + '<li>The link expires in 60 minutes and can be used once</li>'
+        + '<li>Existing active sessions stay signed in</li>'
+        + '<li>The reset is recorded in the audit trail</li>'
+      + '</ul>';
+    var m = build({ ic:'key', icon:ICON.key, title:'Reset password for '+U.name+'?', sub:'Sends a secure reset link to their email.',
+      body:body, primaryClass:'blue', primaryLabel:'Send reset link',
+      primaryIcon:'<svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5l5.5 4L13 5M2 5v6h11V5l-5.5 4z"/></svg>' });
+    m.primary.addEventListener('click', function(){ m.close(); toast('Reset link sent to '+U.email); });
+  }
+
+  // ── Send magic link (confirmation-only) ──
+  function magic(U){
+    var body = chip(U)
+      + '<div class="urm-seclabel">What happens</div>'
+      + '<ul class="urm-list info">'
+        + '<li>A one-time sign-in link is emailed to <strong>'+esc(U.email)+'</strong></li>'
+        + '<li>The link expires in 15 minutes and works once</li>'
+        + '<li>No password is required to use it</li>'
+        + '<li>The sign-in is recorded in the audit trail</li>'
+      + '</ul>';
+    var m = build({ ic:'info', icon:ICON.mail, title:'Send magic sign-in link?', sub:'A one-time link lets '+U.name+' sign in without a password.',
+      body:body, primaryClass:'blue', primaryLabel:'Send magic link',
+      primaryIcon:'<svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 7.5h8M7 4.5l3 3-3 3"/></svg>' });
+    m.primary.addEventListener('click', function(){ m.close(); toast('Magic link sent to '+U.email); });
+  }
+
+  window.URM = { suspend:suspend, scope:scope, reset:reset, magic:magic };
 })();
 </script>
 
