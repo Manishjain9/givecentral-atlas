@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral · Multi-Factor Authentication</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gc-orange:#f47920;
+    --gc-orange-d:#e96c11;
+    --gc-blue:#1d5fab;
+    --gc-blue-d:#174e8e;
+    --gc-navy:#243441;
+    --gc-navy-d:#1b2730;
+    --gc-bright:#2d9cd6;
+    --gc-input:#eef2fb;
+    --gc-text:#3a4654;
+    --gc-muted:#7d8896;
+    --gc-line:#e3e7ee;
+    --gc-bg:#f1f2f4;
+    --gc-green:#2e9e5b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Open Sans',sans-serif;background:#dfe3e8;color:var(--gc-text);-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4,.head{font-family:'Poppins',sans-serif}
+
+  /* ---------- prototype navigator ---------- */
+  .nav-bar{position:sticky;top:0;z-index:50;background:#11202b;color:#fff;display:flex;align-items:center;gap:6px;padding:10px 18px;flex-wrap:wrap;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+  .nav-bar .brand{font-family:'Poppins';font-weight:700;margin-right:14px;font-size:15px;letter-spacing:.3px}
+  .nav-bar .brand span{color:var(--gc-orange)}
+  .nav-btn{background:#22323f;color:#c5cfd8;border:none;padding:8px 14px;border-radius:20px;font-size:12.5px;font-family:'Poppins';font-weight:500;cursor:pointer;transition:.15s}
+  .nav-btn:hover{background:#2d4150;color:#fff}
+  .nav-btn.active{background:var(--gc-orange);color:#fff}
+  .nav-sep{width:1px;height:22px;background:#33454f;margin:0 6px}
+  .nav-tag{font-size:10.5px;color:#7c8b97;text-transform:uppercase;letter-spacing:.6px;margin-right:2px}
+
+  .stage{padding:26px 16px 60px}
+  .screen{display:none;animation:fade .35s ease}
+  .screen.show{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .frame-label{max-width:1180px;margin:0 auto 12px;font-family:'Poppins';font-size:13px;color:#5a6673;font-weight:600;display:flex;align-items:center;gap:8px}
+  .frame-label .dot{width:9px;height:9px;border-radius:50%;background:var(--gc-orange)}
+  .frame-label .sub{font-weight:400;color:#8a96a3}
+
+  /* ================= USER / DONOR SHELL ================= */
+  .site{max-width:1180px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 14px 40px rgba(20,40,70,.18)}
+  .site-top{background:var(--gc-blue);color:#dbe7f5;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;padding:8px 26px}
+  .site-top .lang{background:#fff;color:#444;border-radius:3px;padding:3px 8px;font-size:11.5px}
+  .site-top .r{display:flex;gap:20px;align-items:center}
+  .site-top .r b{color:#fff}
+  .site-head{display:flex;align-items:center;justify-content:space-between;padding:16px 26px;border-bottom:1px solid #eee}
+  .logo{font-family:'Poppins';font-weight:700;font-size:24px;color:var(--gc-blue);display:flex;align-items:center;gap:6px}
+  .logo .m{width:30px;height:30px;background:var(--gc-blue);border-radius:7px 7px 7px 0;display:inline-block;position:relative}
+  .logo .m::after{content:"";position:absolute;inset:7px;border:3px solid #fff;border-radius:4px;border-bottom:none;border-right:none;transform:rotate(45deg)}
+  .menu{display:flex;align-items:center;gap:22px;font-family:'Poppins';font-size:13.5px;font-weight:500;color:#2a3744}
+  .menu a{color:inherit;text-decoration:none}
+  .burger{display:none;font-size:24px;color:#2a3744;cursor:pointer;line-height:1}
+  .pill-orange{background:linear-gradient(180deg,#f78b2c,var(--gc-orange));color:#fff;border:none;border-radius:24px;padding:12px 22px;font-family:'Poppins';font-weight:600;font-size:13px;cursor:pointer;box-shadow:0 4px 10px rgba(244,121,32,.35)}
+  .hero-band{height:80px;background:linear-gradient(90deg,#0c1014,#1c252c);display:flex;align-items:center;padding:0 40px}
+  .hero-band h1{color:#fff;font-size:30px;font-weight:600}
+
+  .auth-wrap{background:#f6f7f8;padding:54px 20px 70px;display:flex;justify-content:center}
+  .card{background:#fff;border-radius:6px;box-shadow:0 18px 45px rgba(30,50,80,.13);width:640px;max-width:100%;padding:42px 60px}
+  .card-narrow{width:560px}
+  .card h2{text-align:center;color:var(--gc-blue);font-size:20px;font-weight:600;margin-bottom:30px}
+  .field{margin-bottom:22px}
+  .field .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+  .field label{font-size:13.5px;color:#5a6673;font-weight:600}
+  .field .link{font-size:13px;color:var(--gc-blue);text-decoration:none;font-weight:600}
+  .inp{width:100%;background:var(--gc-input);border:1px solid #dde6f5;border-radius:5px;padding:13px 14px 13px 40px;font-size:14px;color:#33414f}
+  .inp.ic-user{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237d8896' viewBox='0 0 16 16'><path d='M8 8a3 3 0 100-6 3 3 0 000 6zm0 1c-3 0-6 1.5-6 4v1h12v-1c0-2.5-3-4-6-4z'/></svg>");background-repeat:no-repeat;background-position:14px center}
+  .inp.ic-key{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237d8896' viewBox='0 0 16 16'><path d='M10 1a4 4 0 00-3.8 5.2L1 11.4V15h3.6l.9-.9.9-1 .9-.9.7-.7A4 4 0 1010 1zm1.5 3.5a1 1 0 110-2 1 1 0 010 2z'/></svg>");background-repeat:no-repeat;background-position:14px center}
+  .btn-block{width:100%;border:none;border-radius:26px;padding:15px;font-family:'Poppins';font-weight:600;font-size:15px;cursor:pointer}
+  .btn-orange{background:linear-gradient(180deg,#f78b2c,var(--gc-orange));color:#fff;box-shadow:0 6px 14px rgba(244,121,32,.32)}
+  .btn-blue{background:var(--gc-blue);color:#fff}
+  .btn-orange:hover{background:var(--gc-orange-d)}
+  .btn-ghost{background:#fff;color:var(--gc-blue);border:1.5px solid var(--gc-blue)}
+  .or{display:flex;align-items:center;gap:14px;color:#9aa5b1;font-size:13px;margin:26px 0}
+  .or::before,.or::after{content:"";flex:1;height:1px;background:#e4e8ee}
+  .reg{background:#f4f6f8;text-align:center;padding:15px;border-radius:5px;font-size:13.5px;color:#56636f;margin-top:26px}
+  .reg a{color:var(--gc-blue);font-weight:600;text-decoration:none}
+
+  /* ---- MFA verification specifics ---- */
+  .mfa-icon{width:64px;height:64px;border-radius:50%;background:#eaf2fb;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+  .mfa-icon svg{width:30px;height:30px;fill:var(--gc-blue)}
+  .mfa-sub{text-align:center;color:#6b7682;font-size:13.5px;line-height:1.55;margin:0 0 26px}
+  .mfa-sub b{color:#3a4654}
+  .method-tabs{display:flex;gap:10px;margin-bottom:26px}
+  .mtab{flex:1;border:1.5px solid var(--gc-line);border-radius:8px;padding:14px 12px;cursor:pointer;display:flex;align-items:center;gap:11px;transition:.15s;background:#fff;position:relative}
+  .mtab .ic{width:34px;height:34px;border-radius:8px;background:#f0f3f8;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .mtab .ic svg{width:18px;height:18px;fill:#5a6673}
+  .mtab .t{font-family:'Poppins';font-size:13px;font-weight:600;color:#3a4654}
+  .mtab .d{font-size:11px;color:#8a96a3}
+  .mtab.sel{border-color:var(--gc-blue);background:#f4f9ff}
+  .mtab.sel .ic{background:var(--gc-blue)}
+  .mtab.sel .ic svg{fill:#fff}
+  .mtab .badge-primary{position:absolute;top:-8px;right:8px;background:var(--gc-orange);color:#fff;font-size:9px;font-family:'Poppins';font-weight:600;padding:2px 7px;border-radius:10px;letter-spacing:.4px}
+  .code-label{text-align:center;font-size:13px;color:#5a6673;margin-bottom:14px}
+  .otp{display:flex;justify-content:center;gap:11px;margin-bottom:8px}
+  .otp input{width:52px;height:60px;text-align:center;font-size:24px;font-family:'Poppins';font-weight:600;border:1.5px solid #d7deea;border-radius:9px;background:#fbfcfe;color:#283543}
+  .otp input:focus{outline:none;border-color:var(--gc-blue);background:#fff;box-shadow:0 0 0 3px rgba(29,95,171,.12)}
+  .resend{text-align:center;font-size:12.5px;color:#8a96a3;margin:14px 0 24px}
+  .resend a{color:var(--gc-blue);font-weight:600;text-decoration:none}
+  .trust{display:flex;align-items:center;gap:9px;justify-content:center;font-size:13px;color:#5a6673;margin-bottom:24px}
+  .trust input{width:16px;height:16px;accent-color:var(--gc-blue)}
+  .alt-link{text-align:center;margin-top:20px;font-size:13px}
+  .alt-link a{color:var(--gc-blue);font-weight:600;text-decoration:none}
+
+  .success-ic{width:78px;height:78px;border-radius:50%;background:#e7f6ec;display:flex;align-items:center;justify-content:center;margin:6px auto 18px}
+  .success-ic svg{width:40px;height:40px;fill:var(--gc-green)}
+
+  /* ================= ADMIN SHELL ================= */
+  .admin{max-width:1300px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 14px 40px rgba(20,40,70,.18);display:flex;min-height:760px}
+  .a-side{width:240px;background:var(--gc-navy);flex-shrink:0;color:#c2ccd5;font-size:13.5px}
+  .a-logo{padding:18px 20px;display:flex;align-items:center;gap:8px;font-family:'Poppins';font-weight:700;color:#fff;font-size:19px}
+  .a-logo .m{width:24px;height:24px;background:#fff;border-radius:6px 6px 6px 0;position:relative}
+  .a-logo .m::after{content:"";position:absolute;inset:6px;border:2.5px solid var(--gc-navy);border-radius:3px;border-bottom:none;border-right:none;transform:rotate(45deg)}
+  .a-item{display:flex;align-items:center;gap:12px;padding:13px 20px;cursor:pointer;border-left:3px solid transparent}
+  .a-item:hover{background:#1f2e3a}
+  .a-item .ai{width:17px;text-align:center;opacity:.85}
+  .a-item .arr{margin-left:auto;font-size:10px;opacity:.6}
+  .a-item.active{background:var(--gc-bright);color:#fff;border-left-color:#fff;font-weight:600}
+  .a-tag{background:#1aa15a;color:#fff;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:auto;font-family:'Poppins';font-weight:600}
+  .a-sub{background:#1d2a34}
+  .a-subitem{padding:11px 20px 11px 50px;cursor:pointer;color:#9fabb6;font-size:13px;border-left:3px solid transparent}
+  .a-subitem:hover{color:#fff;background:#22313d}
+  .a-subitem.active{color:#fff;background:#22313d;border-left-color:var(--gc-bright);font-weight:600}
+  .a-subitem .nw{background:var(--gc-orange);color:#fff;font-size:8.5px;padding:1px 5px;border-radius:7px;margin-left:7px;font-family:'Poppins';font-weight:600;letter-spacing:.3px}
+
+  .a-main{flex:1;background:#eef0f3;display:flex;flex-direction:column}
+  .a-top{background:var(--gc-navy-d);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 22px;height:58px}
+  .a-top .l{display:flex;align-items:center;gap:18px}
+  .a-top .icn{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-right:1px solid #2c3b46;color:#9fb0bc}
+  .a-top .welcome{font-size:13px;color:#cdd7df}
+  .a-top .welcome b{color:#fff}
+  .a-top .search{background:#fff;border-radius:5px;padding:8px 12px;font-size:12.5px;color:#9aa5b1;width:230px}
+  .crumb{padding:16px 26px;background:#fff;border-bottom:1px solid #e6e9ee;font-size:13.5px;color:#5a6673;display:flex;align-items:center;gap:8px}
+  .crumb b{color:#2a3744;font-weight:600}
+  .crumb .sl{color:#c3ccd5}
+
+  .a-body{padding:26px;overflow:auto}
+  .panel{background:#fff;border-radius:8px;box-shadow:0 2px 10px rgba(30,50,80,.06);overflow:hidden;margin-bottom:22px}
+  .panel-head{padding:18px 24px;border-bottom:1px solid #eef1f5;display:flex;align-items:center;gap:12px}
+  .panel-head .ph-ic{width:38px;height:38px;border-radius:9px;background:#eaf2fb;display:flex;align-items:center;justify-content:center}
+  .panel-head .ph-ic svg{width:20px;height:20px;fill:var(--gc-blue)}
+  .panel-head h3{font-size:16px;color:#2a3744;font-weight:600}
+  .panel-head p{font-size:12.5px;color:#8a96a3;margin-top:2px}
+  .panel-body{padding:22px 24px}
+
+  .status-banner{display:flex;align-items:center;gap:12px;background:#fff8ef;border:1px solid #ffe2c2;border-radius:8px;padding:14px 18px;margin-bottom:22px;font-size:13.5px;color:#8a5a1d}
+  .status-banner svg{width:20px;height:20px;fill:#e8902a;flex-shrink:0}
+
+  .method-row{display:flex;align-items:center;gap:16px;padding:20px 0;border-bottom:1px solid #eef1f5}
+  .method-row:last-child{border-bottom:none}
+  .m-ic{width:48px;height:48px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .m-ic.sms{background:#e9f6ee}.m-ic.sms svg{fill:#2e9e5b}
+  .m-ic.ga{background:#eaf0fb}.m-ic.ga svg{fill:#3b6fc4}
+  .m-ic.email{background:#eef0fb}.m-ic.email svg{fill:#5a63c4}
+  .m-ic svg{width:24px;height:24px}
+  .m-info{flex:1}
+  .m-info h4{font-family:'Poppins';font-size:14.5px;color:#2a3744;font-weight:600;display:flex;align-items:center;gap:8px}
+  .m-info p{font-size:12.5px;color:#8a96a3;margin-top:3px}
+  .chip{font-size:10.5px;font-family:'Poppins';font-weight:600;padding:3px 9px;border-radius:11px;letter-spacing:.3px}
+  .chip.on{background:#e7f6ec;color:#2e9e5b}
+  .chip.off{background:#f0f2f5;color:#8a96a3}
+  .chip.primary{background:var(--gc-orange);color:#fff}
+  .m-actions{display:flex;align-items:center;gap:10px}
+  .btn-sm{border:none;border-radius:20px;padding:9px 18px;font-family:'Poppins';font-weight:600;font-size:12.5px;cursor:pointer}
+  .btn-sm.blue{background:var(--gc-blue);color:#fff}
+  .btn-sm.ghost{background:#fff;color:var(--gc-blue);border:1.5px solid #cdd9ea}
+  .btn-sm.danger{background:#fff;color:#c0392b;border:1.5px solid #ecc6c1}
+  .btn-sm.green{background:var(--gc-green);color:#fff}
+
+  .setup-box{background:#f8fafc;border:1px solid #e8edf3;border-radius:10px;padding:24px;margin-top:6px}
+  .setup-box h4{font-family:'Poppins';font-size:14px;color:#2a3744;margin-bottom:4px}
+  .setup-box .step-sub{font-size:12.5px;color:#8a96a3;margin-bottom:18px}
+  .ga-flex{display:flex;gap:30px;align-items:flex-start}
+  .qr{width:170px;height:170px;background:#fff;border:1px solid #e3e7ee;border-radius:10px;flex-shrink:0;padding:12px}
+  .qr svg{width:100%;height:100%}
+  .ga-steps{flex:1}
+  .ga-steps ol{margin-left:18px;font-size:13px;color:#5a6673;line-height:1.9}
+  .ga-steps ol b{color:#2a3744}
+  .manual-key{background:#eef2f7;border-radius:6px;padding:9px 12px;font-family:monospace;font-size:13px;color:#3a4654;letter-spacing:1px;display:inline-block;margin-top:6px}
+  .form-line{margin-top:18px}
+  .form-line label{display:block;font-size:12.5px;color:#5a6673;font-weight:600;margin-bottom:7px}
+  .phone-row{display:flex;gap:10px;max-width:420px}
+  .sel-cc{background:#fff;border:1px solid #d7deea;border-radius:6px;padding:11px 12px;font-size:13.5px;color:#3a4654}
+  .inp-line{flex:1;background:#fff;border:1px solid #d7deea;border-radius:6px;padding:11px 13px;font-size:13.5px;color:#3a4654}
+  .otp-sm{display:flex;gap:9px;margin-top:6px}
+  .otp-sm input{width:44px;height:50px;text-align:center;font-size:19px;font-family:'Poppins';font-weight:600;border:1.5px solid #d7deea;border-radius:8px;background:#fff;color:#283543}
+  .otp-sm input:focus{outline:none;border-color:var(--gc-blue)}
+  .primary-pick{display:flex;align-items:center;gap:10px;background:#f8fafc;border:1px solid #e8edf3;border-radius:8px;padding:14px 16px;margin-bottom:12px;cursor:pointer;font-size:13.5px;color:#3a4654}
+  .primary-pick input{width:17px;height:17px;accent-color:var(--gc-orange)}
+  .primary-pick.sel{border-color:var(--gc-orange);background:#fff8ef}
+  .save-bar{display:flex;justify-content:flex-end;gap:12px;margin-top:8px}
+  .hint{font-size:12px;color:#9aa5b1;margin-top:10px;display:flex;gap:6px;align-items:center}
+  .hint svg{width:14px;height:14px;fill:#9aa5b1;flex-shrink:0}
+  .hidden{display:none}
+
+  /* ---- ENHANCED MFA VERIFICATION (scoped to #verify) ---- */
+  #verify .card{width:600px;padding:46px 64px 40px;border-radius:18px;box-shadow:0 26px 64px rgba(22,42,72,.17)}
+  #verify .mfa-icon{width:72px;height:72px;background:#eaf2fb;box-shadow:0 0 0 9px #f2f8ff;margin-bottom:20px}
+  #verify .mfa-icon svg{width:33px;height:33px}
+  #verify h2{font-size:22px;margin-bottom:8px}
+  #verify .mfa-sub{margin:0 0 28px;font-size:13.5px}
+
+  #verify .method-tabs{gap:13px;margin-bottom:28px}
+  #verify .mtab{flex-direction:column;align-items:flex-start;gap:11px;padding:16px 16px 15px;border-radius:15px;border-width:2px;transition:.18s}
+  #verify .mtab .top{display:flex;align-items:center;justify-content:space-between;width:100%}
+  #verify .mtab .ic{width:40px;height:40px;border-radius:11px;margin:0}
+  #verify .mtab .ic svg{width:20px;height:20px}
+  #verify .mtab .t{font-size:13.5px;margin-top:1px}
+  #verify .mtab .d{font-size:11.5px;margin-top:2px;line-height:1.35}
+  #verify .mtab .check{width:22px;height:22px;border-radius:50%;border:2px solid #d4dbe6;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  #verify .mtab .check svg{width:12px;height:12px;fill:#fff;opacity:0}
+  #verify .mtab.sel{box-shadow:0 8px 20px rgba(29,95,171,.16)}
+  #verify .mtab.sel .check{background:var(--gc-blue);border-color:var(--gc-blue)}
+  #verify .mtab.sel .check svg{opacity:1}
+  #verify .mtab .badge-primary{position:static;display:inline-block;margin-left:8px;vertical-align:middle;padding:2px 8px}
+
+  #verify .otp{gap:11px;margin-bottom:6px}
+  #verify .otp input{width:52px;height:64px;border-radius:13px;border:2px solid #e1e7f0;background:#f8fafd;font-size:26px;transition:.12s}
+  #verify .otp input.filled{border-color:#bcd0ea;background:#fff;color:var(--gc-blue)}
+  #verify .otp input:focus{outline:none;border-color:var(--gc-blue);background:#fff;box-shadow:0 0 0 4px rgba(29,95,171,.14)}
+  #verify .otp.err input{border-color:#e0584b;background:#fff5f4;color:#d3493b}
+
+  #verify .err-msg{display:none;align-items:center;justify-content:center;gap:7px;color:#d3493b;font-size:12.5px;margin-top:12px}
+  #verify .err-msg svg{width:15px;height:15px;fill:#d3493b}
+  #verify .err-msg.show{display:flex}
+
+  /* dynamic footer */
+  .vfoot{margin:16px 0 22px}
+  .totp-timer{display:flex;flex-direction:column;align-items:center;gap:9px}
+  .totp-timer .lbl{font-size:12.5px;color:#7d8896}
+  .totp-timer .lbl b{color:#3a4654}
+  .totp-bar{width:172px;height:5px;border-radius:4px;background:#e8ecf2;overflow:hidden}
+  .totp-bar span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#2d9cd6,var(--gc-blue));border-radius:4px}
+
+  #verify .trust{margin-bottom:22px;font-size:13px}
+  #verify .btn-orange.disabled{background:#f6cba0;box-shadow:none;cursor:not-allowed}
+  .pick-prompt{display:flex;align-items:center;justify-content:center;gap:9px;text-align:center;color:#8a96a3;font-size:13px;background:#f7f9fc;border:1px dashed #d9e1ec;border-radius:12px;padding:18px 16px}
+  .pick-prompt svg{width:16px;height:16px;fill:#b6c1cd;flex-shrink:0}
+
+  /* admin: master enable toggle + callout */
+  .master-row{display:flex;align-items:center;gap:18px;padding:4px 0}
+  .master-row .mr-info{flex:1}
+  .master-row h4{font-family:'Poppins';font-size:15px;color:#2a3744;font-weight:600;display:flex;align-items:center;gap:9px}
+  .master-row .mr-info p{font-size:12.5px;color:#8a96a3;margin-top:5px;line-height:1.5}
+  .switch{position:relative;display:inline-block;width:52px;height:29px;flex-shrink:0}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{position:absolute;inset:0;background:#cdd5df;border-radius:20px;transition:.2s;cursor:pointer}
+  .slider::before{content:"";position:absolute;height:23px;width:23px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+  .switch input:checked + .slider{background:var(--gc-green)}
+  .switch input:checked + .slider::before{transform:translateX(23px)}
+  .info-callout{display:flex;gap:13px;background:#fff8ef;border:1px solid #ffe2c2;border-radius:10px;padding:15px 18px;margin-top:20px;font-size:13px;color:#7a5a25;line-height:1.55}
+  .info-callout svg{width:20px;height:20px;fill:#e8902a;flex-shrink:0;margin-top:1px}
+  .info-callout a{color:var(--gc-blue);font-weight:600;text-decoration:none}
+  #primaryPanel{transition:opacity .2s}
+
+  /* admin MFA intro */
+  .mfa-intro{display:flex;gap:14px;background:#f4f8fd;border:1px solid #e0ebf6;border-radius:10px;padding:18px 20px;margin-bottom:22px}
+  .mfa-intro .ii{width:38px;height:38px;border-radius:10px;background:#e2eefb;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .mfa-intro .ii svg{width:20px;height:20px;fill:var(--gc-blue)}
+  .mfa-intro h4{font-family:'Poppins';font-size:14px;color:#2a3744;margin-bottom:4px}
+  .mfa-intro p{font-size:13px;color:#5a6673;line-height:1.6}
+
+  /* ===== DONOR SCREENS — MOBILE RESPONSIVE ===== */
+  @media (max-width:760px){
+    .stage{padding:14px 8px 44px}
+    .site{border-radius:10px}
+    .site-top{flex-direction:column;align-items:flex-start;gap:7px;padding:9px 14px;font-size:11.5px}
+    .site-top .r{gap:16px}
+    .site-head{padding:13px 16px}
+    .logo{font-size:20px}
+    .menu{display:none}        /* desktop nav collapses behind the hamburger */
+    .burger{display:block}
+    .hero-band{height:58px;padding:0 18px}
+    .hero-band h1{font-size:21px}
+    .auth-wrap{padding:22px 12px 38px}
+    .card,#verify .card{width:100%;padding:30px 20px 26px}
+    .card h2,#verify h2{font-size:18px}
+    #verify .mfa-icon{width:62px;height:62px;box-shadow:0 0 0 7px #f2f8ff;margin-bottom:16px}
+    #verify .method-tabs{flex-direction:column;gap:11px;margin-bottom:22px}
+    .otp,#verify .otp{gap:7px}
+    .otp input,#verify .otp input{width:100%;max-width:48px;height:54px;font-size:21px;border-radius:11px}
+    .btn-block{font-size:14px;padding:14px}
+    .reg{font-size:12.5px}
+  }
+  @media (max-width:380px){
+    .otp input,#verify .otp input{height:48px;font-size:18px;border-radius:9px}
+    .card,#verify .card{padding:26px 14px 22px}
+  }
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <div class="brand">Give<span>Central</span> · MFA</div>
+  <span class="nav-tag">Donor</span>
+  <button class="nav-btn active" data-s="login">1 · Login</button>
+  <button class="nav-btn" data-s="verify">2 · MFA Verify</button>
+  <button class="nav-btn" data-s="success">3 · Success</button>
+  <span class="nav-sep"></span>
+  <span class="nav-tag">Admin</span>
+  <button class="nav-btn" data-s="admin">4 · MFA Setup</button>
+</div>
+
+<div class="stage">
+
+<!-- ============ SCREEN 1 : LOGIN ============ -->
+<section class="screen show" id="login">
+  <div class="frame-label"><span class="dot"></span> Donor Login <span class="sub">— existing screen, unchanged</span></div>
+  <div class="site">
+<div class="hero-band"><h1>Log in</h1></div>
+    <div class="auth-wrap">
+      <div class="card">
+        <h2>Login to your account</h2>
+        <div class="field">
+          <div class="row"><label>UserName</label><a class="link">Forgot UserName?</a></div>
+          <input class="inp ic-user" value="mayankjain1105">
+        </div>
+        <div class="field">
+          <div class="row"><label>Password</label><a class="link">Forgot Password?</a></div>
+          <input class="inp ic-key" type="password" value="passwordval">
+        </div>
+        <button class="btn-block btn-orange" onclick="go('verify')">Log in</button>
+        <div class="or">OR</div>
+        <button class="btn-block btn-blue">Log in With One Time Code</button>
+        <div style="text-align:center;font-size:13px;color:#5a6673;margin-top:10px"><b>(For Donors Only)</b></div>
+        <div class="reg">Don't have an account yet ? <a>Register today</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN 2 : MFA VERIFICATION ============ -->
+<section class="screen" id="verify">
+  <div class="frame-label"><span class="dot"></span> MFA Verification <span class="sub">— NEW · appears after password is accepted</span></div>
+  <div class="site">
+<div class="hero-band"><h1>Verify your identity</h1></div>
+    <div class="auth-wrap">
+      <div class="card card-narrow">
+        <div class="mfa-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5 3.8 9.7 9 11 5.2-1.3 9-6 9-11V5l-9-4zm-1 15l-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7z"/></svg>
+        </div>
+        <h2>Two-step verification</h2>
+        <p class="mfa-sub">Choose a verification method and enter the 6-digit code to finish signing in.</p>
+
+        <div class="method-tabs">
+          <div class="mtab sel" id="tab-sms" onclick="pickMethod('sms')">
+            <div class="top">
+              <span class="ic"><svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2zm-3 9H7V9h10v2zm0-3H7V6h10v2z"/></svg></span>
+              <span class="check"><svg viewBox="0 0 24 24"><path d="M9 16.2l-4.2-4.2L3.4 13.4 9 19 21 7l-1.4-1.4z"/></svg></span>
+            </div>
+            <div class="t">Text message (SMS)<span class="badge-primary">PRIMARY</span></div>
+            <div class="d">Code sent to •••• 4821</div>
+          </div>
+          <div class="mtab" id="tab-email" onclick="pickMethod('email')">
+            <div class="top">
+              <span class="ic"><svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></span>
+              <span class="check"><svg viewBox="0 0 24 24"><path d="M9 16.2l-4.2-4.2L3.4 13.4 9 19 21 7l-1.4-1.4z"/></svg></span>
+            </div>
+            <div class="t">Email</div>
+            <div class="d">Code sent to m•••@email.com</div>
+          </div>
+        </div>
+
+        <div id="codeSection">
+          <div class="code-label" id="codeLabel">Enter the code we texted to your phone ending in <b>4821</b></div>
+          <div class="otp" id="otpRow">
+            <input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric">
+          </div>
+          <div class="err-msg" id="errMsg"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> That code didn't match. Check and try again.</div>
+
+          <div class="vfoot">
+            <div class="resend" id="resendFoot">Didn't get a code? <a style="cursor:pointer" id="resendLink">Resend SMS</a> · <span style="color:#b3bcc6">00:42</span></div>
+          </div>
+
+          <button class="btn-block btn-orange disabled" id="verifyBtn" onclick="tryVerify()">Verify &amp; continue</button>
+        </div>
+        <div class="alt-link"><a onclick="go('login')" style="cursor:pointer">← Back to login</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN 3 : SUCCESS ============ -->
+<section class="screen" id="success">
+  <div class="frame-label"><span class="dot"></span> Verified <span class="sub">— NEW · transitional confirmation before redirect</span></div>
+  <div class="site">
+<div class="hero-band"><h1>Welcome back</h1></div>
+    <div class="auth-wrap">
+      <div class="card card-narrow" style="text-align:center">
+        <div class="success-ic">
+          <svg viewBox="0 0 24 24"><path d="M9 16.2l-4.2-4.2L3.4 13.4 9 19 21 7l-1.4-1.4z"/></svg>
+        </div>
+        <h2 style="color:#2a3744;margin-bottom:8px">Identity verified</h2>
+        <p class="mfa-sub" style="margin-bottom:24px">You're all set. We're taking you to your account…</p>
+        <button class="btn-block btn-blue" onclick="go('admin')">Continue to dashboard</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN 4 : ADMIN MFA SETUP ============ -->
+<section class="screen" id="admin">
+  <div class="frame-label"><span class="dot"></span> Admin · Settings ▸ Multi-Factor Authentication <span class="sub">— enable MFA for all users &amp; set the default method</span></div>
+  <div class="admin">
+    <!-- sidebar -->
+    <aside class="a-side">
+      <div class="a-logo"><span class="m"></span>GiveCentral</div>
+      <div class="a-item"><span class="ai">🎁</span> Guru AI</div>
+      <div class="a-item"><span class="ai">📲</span> GiveCentral Tap <span class="a-tag">New</span></div>
+      <div class="a-item"><span class="ai">💡</span> Knowledge Center <span class="a-tag">New</span></div>
+      <div class="a-item"><span class="ai">⚙️</span> Express Setup <span class="arr">›</span></div>
+      <div class="a-item"><span class="ai">📊</span> Reports <span class="arr">›</span></div>
+      <div class="a-item"><span class="ai">📄</span> Smart Reports <span class="arr">›</span></div>
+      <div class="a-item"><span class="ai">📑</span> Accounting Reports <span class="arr">›</span></div>
+      <div class="a-item"><span class="ai">🗄️</span> Database Reports <span class="arr">›</span></div>
+      <div class="a-item"><span class="ai">📈</span> Advanced Reports <span class="arr">›</span></div>
+      <div class="a-item"><span class="ai">💳</span> Payments <span class="arr">›</span></div>
+      <div class="a-item"><span class="ai">🗓️</span> Events <span class="arr">›</span></div>
+      <div class="a-item"><span class="ai">🎁</span> Donors <span class="arr">›</span></div>
+      <div class="a-item"><span class="ai">✉️</span> Communication <span class="arr">›</span></div>
+      <div class="a-item active"><span class="ai">⚙️</span> Settings <span class="arr">⌄</span></div>
+      <div class="a-sub">
+        <div class="a-subitem">Customize location</div>
+        <div class="a-subitem">Set Push Notification Messages</div>
+        <div class="a-subitem">Manage Short Form</div>
+        <div class="a-subitem active">Multi-Factor Authentication <span class="nw">NEW</span></div>
+      </div>
+    </aside>
+
+    <!-- main -->
+    <div class="a-main">
+      <div class="a-top">
+        <div class="l">
+          <span class="icn">☰</span><span class="icn">🔔</span>
+          <span class="welcome">Welcome <b>GiveCentral Support</b>, logged in as Admin</span>
+        </div>
+        <div class="search">🔍 Search by Donor ID</div>
+      </div>
+      <div class="crumb">Admin Panel <span class="sl">🏠 /</span> Settings <span class="sl">/</span> <b>Multi-Factor Authentication</b></div>
+
+      <div class="a-body">
+
+        <!-- enable / disable panel -->
+        <div class="panel">
+          <div class="panel-head">
+            <span class="ph-ic"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5 3.8 9.7 9 11 5.2-1.3 9-6 9-11V5l-9-4z"/></svg></span>
+            <div><h3>Multi-Factor Authentication</h3><p>Require all users you manage to confirm their identity with a one-time code at login. Codes are sent to the mobile number or email address already on each user's profile — no extra setup needed.</p></div>
+          </div>
+          <div class="panel-body">
+            <div class="master-row">
+              <div class="mr-info">
+                <h4>Enable MFA for all users <span class="chip on" id="mfaStatus">Enabled</span></h4>
+                <p>When turned on, every user must verify with a one-time code each time they sign in.</p>
+              </div>
+              <label class="switch"><input type="checkbox" id="mfaToggle" checked onchange="toggleMfa(this)"><span class="slider"></span></label>
+            </div>
+            <div class="info-callout">
+              <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+              <div>Before enabling MFA, make sure every user has a mobile number or email address on file. If a user is missing both, they won't receive verification codes and won't be able to log in — add their contact details in the <a>Manage User</a> screen.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- primary method panel -->
+        <div class="panel" id="primaryPanel">
+          <div class="panel-head">
+            <span class="ph-ic"><svg viewBox="0 0 24 24"><path d="M12 17.3l-6.2 3.7 1.6-7L2 9.2l7.1-.6L12 2l2.9 6.6 7.1.6-5.4 4.8 1.6 7z"/></svg></span>
+            <div><h3>Primary verification method</h3><p>The default channel used to send one-time codes to users. They can switch to the other method at login.</p></div>
+          </div>
+          <div class="panel-body">
+            <label class="primary-pick sel"><input type="radio" name="primary" checked onchange="pickPrimary(this,'sms')"> <b>Text message (SMS)</b> &nbsp;<span style="color:#8a96a3">— code sent to each user's mobile number</span></label>
+            <label class="primary-pick"><input type="radio" name="primary" onchange="pickPrimary(this,'email')"> <b>Email</b> &nbsp;<span style="color:#8a96a3">— code sent to each user's email address</span></label>
+            <div class="hint"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg> Changes take effect at each user's next login.</div>
+            <div class="save-bar" style="margin-top:18px"><button class="btn-sm ghost">Cancel</button><button class="btn-sm blue">Save changes</button></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+  function go(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('show'));
+    document.getElementById(id).classList.add('show');
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.s===id));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>go(b.dataset.s)));
+
+  // MFA verify: switch method — SMS and Email both deliver a one-time code
+  function pickMethod(m){
+    document.getElementById('tab-sms').classList.toggle('sel',m==='sms');
+    document.getElementById('tab-email').classList.toggle('sel',m==='email');
+    const label=document.getElementById('codeLabel');
+    const link=document.getElementById('resendLink');
+    if(m==='sms'){
+      label.innerHTML='Enter the code we texted to your phone ending in <b>4821</b>';
+      link.textContent='Resend SMS';
+    }else{
+      label.innerHTML='Enter the code we emailed to <b>m•••@email.com</b>';
+      link.textContent='Resend email';
+    }
+    clearOtp();
+    document.querySelector('#otpRow input').focus();
+  }
+
+  function clearOtp(){
+    document.querySelectorAll('#otpRow input').forEach(i=>{i.value='';i.classList.remove('filled');});
+    document.getElementById('errMsg').classList.remove('show');
+    document.getElementById('otpRow').classList.remove('err');
+    refreshVerifyBtn();
+  }
+  function otpValue(){return [...document.querySelectorAll('#otpRow input')].map(i=>i.value).join('');}
+  function refreshVerifyBtn(){
+    document.getElementById('verifyBtn').classList.toggle('disabled',otpValue().length<6);
+  }
+  function tryVerify(){
+    if(otpValue().length<6){            // demo error state
+      document.getElementById('otpRow').classList.add('err');
+      document.getElementById('errMsg').classList.add('show');
+      return;
+    }
+    go('success');
+  }
+
+  // Admin: expand/collapse setup boxes
+  function toggleSetup(id){
+    document.getElementById('setup-'+id).classList.toggle('hidden');
+  }
+  function pickPrimary(el,m){
+    document.querySelectorAll('.primary-pick').forEach(p=>p.classList.remove('sel'));
+    el.closest('.primary-pick').classList.add('sel');
+  }
+
+  // admin: enable / disable MFA for all managed users
+  function toggleMfa(el){
+    const on=el.checked;
+    const s=document.getElementById('mfaStatus');
+    s.textContent=on?'Enabled':'Disabled';
+    s.className='chip '+(on?'on':'off');
+    const p=document.getElementById('primaryPanel');
+    p.style.opacity=on?'1':'.45';
+    p.style.pointerEvents=on?'auto':'none';
+  }
+
+  // auto-advance OTP focus + filled styling + verify button state
+  document.querySelectorAll('.otp input, .otp-sm input').forEach((inp)=>{
+    inp.addEventListener('input',()=>{
+      inp.value=inp.value.replace(/[^0-9]/g,'').slice(0,1);
+      inp.classList.toggle('filled',!!inp.value);
+      if(inp.value && inp.nextElementSibling && inp.nextElementSibling.tagName==='INPUT') inp.nextElementSibling.focus();
+      if(inp.closest('#otpRow')){
+        document.getElementById('otpRow').classList.remove('err');
+        document.getElementById('errMsg').classList.remove('show');
+        refreshVerifyBtn();
+      }
+    });
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Backspace' && !inp.value && inp.previousElementSibling && inp.previousElementSibling.tagName==='INPUT'){
+        inp.previousElementSibling.focus();
+      }
+    });
+  });
+</script>
+</body>
+</html>
