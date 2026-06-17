@@ -212,11 +212,15 @@
   #verify .mtab .ic svg{width:20px;height:20px}
   #verify .mtab .t{font-size:13.5px;margin-top:1px}
   #verify .mtab .d{font-size:11.5px;margin-top:2px;line-height:1.35}
-  #verify .mtab .check{width:22px;height:22px;border-radius:50%;border:2px solid #d4dbe6;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  #verify .mtab .check svg{width:12px;height:12px;fill:#fff;opacity:0}
+  #verify .mtab{cursor:pointer}
+  #verify .mtab:hover{border-color:#bcd0ea;background:#fafcff;transform:translateY(-1px)}
+  #verify .mtab .cta-arrow{width:26px;height:26px;border-radius:50%;background:#eef2f8;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.18s}
+  #verify .mtab .cta-arrow svg{width:13px;height:13px;fill:#8a96a3;transition:.18s}
+  #verify .mtab:hover .cta-arrow{background:#dbe8f7}
+  #verify .mtab:hover .cta-arrow svg{fill:var(--gc-blue);transform:translateX(1px)}
   #verify .mtab.sel{box-shadow:0 8px 20px rgba(29,95,171,.16)}
-  #verify .mtab.sel .check{background:var(--gc-blue);border-color:var(--gc-blue)}
-  #verify .mtab.sel .check svg{opacity:1}
+  #verify .mtab.sel .cta-arrow{background:var(--gc-blue)}
+  #verify .mtab.sel .cta-arrow svg{fill:#fff}
   #verify .mtab .badge-primary{position:static;display:inline-block;margin-left:8px;vertical-align:middle;padding:2px 8px}
 
   #verify .otp{gap:11px;margin-bottom:6px}
@@ -241,22 +245,22 @@
   #verify .btn-orange.disabled{background:#f6cba0;box-shadow:none;cursor:not-allowed}
   .pick-prompt{display:flex;align-items:center;justify-content:center;gap:9px;text-align:center;color:#8a96a3;font-size:13px;background:#f7f9fc;border:1px dashed #d9e1ec;border-radius:12px;padding:18px 16px}
   .pick-prompt svg{width:16px;height:16px;fill:#b6c1cd;flex-shrink:0}
+  .send-step{text-align:center}
+  .send-step .send-target{font-size:13.5px;color:#5a6673;margin-bottom:16px}
+  .send-step .send-target b{color:#2a3744}
 
-  /* admin: master enable toggle + callout */
-  .master-row{display:flex;align-items:center;gap:18px;padding:4px 0}
-  .master-row .mr-info{flex:1}
-  .master-row h4{font-family:'Poppins';font-size:15px;color:#2a3744;font-weight:600;display:flex;align-items:center;gap:9px}
-  .master-row .mr-info p{font-size:12.5px;color:#8a96a3;margin-top:5px;line-height:1.5}
-  .switch{position:relative;display:inline-block;width:52px;height:29px;flex-shrink:0}
+  /* admin: per-method enable toggles */
+  .switch{position:relative;display:inline-block;width:50px;height:28px;flex-shrink:0}
   .switch input{opacity:0;width:0;height:0}
   .slider{position:absolute;inset:0;background:#cdd5df;border-radius:20px;transition:.2s;cursor:pointer}
-  .slider::before{content:"";position:absolute;height:23px;width:23px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+  .slider::before{content:"";position:absolute;height:22px;width:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
   .switch input:checked + .slider{background:var(--gc-green)}
-  .switch input:checked + .slider::before{transform:translateX(23px)}
+  .switch input:checked + .slider::before{transform:translateX(22px)}
   .info-callout{display:flex;gap:13px;background:#fff8ef;border:1px solid #ffe2c2;border-radius:10px;padding:15px 18px;margin-top:20px;font-size:13px;color:#7a5a25;line-height:1.55}
   .info-callout svg{width:20px;height:20px;fill:#e8902a;flex-shrink:0;margin-top:1px}
   .info-callout a{color:var(--gc-blue);font-weight:600;text-decoration:none}
-  #primaryPanel{transition:opacity .2s}
+  .default-pick{margin-top:22px;padding-top:20px;border-top:1px solid #eef1f5}
+  .default-pick .dp-label{font-family:'Poppins';font-size:13px;font-weight:600;color:#2a3744;margin-bottom:12px}
 
   /* admin MFA intro */
   .mfa-intro{display:flex;gap:14px;background:#f4f8fd;border:1px solid #e0ebf6;border-radius:10px;padding:18px 20px;margin-bottom:22px}
@@ -348,25 +352,35 @@
         <p class="mfa-sub">Choose a verification method and enter the 6-digit code to finish signing in.</p>
 
         <div class="method-tabs">
-          <div class="mtab sel" id="tab-sms" onclick="pickMethod('sms')">
+          <div class="mtab" id="tab-sms" onclick="pickMethod('sms')">
             <div class="top">
               <span class="ic"><svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2zm-3 9H7V9h10v2zm0-3H7V6h10v2z"/></svg></span>
-              <span class="check"><svg viewBox="0 0 24 24"><path d="M9 16.2l-4.2-4.2L3.4 13.4 9 19 21 7l-1.4-1.4z"/></svg></span>
+              <span class="cta-arrow"><svg viewBox="0 0 24 24"><path d="M8.6 5.4 7.2 6.8l5.2 5.2-5.2 5.2 1.4 1.4 6.6-6.6z"/></svg></span>
             </div>
             <div class="t">Text message (SMS)<span class="badge-primary">PRIMARY</span></div>
-            <div class="d">Code sent to •••• 4821</div>
+            <div class="d">Code will be sent to •••• 4821</div>
           </div>
           <div class="mtab" id="tab-email" onclick="pickMethod('email')">
             <div class="top">
               <span class="ic"><svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></span>
-              <span class="check"><svg viewBox="0 0 24 24"><path d="M9 16.2l-4.2-4.2L3.4 13.4 9 19 21 7l-1.4-1.4z"/></svg></span>
+              <span class="cta-arrow"><svg viewBox="0 0 24 24"><path d="M8.6 5.4 7.2 6.8l5.2 5.2-5.2 5.2 1.4 1.4 6.6-6.6z"/></svg></span>
             </div>
             <div class="t">Email</div>
-            <div class="d">Code sent to m•••@email.com</div>
+            <div class="d">Code will be sent to m•••@email.com</div>
           </div>
         </div>
 
-        <div id="codeSection">
+        <div class="pick-prompt" id="pickPrompt">
+          <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5 3.8 9.7 9 11 5.2-1.3 9-6 9-11V5l-9-4z"/></svg>
+          Select a verification method above to receive your code.
+        </div>
+
+        <div id="sendStep" class="send-step hidden">
+          <p class="send-target" id="sendTarget">We'll text a code to <b>•••• 4821</b>.</p>
+          <button class="btn-block btn-orange" id="sendBtn" onclick="sendCode()">Send code now</button>
+        </div>
+
+        <div id="codeSection" class="hidden">
           <div class="code-label" id="codeLabel">Enter the code we texted to your phone ending in <b>4821</b></div>
           <div class="otp" id="otpRow">
             <input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric">
@@ -405,7 +419,7 @@
 
 <!-- ============ SCREEN 4 : ADMIN MFA SETUP ============ -->
 <section class="screen" id="admin">
-  <div class="frame-label"><span class="dot"></span> Admin · Settings ▸ Multi-Factor Authentication <span class="sub">— enable MFA for all users &amp; set the default method</span></div>
+  <div class="frame-label"><span class="dot"></span> Admin · Settings ▸ Multi-Factor Authentication <span class="sub">— NEW sidebar item &amp; setup screen</span></div>
   <div class="admin">
     <!-- sidebar -->
     <aside class="a-side">
@@ -445,38 +459,47 @@
 
       <div class="a-body">
 
-        <!-- enable / disable panel -->
+        <!-- verification methods panel -->
         <div class="panel">
           <div class="panel-head">
             <span class="ph-ic"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5 3.8 9.7 9 11 5.2-1.3 9-6 9-11V5l-9-4z"/></svg></span>
-            <div><h3>Multi-Factor Authentication</h3><p>Require all users you manage to confirm their identity with a one-time code at login. Codes are sent to the mobile number or email address already on each user's profile — no extra setup needed.</p></div>
+            <div><h3>Multi-Factor Authentication</h3><p>Require all users you manage to confirm their identity with a one-time code at login. Turn on the channels users can receive codes on — enable one or both. Codes are sent to the mobile number or email address already on each user's profile.</p></div>
           </div>
           <div class="panel-body">
-            <div class="master-row">
-              <div class="mr-info">
-                <h4>Enable MFA for all users <span class="chip on" id="mfaStatus">Enabled</span></h4>
-                <p>When turned on, every user must verify with a one-time code each time they sign in.</p>
+
+            <!-- SMS toggle -->
+            <div class="method-row">
+              <span class="m-ic sms"><svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2zm-3 9H7V9h10v2zm0-3H7V6h10v2z"/></svg></span>
+              <div class="m-info">
+                <h4>Text message (SMS) <span class="chip on" id="smsStatus">Enabled</span></h4>
+                <p>Code sent to the user's mobile number on file.</p>
               </div>
-              <label class="switch"><input type="checkbox" id="mfaToggle" checked onchange="toggleMfa(this)"><span class="slider"></span></label>
+              <div class="m-actions"><label class="switch"><input type="checkbox" id="smsEnable" checked onchange="toggleMethod('sms',this)"><span class="slider"></span></label></div>
             </div>
+
+            <!-- Email toggle -->
+            <div class="method-row">
+              <span class="m-ic email"><svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></span>
+              <div class="m-info">
+                <h4>Email <span class="chip off" id="emailStatus">Disabled</span></h4>
+                <p>Code sent to the user's email address on file.</p>
+              </div>
+              <div class="m-actions"><label class="switch"><input type="checkbox" id="emailEnable" onchange="toggleMethod('email',this)"><span class="slider"></span></label></div>
+            </div>
+
+            <!-- default method (only when both enabled) -->
+            <div class="default-pick" id="defaultPick" style="display:none">
+              <div class="dp-label">Default method shown first at login</div>
+              <label class="primary-pick sel"><input type="radio" name="defaultm" checked onchange="pickPrimary(this,'sms')"> <b>Text message (SMS)</b></label>
+              <label class="primary-pick"><input type="radio" name="defaultm" onchange="pickPrimary(this,'email')"> <b>Email</b></label>
+            </div>
+
             <div class="info-callout">
               <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-              <div>Before enabling MFA, make sure every user has a mobile number or email address on file. If a user is missing both, they won't receive verification codes and won't be able to log in — add their contact details in the <a>Manage User</a> screen.</div>
+              <div>Make sure every user has a mobile number or email address on file for the method(s) you enable. If a user is missing the required contact detail, they won't receive verification codes and won't be able to log in — add it in the <a>Manage User</a> screen.</div>
             </div>
-          </div>
-        </div>
 
-        <!-- primary method panel -->
-        <div class="panel" id="primaryPanel">
-          <div class="panel-head">
-            <span class="ph-ic"><svg viewBox="0 0 24 24"><path d="M12 17.3l-6.2 3.7 1.6-7L2 9.2l7.1-.6L12 2l2.9 6.6 7.1.6-5.4 4.8 1.6 7z"/></svg></span>
-            <div><h3>Primary verification method</h3><p>The default channel used to send one-time codes to users. They can switch to the other method at login.</p></div>
-          </div>
-          <div class="panel-body">
-            <label class="primary-pick sel"><input type="radio" name="primary" checked onchange="pickPrimary(this,'sms')"> <b>Text message (SMS)</b> &nbsp;<span style="color:#8a96a3">— code sent to each user's mobile number</span></label>
-            <label class="primary-pick"><input type="radio" name="primary" onchange="pickPrimary(this,'email')"> <b>Email</b> &nbsp;<span style="color:#8a96a3">— code sent to each user's email address</span></label>
-            <div class="hint"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg> Changes take effect at each user's next login.</div>
-            <div class="save-bar" style="margin-top:18px"><button class="btn-sm ghost">Cancel</button><button class="btn-sm blue">Save changes</button></div>
+            <div class="save-bar" style="margin-top:22px"><button class="btn-sm ghost">Cancel</button><button class="btn-sm blue">Save changes</button></div>
           </div>
         </div>
 
@@ -502,13 +525,26 @@
     document.getElementById('tab-email').classList.toggle('sel',m==='email');
     const label=document.getElementById('codeLabel');
     const link=document.getElementById('resendLink');
+    const target=document.getElementById('sendTarget');
     if(m==='sms'){
       label.innerHTML='Enter the code we texted to your phone ending in <b>4821</b>';
       link.textContent='Resend SMS';
+      target.innerHTML="We'll text a code to <b>•••• 4821</b>.";
     }else{
       label.innerHTML='Enter the code we emailed to <b>m•••@email.com</b>';
       link.textContent='Resend email';
+      target.innerHTML="We'll email a code to <b>m•••@email.com</b>.";
     }
+    // step 1: chosen → show the "Send code now" action (not the code fields yet)
+    document.getElementById('pickPrompt').style.display='none';
+    document.getElementById('sendStep').classList.remove('hidden');
+    document.getElementById('codeSection').classList.add('hidden');
+  }
+
+  // step 2: code is sent → reveal the entry fields
+  function sendCode(){
+    document.getElementById('sendStep').classList.add('hidden');
+    document.getElementById('codeSection').classList.remove('hidden');
     clearOtp();
     document.querySelector('#otpRow input').focus();
   }
@@ -541,15 +577,18 @@
     el.closest('.primary-pick').classList.add('sel');
   }
 
-  // admin: enable / disable MFA for all managed users
-  function toggleMfa(el){
-    const on=el.checked;
-    const s=document.getElementById('mfaStatus');
-    s.textContent=on?'Enabled':'Disabled';
-    s.className='chip '+(on?'on':'off');
-    const p=document.getElementById('primaryPanel');
-    p.style.opacity=on?'1':'.45';
-    p.style.pointerEvents=on?'auto':'none';
+  // admin: enable/disable each method independently (one or both)
+  function toggleMethod(m,el){
+    const sms=document.getElementById('smsEnable');
+    const email=document.getElementById('emailEnable');
+    // keep at least one method enabled
+    if(!sms.checked && !email.checked){ el.checked=true; return; }
+    document.getElementById('smsStatus').textContent = sms.checked?'Enabled':'Disabled';
+    document.getElementById('smsStatus').className = 'chip '+(sms.checked?'on':'off');
+    document.getElementById('emailStatus').textContent = email.checked?'Enabled':'Disabled';
+    document.getElementById('emailStatus').className = 'chip '+(email.checked?'on':'off');
+    // the "default at login" choice only matters when both are enabled
+    document.getElementById('defaultPick').style.display = (sms.checked && email.checked)?'block':'none';
   }
 
   // auto-advance OTP focus + filled styling + verify button state
