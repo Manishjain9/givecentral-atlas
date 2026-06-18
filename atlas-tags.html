@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GiveCentral Atlas — Tag management</title>
+<title>GiveCentral Atlas — Tags & Segments</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --navy:#0E1E35; --navy-2:#152844;
-  --blue:#2563EB; --blue-mid:#3B82F6; --blue-light:#DBEAFE; --blue-pale:#EFF6FF;
+:root{
+  --navy:#0E1E35; --navy-3:#1E3A5F;
+  --blue:#2563EB; --blue-light:#DBEAFE; --blue-pale:#EFF6FF;
   --teal:#0D9488; --teal-light:#CCFBF1;
   --green:#15803D; --green-light:#DCFCE7;
   --amber:#D97706; --amber-light:#FEF3C7;
@@ -19,168 +19,178 @@
   --purple:#7C3AED; --purple-light:#EDE9FE;
   --gold:#B45309; --gold-light:#FEF3C7;
   --text:#0F172A; --text-2:#334155; --text-3:#64748B;
-  --border:#E2E8F0; --border-soft:#EDF2F7;
-  --surface:#F8FAFC; --white:#FFFFFF;
-  --sidebar-w:220px;
+  --border:#E2E8F0; --border-soft:#EDF2F7; --surface:#F8FAFC; --white:#fff;
 }
-html{font-size:14px;-webkit-font-smoothing:antialiased}
-body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden}
-a{color:inherit;text-decoration:none}
+html{font-size:14px;-webkit-font-smoothing:antialiased;}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden;}
+a{color:inherit;text-decoration:none;}
 
-/* ══ Sidebar (canonical, abbreviated) ══ */
-.sidebar{width:var(--sidebar-w);background:var(--navy);min-height:100vh;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
-.sidebar-logo{padding:18px 18px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.08)}
-.logo-mark{width: 52px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.logo-mark svg{width: 52px;height:40px}
-.logo-text-wrap{display:flex;flex-direction:column}
-.logo-name{font-family:'DM Serif Display',serif;font-size: 20px;color:white;line-height:1}
-.logo-sub{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:3px}
-.sidebar-search{margin:12px 12px 6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer}
-.sidebar-search svg{width:13px;height:13px;color:rgba(255,255,255,.3);flex-shrink:0}
-.sidebar-search input{background:none;border:none;outline:none;width:100%;font-size:12px;color:rgba(255,255,255,.6);font-family:'DM Sans',sans-serif;cursor:pointer}
-.sidebar-scroll{flex:1;overflow-y:auto;padding:6px 8px}
-.nav-group{padding-top:4px}
-.nav-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:6px 12px 4px}
-.nav-item{display:flex;align-items:center;gap:9px;padding:8px 12px;margin-bottom:1px;border-radius:7px;font-size:12.5px;color:rgba(255,255,255,.7);cursor:pointer}
-.nav-item svg{width:14px;height:14px;flex-shrink:0;color:rgba(255,255,255,.45)}
-.nav-item:hover{background:rgba(255,255,255,.06);color:white}
-.nav-item:hover svg{color:rgba(255,255,255,.85)}
-.nav-item.active{background:rgba(37,99,235,.18);color:white}
-.nav-item.active svg{color:var(--blue-mid)}
-.nav-badge{margin-left:auto;font-size:10px;font-weight:600;color:rgba(255,255,255,.55)}
-.nav-badge.alert{background:var(--amber);color:white;padding:1px 7px;border-radius:99px}
-.sidebar-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
-.user-avatar{width:30px;height:30px;border-radius:50%;background:var(--rose);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
-.user-name{font-size:11.5px;color:white;font-weight:500}
-.user-role{font-size:10px;color:rgba(255,255,255,.45);margin-top:1px}
+/* Sidebar */
+.sidebar{width:220px;background:var(--navy);min-height:100vh;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow:hidden;}
+.sidebar-logo{padding:18px 18px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;}
+.logo-mark{width:52px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.logo-mark svg{width:52px;height:40px;}
+.logo-name{font-family:'DM Serif Display',serif;font-size:20px;color:#fff;line-height:1;}
+.logo-sub{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:3px;}
+.sidebar-search{margin:12px 12px 6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;flex-shrink:0;}
+.sidebar-search svg{width:13px;height:13px;color:rgba(255,255,255,.4);flex-shrink:0;}
+.sidebar-search input{background:none;border:none;outline:none;width:100%;font-size:12px;color:rgba(255,255,255,.6);font-family:'DM Sans',sans-serif;cursor:pointer;}
+.sidebar-search input::placeholder{color:rgba(255,255,255,.3);}
+.sidebar-scroll{flex:1 1 auto;overflow-y:auto;min-height:0;}
+.sidebar-scroll::-webkit-scrollbar{width:4px;} .sidebar-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px;}
+.nav-group{padding:8px 8px 0;}
+.nav-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:0 10px;margin-bottom:4px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;transition:all .15s;margin-bottom:1px;}
+.nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85);}
+.nav-item.active{background:var(--blue);color:#fff;}
+.nav-item svg{width:14px;height:14px;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.6);border-radius:10px;padding:1px 7px;font-size:10px;font-weight:600;}
+.nav-item.active .nav-badge{background:rgba(255,255,255,.2);color:#fff;}
+.nav-badge.alert{background:#EF4444;color:#fff;}
+.sidebar-user{margin-top:auto;padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:9px;flex-shrink:0;}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.user-name{font-size:12px;font-weight:500;color:rgba(255,255,255,.75);}
+.user-role{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px;}
 
-/* ══ Main ══ */
-.main{flex:1;min-width:0;display:flex;flex-direction:column}
-.topbar{background:white;border-bottom:1px solid var(--border);padding:13px 28px;display:flex;align-items:center;gap:14px;flex-shrink:0;min-height:56px}
-.topbar-title{font-size:14px;font-weight:600;color:var(--text)}
-.topbar-date{font-size:11.5px;color:var(--text-3)}
-.topbar-right{margin-left:auto;display:flex;align-items:center;gap:9px}
-.tb-btn{padding:6px 12px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:white;color:var(--text-2);font-family:'DM Sans',sans-serif}
-.tb-btn:hover{background:var(--surface)}
+/* Main */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.topbar-title{font-size:14px;font-weight:600;}
+.topbar-date{font-size:12px;color:var(--text-3);}
+.topbar-search{flex:1;max-width:460px;margin:0 18px;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:text;}
+.topbar-search svg{width:13px;height:13px;color:var(--text-3);}
+.topbar-search input{background:none;border:none;outline:none;width:100%;font-size:12.5px;color:var(--text);font-family:'DM Sans',sans-serif;}
+.dash{padding:24px;overflow-y:auto;}
 
-.page-head{background:white;border-bottom:1px solid var(--border);padding:22px 28px 18px}
-.ph-row{display:flex;align-items:center;gap:14px}
-.ph-title{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text)}
-.ph-count{font-size:13px;color:var(--text-3);margin-left:4px}
-.ph-actions{margin-left:auto;display:flex;gap:8px}
-.btn{padding:8px 14px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;border:none}
-.btn svg{width:12px;height:12px}
-.btn-ghost{background:white;border:1px solid var(--border);color:var(--text-2)}
-.btn-ghost:hover{background:var(--surface)}
-.btn-blue{background:var(--blue);color:white}
-.btn-blue:hover{background:#1D4ED8}
-.ph-desc{font-size:13px;color:var(--text-3);margin-top:7px;line-height:1.55;max-width:680px}
+/* Page head */
+.page-head{margin-bottom:18px;}
+.ph-row{display:flex;align-items:center;gap:12px;}
+.crumb{font-size:12px;color:var(--text-3);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.crumb a{color:var(--blue);} .crumb svg{width:10px;height:10px;}
+.ph-title{font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-.02em;line-height:1.1;}
+.ph-count{font-size:12.5px;color:var(--text-3);}
+.ph-actions{margin-left:auto;display:flex;gap:8px;}
+.ph-desc{color:var(--text-3);font-size:13px;margin-top:6px;max-width:760px;line-height:1.5;}
 
-/* ══ KPIs ══ */
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:20px 28px 12px;background:white}
-.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 16px}
-.kpi .lbl{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
-.kpi .val{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);line-height:1;margin-top:5px}
-.kpi .val.green{color:var(--green)}
-.kpi .meta{font-size:11px;color:var(--text-3);margin-top:5px}
+.btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:9px 15px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent;transition:all .15s;}
+.btn svg{width:13px;height:13px;}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 1px 4px rgba(37,99,235,.25);} .btn-blue:hover{background:#1D4ED8;}
+.btn-ghost{background:#fff;border-color:var(--border);color:var(--text-2);} .btn-ghost:hover{background:var(--surface);border-color:#94A3B8;}
 
-/* ══ Tags grid ══ */
-.tags-wrap{padding:18px 28px 40px}
-.tags-search-row{background:white;border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:11px;margin-bottom:14px}
-.tags-search-row input{flex:1;border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:transparent}
-.tags-search-row svg{width:14px;height:14px;color:var(--text-3)}
-.tags-search-row select{padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:white;cursor:pointer;font-family:'DM Sans',sans-serif}
+/* KPIs */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px;}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+.kpi .lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);}
+.kpi .val{font-family:'DM Serif Display',serif;font-size:26px;line-height:1;margin:7px 0 4px;}
+.kpi .val.blue{color:var(--blue);} .kpi .val.teal{color:var(--teal);} .kpi .val.rose{color:var(--rose);} .kpi .val.purple{color:var(--purple);}
+.kpi .meta{font-size:11px;color:var(--text-3);}
 
-.tags-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-.tag-card{background:white;border:1px solid var(--border);border-radius:11px;padding:14px 16px;cursor:pointer;transition:all .14s;display:flex;flex-direction:column;gap:8px}
-.tag-card:hover{border-color:var(--blue-mid);box-shadow:0 4px 12px rgba(15,23,42,.06);transform:translateY(-1px)}
-.tag-card-head{display:flex;align-items:center;gap:9px}
-.tag-swatch{width:24px;height:24px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700}
-.tag-name{flex:1;font-size:13.5px;font-weight:600;color:var(--text)}
-.tag-kebab{width:24px;height:24px;border-radius:5px;border:none;background:transparent;cursor:pointer;color:var(--text-3);display:inline-flex;align-items:center;justify-content:center}
-.tag-kebab:hover{background:var(--surface);color:var(--text)}
-.tag-kebab svg{width:12px;height:12px}
-.tag-desc{font-size:11.5px;color:var(--text-3);line-height:1.45}
-.tag-meta-row{display:flex;align-items:center;gap:11px;margin-top:auto;padding-top:9px;border-top:1px dashed var(--border)}
-.tag-count{font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);font-weight:500}
-.tag-count-lbl{font-size:10.5px;color:var(--text-3);margin-left:-6px}
-.tag-owner{margin-left:auto;font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px}
-.tag-owner-av{width:18px;height:18px;border-radius:50%;background:var(--blue);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+/* Tabs */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+.tab{padding:10px 16px;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--text-3);border-bottom:2px solid transparent;display:flex;align-items:center;gap:7px;}
+.tab.on{color:var(--blue);border-color:var(--blue);font-weight:600;}
+.tab .ct{font-size:10.5px;padding:1px 7px;border-radius:99px;background:var(--surface);}
+.tab.on .ct{background:var(--blue-pale);color:var(--blue);}
 
-/* ══ Modal ══ */
-.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(3px)}
-.modal-overlay.show{display:flex}
-.modal{background:white;border-radius:14px;width:480px;max-width:calc(100vw - 32px);box-shadow:0 16px 40px rgba(15,23,42,.18);overflow:hidden}
-.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px}
-.modal-title{flex:1;font-family:'DM Serif Display',serif;font-size:18px}
-.modal-close{width:28px;height:28px;border-radius:6px;border:none;background:transparent;cursor:pointer;font-size:22px;color:var(--text-3)}
-.modal-close:hover{background:var(--surface);color:var(--text)}
-.modal-body{padding:18px 20px}
-.modal-foot{padding:14px 20px;background:var(--surface);display:flex;justify-content:flex-end;gap:8px}
-.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
-.field label{font-size:11.5px;font-weight:600;color:var(--text-2)}
-.field input,.field textarea{padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none}
-.field input:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
-.color-row{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-.color-opt{height:32px;border-radius:7px;cursor:pointer;border:2px solid transparent;transition:all .12s;position:relative}
-.color-opt:hover{transform:scale(1.06)}
-.color-opt.on{border-color:var(--text);box-shadow:0 0 0 2px white inset}
-.color-opt.on::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-weight:700;font-size:13px}
+/* Toolbar */
+.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.tb-search{flex:1;min-width:240px;max-width:420px;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;}
+.tb-search svg{width:14px;height:14px;color:var(--text-3);flex-shrink:0;}
+.tb-search input{border:none;outline:none;width:100%;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);}
+.tb-select{font-size:12.5px;font-family:'DM Sans',sans-serif;padding:8px 30px 8px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-2);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M3 5l3 3 3-3z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+.tb-select:focus{outline:none;border-color:var(--blue);}
 
-/* ══ Toast ══ */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:white;padding:12px 20px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:9px;box-shadow:0 12px 32px rgba(0,0,0,.25);opacity:0;transition:all .22s;z-index:300;pointer-events:none}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.success{background:var(--green)}
-.toast svg{width:14px;height:14px}
-</style>
+/* Section group */
+.ts-group{margin-bottom:26px;}
+.ts-group-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.ts-group-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.ts-group-title{font-size:13px;font-weight:700;color:var(--text);}
+.ts-group-ct{font-size:11px;font-weight:600;color:var(--text-3);background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:1px 8px;}
+.ts-group-sub{font-size:11.5px;color:var(--text-3);margin-left:auto;}
 
-<style id="atlas-sidebar-logo-canon">
-  /* Atlas sidebar logo — canonical styling injected to guarantee
-     consistent stacking (Atlas above, By GiveCentral below) across every screen. */
-  .sidebar-logo {
-    display: flex !important;
-    align-items: center !important;
-    gap: 11px !important;
-    padding: 18px 18px 14px !important;
-    border-bottom: 1px solid rgba(255,255,255,.08) !important;
-  }
-  .sidebar-logo .logo-mark {
-    width: 52px !important;
-    height: 40px !important;
-    flex-shrink: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: transparent !important;
-    border-radius: 0 !important;
-  }
-  .sidebar-logo .logo-mark svg {
-    width: 52px !important;
-    height: 40px !important;
-  }
-  .sidebar-logo .logo-text-wrap {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 3px !important;
-  }
-  .sidebar-logo .logo-name {
-    font-family: 'DM Serif Display', serif !important;
-    font-size: 20px !important;
-    color: white !important;
-    line-height: 1 !important;
-    font-weight: 400 !important;
-    margin: 0 !important;
-  }
-  .sidebar-logo .logo-sub {
-    font-size: 9px !important;
-    font-weight: 600 !important;
-    letter-spacing: .1em !important;
-    text-transform: uppercase !important;
-    color: rgba(255,255,255,.35) !important;
-    margin: 0 !important;
-    line-height: 1 !important;
-  }
+.ts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;}
+
+.ts-card{background:#fff;border:1px solid var(--border);border-left-width:3px;border-radius:12px;padding:14px 16px;transition:box-shadow .15s,border-color .15s;}
+.ts-card:hover{box-shadow:0 4px 16px rgba(15,23,42,.07);}
+.ts-card.acc-blue{border-left-color:var(--blue);}
+.ts-card.acc-teal{border-left-color:var(--teal);}
+.ts-card.acc-rose{border-left-color:var(--rose);}
+.ts-card.acc-purple{border-left-color:var(--purple);}
+.ts-card-top{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.ts-name{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+.ts-cat{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px;}
+.ts-desc{font-size:12.5px;color:var(--text-2);line-height:1.5;margin-bottom:11px;}
+.ts-meta{display:flex;flex-wrap:wrap;gap:6px;}
+.ts-chip{font-size:10.5px;font-weight:500;padding:3px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text-3);display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
+.ts-chip svg{width:10px;height:10px;flex-shrink:0;}
+.ts-chip.effect{background:var(--amber-light);border-color:#FCD9A8;color:var(--gold);max-width:100%;overflow:hidden;text-overflow:ellipsis;}
+.ts-chip.effect.label{background:var(--surface);border-color:var(--border);color:var(--text-3);}
+.ts-phase{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:5px;letter-spacing:.03em;}
+.ts-phase.P1{background:var(--green-light);color:var(--green);}
+.ts-phase.P2{background:var(--blue-light);color:var(--blue);}
+.ts-seg-foot{margin-top:11px;padding-top:10px;border-top:1px solid var(--border-soft);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.ts-seg-foot .src{font-size:11px;color:var(--text-3);}
+.ts-use{font-size:11.5px;font-weight:600;color:var(--blue);cursor:pointer;display:inline-flex;align-items:center;gap:4px;}
+.ts-use svg{width:11px;height:11px;}
+
+/* Two-pane layout */
+.ts-layout{display:grid;grid-template-columns:250px 1fr;gap:18px;align-items:start;}
+.ts-rail{position:sticky;top:14px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px;max-height:calc(100vh - 92px);overflow-y:auto;}
+.ts-rail-sec{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);padding:13px 10px 6px;display:flex;align-items:center;gap:7px;}
+.ts-rail-sec:first-child{padding-top:6px;}
+.ts-rail-sec .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.ts-rail-sec .lk{margin-left:auto;display:inline-flex;color:var(--text-3);}
+.ts-rail-sec .lk svg{width:11px;height:11px;}
+.ts-rail-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text-2);border-left:2px solid transparent;}
+.ts-rail-item:hover{background:var(--surface);}
+.ts-rail-item.on{background:var(--blue-pale);color:var(--blue);font-weight:600;border-left-color:var(--blue);}
+.ts-rail-item .nm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ts-rail-item .ct{font-size:11px;font-weight:600;color:var(--text-3);background:var(--surface);border-radius:99px;padding:1px 8px;}
+.ts-rail-item.on .ct{background:#fff;color:var(--blue);}
+.ts-pane{min-width:0;}
+.ts-pane-head{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.ts-pane-title{font-size:17px;font-weight:700;color:var(--text);}
+.ts-pane-meta{font-size:12px;color:var(--text-3);display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.ts-pane-meta .lk svg{width:11px;height:11px;vertical-align:-1px;}
+@media(max-width:840px){ .ts-layout{grid-template-columns:1fr;} .ts-rail{position:static;max-height:none;} }
+
+.ts-fixed{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:var(--text-3);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px 8px;}
+.ts-fixed svg{width:10px;height:10px;}
+.ts-arch{margin-left:auto;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3);background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:2px 7px;}
+.ts-actions{display:flex;gap:8px;margin-top:11px;padding-top:11px;border-top:1px solid var(--border-soft);}
+.ts-act{font-size:12px;font-weight:600;padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:#fff;color:var(--text-2);cursor:pointer;}
+.ts-act:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-pale);}
+.ts-act.danger:hover{border-color:var(--rose);color:var(--rose);background:var(--rose-light);}
+.ts-card.is-archived{opacity:.62;}
+.ts-arch-toggle{color:var(--blue);cursor:pointer;text-decoration:underline;}
+.ts-group-sub svg{width:11px;height:11px;vertical-align:-1px;margin-left:3px;}
+
+.ts-empty{padding:44px 20px;text-align:center;color:var(--text-3);font-size:13px;border:1px dashed var(--border);border-radius:12px;}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:14px;width:520px;max-width:100%;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(15,23,42,.25);}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-family:'DM Serif Display',serif;font-size:19px;}
+.modal-close{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:18px;color:var(--text-3);line-height:1;}
+.modal-close:hover{background:var(--surface);}
+.modal-body{padding:20px 22px;}
+.field{margin-bottom:15px;}
+.field label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);margin-bottom:6px;}
+.field .req{color:var(--rose);}
+.field input,.field textarea,.field select{width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:9px 12px;border:1px solid var(--border);border-radius:8px;color:var(--text);background:#fff;}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.field textarea{min-height:64px;resize:vertical;line-height:1.5;}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--border);background:var(--surface);display:flex;justify-content:flex-end;gap:8px;}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:12px 18px;border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.2);font-size:13px;z-index:300;display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%);}
+.toast svg{width:16px;height:16px;color:#4ADE80;flex-shrink:0;}
+
+@media(max-width:1100px){ .kpi-row{grid-template-columns:repeat(2,1fr);} }
 </style>
 </head>
 <body>
@@ -188,116 +198,63 @@ a{color:inherit;text-decoration:none}
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-mark">
-        <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
-          <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
-          <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
-          <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
-          <circle cx="22" cy="92" r="4" fill="white"/>
-          <circle cx="58" cy="58" r="5" fill="white"/>
-          <circle cx="98" cy="38" r="5.5" fill="white"/>
-          <circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
-          <circle cx="138" cy="24" r="7" fill="#C8A04A"/>
-          <circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
-        </svg>
-      </div>
-    <div class="logo-text-wrap"><span class="logo-name">Atlas</span><span class="logo-sub">By GiveCentral</span></div>
+      <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
+        <circle cx="22" cy="92" r="4" fill="white"/>
+        <circle cx="58" cy="58" r="5" fill="white"/>
+        <circle cx="98" cy="38" r="5.5" fill="white"/>
+        <circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
+        <circle cx="138" cy="24" r="7" fill="#C8A04A"/>
+        <circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
+      </svg>
+    </div>
+    <div class="logo-text-wrap">
+      <span class="logo-name">Atlas</span>
+      <span class="logo-sub">By GiveCentral</span>
+    </div>
   </div>
-  <a href="atlas-search.html" style="display:block;text-decoration:none">
+
+  <a href="atlas-search.html" style="display:block">
     <div class="sidebar-search">
       <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
       <input type="text" placeholder="Search donors, gifts…" readonly>
     </div>
   </a>
+
   <div class="sidebar-scroll">
     <div class="nav-group">
       <div class="nav-label">Main</div>
-      <a class="nav-item" href="atlas-dashboard.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>
-        Dashboard
-      </a>
-      <a class="nav-item" href="atlas-donors-list.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>
-        Donors
-        <span class="nav-badge">3,847</span>
-      </a>
-      <a class="nav-item" href="atlas-gifts-pledges.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>
-        Gifts &amp; pledges
-        <span class="nav-badge">142</span>
-      </a>
-      <a class="nav-item" href="atlas-campaign-dashboard.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>
-        Campaigns
-      </a>
-      <a class="nav-item" href="atlas-reports.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>
-        Reports
-      </a>
+      <a class="nav-item" href="atlas-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>Dashboard</a>
+      <a class="nav-item" href="atlas-donors-list.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>Donors<span class="nav-badge">3,847</span></a>
+      <a class="nav-item" href="atlas-gifts-pledges.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>Gifts &amp; pledges<span class="nav-badge">142</span></a>
+      <a class="nav-item" href="atlas-campaign-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>Campaigns</a>
+      <a class="nav-item" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>Reports</a>
     </div>
-
     <div class="nav-group" style="margin-top:8px">
       <div class="nav-label">Fundraising</div>
-      <a class="nav-item" href="atlas-pipeline.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
-        Prospect pipeline
-        <span class="nav-badge">28</span>
-      </a>
-      <a class="nav-item" href="atlas-tasks.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>
-        Tasks &amp; reminders
-        <span class="nav-badge alert">7</span>
-      </a>
-      <a class="nav-item" href="atlas-communications.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>
-        Communications
-      </a>
-      <a class="nav-item" href="atlas-events-dashboard.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>
-        Events
-      </a>
-      <a class="nav-item" href="atlas-volunteer-management.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
-        Volunteers
-      </a>
+      <a class="nav-item" href="atlas-pipeline.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>Prospect pipeline<span class="nav-badge">28</span></a>
+      <a class="nav-item" href="atlas-tasks.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>Tasks &amp; reminders<span class="nav-badge alert">7</span></a>
+      <a class="nav-item" href="atlas-communications.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>Communications</a>
+      <a class="nav-item" href="atlas-events-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>Events</a>
+      <a class="nav-item" href="atlas-volunteer-management.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Volunteers</a>
     </div>
-
     <div class="nav-group" style="margin-top:8px">
       <div class="nav-label">Intelligence</div>
-      <a class="nav-item" href="atlas-guru-ai.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>
-        Guru AI
-      </a>
-      <a class="nav-item" href="atlas-reports.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>
-        Analytics
-      </a>
+      <a class="nav-item" href="atlas-guru-ai.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>Guru AI</a>
+      <a class="nav-item" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>Analytics</a>
     </div>
-
     <div class="nav-group" style="margin-top:8px">
       <div class="nav-label">Admin</div>
-      <a class="nav-item" href="atlas-users-roles.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
-        Users &amp; roles
-      </a>
-      <a class="nav-item active" href="atlas-tags.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/></svg>
-        Tags
-      </a>
-      <a class="nav-item" href="atlas-integrations.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>
-        Integrations
-      </a>
-      <a class="nav-item" href="atlas-sync.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>
-        Sync
-      </a>
-      <a class="nav-item" href="atlas-location-manage.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>
-        Location portal
-      </a>
+      <a class="nav-item" href="atlas-users-roles.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Users &amp; roles</a>
+      <a class="nav-item active" href="atlas-tags-segments.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/></svg>Tags &amp; segments</a>
+      <a class="nav-item" href="atlas-integrations.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>Integrations</a>
+      <a class="nav-item" href="atlas-sync.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>Sync</a>
     </div>
   </div>
+
   <div class="sidebar-user">
     <div class="user-avatar">SR</div>
     <div><div class="user-name">Sarah Reynolds</div><div class="user-role">Development Director</div></div>
@@ -305,213 +262,473 @@ a{color:inherit;text-decoration:none}
 </aside>
 
 <div class="main">
+  <div class="topbar">
+    <span class="topbar-title">Tags &amp; Segments</span>
+    <span class="topbar-date">Monday, May 4, 2026</span>
+    <a href="atlas-search.html" class="topbar-search">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+      <input type="text" placeholder="Search donors, gifts, campaigns…" readonly style="cursor:pointer">
+    </a>
+  </div>
 
-<div class="topbar">
-  <span class="topbar-title">Tags</span>
-  <span class="topbar-date">Monday, May 4, 2026</span>
-</div>
+  <div class="dash">
+    <div class="page-head">
+      <div class="crumb"><a href="atlas-dashboard.html">Atlas</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <span>Tags &amp; segments</span></div>
+      <div class="ph-row">
+        <h1 class="ph-title">Tags &amp; Segments</h1>
+        <span class="ph-count" id="ph-count"></span>
+        <div class="ph-actions">
+          <button class="btn btn-blue" id="add-btn" onclick="openModal()">
+            <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
+            <span id="add-btn-label">New staff label tag</span>
+          </button>
+        </div>
+      </div>
+      <p class="ph-desc">Tags are labels applied to donor records. <strong>Atlas Intelligence</strong> tags are auto-generated by the system and <strong>Super-admin</strong> tags are governance-controlled — both are fixed and can't be added or edited here. <strong>Staff labels</strong> are the ones your team creates, edits, and archives. Segments are saved filters that resolve against live donor data on demand.</p>
+    </div>
 
-<div class="page-head">
-  <div class="ph-row">
-    <h1 class="ph-title">Tags</h1>
-    <span class="ph-count" id="tags-count">12 tags · used on 2,847 donor records</span>
-    <div class="ph-actions">
-      <button class="btn btn-blue" onclick="openTagModal()">
-        <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
-        New tag
-      </button>
+    <div class="kpi-row" id="kpi-row"></div>
+
+    <div class="tabs" id="ts-tabs">
+      <div class="tab on" data-tab="tags">Tags <span class="ct" id="tab-ct-tags">0</span></div>
+      <div class="tab" data-tab="segments">Segments <span class="ct" id="tab-ct-segs">0</span></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="tb-search">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+        <input type="search" id="ts-search" placeholder="Search all tags &amp; segments…">
+      </div>
+    </div>
+
+    <div class="ts-layout">
+      <aside class="ts-rail" id="ts-rail"></aside>
+      <div class="ts-pane" id="ts-body"></div>
     </div>
   </div>
-  <p class="ph-desc">Tags are flexible labels you can apply to donors for segmentation, recognition, or workflow routing. Use them to mark major prospects, board members, volunteer status, capital campaign participants, or any custom criterion your diocese cares about.</p>
 </div>
 
-<div class="kpi-row">
-  <div class="kpi"><div class="lbl">Total tags</div><div class="val">12</div><div class="meta">8 owner-managed · 4 system</div></div>
-  <div class="kpi"><div class="lbl">Tagged donors</div><div class="val">2,847</div><div class="meta">74% of constituents have ≥1 tag</div></div>
-  <div class="kpi"><div class="lbl">Most-used tag</div><div class="val green">Lapsed</div><div class="meta">412 donors · auto-applied</div></div>
-  <div class="kpi"><div class="lbl">Created this month</div><div class="val">2</div><div class="meta">Easter prospects · Capital 2026</div></div>
-</div>
-
-<div class="tags-wrap">
-  <div class="tags-search-row">
-    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
-    <input id="tag-filter" placeholder="Search tags by name or description…" oninput="renderTags()">
-    <select id="tag-sort" onchange="renderTags()">
-      <option value="usage">Sort: Most used</option>
-      <option value="name">Sort: Name (A-Z)</option>
-      <option value="created">Sort: Recently created</option>
-    </select>
-  </div>
-
-  <div class="tags-grid" id="tags-grid"></div>
-</div>
-
-</div><!-- /.main -->
-
-<!-- New tag modal -->
-<div class="modal-overlay" id="tag-modal" onclick="if(event.target===this) closeTagModal()">
+<!-- Add modal -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-head">
       <div class="modal-title" id="modal-title">Create new tag</div>
-      <button class="modal-close" onclick="closeTagModal()">×</button>
+      <button class="modal-close" onclick="closeModal()">×</button>
     </div>
     <div class="modal-body">
       <div class="field">
-        <label>Tag name <span style="color:var(--rose)">*</span></label>
-        <input id="t-name" placeholder="e.g. Easter 2026 prospects" maxlength="40">
+        <label>Name <span class="req">*</span></label>
+        <input id="m-name" placeholder="e.g. Easter 2026 prospects" maxlength="48">
       </div>
       <div class="field">
         <label>Description</label>
-        <textarea id="t-desc" placeholder="Optional — explain what this tag means and when to apply it" rows="2"></textarea>
+        <textarea id="m-desc" placeholder="Explain what this means and when it applies"></textarea>
       </div>
       <div class="field">
-        <label>Color</label>
-        <div class="color-row" id="color-picker">
-          <div class="color-opt on" data-color="blue"   style="background:var(--blue)"></div>
-          <div class="color-opt"    data-color="green"  style="background:var(--green)"></div>
-          <div class="color-opt"    data-color="amber"  style="background:var(--amber)"></div>
-          <div class="color-opt"    data-color="rose"   style="background:var(--rose)"></div>
-          <div class="color-opt"    data-color="purple" style="background:var(--purple)"></div>
-          <div class="color-opt"    data-color="teal"   style="background:var(--teal)"></div>
-          <div class="color-opt"    data-color="gold"   style="background:var(--gold)"></div>
-        </div>
+        <label>Category</label>
+        <input id="m-cat" list="m-cat-options" placeholder="Pick an existing category or type a new one…" autocomplete="off">
+        <datalist id="m-cat-options"></datalist>
+      </div>
+      <div class="field" id="m-sees-wrap">
+        <label>Who can see</label>
+        <select id="m-sees">
+          <option>All staff</option>
+          <option>Admin + DBA</option>
+          <option>Admin + Development Director</option>
+          <option>Admin only</option>
+        </select>
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeTagModal()">Cancel</button>
-      <button class="btn btn-blue" onclick="saveTag()">Save tag</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-blue" id="m-save" onclick="saveItem()">Save tag</button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
-<div class="toast" id="toast"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 7l3 3 7-7"/></svg><span id="toast-msg"></span></div>
+<div class="toast" id="toast"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7l3 3 7-7"/></svg><span id="toast-msg"></span></div>
 
 <script>
-/* ─── Tag data ─── */
-const COLOR_MAP = {
-  blue:   { bg:'var(--blue)',   light:'var(--blue-pale)' },
-  green:  { bg:'var(--green)',  light:'var(--green-light)' },
-  amber:  { bg:'var(--amber)',  light:'var(--amber-light)' },
-  rose:   { bg:'var(--rose)',   light:'var(--rose-light)' },
-  purple: { bg:'var(--purple)', light:'var(--purple-light)' },
-  teal:   { bg:'var(--teal)',   light:'var(--teal-light)' },
-  gold:   { bg:'var(--gold)',   light:'var(--gold-light)' }
-};
-
-const TAGS = [
-  { id:'T1',  name:'Major donor',           color:'gold',   desc:'Donors with lifetime giving above $25,000 or capacity above $50,000.', count:142, owner:'Sarah Reynolds', ownerAv:'SR', created:'2024-01-15', system:false },
-  { id:'T2',  name:'Recurring giver',       color:'blue',   desc:'Active monthly, quarterly, or annual recurring donors.',             count:412, owner:'(system)',       ownerAv:'AT', created:'2023-06-01', system:true },
-  { id:'T3',  name:'Board member',          color:'purple', desc:'Current diocesan board or council members. Excluded from solicitations.', count:24,  owner:'Fr. Patrick',    ownerAv:'FP', created:'2023-06-01', system:false },
-  { id:'T4',  name:'Parish council',        color:'purple', desc:'Active parish council members across all sites in the diocese.',     count:31,  owner:'Fr. Patrick',    ownerAv:'FP', created:'2023-06-01', system:false },
-  { id:'T5',  name:'Volunteer',             color:'teal',   desc:'Active volunteers tracked in the volunteer module — auto-synced.',   count:63,  owner:'(system)',       ownerAv:'AT', created:'2023-06-01', system:true },
-  { id:'T6',  name:'Capital campaign 2026', color:'gold',   desc:'Donors who pledged or gave to the cathedral capital campaign.',      count:156, owner:'Sarah Reynolds', ownerAv:'SR', created:'2026-01-08', system:false },
-  { id:'T7',  name:'Lapsed',                color:'rose',   desc:'No gift in 24+ months. Auto-applied based on giving history.',       count:412, owner:'(system)',       ownerAv:'AT', created:'2023-06-01', system:true },
-  { id:'T8',  name:'At-risk',               color:'rose',   desc:'Recurring donor whose card has expired or last 2 attempts failed.',  count:38,  owner:'(system)',       ownerAv:'AT', created:'2024-03-12', system:true },
-  { id:'T9',  name:'Faith leader',          color:'purple', desc:'Clergy, religious, or pastoral staff. Influences network and giving.', count:19,  owner:'Fr. Patrick',    ownerAv:'FP', created:'2023-11-20', system:false },
-  { id:'T10', name:'Q2 2026 outreach',      color:'blue',   desc:'Active list for the spring solicitation series.',                    count:87,  owner:'Sarah Reynolds', ownerAv:'SR', created:'2026-04-01', system:false },
-  { id:'T11', name:'Easter 2026 prospects', color:'amber',  desc:'Easter-only donors from prior years targeted for spring follow-up.', count:64,  owner:'Bridget McCarthy', ownerAv:'BM', created:'2026-04-22', system:false },
-  { id:'T12', name:'DAF intermediary',      color:'teal',   desc:'Donor-advised fund accounts — soft-credit the recommending donor.',  count:8,   owner:'Sarah Reynolds', ownerAv:'SR', created:'2025-09-10', system:false }
+const DATA = [
+  {type:"Auto-generated tag",category:"Giving behaviour",name:"Recurring",desc:"Donor has an active recurring online subscription via GiveCentral",effect:"None — label only",applies:"System (event-triggered)",sees:"All staff",phase:"P1"},
+  {type:"Auto-generated tag",category:"Giving behaviour",name:"Major donor",desc:"Lifetime giving has crossed the diocese major-gift threshold (proposed default: $25,000)",effect:"None — label only",applies:"System (nightly job)",sees:"All staff",phase:"P1"},
+  {type:"Auto-generated tag",category:"Giving behaviour",name:"Open pledge",desc:"Donor has at least one active pledge on record",effect:"None — label only",applies:"System (event-triggered)",sees:"All staff",phase:"P1"},
+  {type:"Auto-generated tag",category:"Giving behaviour",name:"Pledge at risk",desc:"An active pledge installment is more than 14 days overdue",effect:"Triggers task for gift officer",applies:"System (nightly job)",sees:"All staff",phase:"P1"},
+  {type:"Auto-generated tag",category:"Giving behaviour",name:"New this year",desc:"First-ever gift was made in the current calendar year",effect:"None — label only",applies:"System (nightly job)",sees:"All staff",phase:"P1"},
+  {type:"Auto-generated tag",category:"Giving behaviour",name:"Lapsed donor",desc:"No gift in the last 18 months and no active pledge",effect:"Triggers re-engagement task for gift officer",applies:"System (nightly job)",sees:"All staff",phase:"P1"},
+  {type:"Auto-generated tag",category:"Giving behaviour",name:"Lapsed recurring",desc:"Had a recurring subscription that stopped within the last 90 days",effect:"Triggers gift officer outreach task",applies:"System (event-triggered)",sees:"All staff",phase:"P1"},
+  {type:"Auto-generated tag",category:"Giving behaviour",name:"LYBUNT",desc:"Gave last year but has not yet given this calendar year",effect:"None — label only",applies:"System (nightly job)",sees:"All staff",phase:"P2"},
+  {type:"Auto-generated tag",category:"Giving behaviour",name:"Soft credit only",desc:"Has soft-credit records but no direct hard-credit gifts (e.g. DAF donor)",effect:"None — label only",applies:"System (nightly job)",sees:"All staff",phase:"P1"},
+  {type:"Auto-generated tag",category:"Contact & deliverability",name:"Email bounced",desc:"Primary email address is no longer deliverable (bounce or complaint received)",effect:"Blocks outbound email; creates DBA task",applies:"System (email webhook)",sees:"All staff",phase:"P1"},
+  {type:"Auto-generated tag",category:"Contact & deliverability",name:"Receipt failed",desc:"A tax receipt failed to send and has not been resolved",effect:"Creates DBA task to resend",applies:"System (email webhook)",sees:"All staff",phase:"P1"},
+  {type:"Auto-generated tag",category:"Contact & deliverability",name:"No email on file",desc:"No active, deliverable primary email address exists on the record",effect:"Creates DBA task to collect email",applies:"System (nightly job)",sees:"All staff",phase:"P1"},
+  {type:"Auto-generated tag",category:"Contact & deliverability",name:"Pending review",desc:"Record was created by a data import with low match confidence; needs staff verification",effect:"Flags record for DBA queue",applies:"System (import/sync)",sees:"Admin + DBA",phase:"P1"},
+  {type:"Auto-generated tag",category:"Contact & deliverability",name:"Deceased",desc:"A date of death has been recorded on this constituent",effect:"Suppresses all outbound communications automatically",applies:"System (manual entry)",sees:"All staff",phase:"P1"},
+  {type:"Auto-generated tag",category:"Derived from codes",name:"Faith leader",desc:"Constituent has the Clergy, Religious, or Deacon constituent code applied",effect:"None — label only",applies:"System (derived from code)",sees:"All staff",phase:"P1"},
+  {type:"Auto-generated tag",category:"Derived from codes",name:"Board member",desc:"Constituent has the BoardMember or AdvisoryCouncilMember constituent code applied",effect:"None — label only",applies:"System (derived from code)",sees:"All staff",phase:"P1"},
+  {type:"Auto-generated tag",category:"Derived from codes",name:"Parish staff",desc:"Constituent has the ParishStaff or DioceseStaff constituent code applied",effect:"None — label only",applies:"System (derived from code)",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Ministry",name:"Music ministry",desc:"Donor is involved in or interested in supporting music ministry",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Ministry",name:"Cathedral restoration",desc:"Donor has expressed interest in the cathedral restoration project",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Ministry",name:"Catholic schools",desc:"Donor is interested in Catholic school funding or education campaigns",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Ministry",name:"Youth programs",desc:"Donor is interested in or connected to diocesan youth ministry",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Ministry",name:"Clergy formation",desc:"Donor supports clergy formation and seminary programs",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Ministry",name:"Outreach / social services",desc:"Donor is interested in Catholic Charities or social outreach work",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Ministry",name:"Marriage & family ministry",desc:"Donor supports marriage preparation or family ministry programs",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Ministry",name:"Pro-life ministry",desc:"Donor supports pro-life ministry and related programs",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Ministry",name:"Environmental stewardship",desc:"Donor is engaged with Laudato Si' or environmental programs",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Ministry",name:"Prison ministry",desc:"Donor supports prison and re-entry ministry",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Ministry",name:"Evangelization / RCIA",desc:"Donor supports evangelization or RCIA programs",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Ministry",name:"Retreat ministry",desc:"Donor participates in or supports diocesan retreats",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Campaign",name:"Capital campaign",desc:"Donor has been identified as a capital campaign prospect or donor",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Campaign",name:"Annual Appeal champion",desc:"Donor acts as a champion or peer solicitor for the Annual Appeal",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Campaign",name:"CMA 2026 prospect",desc:"Identified as a prospect for the 2026 Catholic Ministries Appeal",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Campaign",name:"Online giving activated",desc:"Donor has set up an online giving account through GiveCentral",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Campaign",name:"Scholarship interest",desc:"Donor is interested in scholarship fund giving",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Interest · Campaign",name:"Endowment interest",desc:"Donor has expressed interest in an endowment or named fund",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Prospect management",name:"Hot prospect",desc:"Gift officer has identified this donor as a near-term major gift prospect",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Prospect management",name:"Active cultivation",desc:"Donor is currently in active cultivation by a gift officer",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Prospect management",name:"Soft ask made",desc:"A soft ask for a major gift has been made",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Prospect management",name:"Hard ask made",desc:"A formal major gift ask has been made",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Prospect management",name:"Declined ask",desc:"Donor declined the most recent major gift ask",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Prospect management",name:"Do not ask this year",desc:"Staff note: do not solicit this donor for the current fiscal year",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Prospect management",name:"Proposal delivered",desc:"A written gift proposal has been delivered to this donor",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Prospect management",name:"Proposal stage",desc:"Donor is in the proposal preparation stage with the gift officer",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Prospect management",name:"Site visit completed",desc:"A site visit has been completed with this donor",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Prospect management",name:"Major gift closed",desc:"A major gift from this donor has been closed and posted",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Relationship signals",name:"Foundation connection",desc:"Donor has a relationship with a private family or corporate foundation",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Relationship signals",name:"Corporate sponsor",desc:"Donor is a corporate sponsor or represents a corporate giving relationship",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Relationship signals",name:"Estate attorney contact",desc:"Gift officer is in contact with the donor's estate attorney",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Relationship signals",name:"Matching gift conversation",desc:"A conversation about employer matching gifts has been initiated",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Relationship signals",name:"Named endowment interest",desc:"Donor has expressed interest in establishing a named endowment",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Relationship signals",name:"Peer solicitor",desc:"Donor is willing to solicit peers on behalf of the diocese",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Relationship signals",name:"Planned giving conversation",desc:"A planned giving or estate conversation has taken place",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Relationship signals",name:"Legacy society member",desc:"Donor is a member of the diocesan legacy or planned giving society",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Communication preferences",name:"Prefers phone",desc:"Donor prefers to be contacted by phone rather than email or mail",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Communication preferences",name:"Prefers letter",desc:"Donor prefers formal written correspondence",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Communication preferences",name:"Receipt by mail only",desc:"Donor wants their tax receipt sent by postal mail, not email",effect:"DBA receives a task to print and mail receipt",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Communication preferences",name:"Bilingual outreach",desc:"Donor prefers communications in a second language (Spanish or other)",effect:"Routes to bilingual template when available",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Communication preferences",name:"Do not include in honor roll",desc:"Donor has asked not to be included in public honor rolls or publications",effect:"Suppressed from honor roll exports",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Communication preferences",name:"Anonymous recognition preferred",desc:"Donor prefers to be acknowledged anonymously in informal contexts",effect:"None — context label (Admin applies formal version)",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Events & engagement",name:"Annual Gala 2026",desc:"Donor attended or is invited to the 2026 Annual Gala",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Events & engagement",name:"Bishop's Dinner 2026",desc:"Donor attended or is invited to the 2026 Bishop's Dinner",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Events & engagement",name:"Capital campaign tour",desc:"Donor participated in a capital campaign facility tour",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Events & engagement",name:"Leadership breakfast",desc:"Donor attended a leadership breakfast or cultivation event",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Events & engagement",name:"Gala attendee",desc:"Donor has attended a prior diocesan gala event",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Events & engagement",name:"Retreat participant",desc:"Donor has participated in a diocesan retreat",effect:"None — context label",applies:"Any staff with write access",sees:"All staff",phase:"P1"},
+  {type:"Staff label",category:"Data quality",name:"Duplicate suspected",desc:"Staff suspects this may be a duplicate record; needs investigation",effect:"None — context label",applies:"Any staff with write access",sees:"Admin + DBA",phase:"P1"},
+  {type:"Staff label",category:"Data quality",name:"Address needs verification",desc:"Mailing address may be outdated or incorrect",effect:"None — context label",applies:"Any staff with write access",sees:"Admin + DBA",phase:"P1"},
+  {type:"Staff label",category:"Data quality",name:"Import — needs staff review",desc:"Record requires manual review following data import",effect:"None — context label",applies:"Any staff with write access",sees:"Admin + DBA",phase:"P1"},
+  {type:"Staff label",category:"Data quality",name:"Relationship needs review",desc:"Household or organizational relationships need to be verified",effect:"None — context label",applies:"Any staff with write access",sees:"Admin + DBA",phase:"P1"},
+  {type:"Super admin tag",category:"Privacy & anonymity",name:"Anonymous giver",desc:"Donor has requested completely anonymous recognition",effect:"Name replaced with 'Anonymous' in ALL public outputs: honor rolls, annual reports, publications, CSV exports",applies:"Administrator only",sees:"All staff (shown as a pill)",phase:"P1"},
+  {type:"Super admin tag",category:"Privacy & anonymity",name:"Do not publish name",desc:"Name should not appear in print publications only (receipts and personal correspondence unaffected)",effect:"Name suppressed in print publications only",applies:"Administrator only",sees:"All staff",phase:"P1"},
+  {type:"Super admin tag",category:"Privacy & anonymity",name:"Media consent: granted",desc:"Donor has signed a media consent form for photography and video use",effect:"Enables use of donor image/name in diocesan media",applies:"Administrator only",sees:"All staff",phase:"P1"},
+  {type:"Super admin tag",category:"Privacy & anonymity",name:"Media consent: denied",desc:"Donor has explicitly refused consent for photography or media use",effect:"Warning fires on any media export containing this donor",applies:"Administrator only",sees:"All staff",phase:"P1"},
+  {type:"Super admin tag",category:"Privacy & anonymity",name:"Restricted access",desc:"Record is sensitive — should not be visible to gift officers or read-only users",effect:"Record hidden from Gift Officers and Read-only; placeholder shown: 'This record is restricted'",applies:"Administrator only",sees:"Admin + Database Admin only",phase:"P1"},
+  {type:"Super admin tag",category:"Privacy & anonymity",name:"Data sharing restriction",desc:"Donor has invoked a data restriction request",effect:"Excluded from all bulk CSV exports",applies:"Administrator only",sees:"Admin + Database Admin",phase:"P1"},
+  {type:"Super admin tag",category:"Legal & compliance",name:"Legal hold",desc:"Record is under legal review (estate dispute, litigation, or audit)",effect:"ALL writes blocked at the database level — edits, merges, and deletes are rejected with an error message",applies:"Administrator only",sees:"All staff (red warning banner on record)",phase:"P1"},
+  {type:"Super admin tag",category:"Legal & compliance",name:"Compliance review",desc:"Record is flagged for internal compliance review",effect:"Amber warning banner on record; appears in compliance report",applies:"Administrator only",sees:"Admin + Database Admin",phase:"P1"},
+  {type:"Super admin tag",category:"Legal & compliance",name:"Audit flagged",desc:"Record is included in an active internal audit",effect:"Included in audit report; prevents record archiving or deletion",applies:"Administrator only",sees:"Admin + Development Director",phase:"P1"},
+  {type:"Super admin tag",category:"Legal & compliance",name:"Conflict of interest",desc:"Donor has a known conflict of interest with a board or staff member",effect:"Any gift from this donor requires secondary Admin approval before posting",applies:"Administrator only",sees:"Admin + Development Director",phase:"P1"},
+  {type:"Super admin tag",category:"Data governance",name:"Data verified",desc:"Administrator has manually reviewed and confirmed this record is accurate",effect:"Clears the 'Pending review' system tag",applies:"Administrator only",sees:"All staff",phase:"P1"},
+  {type:"Super admin tag",category:"Data governance",name:"Test constituent",desc:"Record is a test or training record and should be excluded from all real data",effect:"Excluded from ALL reports, counts, exports, and duplicate detection",applies:"Administrator only",sees:"Admin only (amber border on record)",phase:"P1"},
+  {type:"Super admin tag",category:"Data governance",name:"Duplicate: admin review",desc:"Duplicate investigation has been escalated beyond the Database Admin to the Administrator",effect:"Prevents further edits until Admin resolves (merge or confirm-not-duplicate)",applies:"Administrator only",sees:"Admin + Database Admin",phase:"P1"},
+  {type:"Super admin tag",category:"Data governance",name:"Migration: verified",desc:"Record was imported from a prior system and has been manually confirmed as accurate post-migration",effect:"Quality tracking only — confirms clean migration",applies:"Administrator + Database Admin",sees:"Admin + Database Admin",phase:"P1"},
+  {type:"Super admin tag",category:"Data governance",name:"Address: verified",desc:"Physical address has been manually verified as current and correct",effect:"Quality confirmation — no automatic effect",applies:"Administrator + Database Admin",sees:"Admin + Database Admin",phase:"P1"},
+  {type:"Super admin tag",category:"Relationship governance",name:"VIP",desc:"Donor has an institutional-level relationship with the diocese (bishop's contact, major community figure)",effect:"Any gift over $5,000 triggers immediate notification to Dev Director + Admin; stewardship requires sign-off",applies:"Administrator only",sees:"All staff (gold pill)",phase:"P1"},
+  {type:"Super admin tag",category:"Relationship governance",name:"Bishop's relationship",desc:"Donor has a direct personal relationship with the current bishop",effect:"All stewardship routed to bishop's office; standard gift officer not assigned",applies:"Administrator only",sees:"Admin + Development Director",phase:"P1"},
+  {type:"Super admin tag",category:"Relationship governance",name:"Foundation board",desc:"Donor currently serves on the diocesan foundation board",effect:"Governance flag — cannot be solicited for Foundation funds during board term",applies:"Administrator only",sees:"Admin + Development Director",phase:"P1"},
+  {type:"Super admin tag",category:"Relationship governance",name:"Naming opportunity",desc:"Donor is a prospect or confirmed donor for a naming gift ($500,000+)",effect:"Record visible to Admin + Dev Director only; excluded from standard portfolios",applies:"Administrator only",sees:"Admin + Development Director only",phase:"P1"},
+  {type:"Super admin tag",category:"Relationship governance",name:"Campaign chairperson",desc:"Donor is serving as a chairperson for an active fundraising campaign",effect:"Excluded from standard donor reporting; stewardship is campaign-specific",applies:"Administrator only",sees:"All staff",phase:"P1"},
+  {type:"Super admin tag",category:"Communications & gift",name:"Paper mail only",desc:"All communications must go by physical post — no email of any kind",effect:"Blocks ALL outbound email including receipts, pledge reminders, and newsletters; creates a DBA task to print and mail",applies:"Administrator only",sees:"Receipt module + all staff",phase:"P1"},
+  {type:"Super admin tag",category:"Communications & gift",name:"No bulk communications",desc:"Donor may only receive personalised direct communications, not mass appeals or automated sequences",effect:"Excluded from all bulk email campaigns and automated messaging",applies:"Administrator only",sees:"Email module + all staff",phase:"P1"},
+  {type:"Super admin tag",category:"Communications & gift",name:"Anonymous giving preference",desc:"All gifts from this donor should be posted anonymously — this is a standing preference, not a one-off request",effect:"DBA sees a reminder on every gift entry for this donor; all giving reports and honor rolls show 'Anonymous'",applies:"Administrator only",sees:"DBA (reminder shown on gift entry)",phase:"P1"},
+  {type:"Super admin tag",category:"Communications & gift",name:"Bequest: documented",desc:"Estate or bequest intention has been formally documented with the planned giving office",effect:"Added to planned giving pipeline report; stores documentation date, attorney contact, and estimated value",applies:"Administrator + Development Director",sees:"Admin + Development Director only",phase:"P1"},
+  {type:"Segment",category:"Giving behaviour",name:"LYBUNT",desc:"Donors who gave last year but have not yet given in the current calendar year",effect:"Saved filter — runs on demand against live data",applies:"System (pre-built)",sees:"All staff",phase:"P2"},
+  {type:"Segment",category:"Giving behaviour",name:"SYBUNT",desc:"Donors who gave in some prior year but have not given at all in the current year",effect:"Saved filter — runs on demand against live data",applies:"System (pre-built)",sees:"All staff",phase:"P2"},
+  {type:"Segment",category:"Giving behaviour",name:"Active recurring givers",desc:"All donors with an active GiveCentral recurring subscription",effect:"Saved filter — runs on demand against live data",applies:"System (pre-built)",sees:"All staff",phase:"P1"},
+  {type:"Segment",category:"Giving behaviour",name:"New donors this year",desc:"All donors whose first-ever gift was this calendar year",effect:"Saved filter — runs on demand against live data",applies:"System (pre-built)",sees:"All staff",phase:"P1"},
+  {type:"Segment",category:"Giving behaviour",name:"Lapsed donors (18+ months)",desc:"Donors whose last gift was more than 18 months ago with no active pledge",effect:"Saved filter — runs on demand against live data",applies:"System (pre-built)",sees:"All staff",phase:"P1"},
+  {type:"Segment",category:"Giving behaviour",name:"Lapsed recurring",desc:"Donors whose recurring subscription stopped in the last 90 days",effect:"Saved filter — runs on demand against live data",applies:"System (pre-built)",sees:"All staff",phase:"P1"},
+  {type:"Segment",category:"Pledge",name:"Open pledge holders",desc:"All donors with at least one active pledge",effect:"Saved filter — runs on demand against live data",applies:"System (pre-built)",sees:"All staff",phase:"P1"},
+  {type:"Segment",category:"Pledge",name:"At-risk pledges",desc:"Donors with a pledge where an installment is 14+ days overdue",effect:"Saved filter — runs on demand against live data",applies:"System (pre-built)",sees:"All staff",phase:"P1"},
+  {type:"Segment",category:"Wealth Engine",name:"High capacity — unasked",desc:"Donors with a Wealth Engine ask range ≥ $5,000 who have not given in the current year",effect:"Saved filter — runs on demand against live data",applies:"Diocese-saved",sees:"Dev Director + Admin",phase:"P1"},
+  {type:"Segment",category:"Wealth Engine",name:"Major prospects — $25k+",desc:"Donors with lifetime giving or ask range ≥ $25,000 and confidence ≥ Medium",effect:"Saved filter — runs on demand against live data",applies:"Diocese-saved",sees:"Dev Director + Admin",phase:"P1"},
+  {type:"Segment",category:"Contact",name:"No email on file",desc:"All donors with no deliverable primary email address",effect:"Saved filter — runs on demand against live data",applies:"System (pre-built)",sees:"Admin + DBA",phase:"P1"},
+  {type:"Segment",category:"Contact",name:"Pending review",desc:"All donors awaiting Database Admin verification following an import or sync",effect:"Saved filter — runs on demand against live data",applies:"System (pre-built)",sees:"Admin + DBA",phase:"P1"}
 ];
 
-/* ─── Render ─── */
-function renderTags(){
-  const filter = (document.getElementById('tag-filter').value || '').toLowerCase().trim();
-  const sort = document.getElementById('tag-sort').value;
-  let rows = TAGS.slice();
-  if (filter) rows = rows.filter(t => (t.name + ' ' + t.desc).toLowerCase().includes(filter));
-  if (sort === 'usage') rows.sort((a,b) => b.count - a.count);
-  else if (sort === 'name') rows.sort((a,b) => a.name.localeCompare(b.name));
-  else if (sort === 'created') rows.sort((a,b) => b.created.localeCompare(a.created));
+const TYPE_META = {
+  'Auto-generated tag': { label:'Atlas Intelligence', acc:'blue', sub:'Auto-generated · system rule-driven · fixed', fixed:true },
+  'Staff label':        { label:'Staff labels',        acc:'teal', sub:'Applied by staff · editable & archivable', fixed:false },
+  'Super admin tag':    { label:'Super-admin',          acc:'rose', sub:'Administrator-controlled · governance · fixed', fixed:true }
+};
+const TYPE_ORDER = ['Auto-generated tag','Staff label','Super admin tag'];
 
-  const grid = document.getElementById('tags-grid');
-  if (rows.length === 0) {
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--text-3);background:white;border:1px dashed var(--border);border-radius:11px;font-style:italic">No tags match your search</div>';
+// give every item a stable id + archived flag (only staff labels are ever archived)
+DATA.forEach(function(d,i){ d._id = 't'+i; if (d.archived===undefined) d.archived = false; });
+let nextId = DATA.length;
+let showArchived = false;
+let editingId = null;
+
+let tab = 'tags';
+
+function icoLock(){ return '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2.5" y="5.5" width="7" height="5" rx="1"/><path d="M4 5.5V4a2 2 0 014 0v1.5"/></svg>'; }
+
+function isNoEffect(e){ return /^none/i.test((e||'').trim()); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function icoUser(){ return '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4" r="2.2"/><path d="M2 11c0-2.2 1.8-3.5 4-3.5s4 1.3 4 3.5"/></svg>'; }
+function icoEye(){ return '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1 6s2-3.5 5-3.5S11 6 11 6 9 9.5 6 9.5 1 6 1 6z"/><circle cx="6" cy="6" r="1.4"/></svg>'; }
+function icoWarn(){ return '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1.5L11 10.5H1L6 1.5zM6 5v2.5M6 9v.3"/></svg>'; }
+
+function tagCard(it){
+  const meta = TYPE_META[it.type] || {};
+  const acc = meta.acc || 'blue';
+  let effectChip;
+  if (isNoEffect(it.effect)) {
+    effectChip = '<span class="ts-chip effect label">Label only</span>';
+  } else {
+    effectChip = '<span class="ts-chip effect" title="'+esc(it.effect)+'">'+icoWarn()+esc(it.effect)+'</span>';
+  }
+  // Top-right marker: fixed (Atlas Intelligence / Super-admin) or archived (staff)
+  let topRight = meta.fixed
+    ? '<span class="ts-fixed" title="System-managed · cannot be added or edited">'+icoLock()+'Fixed</span>'
+    : (it.archived ? '<span class="ts-arch">Archived</span>' : '');
+  // Only staff labels get edit / archive actions
+  let actions = '';
+  if (it.type === 'Staff label') {
+    actions = '<div class="ts-actions">'
+      + (it.archived
+          ? '<button class="ts-act" data-act="restore" data-id="'+it._id+'">Restore</button>'
+          : '<button class="ts-act" data-act="edit" data-id="'+it._id+'">Edit</button>'
+            + '<button class="ts-act danger" data-act="archive" data-id="'+it._id+'">Archive</button>')
+      + '</div>';
+  }
+  return '<div class="ts-card acc-'+acc+(it.archived?' is-archived':'')+'">'
+    + '<div class="ts-card-top"><span class="ts-name">'+esc(it.name)+'</span>'+topRight+'</div>'
+    + '<div class="ts-cat">'+esc(it.category)+'</div>'
+    + '<div class="ts-desc">'+esc(it.desc)+'</div>'
+    + '<div class="ts-meta">'+effectChip
+      + '<span class="ts-chip">'+icoUser()+esc(it.applies)+'</span>'
+      + '<span class="ts-chip">'+icoEye()+esc(it.sees)+'</span>'
+    + '</div>'+actions+'</div>';
+}
+
+function segCard(it){
+  return '<div class="ts-card acc-purple">'
+    + '<div class="ts-card-top"><span class="ts-name">'+esc(it.name)+'</span></div>'
+    + '<div class="ts-cat">'+esc(it.category)+'</div>'
+    + '<div class="ts-desc">'+esc(it.desc)+'</div>'
+    + '<div class="ts-meta">'
+      + '<span class="ts-chip">'+icoUser()+esc(it.applies)+'</span>'
+      + '<span class="ts-chip">'+icoEye()+esc(it.sees)+'</span>'
+    + '</div>'
+    + '<div class="ts-seg-foot"><span class="src">Saved filter · live data</span>'
+      + '<a class="ts-use" href="atlas-donors-list.html">Use segment '
+      + '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 6h6M6.5 3.5L9 6 6.5 8.5"/></svg></a>'
+    + '</div></div>';
+}
+
+function activeData(){ return DATA.filter(d => tab==='segments' ? d.type==='Segment' : d.type!=='Segment'); }
+
+let selKey = null;  // selected rail item: "type¦category"
+
+// Build the rail model: type groups (tags) / single group (segments), each with categories + counts
+function railModel(){
+  const data = activeData();
+  const out = [];
+  if (tab==='tags'){
+    TYPE_ORDER.forEach(function(type){
+      const cats=[];
+      data.filter(d=>d.type===type).forEach(function(d){
+        let c=cats.find(x=>x.category===d.category);
+        if(!c){ c={category:d.category,total:0,active:0}; cats.push(c); }
+        c.total++; if(!d.archived) c.active++;
+      });
+      if(cats.length) out.push({type:type, meta:TYPE_META[type], cats:cats});
+    });
+  } else {
+    const cats=[];
+    data.forEach(function(d){ let c=cats.find(x=>x.category===d.category); if(!c){c={category:d.category,total:0,active:0};cats.push(c);} c.total++; c.active++; });
+    out.push({type:'Segment', meta:{label:'Segments',acc:'purple',fixed:false}, cats:cats});
+  }
+  return out;
+}
+
+// renderRail (kept name refreshFilters so existing call sites still fire it)
+function refreshFilters(){
+  const model = railModel();
+  const keys = [];
+  model.forEach(s=>s.cats.forEach(c=>keys.push(s.type+'¦'+c.category)));
+  if(!selKey || keys.indexOf(selKey)===-1){
+    let def=null;
+    if(tab==='tags'){ const staff=model.find(s=>s.type==='Staff label'); if(staff&&staff.cats.length) def='Staff label¦'+staff.cats[0].category; }
+    selKey = def || keys[0] || null;
+  }
+  let html='';
+  model.forEach(function(s){
+    html += '<div class="ts-rail-sec"><span class="dot" style="background:var(--'+s.meta.acc+')"></span>'+s.meta.label
+      + (s.meta.fixed ? '<span class="lk" title="Fixed · system-managed">'+icoLock()+'</span>' : '') + '</div>';
+    s.cats.forEach(function(c){
+      const key=s.type+'¦'+c.category;
+      const cnt=(s.type==='Staff label')?c.active:c.total;
+      html += '<div class="ts-rail-item'+(key===selKey?' on':'')+'" data-key="'+esc(key)+'"><span class="nm">'+esc(c.category)+'</span><span class="ct">'+cnt+'</span></div>';
+    });
+  });
+  document.getElementById('ts-rail').innerHTML = html;
+}
+
+// renderPane (kept name render)
+function render(){
+  const q=(document.getElementById('ts-search').value||'').trim().toLowerCase();
+  const body=document.getElementById('ts-body');
+  const isSeg=(tab==='segments');
+
+  if(q){  // search mode — results across all categories, rail selection ignored
+    let data=activeData().filter(d=>(d.name+' '+d.desc+' '+d.category).toLowerCase().indexOf(q)!==-1 && (isSeg||showArchived||!d.archived));
+    if(!data.length){ body.innerHTML='<div class="ts-empty">No '+(isSeg?'segments':'tags')+' match “'+esc(q)+'”.</div>'; return; }
+    const cats=[]; data.forEach(d=>{ if(cats.indexOf(d.category)===-1)cats.push(d.category); });
+    let html='<div class="ts-pane-head"><span class="ts-pane-title">Search results</span><span class="ts-pane-meta">'+data.length+' match'+(data.length===1?'':'es')+' for “'+esc(q)+'”</span></div>';
+    cats.forEach(function(cat){
+      const items=data.filter(d=>d.category===cat);
+      html+='<div class="ts-group"><div class="ts-group-head"><span class="ts-group-title">'+esc(cat)+'</span><span class="ts-group-ct">'+items.length+'</span></div><div class="ts-grid">'+items.map(isSeg?segCard:tagCard).join('')+'</div></div>';
+    });
+    body.innerHTML=html; return;
+  }
+
+  if(!selKey){ body.innerHTML='<div class="ts-empty">Select a category from the left.</div>'; return; }
+  const parts=selKey.split('¦'), selType=parts[0], selCat=parts[1];
+  const meta = isSeg ? {label:'Segments',acc:'purple',fixed:false} : (TYPE_META[selType]||{});
+  let items=activeData().filter(d=>d.category===selCat && (isSeg?true:d.type===selType));
+  const archivedCount=(selType==='Staff label')?items.filter(d=>d.archived).length:0;
+  if(selType==='Staff label' && !showArchived) items=items.filter(d=>!d.archived);
+
+  let metaBits = (isSeg?'Segments':meta.label)+' · '+items.length+(items.length===1?' item':' items');
+  if(!isSeg && meta.fixed) metaBits += ' · <span class="lk" title="Fixed · system-managed">'+icoLock()+'</span> Fixed';
+  else if(selType==='Staff label') metaBits += ' · editable'+(archivedCount?' · <a class="ts-arch-toggle" data-toggle="arch">'+(showArchived?'hide':'show')+' '+archivedCount+' archived</a>':'');
+
+  let html='<div class="ts-pane-head"><span class="ts-pane-title">'+esc(selCat)+'</span><span class="ts-pane-meta">'+metaBits+'</span></div>';
+  html += items.length ? '<div class="ts-grid">'+items.map(isSeg?segCard:tagCard).join('')+'</div>' : '<div class="ts-empty">Nothing in this category yet.</div>';
+  body.innerHTML=html;
+}
+
+// Rail navigation
+document.getElementById('ts-rail').addEventListener('click', function(e){
+  const it=e.target.closest('.ts-rail-item'); if(!it) return;
+  selKey=it.dataset.key;
+  document.getElementById('ts-search').value='';
+  refreshFilters(); render();
+});
+
+function updateCounts(){
+  const tags = DATA.filter(d=>d.type!=='Segment' && !d.archived);
+  const segs = DATA.filter(d=>d.type==='Segment');
+  const byType = t => tags.filter(x=>x.type===t).length;
+  document.getElementById('tab-ct-tags').textContent = tags.length;
+  document.getElementById('tab-ct-segs').textContent = segs.length;
+  document.getElementById('ph-count').textContent = tags.length+' tags · '+segs.length+' segments';
+  document.getElementById('kpi-row').innerHTML =
+    kpi('Total tags', tags.length, '', byType('Auto-generated tag')+' intelligence · '+byType('Staff label')+' staff · '+byType('Super admin tag')+' admin')
+   + kpi('Atlas Intelligence', byType('Auto-generated tag'), 'blue', 'Auto-generated · fixed')
+   + kpi('Staff labels', byType('Staff label'), 'teal', 'Editable & archivable')
+   + kpi('Super-admin', byType('Super admin tag'), 'rose', 'Governance · fixed')
+   + kpi('Segments', segs.length, 'purple', 'Saved live filters');
+}
+function kpi(l,v,cls,meta){ return '<div class="kpi"><div class="lbl">'+l+'</div><div class="val '+(cls||'')+'">'+v+'</div><div class="meta">'+meta+'</div></div>'; }
+
+/* Tabs */
+document.querySelectorAll('#ts-tabs .tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('#ts-tabs .tab').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on');
+    tab = t.dataset.tab;
+    document.getElementById('add-btn-label').textContent = tab==='segments' ? 'New segment' : 'New staff label tag';
+    document.getElementById('ts-search').value='';
+    selKey = null;                 // recompute default category for the new tab
+    refreshFilters(); render();
+  });
+});
+document.getElementById('ts-search').addEventListener('input', render);
+
+/* Card actions (staff labels only) + archived toggle — delegated since cards re-render */
+document.getElementById('ts-body').addEventListener('click', function(e){
+  const toggle = e.target.closest('.ts-arch-toggle');
+  if (toggle){ showArchived = !showArchived; render(); return; }
+  const btn = e.target.closest('.ts-act'); if (!btn) return;
+  const it = DATA.find(d=>d._id===btn.dataset.id); if (!it) return;
+  const act = btn.dataset.act;
+  if (act==='edit'){ openModal(it._id); }
+  else if (act==='archive'){ it.archived=true;  updateCounts(); refreshFilters(); render(); toast('Staff label "'+it.name+'" archived'); }
+  else if (act==='restore'){ it.archived=false; updateCounts(); refreshFilters(); render(); toast('Staff label "'+it.name+'" restored'); }
+});
+
+/* Modal */
+function openModal(editId){
+  const seg = tab==='segments';
+  editingId = editId || null;
+  const item = editingId ? DATA.find(d=>d._id===editingId) : null;
+  // category suggestions come from the existing staff-label taxonomy
+  const cats = [];
+  DATA.forEach(d=>{ if(d.type==='Staff label' && cats.indexOf(d.category)===-1) cats.push(d.category); });
+  document.getElementById('m-cat-options').innerHTML = cats.sort().map(c=>'<option value="'+esc(c)+'"></option>').join('');
+  document.getElementById('m-sees-wrap').style.display = seg ? 'none' : '';
+  document.getElementById('modal-title').textContent = item ? 'Edit staff label' : (seg ? 'Create new segment' : 'Create new staff label');
+  document.getElementById('m-save').textContent = item ? 'Save changes' : (seg ? 'Save segment' : 'Save label');
+  document.getElementById('m-name').value = item ? item.name : '';
+  document.getElementById('m-desc').value = item ? item.desc : '';
+  document.getElementById('m-cat').value  = item ? item.category
+    : ((!seg && selKey && selKey.split('¦')[0]==='Staff label') ? selKey.split('¦')[1] : '');
+  document.getElementById('m-sees').value = item ? item.sees : 'All staff';
+  document.getElementById('modal').classList.add('show');
+  setTimeout(()=>document.getElementById('m-name').focus(),80);
+}
+function closeModal(){ document.getElementById('modal').classList.remove('show'); editingId=null; }
+function saveItem(){
+  const seg = tab==='segments';
+  const nameEl = document.getElementById('m-name');
+  const name = (nameEl.value||'').trim();
+  if (!name){ nameEl.style.borderColor='var(--rose)'; nameEl.focus(); return; }
+  nameEl.style.borderColor='';
+  const cat  = (document.getElementById('m-cat').value||'').trim();
+  const desc = (document.getElementById('m-desc').value||'').trim();
+  const sees = document.getElementById('m-sees').value;
+
+  if (editingId){                              // edit an existing staff label in place
+    const it = DATA.find(d=>d._id===editingId);
+    if (it){ it.name=name; it.desc=desc||it.desc; it.category=cat||it.category; it.sees=sees; }
+    closeModal(); updateCounts(); refreshFilters(); render();
+    toast('Staff label "'+name+'" updated');
     return;
   }
-  grid.innerHTML = rows.map(t => {
-    const color = COLOR_MAP[t.color] || COLOR_MAP.blue;
-    const initial = t.name[0].toUpperCase();
-    return `<div class="tag-card" onclick="viewTag('${t.id}')">
-      <div class="tag-card-head">
-        <span class="tag-swatch" style="background:${color.bg}">${initial}</span>
-        <span class="tag-name">${t.name}</span>
-        <button class="tag-kebab" onclick="event.stopPropagation();showKebab('${t.id}')" aria-label="Tag actions">
-          <svg viewBox="0 0 12 12" fill="currentColor"><circle cx="2.5" cy="6" r="1.1"/><circle cx="6" cy="6" r="1.1"/><circle cx="9.5" cy="6" r="1.1"/></svg>
-        </button>
-      </div>
-      <div class="tag-desc">${t.desc}</div>
-      <div class="tag-meta-row">
-        <span class="tag-count">${t.count.toLocaleString()}</span>
-        <span class="tag-count-lbl">donors</span>
-        <span class="tag-owner">${t.system ? '<span style="background:var(--surface);border:1px solid var(--border);padding:2px 7px;border-radius:99px;font-size:10px;font-weight:600;color:var(--text-2)">SYSTEM</span>' : '<span class="tag-owner-av">' + t.ownerAv + '</span>' + t.owner}</span>
-      </div>
-    </div>`;
-  }).join('');
+  // New items can only be Staff labels (or Segments) — Atlas Intelligence & Super-admin are fixed
+  const item = {
+    _id: 't'+(nextId++), archived:false,
+    type: seg ? 'Segment' : 'Staff label',
+    category: cat || (seg?'Custom':'Uncategorized'),
+    name: name,
+    desc: desc || (seg?'Custom saved filter.':'Custom context label.'),
+    effect: seg ? 'Saved filter — runs on demand against live data' : 'None — context label',
+    applies: seg ? 'Diocese-saved' : 'Any staff with write access',
+    sees: seg ? 'All staff' : sees,
+    phase: ''
+  };
+  DATA.unshift(item);
+  selKey = item.type+'¦'+item.category;   // jump the rail/pane to where the new item lives
+  closeModal();
+  updateCounts(); refreshFilters(); render();
+  toast((seg?'Segment':'Staff label')+' "'+name+'" created');
 }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
 
-function viewTag(id){
-  const tag = TAGS.find(t => t.id === id);
-  toast('Opening "' + tag.name + '" → ' + tag.count + ' tagged donors on the Donors list');
-  setTimeout(() => window.location = 'atlas-donors-list.html', 700);
-}
-
-function showKebab(id){
-  const tag = TAGS.find(t => t.id === id);
-  toast('Tag actions for "' + tag.name + '": Edit · Duplicate · Merge with… · ' + (tag.system ? 'System tags cannot be deleted' : 'Delete'));
-}
-
-/* ─── New tag modal ─── */
-let pickedColor = 'blue';
-function openTagModal(){
-  document.getElementById('tag-modal').classList.add('show');
-  setTimeout(() => document.getElementById('t-name').focus(), 100);
-}
-function closeTagModal(){
-  document.getElementById('tag-modal').classList.remove('show');
-}
-document.querySelectorAll('#color-picker .color-opt').forEach(c => {
-  c.addEventListener('click', () => {
-    document.querySelectorAll('#color-picker .color-opt').forEach(o => o.classList.remove('on'));
-    c.classList.add('on');
-    pickedColor = c.dataset.color;
-  });
-});
-function saveTag(){
-  const name = (document.getElementById('t-name').value || '').trim();
-  const desc = (document.getElementById('t-desc').value || '').trim();
-  if (!name) { document.getElementById('t-name').focus(); return; }
-  TAGS.unshift({
-    id: 'T' + (TAGS.length + 1),
-    name, color: pickedColor,
-    desc: desc || 'No description',
-    count: 0, owner: 'Sarah Reynolds', ownerAv: 'SR',
-    created: new Date().toISOString().slice(0,10), system: false
-  });
-  closeTagModal();
-  document.getElementById('t-name').value = '';
-  document.getElementById('t-desc').value = '';
-  renderTags();
-  toast('Tag "' + name + '" created · ready to apply', 'success');
-}
-
-/* ─── Toast ─── */
-function toast(msg, type){
-  const t = document.getElementById('toast');
-  t.querySelector('#toast-msg').textContent = msg;
-  t.classList.remove('success');
-  if (type) t.classList.add(type);
+function toast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
   t.classList.add('show');
-  clearTimeout(window._tt);
-  window._tt = setTimeout(() => t.classList.remove('show'), 3000);
+  clearTimeout(window.__t); window.__t=setTimeout(()=>t.classList.remove('show'),2600);
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && document.getElementById('tag-modal').classList.contains('show')) closeTagModal();
-});
-
-renderTags();
+/* init */
+updateCounts(); refreshFilters(); render();
 </script>
-
 </body>
 </html>
