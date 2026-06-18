@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Atlas — Role-aware (RBAC) demonstrator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#0E1E35;--blue:#2563EB;--blue-light:#DBEAFE;--blue-pale:#EFF6FF;
+    --teal:#0D9488;--teal-light:#CCFBF1;--green:#15803D;--green-light:#DCFCE7;
+    --amber:#D97706;--amber-light:#FEF3C7;--rose:#BE185D;--rose-light:#FCE7F3;
+    --purple:#7C3AED;--purple-light:#EDE9FE;--gold:#B45309;--gold-light:#FEF3C7;
+    --text:#0F172A;--text-2:#334155;--text-3:#64748B;--border:#E2E8F0;--border-soft:#EDF2F7;--surface:#F8FAFC;
+  }
+  html{font-size:14px;-webkit-font-smoothing:antialiased}
+  body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+
+  /* Sidebar */
+  .sidebar{width:220px;background:var(--navy);min-height:100vh;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow:hidden}
+  .sidebar-logo{padding:18px 18px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
+  .logo-mark{width:46px;height:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .logo-name{font-family:'DM Serif Display',serif;font-size:19px;color:#fff;line-height:1}
+  .logo-sub{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:2px}
+  .sidebar-scroll{flex:1 1 auto;overflow-y:auto;min-height:0;padding-top:6px}
+  .nav-group{padding:8px 8px 0}
+  .nav-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:0 10px;margin-bottom:4px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;margin-bottom:1px}
+  .nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
+  .nav-item.active{background:var(--blue);color:#fff}
+  .nav-item svg{width:14px;height:14px;flex-shrink:0}
+  .nav-badge{margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.6);border-radius:10px;padding:1px 7px;font-size:10px;font-weight:600}
+  .sidebar-user{padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:9px;flex-shrink:0}
+  .user-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+  .user-name{font-size:12px;font-weight:500;color:rgba(255,255,255,.78)}
+  .user-role{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px}
+
+  /* Main */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 22px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+  .topbar-title{font-size:14px;font-weight:600}
+  .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .demo-tag{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);background:var(--amber-light);padding:3px 9px;border-radius:99px}
+  /* Role switcher */
+  .role-switch{position:relative}
+  .rs-btn{display:flex;align-items:center;gap:9px;border:1px solid var(--border);background:#fff;border-radius:9px;padding:6px 10px;cursor:pointer;font-family:'DM Sans',sans-serif}
+  .rs-btn:hover{border-color:#94A3B8}
+  .rs-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+  .rs-meta{text-align:left;line-height:1.15}
+  .rs-meta b{font-size:12px;font-weight:600;color:var(--text);display:block}
+  .rs-meta small{font-size:10.5px;color:var(--text-3)}
+  .rs-btn svg{width:12px;height:12px;color:var(--text-3)}
+  .rs-menu{position:absolute;right:0;top:46px;width:280px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 14px 40px rgba(15,23,42,.18);padding:6px;z-index:50;display:none}
+  .rs-menu.show{display:block}
+  .rs-menu .rs-mlabel{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);padding:8px 10px 4px}
+  .rs-opt{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer}
+  .rs-opt:hover{background:var(--surface)}
+  .rs-opt.on{background:var(--blue-pale)}
+  .rs-opt .rs-av{width:30px;height:30px;font-size:11px}
+  .rs-opt .nm{font-size:13px;font-weight:600;color:var(--text)}
+  .rs-opt .ds{font-size:11px;color:var(--text-3);margin-top:1px}
+  .rs-opt .ph2{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--amber);background:var(--amber-light);border-radius:5px;padding:1px 6px;margin-left:auto;align-self:center}
+
+  .dash{padding:22px;overflow-y:auto}
+  /* Welcome banner */
+  .welcome{background:var(--navy);border-radius:14px;padding:20px 24px;color:#fff;position:relative;overflow:hidden;margin-bottom:18px}
+  .welcome .wg{font-size:12px;color:rgba(255,255,255,.55)}
+  .welcome .wn{font-family:'DM Serif Display',serif;font-size:24px;margin:3px 0 6px}
+  .welcome .ws{font-size:13px;color:rgba(255,255,255,.75);line-height:1.55;max-width:680px}
+  .welcome .scope-pill{display:inline-flex;align-items:center;gap:7px;margin-top:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:99px;padding:5px 12px;font-size:12px;color:#fff}
+  .welcome .scope-pill svg{width:13px;height:13px;color:#FCD34D}
+
+  /* KPI row */
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+  .kpi{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+  .kpi .l{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);display:flex;align-items:center;gap:6px}
+  .kpi .l svg{width:13px;height:13px}
+  .kpi .v{font-family:'DM Serif Display',serif;font-size:26px;line-height:1;margin:8px 0 3px}
+  .kpi .m{font-size:11px;color:var(--text-3)}
+  .kpi .v.blue{color:var(--blue)}.kpi .v.green{color:var(--green)}.kpi .v.amber{color:var(--amber)}.kpi .v.purple{color:var(--purple)}.kpi .v.rose{color:var(--rose)}
+
+  .grid2{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start}
+  @media(max-width:1080px){.grid2{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,1fr)}}
+
+  .card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .card-head{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .card-title{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)}
+  .card-body{padding:0}
+  /* toolbar */
+  .rec-toolbar{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+  .btn{font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;padding:8px 13px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent}
+  .btn svg{width:13px;height:13px}
+  .btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#1D4ED8}
+  .btn-ghost{background:#fff;border-color:var(--border);color:var(--text-2)}.btn-ghost:hover{border-color:#94A3B8;background:var(--surface)}
+  .btn-danger{background:#fff;border-color:#FBCFE8;color:var(--rose)}.btn-danger:hover{background:var(--rose-light)}
+  .ro-note{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--text-3);background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:4px 11px}
+  .ro-note svg{width:12px;height:12px}
+  /* table */
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+  td{padding:11px 16px;border-bottom:1px solid var(--border-soft);font-size:13px;color:var(--text-2)}
+  tr:last-child td{border-bottom:none}
+  td .nm{font-weight:600;color:var(--text)}
+  td.amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:var(--text)}
+  .row-act{display:inline-flex;gap:6px}
+  .ra{font-size:11.5px;font-weight:600;border:1px solid var(--border);background:#fff;color:var(--text-2);border-radius:6px;padding:4px 9px;cursor:pointer}
+  .ra:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-pale)}
+  .ra.danger:hover{border-color:var(--rose);color:var(--rose);background:var(--rose-light)}
+  .rec-empty{padding:28px 16px;text-align:center;color:var(--text-3);font-size:13px}
+  .scope-bar{padding:9px 16px;background:var(--blue-pale);border-bottom:1px solid var(--blue-light);font-size:12px;color:#1D4ED8;display:flex;align-items:center;gap:7px}
+  .scope-bar svg{width:13px;height:13px}
+
+  /* Access panel */
+  .access .card-body{padding:14px 16px}
+  .acc-block{margin-bottom:16px}
+  .acc-block:last-child{margin-bottom:0}
+  .acc-h{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin-bottom:9px}
+  .acc-nav{display:flex;flex-wrap:wrap;gap:5px}
+  .acc-chip{font-size:11px;font-weight:500;border-radius:6px;padding:3px 8px;border:1px solid var(--border);background:var(--surface);color:var(--text-2)}
+  .acc-row{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:12.5px;color:var(--text-2)}
+  .acc-ic{width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .acc-ic.yes{background:var(--green-light);color:var(--green)}
+  .acc-ic.no{background:#F1F5F9;color:#94A3B8}
+  .acc-ic svg{width:11px;height:11px}
+  .acc-row.off{color:var(--text-3)}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <circle cx="22" cy="92" r="4" fill="#fff"/><circle cx="58" cy="58" r="5" fill="#fff"/>
+        <circle cx="98" cy="38" r="5.5" fill="#fff"/><circle cx="138" cy="24" r="7" fill="#C8A04A"/>
+      </svg>
+    </div>
+    <div><div class="logo-name">Atlas</div><div class="logo-sub">By GiveCentral</div></div>
+  </div>
+  <div class="sidebar-scroll" id="nav"></div>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="u-av">SR</div>
+    <div style="flex:1;min-width:0"><div class="user-name" id="u-name">Sarah Reynolds</div><div class="user-role" id="u-role">Administrator</div></div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title">Dashboard</span>
+    <span class="demo-tag">Role-aware preview</span>
+    <div class="topbar-right">
+      <div class="role-switch">
+        <button class="rs-btn" id="rs-btn" onclick="toggleRoleMenu(event)">
+          <span class="rs-av" id="rs-av">SR</span>
+          <span class="rs-meta"><b id="rs-name">Sarah Reynolds</b><small id="rs-role">Administrator</small></span>
+          <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 4l2.5 2.5L7.5 4"/></svg>
+        </button>
+        <div class="rs-menu" id="rs-menu">
+          <div class="rs-mlabel">Switch role (demo)</div>
+          <div id="rs-opts"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="dash" id="main"></div>
+</div>
+
+<script>
+/* ════════════════════ ONE permissions config drives everything ════════════════════ */
+
+/* Master navigation (label · group · icon) */
+const NAV = [
+  {key:'dashboard', label:'Dashboard',        group:'Main', icon:'<rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/>'},
+  {key:'donors',    label:'Donors',           group:'Main', icon:'<circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/>', badge:'3,847'},
+  {key:'gifts',     label:'Gifts & pledges',  group:'Main', icon:'<path d="M7 1.5v11M2 6.5h10"/>', badge:'142'},
+  {key:'campaigns', label:'Campaigns',        group:'Main', icon:'<rect x="1.5" y="1.5" width="11" height="11" rx="2"/><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/>'},
+  {key:'reports',   label:'Reports',          group:'Main', icon:'<path d="M1.5 3h11M1.5 7h7M1.5 11h5"/>'},
+  {key:'pipeline',  label:'Prospect pipeline',group:'Fundraising', icon:'<circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/>', badge:'28'},
+  {key:'tasks',     label:'Tasks & reminders',group:'Fundraising', icon:'<rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/>'},
+  {key:'comms',     label:'Communications',   group:'Fundraising', icon:'<path d="M2 3.5h10v7H2zM2 6.5h10"/>'},
+  {key:'events',    label:'Events',           group:'Fundraising', icon:'<rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/>'},
+  {key:'volunteers',label:'Volunteers',       group:'Fundraising', icon:'<circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5"/>'},
+  {key:'guru',      label:'Guru AI',          group:'Intelligence', icon:'<circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0"/>'},
+  {key:'analytics', label:'Analytics',        group:'Intelligence', icon:'<rect x="2" y="2" width="10" height="10" rx="1.5"/><path d="M2 11l3-3 2 2 3-3 2 2"/>'},
+  {key:'users',     label:'Users & roles',    group:'Admin', icon:'<circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5"/>'},
+  {key:'tags',      label:'Tags & segments',  group:'Admin', icon:'<path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/>'},
+  {key:'integrations',label:'Integrations',   group:'Admin', icon:'<circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/>'},
+  {key:'sync',      label:'Sync',             group:'Admin', icon:'<path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/>'},
+  {key:'location',  label:'Location portal',  group:'Admin', icon:'<path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/>'}
+];
+const GROUP_ORDER = ['Main','Fundraising','Intelligence','Admin'];
+
+/* All actions the app can gate */
+const ACTION_LABELS = {
+  add:'Add donor', recordGift:'Record gift', logActivity:'Log activity', edit:'Edit records',
+  export:'Export data', merge:'Merge duplicates', del:'Delete records', manageTags:'Manage tags',
+  sync:'Run sync', manageUsers:'Manage users & roles', suspend:'Suspend users'
+};
+
+/* Sample donor records — each carries owner (gift officer) + parish for scope demos */
+const DONORS = [
+  {name:"Margaret O'Brien",      parish:"St. Mary's Cathedral",  owner:'Daniel Cho',  amt:84250},
+  {name:"James & Patricia O'Brien",parish:"St. Catherine of Siena",owner:'Daniel Cho',amt:120500},
+  {name:"Robert & Susan Lin",    parish:"St. Catherine of Siena",owner:'Maria Lopez', amt:98000},
+  {name:"Catherine Walsh",       parish:"St. Mary's Cathedral",  owner:'Daniel Cho',  amt:51000},
+  {name:"Dr. Thomas Nguyen",     parish:"St. Joseph's",          owner:'Maria Lopez', amt:40000},
+  {name:"Smith Family Household",parish:"St. Joseph's",          owner:'—',           amt:42180},
+  {name:"Eleanor Whitmore",      parish:"St. Anthony",           owner:'Daniel Cho',  amt:32400},
+  {name:"Diocesan Foundation",   parish:"—",                     owner:'—',           amt:185000},
+  {name:"David Chen",            parish:"St. Mary's Cathedral",  owner:'Maria Lopez', amt:8950},
+  {name:"Fitzgerald Family",     parish:"St. Joseph's",          owner:'Daniel Cho',  amt:67500}
+];
+
+/* The six roles. nav: allowed keys ('*' = all). actions: allowed set. scope: how records filter. */
+const ROLES = {
+  admin: {
+    name:'Sarah Reynolds', initials:'SR', color:'#1E1E1E', label:'Administrator',
+    nav:'*',
+    actions:['add','recordGift','logActivity','edit','export','merge','del','manageTags','sync','manageUsers','suspend'],
+    scope:{type:'all'},
+    blurb:'Full access across the diocese — users, billing, governance, and all donor data.',
+    kpis:[['Staff users','12','blue','6 roles configured'],['Records','3,847','','all entities'],['Pending reviews','9','amber','duplicates + imports'],['Access','Full','green','every screen & action']]
+  },
+  dba: {
+    name:'Daniel Cho', initials:'DC', color:'var(--blue)', label:'Database Admin',
+    nav:['dashboard','donors','gifts','campaigns','reports','analytics','tags','integrations','sync','location'],
+    actions:['edit','export','merge','manageTags','sync','recordGift'],
+    scope:{type:'all'},
+    blurb:'Owns data quality — imports, sync, duplicates, and the tag taxonomy. No user or billing control.',
+    kpis:[['Records','3,847','','all entities'],['Duplicates','9','amber','awaiting review'],['Last sync','2h ago','green','GiveCentral'],['Data health','98%','blue','validated']]
+  },
+  dev: {
+    name:'Patricia Reyes', initials:'PR', color:'var(--purple)', label:'Dev Director / CFO',
+    nav:['dashboard','donors','gifts','campaigns','reports','pipeline','tasks','comms','events','volunteers','guru','analytics','users'],
+    actions:['add','recordGift','logActivity','edit','export','manageUsers'],
+    scope:{type:'all'},
+    blurb:'Whole-shop fundraising oversight — campaigns, reports, officer portfolios, and team management.',
+    kpis:[['Raised YTD','$1.24M','green','78% of goal'],['Pipeline','$340k','purple','28 prospects'],['Active donors','3,847','blue','↑ 8% retention'],['Officers','5','','portfolios assigned']]
+  },
+  officer: {
+    name:'Daniel Cho', initials:'DC', color:'var(--green)', label:'Gift Officer',
+    nav:['dashboard','donors','gifts','campaigns','pipeline','tasks','comms','events','guru','reports'],
+    actions:['add','recordGift','logActivity','edit'],
+    scope:{type:'portfolio', owner:'Daniel Cho'},
+    blurb:'Front-line fundraiser. Sees and works only their assigned portfolio — no admin, no shop-wide exports.',
+    kpis:[['My portfolio','5','green','assigned prospects'],['FY raised','$420k','','70% of $600k'],['Moves due','9','amber','3 overdue'],['Asks open','6','purple','$310k in play']]
+  },
+  read: {
+    name:'Bishop Thomas', initials:'BT', color:'var(--text-3)', label:'Read-only',
+    nav:['dashboard','donors','campaigns','reports','analytics'],
+    actions:[],
+    scope:{type:'all'},
+    blurb:'View-only oversight. Can see reports and donor data across the diocese, but cannot change anything.',
+    kpis:[['Raised YTD','$1.24M','green','78% of goal'],['Campaigns','4','blue','2 active'],['Donors','3,847','','diocese-wide'],['Access','View only','','no edits']]
+  },
+  parish: {
+    name:'Fr. Michael Ryan', initials:'MR', color:'var(--amber)', label:'Parish Admin', phase2:true,
+    nav:['dashboard','donors','gifts','comms','events','reports'],
+    actions:['add','recordGift','logActivity','edit','export'],
+    scope:{type:'parish', parish:"St. Mary's Cathedral"},
+    blurb:"Scoped to a single parish. Manages their parish's donors, gifts, and communications only.",
+    kpis:[['Parish donors','3','amber',"St. Mary's Cathedral"],['Parish raised','$144k','green','this fiscal year'],['Events','2','blue','upcoming'],['Scope','1 parish','','of 5 entities']]
+  }
+};
+const ROLE_ORDER = ['admin','dba','dev','officer','read','parish'];
+
+/* ── Scope: which donors this role can see ── */
+function scopedDonors(r){
+  const s = r.scope;
+  if (s.type==='portfolio') return DONORS.filter(d=>d.owner===s.owner);
+  if (s.type==='parish')    return DONORS.filter(d=>d.parish===s.parish);
+  return DONORS.slice();
+}
+function scopeText(r){
+  const s=r.scope;
+  if (s.type==='portfolio') return 'Your assigned portfolio only';
+  if (s.type==='parish')    return s.parish+' only';
+  return 'All diocese records';
+}
+function can(r, a){ return r.actions.indexOf(a)!==-1; }
+function fmt(n){ return '$'+n.toLocaleString(); }
+
+/* ── Render: sidebar nav filtered by role ── */
+function renderNav(r){
+  const allow = (k)=> r.nav==='*' || r.nav.indexOf(k)!==-1;
+  let html='';
+  GROUP_ORDER.forEach(function(g){
+    const items = NAV.filter(n=>n.group===g && allow(n.key));
+    if (!items.length) return;
+    html += '<div class="nav-group"><div class="nav-label">'+g+'</div>'
+      + items.map(function(n,i){
+          const active = (n.key==='dashboard');
+          return '<a class="nav-item'+(active?' active':'')+'"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">'+n.icon+'</svg>'+n.label
+            + (n.badge?'<span class="nav-badge">'+n.badge+'</span>':'')+'</a>';
+        }).join('')
+      + '</div>';
+  });
+  document.getElementById('nav').innerHTML = html;
+}
+
+/* ── Render: dashboard (welcome + KPIs) ── */
+function renderDash(r){
+  const visible = scopedDonors(r);
+  const kpis = r.kpis.map(function(k){
+    return '<div class="kpi"><div class="l">'+k[0]+'</div><div class="v '+(k[2]||'')+'">'+k[1]+'</div><div class="m">'+(k[3]||'')+'</div></div>';
+  }).join('');
+
+  document.getElementById('main').innerHTML =
+    '<div class="welcome"><div class="wg">Signed in as</div><div class="wn">'+r.name+'</div>'
+      +'<div class="ws">'+r.blurb+'</div>'
+      +'<div class="scope-pill"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 1.5l1.6 3.3 3.6.5-2.6 2.5.6 3.6L7 9.7 3.8 11.4l.6-3.6L1.8 5.3l3.6-.5z"/></svg>Seeing '+visible.length+' of '+DONORS.length+' donors · '+scopeText(r)+'</div></div>'
+    +'<div class="kpi-row">'+kpis+'</div>'
+    +'<div class="grid2">'+recordsCard(r)+accessCard(r)+'</div>';
+}
+
+/* ── Records card: scoped rows + action-gated toolbar/rows ── */
+function recordsCard(r){
+  const rows = scopedDonors(r);
+  const showRowActions = can(r,'edit') || can(r,'del') || can(r,'merge');
+
+  // Toolbar — only the actions this role is granted
+  let tb='';
+  if (can(r,'add'))        tb += '<button class="btn btn-primary"><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>Add donor</button>';
+  if (can(r,'recordGift')) tb += '<button class="btn btn-ghost">Record gift</button>';
+  if (can(r,'export'))     tb += '<button class="btn btn-ghost"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v6.5M3.5 5L6 7.5 8.5 5M1.5 9.5h9"/></svg>Export CSV</button>';
+  if (can(r,'merge'))      tb += '<button class="btn btn-ghost">Merge duplicates</button>';
+  if (can(r,'manageUsers'))tb += '<button class="btn btn-ghost">Manage access</button>';
+  if (r.actions.length===0) tb = '<span class="ro-note"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="5.5" width="7" height="5" rx="1"/><path d="M4 5.5V4a2 2 0 014 0v1.5"/></svg>Read-only · actions disabled</span>';
+
+  let body = '';
+  body += '<div class="scope-bar"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M1.5 7h11M7 1.5a9 9 0 010 11M7 1.5a9 9 0 000 11"/></svg>Record scope: <strong style="margin-left:3px">'+scopeText(r)+'</strong> — '+rows.length+' of '+DONORS.length+' donors</div>';
+  body += '<div class="rec-toolbar">'+(tb||'')+'</div>';
+  if (!rows.length){
+    body += '<div class="rec-empty">No donor records in your scope.</div>';
+  } else {
+    body += '<table><thead><tr><th>Donor</th><th>Parish</th><th>Gift officer</th><th style="text-align:right">Lifetime</th>'+(showRowActions?'<th></th>':'')+'</tr></thead><tbody>';
+    rows.forEach(function(d){
+      let acts='';
+      if (showRowActions){
+        acts = '<td><span class="row-act">';
+        if (can(r,'edit')) acts += '<button class="ra">Edit</button>';
+        if (can(r,'merge'))acts += '<button class="ra">Merge</button>';
+        if (can(r,'del'))  acts += '<button class="ra danger">Delete</button>';
+        acts += '</span></td>';
+      }
+      body += '<tr><td><span class="nm">'+d.name+'</span></td><td>'+d.parish+'</td><td>'+d.owner+'</td><td class="amt">'+fmt(d.amt)+'</td>'+acts+'</tr>';
+    });
+    body += '</tbody></table>';
+  }
+  return '<div class="card"><div class="card-head"><span class="card-title">Donors</span></div><div class="card-body">'+body+'</div></div>';
+}
+
+/* ── Access panel: makes the RBAC explicit (nav + actions allowed/blocked) ── */
+function accessCard(r){
+  const allowNav = NAV.filter(n=> r.nav==='*' || r.nav.indexOf(n.key)!==-1);
+  const navChips = allowNav.map(n=>'<span class="acc-chip">'+n.label+'</span>').join('');
+  const navCount = allowNav.length;
+  const tick='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 6.5l2.5 2.5 4.5-5"/></svg>';
+  const cross='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg>';
+  const actRows = Object.keys(ACTION_LABELS).map(function(a){
+    const ok = can(r,a);
+    return '<div class="acc-row'+(ok?'':' off')+'"><span class="acc-ic '+(ok?'yes':'no')+'">'+(ok?tick:cross)+'</span>'+ACTION_LABELS[a]+'</div>';
+  }).join('');
+  return '<div class="card access"><div class="card-head"><span class="card-title">Your access</span></div><div class="card-body">'
+    + '<div class="acc-block"><div class="acc-h">Navigation · '+navCount+' of '+NAV.length+' areas</div><div class="acc-nav">'+navChips+'</div></div>'
+    + '<div class="acc-block"><div class="acc-h">Record scope</div><div class="acc-row"><span class="acc-ic yes">'+tick+'</span>'+scopeText(r)+'</div></div>'
+    + '<div class="acc-block"><div class="acc-h">Actions</div>'+actRows+'</div>'
+    + '</div></div>';
+}
+
+/* ── Role switcher ── */
+function renderRoleMenu(curKey){
+  document.getElementById('rs-opts').innerHTML = ROLE_ORDER.map(function(k){
+    const r=ROLES[k];
+    return '<div class="rs-opt'+(k===curKey?' on':'')+'" data-role="'+k+'"><span class="rs-av" style="background:'+r.color+'">'+r.initials+'</span>'
+      +'<div style="flex:1;min-width:0"><div class="nm">'+r.label+'</div><div class="ds">'+r.name+'</div></div>'
+      +(r.phase2?'<span class="ph2">Phase 2</span>':'')+'</div>';
+  }).join('');
+  document.querySelectorAll('#rs-opts .rs-opt').forEach(function(o){
+    o.addEventListener('click', function(){ applyRole(o.dataset.role); document.getElementById('rs-menu').classList.remove('show'); });
+  });
+}
+function toggleRoleMenu(e){ e.stopPropagation(); document.getElementById('rs-menu').classList.toggle('show'); }
+document.addEventListener('click', function(e){ if(!e.target.closest('.role-switch')) document.getElementById('rs-menu').classList.remove('show'); });
+
+/* ── Apply a role: re-render every role-aware surface ── */
+let currentRole='admin';
+function applyRole(key){
+  currentRole=key; const r=ROLES[key];
+  // sidebar identity
+  document.getElementById('u-av').textContent=r.initials; document.getElementById('u-av').style.background=r.color;
+  document.getElementById('u-name').textContent=r.name; document.getElementById('u-role').textContent=r.label;
+  // switcher button
+  document.getElementById('rs-av').textContent=r.initials; document.getElementById('rs-av').style.background=r.color;
+  document.getElementById('rs-name').textContent=r.name; document.getElementById('rs-role').textContent=r.label;
+  renderNav(r); renderDash(r); renderRoleMenu(key);
+  document.body.dataset.role=key;
+}
+applyRole('admin');
+</script>
+</body>
+</html>

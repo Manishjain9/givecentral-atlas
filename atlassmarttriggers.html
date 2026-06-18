@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas CRM — Smart Triggers</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0E1E35;--navy2:#152844;--navy3:#1E3A5F;--navy4:#2A4A6B;
+  --gold:#B45309;--golda:#D97706;--goldl:#FEF3C7;
+  --white:#FFFFFF;--off:#F8FAFC;--text:#0F172A;--muted:#64748B;--border:#E2E8F0;
+  --green:#15803D;--greenl:#DCFCE7;--blue:#2563EB;--bluel:#EFF6FF;--blue-light:#DBEAFE;
+  --purple:#7C3AED;--purpl:#EDE9FE;--teal:#0D9488;--teall:#CCFBF1;
+  --amber:#D97706;--amberl:#FEF3C7;--red:#BE185D;--redl:#FCE7F3;
+  --sidebar:240px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;display:flex;font-size:13px}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);background:var(--navy);border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:10}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sidebar-logo .wordmark{font-family:'DM Serif Display',serif;font-size:19px;font-style:normal;font-weight:400;color:#fff}
+.sidebar-logo .sub{font-size:10px;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sidebar-section{padding:20px 12px 8px}
+.sidebar-label{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 8px;margin-bottom:6px}
+.sidebar-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:6px;color:rgba(255,255,255,.45);cursor:pointer;font-size:12.5px;transition:all .15s;margin-bottom:2px}
+.sidebar-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.75)}
+.sidebar-item.active{background:var(--blue);color:#fff}
+.sidebar-item .icon{width:16px;text-align:center;font-size:14px;flex-shrink:0}
+.sidebar-item .badge{margin-left:auto;background:var(--blue);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px}
+.sidebar-user{margin-top:auto;padding:14px 16px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:var(--blue);border:none;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0}
+.user-info .name{color:rgba(255,255,255,.8);font-size:12px;font-weight:500}
+.user-info .role{color:rgba(255,255,255,.3);font-size:10.5px}
+
+/* NOTIFICATION BELL */
+.notif-bell{position:relative;cursor:pointer;padding:6px;border-radius:6px;transition:background .15s;color:rgba(255,255,255,.5)}
+.notif-bell:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.85)}
+.notif-bell .dot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--navy);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+
+/* MAIN */
+.main{margin-left:var(--sidebar);flex:1;background:var(--off);min-height:100vh;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:52px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5}
+.topbar-breadcrumb{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+.topbar-breadcrumb .crumb-active{color:var(--text);font-weight:500}
+.topbar-breadcrumb .sep{color:var(--border)}
+.topbar-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* NOTIFICATION DROPDOWN */
+.notif-wrapper{position:relative}
+.notif-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:360px;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.12);z-index:100;display:none}
+.notif-dropdown.open{display:block}
+.notif-drop-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.notif-drop-title{font-size:13px;font-weight:600;color:var(--navy)}
+.notif-mark-all{font-size:11px;color:var(--blue);cursor:pointer}
+.notif-item{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;position:relative}
+.notif-item:hover{background:var(--off)}
+.notif-item.unread{background:var(--bluel)}
+.notif-item:last-child{border-bottom:none}
+.notif-icon-wrap{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ni-draft{background:var(--bluel)}
+.ni-sent{background:var(--greenl)}
+.ni-warn{background:var(--amberl)}
+.notif-body{flex:1;min-width:0}
+.notif-body .ntitle{font-size:12.5px;font-weight:600;color:var(--navy);margin-bottom:2px}
+.notif-body .ndesc{font-size:11.5px;color:var(--muted);line-height:1.4}
+.notif-body .ntime{font-size:10.5px;color:var(--muted);margin-top:4px}
+.notif-unread-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:6px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-size:12.5px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'DM Sans',sans-serif}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#1D4ED8}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--off);color:var(--text)}
+.btn-sm{padding:5px 10px;font-size:11.5px}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:#166534}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-navy:hover{background:var(--navy2)}
+.btn-red{background:var(--redl);color:var(--red);border:1px solid #FECACA}
+.btn-red:hover{background:#FEE2E2}
+
+/* PAGE */
+.page{padding:28px;flex:1}
+.page-header{margin-bottom:24px}
+.page-title{font-family:'DM Serif Display',serif;font-size:26px;font-weight:600;color:var(--navy);margin-bottom:4px}
+.page-desc{color:var(--muted);font-size:13px}
+
+/* STAT STRIP */
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+.stat-card .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.stat-card .value{font-size:24px;font-weight:600;color:var(--navy);font-family:'DM Serif Display',serif}
+.stat-card .sub{font-size:11px;color:var(--muted);margin-top:3px}
+.stat-card.urgent{border-color:#FECACA;background:#FFFBFB}
+.stat-card.urgent .value{color:var(--red)}
+.trend-up{color:var(--green);font-size:11px;margin-top:4px}
+
+/* TABS */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:24px}
+.tab{padding:10px 18px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab .tab-badge{background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 5px;border-radius:10px}
+
+/* LAYOUT */
+.layout-cols{display:grid;grid-template-columns:1fr 400px;gap:20px;align-items:start}
+
+/* TRIGGER CARDS */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-title{font-size:14px;font-weight:600;color:var(--navy)}
+.section-count{font-size:12px;color:var(--muted)}
+.trigger-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:all .15s}
+.trigger-card:hover{border-color:var(--blue);box-shadow:0 2px 8px rgba(37,99,235,.10)}
+.trigger-card-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.trigger-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.trigger-icon.gift{background:var(--goldl)}
+.trigger-icon.life{background:var(--teall)}
+.trigger-meta{flex:1;min-width:0}
+.trigger-name{font-size:13.5px;font-weight:600;color:var(--navy);margin-bottom:3px}
+.trigger-cond{font-size:12px;color:var(--muted)}
+.toggle{position:relative;display:inline-block;width:36px;height:20px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:#CBD5E1;border-radius:20px;cursor:pointer;transition:.2s}
+.toggle-slider::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:white;border-radius:50%;transition:.2s}
+.toggle input:checked + .toggle-slider{background:var(--green)}
+.toggle input:checked + .toggle-slider::before{transform:translateX(16px)}
+.trigger-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500}
+.pill-gold{background:var(--goldl);color:var(--amber)}
+.pill-green{background:var(--greenl);color:var(--green)}
+.pill-blue{background:var(--bluel);color:var(--blue)}
+.pill-teal{background:var(--teall);color:var(--teal)}
+.pill-purple{background:var(--purpl);color:var(--purple)}
+.pill-gray{background:#F1F5F9;color:var(--muted)}
+.pill-red{background:var(--redl);color:var(--red)}
+.trigger-card-bottom{display:flex;align-items:center;gap:8px;padding-top:12px;border-top:1px solid var(--border)}
+.trigger-stat{font-size:11px;color:var(--muted)}
+.trigger-stat strong{color:var(--text);font-weight:600}
+.trigger-actions{margin-left:auto;display:flex;gap:6px}
+
+/* PANEL (right column) */
+.panel{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.panel-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-size:13px;font-weight:600;color:var(--navy)}
+.panel-body{padding:18px}
+.panel-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:#FAFAFA}
+
+/* STEPPER */
+.stepper{display:flex;align-items:flex-start;gap:0;margin-bottom:22px}
+.step{display:flex;flex-direction:column;align-items:center;position:relative;flex:1}
+.step-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;border:2px solid var(--border);background:var(--white);color:var(--muted);position:relative;z-index:1;transition:all .2s}
+.step.done .step-dot{background:var(--green);border-color:var(--green);color:white}
+.step.active .step-dot{background:var(--blue);border-color:var(--blue);color:#fff}
+.step-label{font-size:10px;color:var(--muted);margin-top:5px;text-align:center;white-space:nowrap}
+.step.active .step-label{color:var(--blue);font-weight:500}
+.step.done .step-label{color:var(--green)}
+.step-line{position:absolute;top:13px;left:calc(50% + 13px);right:calc(-50% + 13px);height:2px;background:var(--border)}
+.step.done .step-line{background:var(--green)}
+
+/* FORM */
+.form-group{margin-bottom:14px}
+.form-label{font-size:11.5px;font-weight:500;color:var(--text);margin-bottom:5px;display:block}
+.form-sub{font-size:11px;color:var(--muted);margin-bottom:5px;display:block}
+.form-control{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:6px;font-size:12.5px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--white);outline:none;transition:border-color .15s}
+.form-control:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+textarea.form-control{resize:vertical;min-height:100px;line-height:1.6}
+.field-hint{font-size:10.5px;color:var(--muted);margin-top:4px}
+.input-prefix{display:flex;align-items:center;border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:box-shadow .15s}
+.input-prefix:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.input-prefix span{padding:8px 10px;background:#F8FAFC;color:var(--muted);font-size:13px;border-right:1px solid var(--border);flex-shrink:0}
+.input-prefix input{border:none;outline:none;padding:8px 11px;font-size:12.5px;font-family:'DM Sans',sans-serif;color:var(--text);width:100%}
+.delay-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.delay-unit{font-size:12px;color:var(--muted);white-space:nowrap}
+
+.type-chooser{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.type-option{border:2px solid var(--border);border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s}
+.type-option:hover{border-color:var(--blue)}
+.type-option.selected{border-color:var(--blue);background:rgba(37,99,235,.06)}
+.type-option .type-icon{font-size:22px;margin-bottom:6px}
+.type-option .type-label{font-size:12px;font-weight:600;color:var(--navy)}
+.type-option .type-desc{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+
+.mode-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.mode-option{border:2px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:all .15s}
+.mode-option:hover{border-color:var(--blue)}
+.mode-option.selected{border-color:var(--blue);background:rgba(37,99,235,.06)}
+.mode-icon{font-size:18px;margin-bottom:6px}
+.mode-title{font-size:12px;font-weight:600;color:var(--navy);margin-bottom:3px}
+.mode-desc{font-size:10.5px;color:var(--muted);line-height:1.4}
+
+.step-content{display:none}
+.step-content.active{display:block}
+
+/* CALLOUT */
+.callout{border-radius:8px;padding:10px 14px;font-size:12px;line-height:1.5;margin-bottom:14px;display:flex;gap:8px}
+.callout-amber{background:var(--amberl);border:1px solid #FDE68A;color:var(--amber)}
+.callout-blue{background:var(--bluel);border:1px solid #BFDBFE;color:#1E40AF}
+.callout-green{background:var(--greenl);border:1px solid #BBF7D0;color:var(--green)}
+
+/* ACTIVITY */
+.activity-item{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
+.activity-item:last-child{border-bottom:none}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.dot-sent{background:var(--green)}
+.dot-draft{background:var(--blue)}
+.dot-skip{background:var(--muted)}
+.activity-text{font-size:12px;color:var(--text);line-height:1.55;flex:1}
+.activity-text .donor{font-weight:600;color:var(--navy)}
+.activity-text .atime{color:var(--muted);font-size:11px}
+.ab{flex-shrink:0;padding:2px 8px;border-radius:12px;font-size:10.5px;font-weight:500;align-self:flex-start;margin-top:2px}
+.ab-sent{background:var(--greenl);color:var(--green)}
+.ab-draft{background:var(--bluel);color:var(--blue)}
+.ab-skip{background:#F1F5F9;color:var(--muted)}
+
+/* ── ACTION QUEUE BANNER (draft notification) ─────────────────────────── */
+.queue-banner{background:var(--white);border:1px solid #BFDBFE;border-left:4px solid var(--blue);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px}
+.queue-banner-icon{font-size:22px;flex-shrink:0;margin-top:1px}
+.queue-banner-body{flex:1}
+.queue-banner-title{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:4px}
+.queue-banner-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.queue-banner-actions{display:flex;gap:8px;margin-top:10px}
+.queue-items{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.queue-item{display:flex;align-items:center;gap:12px;background:var(--bluel);border:1px solid #BFDBFE;border-radius:8px;padding:10px 14px}
+.queue-item-info{flex:1}
+.queue-item-donor{font-size:12.5px;font-weight:600;color:var(--navy)}
+.queue-item-rule{font-size:11.5px;color:var(--muted);margin-top:1px}
+.queue-item-deadline{font-size:11px;color:var(--amber);margin-top:2px}
+.queue-item-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* ── FULL-SCREEN MODALS ───────────────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(11,25,41,.65);z-index:60;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px);padding:20px}
+.modal-overlay.open{display:flex}
+
+/* ADD TRIGGER MODAL */
+.modal-add{background:var(--white);border-radius:14px;width:100%;max-width:640px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;font-weight:600;color:var(--navy)}
+.modal-close{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);transition:all .15s}
+.modal-close:hover{background:var(--off);color:var(--text)}
+.modal-body{flex:1;overflow-y:auto;padding:24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;background:#FAFAFA}
+.modal-footer .step-indicator{font-size:12px;color:var(--muted);margin-right:auto}
+
+/* PREVIEW MODAL */
+.modal-preview{background:var(--white);border-radius:14px;width:100%;max-width:580px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
+.preview-trigger-info{padding:12px 20px;background:var(--off);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex-shrink:0}
+.pti-label{font-size:11px;color:var(--muted)}
+.pti-val{font-size:11px;font-weight:600;color:var(--navy)}
+.pti-sep{color:var(--border)}
+.preview-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;margin:0 20px 12px}
+.email-wrap{margin:0 20px 16px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.email-header-bar{background:var(--navy);padding:14px 18px;display:flex;align-items:center;gap:10px}
+.email-avatar{width:32px;height:32px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0}
+.email-from-name{color:rgba(255,255,255,.9);font-size:12.5px;font-weight:500}
+.email-from-addr{color:rgba(255,255,255,.4);font-size:11px}
+.email-timestamp{margin-left:auto;font-size:11px;color:rgba(255,255,255,.3)}
+.email-fields{padding:10px 18px;background:#FAFAFA;border-bottom:1px solid var(--border)}
+.email-field{display:flex;gap:8px;margin-bottom:4px;font-size:12px}
+.efl{color:var(--muted);width:24px;flex-shrink:0}
+.efv{color:var(--text)}
+.email-body-area{padding:20px 18px}
+.email-body-area p{font-size:13.5px;line-height:1.72;color:var(--text);margin-bottom:12px}
+.email-body-area .sig{color:var(--muted);font-size:12.5px;line-height:1.6}
+.edit-note-bar{margin:0 20px 12px;background:var(--bluel);border:1px solid #BFDBFE;border-radius:8px;padding:10px 14px;font-size:12px;color:#1E40AF;line-height:1.5;display:none}
+.preview-log{margin:0 20px 16px;font-size:11px;color:var(--muted)}
+.preview-log strong{color:var(--text)}
+.preview-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+
+/* tab content */
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* empty state */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-state .es-icon{font-size:36px;margin-bottom:12px}
+.empty-state .es-title{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:6px}
+.empty-state .es-desc{font-size:12.5px;line-height:1.5}
+
+/* Atlas line icons replacing emojis */
+.sidebar-item .icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px}
+.sidebar-item .icon svg{width:15px;height:15px}
+.notif-bell svg{width:16px;height:16px}
+.trigger-icon svg{width:18px;height:18px}
+.trigger-icon.gift svg{color:var(--amber)} .trigger-icon.life svg{color:var(--teal)}
+.notif-icon-wrap svg{width:17px;height:17px}
+.ni-draft svg{color:var(--blue)} .ni-sent svg{color:var(--green)} .ni-warn svg{color:var(--amber)}
+.queue-banner-icon svg{width:22px;height:22px;color:var(--blue)}
+.empty-state .es-icon svg{width:30px;height:30px;color:var(--muted)}
+.type-icon svg{width:22px;height:22px;color:var(--navy)}
+.mode-icon svg{width:18px;height:18px;color:var(--navy)}
+
+/* trigger filter chips + 2-col grid + edit modal */
+.trig-filter{display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tf-chip{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:#fff;color:var(--muted);cursor:pointer;transition:all .14s}
+.tf-chip:hover{border-color:var(--blue);color:var(--blue)}
+.tf-chip.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.tf-sep{width:1px;height:18px;background:var(--border);margin:0 2px}
+#gift-list,#life-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+#gift-list .trigger-card,#life-list .trigger-card{margin-bottom:0}
+@media(max-width:1180px){#gift-list,#life-list{grid-template-columns:1fr}}
+.et-field{margin-bottom:14px}
+.et-field label{font-size:11.5px;font-weight:500;color:var(--text);margin-bottom:5px;display:block}
+.et-toggle-row{display:flex;align-items:center;gap:10px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo" style="display:flex;align-items:center;gap:11px">
+    <svg viewBox="0 0 160 120" width="44" height="34" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+      <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+      <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+      <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+      <circle cx="22" cy="92" r="4" fill="#fff"/><circle cx="58" cy="58" r="5" fill="#fff"/>
+      <circle cx="98" cy="38" r="5.5" fill="#fff"/><circle cx="138" cy="24" r="7" fill="#C8A04A"/>
+    </svg>
+    <div><div class="wordmark">Atlas</div><div class="sub">By GiveCentral</div></div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Main</div>
+    <div class="sidebar-item"><span class="icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><rect x='1.5' y='1.5' width='4.3' height='4.3' rx='1'/><rect x='8.2' y='1.5' width='4.3' height='4.3' rx='1'/><rect x='1.5' y='8.2' width='4.3' height='4.3' rx='1'/><rect x='8.2' y='8.2' width='4.3' height='4.3' rx='1'/></svg></span> Dashboard</div>
+    <div class="sidebar-item"><span class="icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><circle cx='5' cy='5' r='2.2'/><path d='M1.3 12c0-2.2 1.6-3.5 3.7-3.5S8.7 9.8 8.7 12'/><circle cx='10' cy='5.6' r='1.7'/><path d='M9.2 8.7c1.9.1 3.5 1.2 3.5 3.3'/></svg></span> Donors</div>
+    <div class="sidebar-item"><span class="icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 1.6v10.8M9.4 3.5C8.8 2.9 8 2.6 7 2.6c-1.5 0-2.6.8-2.6 2s1 1.7 2.6 2 2.6.8 2.6 2-1.1 2-2.6 2c-1 0-1.9-.3-2.5-1'/></svg></span> Gifts</div>
+    <div class="sidebar-item"><span class="icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><circle cx='7' cy='7' r='5.4'/><circle cx='7' cy='7' r='2'/></svg></span> Campaigns</div>
+    <div class="sidebar-item"><span class="icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><rect x='1.8' y='2.6' width='10.4' height='9.4' rx='1.5'/><path d='M1.8 5.4h10.4M4.5 1.5v2.2M9.5 1.5v2.2'/></svg></span> Events</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">My Work</div>
+    <div class="sidebar-item" onclick="showActionQueue()"><span class="icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M1.6 8.4V4a1.5 1.5 0 011.5-1.5h7.8A1.5 1.5 0 0112.4 4v4.4'/><path d='M1.6 8.4H4l1 1.6h4l1-1.6h2.4V11A1.5 1.5 0 0110.9 12.5H3.1A1.5 1.5 0 011.6 11z'/></svg></span> Action Queue <span class="badge">2</span></div>
+    <div class="sidebar-item"><span class="icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M12.5 1.5L6 8M12.5 1.5L8.3 12.5 6 8 1.5 5.7z'/></svg></span> Sent</div>
+    <div class="sidebar-item active"><span class="icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7.6 1L3 8h3.1l-.6 5L11 6H7.7z'/></svg></span> Smart Triggers</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Tools</div>
+    <div class="sidebar-item"><span class="icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 1.5l1.3 3.2L11.5 6l-3.2 1.3L7 10.5 5.7 7.3 2.5 6l3.2-1.3z'/></svg></span> Guru AI</div>
+    <div class="sidebar-item"><span class="icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M2 12V7M5.5 12V3M9 12V8.5M12.5 12V5'/></svg></span> Reports</div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar">MR</div>
+    <div class="user-info">
+      <div class="name">Margaret Reyes</div>
+      <div class="role">Gift Officer</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-breadcrumb">
+      <span>My Work</span><span class="sep">›</span>
+      <span class="crumb-active">Smart Triggers</span>
+    </div>
+    <div class="topbar-actions">
+      <!-- Notification bell -->
+      <div class="notif-wrapper">
+        <div class="notif-bell" onclick="toggleNotifDropdown(event)" title="Notifications">
+          <svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 1.8a3.6 3.6 0 013.6 3.6v2.4l1 1.8H2.4l1-1.8V5.4A3.6 3.6 0 017 1.8zM5.5 11.6a1.5 1.5 0 003 0'/></svg>
+          <span class="dot"></span>
+        </div>
+        <div class="notif-dropdown" id="notif-dropdown">
+          <div class="notif-drop-header">
+            <span class="notif-drop-title">Notifications</span>
+            <span class="notif-mark-all" onclick="markAllRead()">Mark all read</span>
+          </div>
+          <div class="notif-item unread" onclick="openPreview('major'); closeNotifDropdown()">
+            <div class="notif-icon-wrap ni-draft"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M9.4 1.9l2.7 2.7M2 12l.6-2.7 6.8-6.8 2.7 2.7-6.8 6.8z'/></svg></div>
+            <div class="notif-body">
+              <div class="ntitle">Draft ready — William Andrews</div>
+              <div class="ndesc">Your "Major Gift Thank You" trigger fired on a $5,000 CMA gift. Review and send before it expires.</div>
+              <div class="ntime">2 hours ago · Expires in 1 day</div>
+            </div>
+            <div class="notif-unread-dot"></div>
+          </div>
+          <div class="notif-item unread" onclick="openPreview('anniversary'); closeNotifDropdown()">
+            <div class="notif-icon-wrap ni-draft"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M9.4 1.9l2.7 2.7M2 12l.6-2.7 6.8-6.8 2.7 2.7-6.8 6.8z'/></svg></div>
+            <div class="notif-body">
+              <div class="ntitle">Draft ready — James &amp; Catherine O'Brien</div>
+              <div class="ndesc">Anniversary trigger (3 days before). Review your draft before their anniversary on Jun 14.</div>
+              <div class="ntime">Yesterday · Expires in 2 days</div>
+            </div>
+            <div class="notif-unread-dot"></div>
+          </div>
+          <div class="notif-item" onclick="closeNotifDropdown()">
+            <div class="notif-icon-wrap ni-sent"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7.6 1L3 8h3.1l-.6 5L11 6H7.7z'/></svg></div>
+            <div class="notif-body">
+              <div class="ntitle">Auto-sent — Robert &amp; Patricia Donahue</div>
+              <div class="ndesc">First Gift Welcome sent automatically after $250 gift to Parish Annual Fund.</div>
+              <div class="ntime">Today 9:14 AM</div>
+            </div>
+          </div>
+          <div class="notif-item" onclick="closeNotifDropdown()">
+            <div class="notif-icon-wrap ni-warn"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 2l5.4 9.4H1.6z'/><path d='M7 6v2.6M7 10.2v.3'/></svg></div>
+            <div class="notif-body">
+              <div class="ntitle">Skipped — Margaret Flores</div>
+              <div class="ndesc">Birthday trigger could not fire. No email address on file. Task added to queue.</div>
+              <div class="ntime">Jun 9</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm">Pause all</button>
+      <button class="btn btn-primary btn-sm" onclick="openAddModal()">New trigger</button>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="page-header">
+      <div class="page-title">Smart Triggers</div>
+      <div class="page-desc">Configure automated acknowledgements and reminders for your donor portfolio.</div>
+    </div>
+
+    <!-- Stat strip -->
+    <div class="stat-strip">
+      <div class="stat-card">
+        <div class="label">Active rules</div>
+        <div class="value" id="stat-active-value">4</div>
+        <div class="sub" id="stat-active-sub">2 gift · 2 life event</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Sent this month</div>
+        <div class="value">23</div>
+        <div class="trend-up">↑ 8 vs last month</div>
+      </div>
+      <div class="stat-card urgent">
+        <div class="label">Drafts pending review</div>
+        <div class="value">2</div>
+        <div class="sub" style="color:var(--red)">Oldest expires in 1 day</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Avg. response time</div>
+        <div class="value">1.4h</div>
+        <div class="sub">After trigger fires</div>
+      </div>
+    </div>
+
+    <!-- ACTION QUEUE BANNER — draft notification -->
+    <div class="queue-banner" id="queue-banner">
+      <div class="queue-banner-icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M1.6 8.4V4a1.5 1.5 0 011.5-1.5h7.8A1.5 1.5 0 0112.4 4v4.4'/><path d='M1.6 8.4H4l1 1.6h4l1-1.6h2.4V11A1.5 1.5 0 0110.9 12.5H3.1A1.5 1.5 0 011.6 11z'/></svg></div>
+      <div class="queue-banner-body">
+        <div class="queue-banner-title">2 trigger drafts are waiting for your review</div>
+        <div class="queue-banner-desc">Atlas has generated these drafts based on your trigger rules. Review, personalise if needed, and send — or discard. Drafts expire after 7 days.</div>
+        <div class="queue-items">
+          <div class="queue-item">
+            <div class="queue-item-info">
+              <div class="queue-item-donor">William &amp; Eleanor Andrews</div>
+              <div class="queue-item-rule">Triggered by: Major Gift Thank You — $5,000 CMA gift</div>
+              <div class="queue-item-deadline">Expires in 1 day · Generated 2 hours ago</div>
+            </div>
+            <div class="queue-item-actions">
+              <button class="btn btn-ghost btn-sm" onclick="openPreview('major')">Review &amp; send</button>
+            </div>
+          </div>
+          <div class="queue-item">
+            <div class="queue-item-info">
+              <div class="queue-item-donor">James &amp; Catherine O'Brien</div>
+              <div class="queue-item-rule">Triggered by: Wedding Anniversary — Jun 14</div>
+              <div class="queue-item-deadline">Expires in 2 days · Generated yesterday</div>
+            </div>
+            <div class="queue-item-actions">
+              <button class="btn btn-ghost btn-sm" onclick="openPreview('anniversary')">Review &amp; send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('rules',this)">My Trigger Rules</div>
+      <div class="tab" onclick="switchTab('activity',this)">Recent Activity</div>
+      <div class="tab" onclick="switchTab('queue',this)">Action Queue <span class="tab-badge">2</span></div>
+      <div class="tab" onclick="switchTab('library',this)">Diocese Library</div>
+    </div>
+
+    <!-- Two-col layout -->
+    <div class="layout-cols">
+
+      <!-- LEFT -->
+      <div>
+
+        <!-- RULES TAB -->
+        <div id="tab-rules" class="tab-content active">
+          <div class="trig-filter" id="trig-filter">
+            <button class="tf-chip active" data-f="all" onclick="setTriggerFilter('all',this)">All</button>
+            <button class="tf-chip" data-f="gift" onclick="setTriggerFilter('gift',this)">Gift</button>
+            <button class="tf-chip" data-f="life" onclick="setTriggerFilter('life',this)">Life events</button>
+            <span class="tf-sep"></span>
+            <button class="tf-chip" data-f="active" onclick="setTriggerFilter('active',this)">Active</button>
+            <button class="tf-chip" data-f="paused" onclick="setTriggerFilter('paused',this)">Paused</button>
+          </div>
+          <div id="gift-section">
+            <div class="section-header">
+              <span class="section-title">Gift Triggers</span>
+              <span class="section-count" id="gift-count">—</span>
+            </div>
+            <div id="gift-list"></div>
+          </div>
+          <div id="life-section">
+            <div class="section-header" style="margin-top:20px">
+              <span class="section-title">Life Event Triggers</span>
+              <span class="section-count" id="life-count">—</span>
+            </div>
+            <div id="life-list"></div>
+          </div>
+        </div>
+
+        <!-- ACTIVITY TAB -->
+        <div id="tab-activity" class="tab-content">
+          <div class="section-header">
+            <span class="section-title">Trigger activity</span>
+            <span class="section-count">Last 30 days</span>
+          </div>
+          <div class="panel"><div class="panel-body" style="padding:0 18px">
+            <div class="activity-item">
+              <div class="activity-dot dot-sent"></div>
+              <div class="activity-text"><span class="donor">Robert &amp; Patricia Donahue</span> — First Gift Welcome sent automatically<br><span class="atime">Today 9:14 AM · Gift $250 · Parish Annual Fund</span></div>
+              <span class="ab ab-sent">Sent</span>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot dot-draft"></div>
+              <div class="activity-text"><span class="donor">William &amp; Eleanor Andrews</span> — Major Gift Thank You draft created<br><span class="atime">Yesterday 4:02 PM · Gift $5,000 · CMA 2026 · <strong style="color:var(--red)">Pending your review</strong></span></div>
+              <span class="ab ab-draft">Draft pending</span>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot dot-sent"></div>
+              <div class="activity-text"><span class="donor">Thomas Kowalski</span> — Birthday Greeting sent automatically<br><span class="atime">Jun 9 · Date of birth on file</span></div>
+              <span class="ab ab-sent">Sent</span>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot dot-draft"></div>
+              <div class="activity-text"><span class="donor">James &amp; Catherine O'Brien</span> — Wedding Anniversary draft created<br><span class="atime">Jun 9 · Anniversary Jun 14 · <strong style="color:var(--red)">Pending your review</strong></span></div>
+              <span class="ab ab-draft">Draft pending</span>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot dot-skip"></div>
+              <div class="activity-text"><span class="donor">Margaret Flores</span> — Birthday Greeting skipped<br><span class="atime">Jun 7 · No email address on file · Task created in queue</span></div>
+              <span class="ab ab-skip">Skipped</span>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot dot-sent"></div>
+              <div class="activity-text"><span class="donor">Frank &amp; Diane Castellano</span> — First Gift Welcome sent automatically<br><span class="atime">Jun 5 · Gift $100 · Parish Annual Fund</span></div>
+              <span class="ab ab-sent">Sent</span>
+            </div>
+          </div></div>
+        </div>
+
+        <!-- ACTION QUEUE TAB -->
+        <div id="tab-queue" class="tab-content">
+          <div class="section-header">
+            <span class="section-title">Drafts awaiting review</span>
+            <span class="section-count">2 pending</span>
+          </div>
+          <div class="callout callout-amber" style="margin-bottom:16px">
+            <span></span>
+            <span>Drafts not reviewed within <strong>3 days</strong> escalate to a reminder. After 7 days they expire automatically and are logged as unsent.</span>
+          </div>
+
+          <!-- Draft 1 -->
+          <div class="panel" style="margin-bottom:12px">
+            <div class="panel-header">
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--navy)">William &amp; Eleanor Andrews</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:2px">Major Gift Thank You — $5,000 · CMA 2026 · Jun 9, 4:02 PM</div>
+              </div>
+              <span class="pill pill-red" style="flex-shrink:0">Expires in 1 day</span>
+            </div>
+            <div class="panel-body" style="padding:14px 18px">
+              <div style="font-size:12px;color:var(--text);line-height:1.6;border-left:3px solid var(--border);padding-left:12px;margin-bottom:12px;color:var(--muted);font-style:italic">
+                "Dear William, I wanted to reach out personally to thank you for your remarkable gift of $5,000 to the CMA 2026…"
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-ghost btn-sm btn-red" onclick="dismissDraft(1)">Discard</button>
+                <button class="btn btn-ghost btn-sm btn-navy" onclick="openPreview('major')">Edit draft</button>
+                <button class="btn btn-sm btn-green" onclick="sendDraft(1)">Send now</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Draft 2 -->
+          <div class="panel" id="draft-2-panel">
+            <div class="panel-header">
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--navy)">James &amp; Catherine O'Brien</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:2px">Wedding Anniversary · Jun 14 · Generated Jun 9</div>
+              </div>
+              <span class="pill pill-blue" style="flex-shrink:0">Expires in 2 days</span>
+            </div>
+            <div class="panel-body" style="padding:14px 18px">
+              <div style="font-size:12px;color:var(--muted);line-height:1.6;border-left:3px solid var(--border);padding-left:12px;margin-bottom:12px;font-style:italic">
+                "Dear Catherine and James, Congratulations on your wedding anniversary! We are so grateful for your partnership with the Diocese…"
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-ghost btn-sm btn-red" onclick="dismissDraft(2)">Discard</button>
+                <button class="btn btn-ghost btn-sm btn-navy" onclick="openPreview('anniversary')">Edit draft</button>
+                <button class="btn btn-sm btn-green" onclick="sendDraft(2)">Send now</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LIBRARY TAB -->
+        <div id="tab-library" class="tab-content">
+          <div class="callout callout-amber" style="margin-bottom:16px">
+            <span></span>
+            <span>Templates published by the Diocese Communications Office. Copy one as a starting point for your own trigger rule.</span>
+          </div>
+          <div class="trigger-card">
+            <div class="trigger-card-top">
+              <div class="trigger-icon gift"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M3 1.5h5l3 3v8H3z'/><path d='M8 1.5v3h3M5 7.5h4M5 9.8h3'/></svg></div>
+              <div class="trigger-meta">
+                <div class="trigger-name">CMA Thank You (Standard)</div>
+                <div class="trigger-cond">Approved for all CMA gift acknowledgements</div>
+              </div>
+            </div>
+            <div class="trigger-pills"><span class="pill pill-gold">Gift trigger</span><span class="pill pill-gray">Diocese template</span></div>
+            <div class="trigger-card-bottom">
+              <span class="trigger-stat">Used by <strong>12</strong> officers</span>
+              <div class="trigger-actions">
+                <button class="btn btn-ghost btn-sm">Preview</button>
+                <button class="btn btn-primary btn-sm" onclick="openAddModal()">Copy &amp; create rule</button>
+              </div>
+            </div>
+          </div>
+          <div class="trigger-card">
+            <div class="trigger-card-top">
+              <div class="trigger-icon life"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 1.5v10M3.6 4.6h6.8'/></svg></div>
+              <div class="trigger-meta">
+                <div class="trigger-name">Patron Saint Feast Day</div>
+                <div class="trigger-cond">Approved for feast day greetings</div>
+              </div>
+            </div>
+            <div class="trigger-pills"><span class="pill pill-teal">Life event</span><span class="pill pill-gray">Diocese template</span></div>
+            <div class="trigger-card-bottom">
+              <span class="trigger-stat">Used by <strong>5</strong> officers</span>
+              <div class="trigger-actions">
+                <button class="btn btn-ghost btn-sm">Preview</button>
+                <button class="btn btn-primary btn-sm" onclick="openAddModal()">Copy &amp; create rule</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end LEFT -->
+
+      <!-- RIGHT: Quick preview panel -->
+      <div>
+        <div class="panel" id="right-panel">
+          <div class="panel-header">
+            <span class="panel-title" id="right-panel-title">Select a trigger to preview</span>
+          </div>
+          <div class="panel-body" id="right-panel-body">
+            <div class="empty-state">
+              <div class="es-icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M1 7s2.4-4 6-4 6 4 6 4-2.4 4-6 4-6-4-6-4z'/><circle cx='7' cy='7' r='1.8'/></svg></div>
+              <div class="es-title">Email preview</div>
+              <div class="es-desc">Click any trigger rule or "Preview" button to see the email Atlas would generate for a real donor.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end layout-cols -->
+  </div><!-- end page -->
+</div><!-- end main -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     ADD NEW TRIGGER MODAL
+════════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="add-modal" onclick="closeAddIfOverlay(event)">
+  <div class="modal-add">
+    <div class="modal-header">
+      <div class="modal-title">New trigger rule</div>
+      <button class="modal-close" onclick="closeAddModal()">✕</button>
+    </div>
+    <div class="modal-body" id="add-modal-body">
+
+      <!-- STEP 1: Type -->
+      <div id="add-step-1" class="step-content active">
+        <div class="stepper">
+          <div class="step active"><div class="step-dot">1</div><div class="step-label">Trigger type</div><div class="step-line"></div></div>
+          <div class="step"><div class="step-dot">2</div><div class="step-label">Conditions</div><div class="step-line"></div></div>
+          <div class="step"><div class="step-dot">3</div><div class="step-label">Template</div><div class="step-line"></div></div>
+          <div class="step"><div class="step-dot">4</div><div class="step-label">Send mode</div></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">What should trigger this rule?</label>
+          <div class="type-chooser">
+            <div class="type-option selected" id="add-type-gift" onclick="selectAddType('gift')">
+              <div class="type-icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='5.6' width='10' height='6.4' rx='1'/><path d='M1.3 5.6h11.4M7 5.6V12M7 5.6C7 3.6 5.6 2.2 4.4 2.8 3.5 3.2 4.1 5 7 5.6zM7 5.6C7 3.6 8.4 2.2 9.6 2.8c.9.4.3 2.2-2.6 2.8z'/></svg></div>
+              <div class="type-label">Gift received</div>
+              <div class="type-desc">Fires when a qualifying gift posts to a donor record you manage</div>
+            </div>
+            <div class="type-option" id="add-type-life" onclick="selectAddType('life')">
+              <div class="type-icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><rect x='1.8' y='2.6' width='10.4' height='9.4' rx='1.5'/><path d='M1.8 5.4h10.4M4.5 1.5v2.2M9.5 1.5v2.2'/></svg></div>
+              <div class="type-label">Life event</div>
+              <div class="type-desc">Fires on a birthday, anniversary, giving anniversary, or feast day</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2a: Gift conditions -->
+      <div id="add-step-2-gift" class="step-content">
+        <div class="stepper">
+          <div class="step done"><div class="step-dot">✓</div><div class="step-label">Trigger type</div><div class="step-line"></div></div>
+          <div class="step active"><div class="step-dot">2</div><div class="step-label">Conditions</div><div class="step-line"></div></div>
+          <div class="step"><div class="step-dot">3</div><div class="step-label">Template</div><div class="step-line"></div></div>
+          <div class="step"><div class="step-dot">4</div><div class="step-label">Send mode</div></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Minimum gift amount</label>
+          <div class="input-prefix"><span>$</span><input type="number" value="1000" placeholder="e.g. 500"></div>
+          <div class="field-hint">Trigger fires when a gift ≥ this amount is posted to your donor portfolio</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fund (optional)</label>
+          <select class="form-control">
+            <option value="">All funds</option>
+            <option>CMA 2026</option>
+            <option>Capital Campaign</option>
+            <option>Annual Fund</option>
+            <option>Scholarship Fund</option>
+          </select>
+          <div class="field-hint">Leave blank to trigger on gifts to any fund</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Gift type</label>
+          <select class="form-control">
+            <option>All gift types</option>
+            <option>One-time gifts only</option>
+            <option>Pledge payments only</option>
+            <option>First gift to diocese only</option>
+            <option>Upgrade gifts only (larger than previous highest)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Delay before sending</label>
+          <div class="delay-row">
+            <input type="number" class="form-control" value="0" min="0" max="48">
+            <span class="delay-unit">hours after gift posts</span>
+          </div>
+          <div class="field-hint">Set to 1–2 hrs to avoid sending at midnight if a donor gives late</div>
+        </div>
+      </div>
+
+      <!-- STEP 2b: Life conditions -->
+      <div id="add-step-2-life" class="step-content">
+        <div class="stepper">
+          <div class="step done"><div class="step-dot">✓</div><div class="step-label">Trigger type</div><div class="step-line"></div></div>
+          <div class="step active"><div class="step-dot">2</div><div class="step-label">Conditions</div><div class="step-line"></div></div>
+          <div class="step"><div class="step-dot">3</div><div class="step-label">Template</div><div class="step-line"></div></div>
+          <div class="step"><div class="step-dot">4</div><div class="step-label">Send mode</div></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Life event type</label>
+          <select class="form-control">
+            <option>Birthday</option>
+            <option>Wedding anniversary</option>
+            <option>Giving anniversary (date of first gift)</option>
+            <option>Patron saint feast day</option>
+            <option>Custom milestone</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">When to send</label>
+          <div class="delay-row">
+            <input type="number" class="form-control" value="0" min="0" max="30">
+            <span class="delay-unit">days before event</span>
+          </div>
+          <div class="field-hint">Set to 0 to send on the day itself, or 3–7 to send in advance</div>
+        </div>
+        <div class="callout callout-amber">
+          <span></span>
+          <span>If a donor's date of birth or anniversary is not on file, this trigger will be skipped for that donor, and you'll receive a task in your Action Queue to follow up.</span>
+        </div>
+      </div>
+
+      <!-- STEP 3: Template -->
+      <div id="add-step-3" class="step-content">
+        <div class="stepper">
+          <div class="step done"><div class="step-dot">✓</div><div class="step-label">Trigger type</div><div class="step-line"></div></div>
+          <div class="step done"><div class="step-dot">✓</div><div class="step-label">Conditions</div><div class="step-line"></div></div>
+          <div class="step active"><div class="step-dot">3</div><div class="step-label">Template</div><div class="step-line"></div></div>
+          <div class="step"><div class="step-dot">4</div><div class="step-label">Send mode</div></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rule name <span style="color:var(--red)">*</span></label>
+          <input type="text" class="form-control" placeholder="e.g. Major Gift Thank You — $1K+">
+          <div class="field-hint">Internal label — not visible to donors</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject line <span style="color:var(--red)">*</span></label>
+          <input type="text" class="form-control" value="Thank you for your generous support">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email body <span style="color:var(--red)">*</span></label>
+          <span class="form-sub">Use <code style="background:#F1F5F9;padding:1px 5px;border-radius:3px;font-size:11px">{first_name}</code> to personalise the greeting. Keep the message warm, specific, and brief.</span>
+          <textarea class="form-control">Dear {first_name},
+
+Thank you for your generous gift to the Diocese of Fort Worth. Your support makes a real difference in the lives of the families and communities we serve together.
+
+It is a privilege to be in mission with you.
+
+With gratitude,
+Margaret Reyes
+Gift Officer, Diocese of Fort Worth</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">From name</label>
+          <input type="text" class="form-control" value="Margaret Reyes">
+          <div class="field-hint">Defaults to your name. You can override this per template.</div>
+        </div>
+      </div>
+
+      <!-- STEP 4: Send mode -->
+      <div id="add-step-4" class="step-content">
+        <div class="stepper">
+          <div class="step done"><div class="step-dot">✓</div><div class="step-label">Trigger type</div><div class="step-line"></div></div>
+          <div class="step done"><div class="step-dot">✓</div><div class="step-label">Conditions</div><div class="step-line"></div></div>
+          <div class="step done"><div class="step-dot">✓</div><div class="step-label">Template</div><div class="step-line"></div></div>
+          <div class="step active"><div class="step-dot">4</div><div class="step-label">Send mode</div></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">How should Atlas handle this trigger?</label>
+          <div class="mode-options">
+            <div class="mode-option" id="add-mode-auto" onclick="selectAddMode('auto')">
+              <div class="mode-icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7.6 1L3 8h3.1l-.6 5L11 6H7.7z'/></svg></div>
+              <div class="mode-title">Auto-send</div>
+              <div class="mode-desc">Email sends immediately when trigger fires. No review required. Best for standard acknowledgements and life event greetings.</div>
+            </div>
+            <div class="mode-option selected" id="add-mode-draft" onclick="selectAddMode('draft')">
+              <div class="mode-icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M9.4 1.9l2.7 2.7M2 12l.6-2.7 6.8-6.8 2.7 2.7-6.8 6.8z'/></svg></div>
+              <div class="mode-title">Draft for review</div>
+              <div class="mode-desc">Atlas creates a draft in your Action Queue. You review, personalise if needed, then send. Best for major gift thank yous.</div>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-blue" id="add-draft-note">
+          <span></span>
+          <div><strong>How you'll be notified:</strong> When this trigger fires, a notification bell alert appears in Atlas, and the draft is added to your Action Queue. You'll also see it on your dashboard. Drafts expire after 7 days if not actioned.</div>
+        </div>
+        <div class="callout callout-green" id="add-auto-note" style="display:none">
+          <span></span>
+          <div><strong>Auto-send guardrails:</strong> Atlas validates the template is complete before activating this rule. If a donor has no email address on file when the trigger fires, the email is skipped and a task is created in your Action Queue instead.</div>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Rule status</label>
+          <select class="form-control">
+            <option value="active">Active — start firing immediately</option>
+            <option>Paused — save but don't fire yet</option>
+          </select>
+        </div>
+      </div>
+
+    </div><!-- modal-body -->
+    <div class="modal-footer">
+      <span class="step-indicator" id="add-step-label">Step 1 of 4</span>
+      <button class="btn btn-ghost btn-sm" id="add-btn-back" onclick="addGoBack()" style="visibility:hidden">← Back</button>
+      <button class="btn btn-primary btn-sm" id="add-btn-next" onclick="addGoNext()">Next →</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     EMAIL PREVIEW MODAL
+════════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="preview-modal" onclick="closePreviewIfOverlay(event)">
+  <div class="modal-preview">
+    <div class="modal-header">
+      <div>
+        <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:3px" id="pm-eyebrow">Trigger fired — Auto-send</div>
+        <div class="modal-title" id="pm-title">First Gift Welcome</div>
+      </div>
+      <button class="modal-close" onclick="closePreviewModal()">✕</button>
+    </div>
+
+    <!-- Trigger meta row -->
+    <div class="preview-trigger-info" id="pm-meta">
+      <span class="pti-label">Donor:</span><span class="pti-val" id="pm-donor">Robert &amp; Patricia Donahue</span>
+      <span class="pti-sep">·</span>
+      <span class="pti-label">Gift:</span><span class="pti-val" id="pm-gift">$250</span>
+      <span class="pti-sep">·</span>
+      <span class="pti-label">Fund:</span><span class="pti-val" id="pm-fund">Parish Annual Fund</span>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding-top:14px">
+      <!-- Status badge -->
+      <div class="preview-badge" id="pm-badge" style="background:var(--greenl);color:var(--green)">Auto-sent · Jun 10, 9:14 AM</div>
+
+      <!-- Edit note (drafts only) -->
+      <div class="edit-note-bar" id="pm-edit-note">
+        <strong>This is a draft.</strong> Review the email below, edit the body if you'd like to personalise it, then send — or discard if you'd rather call instead.
+      </div>
+
+      <!-- Email chrome -->
+      <div class="email-wrap">
+        <div class="email-header-bar">
+          <div class="email-avatar">MR</div>
+          <div>
+            <div class="email-from-name">Margaret Reyes</div>
+            <div class="email-from-addr">mreyes@fortworthdiocese.org</div>
+          </div>
+          <div class="email-timestamp" id="pm-time">Today 9:14 AM</div>
+        </div>
+        <div class="email-fields">
+          <div class="email-field"><span class="efl">To</span><span class="efv" id="pm-to">Robert Donahue &lt;rdonahue@email.com&gt;</span></div>
+          <div class="email-field"><span class="efl">Re</span><span class="efv" id="pm-subject">Welcome to our donor family</span></div>
+        </div>
+        <div class="email-body-area" id="pm-body">
+          <p>Dear Robert,</p>
+          <p>Welcome, and thank you for your first gift to the Diocese of Fort Worth. Your support means more than you know.</p>
+          <p class="sig">With gratitude,<br>Margaret Reyes<br>Gift Officer, Diocese of Fort Worth</p>
+        </div>
+      </div>
+
+      <div class="preview-log">
+        <strong>Trigger rule:</strong> First Gift Welcome &nbsp;·&nbsp; <strong>Mode:</strong> <span id="pm-log-mode">Auto-send</span> &nbsp;·&nbsp; Logged to donor record
+      </div>
+    </div>
+
+    <!-- Footer actions -->
+    <div class="preview-footer" id="pm-footer-auto">
+      <button class="btn btn-ghost btn-sm" onclick="closePreviewModal()">Close</button>
+      <div style="margin-left:auto">
+        <a href="#" style="font-size:12px;color:var(--blue);text-decoration:none">View donor record →</a>
+      </div>
+    </div>
+    <div class="preview-footer" id="pm-footer-draft" style="display:none">
+      <button class="btn btn-sm btn-red" onclick="closePreviewModal()">Discard</button>
+      <button class="btn btn-sm btn-navy" onclick="closePreviewModal()">Edit in full</button>
+      <button class="btn btn-sm btn-green" onclick="handleSendFromPreview()">Send now</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ── TAB SWITCHING ─────────────────────────────────────────────────────────
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function showActionQueue() {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab')[2].classList.add('active');
+  document.getElementById('tab-queue').classList.add('active');
+}
+
+// ── NOTIFICATION DROPDOWN ─────────────────────────────────────────────────
+function toggleNotifDropdown(e) {
+  e.stopPropagation();
+  document.getElementById('notif-dropdown').classList.toggle('open');
+}
+function closeNotifDropdown() {
+  document.getElementById('notif-dropdown').classList.remove('open');
+}
+function markAllRead() {
+  document.querySelectorAll('.notif-item.unread').forEach(i => i.classList.remove('unread'));
+  document.querySelectorAll('.notif-unread-dot').forEach(d => d.remove());
+  closeNotifDropdown();
+}
+document.addEventListener('click', () => closeNotifDropdown());
+
+// ── RIGHT PANEL QUICK PREVIEW ─────────────────────────────────────────────
+const previews = {
+  major: {
+    eyebrow: 'Draft for review',
+    title: 'Major Gift Thank You — $5,000+',
+    donor: 'William &amp; Eleanor Andrews', gift: '$5,000', fund: 'CMA 2026',
+    badge: 'Draft created · Jun 9, 4:02 PM',
+    badgeBg: 'var(--bluel)', badgeColor: 'var(--blue)',
+    isDraft: true,
+    to: 'William Andrews &lt;wandrews@email.com&gt;',
+    subject: 'Thank you for your extraordinary generosity',
+    time: 'Jun 9, 4:02 PM',
+    body: `<p>Dear William,</p><p>I wanted to reach out personally to thank you for your remarkable gift of $5,000 to the CMA 2026. Generosity at this level makes a profound difference — it directly funds Catholic education, social services, and pastoral care across our entire diocese.</p><p>Your commitment to this mission is something I deeply appreciate, and I would love the opportunity to share more about the impact your gift will have. I will be in touch soon.</p><p class="sig">With deep gratitude,<br>Margaret Reyes<br>Gift Officer, Diocese of Fort Worth<br>mreyes@fortworthdiocese.org · (817) 560-3300</p>`,
+    logMode: 'Draft for review',
+    metaType: 'gift'
+  },
+  first: {
+    eyebrow: 'Auto-sent — First Gift',
+    title: 'First Gift Welcome',
+    donor: 'Robert &amp; Patricia Donahue', gift: '$250', fund: 'Parish Annual Fund',
+    badge: 'Auto-sent · Jun 10, 9:14 AM',
+    badgeBg: 'var(--greenl)', badgeColor: 'var(--green)',
+    isDraft: false,
+    to: 'Robert Donahue &lt;rdonahue@email.com&gt;',
+    subject: 'Welcome to our donor family',
+    time: 'Today 9:14 AM',
+    body: `<p>Dear Robert,</p><p>Welcome, and thank you for your first gift to the Diocese of Fort Worth. Your support of $250 to the Parish Annual Fund means more than you know — it goes directly to the families and communities we serve.</p><p>We are so glad you are part of this mission. If you ever have questions about your giving or would like to learn more about our work, please reach out anytime.</p><p class="sig">With gratitude,<br>Margaret Reyes<br>Gift Officer, Diocese of Fort Worth<br>mreyes@fortworthdiocese.org · (817) 560-3300</p>`,
+    logMode: 'Auto-send',
+    metaType: 'gift'
+  },
+  birthday: {
+    eyebrow: 'Auto-sent — Birthday',
+    title: 'Birthday Greeting',
+    donor: 'Thomas Kowalski', gift: null, fund: 'Life event',
+    badge: 'Auto-sent · Jun 9, 8:00 AM',
+    badgeBg: 'var(--teall)', badgeColor: 'var(--teal)',
+    isDraft: false,
+    to: 'Thomas Kowalski &lt;tkowalski@email.com&gt;',
+    subject: 'Wishing you a blessed birthday',
+    time: 'Jun 9, 8:00 AM',
+    body: `<p>Dear Thomas,</p><p>Wishing you a very happy birthday and a day filled with joy. Thank you for your continued generosity and your friendship to our diocese — it means the world to all of us.</p><p>Many blessings to you today and always.</p><p class="sig">Warmly,<br>Margaret Reyes<br>Gift Officer, Diocese of Fort Worth</p>`,
+    logMode: 'Auto-send',
+    metaType: 'life'
+  },
+  anniversary: {
+    eyebrow: 'Draft for review — Anniversary',
+    title: 'Wedding Anniversary',
+    donor: 'James &amp; Catherine O\'Brien', gift: null, fund: 'Life event · Jun 14',
+    badge: 'Draft created · Jun 9 · Expires in 2 days',
+    badgeBg: 'var(--purpl)', badgeColor: 'var(--purple)',
+    isDraft: true,
+    to: 'Catherine O\'Brien &lt;cobrien@email.com&gt;',
+    subject: 'Congratulations on your anniversary',
+    time: 'Jun 9 (scheduled)',
+    body: `<p>Dear Catherine and James,</p><p>Congratulations on your wedding anniversary! We are so grateful for your partnership with the Diocese of Fort Worth and for the example of faith and family you set for all of us.</p><p>May God bless you with many more years of love and joy together.</p><p class="sig">With warm regards,<br>Margaret Reyes<br>Gift Officer, Diocese of Fort Worth</p>`,
+    logMode: 'Draft for review',
+    metaType: 'life'
+  }
+};
+
+// Right-panel inline preview
+function openPreview(key) {
+  const p = (typeof key==='string') ? previews[key] : key;
+  const fkey = (typeof key==='string') ? key : '__gen';
+  if (fkey==='__gen') window.__genPreview = p;
+  const panel = document.getElementById('right-panel');
+  const title = document.getElementById('right-panel-title');
+  const body = document.getElementById('right-panel-body');
+
+  title.textContent = 'Email preview';
+
+  const metaHtml = p.metaType === 'gift'
+    ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="pill pill-gray">Donor: <strong style="color:var(--navy)">${p.donor.replace(/&amp;/g,'&')}</strong></span>
+        <span class="pill pill-gold">Gift: ${p.gift}</span>
+        <span class="pill pill-gray">${p.fund}</span>
+       </div>`
+    : `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="pill pill-gray">Donor: <strong style="color:var(--navy)">${p.donor.replace(/&amp;/g,'&')}</strong></span>
+        <span class="pill pill-teal">${p.fund}</span>
+       </div>`;
+
+  const draftBar = p.isDraft
+    ? `<div style="background:var(--bluel);border:1px solid #BFDBFE;border-radius:7px;padding:9px 12px;font-size:11.5px;color:#1E40AF;margin-bottom:12px;line-height:1.5"><strong>Draft awaiting your review.</strong> Use the full preview to edit and send.</div>` : '';
+
+  body.innerHTML = `
+    ${metaHtml}
+    <div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;background:${p.badgeBg};color:${p.badgeColor};margin-bottom:12px">${p.badge}</div>
+    ${draftBar}
+    <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px">
+      <div style="background:var(--navy);padding:10px 14px;display:flex;align-items:center;gap:8px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;flex-shrink:0">MR</div>
+        <div>
+          <div style="color:rgba(255,255,255,.9);font-size:12px;font-weight:500">Margaret Reyes</div>
+          <div style="color:rgba(255,255,255,.35);font-size:10.5px">mreyes@fortworthdiocese.org</div>
+        </div>
+        <div style="margin-left:auto;font-size:10.5px;color:rgba(255,255,255,.3)">${p.time}</div>
+      </div>
+      <div style="padding:8px 14px;background:#FAFAFA;border-bottom:1px solid var(--border);font-size:11.5px">
+        <div style="display:flex;gap:6px;margin-bottom:3px"><span style="color:var(--muted);width:20px">To</span><span>${p.to}</span></div>
+        <div style="display:flex;gap:6px"><span style="color:var(--muted);width:20px">Re</span><span style="color:var(--text)">${p.subject}</span></div>
+      </div>
+      <div style="padding:14px;font-size:12.5px;line-height:1.7;color:var(--text)">${p.body}</div>
+    </div>
+    <div style="font-size:10.5px;color:var(--muted);margin-bottom:14px">
+      <strong style="color:var(--text)">Rule:</strong> ${p.title} &nbsp;·&nbsp; <strong style="color:var(--text)">Mode:</strong> ${p.logMode}
+    </div>
+    <div style="display:flex;gap:8px">
+      ${p.isDraft
+        ? `<button class="btn btn-sm btn-red" onclick="closeRightPanel()">Discard</button>
+           <button class="btn btn-sm btn-navy" onclick="openFullPreview('${fkey}')">Edit &amp; send</button>`
+        : `<button class="btn btn-sm btn-ghost" onclick="openFullPreview('${fkey}')">Open full view</button>`
+      }
+    </div>`;
+}
+
+function closeRightPanel() {
+  document.getElementById('right-panel-body').innerHTML = `
+    <div class="empty-state">
+      <div class="es-icon"><svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M1 7s2.4-4 6-4 6 4 6 4-2.4 4-6 4-6-4-6-4z'/><circle cx='7' cy='7' r='1.8'/></svg></div>
+      <div class="es-title">Email preview</div>
+      <div class="es-desc">Click any trigger rule or "Preview" button to see the email Atlas would generate for a real donor.</div>
+    </div>`;
+  document.getElementById('right-panel-title').textContent = 'Select a trigger to preview';
+}
+
+// Full-screen preview modal
+function openFullPreview(key) {
+  const p = (key==='__gen') ? window.__genPreview : previews[key];
+  document.getElementById('pm-eyebrow').textContent = p.eyebrow;
+  document.getElementById('pm-title').textContent = p.title;
+  document.getElementById('pm-donor').innerHTML = p.donor;
+  document.getElementById('pm-to').innerHTML = p.to;
+  document.getElementById('pm-subject').textContent = p.subject;
+  document.getElementById('pm-time').textContent = p.time;
+  document.getElementById('pm-body').innerHTML = p.body;
+  document.getElementById('pm-log-mode').textContent = p.logMode;
+
+  const badge = document.getElementById('pm-badge');
+  badge.textContent = p.badge;
+  badge.style.background = p.badgeBg;
+  badge.style.color = p.badgeColor;
+
+  // Gift vs life meta
+  if (p.metaType === 'gift') {
+    document.getElementById('pm-meta').innerHTML = `
+      <span class="pti-label">Donor:</span><span class="pti-val">${p.donor}</span>
+      <span class="pti-sep">·</span>
+      <span class="pti-label">Gift:</span><span class="pti-val">${p.gift}</span>
+      <span class="pti-sep">·</span>
+      <span class="pti-label">Fund:</span><span class="pti-val">${p.fund}</span>`;
+  } else {
+    document.getElementById('pm-meta').innerHTML = `
+      <span class="pti-label">Donor:</span><span class="pti-val">${p.donor}</span>
+      <span class="pti-sep">·</span>
+      <span class="pti-label">Event:</span><span class="pti-val">${p.fund}</span>`;
+  }
+
+  document.getElementById('pm-edit-note').style.display = p.isDraft ? 'block' : 'none';
+  document.getElementById('pm-footer-auto').style.display = p.isDraft ? 'none' : 'flex';
+  document.getElementById('pm-footer-draft').style.display = p.isDraft ? 'flex' : 'none';
+
+  document.getElementById('preview-modal').classList.add('open');
+}
+
+function closePreviewModal() {
+  document.getElementById('preview-modal').classList.remove('open');
+}
+function closePreviewIfOverlay(e) {
+  if (e.target === document.getElementById('preview-modal')) closePreviewModal();
+}
+function handleSendFromPreview() {
+  closePreviewModal();
+  showToast('Email sent to donor');
+}
+
+// ── ADD TRIGGER MODAL ─────────────────────────────────────────────────────
+let addStep = 1;
+let addType = 'gift';
+
+function openAddModal() {
+  addStep = 1;
+  addType = 'gift';
+  showAddStep(1);
+  document.getElementById('add-modal').classList.add('open');
+}
+function closeAddModal() {
+  document.getElementById('add-modal').classList.remove('open');
+}
+function closeAddIfOverlay(e) {
+  if (e.target === document.getElementById('add-modal')) closeAddModal();
+}
+
+function showAddStep(n) {
+  addStep = n;
+  document.querySelectorAll('#add-modal-body .step-content').forEach(s => s.classList.remove('active'));
+
+  if (n === 1) document.getElementById('add-step-1').classList.add('active');
+  else if (n === 2) document.getElementById('add-step-2-' + addType).classList.add('active');
+  else if (n === 3) document.getElementById('add-step-3').classList.add('active');
+  else if (n === 4) document.getElementById('add-step-4').classList.add('active');
+
+  document.getElementById('add-step-label').textContent = 'Step ' + n + ' of 4';
+  document.getElementById('add-btn-back').style.visibility = n > 1 ? 'visible' : 'hidden';
+  document.getElementById('add-btn-next').textContent = n < 4 ? 'Next →' : '✓ Activate trigger';
+}
+
+function addGoNext() {
+  if (addStep < 4) showAddStep(addStep + 1);
+  else {
+    closeAddModal();
+    showToast('✓ Trigger rule activated');
+  }
+}
+function addGoBack() {
+  if (addStep > 1) showAddStep(addStep - 1);
+}
+function selectAddType(t) {
+  addType = t;
+  document.getElementById('add-type-gift').classList.toggle('selected', t === 'gift');
+  document.getElementById('add-type-life').classList.toggle('selected', t === 'life');
+}
+function selectAddMode(m) {
+  document.getElementById('add-mode-auto').classList.toggle('selected', m === 'auto');
+  document.getElementById('add-mode-draft').classList.toggle('selected', m === 'draft');
+  document.getElementById('add-draft-note').style.display = m === 'draft' ? 'flex' : 'none';
+  document.getElementById('add-auto-note').style.display = m === 'auto' ? 'flex' : 'none';
+}
+
+// ── ACTION QUEUE ACTIONS ──────────────────────────────────────────────────
+function dismissDraft(n) {
+  const panel = document.getElementById('draft-2-panel');
+  if (n === 2 && panel) {
+    panel.style.opacity = '0.4';
+    panel.style.pointerEvents = 'none';
+  }
+  showToast('Draft discarded');
+  updateBadges();
+}
+function sendDraft(n) {
+  showToast('Email sent successfully');
+  updateBadges();
+}
+function updateBadges() {
+  // Update the red stat card
+  const urg = document.querySelector('.stat-card.urgent .value');
+  if (urg) { let v = parseInt(urg.textContent); if (v > 0) urg.textContent = v - 1; }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position:'fixed', bottom:'28px', left:'50%', transform:'translateX(-50%)',
+    background:'#15803D', color:'white', padding:'10px 20px', borderRadius:'8px',
+    fontSize:'13px', fontWeight:'500', zIndex:'200',
+    boxShadow:'0 4px 12px rgba(0,0,0,.2)', transition:'opacity .3s',
+    fontFamily:'DM Sans, sans-serif', whiteSpace:'nowrap'
+  });
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+}
+
+// ── SMART TRIGGER CATALOGUE (from "ATLAS Donor Tags & Seg" sheet) ──────────
+const TRIGGERS = [
+  {cat:'gift', name:'Major Gift Thank You — $5000+', cond:'Gift ≥ $5,000 · All funds · One-time & pledge', mode:'Draft for review', status:'Active', tag:'≥ $5,000', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='5.6' width='10' height='6.4' rx='1'/><path d='M1.3 5.6h11.4M7 5.6V12M7 5.6C7 3.6 5.6 2.2 4.4 2.8 3.5 3.2 4.1 5 7 5.6zM7 5.6C7 3.6 8.4 2.2 9.6 2.8c.9.4.3 2.2-2.6 2.8z'/></svg>", previewKey:'major', why:"Major donors expect personal acknowledgement within hours. Ensures no $5,000+ gift goes unrecognized at the most sensitive moment in the relationship."},
+  {cat:'gift', name:'Mid-Level Gift Thank You — $1000+', cond:'Gift ≥ $1,000 and < $5,000 · All funds · One-time & pledge', mode:'Draft for review', status:'Active', tag:'$1,000–$4,999', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 11.8C2.6 8.7 1.6 6.3 2.7 4.3 3.6 2.7 6 2.8 7 4.6 8 2.8 10.4 2.7 11.3 4.3c1.1 2 .1 4.4-4.3 7.5z'/></svg>", why:"Mid-level donors are your pipeline to major gifts. A timely thank you at this tier significantly increases likelihood of a gift upgrade."},
+  {cat:'gift', name:'First Gift Welcome', cond:'First ever gift to diocese · Any amount', mode:'Auto-send · 2hr delay', status:'Active', tag:'First gift', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 1.6l1.6 3.5 3.8.4-2.9 2.6.8 3.7L7 10.3 3.7 12.4l.8-3.7L1.6 5.5l3.8-.4z'/></svg>", previewKey:'first', why:"A donor's first gift is the highest-risk moment. Without a warm prompt welcome up to 70% of first-time donors never give again."},
+  {cat:'gift', name:'Pledge Fulfilled', cond:'Pledge 100% paid · CMA 2026 · Any amount', mode:'Draft for review', status:'Active', tag:'Pledge 100%', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><circle cx='7' cy='7' r='5.4'/><path d='M4.6 7.2l1.7 1.7 3.1-3.6'/></svg>", why:"Completing a multi-payment pledge deserves personal recognition — not just a receipt. Opens the natural conversation about renewing next cycle."},
+  {cat:'gift', name:'Recurring Gift Started', cond:'New recurring schedule created via GiveCentral · Any amount', mode:'Auto-send · 1hr delay', status:'Active', tag:'New recurring', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M2 7a5 5 0 018-3.4M12 7a5 5 0 01-8 3.4M9.6 3.6H12V1.2M4.4 10.4H2V12.8'/></svg>", why:"Recurring donors retain at far higher rates. Welcoming a new schedule immediately reduces early cancellation."},
+  {cat:'gift', name:'Stock / Securities Gift', cond:'Non-cash asset donation received · Any fund · Soft-credit ack only', mode:'Draft for review', status:'Active', tag:'Stock / non-cash', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M2 9.5l3-3 2 2 4-4.4M9 4.1h2.5v2.5'/></svg>", why:"Prompt acknowledgement without a dollar amount reflects sophistication and encourages repeat non-cash giving from high-net-worth donors."},
+  {cat:'gift', name:'DAF Distribution Received', cond:'Donor-advised fund gift · Any amount · Soft-credit acknowledgement only', mode:'Draft for review', status:'Active', tag:'DAF', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 1.6l5.4 3H1.6zM2.6 5.1v5.4M5.2 5.1v5.4M8.8 5.1v5.4M11.4 5.1v5.4M1.6 11.8h10.8'/></svg>", why:"Correct soft-credit language (never a tax receipt) shows you understand their giving vehicle and builds trust for future distributions."},
+  {cat:'gift', name:'Major Giving Upgrade (2×)', cond:"Gift is 2× or more than donor's previous largest gift · Any fund", mode:'Draft for review', status:'Active', tag:'2× upgrade', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 12V2.6M3.6 6L7 2.6 10.4 6'/></svg>", why:"A significant gift increase signals deeper commitment. Recognizing it at the moment it happens strengthens the relationship when the donor is most engaged."},
+  {cat:'gift', name:'Lapsed Major Donor', cond:'No gift in 18+ months · Lifetime giving ≥ $10,000', mode:'Draft for review', status:'Active', tag:'Lapsed 18mo+', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><circle cx='7' cy='7' r='5.3'/><path d='M7 4v3.2l2.1 1.3'/></svg>", why:"Donors who lapse without personal re-engagement are far more likely to redirect giving elsewhere. This fires before the relationship goes cold."},
+  {cat:'gift', name:'Year-End Gift Thank You', cond:'Gift received in December · Any amount · Holiday stewardship', mode:'Auto-send', status:'Paused', tag:'December', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='5.6' width='10' height='6.4' rx='1'/><path d='M1.3 5.6h11.4M7 5.6V12M7 5.6C7 3.6 5.6 2.2 4.4 2.8 3.5 3.2 4.1 5 7 5.6zM7 5.6C7 3.6 8.4 2.2 9.6 2.8c.9.4.3 2.2-2.6 2.8z'/></svg>", why:"Year-end donors are motivated by values not just tax deadlines. A warm holiday acknowledgement reinforces the emotional connection and seeds next year's gift."},
+
+  {cat:'life', name:'Birthday Greeting', cond:'Date of birth · On the day · Donors with ≥ $500 lifetime giving', mode:'Draft for review', status:'Active', tag:'On birthday', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M2 12.4h10M2.6 12.4V8h8.8v4.4M2.6 8c0-.9.9-1.5 2.1-1.5S6.8 8 7 8s.3-1.5 2.3-1.5S11.4 7.1 11.4 8M7 5.9V3.6M7 3.6l.8-1-.8-1-.8 1z'/></svg>", previewKey:'birthday', why:"Signals you see them as a person not a record. Donors who receive birthday outreach have measurably higher year-over-year retention."},
+  {cat:'life', name:'Wedding Anniversary', cond:'Marriage date · 3 days before · Household donors', mode:'Draft for review', status:'Paused', tag:'3 days before', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><circle cx='5' cy='8' r='3.1'/><circle cx='9' cy='8' r='3.1'/></svg>", previewKey:'anniversary', why:"Deepens the household relationship. One of the most cited personal touchpoints by major donor couples — and one no other CRM makes automatic."},
+  {cat:'life', name:'Giving Anniversary', cond:'First gift date · On the day · Milestone years (1/5/10/25/50)', mode:'Auto-send', status:'Active', tag:'Milestone yrs', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><rect x='1.8' y='2.6' width='10.4' height='9.4' rx='1.5'/><path d='M1.8 5.4h10.4M4.5 1.5v2.2M9.5 1.5v2.2'/></svg>", why:"Converts a transactional history into a legacy narrative. The single most effective trigger for prompting planned and estate gift conversations."},
+  {cat:'life', name:'Ordination Anniversary', cond:'Ordination date · 7 days before · Clergy donors · Every 5 years', mode:'Draft for review', status:'Active', tag:'Clergy · 5yr', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 1.5v10M3.6 4.6h6.8'/></svg>", why:"Clergy give despite modest incomes. Recognizing their vocation reinforces the bond between the development office and the presbyterate."},
+  {cat:'life', name:'Patron Saint Feast Day', cond:'Feast day · On the day · Based on patron_saint field', mode:'Auto-send', status:'Paused', tag:'Patron saint', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 1.5l1.3 3.2L11.5 6l-3.2 1.3L7 10.5 5.7 7.3 2.5 6l3.2-1.3z'/></svg>", why:"No other CRM tracks this field. A uniquely Catholic differentiator that Raiser's Edge Virtuous and Bloomerang cannot replicate."},
+  {cat:'life', name:'Milestone Birthday', cond:'60th, 70th, 75th, 80th, 90th, or 100th birthday · 7 days before', mode:'Draft for review', status:'Active', tag:'60/70/80/90', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><circle cx='7' cy='5' r='3.2'/><path d='M5.1 7.7L4.1 12l2.9-1.5L9.9 12 8.9 7.7'/></svg>", why:"When donors reflect on legacy and mortality. A meaningful acknowledgement at 80 or 90 gently opens the planned giving conversation."},
+  {cat:'life', name:'Parish Feast Day', cond:"Feast day of donor's home parish · On the day · Based on parish_patron field", mode:'Auto-send', status:'Paused', tag:'Parish feast', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 1.5v3M5.6 3h2.8M2.6 12V6.6L7 4.1l4.4 2.5V12M5.6 12V9.2h2.8V12'/></svg>", why:"Ties giving to the donor's local faith home not just an abstract institution. Strengthens both parish and diocesan loyalty simultaneously."},
+  {cat:'life', name:'Baptism Anniversary', cond:'Date of baptism · On the day · Based on baptism_date field', mode:'Auto-send', status:'Paused', tag:'Baptism', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 1.9C5.5 4 3.6 6.2 3.6 8.2a3.4 3.4 0 006.8 0C10.4 6.2 8.5 4 7 1.9z'/></svg>", why:"The foundational Catholic sacrament. Acknowledging it elevates the relationship far above a transactional donor-recipient dynamic."},
+  {cat:'life', name:"Child's Sacramental Milestone", cond:"Child's First Communion or Confirmation · Notify parent-donor · On the date", mode:'Draft for review', status:'Active', tag:'Sacrament', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 1.6C5.1 4 4.1 5.3 4.1 7.1a2.9 2.9 0 005.8 0c0-.9-.4-1.6-1-2.3-.2.9-1 1.2-1 1.2.5-1.7-.9-4.4-.9-4.4z'/></svg>", why:"A First Communion or Confirmation note makes parents feel seen as a family. Among the highest-conversion touches for mid-level household donors."},
+  {cat:'life', name:'Bereavement Outreach', cond:'Death of spouse logged on constituent record · Pastoral sympathy outreach', mode:'Draft for review', status:'Active', tag:'Bereavement', icon:"<svg viewBox='0 0 14 14' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M7 11.8C2.6 8.7 1.6 6.3 2.7 4.3 3.6 2.7 6 2.8 7 4.6 8 2.8 10.4 2.7 11.3 4.3c1.1 2 .1 4.4-4.3 7.5z'/></svg>", why:"The most vulnerable moment in a donor's life. A purely pastoral note — no ask no link — builds the quality of trust that directly influences legacy gift decisions made in grief."}
+];
+
+function triggerCard(t, idx){
+  const isGift = t.cat==='gift';
+  const modePill = /^Auto-send/.test(t.mode) ? '<span class="pill pill-green">Auto-send</span>' : '<span class="pill pill-blue">Draft for review</span>';
+  const dm = t.mode.split('·');
+  const delayPill = dm.length>1 ? '<span class="pill pill-gray">'+dm[1].trim()+'</span>' : '';
+  const pausedPill = t.status==='Paused' ? '<span class="pill pill-red">Paused</span>' : '';
+  const tagPill = '<span class="pill '+(isGift?'pill-gold':'pill-teal')+'">'+t.tag+'</span>';
+  const checked = t.status==='Active' ? ' checked' : '';
+  const call = "openTriggerPreview("+idx+")";
+  let whyShort = (t.why.split('. ')[0]);
+  if (whyShort.length>78) whyShort = whyShort.slice(0,78)+'…';
+  const statLine = t.status + ' · ' + whyShort;
+  return '<div class="trigger-card" onclick="'+call+'">'
+    + '<div class="trigger-card-top">'
+      + '<div class="trigger-icon '+(isGift?'gift':'life')+'">'+t.icon+'</div>'
+      + '<div class="trigger-meta"><div class="trigger-name">'+t.name+'</div><div class="trigger-cond">'+t.cond+'</div></div>'
+      + '<label class="toggle" onclick="event.stopPropagation()"><input type="checkbox"'+checked+' onchange="toggleTrigger(this,'+idx+')"><span class="toggle-slider"></span></label>'
+    + '</div>'
+    + '<div class="trigger-pills">'+tagPill+modePill+delayPill+pausedPill+'</div>'
+    + '<div class="trigger-card-bottom">'
+      + '<span class="trigger-stat" title="'+t.why.replace(/"/g,"&quot;")+'">'+statLine+'</span>'
+      + '<div class="trigger-actions">'
+        + '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();'+call+'">Preview</button>'
+        + '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditTrigger('+idx+')">Edit</button>'
+      + '</div>'
+    + '</div></div>';
+}
+
+function renderTriggers(){
+  const fil = window.triggerFilter || 'all';
+  const passF = t => fil==='all' || (fil==='gift'&&t.cat==='gift') || (fil==='life'&&t.cat==='life') || (fil==='active'&&t.status==='Active') || (fil==='paused'&&t.status==='Paused');
+  const allGift = TRIGGERS.filter(t=>t.cat==='gift');
+  const allLife = TRIGGERS.filter(t=>t.cat==='life');
+  const gift = allGift.filter(passF);
+  const life = allLife.filter(passF);
+  document.getElementById('gift-list').innerHTML = gift.map(t=>triggerCard(t, TRIGGERS.indexOf(t))).join('');
+  document.getElementById('life-list').innerHTML = life.map(t=>triggerCard(t, TRIGGERS.indexOf(t))).join('');
+  const gs=document.getElementById('gift-section'), ls=document.getElementById('life-section');
+  if(gs) gs.style.display = gift.length ? '' : 'none';
+  if(ls) ls.style.display = life.length ? '' : 'none';
+  const ga = allGift.filter(t=>t.status==='Active').length;
+  const la = allLife.filter(t=>t.status==='Active').length;
+  document.getElementById('gift-count').textContent = ga+' of '+allGift.length+' active';
+  document.getElementById('life-count').textContent = la+' of '+allLife.length+' active';
+  const av=document.getElementById('stat-active-value'); if(av) av.textContent = (ga+la);
+  const as=document.getElementById('stat-active-sub'); if(as) as.textContent = ga+' gift · '+la+' life event';
+}
+
+function toggleTrigger(input, idx){
+  TRIGGERS[idx].status = input.checked ? 'Active' : 'Paused';
+  renderTriggers();
+  showToast((input.checked?'✓ Activated: ':'Paused: ') + TRIGGERS[idx].name);
+}
+
+function openTriggerInfo(idx){
+  const t = TRIGGERS[idx];
+  const isAuto = /^Auto-send/.test(t.mode);
+  document.getElementById('right-panel-title').textContent = 'Trigger details';
+  document.getElementById('right-panel-body').innerHTML =
+    '<div style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:8px">'+t.icon+' '+t.name+'</div>'
+    + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">'
+      + '<span class="pill '+(t.cat==="gift"?"pill-gold":"pill-teal")+'">'+(t.cat==="gift"?"Gift trigger":"Life event")+'</span>'
+      + '<span class="pill '+(isAuto?"pill-green":"pill-blue")+'">'+(isAuto?"Auto-send":"Draft for review")+'</span>'
+      + '<span class="pill '+(t.status==="Active"?"pill-green":"pill-red")+'">'+t.status+'</span>'
+    + '</div>'
+    + '<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Condition</div>'
+    + '<div style="font-size:12.5px;color:var(--text);line-height:1.55;margin-bottom:12px">'+t.cond+'</div>'
+    + '<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Why it exists</div>'
+    + '<div style="font-size:12.5px;color:var(--text);line-height:1.6;margin-bottom:14px">'+t.why+'</div>'
+    + '<div style="background:var(--bluel);border:1px solid #BFDBFE;border-radius:7px;padding:9px 12px;font-size:11.5px;color:#1E40AF;line-height:1.5;margin-bottom:12px">No custom email template yet — the diocese default will be used until you draft one.</div>'
+    + '<button class="btn btn-primary btn-sm" onclick="openAddModal()">Set up email template</button>';
+}
+
+document.addEventListener('DOMContentLoaded', renderTriggers);
+
+
+// ── Trigger filter ──
+window.triggerFilter='all';
+function setTriggerFilter(f, el){
+  window.triggerFilter=f;
+  document.querySelectorAll('#trig-filter .tf-chip').forEach(c=>c.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderTriggers();
+}
+// ── Lightweight edit panel ──
+function openEditTrigger(idx){
+  const t=TRIGGERS[idx]; if(!t) return;
+  document.getElementById('et-idx').value=idx;
+  document.getElementById('et-name').value=t.name;
+  document.getElementById('et-cond').value=t.cond;
+  const sel=document.getElementById('et-mode');
+  if(![...sel.options].some(o=>o.value===t.mode)){ const o=document.createElement('option'); o.text=t.mode; o.value=t.mode; sel.add(o,0); }
+  sel.value=t.mode;
+  const cb=document.getElementById('et-status'); cb.checked=(t.status==='Active');
+  document.getElementById('et-status-label').textContent=cb.checked?'Active':'Paused';
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeEditModal(){ document.getElementById('edit-modal').classList.remove('open'); }
+function saveEdit(){
+  const idx=parseInt(document.getElementById('et-idx').value,10);
+  const t=TRIGGERS[idx]; if(!t) return;
+  t.name=(document.getElementById('et-name').value||'').trim()||t.name;
+  t.cond=(document.getElementById('et-cond').value||'').trim()||t.cond;
+  t.mode=document.getElementById('et-mode').value;
+  t.status=document.getElementById('et-status').checked?'Active':'Paused';
+  closeEditModal(); renderTriggers();
+  showToast('Saved: '+t.name);
+}
+document.addEventListener('change',function(e){ if(e.target && e.target.id==='et-status'){ document.getElementById('et-status-label').textContent=e.target.checked?'Active':'Paused'; }});
+// ── Generated email preview for any trigger ──
+function genPreview(t){
+  const isAuto=/^Auto-send/.test(t.mode);
+  const isGift=t.cat==='gift';
+  const subj = isGift ? 'Thank you for your generous support' : 'Thinking of you — from the Diocese of Fort Worth';
+  const line = isGift
+    ? 'Thank you for your generous support of the Diocese of Fort Worth. Your gift makes a real difference in the families and communities we serve together.'
+    : 'We are thinking of you, and are grateful for your friendship and partnership with the Diocese of Fort Worth.';
+  const body = '<p>Dear {first_name},</p><p>'+line+'</p><p>It is a privilege to be in mission with you.</p>'
+    + '<p class="sig">With gratitude,<br>Margaret Reyes<br>Gift Officer, Diocese of Fort Worth<br>mreyes@fortworthdiocese.org</p>';
+  return {
+    eyebrow: isAuto?'Auto-send':'Draft for review',
+    title: t.name, donor:'Sample Donor', gift: isGift?'$1,000':null, fund: isGift?'CMA 2026':'Life event',
+    badge: isAuto?'Auto-send · sends when the trigger fires':'Draft for review · queued for your review',
+    badgeBg: isAuto?'var(--greenl)':'var(--bluel)', badgeColor: isAuto?'var(--green)':'var(--blue)',
+    isDraft: !isAuto, to:'Sample Donor <donor@email.com>', subject: subj, time:'Sample preview',
+    body: body, logMode: isAuto?'Auto-send':'Draft for review', metaType: t.cat
+  };
+}
+function openTriggerPreview(idx){
+  const t=TRIGGERS[idx];
+  const p = (t.previewKey && previews[t.previewKey]) ? previews[t.previewKey] : genPreview(t);
+  openPreview(p);
+}
+
+</script>
+
+<div class="modal-overlay" id="edit-modal" onclick="if(event.target===this)closeEditModal()">
+  <div class="modal-add" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title">Edit trigger rule</div>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="et-idx">
+      <div class="et-field"><label>Rule name</label><input class="form-control" id="et-name"></div>
+      <div class="et-field"><label>Condition</label><input class="form-control" id="et-cond"></div>
+      <div class="et-field"><label>Delivery mode</label>
+        <select class="form-control" id="et-mode">
+          <option>Draft for review</option>
+          <option>Auto-send</option>
+          <option>Auto-send · 1hr delay</option>
+          <option>Auto-send · 2hr delay</option>
+        </select>
+      </div>
+      <div class="et-field"><label>Status</label>
+        <div class="et-toggle-row">
+          <label class="toggle"><input type="checkbox" id="et-status"><span class="toggle-slider"></span></label>
+          <span id="et-status-label" style="font-size:12.5px;color:var(--muted)">Active</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" style="margin-right:auto" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveEdit()">Save changes</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

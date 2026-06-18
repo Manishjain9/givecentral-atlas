@@ -702,17 +702,17 @@ body {
       <section class="dpanel active" data-panel="1">
         <div class="sec-h">Who are you inviting?</div>
         <div class="row2">
-          <div><span class="lbl">First name<span class="req">*</span></span><input class="fld" placeholder="e.g. Jamie" value="Jamie"></div>
-          <div><span class="lbl">Last name<span class="req">*</span></span><input class="fld" placeholder="e.g. Morrison" value="Morrison"></div>
+          <div><span class="lbl">First name<span class="req">*</span></span><input class="fld" data-field="firstName" placeholder="e.g. Jamie" value="Jamie"></div>
+          <div><span class="lbl">Last name<span class="req">*</span></span><input class="fld" data-field="lastName" placeholder="e.g. Morrison" value="Morrison"></div>
         </div>
         <div class="row2 mt-12" style="margin-top:12px">
           <div>
             <span class="lbl">Work email<span class="req">*</span></span>
-            <input class="fld" type="email" placeholder="jamie@diocese.org" value="jamie.morrison@diocese.org">
+            <input class="fld" data-field="email" type="email" placeholder="jamie@diocese.org" value="jamie.morrison@diocese.org">
           </div>
           <div>
             <span class="lbl">Title (shown on profile)</span>
-            <input class="fld" placeholder="e.g. Gift Officer" value="Gift Officer">
+            <input class="fld" data-field="title" placeholder="e.g. Gift Officer" value="Gift Officer">
           </div>
         </div>
 
@@ -720,7 +720,7 @@ body {
         <div class="row2">
           <div>
             <span class="lbl">Authentication</span>
-            <select class="fld">
+            <select class="fld" data-field="authMethod">
               <option selected>Microsoft 365 SSO (recommended for this domain)</option>
               <option>Google Workspace SSO</option>
               <option>Email + password (magic-link first sign-in)</option>
@@ -728,7 +728,7 @@ body {
           </div>
           <div>
             <span class="lbl">Two-factor</span>
-            <select class="fld">
+            <select class="fld" data-field="twoFactor">
               <option selected>Required (Atlas policy)</option>
               <option>Optional</option>
             </select>
@@ -748,50 +748,50 @@ body {
         <div class="sec-h">Pick a role</div>
         <p class="muted" style="font-size:12px;margin-top:-6px;margin-bottom:10px">Roles bundle permissions across Donors, Gifts, Campaigns, Communications, Reports, and Admin. Need something custom? <a href="atlas-role-builder.html" style="color:var(--blue);font-weight:500">Define a custom role →</a></p>
 
-        <div class="role-grid">
-          <div class="role-pick">
+        <div class="role-grid" id="role-grid">
+          <div class="role-pick" data-role-id="admin">
             <span class="role-tag-big admin">Admin</span>
             <div class="body"><div class="nm">Administrator</div><div class="desc">Full access · users &amp; roles · audit log · billing. Reserve for IT and the bishop's office.</div></div>
           </div>
-          <div class="role-pick">
+          <div class="role-pick" data-role-id="dba">
             <span class="role-tag-big dba">Database Admin</span>
             <div class="body"><div class="nm">Database Admin</div><div class="desc">Owns data quality. Gift entry · batch · receipts · parish rosters · duplicate management. Phase 1 primary persona.</div></div>
           </div>
-          <div class="role-pick">
+          <div class="role-pick" data-role-id="dev">
             <span class="role-tag-big dev">Dev Director</span>
             <div class="body"><div class="nm">Development Director / CFO</div><div class="desc">Accountable for fundraising performance · GL accuracy · receipt compliance · board reporting.</div></div>
           </div>
-          <div class="role-pick on">
+          <div class="role-pick on" data-role-id="officer">
             <span class="role-tag-big officer">Gift Officer</span>
             <div class="body"><div class="nm">Gift Officer (recommended for Jamie)</div><div class="desc">Carries 75–150 prospects · pipeline visibility · pre-meeting briefs · log activity. <strong>Cannot</strong> post batches or change campaigns.</div></div>
           </div>
-          <div class="role-pick">
+          <div class="role-pick" data-role-id="read">
             <span class="role-tag-big read">Read-only</span>
             <div class="body"><div class="nm">Read-only</div><div class="desc">View any record · cannot create, edit, or send communications.</div></div>
           </div>
-          <div class="role-pick">
+          <div class="role-pick" data-role-id="custom" id="role-pick-custom">
             <span class="role-tag-big custom">Custom</span>
-            <div class="body"><div class="nm">Custom role…</div><div class="desc">Build your own permission matrix in <a href="atlas-role-builder.html" style="color:var(--blue);font-weight:500">role builder</a>.</div></div>
+            <div class="body"><div class="nm">Custom role…</div><div class="desc">Build your own permission matrix in <a href="#" onclick="event.preventDefault();document.getElementById('role-pick-custom').click();return false;" style="color:var(--blue);font-weight:500">role builder</a>.</div></div>
           </div>
         </div>
 
         <div class="sec-h">Legal-entity scope</div>
         <p class="muted" style="font-size:12px;margin-top:-6px;margin-bottom:10px">Pick which entities Jamie can see and act on. Funds outside this scope will be invisible to them.</p>
 
-        <div class="scope-grid">
-          <div class="scope-card on">
+        <div class="scope-grid" id="scope-grid">
+          <div class="scope-card on" data-scope-id="diocese">
             <div class="check">✓</div>
             <div><div class="nm">Diocese of Albany</div><div class="ein">EIN 14-•••2401 · primary tenant</div></div>
           </div>
-          <div class="scope-card on">
+          <div class="scope-card on" data-scope-id="foundation">
             <div class="check">✓</div>
             <div><div class="nm">Diocesan Foundation</div><div class="ein">EIN 14-•••8847</div></div>
           </div>
-          <div class="scope-card">
+          <div class="scope-card" data-scope-id="charities">
             <div class="check"></div>
             <div><div class="nm">Catholic Charities</div><div class="ein">EIN 14-•••5512</div></div>
           </div>
-          <div class="scope-card">
+          <div class="scope-card" data-scope-id="scholarship">
             <div class="check"></div>
             <div><div class="nm">Scholarship Foundation</div><div class="ein">EIN 14-•••9201</div></div>
           </div>
@@ -801,7 +801,7 @@ body {
         <div class="row2">
           <div>
             <span class="lbl">Auto-assign starter portfolio?</span>
-            <select class="fld">
+            <select class="fld" data-field="starterPortfolio">
               <option>No · Jamie picks their own prospects</option>
               <option selected>Yes · 5 unassigned LYBUNT donors at Cathedral Restoration</option>
               <option>Custom segment…</option>
@@ -809,7 +809,7 @@ body {
           </div>
           <div>
             <span class="lbl">Create welcome tasks?</span>
-            <select class="fld">
+            <select class="fld" data-field="welcomeTasks">
               <option>None</option>
               <option selected>"Read playbook" + "Shadow Sarah" + "Log first activity"</option>
               <option>Custom…</option>
@@ -865,13 +865,13 @@ body {
     </div>
 
     <div class="drawer-foot">
-      <div class="left">
+      <div class="left" id="autosave-label">
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--green)"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg>
-        Auto-saved as draft · audit log active
+        <span id="autosave-text">Draft active · audit log will record this invite</span>
       </div>
       <button class="btn btn-ghost" id="back-btn" style="display:none">← Back</button>
       <button class="btn btn-primary" id="next-btn">Next: Role &amp; scope →</button>
-      <button class="btn btn-primary" id="send-btn" style="display:none" onclick="alert('Invitation sent to jamie.morrison@diocese.org · expires in 7 days · audit entry #AU-2026-1842 created'); window.location='atlas-users-roles.html'">
+      <button class="btn btn-primary" id="send-btn" style="display:none" onclick="window.__sendInvite && window.__sendInvite()">
         <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M2 7l11-5-3 11-3-4-5-2z"/></svg>
         Send invitation
       </button>
@@ -928,10 +928,12 @@ body {
 
   document.querySelectorAll('.role-pick').forEach(function(c){
     c.addEventListener('click', function(){
-      // Custom card → redirect to role-builder
-      if (c.querySelector('.role-tag-big.custom')) {
-        window.location = 'atlas-role-builder.html';
-        return;
+      // Custom card → hand off to role-builder with draft persistence (see draft script below)
+      if (c.dataset.roleId === 'custom' && !c.dataset.customResolved) {
+        if (window.__handoffToRoleBuilder) {
+          window.__handoffToRoleBuilder();
+          return;
+        }
       }
       document.querySelectorAll('.role-pick').forEach(function(x){ x.classList.remove('on'); });
       c.classList.add('on');
@@ -974,7 +976,7 @@ body {
   var ACTIONS = {
     // Late additions (final dead-end sweep)
     'import csv':                  { type:'toast', msg:'CSV import started · drop or pick a file in the next step' },
-    'save draft':                  { type:'toast', msg:'Draft saved · resume anytime from Batches → Drafts' },
+    'save draft':                  { type:'toast', msg:'Invite draft saved · resume anytime from Users & roles → Pending invites' },
     'csv file':                    { type:'toast', msg:'CSV import selected · choose file…' },
     'excel':                       { type:'toast', msg:'Excel import selected · choose .xlsx file…' },
     'pdf scan':                    { type:'toast', msg:'PDF OCR scan · drop a check image or pledge form' },
@@ -1466,6 +1468,285 @@ body {
 })();
 </script>
 <!-- end Atlas Dead-CTA Rescue -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Invite-User · draft persistence + role-builder round-trip
+     ═══════════════════════════════════════════════════════════════
+     Five pieces wired here:
+       1. Real localStorage auto-save on every input (debounced 350ms)
+       2. Live "Saved Ns ago" timestamp on the footer label
+       3. "Custom role…" handoff: saves draft + flag, navigates with ?from=invite-draft
+       4. On return (?resume=1), restores form, jumps to Step 2, pre-selects new role
+       5. "Send invitation" + "Discard" clear the draft cleanly
+     =============================================================== -->
+<style>
+  /* New-custom-role banner injected into the role grid */
+  .new-custom-role-flash {
+    grid-column: 1 / -1;
+    background:linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%);
+    border:1px solid #FDE68A; border-radius:11px;
+    padding:11px 14px; display:flex; align-items:center; gap:11px;
+    font-size:12.5px; color:#92400E; margin-bottom:6px;
+    animation: ncrFade 4.6s ease-out forwards;
+  }
+  @keyframes ncrFade {
+    0% { opacity:0; transform:translateY(-6px); }
+    8%, 80% { opacity:1; transform:translateY(0); }
+    100% { opacity:0; transform:translateY(-6px); display:none; }
+  }
+  .new-custom-role-flash .nc-ic {
+    width:22px; height:22px; border-radius:50%; background:#D97706; color:white;
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;
+    flex-shrink:0;
+  }
+  .new-custom-role-flash strong { color:#78350F; }
+
+  /* Resolved-custom-role pick styling */
+  .role-pick[data-custom-resolved] .role-tag-big.custom {
+    background: var(--gold); color:white;
+  }
+  .role-pick[data-custom-resolved] .body .nm::after {
+    content: ' · custom'; color: var(--text-3); font-weight:500; font-size:11.5px;
+  }
+</style>
+
+<script>
+(function(){
+  // ─── Storage keys ───
+  var KEY_DRAFT = 'atlas:invite-draft';
+  var KEY_ROLES = 'atlas:custom-roles';
+
+  // ─── Helpers ───
+  function read(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key) || 'null') || fallback; }
+    catch(e) { return fallback; }
+  }
+  function write(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+  }
+  function clear(key) {
+    try { localStorage.removeItem(key); } catch(e) {}
+  }
+  function param(name) {
+    var m = new URLSearchParams(window.location.search).get(name);
+    return m;
+  }
+
+  // ─── Serialize form → draft object ───
+  function serialize() {
+    var d = {};
+    document.querySelectorAll('[data-field]').forEach(function(el){
+      d[el.dataset.field] = el.value;
+    });
+    var activeRole = document.querySelector('.role-pick.on');
+    d.role = activeRole ? activeRole.dataset.roleId : null;
+    d.scope = Array.from(document.querySelectorAll('.scope-card.on')).map(function(c){ return c.dataset.scopeId; });
+
+    // Currently visible step
+    var curStep = document.querySelector('.dstep.cur');
+    d.stepReached = curStep ? parseInt(curStep.dataset.step, 10) : 1;
+    d.savedAt = Date.now();
+    return d;
+  }
+
+  // ─── Restore draft → form ───
+  function restore(d) {
+    if (!d) return;
+    document.querySelectorAll('[data-field]').forEach(function(el){
+      if (d[el.dataset.field] !== undefined) el.value = d[el.dataset.field];
+    });
+    if (d.role) {
+      document.querySelectorAll('.role-pick').forEach(function(c){
+        c.classList.toggle('on', c.dataset.roleId === d.role);
+      });
+    }
+    if (Array.isArray(d.scope)) {
+      document.querySelectorAll('.scope-card').forEach(function(c){
+        var isOn = d.scope.indexOf(c.dataset.scopeId) !== -1;
+        c.classList.toggle('on', isOn);
+        var chk = c.querySelector('.check');
+        if (chk) chk.textContent = isOn ? '✓' : '';
+      });
+    }
+  }
+
+  // ─── Auto-save (debounced) ───
+  var saveTimer = null;
+  function scheduleSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      var d = serialize();
+      write(KEY_DRAFT, d);
+      updateAutoSaveLabel(Date.now());
+    }, 350);
+  }
+  window.__inviteScheduleSave = scheduleSave;
+
+  // ─── Auto-save label (live "saved Ns ago") ───
+  var lastSavedAt = null;
+  function updateAutoSaveLabel(at) {
+    if (at) lastSavedAt = at;
+    var lbl = document.getElementById('autosave-text');
+    if (!lbl) return;
+    if (!lastSavedAt) {
+      lbl.textContent = 'Draft active · audit log will record this invite';
+      return;
+    }
+    var sec = Math.max(0, Math.floor((Date.now() - lastSavedAt) / 1000));
+    var phrase = sec < 2 ? 'just now'
+               : sec < 60 ? sec + 's ago'
+               : sec < 3600 ? Math.floor(sec/60) + 'm ago'
+               : Math.floor(sec/3600) + 'h ago';
+    lbl.textContent = 'Draft saved · ' + phrase;
+  }
+  setInterval(function(){ updateAutoSaveLabel(); }, 1000);
+
+  // Hook all inputs/selects + role/scope picks
+  function attachListeners() {
+    document.querySelectorAll('[data-field]').forEach(function(el){
+      el.addEventListener('input', scheduleSave);
+      el.addEventListener('change', scheduleSave);
+    });
+    document.querySelectorAll('.role-pick').forEach(function(c){
+      c.addEventListener('click', function(){ setTimeout(scheduleSave, 50); });
+    });
+    document.querySelectorAll('.scope-card').forEach(function(c){
+      c.addEventListener('click', function(){
+        c.classList.toggle('on');
+        var chk = c.querySelector('.check');
+        if (chk) chk.textContent = c.classList.contains('on') ? '✓' : '';
+        scheduleSave();
+      });
+    });
+  }
+
+  // ─── Handoff to role-builder ───
+  window.__handoffToRoleBuilder = function(){
+    var d = serialize();
+    d.pendingCustomRole = true;
+    write(KEY_DRAFT, d);
+    showToast('Saving your invite as draft · jumping to role builder', 'info');
+    setTimeout(function(){
+      window.location = 'atlas-role-builder.html?from=invite-draft';
+    }, 600);
+  };
+
+  // ─── Send invitation (clears draft) ───
+  window.__sendInvite = function(){
+    var d = serialize();
+    var email = d.email || 'jamie.morrison@diocese.org';
+    clear(KEY_DRAFT);
+    showToast('Invitation sent to ' + email + ' · expires in 7 days · audit entry #AU-2026-1842 created', 'success');
+    setTimeout(function(){ window.location = 'atlas-users-roles.html'; }, 1400);
+  };
+
+  // ─── Toast (reuses rescue toast if available) ───
+  function showToast(msg, type) {
+    if (window.atlasToast) { window.atlasToast(msg); return; }
+    var t = document.getElementById('atlas-rescue-toast');
+    if (t) {
+      t.querySelector('.msg').textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(function(){ t.classList.remove('show'); }, 3400);
+    }
+  }
+
+  // ─── On return from role-builder ───
+  function handleResume() {
+    var resume = param('resume');
+    var newRoleId = param('newRole');
+    if (resume !== '1') return;
+
+    var draft = read(KEY_DRAFT, null);
+    if (!draft) return;
+
+    restore(draft);
+
+    // Jump to Step 2 (Role & scope)
+    if (window.__inviteShow) window.__inviteShow(2);
+    else {
+      // Fallback: click the step 2 indicator
+      var s2 = document.querySelector('.dstep[data-step="2"]');
+      if (s2) s2.classList.remove('disabled');
+      s2 && s2.click();
+    }
+
+    // If a new role was just created, pre-select the Custom card and label it
+    if (newRoleId) {
+      var roles = read(KEY_ROLES, []);
+      var role = roles.find(function(r){ return r.id === newRoleId; });
+      if (role) {
+        var customCard = document.getElementById('role-pick-custom');
+        if (customCard) {
+          customCard.dataset.customResolved = 'true';
+          customCard.dataset.roleId = newRoleId; // becomes the new role ID
+          var nm = customCard.querySelector('.body .nm');
+          var ds = customCard.querySelector('.body .desc');
+          if (nm) nm.textContent = role.name;
+          if (ds) ds.innerHTML = role.description
+            ? role.description
+            : 'Custom permission matrix — ' + Object.keys(role.permissions || {}).length + ' modules configured.';
+
+          // Select it
+          document.querySelectorAll('.role-pick').forEach(function(x){ x.classList.remove('on'); });
+          customCard.classList.add('on');
+
+          // Inject success banner
+          var grid = document.getElementById('role-grid');
+          if (grid) {
+            var flash = document.createElement('div');
+            flash.className = 'new-custom-role-flash';
+            flash.innerHTML =
+              '<span class="nc-ic">✓</span>' +
+              '<div>Custom role <strong>' + role.name + '</strong> created and applied to this invite. Your draft was restored.</div>';
+            grid.insertBefore(flash, grid.firstChild);
+          }
+          // Save updated draft with new role assignment
+          var d2 = serialize();
+          d2.role = newRoleId;
+          d2.pendingCustomRole = false;
+          write(KEY_DRAFT, d2);
+        }
+      }
+
+      showToast('Welcome back · custom role "' + (role ? role.name : 'New role') + '" applied to this invite', 'success');
+    } else {
+      showToast('Resumed your draft invite for ' + (draft.firstName || '') + ' ' + (draft.lastName || ''), 'info');
+    }
+
+    // Clean URL so refresh doesn't re-trigger
+    if (history.replaceState) {
+      history.replaceState({}, '', window.location.pathname);
+    }
+  }
+
+  // Jump to a step by clicking its indicator — this preserves the original
+  // wizard's closure-internal state (current step, maxReached, button labels).
+  window.__inviteShow = function(n){
+    // First, undisable all step indicators up to n so the click handler accepts
+    for (var i = 1; i <= n; i++) {
+      var s = document.querySelector('.dstep[data-step="' + i + '"]');
+      if (s) s.classList.remove('disabled');
+    }
+    var target = document.querySelector('.dstep[data-step="' + n + '"]');
+    if (target) target.click();
+  };
+
+  // ─── Init ───
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+  function init() {
+    attachListeners();
+    // Initial save (so refresh keeps state without a stroke)
+    scheduleSave();
+    handleResume();
+  }
+})();
+</script>
 
 </body>
 </html>

@@ -334,6 +334,9 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 
 /* ═══ Posted history — expanded filters + KPIs + drawer ═══ */
 .ph-filters { display:flex; gap:8px; align-items:center; padding:14px 0 12px; flex-wrap:wrap; }
+/* Recent gifts toolbar lives inside the bordered .gift-table card — inset it
+   to the row gutter (18px) so controls don't overlap the card's side stroke. */
+#rg-toolbar { padding:14px 18px; border-bottom:1px solid var(--border); }
 .ph-filter { padding:7px 11px; border:1px solid var(--border); border-radius:8px; font-size:12px; font-family:'DM Sans',sans-serif; color:var(--text-2); background:white; cursor:pointer; outline:none; }
 .ph-filter:focus { border-color:var(--blue); }
 .ph-search { padding:7px 11px; border:1px solid var(--border); border-radius:8px; font-size:12px; font-family:'DM Sans',sans-serif; color:var(--text); background:white; outline:none; min-width:200px; }
@@ -777,12 +780,32 @@ body {
     <div class="tab on" data-gp="recent">Recent gifts <span class="ct">142</span></div>
     <div class="tab" data-gp="pledges">Open pledges <span class="ct">28</span></div>
     <div class="tab" data-gp="recurring">Recurring <span class="ct">412</span></div>
-    <div class="tab" data-gp="posted">Posted history <span class="ct">36</span></div>
+    <div class="tab" data-gp="posted">Posted Batch <span class="ct">36</span></div>
     <div class="tab" data-gp="pending">Pending review <span class="ct" style="background:var(--rose-light);color:var(--rose)">9</span></div>
   </div>
 
   <!-- Recent gifts table -->
   <div class="gift-table" data-gp-view="recent">
+
+    <!-- Recent gifts toolbar: filters · search · export -->
+    <div class="ph-filters" id="rg-toolbar">
+      <select class="ph-filter" id="rg-date" aria-label="Date range">
+        <option value="all">All dates</option>
+        <option value="month">This month</option>
+        <option value="30">Last 30 days</option>
+        <option value="90">Last 90 days</option>
+        <option value="2026">This year</option>
+      </select>
+      <select class="ph-filter" id="rg-type" aria-label="Gift type"><option value="all">All types</option></select>
+      <select class="ph-filter" id="rg-fund" aria-label="Designation / fund"><option value="all">All funds</option></select>
+      <select class="ph-filter" id="rg-receipt" aria-label="Receipt status"><option value="all">All receipts</option></select>
+      <input type="search" class="ph-search" id="rg-search" placeholder="Search donor, fund, type…">
+      <div class="ph-spacer"></div>
+      <button class="ph-export-btn" id="rg-export" type="button">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v6.5M3.5 5L6 7.5 8.5 5"/><path d="M1.5 9.5h9"/></svg>
+        Export CSV
+      </button>
+    </div>
 
     <div class="gt-head">
       <div>Donor</div>
@@ -793,6 +816,8 @@ body {
       <div style="text-align:right">Amount</div>
       <div></div>
     </div>
+
+    <div class="gt-empty" id="rg-empty" style="display:none;padding:34px 20px;text-align:center;color:var(--text-3);font-size:13px">No gifts match these filters.<button type="button" id="rg-clear" style="margin-left:6px;background:none;border:none;color:var(--blue);font-weight:600;cursor:pointer;font-size:13px">Clear filters</button></div>
 
     <a class="gt-row" href="atlas-donor-360.html">
       <div class="name"><span class="av" style="background:var(--rose)">M</span><div class="nm-text"><div class="nm">Margaret O'Brien</div><div class="sub">Indiv. · Major donor</div></div></div>
@@ -1112,6 +1137,112 @@ body {
       views.forEach(function(v){ v.style.display = (v.dataset.gpView === key) ? '' : 'none'; });
     });
   });
+})();
+</script>
+
+<script id="rg-recent-wire">
+(function(){
+  if (window.__rgWired) return; window.__rgWired = true;
+  var view = document.querySelector('[data-gp-view="recent"]');
+  if (!view) return;
+  var NOW = new Date(2026, 4, 5); // prototype "now" ≈ early May 2026 (latest gift May 4)
+  function toast(m){ if (window.atlasToast) window.atlasToast(m); }
+  function addMonths(d,n){ var x=new Date(d.getTime()); x.setMonth(x.getMonth()+n); return x; }
+  function parseDate(t){ var m=(t||'').match(/([A-Za-z]{3,})\s+(\d{1,2}),\s+(\d{4})/); if(!m) return null; var d=new Date(m[1]+' '+m[2]+', '+m[3]); return isNaN(d.getTime())?null:d; }
+
+  // ── Derive filterable data from each row's existing cells ──
+  var rows = Array.prototype.slice.call(view.querySelectorAll('.gt-row'));
+  rows.forEach(function(r){
+    var c = r.children;
+    var dateTxt = c[1] ? c[1].textContent.trim() : '';
+    var design  = c[2] ? c[2].textContent.trim() : '';
+    var typeEl  = c[3] ? c[3].querySelector('.tag') : null;
+    var recEl   = c[4] ? c[4].querySelector('.tag') : null;
+    var nameEl  = r.querySelector('.nm');
+    r.__d = {
+      date: parseDate(dateTxt),
+      fund: design.split('·')[0].trim(),
+      type: typeEl ? typeEl.textContent.trim() : '',
+      receipt: recEl ? recEl.textContent.trim() : '',
+      search: ((nameEl?nameEl.textContent:'')+' '+design+' '+(typeEl?typeEl.textContent:'')+' '+(recEl?recEl.textContent:'')).toLowerCase()
+    };
+  });
+
+  // ── Populate filter option lists from the data (stays in sync with rows) ──
+  function uniq(key){ var s=[]; rows.forEach(function(r){ var v=r.__d[key]; if(v && s.indexOf(v)===-1) s.push(v); }); return s; }
+  function fill(id, values){ var sel=document.getElementById(id); if(!sel) return;
+    values.forEach(function(v){ var o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); }); }
+  fill('rg-type', uniq('type'));
+  fill('rg-fund', uniq('fund'));
+  fill('rg-receipt', uniq('receipt'));
+
+  var elDate=document.getElementById('rg-date'), elType=document.getElementById('rg-type'),
+      elFund=document.getElementById('rg-fund'), elRec=document.getElementById('rg-receipt'),
+      elSearch=document.getElementById('rg-search'), elEmpty=document.getElementById('rg-empty');
+
+  function dateOk(d,v){
+    if(v==='all') return true;
+    if(!d) return false;
+    if(v==='month')  return d.getFullYear()===NOW.getFullYear() && d.getMonth()===NOW.getMonth();
+    if(v==='30')     return d>=addMonths(NOW,-1);
+    if(v==='90')     return d>=addMonths(NOW,-3);
+    if(v==='2026')   return d.getFullYear()===2026;
+    return true;
+  }
+  function apply(){
+    var dv=elDate.value, tv=elType.value, fv=elFund.value, rv=elRec.value, q=(elSearch.value||'').trim().toLowerCase();
+    var vis=0;
+    rows.forEach(function(r){
+      var d=r.__d, ok=true;
+      if(!dateOk(d.date,dv)) ok=false;
+      if(ok && tv!=='all' && d.type!==tv) ok=false;
+      if(ok && fv!=='all' && d.fund!==fv) ok=false;
+      if(ok && rv!=='all' && d.receipt!==rv) ok=false;
+      if(ok && q && d.search.indexOf(q)===-1) ok=false;
+      r.style.display = ok ? '' : 'none';
+      if(ok) vis++;
+    });
+    if(elEmpty) elEmpty.style.display = vis===0 ? '' : 'none';
+    var pg=view.querySelector('.pager strong');
+    if(pg) pg.textContent = vis===0 ? '0' : '1–'+vis;
+    return vis;
+  }
+  [elDate,elType,elFund,elRec].forEach(function(s){ if(s) s.addEventListener('change', apply); });
+  if(elSearch) elSearch.addEventListener('input', apply);
+
+  var clearBtn=document.getElementById('rg-clear');
+  if(clearBtn) clearBtn.addEventListener('click', function(){
+    elDate.value='all'; elType.value='all'; elFund.value='all'; elRec.value='all'; elSearch.value=''; apply();
+    toast('Filters cleared');
+  });
+
+  // ── Export CSV: real client-side download of the currently visible rows ──
+  var exportBtn=document.getElementById('rg-export');
+  if(exportBtn) exportBtn.addEventListener('click', function(e){
+    e.preventDefault(); e.stopPropagation(); // bypass the generic dead-CTA toast
+    var lines=[['Donor','Date','Designation','Type','Receipt','Amount']];
+    var n=0;
+    rows.forEach(function(r){
+      if(r.style.display==='none') return;
+      var c=r.children, nm=(r.querySelector('.nm')||{}).textContent||'';
+      lines.push([ nm.trim(), c[1].textContent.trim(), c[2].textContent.trim(),
+                   (c[3].querySelector('.tag')||{}).textContent||'',
+                   (c[4].querySelector('.tag')||{}).textContent||'',
+                   (c[5]||{}).textContent.trim() ]);
+      n++;
+    });
+    var csv=lines.map(function(row){ return row.map(function(cell){
+      var s=String(cell).replace(/"/g,'""'); return /[",\n]/.test(s) ? '"'+s+'"' : s;
+    }).join(','); }).join('\n');
+    var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    var url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url; a.download='recent-gifts-'+new Date().toISOString().slice(0,10)+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    toast(n+' gift'+(n===1?'':'s')+' exported · CSV downloaded');
+  });
+
+  apply(); // initial paint — all rows visible
 })();
 </script>
 

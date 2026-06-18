@@ -751,10 +751,10 @@ body {
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4"/><path d="M9 9l3 3"/></svg>
         Search tasks
       </button>
-      <a class="btn btn-primary" href="atlas-task-modal.html">
+      <button class="btn btn-primary" onclick="event.preventDefault();openNewTaskModal()">
         <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg>
         New task
-      </a>
+      </button>
     </div>
   </div>
 
@@ -3768,6 +3768,549 @@ body {
     clearTimeout(t._timer);
     t._timer = setTimeout(function(){ t.classList.remove('show'); }, 3200);
   }
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     NEW TASK MODAL · inline overlay (replaces full-page navigation)
+     ═══════════════════════════════════════════════════════ -->
+<style>
+  .ntm-overlay {
+    position:fixed; inset:0; background:rgba(15,23,42,.55); backdrop-filter:blur(3px);
+    display:none; align-items:flex-start; justify-content:center;
+    padding:48px 24px;
+    z-index:9500; font-family:'DM Sans',sans-serif;
+    opacity:0; transition:opacity .2s;
+  }
+  .ntm-overlay.show { display:flex; opacity:1; }
+  body.ntm-modal-open { overflow:hidden; }
+
+  .ntm-modal {
+    background:white; border-radius:14px; width:640px; max-width:100%;
+    max-height:calc(100vh - 96px); display:flex; flex-direction:column;
+    box-shadow:0 28px 64px rgba(15,23,42,.28);
+    transform:translateY(12px) scale(.985); opacity:0;
+    transition:transform .25s cubic-bezier(.16,1,.3,1), opacity .2s;
+  }
+  .ntm-overlay.show .ntm-modal { transform:translateY(0) scale(1); opacity:1; }
+
+  /* ── Head ── */
+  .ntm-head {
+    padding:18px 22px 16px; border-bottom:1px solid var(--border);
+    display:flex; align-items:flex-start; gap:12px; flex-shrink:0;
+  }
+  .ntm-head-icon {
+    width:36px; height:36px; border-radius:9px;
+    background:linear-gradient(135deg, var(--blue) 0%, #1D4ED8 100%);
+    color:white; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .ntm-head-icon svg { width:18px; height:18px; }
+  .ntm-head-text { flex:1; min-width:0; }
+  .ntm-head-title { font-family:'DM Serif Display',serif; font-size:20px; color:var(--text); line-height:1.2; }
+  .ntm-head-sub { font-size:12px; color:var(--text-3); margin-top:3px; }
+  .ntm-head-close {
+    width:30px; height:30px; border-radius:7px; border:none;
+    background:transparent; color:var(--text-3); cursor:pointer;
+  }
+  .ntm-head-close:hover { background:var(--surface); color:var(--text); }
+  .ntm-head-close svg { width:14px; height:14px; }
+
+  /* ── Body ── */
+  .ntm-body { padding:18px 22px; overflow-y:auto; flex:1; min-height:0; }
+  .ntm-sec-h {
+    font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--text-3); margin-bottom:10px; padding-bottom:6px;
+    border-bottom:1px solid var(--border);
+  }
+  .ntm-sec + .ntm-sec { margin-top:20px; }
+
+  .ntm-lbl {
+    display:block; font-size:11.5px; font-weight:600; color:var(--text-2);
+    margin-bottom:6px;
+  }
+  .ntm-lbl .req { color:var(--rose); margin-left:2px; }
+
+  .ntm-fld {
+    width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px;
+    font-size:13.5px; font-family:'DM Sans',sans-serif; color:var(--text);
+    outline:none; background:white;
+    transition:border-color .12s, box-shadow .12s;
+  }
+  .ntm-fld:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.12); }
+  textarea.ntm-fld { min-height:64px; resize:vertical; }
+
+  .ntm-row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+  .ntm-row2:last-child { margin-bottom:0; }
+
+  /* Quick-fill chips */
+  .ntm-chip-strip {
+    display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; margin-bottom:14px;
+    align-items:center;
+  }
+  .ntm-chip-strip .qf-lbl { font-size:11px; color:var(--text-3); margin-right:4px; }
+  .ntm-chip {
+    font-size:11.5px; padding:4px 10px; border-radius:99px;
+    background:var(--surface); border:1px solid var(--border); color:var(--text-2);
+    cursor:pointer; transition:all .12s;
+  }
+  .ntm-chip:hover { background:var(--blue-pale); border-color:#BFDBFE; color:var(--blue); }
+
+  /* Donor pill */
+  .ntm-donor-pill {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:6px 12px 6px 6px; border-radius:99px;
+    background:var(--surface); border:1px solid var(--border);
+    font-size:13px; font-weight:500;
+  }
+  .ntm-donor-pill .av {
+    width:24px; height:24px; border-radius:50%; background:var(--rose); color:white;
+    display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;
+  }
+  .ntm-donor-pill .muted { color:var(--text-3); font-weight:400; }
+  .ntm-donor-change {
+    margin-left:6px; font-size:11.5px; color:var(--blue); cursor:pointer; font-weight:500;
+  }
+  .ntm-donor-change:hover { text-decoration:underline; }
+
+  /* Category pills */
+  .ntm-cat-grid {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:6px;
+  }
+  .ntm-cat-pill {
+    padding:7px 8px; border:1.5px solid var(--border); border-radius:7px;
+    background:white; color:var(--text-2); font-size:12px; font-weight:500;
+    text-align:center; cursor:pointer; transition:all .12s;
+  }
+  .ntm-cat-pill:hover { border-color:#94A3B8; }
+  .ntm-cat-pill.on {
+    background:var(--blue-pale); border-color:var(--blue); color:var(--blue); font-weight:600;
+  }
+
+  /* Priority pills */
+  .ntm-pri-grid {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:6px;
+  }
+  .ntm-pri-pill {
+    padding:7px 8px; border:1.5px solid var(--border); border-radius:7px;
+    background:white; color:var(--text-2); font-size:12px; font-weight:500;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    cursor:pointer; transition:all .12s;
+  }
+  .ntm-pri-pill:hover { border-color:#94A3B8; }
+  .ntm-pri-pill .dot { width:7px; height:7px; border-radius:50%; }
+  .ntm-pri-pill.low .dot      { background:var(--text-3); }
+  .ntm-pri-pill.med .dot      { background:var(--blue); }
+  .ntm-pri-pill.high .dot     { background:var(--amber); }
+  .ntm-pri-pill.critical .dot { background:var(--rose); }
+  .ntm-pri-pill.on {
+    background:var(--surface); border-color:var(--text-2); color:var(--text); font-weight:600;
+  }
+  .ntm-pri-pill.on.low      { background:#F1F5F9; }
+  .ntm-pri-pill.on.med      { background:var(--blue-pale); border-color:var(--blue); color:var(--blue); }
+  .ntm-pri-pill.on.high     { background:#FEF3C7; border-color:var(--amber); color:#92400E; }
+  .ntm-pri-pill.on.critical { background:#FCE7F3; border-color:var(--rose); color:#9D174D; }
+
+  /* AI tip */
+  .ntm-ai-tip {
+    margin-top:14px; padding:11px 13px; border-radius:9px;
+    background:linear-gradient(135deg,#FAF5FF 0%,#EFF6FF 100%);
+    border:1px solid #DDD6FE; display:flex; gap:10px;
+    font-size:12px; color:var(--text-2); line-height:1.5;
+  }
+  .ntm-ai-tip .ic {
+    width:22px; height:22px; border-radius:50%; background:var(--purple); color:white;
+    font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .ntm-ai-tip strong { color:var(--text); font-weight:600; }
+
+  /* Foot */
+  .ntm-foot {
+    padding:14px 22px; background:var(--surface); border-top:1px solid var(--border);
+    display:flex; align-items:center; gap:8px; flex-shrink:0;
+  }
+  .ntm-foot-hint {
+    display:flex; align-items:center; gap:6px; flex:1;
+    font-size:11.5px; color:var(--text-3);
+  }
+  .ntm-foot-hint svg { width:13px; height:13px; color:var(--green); flex-shrink:0; }
+  .ntm-foot-hint kbd {
+    background:white; border:1px solid var(--border); border-radius:4px;
+    padding:1px 5px; font-size:11px; font-family:'JetBrains Mono','SF Mono',monospace;
+    color:var(--text-2);
+  }
+  .ntm-foot-btn {
+    padding:9px 14px; border-radius:8px; font-size:13px; font-weight:500;
+    font-family:'DM Sans',sans-serif; cursor:pointer; border:none;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .ntm-foot-btn.ghost {
+    background:white; border:1px solid var(--border); color:var(--text-2);
+  }
+  .ntm-foot-btn.ghost:hover { background:var(--surface); }
+  .ntm-foot-btn.primary {
+    background:var(--blue); color:white; box-shadow:0 1px 6px rgba(37,99,235,.25);
+  }
+  .ntm-foot-btn.primary:hover { background:#1D4ED8; }
+  .ntm-foot-btn svg { width:12px; height:12px; flex-shrink:0; }
+
+  .ntm-error { font-size:12px; color:var(--rose); min-height:18px; padding:0 22px 6px; }
+
+  /* Newly-added task row pulse animation */
+  @keyframes ntmRowFlash {
+    0%   { box-shadow:0 0 0 0 rgba(37,99,235,.30); background:#EFF6FF; }
+    100% { box-shadow:0 0 0 0 rgba(37,99,235,0);   background:white; }
+  }
+  .tk-row.ntm-just-added { animation:ntmRowFlash 1.8s ease-out; }
+</style>
+
+<div class="ntm-overlay" id="ntm-overlay" onclick="if(event.target===this) closeNewTaskModal()">
+  <div class="ntm-modal" role="dialog" aria-modal="true" aria-labelledby="ntm-title">
+    <div class="ntm-head">
+      <div class="ntm-head-icon">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2.5" y="3.5" width="13" height="11" rx="1.5"/>
+          <path d="M2.5 7h13M6 3.5V2M12 3.5V2"/>
+          <path d="M6 11l1.5 1.5L11 9"/>
+        </svg>
+      </div>
+      <div class="ntm-head-text">
+        <div class="ntm-head-title" id="ntm-title">Create new task</div>
+        <div class="ntm-head-sub">Assigned to Sarah Reynolds · saves to your Today queue</div>
+      </div>
+      <button class="ntm-head-close" onclick="closeNewTaskModal()" aria-label="Close">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg>
+      </button>
+    </div>
+
+    <div class="ntm-body">
+
+      <!-- ── Section: Task ── -->
+      <div class="ntm-sec">
+        <div class="ntm-sec-h">Task</div>
+        <label class="ntm-lbl" for="ntm-title-input">Title<span class="req">*</span></label>
+        <input id="ntm-title-input" class="ntm-fld" placeholder="What needs to happen?" autocomplete="off">
+
+        <div class="ntm-chip-strip">
+          <span class="qf-lbl">Quick fill:</span>
+          <span class="ntm-chip" onclick="ntmQuickFill(this)">Call to thank donor</span>
+          <span class="ntm-chip" onclick="ntmQuickFill(this)">Send pledge agreement</span>
+          <span class="ntm-chip" onclick="ntmQuickFill(this)">Schedule cultivation visit</span>
+          <span class="ntm-chip" onclick="ntmQuickFill(this)">Acknowledge soft-credit gift</span>
+        </div>
+
+        <label class="ntm-lbl" for="ntm-desc">Description <span style="font-weight:400;color:var(--text-3)">— optional</span></label>
+        <textarea id="ntm-desc" class="ntm-fld" placeholder="Add context, links, or notes the future-you will want."></textarea>
+      </div>
+
+      <!-- ── Section: Schedule ── -->
+      <div class="ntm-sec">
+        <div class="ntm-sec-h">Schedule</div>
+        <div class="ntm-row2">
+          <div>
+            <label class="ntm-lbl" for="ntm-due-date">Due date<span class="req">*</span></label>
+            <input id="ntm-due-date" class="ntm-fld" type="text" value="May 7, 2026 (Thu)">
+          </div>
+          <div>
+            <label class="ntm-lbl" for="ntm-due-time">Due time</label>
+            <input id="ntm-due-time" class="ntm-fld" type="text" value="By 5:00 PM ET">
+          </div>
+        </div>
+        <div class="ntm-row2">
+          <div>
+            <label class="ntm-lbl" for="ntm-reminder">Reminder</label>
+            <select id="ntm-reminder" class="ntm-fld">
+              <option>None</option>
+              <option>15 minutes before</option>
+              <option>1 hour before</option>
+              <option selected>1 day before</option>
+              <option>2 days before</option>
+            </select>
+          </div>
+          <div>
+            <label class="ntm-lbl" for="ntm-recurrence">Recurrence</label>
+            <select id="ntm-recurrence" class="ntm-fld">
+              <option selected>Doesn't repeat</option>
+              <option>Daily</option>
+              <option>Weekly</option>
+              <option>Monthly</option>
+              <option>Custom…</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Section: Linked records ── -->
+      <div class="ntm-sec">
+        <div class="ntm-sec-h">Linked records</div>
+        <label class="ntm-lbl">Donor / household</label>
+        <div class="ntm-donor-pill" id="ntm-donor-pill">
+          <span class="av">M</span>
+          Margaret O'Brien
+          <span class="muted">· Major donor</span>
+          <span class="ntm-donor-change" onclick="ntmToast('Donor picker opened — search-as-you-type')">Change</span>
+        </div>
+
+        <div class="ntm-row2" style="margin-top:14px">
+          <div>
+            <label class="ntm-lbl" for="ntm-campaign">Related campaign</label>
+            <select id="ntm-campaign" class="ntm-fld">
+              <option selected>Cathedral Capital Campaign 2026</option>
+              <option>Annual Appeal 2026</option>
+              <option>Bishop's Gala 2026</option>
+              <option>(none)</option>
+            </select>
+          </div>
+          <div>
+            <label class="ntm-lbl" for="ntm-activity">Linked activity</label>
+            <select id="ntm-activity" class="ntm-fld">
+              <option selected>Visit · May 4 · "Quarterly cultivation"</option>
+              <option>Email · May 1 · "Thank you for May visit"</option>
+              <option>(none)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Section: Assignment & priority ── -->
+      <div class="ntm-sec">
+        <div class="ntm-sec-h">Assignment &amp; priority</div>
+        <div class="ntm-row2">
+          <div>
+            <label class="ntm-lbl" for="ntm-owner">Owner<span class="req">*</span></label>
+            <select id="ntm-owner" class="ntm-fld">
+              <option selected>Sarah Reynolds (you)</option>
+              <option>Bridget McCarthy · Director of Development</option>
+              <option>Daniel Cho · Database Admin</option>
+              <option>Fr. Michael Reilly · Pastor (St. Mary's)</option>
+            </select>
+          </div>
+          <div>
+            <label class="ntm-lbl">Category</label>
+            <div class="ntm-cat-grid">
+              <div class="ntm-cat-pill on" data-cat="Solicitation" onclick="ntmPickCat(this)">Solicitation</div>
+              <div class="ntm-cat-pill" data-cat="Stewardship" onclick="ntmPickCat(this)">Stewardship</div>
+              <div class="ntm-cat-pill" data-cat="Admin" onclick="ntmPickCat(this)">Admin</div>
+            </div>
+          </div>
+        </div>
+
+        <label class="ntm-lbl" style="margin-top:14px">Priority</label>
+        <div class="ntm-pri-grid">
+          <div class="ntm-pri-pill low"      data-pri="Low"      onclick="ntmPickPri(this)"><span class="dot"></span>Low</div>
+          <div class="ntm-pri-pill med"      data-pri="Medium"   onclick="ntmPickPri(this)"><span class="dot"></span>Medium</div>
+          <div class="ntm-pri-pill high on"  data-pri="High"     onclick="ntmPickPri(this)"><span class="dot"></span>High</div>
+          <div class="ntm-pri-pill critical" data-pri="Critical" onclick="ntmPickPri(this)"><span class="dot"></span>Critical</div>
+        </div>
+
+        <div class="ntm-ai-tip">
+          <div class="ic">G</div>
+          <div>
+            <strong>Guru AI suggests:</strong> Mark this as <strong>High priority</strong> — donors who receive a cultivation visit and don't get a follow-up artifact within 5 days convert to a gift 28% less often.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="ntm-error" id="ntm-error"></div>
+
+    <div class="ntm-foot">
+      <div class="ntm-foot-hint">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg>
+        <span><kbd>⌘</kbd> + <kbd>Enter</kbd> to save</span>
+      </div>
+      <button class="ntm-foot-btn ghost" onclick="closeNewTaskModal()">Cancel</button>
+      <button class="ntm-foot-btn ghost" onclick="saveNewTask(true)">Save &amp; add another</button>
+      <button class="ntm-foot-btn primary" onclick="saveNewTask(false)">
+        <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round"><path d="M2 6l3 3 5-7"/></svg>
+        Save task
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ─── State ───
+  let ntmCat = 'Solicitation';
+  let ntmPri = 'High';
+
+  // ─── Open / Close ───
+  window.openNewTaskModal = function() {
+    const ov = document.getElementById('ntm-overlay');
+    if (!ov) return;
+    document.body.classList.add('ntm-modal-open');
+    ov.classList.add('show');
+    document.getElementById('ntm-error').textContent = '';
+    setTimeout(() => document.getElementById('ntm-title-input').focus(), 220);
+  };
+  window.closeNewTaskModal = function() {
+    const ov = document.getElementById('ntm-overlay');
+    if (ov) ov.classList.remove('show');
+    document.body.classList.remove('ntm-modal-open');
+  };
+
+  // ─── Quick-fill chips ───
+  window.ntmQuickFill = function(el) {
+    const map = {
+      'Call to thank donor':       { title: 'Call Margaret O\'Brien — thank you for May 4 cultivation visit', cat:'Stewardship', pri:'Medium' },
+      'Send pledge agreement':     { title: 'Send Cathedral pledge agreement (DocuSign) — Margaret O\'Brien', cat:'Solicitation', pri:'High' },
+      'Schedule cultivation visit':{ title: 'Schedule Q3 cultivation visit with Margaret O\'Brien', cat:'Solicitation', pri:'Medium' },
+      'Acknowledge soft-credit gift':{ title: 'Acknowledge soft-credit gift from Lin Family Foundation', cat:'Stewardship', pri:'Medium' },
+    };
+    const m = map[el.textContent.trim()];
+    if (!m) return;
+    document.getElementById('ntm-title-input').value = m.title;
+    document.querySelectorAll('.ntm-cat-pill').forEach(p => p.classList.toggle('on', p.dataset.cat === m.cat));
+    document.querySelectorAll('.ntm-pri-pill').forEach(p => p.classList.toggle('on', p.dataset.pri === m.pri));
+    ntmCat = m.cat; ntmPri = m.pri;
+  };
+
+  window.ntmPickCat = function(el) {
+    document.querySelectorAll('.ntm-cat-pill').forEach(p => p.classList.remove('on'));
+    el.classList.add('on');
+    ntmCat = el.dataset.cat;
+  };
+  window.ntmPickPri = function(el) {
+    document.querySelectorAll('.ntm-pri-pill').forEach(p => p.classList.remove('on'));
+    el.classList.add('on');
+    ntmPri = el.dataset.pri;
+  };
+
+  // ─── Toast (reuses page's toast if present) ───
+  window.ntmToast = function(msg) {
+    const existing = document.getElementById('toast') || document.getElementById('atlas-rescue-toast');
+    if (existing && typeof window.atlasToast === 'function') { window.atlasToast(msg); return; }
+    let t = document.getElementById('ntm-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'ntm-toast';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#0F172A;color:white;padding:12px 18px;border-radius:10px;font-family:DM Sans,sans-serif;font-size:13px;box-shadow:0 12px 32px rgba(15,23,42,.25);z-index:10000;opacity:0;transition:opacity .22s,transform .22s;display:flex;align-items:center;gap:10px;';
+      t.innerHTML = '<span style="width:22px;height:22px;border-radius:50%;background:#15803D;color:white;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center">✓</span><span class="ntm-toast-msg"></span>';
+      document.body.appendChild(t);
+    }
+    t.querySelector('.ntm-toast-msg').textContent = msg;
+    requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => {
+      t.style.opacity = '0';
+      t.style.transform = 'translateX(-50%) translateY(20px)';
+    }, 3200);
+  };
+
+  // ─── Save logic ───
+  window.saveNewTask = function(addAnother) {
+    const title = document.getElementById('ntm-title-input').value.trim();
+    const dueDate = document.getElementById('ntm-due-date').value.trim();
+    const err = document.getElementById('ntm-error');
+
+    if (!title) {
+      err.textContent = 'Give the task a title before saving.';
+      document.getElementById('ntm-title-input').focus();
+      return;
+    }
+    if (!dueDate) {
+      err.textContent = 'Due date is required.';
+      document.getElementById('ntm-due-date').focus();
+      return;
+    }
+    err.textContent = '';
+
+    appendTaskRow(title, dueDate);
+    bumpCounters();
+
+    if (addAnother) {
+      // Reset + keep open
+      document.getElementById('ntm-title-input').value = '';
+      document.getElementById('ntm-desc').value = '';
+      ntmToast('Task "' + title.slice(0, 40) + (title.length > 40 ? '…' : '') + '" created · adding another');
+      setTimeout(() => document.getElementById('ntm-title-input').focus(), 80);
+    } else {
+      closeNewTaskModal();
+      ntmToast('Task "' + title.slice(0, 40) + (title.length > 40 ? '…' : '') + '" created · added to ' + (isToday(dueDate) ? 'Today' : 'Upcoming'));
+    }
+  };
+
+  function isToday(dueDateText) {
+    return /today/i.test(dueDateText);
+  }
+
+  // Append a new task row to the Today (or Upcoming) group as a demo
+  function appendTaskRow(title, dueDate) {
+    // Find the appropriate group — prefer Today if the page has it
+    const groupHeaders = document.querySelectorAll('.group-h');
+    let target = null;
+    for (const h of groupHeaders) {
+      if (/today/i.test(h.textContent) && !/start of/i.test(h.textContent)) { target = h; break; }
+    }
+    // Fallback: use the first .group-h
+    if (!target && groupHeaders.length) target = groupHeaders[0];
+    if (!target) return;
+
+    // Find the next .group-h to know where this group ends
+    const row = document.createElement('div');
+    row.className = 'tk-row ntm-just-added';
+
+    const donorAv = 'M';
+    const donorName = "Margaret O'Brien";
+    const dueLabel = isToday(dueDate) ? 'Today' : dueDate.split('(')[0].trim();
+
+    row.innerHTML =
+      '<span class="cb"></span>' +
+      '<div class="body">' +
+        '<div class="ttl">' + escapeHTML(title) + '</div>' +
+        '<div class="meta"><span class="task-av" style="background:var(--rose);color:white">' + donorAv + '</span> ' + donorName + ' · ' + ntmCat + ' · ' + ntmPri + ' priority</div>' +
+      '</div>' +
+      '<div class="due"><div class="d">' + dueLabel + '</div><div class="badge today">just added</div></div>';
+
+    // Insert right after the group-h
+    if (target.nextSibling) {
+      target.parentNode.insertBefore(row, target.nextSibling);
+    } else {
+      target.parentNode.appendChild(row);
+    }
+
+    // Scroll to it briefly
+    setTimeout(() => row.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+  }
+
+  function escapeHTML(s) {
+    return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // Bump visible counters
+  function bumpCounters() {
+    // Top "24 active" counter on page-actions
+    const paCount = document.querySelector('.pa-count');
+    if (paCount) {
+      const m = (paCount.textContent || '').match(/\d+/);
+      if (m) paCount.textContent = (parseInt(m[0]) + 1) + ' active';
+    }
+    // Tab counter "All 24"
+    const allTabCt = document.querySelector('.tabs .tab.on .ct');
+    if (allTabCt) {
+      const n = parseInt(allTabCt.textContent || '0');
+      if (!isNaN(n)) allTabCt.textContent = (n + 1).toString();
+    }
+    // "Due today" numeric (only if added to Today)
+    const todayNum = document.querySelector('.tk-stat.today .num');
+    if (todayNum) {
+      const n = parseInt(todayNum.textContent || '0');
+      if (!isNaN(n)) todayNum.textContent = (n + 1).toString();
+    }
+  }
+
+  // ─── Keyboard ───
+  document.addEventListener('keydown', function(e) {
+    const ov = document.getElementById('ntm-overlay');
+    if (!ov || !ov.classList.contains('show')) return;
+    if (e.key === 'Escape') { closeNewTaskModal(); }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      saveNewTask(false);
+    }
+  });
 })();
 </script>
 

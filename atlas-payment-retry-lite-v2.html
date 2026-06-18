@@ -391,6 +391,28 @@ select.in{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xml
   .success-actions .spacer{display:none}
   .success-actions .btn{width:100%;justify-content:center}
 }
+/* ── Not-scheduled states (declined failure + nothing-to-schedule) reuse .success-card ── */
+.success-hero.fail{background:linear-gradient(135deg,#BE185D 0%,#86123F 100%)}
+.success-hero.info{background:linear-gradient(135deg,#334155 0%,#0E1E35 100%)}
+.success-hero.fail .success-sub{color:rgba(252,231,243,.92)}
+.success-hero.info .success-sub{color:rgba(226,232,240,.9)}
+.reason-box{display:flex;gap:12px;padding:13px 14px;background:#FEF2F7;border:1px solid #FBCFE8;border-radius:10px;margin-bottom:16px}
+.reason-box.info{background:var(--surface);border-color:var(--border)}
+.reason-ic{width:34px;height:34px;border-radius:8px;background:white;border:1px solid #FBCFE8;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.reason-box.info .reason-ic{border-color:var(--border)}
+.reason-ic svg{width:18px;height:18px;color:var(--rose)}
+.reason-box.info .reason-ic svg{color:var(--text-3)}
+.reason-text{flex:1;min-width:0}
+.reason-label{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--rose)}
+.reason-box.info .reason-label{color:var(--text-3)}
+.reason-value{font-size:13.5px;color:var(--text);font-weight:600;margin-top:2px}
+.reason-hint{font-size:12px;color:var(--text-2);margin-top:4px;line-height:1.5}
+/* Demo-only preview switcher */
+.demo-preview{position:fixed;left:14px;bottom:14px;z-index:60;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:0 6px 20px rgba(15,23,42,.14);padding:7px 9px;display:flex;align-items:center;gap:6px;font-size:11px;flex-wrap:wrap;max-width:calc(100vw - 28px)}
+.demo-preview .dp-label{font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)}
+.demo-preview button{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;border:1px solid var(--border);background:white;color:var(--text-2);border-radius:7px;padding:5px 9px;cursor:pointer}
+.demo-preview button:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-pale)}
+
 .spin{width:30px;height:30px;border:3px solid var(--blue-light);border-top-color:var(--blue);border-radius:50%;animation:spin .85s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin-lbl{font-size:13px;color:var(--text-2);font-weight:500}
@@ -470,6 +492,76 @@ select.in{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xml
         <div class="success-actions">
           <div class="spacer"></div>
           <button class="btn btn-secondary" onclick="resetForm()">Make another change</button>
+          <button class="btn btn-primary" onclick="window.location.href='https://www.givecentral.org'">
+            <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h10M8 3l4 4-4 4"/></svg>
+            Return to my account
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── NOT SCHEDULED · payment declined (failure outcome of Save) ─── -->
+    <div class="success-card" id="declined-card">
+      <div class="success-hero fail">
+        <span class="success-icon-wrap">
+          <svg viewBox="0 0 30 30" fill="none"><path d="M9 9l12 12M21 9L9 21" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+        </span>
+        <div class="success-title">Payment couldn't be scheduled</div>
+        <div class="success-sub" id="decl-sub">We couldn't process your card, so no retry was scheduled. Nothing has been charged.</div>
+      </div>
+      <div class="success-body">
+        <div class="reason-box">
+          <span class="reason-ic">
+            <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2L16.5 15.5h-15L9 2z"/><path d="M9 7v4M9 13v.4"/></svg>
+          </span>
+          <div class="reason-text">
+            <div class="reason-label">Why it failed</div>
+            <div class="reason-value" id="decl-reason">Card declined by issuer</div>
+            <div class="reason-hint" id="decl-hint">Your bank declined this charge. Try a different card, or contact your bank to authorise it.</div>
+          </div>
+        </div>
+        <div class="next-steps">
+          <div class="ns-title">What you can do</div>
+          <div class="ns-list">
+            <div class="ns-item"><span class="ns-num">1</span><span>Re-enter your details or <strong>try a different card</strong> — nothing was charged.</span></div>
+            <div class="ns-item"><span class="ns-num">2</span><span>If it keeps failing, <strong>contact your bank</strong> to authorise the payment.</span></div>
+            <div class="ns-item"><span class="ns-num">3</span><span>Still stuck? <strong>GiveCentral support</strong> can help sort it out.</span></div>
+          </div>
+        </div>
+        <div class="success-actions">
+          <button class="btn btn-secondary" onclick="contactSupport()">Contact support</button>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" onclick="resetForm()">
+            <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7a5 5 0 119 3M2 7l-.5-2M2 7l2 .5"/></svg>
+            Try a different card
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── NOT SCHEDULED · nothing to retry (info / empty state on load) ─── -->
+    <div class="success-card" id="empty-card">
+      <div class="success-hero info">
+        <span class="success-icon-wrap">
+          <svg viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="15" cy="15" r="12"/><path d="M15 10v.4M15 14v6"/></svg>
+        </span>
+        <div class="success-title" id="empty-title">No payment to retry</div>
+        <div class="success-sub" id="empty-sub">There's nothing outstanding on this link right now.</div>
+      </div>
+      <div class="success-body">
+        <div class="reason-box info">
+          <span class="reason-ic">
+            <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="7"/><path d="M9 8.5v4M9 6v.4"/></svg>
+          </span>
+          <div class="reason-text">
+            <div class="reason-label">Why you're seeing this</div>
+            <div class="reason-value" id="empty-reason">This payment has already been settled</div>
+            <div class="reason-hint" id="empty-hint">Our records show this missed payment was already paid — there's nothing left to retry. No action is needed.</div>
+          </div>
+        </div>
+        <div class="success-actions">
+          <button class="btn btn-secondary" onclick="contactSupport()">Contact support</button>
+          <div class="spacer"></div>
           <button class="btn btn-primary" onclick="window.location.href='https://www.givecentral.org'">
             <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h10M8 3l4 4-4 4"/></svg>
             Return to my account
@@ -710,6 +802,15 @@ select.in{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xml
   <span class="copy">©2026 GiveCentral.org</span>
 </footer>
 
+<!-- Demo-only preview switcher (remove for production) -->
+<div class="demo-preview" id="demo-preview">
+  <span class="dp-label">Demo preview</span>
+  <button onclick="previewState('form')">Form</button>
+  <button onclick="previewState('success')">Scheduled</button>
+  <button onclick="previewState('declined')">Declined</button>
+  <button onclick="previewState('empty')">No payment</button>
+</div>
+
 <!-- Loader overlay (preserves original page's bx_loader.gif concept) -->
 <div class="overlay" id="overlay">
   <div class="spin-box">
@@ -794,30 +895,97 @@ function refreshV2Total(){
   if (saveLabelEl)  saveLabelEl.textContent  = 'Save & retry ' + fmt;
 }
 
-/* Save → spinner → success */
-function submitForm(){
-  // Snapshot the count + total for the success copy
-  let optionalCount = 0;
-  let optionalTotal = 0;
-  document.querySelectorAll('.opt-row.checked').forEach(r => {
-    optionalTotal += parseFloat(r.dataset.amount);
-    optionalCount++;
-  });
-  const required = getRequiredAmount();
-  const total = required + optionalTotal;
-  const totalCount = 1 + optionalCount; // 1 = the required payment
+/* ── Outcome reasons ── */
+const DECLINE_REASONS = {
+  card_declined:      { value:'Card declined by issuer',  hint:'Your bank declined this charge. Try a different card, or contact your bank to authorise it.' },
+  insufficient_funds: { value:'Insufficient funds',       hint:"There weren't enough funds available on this card. Try another card, or retry once funds are available." },
+  expired_card:       { value:'Card expired',             hint:'The card you entered has already expired. Please enter a card with a valid expiry date.' },
+  processing_error:   { value:'Payment processor error',  hint:"Something went wrong on our payment provider's side. No charge was made — please try again in a moment." }
+};
+const EMPTY_REASONS = {
+  settled:          { title:'No payment to retry',        value:'This payment has already been settled', hint:"Our records show this missed payment was already paid — there's nothing left to retry. No action is needed." },
+  expired_link:     { title:'This link has expired',      value:'The retry link is no longer valid',     hint:'For security, retry links expire after a while. Sign in to your donor account to update your payment method.' },
+  none_outstanding: { title:"You're all caught up",       value:'No outstanding failed payments',        hint:'There are no missed payments on your account that need a retry right now.' },
+  cancelled:        { title:'This donation was cancelled',value:'The recurring donation is no longer active', hint:"This donation has been cancelled, so there's nothing to retry. Contact support if this looks wrong." }
+};
 
+/* Demo: known test card numbers route to a decline reason (mirrors real gateway test cards). */
+function detectDecline(){
+  const bankOn = document.getElementById('bank-pane').classList.contains('on');
+  if (bankOn) return null;                       // demo: bank transfers always schedule
+  const num = (document.getElementById('cc-num').value || '').replace(/\D/g,'');
+  if (num.endsWith('0002')) return 'card_declined';
+  if (num.endsWith('9995')) return 'insufficient_funds';
+  if (num.endsWith('0069')) return 'expired_card';
+  if (num.endsWith('0119')) return 'processing_error';
+  return null;
+}
+
+function optionalSnapshot(){
+  let total=0, count=0;
+  document.querySelectorAll('.opt-row.checked').forEach(r => { total += parseFloat(r.dataset.amount); count++; });
+  return { total: getRequiredAmount() + total, count: 1 + count };
+}
+
+/* Save → spinner → success OR declined */
+function submitForm(){
+  const snap = optionalSnapshot();
+  const decline = detectDecline();
   const ov = document.getElementById('overlay');
-  ov.querySelector('.spin-lbl').textContent = 'Processing payment' + (totalCount > 1 ? 's' : '') + '…';
+  ov.querySelector('.spin-lbl').textContent = 'Processing payment' + (snap.count > 1 ? 's' : '') + '…';
   ov.classList.add('show');
   setTimeout(() => {
     ov.classList.remove('show');
-    showSuccessPanel(totalCount, total);
+    if (decline) showDeclinedPanel(decline, snap.total);
+    else showSuccessPanel(snap.count, snap.total);
   }, 1100);
+}
+
+function hideAllPanels(){
+  document.getElementById('success-card').classList.remove('show');
+  document.getElementById('declined-card').classList.remove('show');
+  document.getElementById('empty-card').classList.remove('show');
+}
+
+/* Declined — payment not scheduled */
+function showDeclinedPanel(reasonKey, total){
+  hideAllPanels();
+  document.getElementById('form-card').style.display = 'none';
+  const r = DECLINE_REASONS[reasonKey] || DECLINE_REASONS.processing_error;
+  const fmt = '$' + (typeof total === 'number' ? total : getRequiredAmount()).toFixed(2);
+  document.getElementById('decl-reason').textContent = r.value;
+  document.getElementById('decl-hint').textContent = r.hint;
+  document.getElementById('decl-sub').textContent = "We couldn't process your " + fmt + " payment, so no retry was scheduled. Nothing has been charged.";
+  document.getElementById('declined-card').classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* Nothing to schedule — info / empty state */
+function showEmptyPanel(reasonKey){
+  hideAllPanels();
+  document.getElementById('form-card').style.display = 'none';
+  const r = EMPTY_REASONS[reasonKey] || EMPTY_REASONS.settled;
+  document.getElementById('empty-title').textContent = r.title;
+  document.getElementById('empty-reason').textContent = r.value;
+  document.getElementById('empty-hint').textContent = r.hint;
+  document.getElementById('empty-card').classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function contactSupport(){ window.location.href = 'mailto:support@givecentral.org?subject=Help%20with%20my%20payment%20retry'; }
+
+/* Demo preview switcher */
+function previewState(s){
+  if (s === 'form')      { resetForm(); return; }
+  const snap = optionalSnapshot();
+  if (s === 'success')   showSuccessPanel(snap.count, snap.total);
+  else if (s === 'declined') showDeclinedPanel('card_declined', snap.total);
+  else if (s === 'empty')    showEmptyPanel('settled');
 }
 
 /* Confirmation — single mode (always retrying the required payment + any optionals) */
 function showSuccessPanel(count, total){
+  hideAllPanels();
   document.getElementById('form-card').style.display = 'none';
   const success = document.getElementById('success-card');
   success.classList.add('show');
@@ -840,15 +1008,23 @@ function showSuccessPanel(count, total){
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* Reset back to form ("Make another change" on the success panel) */
+/* Reset back to form ("Make another change" / "Try a different card") */
 function resetForm(){
-  document.getElementById('success-card').classList.remove('show');
+  hideAllPanels();
   document.getElementById('form-card').style.display = '';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Initial total
-document.addEventListener('DOMContentLoaded', refreshV2Total);
+// Initial total + deep-link state (?state=declined|empty|none|success&reason=…)
+document.addEventListener('DOMContentLoaded', function(){
+  refreshV2Total();
+  var p = new URLSearchParams(location.search);
+  var st = (p.get('state') || '').toLowerCase();
+  var rs = p.get('reason') || '';
+  if (st === 'declined')                 showDeclinedPanel(rs || 'card_declined', getRequiredAmount());
+  else if (st === 'empty' || st === 'none') showEmptyPanel(rs || 'settled');
+  else if (st === 'success')             showSuccessPanel(1, getRequiredAmount());
+});
 </script>
 
 </body>
