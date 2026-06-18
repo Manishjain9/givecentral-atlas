@@ -680,8 +680,18 @@ body {
 
     <main>
 
+      <!-- Context banner: appears only when launched from the Invite-User flow -->
+      <div id="rb-invite-banner" style="display:none;background:linear-gradient(135deg,#FFFBEB 0%,#FEF3C7 100%);border:1px solid #FDE68A;border-radius:11px;padding:13px 16px;margin-bottom:14px;align-items:center;gap:12px">
+        <div style="width:30px;height:30px;border-radius:8px;background:#D97706;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700">←</div>
+        <div style="flex:1;font-size:12.5px;color:#78350F;line-height:1.5">
+          <strong style="color:#78350F">Returning to <span id="rb-invite-name">your invite</span> when you save this role.</strong>
+          <div style="margin-top:2px;color:#92400E">Your invite draft is safe — name, email, scope, and step are restored automatically.</div>
+        </div>
+        <a href="atlas-invite-user.html?resume=1" style="font-size:12px;color:#92400E;font-weight:600;text-decoration:underline">Back to invite without saving</a>
+      </div>
+
       <div class="rb-card">
-        <input class="name-input" value="Parish gift officer">
+        <input class="name-input" id="rb-role-name" value="Parish gift officer">
         <p class="muted" style="font-size:12.5px;margin-top:4px">Used by parish-level staff who manage their own parish's prospects but cannot edit diocesan campaigns or post batches.</p>
       </div>
 
@@ -805,7 +815,7 @@ body {
         </div>
 
         <p class="muted" style="font-size:11.5px;margin-top:14px;display:flex;align-items:center;gap:8px">
-          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--blue)"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.5M7 9v.5"/></svg>
+          <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--blue);width:14px;height:14px;flex-shrink:0"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.5M7 9v.5"/></svg>
           <span><strong>None</strong> = no access · <strong>View</strong> = read-only · <strong>Edit</strong> = create/modify own + assigned · <strong>Full</strong> = create/modify any · including delete &amp; permanent actions</span>
         </p>
       </div>
@@ -870,11 +880,18 @@ body {
         </div>
 
         <div class="actions">
-          <button class="primary" onclick="alert('Custom role &quot;Parish gift officer&quot; created · 0 users assigned · ready to use in Invite User'); window.location='atlas-users-roles.html'">
+          <button class="primary" id="rb-save-primary" onclick="event.preventDefault();window.__rbSaveRole&&window.__rbSaveRole()">
             Save custom role
           </button>
-          <button class="ghost" onclick="alert('Saved as draft')">Save as draft</button>
-          <button class="ghost" onclick="window.location='atlas-users-roles.html'">Cancel</button>
+          <button class="ghost" id="rb-save-draft" onclick="event.preventDefault();window.__rbSaveDraft&&window.__rbSaveDraft()">Save as draft</button>
+          <button class="ghost" id="rb-cancel" onclick="event.preventDefault();window.__rbCancel&&window.__rbCancel()">Cancel</button>
+        </div>
+
+        <!-- Live "Draft saved · Ns ago" indicator -->
+        <div id="rb-draft-status" style="display:none;margin-top:12px;padding:9px 12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;font-size:11.5px;color:#15803D;align-items:center;gap:7px">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" style="width:13px;height:13px;flex-shrink:0"><path d="M3 7l3 3 5-6"/></svg>
+          <span id="rb-draft-text">Draft saved · just now</span>
+          <a href="#" onclick="event.preventDefault();window.__rbDiscardDraft&&window.__rbDiscardDraft()" style="margin-left:auto;color:#64748B;font-size:11px;text-decoration:underline">Discard</a>
         </div>
       </div>
     </aside>
@@ -932,7 +949,7 @@ body {
   var ACTIONS = {
     // Late additions (final dead-end sweep)
     'import csv':                  { type:'toast', msg:'CSV import started · drop or pick a file in the next step' },
-    'save draft':                  { type:'toast', msg:'Draft saved · resume anytime from Batches → Drafts' },
+    'save draft':                  { type:'toast', msg:'Role draft saved · resume anytime from Users & roles → Roles' },
     'csv file':                    { type:'toast', msg:'CSV import selected · choose file…' },
     'excel':                       { type:'toast', msg:'Excel import selected · choose .xlsx file…' },
     'pdf scan':                    { type:'toast', msg:'PDF OCR scan · drop a check image or pledge form' },
@@ -1424,6 +1441,281 @@ body {
 })();
 </script>
 <!-- end Atlas Dead-CTA Rescue -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Role-Builder · draft persistence + context detection + save flow
+     ───────────────────────────────────────────────────────────────
+     Storage keys:
+       atlas:role-builder-draft   single in-progress draft (one slot)
+       atlas:custom-roles         array of finalized custom roles
+       atlas:invite-draft         the invite draft (read here when ?from=invite-draft)
+     =============================================================== -->
+<script>
+(function(){
+  var KEY_INVITE  = 'atlas:invite-draft';
+  var KEY_ROLES   = 'atlas:custom-roles';
+  var KEY_RB_DRAFT = 'atlas:role-builder-draft';
+
+  function read(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key) || 'null') || fallback; }
+    catch(e) { return fallback; }
+  }
+  function write(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+  }
+  function clear(key) {
+    try { localStorage.removeItem(key); } catch(e) {}
+  }
+  function param(name) {
+    return new URLSearchParams(window.location.search).get(name);
+  }
+
+  // ─── Detect invite context ───
+  var fromInvite = param('from') === 'invite-draft';
+
+  function toast(msg) {
+    var t = document.getElementById('atlas-rescue-toast');
+    if (t) {
+      t.querySelector('.msg').textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(function(){ t.classList.remove('show'); }, 3200);
+    } else if (window.atlasToast) {
+      window.atlasToast(msg);
+    }
+  }
+
+  // ─── Read current state ───
+  function collectRole(idHint) {
+    var name = (document.getElementById('rb-role-name') || {}).value || 'Custom role';
+    var perms = {};
+    document.querySelectorAll('.m-row').forEach(function(row){
+      // Best-effort: pull the first text-bearing child as the module label
+      var label = null;
+      for (var i = 0; i < row.children.length; i++) {
+        if (row.children[i].textContent && row.children[i].textContent.trim()) {
+          label = row.children[i]; break;
+        }
+      }
+      var moduleName = label ? label.textContent.trim().slice(0, 40) : 'Module';
+      var on = row.querySelector('.perm-radio.on');
+      var level = 'no-access';
+      if (on) {
+        var parentR = on.parentElement;
+        var idx = Array.prototype.indexOf.call(parentR.children, on);
+        level = on.dataset.level || ['none','view','edit','full'][idx] || 'set';
+      }
+      if (perms[moduleName]) return;
+      perms[moduleName] = level;
+    });
+    // Active template chip
+    var tpl = document.querySelector('.tpl-strip .chip.on');
+    return {
+      id: idHint || 'custom-' + Date.now().toString(36),
+      name: name,
+      description: '',
+      template: tpl ? tpl.textContent.trim() : null,
+      permissions: perms,
+      updatedAt: Date.now(),
+      createdBy: 'Sarah Reynolds'
+    };
+  }
+
+  function restoreDraft(d) {
+    if (!d) return;
+    if (d.name) {
+      var nameEl = document.getElementById('rb-role-name');
+      if (nameEl) nameEl.value = d.name;
+    }
+    if (d.template) {
+      document.querySelectorAll('.tpl-strip .chip').forEach(function(c){
+        c.classList.toggle('on', c.textContent.trim() === d.template);
+      });
+    }
+    if (d.permissions) {
+      document.querySelectorAll('.m-row').forEach(function(row){
+        var label = null;
+        for (var i = 0; i < row.children.length; i++) {
+          if (row.children[i].textContent && row.children[i].textContent.trim()) {
+            label = row.children[i]; break;
+          }
+        }
+        var moduleName = label ? label.textContent.trim().slice(0, 40) : 'Module';
+        var savedLevel = d.permissions[moduleName];
+        if (!savedLevel) return;
+        var radios = row.querySelectorAll('.perm-radio');
+        radios.forEach(function(r, idx){
+          r.classList.remove('on');
+          r.textContent = '';
+          var levelIdx = ['none','view','edit','full'].indexOf(savedLevel);
+          if (levelIdx === idx && r.style.opacity !== '0.4') {
+            r.classList.add('on');
+            r.textContent = '✓';
+          }
+        });
+      });
+    }
+  }
+
+  // ─── Live draft-saved indicator ───
+  var lastSavedAt = null;
+  function updateDraftStatus(at) {
+    if (at) lastSavedAt = at;
+    var box = document.getElementById('rb-draft-status');
+    var txt = document.getElementById('rb-draft-text');
+    if (!box || !txt) return;
+    if (!lastSavedAt) { box.style.display = 'none'; return; }
+    box.style.display = 'flex';
+    var sec = Math.max(0, Math.floor((Date.now() - lastSavedAt) / 1000));
+    var phrase = sec < 2 ? 'just now'
+               : sec < 60 ? sec + 's ago'
+               : sec < 3600 ? Math.floor(sec/60) + 'm ago'
+               : Math.floor(sec/3600) + 'h ago';
+    txt.textContent = 'Draft saved · ' + phrase;
+  }
+  setInterval(function(){ updateDraftStatus(); }, 1000);
+
+  // ─── Auto-save (debounced) ───
+  var existingDraftId = null; // stable across saves to keep one slot
+  var saveTimer = null;
+  function scheduleAutoSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      var d = collectRole(existingDraftId);
+      existingDraftId = d.id;
+      write(KEY_RB_DRAFT, d);
+      updateDraftStatus(Date.now());
+    }, 400);
+  }
+
+  // ─── Action handlers ───
+  window.__rbSaveRole = function() {
+    var role = collectRole();
+    // Persist to finalized array, append
+    var roles = read(KEY_ROLES, []);
+    roles.push(Object.assign({}, role, { createdAt: new Date().toISOString() }));
+    write(KEY_ROLES, roles);
+    // Clear the in-progress draft
+    clear(KEY_RB_DRAFT);
+
+    if (fromInvite) {
+      toast('Custom role "' + role.name + '" saved · returning to invite');
+      setTimeout(function(){
+        window.location = 'atlas-invite-user.html?resume=1&newRole=' + encodeURIComponent(role.id);
+      }, 700);
+    } else {
+      toast('Custom role "' + role.name + '" created · ready to assign');
+      setTimeout(function(){ window.location = 'atlas-users-roles.html?tab=roles'; }, 900);
+    }
+  };
+
+  window.__rbSaveDraft = function() {
+    var d = collectRole(existingDraftId);
+    existingDraftId = d.id;
+    write(KEY_RB_DRAFT, d);
+    updateDraftStatus(Date.now());
+    if (fromInvite) {
+      toast('Role draft saved · "' + d.name + '" — your invite draft is also intact');
+    } else {
+      toast('Role draft saved · resume anytime from Users & roles → Roles');
+    }
+  };
+
+  window.__rbDiscardDraft = function() {
+    if (!confirm('Discard this role draft? Your work cannot be recovered.')) return;
+    clear(KEY_RB_DRAFT);
+    existingDraftId = null;
+    lastSavedAt = null;
+    updateDraftStatus();
+    toast('Draft discarded · starting fresh');
+    // Reset name + perms to a sensible default (Gift Officer template values stay in DOM)
+  };
+
+  window.__rbCancel = function() {
+    if (fromInvite) {
+      toast('Returning to invite · no custom role created');
+      setTimeout(function(){ window.location = 'atlas-invite-user.html?resume=1'; }, 500);
+    } else {
+      window.location = 'atlas-users-roles.html';
+    }
+  };
+
+  // ─── Show invite-context banner ───
+  function showInviteBanner() {
+    if (!fromInvite) return;
+    var banner = document.getElementById('rb-invite-banner');
+    var nameSpan = document.getElementById('rb-invite-name');
+    if (!banner) return;
+
+    var inv = read(KEY_INVITE, {});
+    var nm = ((inv.firstName || '') + ' ' + (inv.lastName || '')).trim() || (inv.email || 'your invite');
+    if (nameSpan) nameSpan.textContent = nm + "'s invite";
+    banner.style.display = 'flex';
+
+    var primary = document.getElementById('rb-save-primary');
+    if (primary) primary.textContent = 'Save role & return to invite →';
+
+    var cancel = document.getElementById('rb-cancel');
+    if (cancel) cancel.textContent = '← Back to invite (no save)';
+  }
+
+  // ─── Restore draft on load ───
+  function attachAutoSaveListeners() {
+    var nameEl = document.getElementById('rb-role-name');
+    if (nameEl) nameEl.addEventListener('input', scheduleAutoSave);
+    document.querySelectorAll('.tpl-strip .chip').forEach(function(c){
+      c.addEventListener('click', function(){
+        document.querySelectorAll('.tpl-strip .chip').forEach(function(x){ x.classList.remove('on'); });
+        c.classList.add('on');
+        setTimeout(scheduleAutoSave, 30);
+      });
+    });
+    document.querySelectorAll('.m-row .perm-radio').forEach(function(r){
+      r.addEventListener('click', function(){ setTimeout(scheduleAutoSave, 30); });
+    });
+  }
+
+  function maybeShowResumeBanner(d) {
+    var grid = document.querySelector('.rb-grid main');
+    if (!grid || !d) return;
+    var b = document.createElement('div');
+    var elapsed = Math.max(0, Math.floor((Date.now() - (d.updatedAt || Date.now())) / 1000));
+    var when = elapsed < 60 ? elapsed + 's ago'
+             : elapsed < 3600 ? Math.floor(elapsed/60) + 'm ago'
+             : elapsed < 86400 ? Math.floor(elapsed/3600) + 'h ago'
+             : Math.floor(elapsed/86400) + 'd ago';
+    b.style.cssText = 'background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);border:1px solid #BFDBFE;border-radius:11px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:11px;font-size:12.5px;color:#1E3A8A';
+    b.innerHTML =
+      '<svg viewBox="0 0 16 16" fill="none" stroke="#2563EB" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0"><path d="M8 4v4l3 2"/><circle cx="8" cy="8" r="6.5"/></svg>' +
+      '<div style="flex:1"><strong>Resumed your draft from ' + when + '</strong><div style="font-size:11.5px;color:#1D4ED8;margin-top:2px">Role: <em>' + (d.name || 'Untitled') + '</em> · ' + Object.keys(d.permissions || {}).length + ' modules configured · changes continue to auto-save.</div></div>' +
+      '<a href="#" onclick="event.preventDefault();window.__rbDiscardDraft&&window.__rbDiscardDraft();this.parentNode.remove()" style="font-size:11.5px;color:#1D4ED8;text-decoration:underline">× Discard</a>';
+    grid.insertBefore(b, grid.firstChild);
+  }
+
+  function init() {
+    showInviteBanner();
+    attachAutoSaveListeners();
+
+    // Restore if there's an existing draft AND we're not coming from invite with a forced fresh start
+    var draft = read(KEY_RB_DRAFT, null);
+    if (draft) {
+      existingDraftId = draft.id;
+      restoreDraft(draft);
+      lastSavedAt = draft.updatedAt || Date.now();
+      updateDraftStatus();
+      // Only show "Resumed" banner if the draft is older than 5s (avoid showing it on snappy back-navigation)
+      var ageSec = (Date.now() - (draft.updatedAt || Date.now())) / 1000;
+      if (ageSec > 5) maybeShowResumeBanner(draft);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
 
 </body>
 </html>
