@@ -561,6 +561,15 @@ body {
 /* .main is intentionally NOT overridden — each page keeps its own layout. */
 </style>
 <style id="ur-nav-underline-fix">.nav-item,.nav-item:link,.nav-item:visited,.nav-item:hover,.nav-item:focus,.nav-item:active,.sidebar-item,.sidebar-item:hover{text-decoration:none}</style>
+<style id="atlas-sidebar-logo-canon">
+  /* Atlas sidebar logo — canonical styling (matches dashboard exactly) */
+  .sidebar-logo{display:flex !important;align-items:center !important;gap:11px !important;padding:18px 18px 14px !important;border-bottom:1px solid rgba(255,255,255,.08) !important}
+  .sidebar-logo .logo-mark{width:52px !important;height:40px !important;flex-shrink:0 !important;display:flex !important;align-items:center !important;justify-content:center !important;background:transparent !important;border-radius:0 !important}
+  .sidebar-logo .logo-mark svg{width:52px !important;height:40px !important}
+  .sidebar-logo .logo-text-wrap{display:flex !important;flex-direction:column !important;align-items:flex-start !important;gap:3px !important}
+  .sidebar-logo .logo-name{font-family:'DM Serif Display',serif !important;font-size:20px !important;color:#fff !important;line-height:1 !important;font-weight:400 !important;margin:0 !important}
+  .sidebar-logo .logo-sub{font-size:9px !important;font-weight:600 !important;letter-spacing:.1em !important;text-transform:uppercase !important;color:rgba(255,255,255,.35) !important;margin:0 !important;line-height:1 !important}
+</style>
 </head>
 <body>
 
@@ -568,14 +577,22 @@ body {
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="sidebar-logo-mark logo-mark">
-        <svg viewBox="0 0 18 18" fill="none">
-          <circle cx="9" cy="9" r="7.5" stroke="white" stroke-width="1.5"/>
-          <path d="M5.5 9.5C6.5 11.5 9 13 9 13s2.5-1.5 3.5-3.5S12 5 9 5 4.5 7.5 5.5 9.5z" fill="white" fill-opacity=".9"/>
+        <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
+          <circle cx="22" cy="92" r="4" fill="white"/>
+          <circle cx="58" cy="58" r="5" fill="white"/>
+          <circle cx="98" cy="38" r="5.5" fill="white"/>
+          <circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
+          <circle cx="138" cy="24" r="7" fill="#C8A04A"/>
+          <circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
         </svg>
       </div>
       <div class="sidebar-logo-text logo-text-wrap">
-        <span class="sidebar-logo-name logo-name">GiveCentral</span>
-        <span class="sidebar-logo-sub logo-sub">Atlas CRM</span>
+        <span class="sidebar-logo-name logo-name">Atlas</span>
+        <span class="sidebar-logo-sub logo-sub">By GiveCentral</span>
       </div>
     </div>
 
@@ -2931,6 +2948,61 @@ body {
       document.head.appendChild(st);
     }
   }
+})();
+</script>
+
+<script>
+/* If opened with a ?name= param (e.g. from the campaign portal drawer),
+   show that donor's identity instead of the static default. */
+(function(){
+  var q = new URLSearchParams(location.search);
+  var name = q.get('name');
+  if (!name) return;
+  var parish = q.get('parish'), since = q.get('since');
+
+  var nameEl = document.querySelector('.donor-name');
+  if (nameEl) nameEl.textContent = name;
+
+  var av = document.querySelector('.donor-avatar');
+  if (av) {
+    var parts = name.replace(/,/g,'').split(/[\s&]+/).filter(Boolean);
+    av.textContent = ((parts[0]||'')[0]||'') + ((parts[1]||'')[0]||'');
+  }
+
+  var sub = document.querySelector('.donor-sub');
+  if (sub) {
+    var spans = sub.querySelectorAll('span');
+    spans.forEach(function(s){
+      if (parish && /Parish|FL|Diocese|parishes/i.test(s.textContent) && !/Donor since/.test(s.textContent)) {
+        s.textContent = parish;
+      }
+      if (since && /Donor since/.test(s.textContent)) s.textContent = 'Donor since ' + since;
+    });
+  }
+
+  // ── Breadcrumb + sidebar: keep the origin flow consistent ──
+  var bc = document.querySelector('.breadcrumb');
+  var from = q.get('from'), campaign = q.get('campaign');
+  if (bc) {
+    var sep = '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 2L6.5 5L3.5 8"/></svg>';
+    if (from === 'campaign') {
+      // Came from the campaign portal — preserve the Campaigns trail
+      bc.innerHTML = '<a href="atlas-campaign-dashboard.html">Campaigns</a>' + sep
+        + '<a href="atlas-campaign-portal.html">' + (campaign || 'Campaign') + '</a>' + sep
+        + '<span>' + name + '</span>';
+      // Move sidebar highlight from Donors to Campaigns
+      var act = document.querySelector('.nav-item.active');
+      if (act) act.classList.remove('active');
+      var camp = document.querySelector('.nav-item[href="atlas-campaign-dashboard.html"]');
+      if (camp) camp.classList.add('active');
+    } else {
+      // Default Donors trail — just sync the donor name
+      var last = bc.querySelector('span');
+      if (last) last.textContent = name;
+    }
+  }
+
+  document.title = name + ' · Donor 360 — Atlas';
 })();
 </script>
 

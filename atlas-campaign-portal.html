@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Atlas — Campaign Overview Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#0E1E35;--navy-2:#152844;--blue:#2563EB;--blue-light:#DBEAFE;--blue-pale:#EFF6FF;
+    --teal:#0D9488;--teal-light:#CCFBF1;--green:#15803D;--green-2:#22C55E;--green-light:#DCFCE7;
+    --amber:#D97706;--amber-2:#F59E0B;--amber-light:#FEF3C7;--rose:#BE185D;--rose-light:#FCE7F3;
+    --purple:#7C3AED;--purple-light:#EDE9FE;--gold:#C8A04A;
+    --text:#0F172A;--text-2:#334155;--text-3:#64748B;--border:#E2E8F0;--border-soft:#EDF2F7;--surface:#F8FAFC;
+  }
+  html{font-size:14px;-webkit-font-smoothing:antialiased}
+  body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+
+  /* Sidebar */
+  .sidebar{width:220px;background:var(--navy);min-height:100vh;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow:hidden}
+  .sidebar-logo{padding:18px 18px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
+  .logo-mark{width:46px;height:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .logo-name{font-family:'DM Serif Display',serif;font-size:19px;color:#fff;line-height:1}
+  .logo-sub{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:2px}
+  .sidebar-scroll{flex:1 1 auto;overflow-y:auto;min-height:0;padding-top:6px}
+  .nav-group{padding:8px 8px 0}
+  .nav-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:0 10px;margin-bottom:4px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;margin-bottom:1px}
+  .nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
+  .nav-item.active{background:var(--blue);color:#fff}
+  .nav-item svg{width:14px;height:14px;flex-shrink:0}
+  .nav-badge{margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.6);border-radius:10px;padding:1px 7px;font-size:10px;font-weight:600}
+  .nav-badge.alert{background:var(--rose);color:#fff}
+  .sidebar-user{padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:9px;flex-shrink:0}
+  .user-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+  .user-name{font-size:12px;font-weight:500;color:rgba(255,255,255,.78)}
+  .user-role{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px}
+
+  /* Main */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 22px;height:52px;display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:30}
+  .crumb{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-3);min-width:0}
+  .crumb .sep{color:#CBD5E1}
+  .crumb .cur{color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+  /* Role switcher */
+  .role-switch{position:relative}
+  .rs-btn{display:flex;align-items:center;gap:9px;border:1px solid var(--border);background:#fff;border-radius:9px;padding:5px 9px;cursor:pointer;font-family:'DM Sans',sans-serif}
+  .rs-btn:hover{border-color:#94A3B8}
+  .rs-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+  .rs-meta{text-align:left;line-height:1.15}
+  .rs-meta b{font-size:12px;font-weight:600;color:var(--text);display:block}
+  .rs-meta small{font-size:10.5px;color:var(--text-3)}
+  .rs-btn>svg{width:11px;height:11px;color:var(--text-3)}
+  .rs-menu{position:absolute;right:0;top:44px;width:268px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 14px 40px rgba(15,23,42,.18);padding:6px;z-index:50;display:none}
+  .rs-menu.show{display:block}
+  .rs-mlabel{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);padding:8px 10px 4px}
+  .rs-opt{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer}
+  .rs-opt:hover{background:var(--surface)}
+  .rs-opt.on{background:var(--blue-pale)}
+  .rs-opt .rs-av{width:30px;height:30px;font-size:11px}
+  .rs-opt .nm{font-size:13px;font-weight:600;color:var(--text)}
+  .rs-opt .ds{font-size:11px;color:var(--text-3);margin-top:1px}
+
+  /* shared buttons */
+  .btn{font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent;white-space:nowrap}
+  .btn svg{width:13px;height:13px}
+  .btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#1D4ED8}
+  .btn-ghost{background:#fff;border-color:var(--border);color:var(--text-2)}.btn-ghost:hover{border-color:#94A3B8;background:var(--surface)}
+  .btn-dark{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18);color:#fff}
+  .btn-dark:hover{background:rgba(255,255,255,.18)}
+
+  .scroll{overflow-y:auto;flex:1}
+
+  /* ════ HERO (navy) ════ */
+  .hero{background:linear-gradient(135deg,#16294C 0%,#1E3D6E 55%,#264C8C 100%);color:#fff;padding:22px 30px 26px;position:relative;overflow:hidden;box-shadow:inset 1px 0 0 rgba(255,255,255,.06)}
+  .hero::after{content:"";position:absolute;right:-60px;top:-60px;width:340px;height:340px;background:radial-gradient(circle,rgba(200,160,74,.10),transparent 70%);pointer-events:none}
+  .hero-top{display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap}
+  .hero-left{flex:1 1 380px;min-width:0}
+  .hero-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .status-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,.16);color:#86EFAC;border:1px solid rgba(34,197,94,.3);border-radius:99px;padding:2px 10px;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:none}
+  .status-pill .dot{width:6px;height:6px;border-radius:50%;background:#22C55E}
+  .hero-title{font-family:'DM Serif Display',serif;font-size:32px;line-height:1.1;margin:10px 0 8px}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:12.5px;color:rgba(255,255,255,.6)}
+  .hero-meta span{display:inline-flex;align-items:center;gap:7px}
+  .hero-meta svg{width:13px;height:13px;color:rgba(255,255,255,.4)}
+  .hero-desc{font-size:13px;color:rgba(255,255,255,.62);line-height:1.55;max-width:600px;margin-top:14px}
+  .hero-scope{display:inline-flex;align-items:center;gap:7px;margin-top:13px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:99px;padding:5px 12px;font-size:12px;color:#fff}
+  .hero-scope svg{width:13px;height:13px;color:var(--gold)}
+
+  /* hero stat cards */
+  .hero-stats{display:flex;gap:0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:13px;overflow:hidden;flex-shrink:0;flex-wrap:wrap}
+  .hstat{padding:14px 20px;border-right:1px solid rgba(255,255,255,.09);min-width:118px;text-align:left}
+  .hstat:last-child{border-right:none}
+  .hstat .v{font-family:'DM Serif Display',serif;font-size:24px;line-height:1}
+  .hstat .l{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-top:6px}
+  .hstat .v.gold{color:#E5C06B}.hstat .v.green{color:#4ADE80}.hstat .v.rose{color:#FB7DAE}.hstat .v.white{color:#fff}
+
+  /* hero progress */
+  .hero-prog{margin-top:22px}
+  .hp-head{display:flex;align-items:baseline;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.6);margin-bottom:7px}
+  .hp-head b{color:#fff}
+  .hp-pct{font-size:12.5px}
+  .hp-pct .a{color:#4ADE80;font-weight:700}.hp-pct .b{color:#E5C06B;font-weight:700}
+  .hp-bar{height:11px;border-radius:99px;background:rgba(255,255,255,.1);position:relative;overflow:visible;display:flex}
+  .hp-seg{height:100%}
+  .hp-seg.cash{background:linear-gradient(90deg,#15803D,#22C55E);border-radius:99px 0 0 99px}
+  .hp-seg.pledge{background:linear-gradient(90deg,#B98A2E,#D9A943)}
+  .hp-pace{position:absolute;top:-4px;bottom:-4px;width:2px;background:rgba(255,255,255,.85);border-radius:2px}
+  .hp-pace::after{content:"Calendar pace ("attr(data-pace)")";position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:9.5px;color:rgba(255,255,255,.55);white-space:nowrap}
+  .hp-legend{display:flex;gap:18px;margin-top:11px;font-size:11.5px;color:rgba(255,255,255,.6)}
+  .hp-legend span{display:inline-flex;align-items:center;gap:7px}
+  .hp-legend i{width:9px;height:9px;border-radius:3px;display:inline-block}
+
+  /* ════ BODY ════ */
+  .body{padding:18px 22px 40px}
+  /* KPI strip */
+  .kstrip{display:grid;gap:12px;margin-bottom:16px;grid-template-columns:repeat(5,1fr)}
+  .kstrip.c5{grid-template-columns:repeat(5,1fr)}
+  .kstrip.c6{grid-template-columns:repeat(6,1fr)}
+  .kcard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:13px 15px}
+  .kcard .l{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);display:flex;align-items:center;gap:6px}
+  .kcard .l svg{width:13px;height:13px;color:var(--text-3)}
+  .kcard .v{font-family:'DM Serif Display',serif;font-size:23px;line-height:1;margin:9px 0 4px}
+  .kcard .v.amber{color:var(--amber)}.kcard .v.rose{color:var(--rose)}.kcard .v.green{color:var(--green)}
+  .kcard .m{font-size:11px;color:var(--text-3)}
+  .kcard .m .up{color:var(--green);font-weight:600}
+
+  /* lens switcher */
+  .lensbar{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .lens{display:inline-flex;background:#fff;border:1px solid var(--border);border-radius:10px;padding:3px}
+  .lens button{font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:var(--text-2);background:transparent;border:none;border-radius:7px;padding:7px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+  .lens button svg{width:13px;height:13px}
+  .lens button.on{background:var(--navy);color:#fff}
+  .lens-note{font-size:11.5px;color:var(--text-3)}
+
+  /* layout */
+  .grid{display:grid;grid-template-columns:1fr 312px;gap:16px;align-items:start}
+  @media(max-width:1180px){.grid{grid-template-columns:1fr}.kstrip.c5,.kstrip.c6{grid-template-columns:repeat(3,1fr)}.hero-stats{width:100%}.pcards{grid-template-columns:1fr}}
+  @media(max-width:680px){.kstrip.c5,.kstrip.c6{grid-template-columns:repeat(2,1fr)}.hstat{flex:1 0 33%}
+    .toolbar{flex-wrap:wrap}.search{flex:1 1 100%}.tool-right{width:100%}}
+
+  .card{background:#fff;border:1px solid var(--border);border-radius:13px;overflow:hidden}
+  .card-head{padding:14px 16px;border-bottom:1px solid var(--border)}
+  .card-head .t{font-size:14px;font-weight:700;color:var(--text)}
+  .card-head .s{font-size:12px;color:var(--text-3);margin-top:2px}
+  .card-head .ct{margin-left:auto;font-size:11.5px;color:var(--text-3);font-weight:600}
+  .card-head.row{display:flex;align-items:center;gap:10px}
+
+  /* toolbar */
+  .toolbar{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--border)}
+  .search{flex:0 0 230px;position:relative}
+  .search input{width:100%;font-family:'DM Sans',sans-serif;font-size:12.5px;border:1px solid var(--border);border-radius:8px;padding:8px 10px 8px 30px;background:var(--surface);color:var(--text)}
+  .search input:focus{outline:none;border-color:var(--blue);background:#fff}
+  .search svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--text-3)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;flex:1 1 auto;min-width:0}
+  .chip{font-size:12px;font-weight:600;border:1px solid var(--border);background:#fff;color:var(--text-2);border-radius:99px;padding:6px 13px;cursor:pointer}
+  .chip:hover{border-color:#94A3B8}
+  .chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .tool-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .seg button{font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:600;color:var(--text-2);background:#fff;border:none;padding:7px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+  .seg button svg{width:12px;height:12px}
+  .seg button.on{background:var(--surface);color:var(--text)}
+  .seg button+button{border-left:1px solid var(--border)}
+
+  /* table */
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);white-space:nowrap}
+  th.r{text-align:right}
+  td{padding:12px 16px;border-bottom:1px solid var(--border-soft);font-size:13px;color:var(--text-2);vertical-align:middle}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:var(--blue-pale)}
+  tr:last-child td{border-bottom:none}
+  td.r{text-align:right;font-variant-numeric:tabular-nums}
+  .av{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+  .donor-cell{display:flex;align-items:center;gap:11px}
+  .donor-cell .nm{font-weight:600;color:var(--text);line-height:1.2}
+  .donor-cell .su{font-size:11px;color:var(--text-3)}
+  .paid{color:var(--green);font-weight:600}
+  .bal{font-weight:700;color:var(--text)}
+  .mut{color:var(--text-3)}
+  /* progress mini */
+  .pmini{display:flex;align-items:center;gap:9px;min-width:130px}
+  .pmini .track{flex:1;height:6px;border-radius:99px;background:#E2E8F0;overflow:hidden}
+  .pmini .fill{height:100%;border-radius:99px}
+  .pmini .pct{font-size:12px;font-weight:600;width:34px;text-align:right;font-variant-numeric:tabular-nums}
+  /* status badge */
+  .sb{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;border-radius:99px;padding:3px 10px}
+  .sb .d{width:6px;height:6px;border-radius:50%}
+  .sb.current{background:var(--green-light);color:var(--green)} .sb.current .d{background:var(--green)}
+  .sb.overdue{background:var(--rose-light);color:var(--rose)} .sb.overdue .d{background:var(--rose)}
+  .sb.behind{background:var(--amber-light);color:var(--amber)} .sb.behind .d{background:var(--amber)}
+  .sb.fulfilled{background:var(--blue-light);color:#1D4ED8} .sb.fulfilled .d{background:var(--blue)}
+  .sb.atrisk{background:var(--amber-light);color:var(--amber)} .sb.atrisk .d{background:var(--amber)}
+  .sb.onpace{background:var(--green-light);color:var(--green)} .sb.onpace .d{background:var(--green)}
+  .sb.goalmet{background:var(--blue-light);color:#1D4ED8} .sb.goalmet .d{background:var(--blue)}
+  .next-amt{font-weight:600;color:var(--text)}.next-amt.over{color:var(--rose)}
+  .next-date{font-size:11px;color:var(--text-3)}
+  .ahead{color:var(--green);font-weight:600}.behindp{color:var(--rose);font-weight:600}
+  .open-due{font-size:11px;color:var(--rose);font-weight:600}
+  .rank{width:24px;height:24px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--surface);color:var(--text-2)}
+  .rank.g1{background:#FEF3C7;color:#B45309}.rank.g2{background:#E2E8F0;color:#475569}.rank.g3{background:#FCE7F3;color:#BE185D}
+  .empty{padding:34px 16px;text-align:center;color:var(--text-3);font-size:13px}
+  .pdrill{font-size:11px;color:var(--blue);font-weight:600;margin-top:2px}
+
+  /* parish cards view */
+  .pcards{padding:14px 16px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .pc{border:1px solid var(--border);border-radius:11px;padding:14px;cursor:pointer}
+  .pc:hover{border-color:var(--blue);box-shadow:0 4px 14px rgba(37,99,235,.08)}
+  .pc-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .pc-name{font-weight:700;color:var(--text);font-size:13.5px}
+  .pc-loc{font-size:11px;color:var(--text-3)}
+  .pc-fig{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--text-3);margin-bottom:6px}
+  .pc-fig b{font-size:15px;color:var(--text);font-family:'DM Serif Display',serif}
+
+  /* right rail */
+  .rail{display:flex;flex-direction:column;gap:14px}
+  .rc{background:#fff;border:1px solid var(--border);border-radius:13px;padding:15px 16px}
+  .rc-h{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:12px}
+  .pace-big{font-family:'DM Serif Display',serif;font-size:34px;color:var(--green);line-height:1}
+  .pace-tag{display:inline-block;font-size:10.5px;font-weight:700;background:var(--green-light);color:var(--green);border-radius:6px;padding:2px 8px;margin-left:8px;vertical-align:middle}
+  .pace-tag.warn{background:var(--amber-light);color:var(--amber)}
+  .pace-bar{height:7px;border-radius:99px;background:#E2E8F0;overflow:hidden;margin:12px 0 9px}
+  .pace-bar .f{height:100%;background:var(--blue);border-radius:99px}
+  .rc-note{font-size:12px;color:var(--text-3);line-height:1.5}
+  .seg-row{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:12.5px}
+  .seg-row+.seg-row{border-top:1px solid var(--border-soft)}
+  .seg-row i{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+  .seg-row .nm{color:var(--text-2);font-weight:500}
+  .seg-row .ct{margin-left:auto;font-weight:700;color:var(--text)}
+  .seg-row .am{font-size:11px;color:var(--text-3);margin-left:6px}
+  .dist-row{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:12.5px}
+  .dist-row .nm{width:64px;color:var(--text-2)}
+  .dist-row .track{flex:1;height:7px;border-radius:99px;background:#E2E8F0;overflow:hidden}
+  .dist-row .track .f{height:100%;border-radius:99px}
+  .dist-row .ct{width:18px;text-align:right;font-weight:700;color:var(--text)}
+  .top-row{display:flex;align-items:center;gap:11px;padding:8px 0;font-size:12.5px}
+  .top-row+.top-row{border-top:1px solid var(--border-soft)}
+  .top-row .rk{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:var(--surface);color:var(--text-2);flex-shrink:0}
+  .top-row .nm{font-weight:600;color:var(--text)}
+  .top-row .su{font-size:11px;color:var(--text-3)}
+  .top-row .am{margin-left:auto;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+  .ms-row{display:flex;gap:11px;padding:8px 0}
+  .ms-row .ic{width:18px;height:18px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .ms-row .ic.done{background:var(--green-light);color:var(--green)}
+  .ms-row .ic.next{background:var(--surface);color:var(--text-3);border:1.5px dashed #CBD5E1}
+  .ms-row .ic svg{width:11px;height:11px}
+  .ms-row .nm{font-weight:600;color:var(--text);font-size:12.5px}
+  .ms-row .su{font-size:11px;color:var(--text-3);margin-top:1px}
+  .guru-tag{font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green);margin-bottom:4px}
+  .guru-tag.warn{color:var(--rose)}
+  .guru-block{padding:10px 0}
+  .guru-block+.guru-block{border-top:1px solid var(--border-soft)}
+  .guru-block p{font-size:12.5px;color:var(--text-2);line-height:1.5}
+  .guru-block b{color:var(--text)}
+  .rc-ai-head{display:flex;align-items:center;gap:7px}
+  .rc-ai-head .badge{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--purple);background:var(--purple-light);border-radius:5px;padding:2px 7px}
+
+  /* drawer */
+  .scrim{position:fixed;inset:0;background:rgba(15,23,42,.4);opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
+  .scrim.show{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;height:100vh;width:440px;max-width:92vw;background:#fff;box-shadow:-12px 0 40px rgba(15,23,42,.2);transform:translateX(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);z-index:61;display:flex;flex-direction:column}
+  .drawer.show{transform:translateX(0)}
+  .dh{background:linear-gradient(135deg,#0E1E35,#1B3358);color:#fff;padding:18px 20px 20px;position:relative;flex-shrink:0}
+  .dh-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:8px;border:none;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .dh-close:hover{background:rgba(255,255,255,.22)}
+  .dh-close svg{width:13px;height:13px}
+  .dh-top{display:flex;align-items:center;gap:13px;padding-right:34px}
+  .dh-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0}
+  .dh-name{font-family:'DM Serif Display',serif;font-size:21px;line-height:1.1}
+  .dh-sub{font-size:12px;color:rgba(255,255,255,.6);margin-top:3px}
+  .dh-stats{display:flex;gap:0;margin-top:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:11px;overflow:hidden}
+  .dh-st{flex:1;padding:11px 14px;border-right:1px solid rgba(255,255,255,.09);text-align:center}
+  .dh-st:last-child{border-right:none}
+  .dh-st .v{font-family:'DM Serif Display',serif;font-size:19px}
+  .dh-st .v.gold{color:#E5C06B}.dh-st .v.green{color:#4ADE80}.dh-st .v.rose{color:#FB7DAE}
+  .dh-st .l{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-top:4px}
+  .db{padding:18px 20px;overflow-y:auto;flex:1}
+  .db-sec{margin-bottom:20px}
+  .db-sec h4{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px}
+  .pp-bar{height:9px;border-radius:99px;background:#E2E8F0;overflow:hidden;margin-bottom:7px}
+  .pp-bar .f{height:100%;background:linear-gradient(90deg,#15803D,#22C55E);border-radius:99px}
+  .pp-cap{display:flex;justify-content:space-between;font-size:12px;color:var(--text-3);margin-bottom:12px}
+  .pp-cap b{color:var(--text)}
+  .insts{display:flex;gap:7px;flex-wrap:wrap}
+  .inst{border-radius:8px;padding:7px 10px;text-align:center;min-width:62px;border:1px solid var(--border)}
+  .inst .a{font-size:12px;font-weight:700}
+  .inst .d{font-size:10px;color:var(--text-3);margin-top:2px}
+  .inst.paid{background:var(--green-light);border-color:#bbf7d0}.inst.paid .a{color:var(--green)}
+  .inst.due{background:var(--amber-light);border-color:#fde68a}.inst.due .a{color:var(--amber)}
+  .inst.up{background:#fff}.inst.up .a{color:var(--text-3)}
+  .note{background:var(--blue-pale);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:11px 13px;font-size:12.5px;color:var(--text-2);line-height:1.5}
+  .act-row{display:flex;align-items:center;gap:11px;padding:9px 0;font-size:12.5px}
+  .act-row+.act-row{border-top:1px solid var(--border-soft)}
+  .act-ic{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .act-ic.ok{background:var(--green-light);color:var(--green)}.act-ic.wait{background:var(--amber-light);color:var(--amber)}
+  .act-ic svg{width:13px;height:13px}
+  .act-row .nm{font-weight:600;color:var(--text)}
+  .act-row .su{font-size:11px;color:var(--text-3);margin-top:1px}
+  .act-row .am{margin-left:auto;font-weight:700;color:var(--text)}
+  .contact-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:12.5px;color:var(--text-2)}
+  .contact-row svg{width:14px;height:14px;color:var(--text-3);flex-shrink:0}
+  .df{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0}
+  .df .btn{flex:1;justify-content:center}
+
+  /* reminder modal */
+  .rm-scrim{position:fixed;inset:0;background:rgba(15,23,42,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:70}
+  .rm-scrim.show{opacity:1;pointer-events:auto}
+  .rm{position:fixed;top:50%;left:50%;transform:translate(-50%,-46%) scale(.98);width:440px;max-width:92vw;background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.3);z-index:71;opacity:0;pointer-events:none;transition:.2s}
+  .rm.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+  .rm-h{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
+  .rm-h .ic{width:36px;height:36px;border-radius:10px;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .rm-h .ic svg{width:17px;height:17px}
+  .rm-h .t{font-size:15px;font-weight:700;color:var(--text)}
+  .rm-h .s{font-size:12px;color:var(--text-3);margin-top:2px}
+  .rm-b{padding:18px 20px}
+  .rm-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+  .rm-row{display:flex;justify-content:space-between;gap:14px;font-size:12.5px;padding:6px 0;color:var(--text-3);border-bottom:1px solid var(--border-soft)}
+  .rm-row:last-child{border-bottom:none}
+  .rm-row b{color:var(--text);font-weight:600;text-align:right}
+  .rm-msg{font-size:12.5px;color:var(--text-2);line-height:1.55;background:var(--blue-pale);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:11px 13px}
+  .rm-f{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;font-size:13px;font-weight:500;padding:11px 18px;border-radius:10px;box-shadow:0 10px 30px rgba(15,23,42,.25);opacity:0;pointer-events:none;transition:.25s;z-index:80}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+<style id="ur-nav-underline-fix">.nav-item,.nav-item:link,.nav-item:visited,.nav-item:hover,.nav-item:focus,.nav-item:active{text-decoration:none}</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <circle cx="22" cy="92" r="4" fill="#fff"/><circle cx="58" cy="58" r="5" fill="#fff"/>
+        <circle cx="98" cy="38" r="5.5" fill="#fff"/><circle cx="138" cy="24" r="7" fill="#C8A04A"/>
+      </svg>
+    </div>
+    <div><div class="logo-name">Atlas</div><div class="logo-sub">By GiveCentral</div></div>
+  </div>
+  <div class="sidebar-scroll" id="nav"></div>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="u-av" style="background:#2563EB">SR</div>
+    <div style="flex:1;min-width:0"><div class="user-name" id="u-name">Sarah Reynolds</div><div class="user-role" id="u-role">Development Director</div></div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="crumb">
+      <a href="atlas-campaign-dashboard.html" style="color:inherit">Campaigns</a><span class="sep">›</span>
+      <span class="cur">Catholic Ministry Appeal 2026</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost" onclick="toast('Exporting campaign PDF…')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v6.5M3.5 5L6 7.5 8.5 5M1.5 9.5h9"/></svg>Export PDF</button>
+      <button class="btn btn-ghost" id="email-btn" onclick="toast('Opening email composer…')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="9" height="7" rx="1"/><path d="M1.5 3.5L6 6.5l4.5-3" stroke-linecap="round"/></svg>Email to client</button>
+      <button class="btn btn-primary" id="share-btn" onclick="toast('Live link copied to clipboard')"><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><circle cx="3" cy="6" r="1.6"/><circle cx="9" cy="3" r="1.6"/><circle cx="9" cy="9" r="1.6"/><path d="M4.4 5.2l3.2-1.6M4.4 6.8l3.2 1.6"/></svg>Share live link</button>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <div class="hero" id="hero"></div>
+    <div class="body">
+      <div class="kstrip" id="kstrip"></div>
+      <div class="lensbar">
+        <div class="lens" id="lens">
+          <button data-lens="parish" onclick="setLens('parish')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5l5 3v8H2v-8z"/><path d="M5.5 12.5V8.5h3v4"/></svg>By Parish</button>
+          <button data-lens="donor" onclick="setLens('donor')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="4.5" r="2.5"/><path d="M2 12c0-2.5 2.2-4 5-4s5 1.5 5 4"/></svg>By Donor</button>
+        </div>
+        <span class="lens-note" id="lens-note"></span>
+      </div>
+      <div class="grid">
+        <div id="content"></div>
+        <div class="rail" id="rail"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer"></aside>
+<div class="rm-scrim" id="rm-scrim" onclick="closeReminder()"></div>
+<div class="rm" id="rm" role="dialog" aria-modal="true"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════════════ DATA ════════════════ */
+const CAMPAIGN = {
+  name:"Catholic Ministry Appeal 2026",
+  diocese:"Diocese of St. Petersburg · Annual Appeal",
+  dates:"Jan 1 – Dec 31, 2026", chair:"Patricia Reyes", goal:1600000,
+  desc:"Funding diocesan ministries — Catholic education, seminarian formation, parish outreach, and social services — across all 20 parishes of the Diocese of St. Petersburg.",
+  pledged:1248000, cash:992000, balance:256000, overdue:28000, activePledges:96,
+  donors:2940, newDonors:180, avgGift:425, medianGift:150,
+  pledgesDue:46500, dueInstallments:22, dueOverdue:4,
+  largestGift:25000, largestBy:"Sullivan Family Foundation — appeal lead gift",
+  daysRemaining:88, pace:64,
+  /* parish rollup (real headline figures) */
+  parishCount:20, parishRaised:1248000, parishGoal:1600000, parishRemaining:352000, parishPace:78
+};
+
+const OFFICER_COLOR = {"Mike Donovan":"#2563EB","Sarah Reynolds":"#0D9488","Janet Walsh":"#7C3AED","—":"#94A3B8"};
+function oc(o){return OFFICER_COLOR[o]||"#64748B";}
+
+const DONORS = [
+  {n:"Sullivan Family Foundation", parish:"All parishes", pledged:25000, paid:18750, status:"current", nextAmt:6250, nextDate:"Oct 1, 2026", officer:"Mike Donovan", since:2011, email:"grants@sullivanfdn.org", phone:"(813) 555-0110", addr:"Sullivan Foundation, Tampa FL", term:"2026", note:"Appeal lead gift — foundation board approves each quarter.", insts:[["paid","Q1"],["paid","Q2"],["paid","Q3"],["due","Q4"]]},
+  {n:"O'Brien, James & Patricia", parish:"Cathedral", pledged:15000, paid:11250, status:"current", nextAmt:3750, nextDate:"Oct 1, 2026", officer:"Mike Donovan", since:2014, email:"jobrien@email.com", phone:"(727) 555-0142", addr:"14 Bayshore Blvd, Tampa FL", term:"2026", note:"Long-standing major appeal donor — personal stewardship by Mike D.", insts:[["paid","Q1"],["paid","Q2"],["paid","Q3"],["due","Q4"]]},
+  {n:"Harrington, David & Susan", parish:"Cathedral", pledged:12000, paid:3000, status:"overdue", nextAmt:3000, nextDate:"Apr 1, 2026", officer:"Mike Donovan", since:2016, email:"d.harrington@email.com", phone:"(727) 555-0188", addr:"902 Snell Isle, St. Petersburg FL", term:"2026", note:"Q2 installment overdue — reminder sent, awaiting response.", insts:[["paid","Q1"],["due","Q2"],["up","Q3"],["up","Q4"]]},
+  {n:"First Catholic Bank", parish:"All parishes", pledged:10000, paid:10000, status:"fulfilled", nextAmt:0, nextDate:"", officer:"Sarah Reynolds", since:2018, email:"giving@firstcatholic.com", phone:"(813) 555-0199", addr:"First Catholic Bank, Tampa FL", term:"2026", note:"Corporate sponsor — appeal pledge fully paid for the year.", insts:[["paid","Q1"],["paid","Q2"],["paid","Q3"],["paid","Q4"]]},
+  {n:"Catholic Community Foundation", parish:"Diocese", pledged:10000, paid:7500, status:"current", nextAmt:2500, nextDate:"Oct 1, 2026", officer:"Mike Donovan", since:2012, email:"info@ccfdiocese.org", phone:"(813) 555-0133", addr:"Diocesan Center, St. Petersburg FL", term:"2026", note:"Donor-advised fund — quarterly distribution.", insts:[["paid","Q1"],["paid","Q2"],["paid","Q3"],["due","Q4"]]},
+  {n:"Walsh Estate", parish:"St. Michael's", pledged:8000, paid:2000, status:"overdue", nextAmt:2000, nextDate:"Apr 1, 2026", officer:"Sarah Reynolds", since:2009, email:"trustee@walshestate.com", phone:"(727) 555-0167", addr:"c/o Walsh Trust, Clearwater FL", term:"2026", note:"Estate gift — coordinate through trustee. Q2 overdue.", insts:[["paid","Q1"],["due","Q2"],["up","Q3"],["up","Q4"]]},
+  {n:"Kim, Dr. Patricia", parish:"Holy Cross", pledged:6000, paid:4500, status:"current", nextAmt:1500, nextDate:"Oct 1, 2026", officer:"Janet Walsh", since:2017, email:"p.kim@email.com", phone:"(813) 555-0144", addr:"45 Harbour Dr, Brandon FL", term:"2026", note:"On track. Reliable quarterly giver.", insts:[["paid","Q1"],["paid","Q2"],["paid","Q3"],["due","Q4"]]},
+  {n:"Morrison, Peter & Clare", parish:"St. Catherine's", pledged:5000, paid:5000, status:"fulfilled", nextAmt:0, nextDate:"", officer:"Sarah Reynolds", since:2015, email:"morrison.pc@email.com", phone:"(727) 555-0121", addr:"7 Largo Vista, Largo FL", term:"2026", note:"Appeal pledge fully paid. Auto-reminder enabled.", insts:[["paid","Q1"],["paid","Q2"],["paid","Q3"],["paid","Q4"]]},
+  {n:"Doyle, Michael & Anne", parish:"Holy Cross", pledged:4000, paid:1000, status:"overdue", nextAmt:1000, nextDate:"Apr 1, 2026", officer:"Janet Walsh", since:2016, email:"doyle.ma@email.com", phone:"(813) 555-0155", addr:"18 Brandon Oaks, Brandon FL", term:"2026", note:"Q2 payment overdue — second reminder scheduled.", insts:[["paid","Q1"],["due","Q2"],["up","Q3"],["up","Q4"]]},
+  {n:"Ramirez, Elena & Carlos", parish:"St. Michael's", pledged:3500, paid:3500, status:"fulfilled", nextAmt:0, nextDate:"", officer:"Janet Walsh", since:2019, email:"ramirez.ec@email.com", phone:"(727) 555-0177", addr:"22 Coquina Way, Tampa FL", term:"2026", note:"Fulfilled ahead of schedule. Strong upgrade prospect.", insts:[["paid","Q1"],["paid","Q2"],["paid","Q3"],["paid","Q4"]]},
+  {n:"Fitzgerald, James & Mary", parish:"Cathedral", pledged:3000, paid:2250, status:"current", nextAmt:750, nextDate:"Oct 1, 2026", officer:"Mike Donovan", since:2013, email:"fitz.jm@email.com", phone:"(727) 555-0166", addr:"31 Old Tampa Way, Tampa FL", term:"2026", note:"On track. Long-term parishioner.", insts:[["paid","Q1"],["paid","Q2"],["paid","Q3"],["due","Q4"]]},
+  {n:"Andrews, William", parish:"All parishes", pledged:2500, paid:1250, status:"behind", nextAmt:625, nextDate:"Jul 1, 2026", officer:"Mike Donovan", since:2018, email:"w.andrews@email.com", phone:"(727) 555-0102", addr:"5 Pinellas Pt, St. Petersburg FL", term:"2026", note:"Slightly behind pace — check in at next event.", insts:[["paid","Q1"],["paid","Q2"],["due","Q3"],["up","Q4"]]},
+  {n:"Bishop, Robert & Karen", parish:"St. Catherine's", pledged:2000, paid:1500, status:"current", nextAmt:500, nextDate:"Oct 1, 2026", officer:"Sarah Reynolds", since:2017, email:"bishop.rk@email.com", phone:"(727) 555-0181", addr:"9 Largo Bay, Largo FL", term:"2026", note:"On track. Prefers email contact only.", insts:[["paid","Q1"],["paid","Q2"],["paid","Q3"],["due","Q4"]]},
+  {n:"Ng, Helen", parish:"Holy Cross", pledged:1500, paid:1500, status:"fulfilled", nextAmt:0, nextDate:"", officer:"Janet Walsh", since:2020, email:"h.ng@email.com", phone:"(813) 555-0123", addr:"12 Brandon Pl, Brandon FL", term:"2026", note:"Pledge complete. First-time appeal donor.", insts:[["paid","Q1"],["paid","Q2"],["paid","Q3"],["paid","Q4"]]},
+  {n:"Petrov, Anna & Dmitri", parish:"Cathedral", pledged:1200, paid:600, status:"behind", nextAmt:300, nextDate:"Jul 1, 2026", officer:"Mike Donovan", since:2019, email:"petrov.ad@email.com", phone:"(727) 555-0145", addr:"3 Vinoy Pl, St. Petersburg FL", term:"2026", note:"Behind pace — newer relationship, gentle follow-up.", insts:[["paid","Q1"],["paid","Q2"],["due","Q3"],["up","Q4"]]},
+  {n:"Castellano, Joseph", parish:"St. Michael's", pledged:1000, paid:250, status:"overdue", nextAmt:250, nextDate:"Apr 1, 2026", officer:"Janet Walsh", since:2018, email:"j.castellano@email.com", phone:"(727) 555-0190", addr:"8 Tampa Heights, Tampa FL", term:"2026", note:"Q2 installment overdue — phone follow-up needed.", insts:[["paid","Q1"],["due","Q2"],["up","Q3"],["up","Q4"]]},
+  {n:"Tran, Linh", parish:"San Juan Diego", pledged:750, paid:562, status:"current", nextAmt:188, nextDate:"Oct 1, 2026", officer:"Janet Walsh", since:2021, email:"l.tran@email.com", phone:"(813) 555-0166", addr:"40 Town N Country, Tampa FL", term:"2026", note:"Steady grassroots supporter.", insts:[["paid","Q1"],["paid","Q2"],["paid","Q3"],["due","Q4"]]},
+  {n:"Murphy, Sean", parish:"Our Lady of Lourdes", pledged:500, paid:500, status:"fulfilled", nextAmt:0, nextDate:"", officer:"Sarah Reynolds", since:2022, email:"s.murphy@email.com", phone:"(727) 555-0150", addr:"61 Gulf-to-Bay, Clearwater FL", term:"2026", note:"Grassroots gift fulfilled. Welcome new donor.", insts:[["paid","Q1"],["paid","Q2"],["paid","Q3"],["paid","Q4"]]}
+];
+
+const PARISHES = [
+  {n:"Cathedral of St. Jude", loc:"St. Petersburg", raised:184000, goal:196000, pace:30,  status:"onpace", donors:412, open:14, overdue:8000},
+  {n:"Holy Cross Parish",     loc:"Brandon",        raised:97000,  goal:110000, pace:24,  status:"onpace", donors:268, open:9,  overdue:2000},
+  {n:"St. Anthony's Parish",  loc:"St. Petersburg", raised:72000,  goal:88000,  pace:18,  status:"onpace", donors:204, open:11, overdue:5000},
+  {n:"St. Jude the Apostle",  loc:"Tampa",          raised:58000,  goal:80000,  pace:9,   status:"onpace", donors:160, open:6,  overdue:0},
+  {n:"St. Michael's Parish",  loc:"Tampa",          raised:54000,  goal:78000,  pace:5,   status:"onpace", donors:247, open:8,  overdue:0},
+  {n:"Holy Family Parish",    loc:"Largo",          raised:38000,  goal:54000,  pace:6,   status:"onpace", donors:131, open:4,  overdue:0},
+  {n:"San Juan Diego",        loc:"Tampa",          raised:49000,  goal:75000,  pace:1,   status:"onpace", donors:189, open:7,  overdue:2000},
+  {n:"St. Catherine's Parish",loc:"Largo",          raised:38000,  goal:58000,  pace:2,   status:"onpace", donors:142, open:6,  overdue:1000},
+  {n:"Our Lady of Lourdes",   loc:"Clearwater",     raised:40000,  goal:62000,  pace:0,   status:"onpace", donors:148, open:5,  overdue:0},
+  {n:"St. Jerome",            loc:"Largo",          raised:31000,  goal:50000,  pace:-1,  status:"atrisk", donors:120, open:5,  overdue:0},
+  {n:"St. Mary",              loc:"Tampa",          raised:27000,  goal:50000,  pace:-8,  status:"atrisk", donors:115, open:5,  overdue:1000},
+  {n:"St. Paul",              loc:"Tampa",          raised:28000,  goal:52000,  pace:-8,  status:"atrisk", donors:110, open:6,  overdue:3000},
+  {n:"Sacred Heart",          loc:"Pinellas Park",  raised:26000,  goal:48000,  pace:-7,  status:"atrisk", donors:105, open:7,  overdue:2000},
+  {n:"St. Raphael",           loc:"St. Petersburg", raised:24000,  goal:46000,  pace:-10, status:"atrisk", donors:98,  open:5,  overdue:1000},
+  {n:"Blessed Sacrament",     loc:"Seminole",       raised:22000,  goal:44000,  pace:-12, status:"atrisk", donors:92,  open:6,  overdue:2000},
+  {n:"Christ the King",       loc:"Tampa",          raised:18000,  goal:45000,  pace:-22, status:"behind", donors:78,  open:9,  overdue:7000},
+  {n:"St. Joseph",            loc:"St. Petersburg", raised:17000,  goal:44000,  pace:-23, status:"behind", donors:82,  open:7,  overdue:5000},
+  {n:"Nativity",              loc:"Brandon",        raised:15000,  goal:42000,  pace:-26, status:"behind", donors:70,  open:8,  overdue:6000},
+  {n:"St. Cecelia",           loc:"Clearwater",     raised:16000,  goal:43000,  pace:-25, status:"behind", donors:72,  open:7,  overdue:5000},
+  {n:"Espiritu Santo",        loc:"Safety Harbor",  raised:14000,  goal:40000,  pace:-27, status:"behind", donors:65,  open:6,  overdue:4000}
+];
+
+/* ════════════════ ROLES (role-aware default) ════════════════ */
+const ROLES = {
+  dev:    {name:"Patricia Reyes", initials:"PR", color:"#7C3AED", label:"Dev Director", defaultLens:"parish", scope:"all",       canAct:true,  blurb:""},
+  officer:{name:"Mike Donovan",   initials:"MD", color:"#2563EB", label:"Gift Officer", defaultLens:"donor",  scope:"Mike Donovan", canAct:true, blurb:"Your portfolio"},
+  read:   {name:"Bishop Thomas",  initials:"BT", color:"#64748B", label:"Read-only",    defaultLens:"parish", scope:"all",       canAct:false, blurb:""}
+};
+const ROLE_ORDER = ["dev","officer","read"];
+let role = ROLES.dev, roleKey = "dev";
+let lens = "parish";
+let donorFilter = "all", donorSearch = "";
+let parishFilter = "all", parishView = "table", parishSearch = "";
+
+/* ════════════════ HELPERS ════════════════ */
+function money(n){ if(n>=1000000) return "$"+(n/1000000).toFixed(2).replace(/\.00$/,"")+"M"; if(n>=1000) return "$"+Math.round(n/1000)+"K"; return "$"+n.toLocaleString(); }
+function full(n){ return "$"+n.toLocaleString(); }
+function initials(name){ const c=name.replace(/,/g,"").split(/[\s&]+/).filter(Boolean); return ((c[0]||"")[0]||"")+((c[1]||"")[0]||""); }
+function pct(d){ return d.pledged? Math.round(d.paid/d.pledged*100):0; }
+function progColor(p){ return p>=100?"var(--blue)":p>=66?"var(--green-2)":p>=50?"var(--green-2)":p>=40?"var(--amber-2)":"var(--rose)"; }
+function statusLabel(s){ return {current:"Current",overdue:"Overdue",behind:"Behind",fulfilled:"Fulfilled",onpace:"On pace",atrisk:"At risk",behindp:"Behind"}[s]||s; }
+
+function visibleDonors(){
+  let rows = DONORS.slice();
+  if(role.scope!=="all") rows = rows.filter(d=>d.officer===role.scope);
+  return rows;
+}
+
+/* ════════════════ NAV ════════════════ */
+/* Mirror of atlas-campaign-dashboard.html sidebar — [label, icon, href, badge, alert, active] */
+const NAV = [
+  ["Main",[
+    ["Dashboard","<rect x='1.5' y='1.5' width='4' height='4' rx='1.2'/><rect x='8.5' y='1.5' width='4' height='4' rx='1.2'/><rect x='1.5' y='8.5' width='4' height='4' rx='1.2'/><rect x='8.5' y='8.5' width='4' height='4' rx='1.2'/>","atlas-dashboard.html"],
+    ["Donors","<circle cx='6' cy='4.5' r='3'/><path d='M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5'/>","atlas-donors-list.html","3,847"],
+    ["Gifts & pledges","<path d='M7 1.5v11M2 6.5h10'/>","atlas-gifts-pledges.html","142"],
+    ["Campaigns","<path d='M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2'/><rect x='1.5' y='1.5' width='11' height='11' rx='2'/>","atlas-campaign-dashboard.html","",false,true],
+    ["Reports","<path d='M1.5 3h11M1.5 7h7M1.5 11h5'/>","atlas-reports.html"]
+  ]],
+  ["Fundraising",[
+    ["Prospect pipeline","<circle cx='7' cy='7' r='5.5'/><path d='M7 4v4M7 10v.5'/>","atlas-pipeline.html","28"],
+    ["Tasks & reminders","<rect x='1.5' y='2.5' width='11' height='9' rx='1.5'/><path d='M1.5 6h11M5 2.5v2M9 2.5v2'/>","atlas-tasks.html","7",true],
+    ["Communications","<path d='M2 3.5h10v7H2zM2 6.5h10M5 3.5v3'/>","atlas-communications.html"],
+    ["Events","<rect x='2' y='3' width='10' height='9' rx='1.5'/><path d='M2 6h10M5 2v2M9 2v2'/>","atlas-events-dashboard.html"],
+    ["Volunteers","<circle cx='5' cy='5' r='2.5'/><circle cx='10' cy='5.5' r='2'/><path d='M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7'/>","atlas-volunteer-management.html"]
+  ]],
+  ["Intelligence",[
+    ["Guru AI","<circle cx='7' cy='5' r='3.5'/><path d='M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5'/>","atlas-guru-ai.html"],
+    ["Analytics","<path d='M2 11l3-3 2 2 3-3 2 2'/><rect x='2' y='2' width='10' height='10' rx='1.5'/>","atlas-reports.html"]
+  ]],
+  ["Admin",[
+    ["Users & roles","<circle cx='5' cy='5' r='2.5'/><circle cx='10' cy='5.5' r='2'/><path d='M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7'/>","atlas-users-roles.html"],
+    ["Tags & Segment","<path d='M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z'/><circle cx='4.5' cy='4.5' r='1'/>","atlas-tags.html"],
+    ["Integrations","<circle cx='4' cy='7' r='2.5'/><circle cx='10' cy='7' r='2.5'/><path d='M6.5 7h1'/>","atlas-integrations.html"],
+    ["Sync","<path d='M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12'/>","atlas-sync.html"],
+    ["Location portal","<path d='M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z'/><circle cx='7' cy='5' r='1.8'/>","atlas-location-manage.html"]
+  ]]
+];
+function renderNav(){
+  document.getElementById("nav").innerHTML = NAV.map(([g,items])=>
+    '<div class="nav-group"><div class="nav-label">'+g+'</div>'+
+    items.map(([label,icon,href,badge,alert,active])=>
+      '<a class="nav-item'+(active?' active':'')+'" href="'+href+'"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">'+icon+'</svg>'+label
+      +(badge?'<span class="nav-badge'+(alert?' alert':'')+'">'+badge+'</span>':'')+'</a>').join("")+
+    '</div>').join("");
+}
+
+/* ════════════════ HERO ════════════════ */
+function renderHero(){
+  const c=CAMPAIGN;
+  const pledgedPct = (c.pledged/c.goal*100);
+  const cashPct = (c.cash/c.goal*100);
+  const scope = role.scope==="all"
+    ? ''
+    : '<div class="hero-scope"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 1.5l1.6 3.3 3.6.5-2.6 2.5.6 3.6L7 9.7 3.8 11.4l.6-3.6L1.8 5.3l3.6-.5z"/></svg>Your portfolio · '+visibleDonors().length+' of '+DONORS.length+' campaign donors</div>';
+  document.getElementById("hero").innerHTML =
+   '<div class="hero-top"><div class="hero-left">'
+   + '<div class="hero-eyebrow">'+c.diocese+'<span class="status-pill"><span class="dot"></span>Active · On pace</span></div>'
+   + '<div class="hero-title">'+c.name+'</div>'
+   + '<div class="hero-meta">'
+     + '<span><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="11" height="10" rx="1.5"/><path d="M1.5 5.5h11M4.5 1v2.5M9.5 1v2.5" stroke-linecap="round"/></svg>'+c.dates+'</span>'
+     + '<span><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="4.5" r="2.5"/><path d="M2 12c0-2.5 2.2-4 5-4s5 1.5 5 4" stroke-linecap="round"/></svg>Campaign chair: '+c.chair+'</span>'
+     + '<span><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 1.5l5.5 5.5L7 12.5 1.5 7z" stroke-linejoin="round"/></svg>Goal: '+full(c.goal)+'</span>'
+   + '</div>'
+   + '<div class="hero-desc">'+c.desc+'</div>'+scope
+   + '</div>'
+   + '<div class="hero-stats">'
+     + hstat(money(c.pledged),"Total pledged","gold")
+     + hstat(money(c.cash),"Cash received","green")
+     + hstat(money(c.balance),"Pledge balance","white")
+     + hstat(money(c.overdue),"Overdue","rose")
+     + hstat(c.activePledges,"Active pledges","white")
+   + '</div></div>'
+   + '<div class="hero-prog">'
+     + '<div class="hp-head"><span>Progress toward <b>'+full(c.goal)+'</b> goal</span>'
+       + '<span class="hp-pct"><span class="a">'+pledgedPct.toFixed(1)+'%</span> pledged · <span class="b">'+cashPct.toFixed(1)+'%</span> received in cash</span></div>'
+     + '<div class="hp-bar">'
+       + '<div class="hp-seg cash" style="width:'+cashPct+'%"></div>'
+       + '<div class="hp-seg pledge" style="width:'+(pledgedPct-cashPct)+'%"></div>'
+       + '<div class="hp-pace" data-pace="'+c.pace+'%" style="left:'+c.pace+'%"></div>'
+     + '</div>'
+     + '<div class="hp-legend">'
+       + '<span><i style="background:#22C55E"></i>Cash received — '+money(c.cash)+'</span>'
+       + '<span><i style="background:#D9A943"></i>Pledged, not yet paid — '+money(c.balance)+'</span>'
+       + '<span><i style="background:rgba(255,255,255,.18)"></i>Remaining to goal — '+money(c.goal-c.pledged)+'</span>'
+     + '</div>'
+   + '</div>';
+}
+function hstat(v,l,cls){ return '<div class="hstat"><div class="v '+cls+'">'+v+'</div><div class="l">'+l+'</div></div>'; }
+
+/* ════════════════ KPI STRIP (lens-aware) ════════════════ */
+function renderKpis(){
+  const strip=document.getElementById("kstrip");
+  const cards = lens==="parish" ? parishKpiCards() : donorKpiCards();
+  strip.className = "kstrip " + (cards.length===6 ? "c6" : "c5");
+  strip.innerHTML = cards.map(([l,ic,v,m,cls])=>
+    '<div class="kcard"><div class="l"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">'+ic+'</svg>'+l+'</div>'
+    +'<div class="v '+cls+'">'+v+'</div><div class="m">'+m+'</div></div>').join("");
+}
+function donorKpiCards(){
+  const c=CAMPAIGN;
+  return [
+    ["Total donors","<circle cx='6.5' cy='4.5' r='2.5'/><path d='M2 12c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4'/>",c.donors,'<span class="up">↑ '+c.newDonors+'</span> new this quarter',""],
+    ["Average gift","<path d='M2 7h9M7 2.5v9' /><path d='M4.5 4.5L2 7l2.5 2.5M8.5 4.5L11 7l-2.5 2.5'/>",full(c.avgGift),"Median: "+full(c.medianGift),""],
+    ["Pledges due (30d)","<circle cx='6.5' cy='6.5' r='5'/><path d='M6.5 3.5v3l2 1.5'/>",money(c.pledgesDue),c.dueInstallments+" installments · "+c.dueOverdue+" overdue","amber"],
+    ["Largest gift","<rect x='2' y='2' width='9' height='9' rx='1.5'/><path d='M2 8l2.5-2 2 1.5L9 5l2 1.5'/>",full(c.largestGift),c.largestBy,""],
+    ["Days remaining","<rect x='1.5' y='2.5' width='10' height='9' rx='1.5'/><path d='M1.5 5h10M4 1v2.5M9 1v2.5'/>",c.daysRemaining,"Campaign ends Dec 2027","rose"]
+  ];
+}
+function parishKpiCards(){
+  const n=CAMPAIGN.parishCount;
+  const raised=CAMPAIGN.parishRaised;
+  const goal=CAMPAIGN.parishGoal;
+  const dist=countParishStatuses();
+  const goalmet=dist.goalmet||0;
+  return [
+    ["Raised","<path d='M7 1.5l5 3v8H2v-8z'/><path d='M5.5 12.5V8.5h3v4'/>",money(raised),"across "+n+" parishes","amber"],
+    ["% of goal","<circle cx='6.5' cy='6.5' r='5'/><path d='M6.5 6.5L6.5 2M6.5 6.5l3.5 1.5'/>",CAMPAIGN.parishPace+"%","of "+money(goal)+" goal","green"],
+    ["Remaining","<path d='M2 7h9M7 2.5v9'/>",money(CAMPAIGN.parishRemaining),"to combined goal",""],
+    ["On pace","<circle cx='6.5' cy='6.5' r='5'/><path d='M4 6.5l2 2 3.5-4'/>",dist.onpace,"parishes","green"],
+    ["At risk","<path d='M6.5 1.5l5.5 9.5H1z'/><path d='M6.5 5v2.5M6.5 9v.5'/>",dist.atrisk,"parishes","amber"],
+    ["Behind","<circle cx='6.5' cy='6.5' r='5'/><path d='M6.5 4v3M6.5 9v.5'/>",dist.behind+(goalmet?" / "+goalmet+" met":""),"behind pace","rose"]
+  ];
+}
+
+/* ════════════════ LENS ════════════════ */
+function setLens(l){
+  lens=l;
+  document.querySelectorAll("#lens button").forEach(b=>b.classList.toggle("on",b.dataset.lens===l));
+  document.getElementById("lens-note").textContent = l==="donor"
+    ? "Showing every pledging donor in this campaign. Click a donor for their full pledge schedule."
+    : "Showing each parish's progress in this campaign. Click a parish to drill into its donors.";
+  renderKpis(); renderContent(); renderRail();
+}
+
+function renderContent(){
+  document.getElementById("content").innerHTML = lens==="donor"? donorCard() : parishCard();
+  if(lens==="donor") renderDonorTable(); else renderParishBody();
+}
+
+/* ──── DONOR LENS ──── */
+function donorCard(){
+  const counts = countDonorStatuses();
+  const chips = [["all","All"],["current","Current"],["behind","Behind"],["overdue","Overdue"],["fulfilled","Fulfilled"]]
+    .map(([k,lbl])=>'<div class="chip'+(donorFilter===k?' on':'')+'" onclick="setDonorFilter(\''+k+'\')">'+lbl+(counts[k]!=null?' ('+counts[k]+')':'')+'</div>').join("");
+  const exportBtn = role.canAct ? '<button class="btn btn-ghost" onclick="exportDonors()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v6.5M3.5 5L6 7.5 8.5 5M1.5 9.5h9"/></svg>Export list</button>'
+    : '<span class="lens-note">Read-only · view access</span>';
+  return '<div class="card">'
+    + '<div class="card-head row"><div><div class="t">Donors &amp; pledges</div><div class="s">Click any row for full giving history, pledge schedule, and contact details</div></div><div class="ct" id="donor-count"></div></div>'
+    + '<div class="toolbar">'
+      + '<div class="search"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5.5" cy="5.5" r="4"/><path d="M8.5 8.5L11.5 11.5" stroke-linecap="round"/></svg>'
+        + '<input id="donor-q" placeholder="Search donors…" oninput="onDonorSearch(this.value)"></div>'
+      + '<div class="chips">'+chips+'</div>'
+      + '<div class="tool-right">'+exportBtn+'</div>'
+    + '</div>'
+    + '<div id="donor-table"></div>'
+    + '</div>';
+}
+function countDonorStatuses(){
+  const rows=visibleDonors(); const c={all:rows.length,current:0,behind:0,overdue:0,fulfilled:0};
+  rows.forEach(d=>{ if(c[d.status]!=null) c[d.status]++; }); return c;
+}
+function filteredDonors(){
+  let rows=visibleDonors();
+  if(donorFilter!=="all") rows=rows.filter(d=>d.status===donorFilter);
+  if(donorSearch) rows=rows.filter(d=>(d.n+" "+d.parish+" "+d.officer).toLowerCase().includes(donorSearch.toLowerCase()));
+  return rows;
+}
+function renderDonorTable(){
+  const rows=filteredDonors();
+  const el=document.getElementById("donor-table"); if(!el)return;
+  const cnt=document.getElementById("donor-count"); if(cnt) cnt.textContent=rows.length+" of "+visibleDonors().length;
+  if(!rows.length){ el.innerHTML='<div class="empty">No donors match this view.</div>'; return; }
+  el.innerHTML='<table><thead><tr><th>Donor</th><th class="r">Pledged</th><th class="r">Paid</th><th class="r">Balance</th><th>Progress</th><th>Status</th><th>Next installment</th><th>Gift officer</th></tr></thead><tbody>'
+    + rows.map((d,i)=>{ const p=pct(d); const bal=d.pledged-d.paid;
+      return '<tr data-donor="'+DONORS.indexOf(d)+'">'
+       + '<td><div class="donor-cell"><span class="av" style="background:'+oc(d.officer)+'">'+initials(d.n)+'</span><div><div class="nm">'+d.n+'</div><div class="su">'+d.parish+'</div></div></div></td>'
+       + '<td class="r">'+full(d.pledged)+'</td>'
+       + '<td class="r paid">'+full(d.paid)+'</td>'
+       + '<td class="r bal">'+(bal>0?full(bal):'<span class="mut">—</span>')+'</td>'
+       + '<td><div class="pmini"><div class="track"><div class="fill" style="width:'+p+'%;background:'+progColor(p)+'"></div></div><span class="pct" style="color:'+progColor(p)+'">'+p+'%</span></div></td>'
+       + '<td><span class="sb '+d.status+'"><span class="d"></span>'+statusLabel(d.status)+'</span></td>'
+       + '<td>'+(d.nextAmt? '<div class="next-amt'+(d.status==="overdue"?' over':'')+'">'+full(d.nextAmt)+'</div><div class="next-date">'+d.nextDate+'</div>' : '<span class="mut">Fulfilled</span>')+'</td>'
+       + '<td>'+d.officer+'</td>'
+       + '</tr>';
+    }).join("")
+    + '</tbody></table>';
+  bindRows();
+}
+function setDonorFilter(f){ donorFilter=f; renderContent(); }
+function onDonorSearch(v){ donorSearch=v; renderDonorTable(); }
+
+/* ──── PARISH LENS ──── */
+function parishCard(){
+  const counts=countParishStatuses();
+  const chips=[["all","All parishes"],["onpace","On pace"],["atrisk","At risk"],["behind","Behind"],["goalmet","Goal met"]]
+    .map(([k,lbl])=>'<div class="chip'+(parishFilter===k?' on':'')+'" onclick="setParishFilter(\''+k+'\')">'+lbl+(counts[k]!=null?' ('+counts[k]+')':'')+'</div>').join("");
+  return '<div class="card">'
+    + '<div class="card-head row"><div><div class="t">Parish leaderboard</div><div class="s">Click any parish for its full donor and pledge breakdown</div></div><div class="ct" id="parish-count"></div></div>'
+    + '<div class="toolbar">'
+      + '<div class="search"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5.5" cy="5.5" r="4"/><path d="M8.5 8.5L11.5 11.5" stroke-linecap="round"/></svg>'
+        + '<input id="parish-q" placeholder="Search parishes…" oninput="onParishSearch(this.value)"></div>'
+      + '<div class="chips">'+chips+'</div>'
+      + '<div class="tool-right"><div class="seg">'
+        + '<button class="'+(parishView==="table"?"on":"")+'" onclick="setParishView(\'table\')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1.5 3h9M1.5 6h9M1.5 9h9" stroke-linecap="round"/></svg>Table</button>'
+        + '<button class="'+(parishView==="cards"?"on":"")+'" onclick="setParishView(\'cards\')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="1.5" width="4" height="4" rx="1"/><rect x="6.5" y="1.5" width="4" height="4" rx="1"/><rect x="1.5" y="6.5" width="4" height="4" rx="1"/><rect x="6.5" y="6.5" width="4" height="4" rx="1"/></svg>Cards</button>'
+      + '</div></div>'
+    + '</div>'
+    + '<div id="parish-body"></div>'
+    + '</div>';
+}
+function countParishStatuses(){
+  const c={all:PARISHES.length,onpace:0,atrisk:0,behind:0,goalmet:0};
+  PARISHES.forEach(p=>{ if(c[p.status]!=null)c[p.status]++; }); return c;
+}
+function filteredParishes(){
+  let rows=PARISHES.slice().sort((a,b)=>b.raised-a.raised);
+  if(parishFilter!=="all") rows=rows.filter(p=>p.status===parishFilter);
+  if(parishSearch) rows=rows.filter(p=>(p.n+" "+p.loc).toLowerCase().includes(parishSearch.toLowerCase()));
+  return rows;
+}
+function renderParishBody(){
+  const rows=filteredParishes(); const el=document.getElementById("parish-body"); if(!el)return;
+  const cnt=document.getElementById("parish-count"); if(cnt) cnt.textContent=rows.length+" of "+PARISHES.length+" parishes";
+  if(!rows.length){ el.innerHTML='<div class="empty">No parishes match this view.</div>'; return; }
+  if(parishView==="cards"){ el.innerHTML='<div class="pcards">'+rows.map(parishCardItem).join("")+'</div>'; bindRows(); return; }
+  el.innerHTML='<table><thead><tr><th>#</th><th>Parish</th><th class="r">Raised</th><th class="r">Goal</th><th>Progress vs. pace</th><th>Status</th><th class="r">Donors</th><th>Open pledges</th></tr></thead><tbody>'
+    + rows.map((p,i)=>{ const pr=Math.round(p.raised/p.goal*100);
+      return '<tr data-parish="'+PARISHES.indexOf(p)+'">'
+       + '<td><span class="rank '+(i<3?'g'+(i+1):'')+'">'+(i+1)+'</span></td>'
+       + '<td><div class="nm" style="font-weight:600;color:var(--text)">'+p.n+'</div><div class="su" style="font-size:11px;color:var(--text-3)">'+p.loc+'</div><div class="pdrill">View donors →</div></td>'
+       + '<td class="r" style="font-weight:600;color:var(--text)">'+money(p.raised)+'</td>'
+       + '<td class="r mut">'+money(p.goal)+'</td>'
+       + '<td><div class="pmini"><div class="track"><div class="fill" style="width:'+pr+'%;background:'+(p.pace<0?'var(--rose)':'var(--green-2)')+'"></div></div><span class="pct">'+pr+'%</span></div>'
+         + '<div style="font-size:11px;margin-top:2px" class="'+(p.pace<0?'behindp':'ahead')+'">'+(p.pace>=0?'+':'')+p.pace+'% '+(p.pace<0?'behind':'ahead')+'</div></td>'
+       + '<td><span class="sb '+p.status+'"><span class="d"></span>'+statusLabel(p.status)+'</span></td>'
+       + '<td class="r">'+p.donors+'</td>'
+       + '<td>'+p.open+' open'+(p.overdue?'<div class="open-due">'+money(p.overdue)+' overdue</div>':'')+'</td>'
+       + '</tr>';
+    }).join("")
+    + '</tbody></table>';
+  bindRows();
+}
+function parishCardItem(p){ const pr=Math.round(p.raised/p.goal*100);
+  return '<div class="pc" data-parish="'+PARISHES.indexOf(p)+'">'
+   + '<div class="pc-top"><div style="flex:1"><div class="pc-name">'+p.n+'</div><div class="pc-loc">'+p.loc+'</div></div><span class="sb '+p.status+'"><span class="d"></span>'+statusLabel(p.status)+'</span></div>'
+   + '<div class="pc-fig"><span>Raised <b>'+money(p.raised)+'</b></span><span>Goal '+money(p.goal)+'</span></div>'
+   + '<div class="pmini"><div class="track"><div class="fill" style="width:'+pr+'%;background:'+(p.pace<0?'var(--rose)':'var(--green-2)')+'"></div></div><span class="pct">'+pr+'%</span></div>'
+   + '<div style="display:flex;justify-content:space-between;margin-top:9px;font-size:11.5px;color:var(--text-3)"><span>'+p.donors+' donors</span><span class="'+(p.pace<0?'behindp':'ahead')+'">'+(p.pace>=0?'+':'')+p.pace+'% '+(p.pace<0?'behind':'ahead')+'</span></div>'
+   + '</div>';
+}
+function setParishFilter(f){ parishFilter=f; renderContent(); }
+function onParishSearch(v){ parishSearch=v; renderParishBody(); }
+function setParishView(v){ parishView=v; renderContent(); }
+
+/* shared post-render */
+function bindRows(){
+  if(lens==="donor"){
+    const t=document.getElementById("donor-table");
+    if(t&&!t.dataset.bound){ /* table rebuilt each time; bind directly */ }
+    document.querySelectorAll("#donor-table tr[data-donor]").forEach(tr=>tr.onclick=()=>openDonor(+tr.dataset.donor));
+  } else {
+    document.querySelectorAll("[data-parish]").forEach(tr=>tr.onclick=()=>drillParish(+tr.dataset.parish));
+  }
+}
+
+/* ════════════════ RIGHT RAIL (contextual) ════════════════ */
+function renderRail(){
+  document.getElementById("rail").innerHTML = lens==="donor" ? donorRail() : parishRail();
+}
+function donorRail(){
+  const c=CAMPAIGN;
+  const pledgedPct=(c.pledged/c.goal*100);
+  // segments
+  const major=DONORS.filter(d=>d.pledged>=10000), mid=DONORS.filter(d=>d.pledged>=1000&&d.pledged<10000), grass=DONORS.filter(d=>d.pledged<1000);
+  const sum=a=>a.reduce((s,d)=>s+d.pledged,0);
+  const segs=[["#D97706","Major ($10K+)",major.length,sum(major)],["#2563EB","Mid-level ($1K–10K)",mid.length,sum(mid)],["#15803D","Grassroots (<$1K)",grass.length,sum(grass)]];
+  const top=DONORS.slice().sort((a,b)=>b.pledged-a.pledged).slice(0,4);
+  return ''
+   + '<div class="rc"><div class="rc-h">Pacing</div>'
+     + '<div><span class="pace-big">'+pledgedPct.toFixed(1)+'%</span><span class="pace-tag">+14% ahead</span></div>'
+     + '<div class="pace-bar"><div class="f" style="width:'+pledgedPct+'%"></div></div>'
+     + '<div class="rc-note">Pledged total is '+CAMPAIGN.parishPace+'% of goal vs. '+c.pace+'% of the calendar — running ahead of pace. The '+money(c.goal)+' goal is reachable before year-end.</div></div>'
+   + '<div class="rc"><div class="rc-h">Donor segments</div>'
+     + segs.map(([col,nm,ct,amt])=>'<div class="seg-row"><i style="background:'+col+'"></i><span class="nm">'+nm+'</span><span class="ct">'+ct+'</span><span class="am">'+money(amt)+'</span></div>').join("")+'</div>'
+   + '<div class="rc"><div class="rc-h">Top gifts</div>'
+     + top.map((d,i)=>'<div class="top-row"><span class="rk">'+(i+1)+'</span><div><div class="nm">'+d.n.split(",")[0]+(d.n.includes("Family")||d.n.includes("Foundation")||d.n.includes("Bank")?"":" Family")+'</div><div class="su">'+d.term+' pledge</div></div><span class="am">'+money(d.pledged)+'</span></div>').join("")+'</div>'
+   + '<div class="rc"><div class="rc-h">Campaign milestones</div>'
+     + milestone("done","Appeal launch","Jan 2026 · all 20 parishes commissioned")
+     + milestone("done","50% of goal reached","Apr 2026")
+     + milestone("done","75% milestone reached","Jun 2026 · ahead of schedule")
+     + milestone("next","100% of goal","Projected Oct 2026")
+     + '</div>';
+}
+function milestone(state,nm,su){
+  const ic = state==="done"
+    ? '<span class="ic done"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 6.5l2.5 2.5 4.5-5"/></svg></span>'
+    : '<span class="ic next"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="1.5"/></svg></span>';
+  return '<div class="ms-row">'+ic+'<div><div class="nm">'+nm+'</div><div class="su">'+su+'</div></div></div>';
+}
+function parishRail(){
+  const pacePct=CAMPAIGN.parishPace;
+  const dist=countParishStatuses();
+  const max=PARISHES.length;
+  const distRows=[["On pace","onpace","var(--green-2)"],["At risk","atrisk","var(--amber-2)"],["Behind","behind","var(--rose)"],["Goal met","goalmet","var(--blue)"]]
+    .map(([lbl,k,col])=>'<div class="dist-row"><span class="nm">'+lbl+'</span><div class="track"><div class="f" style="width:'+(dist[k]/max*100)+'%;background:'+col+'"></div></div><span class="ct">'+dist[k]+'</span></div>').join("");
+  const lead=PARISHES.slice().sort((a,b)=>(b.raised/b.goal)-(a.raised/a.goal))[0];
+  const worst=PARISHES.slice().sort((a,b)=>a.pace-b.pace)[0];
+  const leadPct=Math.round(lead.raised/lead.goal*100);
+  return ''
+   + '<div class="rc"><div class="rc-h">Campaign-wide pace</div>'
+     + '<div style="text-align:center"><span class="pace-big" style="font-size:40px">'+pacePct+'%</span><div class="rc-note" style="margin-top:4px">of total parish goal raised</div></div>'
+     + '<div class="pace-bar" style="margin-top:14px"><div class="f" style="width:'+pacePct+'%"></div></div>'
+     + '<div class="rc-note" style="text-align:center">Calendar pace: '+CAMPAIGN.pace+'% · running ahead</div></div>'
+   + '<div class="rc"><div class="rc-h">Status distribution</div>'+distRows+'</div>'
+   + '<div class="rc"><div class="rc-ai-head"><div class="rc-h" style="margin:0">Guru AI insights</div><span class="badge"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 1l1.2 2.6L9 4l-2 2 .5 2.8L5 7.5 2.5 8.8 3 6 1 4l2.8-.4z"/></svg>AI</span></div>'
+     + '<div class="guru-block"><div class="guru-tag">Leading parish</div><p><b>'+lead.n+'</b> is at '+leadPct+'% of its '+money(lead.goal)+' goal — the strongest pace in the diocese.</p></div>'
+     + '<div class="guru-block"><div class="guru-tag warn">Needs attention</div><p><b>'+worst.n+'</b> is '+Math.abs(worst.pace)+'% behind pace with '+money(worst.overdue)+' overdue. Recommend a pastor check-in.</p></div>'
+     + '</div>';
+}
+
+/* ════════════════ DONOR DRAWER ════════════════ */
+function openDonor(idx){
+  const d=DONORS[idx]; const p=pct(d); const bal=d.pledged-d.paid;
+  const insts=d.insts.map(([st,lbl])=>'<div class="inst '+st+'"><div class="a">'+money(d.pledged/d.insts.length)+'</div><div class="d">'+lbl+'</div></div>').join("");
+  const paidInst=d.insts.filter(i=>i[0]==="paid").length;
+  const acts=[];
+  if(paidInst>0) acts.push(['ok','Installment '+paidInst+' of '+d.insts.length,CAMPAIGN.name,'paid']);
+  if(d.nextAmt) acts.push(['wait','Installment '+(paidInst+1)+' of '+d.insts.length,d.nextDate,'due']);
+  const actHtml=acts.map(([ic,nm,su,kind])=>'<div class="act-row"><span class="act-ic '+ic+'">'+(ic==="ok"
+    ?'<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 6.5l2.5 2.5 4.5-5"/></svg>'
+    :'<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="6" r="4.5"/><path d="M6 3.5V6l1.7 1" stroke-linecap="round"/></svg>')
+    +'</span><div><div class="nm">'+nm+'</div><div class="su">'+su+'</div></div><span class="am">'+money(d.nextAmt||d.insts.length?d.pledged/d.insts.length:0)+'</span></div>').join("");
+  const remindBtn = d.nextAmt>0
+    ? '<button class="btn btn-primary" id="send-reminder-btn" onclick="openReminder('+idx+')"><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.5"><rect x="1.5" y="2.5" width="9" height="7" rx="1"/><path d="M1.5 3.5L6 6.5l4.5-3" stroke-linecap="round"/></svg>Send pledge reminder</button>'
+    : '<button class="btn btn-ghost" disabled style="opacity:.65;cursor:default"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 6.5l2.5 2.5 4.5-5"/></svg>Pledge fulfilled</button>';
+  const footer = '<button class="btn btn-ghost" onclick="openProfile('+idx+')">View full donor profile</button>'+remindBtn;
+  document.getElementById("drawer").innerHTML =
+   '<div class="dh"><button class="dh-close" onclick="closeDrawer()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>'
+   + '<div class="dh-top"><span class="dh-av" style="background:'+oc(d.officer)+'">'+initials(d.n)+'</span>'
+     + '<div><div class="dh-name">'+d.n+'</div><div class="dh-sub">'+d.parish+' · Donor since '+d.since+'</div></div></div>'
+   + '<div class="dh-stats">'
+     + '<div class="dh-st"><div class="v gold">'+money(d.pledged)+'</div><div class="l">Pledged</div></div>'
+     + '<div class="dh-st"><div class="v green">'+money(d.paid)+'</div><div class="l">Paid</div></div>'
+     + '<div class="dh-st"><div class="v rose">'+(bal>0?money(bal):"$0")+'</div><div class="l">Balance</div></div>'
+   + '</div></div>'
+   + '<div class="db">'
+     + '<div class="db-sec"><h4>Pledge progress · '+d.term+'</h4>'
+       + '<div class="pp-bar"><div class="f" style="width:'+p+'%"></div></div>'
+       + '<div class="pp-cap"><span><b>'+full(d.paid)+'</b> paid of '+full(d.pledged)+'</span><span>'+p+'%</span></div>'
+       + '<div class="insts">'+insts+'</div></div>'
+     + '<div class="db-sec"><h4>Officer note</h4><div class="note">'+d.note+'</div></div>'
+     + (actHtml?'<div class="db-sec"><h4>Recent activity</h4>'+actHtml+'</div>':'')
+     + '<div class="db-sec"><h4>Contact</h4>'
+       + '<div class="contact-row"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="3" width="11" height="8" rx="1.5"/><path d="M1.5 4L7 8l5.5-4" stroke-linecap="round"/></svg>'+d.email+'</div>'
+       + '<div class="contact-row"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 2.5l2 .5 1 2.5-1.5 1a8 8 0 003.5 3.5l1-1.5 2.5 1 .5 2c0 .8-.7 1.5-1.5 1.4A11 11 0 012.6 4C2.5 3.2 3.2 2.5 4 2.5z" stroke-linejoin="round"/></svg>'+d.phone+'</div>'
+       + '<div class="contact-row"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M7 1.5s4.5 3 4.5 6.5S7 12.5 7 12.5 2.5 11.5 2.5 8 7 1.5 7 1.5z"/><circle cx="7" cy="6" r="1.5"/></svg>'+d.addr+'</div>'
+     + '</div>'
+   + '</div>'
+   + '<div class="df">'+footer+'</div>';
+  document.getElementById("drawer").classList.add("show");
+  document.getElementById("scrim").classList.add("show");
+}
+function closeDrawer(){ document.getElementById("drawer").classList.remove("show"); document.getElementById("scrim").classList.remove("show"); }
+
+/* open the donor 360 profile for the clicked donor (carries identity in the URL) */
+function openProfile(idx){
+  const d=DONORS[idx];
+  window.location.href='atlas-donor-360.html?name='+encodeURIComponent(d.n)
+    +'&parish='+encodeURIComponent(d.parish)+'&since='+encodeURIComponent(d.since)
+    +'&from=campaign&campaign='+encodeURIComponent(CAMPAIGN.name);
+}
+
+/* ── Pledge reminder (functional confirmation flow) ── */
+let reminderIdx=null;
+function openReminder(idx){
+  reminderIdx=idx; const d=DONORS[idx]; const first=d.n.split(/[,&]/)[0].trim();
+  document.getElementById("rm").innerHTML =
+   '<div class="rm-h"><span class="ic"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="3" width="11" height="8" rx="1.5"/><path d="M1.5 4L7 8l5.5-4" stroke-linecap="round"/></svg></span>'
+     + '<div><div class="t">Send pledge reminder</div><div class="s">'+d.n+' · '+d.parish+'</div></div></div>'
+   + '<div class="rm-b">'
+     + '<div class="rm-card">'
+       + '<div class="rm-row"><span>To</span><b>'+d.email+'</b></div>'
+       + '<div class="rm-row"><span>Next installment</span><b>'+full(d.nextAmt)+'</b></div>'
+       + '<div class="rm-row"><span>Due</span><b>'+d.nextDate+'</b></div>'
+       + '<div class="rm-row"><span>Campaign</span><b>'+CAMPAIGN.name+'</b></div>'
+     + '</div>'
+     + '<div class="rm-msg">“Dear '+first+', a friendly reminder that your next '+CAMPAIGN.name+' installment of '+full(d.nextAmt)+' is due on '+d.nextDate+'. Thank you for your continued generosity to the Diocese of St. Petersburg.”</div>'
+   + '</div>'
+   + '<div class="rm-f"><button class="btn btn-ghost" onclick="closeReminder()">Cancel</button>'
+     + '<button class="btn btn-primary" onclick="confirmReminder()"><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 6.5l3 3 6-7"/></svg>Send reminder</button></div>';
+  document.getElementById("rm").classList.add("show");
+  document.getElementById("rm-scrim").classList.add("show");
+}
+function closeReminder(){ document.getElementById("rm").classList.remove("show"); document.getElementById("rm-scrim").classList.remove("show"); }
+function confirmReminder(){
+  const d=DONORS[reminderIdx]; closeReminder();
+  toast("Pledge reminder emailed to "+d.n);
+  const btn=document.getElementById("send-reminder-btn");
+  if(btn) btn.outerHTML='<button class="btn btn-ghost" disabled style="opacity:.7;cursor:default"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 6.5l2.5 2.5 4.5-5"/></svg>Reminder sent</button>';
+}
+
+/* parish row → drill into By Donor filtered to that parish */
+function drillParish(idx){
+  const p=PARISHES[idx];
+  lens="donor"; donorFilter="all"; donorSearch="";
+  document.querySelectorAll("#lens button").forEach(b=>b.classList.toggle("on",b.dataset.lens==="donor"));
+  renderContent(); renderRail();
+  // filter donor table to parish via search box
+  const map={"Cathedral of St. Jude":"Cathedral","Holy Cross Parish":"Holy Cross","St. Michael's Parish":"St. Michael's","St. Catherine's Parish":"St. Catherine's"};
+  const term=map[p.n]||p.n.replace(/ Parish$/,"");
+  donorSearch=term; const q=document.getElementById("donor-q"); if(q)q.value=term;
+  renderDonorTable();
+  document.getElementById("lens-note").textContent="Donors in "+p.n+" — click any donor for their pledge schedule. Clear search to see all.";
+  toast("Drilled into "+p.n);
+}
+
+/* ════════════════ VIEW SETUP (single full view — no role switching) ════════════════ */
+function applyRole(key){
+  roleKey=key; role=ROLES[key];
+  donorFilter="all"; donorSearch=""; parishFilter="all"; parishSearch="";
+  renderHero(); renderKpis();
+  setLens(role.defaultLens);
+}
+
+/* ════════════════ TOAST ════════════════ */
+let toastT;
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2200); }
+
+/* ════════════════ INIT ════════════════ */
+renderNav();
+applyRole("dev");
+</script>
+</body>
+</html>
