@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas — Gift Correction &amp; Reversal Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0E1E35;--navy2:#152844;--navy3:#1B3A6B;
+  --blue:#2563EB;--bluel:#DBEAFE;--bluep:#EFF6FF;
+  --green:#15803D;--greenl:#DCFCE7;--greend:#14532D;
+  --amber:#D97706;--amberl:#FEF3C7;--amberd:#78350F;
+  --rose:#BE185D;--rosel:#FCE7F3;--rosed:#881337;
+  --red:#DC2626;--redl:#FEE2E2;--redd:#7F1D1D;
+  --teal:#0D9488;--teall:#CCFBF1;
+  --orange:#EA580C;--orangel:#FFEDD5;
+  --text:#0F172A;--text2:#334155;--text3:#64748B;--text4:#94A3B8;
+  --border:#E2E8F0;--surf:#F8FAFC;
+}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',sans-serif;background:#EEF2F7;color:var(--text);display:flex;min-height:100vh}
+
+/* ── ATLAS SHELL (sidebar + topbar) ── */
+.sidebar{width:220px;background:var(--navy);min-height:100vh;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow:hidden}
+.sidebar-logo{padding:18px 18px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.logo-mark{width:52px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.logo-mark svg{width:52px;height:40px}
+.logo-name{font-family:'DM Serif Display',serif;font-size:20px;color:#fff;line-height:1}
+.logo-sub{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:2px}
+.sidebar-scroll{flex:1 1 auto;overflow-y:auto;min-height:0;padding-top:6px}
+.nav-group{padding:8px 8px 0}
+.nav-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:0 10px;margin-bottom:4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;margin-bottom:1px;text-decoration:none}
+.nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
+.nav-item.active{background:var(--blue);color:#fff}
+.nav-item svg.nav-ic{width:14px;height:14px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.6);border-radius:10px;padding:1px 7px;font-size:10px;font-weight:600}
+.nav-badge.alert{background:var(--rose);color:#fff}
+.nav-caret{margin-left:6px;width:10px;height:10px;flex-shrink:0;transition:transform .18s;color:rgba(255,255,255,.45)}
+.nav-parent.open>.nav-item .nav-caret{transform:rotate(90deg)}
+.nav-sub{overflow:hidden;max-height:0;transition:max-height .2s ease}
+.nav-parent.open .nav-sub{max-height:160px}
+.nav-subitem{display:flex;align-items:center;gap:9px;padding:7px 10px 7px 33px;border-radius:7px;font-size:11.5px;font-weight:500;color:rgba(255,255,255,.5);cursor:pointer;margin-bottom:1px;text-decoration:none}
+.nav-subitem:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
+.nav-subitem.active{background:var(--blue);color:#fff}
+.nav-subitem .dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;opacity:.75}
+.sidebar-user{padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.user-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;background:var(--blue)}
+.user-name{font-size:12px;font-weight:500;color:rgba(255,255,255,.78)}
+.user-role{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 22px;height:52px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.tb-crumb{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text3)}
+.tb-crumb a{color:inherit;text-decoration:none}
+.tb-crumb a:hover{color:var(--blue)}
+.tb-crumb .sep{color:#CBD5E1}
+.tb-crumb .cur{color:var(--text);font-weight:600}
+.tb-right{margin-left:auto;display:flex;gap:8px}
+.tbtn{padding:6px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);color:var(--text2)}
+.tbtn:hover{background:var(--surf);border-color:#94A3B8}
+.tbtn svg{width:12px;height:12px}
+.page{flex:1;min-height:0}
+
+/* ── CHROME ── */
+.chrome{background:var(--navy);padding:0 28px;height:52px;display:flex;align-items:center;gap:14px}
+.chrome-mark{width:28px;height:28px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chrome-mark svg{width:13px;height:13px}
+.chrome-title{font-family:'DM Serif Display',serif;font-size:15px;color:white}
+.chrome-sep{width:1px;height:18px;background:rgba(255,255,255,.12)}
+.chrome-path{font-size:12px;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:6px}
+.chrome-path b{color:rgba(255,255,255,.78);font-weight:500}
+.chrome-right{margin-left:auto;display:flex;gap:8px}
+.cbtn{padding:5px 13px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;display:flex;align-items:center;gap:5px}
+.cbtn svg{width:11px;height:11px}
+.cbtn-ghost{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.7)}
+.cbtn-ghost:hover{background:rgba(255,255,255,.14)}
+
+/* ── MAIN LAYOUT ── */
+.page{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 52px)}
+
+/* ── LEFT PANEL — GIFT LOOKUP ── */
+.left-panel{background:white;border-right:1px solid var(--border);display:flex;flex-direction:column}
+.lp-head{padding:14px 16px 12px;border-bottom:1px solid var(--border)}
+.lp-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--text);margin-bottom:3px}
+.lp-sub{font-size:11px;color:var(--text3)}
+.lp-search-wrap{padding:10px 12px;border-bottom:1px solid var(--border)}
+.lp-search{width:100%;padding:7px 10px 7px 30px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;background:var(--surf);color:var(--text)}
+.lp-search:focus{border-color:var(--blue);background:white}
+.search-icon{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:var(--text4)}
+.search-icon svg{width:12px;height:12px}
+.search-wrap-rel{position:relative}
+
+/* Gift list */
+.gift-list{flex:1;overflow-y:auto}
+.gift-item{padding:11px 14px;border-bottom:.5px solid var(--border);cursor:pointer;transition:background .1s}
+.gift-item:hover{background:var(--surf)}
+.gift-item.selected{background:var(--bluep);border-left:3px solid var(--blue)}
+.gift-item.selected .gi-donor{color:var(--blue)}
+.gi-top{display:flex;align-items:baseline;gap:6px;margin-bottom:3px}
+.gi-donor{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.gi-amt{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--text)}
+.gi-meta{font-size:11px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap}
+.gi-badge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px}
+.gb-posted{background:var(--greenl);color:var(--greend)}
+.gb-reversed{background:var(--redl);color:var(--redd)}
+.gb-corrected{background:var(--bluep);color:var(--blue)}
+.gb-nsf{background:var(--orangel);color:var(--orange)}
+
+/* ── RIGHT PANEL ── */
+.right-panel{display:flex;flex-direction:column;overflow:hidden}
+
+/* Tabs */
+.rt-tabs{display:flex;background:white;border-bottom:1px solid var(--border);padding:0 24px;gap:0}
+.rt-tab{padding:13px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap;font-family:'DM Sans',sans-serif;background:none;border-left:none;border-right:none;border-top:none}
+.rt-tab:hover{color:var(--text2)}
+.rt-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+
+/* Right panel body */
+.rp-body{flex:1;overflow-y:auto;padding:24px}
+.panel-view{display:none}
+.panel-view.active{display:block}
+
+/* ── GIFT DETAIL CARD ── */
+.gift-detail-card{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.gdc-head{background:var(--navy);padding:14px 18px;display:flex;align-items:center;gap:12px}
+.gdc-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;margin-left:auto}
+.gdc-title{font-family:'DM Serif Display',serif;font-size:16px;color:white}
+.gdc-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px}
+.gdc-fields{display:grid;grid-template-columns:1fr 1fr;padding:14px 18px;gap:10px;border-bottom:1px solid var(--border)}
+.gdf-row{padding:6px 0;border-bottom:.5px solid var(--border)}
+.gdf-row:last-child{border-bottom:none}
+.gdf-label{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text4);margin-bottom:3px}
+.gdf-val{font-size:13px;color:var(--text);font-weight:500}
+.gdf-val.mono{font-family:'DM Mono',monospace}
+.gdf-val.green{color:var(--green)}
+.gdf-val.red{color:var(--red)}
+.gdc-warning{padding:10px 18px;background:var(--amberl);border-bottom:1px solid #FDE68A;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--amberd)}
+.gdc-warning svg{width:14px;height:14px;flex-shrink:0}
+
+/* ── CORRECTION WIZARD ── */
+.wizard-head{margin-bottom:20px}
+.wh-title{font-family:'DM Serif Display',serif;font-size:19px;color:var(--text);margin-bottom:4px}
+.wh-sub{font-size:13px;color:var(--text3);line-height:1.6}
+
+/* Step indicator */
+.step-indicator{display:flex;align-items:center;gap:0;margin-bottom:24px}
+.si-step{display:flex;align-items:center;flex:1}
+.si-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;transition:all .15s}
+.si-dot.done{background:var(--green);color:white}
+.si-dot.active{background:var(--blue);color:white}
+.si-dot.pending{background:var(--border);color:var(--text3)}
+.si-label{font-size:11px;font-weight:500;margin-left:6px;white-space:nowrap}
+.si-dot.active + .si-label{color:var(--blue);font-weight:600}
+.si-dot.done + .si-label{color:var(--green)}
+.si-dot.pending + .si-label{color:var(--text3)}
+.si-line{flex:1;height:1px;background:var(--border);margin:0 8px}
+.si-line.done{background:var(--green)}
+
+/* Step panels */
+.step-panel{display:none}
+.step-panel.active{display:block}
+
+/* Correction type cards */
+.correction-types{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.ct-card{border:1.5px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all .14s;background:white}
+.ct-card:hover{border-color:#94A3B8;background:var(--surf)}
+.ct-card.selected{border-color:var(--blue);background:var(--bluep)}
+.ct-card.selected .ct-title{color:var(--blue)}
+.ct-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.ct-icon svg{width:16px;height:16px}
+.ct-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+.ct-desc{font-size:12px;color:var(--text3);line-height:1.55}
+
+/* From/To comparison */
+.from-to-wrap{display:grid;grid-template-columns:1fr 40px 1fr;gap:0;align-items:start;margin-bottom:16px}
+.ft-col{background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.ft-col.to-col{border-color:var(--blue)}
+.ft-head{padding:9px 14px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.ft-col.from-col .ft-head{background:var(--redl);color:var(--redd)}
+.ft-col.to-col   .ft-head{background:var(--bluep);color:var(--blue)}
+.ft-body{padding:12px 14px}
+.ft-field{margin-bottom:10px}
+.ft-field:last-child{margin-bottom:0}
+.ft-label{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text4);margin-bottom:4px}
+.ft-value{font-size:13px;color:var(--text);font-weight:500;padding:6px 9px;border-radius:7px}
+.ft-value.readonly{background:var(--surf);border:1px solid var(--border)}
+.ft-value.editable{border:1px solid var(--border);outline:none;font-family:'DM Sans',sans-serif;cursor:text;width:100%}
+.ft-value.editable:focus{border-color:var(--blue);background:white}
+.ft-value.changed{background:var(--bluep);border-color:var(--bluel);color:var(--blue)}
+.ft-arrow{display:flex;align-items:center;justify-content:center;padding-top:40px;color:var(--text3)}
+.ft-arrow svg{width:18px;height:18px}
+
+/* Reason field */
+.reason-wrap{margin-bottom:16px}
+.reason-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.reason-select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;background:white;color:var(--text);cursor:pointer}
+.reason-select:focus{border-color:var(--blue)}
+.reason-notes{width:100%;margin-top:8px;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;min-height:72px;color:var(--text);background:white}
+.reason-notes:focus{border-color:var(--blue)}
+
+/* Receipt reissue toggle */
+.receipt-toggle{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.rt-text{flex:1}
+.rt-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.rt-sub{font-size:11px;color:var(--text3)}
+.toggle{width:36px;height:20px;border-radius:10px;cursor:pointer;position:relative;border:none;transition:background .15s;flex-shrink:0}
+.toggle.on{background:var(--blue)}
+.toggle.off{background:#CBD5E1}
+.toggle-thumb{position:absolute;top:2px;width:16px;height:16px;background:white;border-radius:50%;transition:left .15s}
+.toggle.on .toggle-thumb{left:18px}
+.toggle.off .toggle-thumb{left:2px}
+
+/* Confirmation summary */
+.confirm-summary{background:var(--greenl);border:1px solid #BBF7D0;border-radius:10px;padding:16px 18px;margin-bottom:16px}
+.cs-title{font-size:13px;font-weight:600;color:var(--greend);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cs-title svg{width:14px;height:14px}
+.cs-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid #BBF7D0;font-size:12px}
+.cs-row:last-child{border-bottom:none}
+.cs-key{color:var(--greend)}
+.cs-val{font-weight:600;color:var(--greend)}
+
+/* Audit trail */
+.audit-entry{background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px}
+.ae-head{padding:10px 14px;background:var(--surf);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.ae-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ae-icon svg{width:12px;height:12px}
+.ae-type{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.ae-ts{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+.ae-user{font-size:11px;color:var(--text3)}
+.ae-body{padding:11px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ae-field{font-size:11px}
+.ae-field-label{color:var(--text3);margin-bottom:2px}
+.ae-field-val{font-weight:500;color:var(--text)}
+.ae-field-change{display:flex;align-items:center;gap:5px;font-size:11px}
+.ae-old{color:var(--red);text-decoration:line-through;font-family:'DM Mono',monospace}
+.ae-new{color:var(--green);font-family:'DM Mono',monospace}
+.ae-arrow{color:var(--text3)}
+.ae-reason{padding:8px 14px;background:var(--amberl);border-top:1px solid #FDE68A;font-size:11px;color:var(--amberd);display:flex;gap:6px;align-items:flex-start}
+.ae-reason svg{width:11px;height:11px;flex-shrink:0;margin-top:1px}
+.ae-hash{padding:8px 14px;border-top:1px solid var(--border);font-size:10px;color:var(--text4);font-family:'DM Mono',monospace;display:flex;align-items:center;gap:6px}
+.ae-hash-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.immutable-badge{font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;background:var(--greenl);color:var(--greend);margin-left:auto}
+
+/* NSF Reversal */
+.nsf-card{background:var(--redl);border:1px solid #FECACA;border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;gap:12px}
+.nsf-icon{width:36px;height:36px;background:var(--red);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nsf-icon svg{width:16px;height:16px;color:white}
+.nsf-title{font-size:14px;font-weight:600;color:var(--redd);margin-bottom:3px}
+.nsf-sub{font-size:12px;color:#B91C1C;line-height:1.6}
+.nsf-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.nsf-field{background:white;border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.nsf-field-label{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.nsf-field-val{font-size:13px;font-weight:600;color:var(--text)}
+.nsf-field-val.mono{font-family:'DM Mono',monospace}
+.nsf-field-val.red{color:var(--red)}
+.nsf-field-input{width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;color:var(--text)}
+.nsf-field-input:focus{border-color:var(--red)}
+.nsf-impact{background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.ni-head{padding:9px 14px;background:var(--redl);border-bottom:1px solid #FECACA;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--redd)}
+.ni-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:.5px solid var(--border);font-size:12px}
+.ni-row:last-child{border-bottom:none}
+.ni-icon{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ni-icon svg{width:10px;height:10px}
+.ni-text{flex:1;color:var(--text2)}
+.ni-action{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.ni-auto{background:var(--greenl);color:var(--greend)}
+.ni-manual{background:var(--amberl);color:var(--amberd)}
+.ni-required{background:var(--redl);color:var(--redd)}
+
+/* Action buttons */
+.action-bar{display:flex;gap:8px;align-items:center;padding-top:16px;border-top:1px solid var(--border);margin-top:4px}
+.btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .13s;display:flex;align-items:center;gap:6px;border:1px solid var(--border);background:white;color:var(--text2)}
+.btn svg{width:12px;height:12px}
+.btn:hover{background:var(--surf)}
+.btn-primary{background:var(--blue);color:white;border-color:var(--blue)}
+.btn-primary:hover{background:#1D4ED8}
+.btn-red{background:var(--red);color:white;border-color:var(--red)}
+.btn-red:hover{background:#B91C1C}
+.btn-green{background:var(--green);color:white;border-color:var(--green)}
+.btn-green:hover{background:#126e31}
+.btn-ghost{background:none;border-color:transparent;color:var(--text3)}
+.btn-ghost:hover{background:var(--surf);color:var(--text2)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* No selection state */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;color:var(--text3)}
+.empty-state svg{width:40px;height:40px;color:var(--text4);margin-bottom:12px}
+.empty-state h3{font-size:15px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.empty-state p{font-size:13px;line-height:1.65;max-width:300px}
+
+/* Snack notification */
+.snack{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;opacity:0;transition:all .25s;pointer-events:none;z-index:100}
+.snack.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.snack svg{width:14px;height:14px;flex-shrink:0}
+.snack.green{background:var(--green)}
+.snack.red{background:var(--red)}
+
+/* ── ENHANCEMENTS ── */
+/* list: status filter */
+.lp-filter{display:flex;gap:5px;padding:8px 12px 10px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.lpf-chip{font-size:11px;font-weight:600;border:1px solid var(--border);background:white;color:var(--text2);border-radius:20px;padding:4px 10px;cursor:pointer}
+.lpf-chip:hover{border-color:#94A3B8}
+.lpf-chip.on{background:var(--navy);color:white;border-color:var(--navy)}
+/* list: needs-attention flag */
+.gi-flag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;margin-top:5px}
+.gi-flag svg{width:9px;height:9px}
+.gf-nsf{background:var(--redl);color:var(--redd)}
+.gf-ocr{background:var(--amberl);color:var(--amberd)}
+.gf-closed{background:#EDE9FE;color:#6D28D9}
+/* list: bulk select */
+.gi-row{display:flex;gap:9px;align-items:flex-start}
+.gi-check{width:15px;height:15px;margin-top:2px;flex-shrink:0;accent-color:var(--blue);cursor:pointer}
+.gi-main{flex:1;min-width:0}
+.bulk-bar{display:none;align-items:center;gap:10px;padding:10px 14px;background:var(--bluep);border-bottom:1px solid var(--bluel);font-size:12px}
+.bulk-bar.show{display:flex}
+.bulk-bar b{color:var(--blue)}
+.bulk-bar select{margin-left:auto;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif}
+/* check scan card */
+.check-scan{background:#FbFcFe;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.cs-h{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text4);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cs-h svg{width:12px;height:12px}
+.check-paper{background:linear-gradient(135deg,#F0F7FF,#FdFefe);border:1px solid #CBD9EC;border-radius:8px;padding:14px 16px;position:relative;font-family:'DM Mono',monospace}
+.cp-top{display:flex;justify-content:space-between;font-size:11px;color:var(--text3)}
+.cp-payto{margin-top:14px;display:flex;align-items:baseline;gap:8px}
+.cp-payto .lbl{font-size:9px;color:var(--text4);font-family:'DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.04em}
+.cp-payto .nm{font-size:14px;color:var(--text);border-bottom:1px solid #CBD9EC;flex:1;padding-bottom:2px}
+.cp-amtbox{font-size:13px;color:var(--text);border:1px solid #CBD9EC;border-radius:5px;padding:2px 8px;background:white}
+.cp-bottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px}
+.cp-memo{font-size:11px;color:var(--text2)}
+.cp-memo .lbl{font-size:9px;color:var(--text4);font-family:'DM Sans',sans-serif;text-transform:uppercase}
+.cp-sig{font-family:'DM Serif Display',serif;font-style:italic;font-size:15px;color:#1E3A6E;border-bottom:1px solid #CBD9EC;padding:0 14px 2px}
+.cp-micr{margin-top:10px;font-size:11px;color:var(--text3);letter-spacing:.08em}
+/* receipt intel banner */
+.receipt-note{display:flex;gap:8px;align-items:flex-start;border-radius:9px;padding:10px 13px;font-size:12px;margin-bottom:16px;line-height:1.5}
+.receipt-note svg{width:14px;height:14px;flex-shrink:0;margin-top:1px}
+.rn-ok{background:var(--bluep);border:1px solid var(--bluel);color:#1D4ED8}
+.rn-warn{background:var(--amberl);border:1px solid #FDE68A;color:var(--amberd)}
+/* smart donor suggestions */
+.donor-suggest{margin-bottom:8px}
+.dsg-label{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text4);margin-bottom:6px}
+.dsg-chips{display:flex;flex-direction:column;gap:5px}
+.ds-chip{display:flex;align-items:center;gap:8px;text-align:left;border:1px solid var(--border);background:white;border-radius:8px;padding:7px 10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text2)}
+.ds-chip:hover{border-color:var(--blue);background:var(--bluep)}
+.ds-chip .rel{margin-left:auto;font-size:10px;color:var(--text4);font-weight:600}
+.ds-chip .av{width:22px;height:22px;border-radius:50%;background:var(--bluep);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+/* amount delta */
+.amt-delta{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:6px}
+.ad-up{background:var(--greenl);color:var(--greend)}
+.ad-down{background:var(--redl);color:var(--redd)}
+.ad-zero{background:var(--surf);color:var(--text3)}
+/* approval notice */
+.approval-note{background:#EDE9FE;border:1px solid #DDD6FE;border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start}
+.approval-note svg{width:16px;height:16px;color:#6D28D9;flex-shrink:0;margin-top:1px}
+.apn-title{font-size:13px;font-weight:600;color:#5B21B6;margin-bottom:2px}
+.apn-sub{font-size:12px;color:#6D28D9;line-height:1.5}
+/* analytics */
+.an-wrap{background:white;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.an-title{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.an-title svg{width:14px;height:14px;color:var(--blue)}
+.an-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.an-stat{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:10px 12px}
+.an-stat .v{font-family:'DM Serif Display',serif;font-size:21px;color:var(--text);line-height:1}
+.an-stat .l{font-size:10px;color:var(--text3);margin-top:4px}
+.an-bars{display:flex;flex-direction:column;gap:7px}
+.an-bar-row{display:flex;align-items:center;gap:10px;font-size:11.5px}
+.an-bar-row .nm{width:150px;color:var(--text2);flex-shrink:0}
+.an-bar-row .track{flex:1;height:8px;background:var(--surf);border-radius:20px;overflow:hidden}
+.an-bar-row .fill{height:100%;background:var(--blue);border-radius:20px}
+.an-bar-row .ct{width:20px;text-align:right;font-weight:700;color:var(--text)}
+
+/* ── LIST-FORWARD LAYOUT ── */
+.page{display:block;flex:1;min-height:0;position:relative}
+.left-panel{width:100%;border-right:none;height:100%}
+.lp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.triage{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--surf)}
+@media(max-width:1100px){.triage{grid-template-columns:repeat(2,1fr)}}
+.tr-card{position:relative;border:1px solid var(--border);border-radius:12px;padding:13px 16px 14px;cursor:pointer;background:#fff;overflow:hidden;transition:transform .14s,box-shadow .14s}
+.tr-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent)}
+.tr-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(15,23,42,.09)}
+.tr-top{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.tr-ic{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tr-ic svg{width:16px;height:16px}
+.tr-v{font-family:'DM Serif Display',serif;font-size:27px;line-height:1;margin-left:auto;color:var(--accent)}
+.tr-l{font-size:12px;font-weight:600;color:var(--text2)}
+.tr-bar{height:5px;border-radius:20px;background:var(--surf);overflow:hidden;margin-top:10px}
+.tr-bar i{display:block;height:100%;border-radius:20px;background:var(--accent)}
+.tr-sub{font-size:10.5px;color:var(--text3);margin-top:7px;display:flex;justify-content:space-between}
+.drawer-title{font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;padding:14px 0}
+.pick-group{margin-bottom:18px}
+.pick-h{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--text3);margin-bottom:9px;display:flex;align-items:center;gap:10px}
+.pick-h::after{content:"";flex:1;height:1px;background:var(--border)}
+.pick-h .tag{font-weight:600;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text4)}
+.gi-actions{display:flex;gap:6px;margin-left:auto;align-self:center}
+.gi-act{font-size:11px;font-weight:600;border:1px solid var(--border);background:#fff;color:var(--text2);border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap}
+.gi-act:hover{border-color:var(--blue);color:var(--blue);background:var(--bluep)}
+.gi-act.danger:hover{border-color:var(--red);color:var(--red);background:var(--redl)}
+.gc-scrim{position:fixed;inset:0;top:52px;background:rgba(15,23,42,.35);opacity:0;pointer-events:none;transition:opacity .2s;z-index:55}
+.gc-scrim.show{opacity:1;pointer-events:auto}
+/* correction drawer (gift) */
+.right-panel{position:fixed;top:52px;right:0;bottom:0;width:min(680px,94vw);background:#fff;box-shadow:-16px 0 44px rgba(15,23,42,.2);transform:translateX(102%);transition:transform .26s cubic-bezier(.4,0,.2,1);z-index:60;border-left:1px solid var(--border)}
+.right-panel.open{transform:none}
+.drawer-close{width:28px;height:28px;border:none;background:var(--surf);border-radius:7px;cursor:pointer;align-items:center;justify-content:center;color:var(--text3);margin:9px 12px 9px auto;display:flex}
+.drawer-close svg{width:13px;height:13px}
+.drawer-close:hover{background:#E2E8F0;color:var(--text2)}
+/* audit trail overlay (right, ~65%) */
+.audit-scrim{position:fixed;inset:0;background:rgba(15,23,42,.42);opacity:0;pointer-events:none;transition:opacity .2s;z-index:64}
+.audit-scrim.show{opacity:1;pointer-events:auto}
+.audit-drawer{position:fixed;top:0;right:0;height:100vh;width:min(68%,1180px);min-width:520px;max-width:96vw;background:var(--surf);box-shadow:-18px 0 50px rgba(15,23,42,.28);transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);z-index:65;display:flex;flex-direction:column}
+.audit-drawer.open{transform:none}
+.ad-head{background:#fff;border-bottom:1px solid var(--border);padding:15px 22px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.ad-head .t{font-family:'DM Serif Display',serif;font-size:18px;color:var(--text)}
+.ad-head .s{font-size:12px;color:var(--text3);margin-top:2px}
+.ad-head .sp{margin-left:auto;display:flex;gap:8px;align-items:center}
+.ad-head select{padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif}
+.ad-close{width:30px;height:30px;border:none;background:var(--surf);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);flex-shrink:0}
+.ad-close:hover{background:#E2E8F0;color:var(--text2)}
+.ad-close svg{width:14px;height:14px}
+.ad-body{flex:1;overflow-y:auto;padding:20px 22px}
+</style>
+</head>
+<body>
+
+<!-- ── ATLAS SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
+        <circle cx="22" cy="92" r="4" fill="#fff"/><circle cx="58" cy="58" r="5" fill="#fff"/>
+        <circle cx="98" cy="38" r="5.5" fill="#fff"/><circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
+        <circle cx="138" cy="24" r="7" fill="#C8A04A"/><circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
+      </svg>
+    </div>
+    <div><div class="logo-name">Atlas</div><div class="logo-sub">By GiveCentral</div></div>
+  </div>
+  <div class="sidebar-scroll">
+    <div class="nav-group">
+      <div class="nav-label">Main</div>
+      <a class="nav-item" href="atlas-dashboard.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>Dashboard</a>
+      <a class="nav-item" href="atlas-donors-list.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>Donors<span class="nav-badge">3,847</span></a>
+      <div class="nav-parent open">
+        <a class="nav-item" onclick="this.parentElement.classList.toggle('open')"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>Gifts &amp; pledges<span class="nav-badge">142</span><svg class="nav-caret" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 2L6.5 5L3.5 8"/></svg></a>
+        <div class="nav-sub">
+          <a class="nav-subitem" href="atlas-gifts-pledges.html"><span class="dot"></span>All gifts &amp; pledges</a>
+          <a class="nav-subitem active"><span class="dot"></span>Gift Correction</a>
+        </div>
+      </div>
+      <a class="nav-item" href="atlas-reports.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>Reports</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Fundraising</div>
+      <a class="nav-item" href="atlas-pipeline.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>Prospect pipeline<span class="nav-badge">28</span></a>
+      <a class="nav-item" href="atlas-tasks.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>Tasks &amp; reminders<span class="nav-badge alert">7</span></a>
+      <a class="nav-item" href="atlas-communications.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>Communications</a>
+      <a class="nav-item" href="atlas-events-dashboard.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>Events</a>
+      <a class="nav-item" href="atlas-volunteer-management.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Volunteers</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Intelligence</div>
+      <a class="nav-item" href="atlas-guru-ai.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0"/></svg>Guru AI</a>
+      <a class="nav-item" href="atlas-reports.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="2" width="10" height="10" rx="1.5"/><path d="M2 11l3-3 2 2 3-3 2 2"/></svg>Analytics</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Admin</div>
+      <a class="nav-item" href="atlas-users-roles.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Users &amp; roles</a>
+      <a class="nav-item" href="atlas-tags.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/></svg>Tags &amp; Segment</a>
+      <a class="nav-item" href="atlas-integrations.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>Integrations</a>
+      <a class="nav-item" href="atlas-sync.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>Sync</a>
+      <a class="nav-item" href="atlas-location-manage.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>Location portal</a>
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar">SR</div>
+    <div style="flex:1;min-width:0"><div class="user-name">Sarah Reynolds</div><div class="user-role">Development Director</div></div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="tb-crumb">
+      <a href="atlas-gifts-pledges.html">Gifts &amp; pledges</a><span class="sep">›</span>
+      <span class="cur">Gift Correction &amp; Reversal Center</span>
+    </div>
+    <div class="tb-right">
+      <button class="tbtn" onclick="openAudit()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 2.5h9M1.5 6h9M1.5 9.5h5.5"/></svg>Audit trail</button>
+      <button class="tbtn"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M6 4v3M6 8v.5"/></svg>Help</button>
+    </div>
+  </div>
+
+<div class="page" id="page">
+  <div class="gc-scrim" id="gc-scrim" onclick="clearSelection()"></div>
+
+  <!-- ── WORKLIST (primary view) ── -->
+  <div class="left-panel">
+    <div class="lp-head">
+      <div><div class="lp-title">Find a gift</div>
+      <div class="lp-sub">Search by donor, check #, batch ID, or amount — flagged gifts appear first</div></div>
+    </div>
+    <div class="triage" id="triage"></div>
+    <div class="lp-search-wrap">
+      <div class="search-wrap-rel">
+        <div class="search-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M8 8l2 2"/></svg></div>
+        <input type="text" class="lp-search" placeholder="Search gifts…" oninput="filterGifts(this.value)">
+      </div>
+    </div>
+    <div class="lp-filter" id="lp-filter"></div>
+    <div class="bulk-bar" id="bulk-bar">
+      <b id="bulk-count">0 selected</b>
+      <select id="bulk-fund" style="flex:1;min-width:0">
+        <option>CMA Annual Fund</option><option>Cathedral Capital</option><option>General Fund</option><option>School Scholarship</option><option>Bishop's Annual Fund</option>
+      </select>
+      <button class="btn btn-primary" style="padding:5px 11px;font-size:12px" onclick="applyBulk()">Reassign</button>
+      <button class="btn btn-ghost" style="padding:5px 7px;font-size:12px" onclick="clearBulk()">✕</button>
+    </div>
+    <div class="gift-list" id="gift-list"></div>
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="right-panel">
+    <div class="rt-tabs">
+      <span class="drawer-title">Fix this gift</span>
+      <button class="drawer-close" onclick="clearSelection()" title="Close"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>
+    </div>
+    <div class="rp-body">
+
+      <!-- ── RECLASSIFY TAB ── -->
+      <div class="panel-view active" id="tab-correct">
+        <div id="correct-empty" class="empty-state">
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="6" y="8" width="28" height="26" rx="3"/><path d="M13 16h14M13 22h10M13 28h7"/><path d="M26 6v6M32 9h-12"/></svg>
+          <h3>Select a gift to reclassify</h3>
+          <p>Choose any posted gift from the list to correct the donor, fund, amount, or GL code. All changes are logged in the immutable audit trail.</p>
+        </div>
+        <div id="correct-content" style="display:none">
+          <div class="wizard-head">
+            <div class="wh-title">What happened to this gift?</div>
+            <div class="wh-sub">Pick what's wrong below. Re-attributions keep the money on the books and move it; reversals back the money out. Every change is written to the immutable audit trail.</div>
+          </div>
+
+          <!-- Step indicator -->
+          <div class="step-indicator" id="step-indicator">
+            <div class="si-step">
+              <div class="si-dot active" id="sd-1">1</div>
+              <span class="si-label">Choose correction type</span>
+            </div>
+            <div class="si-line" id="sl-1"></div>
+            <div class="si-step">
+              <div class="si-dot pending" id="sd-2">2</div>
+              <span class="si-label">Make corrections</span>
+            </div>
+            <div class="si-line" id="sl-2"></div>
+            <div class="si-step">
+              <div class="si-dot pending" id="sd-3">3</div>
+              <span class="si-label">Add reason</span>
+            </div>
+            <div class="si-line" id="sl-3"></div>
+            <div class="si-step">
+              <div class="si-dot pending" id="sd-4">4</div>
+              <span class="si-label">Confirm &amp; post</span>
+            </div>
+          </div>
+
+          <!-- Original gift summary -->
+          <div class="gift-detail-card" id="selected-gift-card">
+            <div class="gdc-head">
+              <div>
+                <div class="gdc-title" id="sgc-title">O'Brien, James — $2,500</div>
+                <div class="gdc-sub" id="sgc-sub">Batch #2026-0412 · Posted Apr 12, 2026 · Entry: K. Novicky</div>
+              </div>
+              <span class="gdc-badge" id="sgc-badge" style="background:rgba(37,99,235,.25);color:#93C5FD">Posted</span>
+            </div>
+            <div class="gdc-fields" id="sgc-fields"></div>
+          </div>
+
+          <!-- Receipt intelligence + scanned check -->
+          <div id="receipt-note-slot"></div>
+          <div id="check-scan-slot"></div>
+
+          <!-- STEP 1: Correction type -->
+          <div class="step-panel active" id="step-1">
+            <div class="pick-group">
+              <div class="pick-h">Recorded incorrectly <span class="tag">· the money stays, you re-attribute it</span></div>
+              <div class="correction-types">
+                <div class="ct-card" onclick="selectCorrection('donor',this)">
+                  <div class="ct-icon" style="background:var(--bluep)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="6" r="3.5"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5"/></svg></div>
+                  <div class="ct-title">Wrong donor</div>
+                  <div class="ct-desc">Gift was posted to the wrong donor record. Move to the correct individual or organisation.</div>
+                </div>
+                <div class="ct-card" onclick="selectCorrection('fund',this)">
+                  <div class="ct-icon" style="background:var(--greenl)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="5" width="12" height="8" rx="1.5"/><path d="M5 5V3.5a1.5 1.5 0 013 0V5M10 5V3.5a1.5 1.5 0 013 0V5"/><path d="M5 10h6"/></svg></div>
+                  <div class="ct-title">Wrong fund / GL</div>
+                  <div class="ct-desc">Gift was applied to the wrong fund or GL code. Reassign to the correct fund.</div>
+                </div>
+                <div class="ct-card" onclick="selectCorrection('both',this)">
+                  <div class="ct-icon" style="background:#EDE9FE"><svg viewBox="0 0 16 16" fill="none" stroke="#7C3AED" stroke-width="1.4" stroke-linecap="round"><path d="M3 8h10M8 3l5 5-5 5"/></svg></div>
+                  <div class="ct-title">Wrong donor &amp; fund</div>
+                  <div class="ct-desc">Both the donor assignment and the fund need to be corrected in one step.</div>
+                </div>
+                <div class="ct-card" onclick="selectCorrection('amount',this)">
+                  <div class="ct-icon" style="background:var(--amberl)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--amber)" stroke-width="1.4" stroke-linecap="round"><path d="M8 2v12M5 5h6a2 2 0 010 4H5M5 9h7a2 2 0 010 4H5"/></svg></div>
+                  <div class="ct-title">Amount correction</div>
+                  <div class="ct-desc">Gift amount was entered incorrectly. Correct to the actual received amount.</div>
+                </div>
+                <div class="ct-card" onclick="selectCorrection('date',this)">
+                  <div class="ct-icon" style="background:var(--bluep)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3"/></svg></div>
+                  <div class="ct-title">Gift date / period</div>
+                  <div class="ct-desc">Gift was posted to the wrong date or fiscal period. Correct the reporting year.</div>
+                </div>
+                <div class="ct-card" onclick="selectCorrection('method',this)">
+                  <div class="ct-icon" style="background:var(--teall)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--teal)" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/><path d="M1.5 6.5h13M4 10h3"/></svg></div>
+                  <div class="ct-title">Payment method</div>
+                  <div class="ct-desc">Wrong method (check, card, stock, DAF…). Correct it so fees and receipting are right.</div>
+                </div>
+                <div class="ct-card" onclick="selectCorrection('pledge',this)">
+                  <div class="ct-icon" style="background:#EDE9FE"><svg viewBox="0 0 16 16" fill="none" stroke="#7C3AED" stroke-width="1.4" stroke-linecap="round"><path d="M6.5 9.5l3-3M5 7L3.5 8.5a2.5 2.5 0 003.5 3.5L8.5 10.5M11 9l1.5-1.5a2.5 2.5 0 00-3.5-3.5L7.5 5.5"/></svg></div>
+                  <div class="ct-title">Apply to pledge</div>
+                  <div class="ct-desc">Link this gift to an existing pledge as a payment, updating its balance.</div>
+                </div>
+              </div>
+            </div>
+            <div class="pick-group">
+              <div class="pick-h">Money didn't come through <span class="tag">· reverses the gift &amp; backs out the money</span></div>
+              <div class="correction-types">
+                <div class="ct-card" onclick="selectCorrection('nsf',this)">
+                  <div class="ct-icon" style="background:var(--redl)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--red)" stroke-width="1.4" stroke-linecap="round"><path d="M8 3v5M8 11v.5"/><path d="M1.5 14L8 1.5 14.5 14H1.5z"/></svg></div>
+                  <div class="ct-title">Check returned / NSF</div>
+                  <div class="ct-desc">The check bounced or payment failed. Reverse the gift — totals, receipt and GL are backed out.</div>
+                </div>
+                <div class="ct-card" onclick="selectCorrection('duplicate',this)">
+                  <div class="ct-icon" style="background:var(--rosel)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--rose)" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="2" width="9" height="9" rx="1.5"/><path d="M5 14h7a1.5 1.5 0 001.5-1.5V6"/></svg></div>
+                  <div class="ct-title">Duplicate gift</div>
+                  <div class="ct-desc">The same gift was entered twice. Reverse the duplicate — no new gift is posted.</div>
+                </div>
+              </div>
+            </div>
+            <div class="action-bar">
+              <button class="btn btn-ghost" onclick="clearSelection()">Cancel</button>
+              <button class="btn btn-primary" id="step1-next" disabled onclick="advanceFromPicker()">Continue →</button>
+            </div>
+          </div>
+
+          <!-- STEP 2: Make corrections -->
+          <div class="step-panel" id="step-2">
+            <div class="from-to-wrap" id="from-to-panel"></div>
+            <div class="action-bar">
+              <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+              <button class="btn btn-primary" onclick="goStep(3)">Continue →</button>
+            </div>
+          </div>
+
+          <!-- STEP 3: Reason -->
+          <div class="step-panel" id="step-3">
+            <div class="reason-wrap">
+              <div class="reason-label">Reason for correction <span style="color:var(--red)">*</span></div>
+              <select class="reason-select" id="reason-select" onchange="checkReasonFilled()">
+                <option value="">— Select a reason —</option>
+                <option value="Data entry error — wrong donor selected">Data entry error — wrong donor selected</option>
+                <option value="Data entry error — wrong fund selected">Data entry error — wrong fund selected</option>
+                <option value="Donor requested reallocation">Donor requested reallocation</option>
+                <option value="Check written by joint account holder">Check written by joint account holder</option>
+                <option value="Transposition error — wrong amount">Transposition error — wrong amount</option>
+                <option value="OCR misread — check scan error">OCR misread — check scan error</option>
+                <option value="Fund closed — gift redirected">Fund closed — gift redirected</option>
+                <option value="Other (see notes)">Other (see notes)</option>
+              </select>
+              <textarea class="reason-notes" id="reason-notes" placeholder="Additional notes (optional) — these will appear permanently in the audit trail…" oninput="checkReasonFilled()"></textarea>
+            </div>
+
+            <div class="receipt-toggle">
+              <div class="rt-text">
+                <div class="rt-title">Reissue tax receipt to corrected donor</div>
+                <div class="rt-sub">A new receipt will be generated for the corrected record. The original receipt will be voided and logged.</div>
+              </div>
+              <button class="toggle on" id="receipt-toggle" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-thumb"></div></button>
+            </div>
+
+            <div style="background:var(--amberl);border:1px solid #FDE68A;border-radius:9px;padding:12px 14px;font-size:12px;color:var(--amberd);display:flex;gap:8px;align-items:flex-start;margin-bottom:4px">
+              <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" width="14" height="14" style="flex-shrink:0;margin-top:1px"><path d="M6.5 2v3.5M6.5 9v.5"/><path d="M1 12L6.5 1 12 12H1z"/></svg>
+              This correction will create a reversing entry on the original gift and a new corrected gift. Both will appear in the batch history and cannot be deleted — only the audit trail can document further changes.
+            </div>
+
+            <div class="action-bar">
+              <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+              <button class="btn btn-primary" id="step3-next" disabled onclick="goStep(4)">Review correction →</button>
+            </div>
+          </div>
+
+          <!-- STEP 4: Confirm -->
+          <div class="step-panel" id="step-4">
+            <div class="confirm-summary" id="confirm-summary">
+              <div class="cs-title"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="14" height="14"><path d="M2 7l3 3 7-7"/></svg> Review correction before posting</div>
+            </div>
+            <div id="confirm-impact"></div>
+            <div style="background:var(--redl);border:1px solid #FECACA;border-radius:9px;padding:12px 14px;font-size:12px;color:var(--redd);margin-bottom:16px;display:flex;gap:8px;align-items:flex-start">
+              <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" width="14" height="14" style="flex-shrink:0;margin-top:1px"><path d="M2 2l9 9M11 2L2 11"/></svg>
+              Once posted, this correction is permanent. The reversing entry and new gift will both appear in the batch audit log and cannot be deleted.
+            </div>
+            <div class="action-bar">
+              <button class="btn btn-ghost" onclick="goStep(3)">← Back</button>
+              <button class="btn btn-green" id="post-btn" onclick="postCorrection()">
+                <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg>
+                Post correction
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── REVERSAL TAB ── -->
+      <div class="panel-view" id="tab-reversal">
+        <div id="reversal-empty" class="empty-state">
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="4" y="10" width="32" height="22" rx="2.5"/><path d="M4 17h32M12 24h4M19 24h5M28 13h4M8 13h16"/></svg>
+          <h3>Select a gift to reverse</h3>
+          <p>Choose a posted gift from the left panel to process a check return, NSF, or voiding. The full impact on donor records and receipts is handled automatically.</p>
+        </div>
+        <div id="reversal-content" style="display:none">
+          <div class="wizard-head">
+            <div class="wh-title">Check return / NSF reversal</div>
+            <div class="wh-sub">Process a returned check or NSF. All downstream impacts — donor balance, tax receipt void, GL reversal — are handled automatically.</div>
+          </div>
+
+          <div class="nsf-card">
+            <div class="nsf-icon"><svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M8 3v5M8 11v.5"/><path d="M1.5 14L8 1.5 14.5 14H1.5z"/></svg></div>
+            <div>
+              <div class="nsf-title">Check return / NSF</div>
+              <div class="nsf-sub" id="nsf-gift-desc">Loading gift details…</div>
+            </div>
+          </div>
+
+          <div class="nsf-details">
+            <div class="nsf-field">
+              <div class="nsf-field-label">Return type</div>
+              <select class="nsf-field-input" id="nsf-type">
+                <option>NSF — insufficient funds</option>
+                <option>Account closed</option>
+                <option>Payment stopped by donor</option>
+                <option>Check stale / expired</option>
+                <option>Signature missing</option>
+                <option>Amount mismatch</option>
+                <option>Duplicate payment</option>
+              </select>
+            </div>
+            <div class="nsf-field">
+              <div class="nsf-field-label">Bank return date</div>
+              <input type="date" class="nsf-field-input" id="nsf-date">
+            </div>
+            <div class="nsf-field">
+              <div class="nsf-field-label">Bank reference / trace #</div>
+              <input type="text" class="nsf-field-input" id="nsf-ref" placeholder="e.g. TRC-20260512-4421">
+            </div>
+            <div class="nsf-field">
+              <div class="nsf-field-label">NSF bank fee charged</div>
+              <input type="text" class="nsf-field-input" id="nsf-fee" placeholder="$0.00 if none">
+            </div>
+          </div>
+
+          <div class="nsf-impact">
+            <div class="ni-head">Automatic actions on posting reversal</div>
+            <div class="ni-row">
+              <div class="ni-icon" style="background:var(--greenl)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 5l2 2 5-5"/></svg></div>
+              <div class="ni-text">Reversing entry posted to original batch — gift amount negated to $0 net</div>
+              <span class="ni-action ni-auto">Auto</span>
+            </div>
+            <div class="ni-row">
+              <div class="ni-icon" style="background:var(--greenl)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 5l2 2 5-5"/></svg></div>
+              <div class="ni-text">Donor's giving history updated — gift removed from YTD and LTG totals</div>
+              <span class="ni-action ni-auto">Auto</span>
+            </div>
+            <div class="ni-row">
+              <div class="ni-icon" style="background:var(--greenl)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 5l2 2 5-5"/></svg></div>
+              <div class="ni-text">Tax receipt voided and flagged in donor's receipt history</div>
+              <span class="ni-action ni-auto">Auto</span>
+            </div>
+            <div class="ni-row">
+              <div class="ni-icon" style="background:var(--greenl)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 5l2 2 5-5"/></svg></div>
+              <div class="ni-text">GL reversal entry generated for accounting export</div>
+              <span class="ni-action ni-auto">Auto</span>
+            </div>
+            <div class="ni-row">
+              <div class="ni-icon" style="background:var(--amberl)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--amber)" stroke-width="1.4" stroke-linecap="round"><path d="M5 2v3M5 7v.5"/><path d="M1 9.5L5 1l4 8.5H1z"/></svg></div>
+              <div class="ni-text">Gift officer task created — follow up with donor re: resubmission</div>
+              <span class="ni-action ni-manual">Officer task</span>
+            </div>
+            <div class="ni-row">
+              <div class="ni-icon" style="background:var(--redl)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--red)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7"/></svg></div>
+              <div class="ni-text">Correction letter to donor — <strong>must be reviewed before sending</strong></div>
+              <span class="ni-action ni-required">Review req.</span>
+            </div>
+          </div>
+
+          <div class="reason-wrap">
+            <div class="reason-label">Staff notes for audit log</div>
+            <textarea class="reason-notes" placeholder="Add any additional context — conversation with donor, bank instructions, resubmission plan…" style="min-height:60px"></textarea>
+          </div>
+
+          <div class="action-bar">
+            <button class="btn btn-ghost" onclick="backToPicker()">← Back to options</button>
+            <button class="btn btn-red" onclick="postReversal()">
+              <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M2 2l8 8M10 2L2 10"/></svg>
+              Post NSF reversal
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div><!-- /.main -->
+
+<!-- ── AUDIT TRAIL OVERLAY ── -->
+<div class="audit-scrim" id="audit-scrim" onclick="closeAudit()"></div>
+<aside class="audit-drawer" id="audit-drawer">
+  <div class="ad-head">
+    <div>
+      <div class="t">Correction &amp; reversal audit trail</div>
+      <div class="s">Immutable log · all entries are permanent · cannot be edited or deleted</div>
+    </div>
+    <div class="sp">
+      <select class="nsf-field-input" style="width:auto">
+        <option>All correction types</option>
+        <option>Donor reclassification</option>
+        <option>Fund reclassification</option>
+        <option>NSF / check return</option>
+        <option>Amount correction</option>
+      </select>
+      <button class="btn btn-primary" style="font-size:12px;padding:6px 13px">Export CSV</button>
+      <button class="ad-close" onclick="closeAudit()" title="Close"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>
+    </div>
+  </div>
+  <div class="ad-body">
+    <div id="audit-analytics"></div>
+    <div id="audit-entries"></div>
+  </div>
+</aside>
+
+<div class="snack" id="snack">
+  <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg>
+  <span id="snack-text">Done</span>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const GIFTS = [
+  {id:'G001', donor:"O'Brien, James",      amt:2500,  fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0412", date:"Apr 12, 2026", check:"10441", officer:"Mike D.", status:"posted",    parish:"Cathedral",      memo:"CMA 2026", ocr:0.98, rYear:2026, receipt:true,  house:[{nm:"O'Brien, Patricia",rel:"Spouse · #4811"},{nm:"O'Brien Family Foundation",rel:"DAF · linked"}]},
+  {id:'G002', donor:"Sullivan, Margaret",  amt:1000,  fund:"Cathedral Capital",    gl:"5200", batch:"2026-0412", date:"Apr 12, 2026", check:"8821",  officer:"Mike D.", status:"posted",    parish:"Cathedral",      memo:"Capital campaign", ocr:0.72, rYear:2026, receipt:true,  house:[{nm:"Sullivan, Thomas",rel:"Spouse · #4821"},{nm:"Sullivan Family Foundation",rel:"DAF · linked"}]},
+  {id:'G003', donor:"Walsh, Thomas",       amt:500,   fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0412", date:"Apr 12, 2026", check:"10441", officer:"Sarah R.",status:"corrected", parish:"St. Michael's",  memo:"CMA", ocr:0.90, rYear:2026, receipt:true,  house:[{nm:"Walsh, Susan",rel:"Spouse · #4820"}]},
+  {id:'G004', donor:"Harrington, David",  amt:5000,  fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0415", date:"Apr 15, 2026", check:"3301",  officer:"Mike D.", status:"reversed",  parish:"Cathedral",      memo:"Bishop appeal", ocr:0.95, rYear:2025, receipt:true,  house:[{nm:"Harrington, Susan",rel:"Spouse · #4803"}]},
+  {id:'G005', donor:"Kim, Dr. Patricia",  amt:750,   fund:"General Fund",         gl:"4050", batch:"2026-0415", date:"Apr 15, 2026", check:"2219",  officer:"Janet W.",status:"posted",    parish:"Holy Cross",     memo:"General", ocr:0.88, rYear:2026, receipt:true,  house:[{nm:"Kim, Daniel",rel:"Spouse · #5102"}]},
+  {id:'G006', donor:"Morrison, Peter",    amt:2000,  fund:"School Scholarship",   gl:"4300", batch:"2026-0415", date:"Apr 15, 2026", check:"9922",  officer:"Sarah R.",status:"posted",    parish:"St. Catherine's",memo:"Scholarship", ocr:0.94, rYear:2026, receipt:true, fundClosed:true, house:[{nm:"Morrison, Clare",rel:"Spouse · #4931"}]},
+  {id:'G007', donor:"Mendez, Carlos",     amt:250,   fund:"Cathedral Capital",    gl:"5200", batch:"2026-0418", date:"Apr 18, 2026", check:"7711",  officer:"Janet W.",status:"nsf",       parish:"Cathedral",      memo:"CMA", ocr:0.68, rYear:2026, receipt:true,  house:[{nm:"Mendez, Sofia",rel:"Spouse · #5202"}]},
+  {id:'G008', donor:"Collins, Brian",     amt:1500,  fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0418", date:"Apr 18, 2026", check:"4456",  officer:"Mike D.", status:"posted",    parish:"Cathedral",      memo:"CMA 2026", ocr:0.91, rYear:2026, receipt:true,  house:[{nm:"Collins, Mary",rel:"Spouse · #4709"}]},
+  {id:'G009', donor:"Fitzgerald, Anne",   amt:300,   fund:"General Fund",         gl:"4050", batch:"2026-0418", date:"Apr 18, 2026", check:"1122",  officer:"Janet W.",status:"posted",    parish:"Holy Cross",     memo:"General fund", ocr:0.80, rYear:2025, receipt:true,  house:[{nm:"Fitzgerald, James",rel:"Spouse · #5044"}]},
+  {id:'G010', donor:"Nguyen, Thomas",     amt:1200,  fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0420", date:"Apr 20, 2026", check:"5533",  officer:"Sarah R.",status:"posted",    parish:"St. Catherine's",memo:"CMA", ocr:0.97, rYear:2026, receipt:true,  house:[{nm:"Nguyen, Linh",rel:"Spouse · #5310"}]},
+];
+const FUND_GL = {"CMA Annual Fund":"4100","Cathedral Capital":"5200","General Fund":"4050","School Scholarship":"4300","Bishop's Annual Fund":"4150"};
+function giftFlag(g){
+  if(g.status==='nsf') return {cls:'gf-nsf', label:'NSF — needs reversal'};
+  if(g.fundClosed)     return {cls:'gf-closed', label:'Fund closed — reassign'};
+  if(g.ocr < 0.85)     return {cls:'gf-ocr', label:'Low-confidence scan ('+Math.round(g.ocr*100)+'%)'};
+  return null;
+}
+
+const AUDIT_LOG = [
+  {
+    id:"AUD-001", type:"Donor reclassification", ts:"Apr 13, 2026 · 9:14 AM", user:"K. Novicky",
+    from:{donor:"Walsh, Susan (#4820)", fund:"CMA Annual Fund", amt:"$500.00", check:"#10441"},
+    to:  {donor:"Walsh, Thomas (#4821)", fund:"CMA Annual Fund", amt:"$500.00", check:"#10441"},
+    reason:"Data entry error — wrong donor selected. Walsh, Thomas wrote the check (confirmed by check signature). Walsh, Susan is his spouse.",
+    receiptAction:"New receipt issued to Walsh, Thomas (#4821). Original receipt #RCP-2026-0412-04 voided.",
+    hash:"3a7f9c2e8b14d05f61a2c98b4e7d03a1",
+  },
+  {
+    id:"AUD-002", type:"NSF reversal — insufficient funds", ts:"Apr 16, 2026 · 2:38 PM", user:"K. Novicky",
+    from:{donor:"Harrington, David (#4802)", fund:"CMA Annual Fund", amt:"$5,000.00", check:"#3301"},
+    to:  {donor:"—", fund:"—", amt:"$0.00 (reversed)", check:"NSF ref: TRC-20260416-9921"},
+    reason:"Bank returned check Apr 16 — insufficient funds. Tax receipt RCP-2026-0415-02 voided. Gift officer task created for Mike D. to contact donor. Donor confirmed resubmission expected by Apr 30.",
+    receiptAction:"Tax receipt #RCP-2026-0415-02 voided. Donor notified.",
+    hash:"8d2a4f7c1b9e035d6a7f82c3d94b10e5",
+  },
+  {
+    id:"AUD-003", type:"Fund reclassification", ts:"Apr 19, 2026 · 10:02 AM", user:"M. Donovan",
+    from:{donor:"Mendez, Carlos (#5201)", fund:"Cathedral Capital (GL 5200)", amt:"$250.00", check:"#7711"},
+    to:  {donor:"Mendez, Carlos (#5201)", fund:"CMA Annual Fund (GL 4100)", amt:"$250.00", check:"#7711"},
+    reason:"OCR misread — check scan assigned wrong fund. Donor memo line reads 'CMA'. Corrected by development director.",
+    receiptAction:"Receipt reissued to Mendez, Carlos with correct fund designation. Original voided.",
+    hash:"f5b3c8a9e2d1074f38a6bc9d02e74a1f",
+  },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let selectedGift = null;
+let correctionType = null;
+let currentStep = 1;
+
+// ── RENDER GIFT LIST ──────────────────────────────────────────────────────────
+let listSearch = '', listStatus = 'all';
+const BULK = new Set();
+
+function renderListFilter() {
+  const counts = {all:GIFTS.length};
+  GIFTS.forEach(g => counts[g.status] = (counts[g.status]||0)+1);
+  counts.flagged = GIFTS.filter(g => giftFlag(g)).length;
+  const chips = [['all','All'],['flagged','Needs attention'],['posted','Posted'],['corrected','Corrected'],['reversed','Reversed'],['nsf','NSF']];
+  document.getElementById('lp-filter').innerHTML = chips.map(([k,l]) =>
+    `<button class="lpf-chip ${listStatus===k?'on':''}" onclick="setListFilter('${k}')">${l}${counts[k]!=null?' ('+counts[k]+')':''}</button>`).join('');
+}
+function setListFilter(s) { listStatus = s; renderListFilter(); renderGiftList(); }
+function filterGifts(v) { listSearch = v; renderGiftList(); }
+
+function giftsFiltered() {
+  const f = listSearch.toLowerCase();
+  return GIFTS.filter(g => {
+    if (listStatus === 'flagged' && !giftFlag(g)) return false;
+    if (listStatus !== 'all' && listStatus !== 'flagged' && g.status !== listStatus) return false;
+    return !f || g.donor.toLowerCase().includes(f) || g.check.includes(listSearch) || g.batch.includes(listSearch) || g.fund.toLowerCase().includes(f);
+  });
+}
+
+function renderGiftList() {
+  const statusLabel = {posted:'Posted', corrected:'Corrected', reversed:'Reversed', nsf:'NSF'};
+  const statusClass = {posted:'gb-posted', corrected:'gb-corrected', reversed:'gb-reversed', nsf:'gb-nsf'};
+  const rows = giftsFiltered();
+  document.getElementById('gift-list').innerHTML = rows.map(g => {
+    const fl = giftFlag(g);
+    return `<div class="gift-item ${selectedGift?.id===g.id?'selected':''}">
+      <div class="gi-row">
+        <input type="checkbox" class="gi-check" ${BULK.has(g.id)?'checked':''} onclick="event.stopPropagation();toggleBulk('${g.id}')" title="Select for bulk action">
+        <div class="gi-main" onclick="selectGift('${g.id}')">
+          <div class="gi-top"><span class="gi-donor">${g.donor}</span><span class="gi-amt">$${g.amt.toLocaleString()}</span></div>
+          <div class="gi-meta"><span>${g.fund.split(' ').slice(0,2).join(' ')}</span><span>·</span><span>Chk #${g.check}</span><span>·</span><span>${g.date}</span><span class="gi-badge ${statusClass[g.status]}">${statusLabel[g.status]}</span></div>
+          ${fl ? `<div class="gi-flag ${fl.cls}"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M5.5 2v3.5M5.5 8v.3"/><path d="M1 9.5L5.5 1 10 9.5H1z"/></svg>${fl.label}</div>` : ''}
+        </div>
+        <div class="gi-actions" onclick="event.stopPropagation()">
+          ${g.status==='nsf' ? `<button class="gi-act danger" onclick="quickAction('${g.id}','reverse')">Reverse</button>` : ''}
+          ${g.fundClosed ? `<button class="gi-act" onclick="quickAction('${g.id}','reassign')">Reassign</button>` : ''}
+          <button class="gi-act" onclick="quickAction('${g.id}','correct')">Correct →</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty-state" style="padding:40px 20px"><h3>No gifts match</h3><p>Adjust the filter or search above.</p></div>';
+  renderBulkBar();
+  renderTriage();
+}
+
+function toggleBulk(id) { BULK.has(id) ? BULK.delete(id) : BULK.add(id); renderGiftList(); }
+function clearBulk() { BULK.clear(); renderGiftList(); }
+function renderBulkBar() {
+  document.getElementById('bulk-count').textContent = BULK.size + ' selected';
+  document.getElementById('bulk-bar').classList.toggle('show', BULK.size > 0);
+}
+function applyBulk() {
+  if (!BULK.size) return;
+  const fund = document.getElementById('bulk-fund').value, gl = FUND_GL[fund] || '', n = BULK.size;
+  BULK.forEach(id => {
+    const g = GIFTS.find(x => x.id === id); if (!g) return;
+    const oldFund = g.fund;
+    g.fund = fund; g.gl = gl; g.status = 'corrected';
+    addAuditEntry({ id:'AUD-BULK-'+id+'-'+Date.now(), type:'Fund reclassification (bulk)', ts:'Just now', user:'Current user',
+      from:{donor:g.donor, fund:oldFund, amt:'$'+g.amt.toLocaleString()+'.00', check:'#'+g.check},
+      to:{donor:g.donor, fund:fund+' (GL '+gl+')', amt:'$'+g.amt.toLocaleString()+'.00', check:'#'+g.check},
+      reason:'Bulk fund reassignment applied across '+n+' selected gifts.', receiptAction:'Receipts reissued with corrected fund.', hash:Math.random().toString(36).substr(2,32) });
+  });
+  clearBulk(); renderGiftList();
+  showSnack(n+' gifts reassigned to '+fund, 'green');
+  openAudit();
+}
+
+// ── SELECT GIFT ───────────────────────────────────────────────────────────────
+function selectGift(id) {
+  selectedGift = GIFTS.find(g => g.id === id);
+  correctionType = null;
+  currentStep = 1;
+  renderGiftList();
+  renderSelectedGift();
+  resetWizard();
+  document.getElementById('correct-empty').style.display = 'none';
+  document.getElementById('correct-content').style.display = 'block';
+  document.getElementById('reversal-empty').style.display = 'none';
+  document.getElementById('reversal-content').style.display = 'block';
+
+  // Populate NSF section
+  document.getElementById('nsf-gift-desc').textContent =
+    `${selectedGift.donor} · $${selectedGift.amt.toLocaleString()} · Check #${selectedGift.check} · ${selectedGift.date}`;
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('nsf-date').value = today;
+
+  // open the drawer on the picker
+  document.querySelector('.right-panel').classList.add('open');
+  document.getElementById('gc-scrim').classList.add('show');
+  document.getElementById('tab-reversal').classList.remove('active');
+  document.getElementById('tab-correct').classList.add('active');
+  // auto-route: a returned/NSF gift jumps straight to the reversal form
+  if (selectedGift.status === 'nsf') {
+    const c = [...document.querySelectorAll('.ct-card')].find(x => (x.getAttribute('onclick')||'').includes("'nsf'"));
+    if (c) selectCorrection('nsf', c);
+    showNSF();
+  }
+}
+
+// Picker router: reclassify types advance the wizard; NSF/returns open the reversal form
+function advanceFromPicker() {
+  if (correctionType === 'nsf') showNSF();
+  else if (correctionType) goStep(2);
+}
+function showNSF() {
+  document.getElementById('step-indicator').style.display = 'none';
+  document.getElementById('tab-correct').classList.remove('active');
+  document.getElementById('tab-reversal').classList.add('active');
+  document.getElementById('reversal-empty').style.display = 'none';
+  document.getElementById('reversal-content').style.display = 'block';
+  const g = selectedGift; if (!g) return;
+  document.getElementById('nsf-gift-desc').textContent =
+    `${g.donor} · $${g.amt.toLocaleString()} · Check #${g.check} · ${g.date}`;
+  document.getElementById('nsf-date').value = new Date().toISOString().split('T')[0];
+}
+function backToPicker() {
+  document.getElementById('tab-reversal').classList.remove('active');
+  document.getElementById('tab-correct').classList.add('active');
+  document.getElementById('step-indicator').style.display = 'flex';
+  resetWizard();
+}
+
+function renderSelectedGift() {
+  if (!selectedGift) return;
+  const g = selectedGift;
+  document.getElementById('sgc-title').textContent = `${g.donor} — $${g.amt.toLocaleString()}`;
+  document.getElementById('sgc-sub').textContent = `Batch #${g.batch} · Posted ${g.date} · Entry: ${g.officer}`;
+  const statusColors = {posted:'rgba(37,99,235,.25)',corrected:'rgba(13,148,136,.25)',reversed:'rgba(220,38,38,.25)',nsf:'rgba(234,88,12,.25)'};
+  const statusText = {posted:'#93C5FD',corrected:'#5EEAD4',reversed:'#FDA4AF',nsf:'#FDBA74'};
+  const statusLabel = {posted:'Posted',corrected:'Corrected',reversed:'Reversed',nsf:'NSF — Reversed'};
+  document.getElementById('sgc-badge').style.background = statusColors[g.status]||'rgba(37,99,235,.25)';
+  document.getElementById('sgc-badge').style.color = statusText[g.status]||'#93C5FD';
+  document.getElementById('sgc-badge').textContent = statusLabel[g.status]||g.status;
+  document.getElementById('sgc-fields').innerHTML = `
+    <div>
+      <div class="gdf-row"><div class="gdf-label">Donor</div><div class="gdf-val">${g.donor}</div></div>
+      <div class="gdf-row"><div class="gdf-label">Amount</div><div class="gdf-val mono green">$${g.amt.toLocaleString()}.00</div></div>
+      <div class="gdf-row"><div class="gdf-label">Payment method</div><div class="gdf-val">Check</div></div>
+    </div>
+    <div>
+      <div class="gdf-row"><div class="gdf-label">Fund</div><div class="gdf-val">${g.fund}</div></div>
+      <div class="gdf-row"><div class="gdf-label">GL code</div><div class="gdf-val mono">${g.gl}</div></div>
+      <div class="gdf-row"><div class="gdf-label">Check #</div><div class="gdf-val mono">${g.check}</div></div>
+    </div>`;
+
+  // Receipt intelligence banner
+  const rslot = document.getElementById('receipt-note-slot');
+  if (g.receipt && g.rYear < 2026) {
+    rslot.innerHTML = `<div class="receipt-note rn-warn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 2v4M7 9v.5"/><path d="M1 11.5L7 1l6 10.5H1z"/></svg><span><strong>Prior-year receipt (${g.rYear}).</strong> A tax receipt was already issued for ${g.rYear}. Correcting this gift requires an <strong>amended receipt</strong> — confirm with finance before posting.</span></div>`;
+  } else if (g.receipt) {
+    rslot.innerHTML = `<div class="receipt-note rn-ok"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7l3 3 7-7"/></svg><span>Tax receipt issued for ${g.rYear}. A corrected receipt can be reissued in step 3.</span></div>`;
+  } else { rslot.innerHTML = ''; }
+
+  // Scanned check (source of truth)
+  const nm = g.donor.split(',').reverse().join(' ').trim();
+  const ocrPct = Math.round(g.ocr * 100);
+  document.getElementById('check-scan-slot').innerHTML = `
+    <div class="check-scan">
+      <div class="cs-h"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1" y="2.5" width="10" height="7" rx="1"/><path d="M3 5h2.5M3 7h4"/></svg>Scanned check · OCR confidence ${ocrPct}%${g.ocr < 0.85 ? ' · <span style="color:var(--amber);font-weight:700">verify against image</span>' : ''}</div>
+      <div class="check-paper">
+        <div class="cp-top"><span>Diocese of St. Petersburg</span><span>Check #${g.check}</span></div>
+        <div class="cp-payto"><span class="lbl">Pay to</span><span class="nm">${nm}</span><span class="cp-amtbox">$${g.amt.toLocaleString()}.00</span></div>
+        <div class="cp-bottom"><div class="cp-memo"><span class="lbl">Memo</span><br>${g.memo || '—'}</div><div class="cp-sig">${nm}</div></div>
+        <div class="cp-micr">⑆063100277⑆ 0042${g.check}⑈</div>
+      </div>
+    </div>`;
+}
+
+// ── CORRECTION TYPE ───────────────────────────────────────────────────────────
+function selectCorrection(type, el) {
+  correctionType = type;
+  document.querySelectorAll('.ct-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('step1-next').disabled = false;
+}
+
+// ── FROM/TO PANEL ─────────────────────────────────────────────────────────────
+function initialsOf(n){ const p=n.replace(/,/g,'').split(/[\s&]+/).filter(Boolean); return ((p[0]||'')[0]||'')+((p[1]||'')[0]||''); }
+function updateAmtDelta(){
+  const el=document.getElementById('to-amt-input'), d=document.getElementById('amt-delta');
+  if(!el||!d||!selectedGift) return;
+  const v=parseFloat(el.value.replace(/[^0-9.]/g,''))||0, diff=v-selectedGift.amt;
+  if(Math.abs(diff)<0.005){ d.className='amt-delta ad-zero'; d.textContent='No change'; }
+  else if(diff>0){ d.className='amt-delta ad-up'; d.textContent='+$'+diff.toLocaleString()+' increase'; }
+  else { d.className='amt-delta ad-down'; d.textContent='−$'+Math.abs(diff).toLocaleString()+' decrease'; }
+}
+function renderFromTo() {
+  if (!selectedGift || !correctionType) return;
+  const g = selectedGift;
+  let fields = '';
+  if (correctionType === 'donor' || correctionType === 'both') {
+    fields += `
+      <div class="ft-field">
+        <div class="ft-label">Donor</div>
+        <div class="ft-value readonly">${g.donor}</div>
+      </div>`;
+  }
+  if (correctionType === 'fund' || correctionType === 'both') {
+    fields += `
+      <div class="ft-field">
+        <div class="ft-label">Fund</div>
+        <div class="ft-value readonly">${g.fund}</div>
+      </div>
+      <div class="ft-field">
+        <div class="ft-label">GL code</div>
+        <div class="ft-value readonly mono">${g.gl}</div>
+      </div>`;
+  }
+  if (correctionType === 'amount') {
+    fields += `
+      <div class="ft-field">
+        <div class="ft-label">Amount</div>
+        <div class="ft-value readonly mono">$${g.amt.toLocaleString()}.00</div>
+      </div>`;
+  }
+
+  let toFields = '';
+  if (correctionType === 'donor' || correctionType === 'both') {
+    const sugg = (g.house||[]).map(h =>
+      `<button type="button" class="ds-chip" data-nm="${h.nm}" onclick="document.getElementById('to-donor-input').value=this.dataset.nm"><span class="av">${initialsOf(h.nm)}</span>${h.nm}<span class="rel">${h.rel}</span></button>`).join('');
+    toFields += `
+      <div class="ft-field">
+        <div class="ft-label">Correct donor</div>
+        ${sugg ? `<div class="donor-suggest"><div class="dsg-label">Likely matches · household</div><div class="dsg-chips">${sugg}</div></div>` : ''}
+        <input id="to-donor-input" type="text" class="ft-value editable changed" value="${g.donor}" placeholder="Search donor name…" style="display:block">
+      </div>`;
+  }
+  if (correctionType === 'fund' || correctionType === 'both') {
+    toFields += `
+      <div class="ft-field">
+        <div class="ft-label">Correct fund</div>
+        <select id="to-fund-select" class="ft-value editable changed" style="display:block;cursor:pointer" onchange="var gl=FUND_GL[this.value];if(gl)document.getElementById('to-gl-input').value=gl">
+          <option ${g.fund==='CMA Annual Fund'?'selected':''}>CMA Annual Fund</option>
+          <option ${g.fund==='Cathedral Capital'?'selected':''}>Cathedral Capital</option>
+          <option ${g.fund==='General Fund'?'selected':''}>General Fund</option>
+          <option ${g.fund==='School Scholarship'?'selected':''}>School Scholarship</option>
+          <option ${g.fund==="Bishop's Annual Fund"?'selected':''}>Bishop's Annual Fund</option>
+        </select>
+      </div>
+      <div class="ft-field">
+        <div class="ft-label">GL code <span style="font-weight:500;text-transform:none;color:var(--text4)">· auto-maps from fund</span></div>
+        <input id="to-gl-input" type="text" class="ft-value editable changed mono" value="${g.gl}" style="display:block">
+      </div>`;
+  }
+  if (correctionType === 'amount') {
+    toFields += `
+      <div class="ft-field">
+        <div class="ft-label">Corrected amount</div>
+        <input id="to-amt-input" type="text" class="ft-value editable changed mono" value="$${g.amt.toLocaleString()}.00" style="display:block" oninput="updateAmtDelta()">
+        <div id="amt-delta" class="amt-delta ad-zero">No change</div>
+      </div>`;
+  }
+
+  // always show amount and fund unchanged in other modes
+  if (correctionType === 'donor') {
+    fields += `<div class="ft-field"><div class="ft-label">Fund</div><div class="ft-value readonly">${g.fund}</div></div>
+               <div class="ft-field"><div class="ft-label">Amount</div><div class="ft-value readonly mono">$${g.amt.toLocaleString()}.00</div></div>`;
+    toFields+= `<div class="ft-field"><div class="ft-label">Fund</div><div class="ft-value readonly">${g.fund}</div></div>
+                <div class="ft-field"><div class="ft-label">Amount</div><div class="ft-value readonly mono">$${g.amt.toLocaleString()}.00</div></div>`;
+  }
+  if (correctionType === 'fund') {
+    fields = `<div class="ft-field"><div class="ft-label">Donor</div><div class="ft-value readonly">${g.donor}</div></div>
+              <div class="ft-field"><div class="ft-label">Amount</div><div class="ft-value readonly mono">$${g.amt.toLocaleString()}.00</div></div>` + fields;
+    toFields=`<div class="ft-field"><div class="ft-label">Donor</div><div class="ft-value readonly">${g.donor}</div></div>
+              <div class="ft-field"><div class="ft-label">Amount</div><div class="ft-value readonly mono">$${g.amt.toLocaleString()}.00</div></div>` + toFields;
+  }
+
+  // ── Additional correction types ──
+  const donorRO = `<div class="ft-field"><div class="ft-label">Donor</div><div class="ft-value readonly">${g.donor}</div></div>`;
+  const amtRO   = `<div class="ft-field"><div class="ft-label">Amount</div><div class="ft-value readonly mono">$${g.amt.toLocaleString()}.00</div></div>`;
+  const fundRO  = `<div class="ft-field"><div class="ft-label">Fund</div><div class="ft-value readonly">${g.fund}</div></div>`;
+  if (correctionType === 'date') {
+    fields   = donorRO + `<div class="ft-field"><div class="ft-label">Gift date</div><div class="ft-value readonly">${g.date}</div></div>` + amtRO;
+    toFields = donorRO + `<div class="ft-field"><div class="ft-label">Corrected gift date</div><input type="date" class="ft-value editable changed" style="display:block"></div>` + amtRO;
+  }
+  if (correctionType === 'method') {
+    fields   = donorRO + `<div class="ft-field"><div class="ft-label">Payment method</div><div class="ft-value readonly">Check</div></div>` + amtRO;
+    toFields = donorRO + `<div class="ft-field"><div class="ft-label">Correct payment method</div><select class="ft-value editable changed" style="display:block;cursor:pointer"><option>Check</option><option>Credit card</option><option>Cash</option><option>ACH / bank transfer</option><option>Stock / securities</option><option>Donor-advised fund</option><option>In-kind</option></select></div>` + amtRO;
+  }
+  if (correctionType === 'pledge') {
+    fields   = donorRO + amtRO + `<div class="ft-field"><div class="ft-label">Pledge link</div><div class="ft-value readonly">Not linked</div></div>`;
+    toFields = donorRO + amtRO + `<div class="ft-field"><div class="ft-label">Apply to pledge</div><select class="ft-value editable changed" style="display:block;cursor:pointer"><option>2026 CMA Pledge — $10,000 (bal $4,000)</option><option>Capital Campaign — $25,000 (bal $12,500)</option><option>2026 Bishop's Appeal — $5,000 (bal $2,000)</option></select></div>`;
+  }
+  if (correctionType === 'duplicate') {
+    fields   = donorRO + amtRO + fundRO;
+    toFields = `<div style="background:var(--rosel);border:1px solid #FECACA;border-radius:8px;padding:12px 14px;font-size:12px;color:var(--rosed);line-height:1.55"><strong>Reverse as duplicate.</strong> This gift will be voided — no new gift is posted. The donor's totals and any tax receipt are reversed. Use only when the same gift was entered twice.</div>`;
+  }
+
+  document.getElementById('from-to-panel').innerHTML = `
+    <div class="ft-col from-col">
+      <div class="ft-head">Original (will be reversed)</div>
+      <div class="ft-body">${fields}</div>
+    </div>
+    <div class="ft-arrow">
+      <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 9h10M10 5l4 4-4 4"/></svg>
+    </div>
+    <div class="ft-col to-col">
+      <div class="ft-head">Corrected (new posted gift)</div>
+      <div class="ft-body">${toFields}</div>
+    </div>`;
+}
+
+// ── STEP NAV ─────────────────────────────────────────────────────────────────
+function goStep(n) {
+  currentStep = n;
+  document.querySelectorAll('.step-panel').forEach((p,i) => p.classList.toggle('active', i===n-1));
+  [1,2,3,4].forEach(i => {
+    const dot = document.getElementById('sd-'+i);
+    if (!dot) return;
+    dot.className = 'si-dot ' + (i < n ? 'done' : i === n ? 'active' : 'pending');
+    dot.textContent = i < n ? '✓' : i;
+    if (i < 4) {
+      const line = document.getElementById('sl-'+i);
+      if (line) line.classList.toggle('done', i < n);
+    }
+  });
+  if (n === 2) renderFromTo();
+  if (n === 4) renderConfirmSummary();
+}
+
+function renderConfirmSummary() {
+  const g = selectedGift;
+  const typeLabel = {donor:'Wrong donor corrected',fund:'Fund / GL corrected',both:'Donor and fund corrected',amount:'Amount corrected',date:'Gift date corrected',method:'Payment method corrected',pledge:'Applied to pledge',duplicate:'Reversed as duplicate'};
+  const reason = document.getElementById('reason-select').value;
+  const receiptOn = document.getElementById('receipt-toggle').classList.contains('on');
+  document.getElementById('confirm-summary').innerHTML = `
+    <div class="cs-title"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="14" height="14"><path d="M2 7l3 3 7-7"/></svg>Correction summary — review before posting</div>
+    <div class="cs-row"><span class="cs-key">Original gift</span><span class="cs-val">${g.donor} · $${g.amt.toLocaleString()} · ${g.fund}</span></div>
+    <div class="cs-row"><span class="cs-key">Correction type</span><span class="cs-val">${typeLabel[correctionType]}</span></div>
+    <div class="cs-row"><span class="cs-key">Reason</span><span class="cs-val">${reason}</span></div>
+    <div class="cs-row"><span class="cs-key">Reversing entry</span><span class="cs-val">Will be created — ($${g.amt.toLocaleString()}) on batch ${g.batch}</span></div>
+    <div class="cs-row"><span class="cs-key">New corrected gift</span><span class="cs-val">Will be posted with corrected values</span></div>
+    <div class="cs-row"><span class="cs-key">Tax receipt</span><span class="cs-val">${receiptOn ? 'Original voided · New receipt issued' : 'No receipt change'}</span></div>
+    <div class="cs-row"><span class="cs-key">Audit entry</span><span class="cs-val">Permanent · cannot be edited or deleted</span></div>`;
+
+  // ── Impact preview ──
+  const prior = g.rYear < 2026;
+  const impact = [
+    ['auto','Reversing entry posted to batch '+g.batch+' — original gift negated'],
+    [correctionType==='duplicate'?'skip':'auto', correctionType==='duplicate'?'Duplicate removed — no new gift posted':'New corrected gift posted with the updated values'],
+    ['auto',"Donor's giving history (YTD + lifetime) recalculated"],
+    ['auto','GL reversal + re-post entries generated for accounting export'],
+    [receiptOn ? (prior?'review':'auto') : 'skip', receiptOn ? (prior ? 'Amended '+g.rYear+' tax receipt — must be reviewed before sending' : 'Original receipt voided · corrected receipt reissued') : 'No tax-receipt change'],
+  ];
+  const badge = {auto:['ni-auto','Auto'], review:['ni-required','Review req.'], skip:['ni-manual','Skipped']};
+  const ico = {auto:'<svg viewBox="0 0 10 10" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 5l2 2 5-5"/></svg>', review:'<svg viewBox="0 0 10 10" fill="none" stroke="var(--red)" stroke-width="1.4" stroke-linecap="round"><path d="M5 2v3M5 7v.5"/><path d="M1 8.5L5 1l4 7.5H1z"/></svg>', skip:'<svg viewBox="0 0 10 10" fill="none" stroke="#94A3B8" stroke-width="1.4" stroke-linecap="round"><path d="M2 5h6"/></svg>'};
+  const bg = {auto:'var(--greenl)', review:'var(--redl)', skip:'#F1F5F9'};
+  document.getElementById('confirm-impact').innerHTML = `
+    <div class="nsf-impact" style="margin-bottom:16px">
+      <div class="ni-head" style="background:var(--bluep);color:#1D4ED8;border-bottom-color:var(--bluel)">What happens when you post</div>
+      ${impact.map(([k,t])=>`<div class="ni-row"><div class="ni-icon" style="background:${bg[k]}">${ico[k]}</div><div class="ni-text">${t}</div><span class="ni-action ${badge[k][0]}">${badge[k][1]}</span></div>`).join('')}
+    </div>`;
+
+  // ── Approval workflow for high-impact corrections ──
+  const needsApproval = correctionType === 'amount' || g.amt >= 2500;
+  const btn = document.getElementById('post-btn');
+  if (needsApproval) {
+    document.getElementById('confirm-impact').insertAdjacentHTML('beforeend', `
+      <div class="approval-note">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5l5.5 2.5v3.5c0 3-2.3 5.2-5.5 6.5C4.8 12.7 2.5 10.5 2.5 7.5V4z"/><path d="M5.8 8l1.6 1.6L10.5 6"/></svg>
+        <div><div class="apn-title">Second approval required</div><div class="apn-sub">${correctionType==='amount'?'Amount changes':'Corrections of $2,500 or more'} must be approved by a Finance reviewer before posting. This will be sent to the approval queue.</div></div>
+      </div>`);
+    btn.className = 'btn btn-primary'; btn.setAttribute('onclick','submitForApproval()');
+    btn.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1.5l4 2v2.5c0 2.2-1.7 3.8-4 4.5C3.7 9.8 2 8.2 2 6V3.5z"/></svg> Submit for approval';
+  } else {
+    btn.className = 'btn btn-green'; btn.setAttribute('onclick','postCorrection()');
+    btn.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg> Post correction';
+  }
+}
+
+function submitForApproval() {
+  if (!selectedGift) return;
+  const g = GIFTS.find(f => f.id === selectedGift.id);
+  addAuditEntry({ id:'AUD-APR-'+Date.now(), type:(correctionType==='amount'?'Amount correction':'Reclassification')+' — pending approval', ts:'Just now', user:'Current user',
+    from:{donor:g.donor, fund:g.fund, amt:'$'+g.amt.toLocaleString()+'.00', check:'#'+g.check},
+    to:{donor:g.donor+' (proposed)', fund:g.fund, amt:'$'+g.amt.toLocaleString()+'.00 (proposed)', check:'#'+g.check},
+    reason:'Submitted to Finance approval queue. '+(document.getElementById('reason-select').value||'')+(document.getElementById('reason-notes').value ? ' — '+document.getElementById('reason-notes').value : ''),
+    receiptAction:'Pending — no receipt action until approved.', hash:Math.random().toString(36).substr(2,32) });
+  showSnack('Submitted to approval queue — awaiting Finance review', '');
+  resetWizard(); clearSelection();
+  openAudit();
+}
+
+function resetWizard() {
+  correctionType = null;
+  currentStep = 1;
+  const si = document.getElementById('step-indicator'); if (si) si.style.display = 'flex';
+  document.querySelectorAll('.step-panel').forEach((p,i) => p.classList.toggle('active', i===0));
+  document.querySelectorAll('.ct-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('step1-next').disabled = true;
+  document.getElementById('step3-next').disabled = true;
+  if (document.getElementById('reason-select')) document.getElementById('reason-select').value = '';
+  [1,2,3,4].forEach(i => {
+    const dot = document.getElementById('sd-'+i);
+    if (dot) { dot.className = 'si-dot ' + (i===1?'active':'pending'); dot.textContent = i; }
+    if (i<4) { const l=document.getElementById('sl-'+i); if(l) l.classList.remove('done'); }
+  });
+}
+
+function checkReasonFilled() {
+  const v = document.getElementById('reason-select').value;
+  document.getElementById('step3-next').disabled = !v;
+}
+
+// ── POST ACTIONS ──────────────────────────────────────────────────────────────
+function postCorrection() {
+  if (!selectedGift) return;
+  const g = GIFTS.find(f => f.id===selectedGift.id);
+  g.status = (correctionType === 'duplicate') ? 'reversed' : 'corrected';
+  renderGiftList();
+  addAuditEntry({
+    id: 'AUD-NEW-'+(Date.now()),
+    type: {donor:'Donor reclassification',fund:'Fund reclassification',both:'Donor & fund reclassification',amount:'Amount correction',date:'Gift date correction',method:'Payment method correction',pledge:'Pledge linkage',duplicate:'Duplicate reversed'}[correctionType] || 'Correction',
+    ts: 'Just now',
+    user: 'Current user',
+    from: {donor:g.donor, fund:g.fund, amt:'$'+g.amt.toLocaleString()+'.00', check:'#'+g.check},
+    to:   {donor:g.donor+' (corrected)', fund:g.fund+' (corrected)', amt:'$'+g.amt.toLocaleString()+'.00', check:'#'+g.check},
+    reason: document.getElementById('reason-select').value + (document.getElementById('reason-notes').value ? ' — '+document.getElementById('reason-notes').value : ''),
+    receiptAction: document.getElementById('receipt-toggle').classList.contains('on') ? 'Receipt reissued to corrected record.' : 'No receipt change.',
+    hash: Math.random().toString(36).substr(2,32),
+  });
+  showSnack('Correction posted and audit trail updated', 'green');
+  resetWizard();
+  clearSelection();
+  openAudit();
+}
+
+function postReversal() {
+  if (!selectedGift) return;
+  const g = GIFTS.find(f => f.id===selectedGift.id);
+  g.status = 'reversed';
+  renderGiftList();
+  addAuditEntry({
+    id: 'AUD-NSF-'+(Date.now()),
+    type: 'NSF reversal — ' + (document.getElementById('nsf-type').value||'returned check'),
+    ts: 'Just now',
+    user: 'Current user',
+    from: {donor:g.donor, fund:g.fund, amt:'$'+g.amt.toLocaleString()+'.00', check:'#'+g.check},
+    to:   {donor:'—', fund:'—', amt:'$0.00 (reversed)', check:'NSF ref: '+(document.getElementById('nsf-ref').value||'TRC-pending')},
+    reason: 'Bank return: '+(document.getElementById('nsf-type').value||'NSF')+'. Return date: '+(document.getElementById('nsf-date').value||'today')+'. '+((document.querySelector('#tab-reversal textarea')||{}).value||''),
+    receiptAction: 'Tax receipt voided. Gift officer task created.',
+    hash: Math.random().toString(36).substr(2,32),
+  });
+  showSnack('NSF reversal posted — all downstream actions completed', 'red');
+  clearSelection();
+  openAudit();
+}
+
+function addAuditEntry(entry) {
+  AUDIT_LOG.unshift(entry);
+  renderAuditLog();
+  renderAuditAnalytics();
+}
+
+function renderAuditAnalytics() {
+  const el = document.getElementById('audit-analytics'); if (!el) return;
+  const cats = [
+    ['Donor reclassification', e => /donor reclass/i.test(e.type)],
+    ['Fund reclassification',  e => /fund reclass/i.test(e.type)],
+    ['NSF / check return',     e => /nsf|reversal|check return/i.test(e.type)],
+    ['Amount correction',      e => /amount/i.test(e.type)],
+    ['Pending approval',       e => /pending approval/i.test(e.type)],
+  ];
+  const total = AUDIT_LOG.length;
+  const counts = cats.map(([n, fn]) => [n, AUDIT_LOG.filter(fn).length]);
+  const max = Math.max(1, ...counts.map(c => c[1]));
+  const reversals = AUDIT_LOG.filter(e => /nsf|reversal/i.test(e.type)).length;
+  const pending = AUDIT_LOG.filter(e => /pending approval/i.test(e.type)).length;
+  el.innerHTML = `
+    <div class="an-wrap">
+      <div class="an-title"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 12V8M6 12V4M10 12V6"/></svg>Correction insights</div>
+      <div class="an-grid">
+        <div class="an-stat"><div class="v">${total}</div><div class="l">Total entries</div></div>
+        <div class="an-stat"><div class="v">${Math.max(0,total-reversals-pending)}</div><div class="l">Reclassifications</div></div>
+        <div class="an-stat"><div class="v">${reversals}</div><div class="l">NSF / returns</div></div>
+        <div class="an-stat"><div class="v">${pending}</div><div class="l">Pending approval</div></div>
+      </div>
+      <div class="an-bars">
+        ${counts.map(([n,c]) => `<div class="an-bar-row"><span class="nm">${n}</span><div class="track"><div class="fill" style="width:${c/max*100}%"></div></div><span class="ct">${c}</span></div>`).join('')}
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:10px">Tip: a spike in one reason usually points to an upstream data-entry or scanning issue worth fixing at the source.</div>
+    </div>`;
+}
+
+function clearSelection() {
+  selectedGift = null;
+  renderGiftList();
+  document.getElementById('correct-empty').style.display='flex';
+  document.getElementById('correct-content').style.display='none';
+  document.getElementById('reversal-empty').style.display='flex';
+  document.getElementById('reversal-content').style.display='none';
+  document.querySelector('.right-panel').classList.remove('open');
+  document.getElementById('gc-scrim').classList.remove('show');
+}
+
+function openAudit() {
+  renderAuditLog(); renderAuditAnalytics();
+  document.getElementById('audit-drawer').classList.add('open');
+  document.getElementById('audit-scrim').classList.add('show');
+}
+function closeAudit() {
+  document.getElementById('audit-drawer').classList.remove('open');
+  document.getElementById('audit-scrim').classList.remove('show');
+}
+
+function quickAction(id, action) {
+  selectGift(id);
+  if (action === 'reverse') {
+    const c = [...document.querySelectorAll('.ct-card')].find(x => (x.getAttribute('onclick')||'').includes("'nsf'"));
+    if (c) selectCorrection('nsf', c);
+    showNSF();
+  } else if (action === 'reassign') {
+    const card = [...document.querySelectorAll('.ct-card')].find(c => (c.getAttribute('onclick')||'').includes("'fund'"));
+    if (card) { selectCorrection('fund', card); goStep(2); }
+  }
+  // 'correct' → leaves the picker open
+}
+
+function renderTriage() {
+  const el = document.getElementById('triage'); if (!el) return;
+  const total = GIFTS.length;
+  const nsf = GIFTS.filter(g => g.status === 'nsf').length;
+  const ocr = GIFTS.filter(g => { const fl = giftFlag(g); return fl && fl.cls === 'gf-ocr'; }).length;
+  const closed = GIFTS.filter(g => g.fundClosed).length;
+  const warn = '<svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7.5 5v3.5M7.5 10.8v.2"/><path d="M1.5 12.5L7.5 1.5l6 11H1.5z"/></svg>';
+  const scan = '<svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="3" width="12" height="9" rx="1.5"/><path d="M4 6h4M4 9h6"/></svg>';
+  const tag  = '<svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5L13.5 7l-6.5 6.5L1.5 8V1.5z"/><circle cx="5" cy="5" r="1"/></svg>';
+  const bars = '<svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 12.5V8M7.5 12.5V4M12.5 12.5V6.5"/></svg>';
+  const tile = (accent, bg, ic, v, l, sub, bar, fn) =>
+    `<div class="tr-card" style="--accent:${accent}" onclick="${fn}">
+      <div class="tr-top"><div class="tr-ic" style="background:${bg};color:${accent}">${ic}</div><div class="tr-v">${v}</div></div>
+      <div class="tr-l">${l}</div>
+      ${bar != null
+        ? `<div class="tr-bar"><i style="width:${Math.max(bar,4)}%"></i></div><div class="tr-sub"><span>${sub}</span><span>${Math.round(bar)}% of list</span></div>`
+        : `<div class="tr-sub" style="color:${accent};font-weight:700">${sub}</div>`}
+    </div>`;
+  el.innerHTML =
+    tile('var(--red)',  'var(--redl)',   warn, nsf,            'NSF to reverse',        'of '+total+' gifts', nsf/total*100,    "setListFilter('nsf')") +
+    tile('var(--amber)','var(--amberl)', scan, ocr,            'Low-confidence scans',  'of '+total+' gifts', ocr/total*100,    "setListFilter('flagged')") +
+    tile('#7C3AED',     '#EDE9FE',       tag,  closed,         'Fund closed — reassign','of '+total+' gifts', closed/total*100, "setListFilter('flagged')") +
+    tile('var(--blue)', 'var(--bluep)',  bars, AUDIT_LOG.length,'Logged corrections',   'View audit trail →', null,             "openAudit()");
+}
+
+// ── AUDIT RENDER ──────────────────────────────────────────────────────────────
+function renderAuditLog() {
+  const typeColors = {
+    'Donor reclassification':     {bg:var_('bluep'), ico:var_('blue')},
+    'Fund reclassification':      {bg:var_('greenl'),ico:var_('green')},
+    'Donor & fund reclassification':{bg:'#EDE9FE',ico:'#7C3AED'},
+    'Amount correction':          {bg:var_('amberl'),ico:var_('amber')},
+  };
+  document.getElementById('audit-entries').innerHTML = AUDIT_LOG.map(e => {
+    const isNSF = e.type.toLowerCase().includes('nsf') || e.type.toLowerCase().includes('reversal') || e.type.toLowerCase().includes('check return');
+    const iconBg  = isNSF ? 'var(--redl)' : 'var(--bluep)';
+    const iconStr = isNSF ? '#DC2626' : 'var(--blue)';
+    return `<div class="audit-entry">
+      <div class="ae-head">
+        <div class="ae-icon" style="background:${iconBg}">
+          ${isNSF
+            ? `<svg viewBox="0 0 12 12" fill="none" stroke="${iconStr}" stroke-width="1.4" stroke-linecap="round"><path d="M2 2l8 8M10 2L2 10"/></svg>`
+            : `<svg viewBox="0 0 12 12" fill="none" stroke="${iconStr}" stroke-width="1.4" stroke-linecap="round"><path d="M2 6h8M7 3l3 3-3 3"/></svg>`}
+        </div>
+        <span class="ae-type">${e.type}</span>
+        <span class="ae-ts">${e.ts}</span>
+        <span class="ae-user" style="margin-left:8px">· ${e.user}</span>
+        <span class="immutable-badge">Immutable</span>
+      </div>
+      <div class="ae-body">
+        <div>
+          <div class="ae-field" style="margin-bottom:6px">
+            <div class="ae-field-label" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);margin-bottom:4px">Original gift</div>
+            <div class="ae-field-change">
+              <span class="ae-old">${e.from.donor}</span>
+            </div>
+            <div class="ae-field-change">
+              <span class="ae-old">${e.from.fund}</span>
+            </div>
+            <div class="ae-field-change">
+              <span class="ae-old">${e.from.amt}</span>
+              <span class="ae-arrow">·</span>
+              <span style="font-size:11px;color:var(--text3)">Check ${e.from.check}</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="ae-field" style="margin-bottom:6px">
+            <div class="ae-field-label" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);margin-bottom:4px">Corrected to</div>
+            <div class="ae-field-change">
+              <span class="ae-new">${e.to.donor}</span>
+            </div>
+            <div class="ae-field-change">
+              <span class="ae-new">${e.to.fund}</span>
+            </div>
+            <div class="ae-field-change">
+              <span class="ae-new">${e.to.amt}</span>
+              <span class="ae-arrow">·</span>
+              <span style="font-size:11px;color:var(--text3)">${e.to.check}</span>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);padding-top:4px;border-top:.5px solid var(--border)">${e.receiptAction}</div>
+        </div>
+      </div>
+      <div class="ae-reason">
+        <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M5.5 2v3M5.5 7v.5"/><path d="M1 10L5.5 1 10 10H1z"/></svg>
+        <span><strong>Reason: </strong>${e.reason}</span>
+      </div>
+      <div class="ae-hash">
+        <div class="ae-hash-dot"></div>
+        Audit hash: ${e.hash}
+        <span style="margin-left:8px;font-size:10px;color:var(--text4)">Entry cannot be modified or deleted</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function var_(name) {
+  const map = {bluep:'#EFF6FF',greenl:'#DCFCE7',amberl:'#FEF3C7',blue:'#2563EB',green:'#15803D',amber:'#D97706'};
+  return map[name]||'#EEE';
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+function setTab(id, btn) {
+  document.querySelectorAll('.panel-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.rt-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── SNACK ─────────────────────────────────────────────────────────────────────
+function showSnack(msg, type='') {
+  const s = document.getElementById('snack');
+  document.getElementById('snack-text').textContent = msg;
+  s.className = 'snack show' + (type?' '+type:'');
+  setTimeout(()=>s.classList.remove('show'),3000);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+renderListFilter();
+renderGiftList();
+renderAuditLog();
+renderAuditAnalytics();
+</script>
+</body>
+</html>
