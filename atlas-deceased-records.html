@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas — Deceased Record Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1A1F2E;--ink2:#232A3B;--ink3:#2D3650;
+  --stone:#5C6478;--stone2:#8391A8;--stone3:#B0BAC8;--stone4:#D4DAE4;
+  --ice:#EEF1F6;--white:#FFFFFF;
+  --slate:#3D4F6A;--slatel:#E8ECF2;
+  --warm:#7A6A52;--warml:#F7F3ED;--warmb:#EDE3D4;--warmd:#4A3E2C;
+  --sage:#4A6B5A;--sagel:#E4EFE8;--saged:#2C4238;
+  --amber:#8B6914;--amberl:#F7F0DC;--amberb:#EDD89A;
+  --rose:#7A2D42;--rosel:#F5E8EC;--rosed:#4A1828;
+  --blue:#2A5298;--bluep:#EAF0FA;
+  --border:#D8DDE8;--surf:#F4F6FA;
+  --text:#1A1F2E;--text2:#3D4F6A;--text3:#6B7A94;--text4:#9DAABB;
+}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',sans-serif;background:#ECEEF4;color:var(--text);min-height:100vh}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--ink);padding:0 28px;height:54px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:60;border-bottom:1px solid rgba(255,255,255,.04)}
+.tb-mark{width:30px;height:30px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tb-mark svg{width:14px;height:14px}
+.tb-name{font-family:'Libre Baskerville',serif;font-size:16px;color:white;font-style:italic;letter-spacing:.01em}
+.tb-sep{width:1px;height:20px;background:rgba(255,255,255,.1)}
+.tb-crumb{font-size:12px;color:rgba(255,255,255,.38);display:flex;align-items:center;gap:7px}
+.tb-crumb b{color:rgba(255,255,255,.7);font-weight:500}
+.tb-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tbtn{padding:5px 14px;border-radius:7px;font-size:11px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;display:flex;align-items:center;gap:5px;letter-spacing:.02em}
+.tbtn svg{width:11px;height:11px}
+.tbtn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6)}
+.tbtn-ghost:hover{background:rgba(255,255,255,.1)}
+.tbtn-warm{background:linear-gradient(135deg,var(--warm),#5A4A38);border:none;color:white}
+.tbtn-warm:hover{opacity:.9}
+
+/* ── HERO ── */
+.hero{background:var(--ink2);padding:28px 36px 24px;border-bottom:1px solid rgba(255,255,255,.04);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.008) 0px,rgba(255,255,255,.008) 1px,transparent 1px,transparent 12px);pointer-events:none}
+.hero-inner{max-width:1140px;margin:0 auto;display:flex;align-items:flex-start;gap:20px}
+.hero-icon{width:48px;height:48px;border-radius:12px;background:rgba(122,106,82,.2);border:1px solid rgba(122,106,82,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hero-icon svg{width:24px;height:24px;color:#C9B990}
+.hero-eyebrow{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:rgba(201,185,144,.55);margin-bottom:7px}
+.hero-title{font-family:'Libre Baskerville',serif;font-size:22px;color:white;margin-bottom:5px;line-height:1.25}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.42);line-height:1.65;max-width:520px}
+.hero-stats{display:flex;gap:0;margin-left:auto;background:rgba(0,0,0,.2);border-radius:10px;overflow:hidden;flex-shrink:0;align-self:center}
+.hs{padding:11px 20px;border-right:1px solid rgba(255,255,255,.06);text-align:center}
+.hs:last-child{border-right:none}
+.hs-val{font-family:'Libre Baskerville',serif;font-size:20px;color:white;line-height:1}
+.hs-val.amber{color:#C9B990}
+.hs-val.sage{color:#8BC4A4}
+.hs-val.rose{color:#D4909A}
+.hs-lbl{font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-top:3px}
+
+/* ── TABS ── */
+.tab-bar{background:var(--white);border-bottom:1px solid var(--border);padding:0 36px;display:flex;gap:0;max-width:none}
+.tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-family:'DM Sans',sans-serif;background:none;border-top:none;border-left:none;border-right:none;border-bottom:2px solid transparent;white-space:nowrap}
+.tab:hover{color:var(--text2)}
+.tab.active{color:var(--warm);border-bottom-color:var(--warm);font-weight:600}
+
+/* ── MAIN ── */
+.main{max-width:1140px;margin:0 auto;padding:28px 36px 80px}
+
+/* ── VIEWS ── */
+.view{display:none;flex-direction:column;gap:18px}
+.view.active{display:flex}
+
+/* ── ALERT BANNER ── */
+.alert-banner{background:var(--amberl);border:1px solid var(--amberb);border-left:4px solid var(--amber);border-radius:0 10px 10px 0;padding:14px 18px;display:flex;align-items:flex-start;gap:12px}
+.ab-icon{width:32px;height:32px;background:var(--amber);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ab-icon svg{width:14px;height:14px;color:white}
+.ab-title{font-size:13px;font-weight:600;color:var(--warmd);margin-bottom:3px}
+.ab-sub{font-size:12px;color:var(--amber);line-height:1.6}
+.ab-cta{padding:6px 14px;background:var(--warm);color:white;border:none;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;align-self:center}
+
+/* ── SOURCE BADGES ── */
+.source-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;letter-spacing:.03em}
+.src-lexis{background:#E8F0FA;color:#1E3A78}
+.src-legacy{background:var(--sagel);color:var(--saged)}
+.src-ssdi{background:var(--slatel);color:var(--slate)}
+
+/* ── MATCH QUEUE CARD ── */
+.queue-card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.qc-head{background:var(--surf);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:10px}
+.qch-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.qch-icon svg{width:12px;height:12px}
+.qch-title{font-size:12px;font-weight:600;color:var(--text);flex:1;letter-spacing:.01em}
+.qch-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.match-table{width:100%;border-collapse:collapse;font-size:12px}
+.match-table th{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.6);background:var(--ink);padding:9px 16px;border-right:1px solid rgba(255,255,255,.06);text-align:left;white-space:nowrap}
+.match-table th:last-child{border-right:none}
+.match-table td{padding:12px 16px;border-bottom:.5px solid var(--border);vertical-align:middle}
+.match-table tr:last-child td{border-bottom:none}
+.match-table tr:hover td{background:var(--surf)}
+.match-table tr.selected td{background:var(--warml);border-bottom-color:var(--amberb)}
+
+/* Confidence meter */
+.conf-wrap{display:flex;align-items:center;gap:7px}
+.conf-bar{width:60px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;flex-shrink:0}
+.conf-fill{height:100%;border-radius:3px}
+.conf-val{font-family:'DM Mono',monospace;font-size:11px;font-weight:500}
+
+/* Action buttons in table */
+.tbl-btn{padding:4px 11px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;transition:all .12s;white-space:nowrap}
+.btn-confirm{background:var(--sagel);color:var(--saged)}
+.btn-confirm:hover{background:#C8DFD0}
+.btn-dismiss{background:var(--slatel);color:var(--slate)}
+.btn-dismiss:hover{background:var(--stone4)}
+.btn-review{background:var(--amberl);color:var(--warmd)}
+.btn-review:hover{background:var(--amberb)}
+.btn-full{background:var(--ink);color:white}
+.btn-full:hover{background:var(--ink2)}
+
+/* ── CONFIRMATION PANEL ── */
+.confirm-shell{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel-card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.pc-head{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;background:var(--surf)}
+.pc-head.deceased{background:var(--warml);border-bottom-color:var(--amberb)}
+.pch-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pch-icon svg{width:12px;height:12px}
+.pch-title{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.pc-body{padding:16px 18px}
+
+/* Donor summary in confirm */
+.donor-confirm{display:flex;align-items:center;gap:13px;margin-bottom:14px;padding-bottom:14px;border-bottom:.5px solid var(--border)}
+.dc-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Libre Baskerville',serif;font-size:15px;color:white;flex-shrink:0;font-style:italic}
+.dc-name{font-family:'Libre Baskerville',serif;font-size:15px;color:var(--text);margin-bottom:2px}
+.dc-sub{font-size:11px;color:var(--text3)}
+.data-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:.5px solid var(--border);font-size:12px}
+.data-row:last-child{border-bottom:none}
+.dr-key{color:var(--text3)}
+.dr-val{color:var(--text);font-weight:500;text-align:right}
+.dr-val.mono{font-family:'DM Mono',monospace;font-size:11px}
+.dr-val.green{color:var(--saged)}
+.dr-val.amber{color:var(--amber)}
+
+/* Match detail */
+.match-detail-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:.5px solid var(--border);font-size:12px}
+.match-detail-row:last-child{border-bottom:none}
+.mdr-icon{width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.mdr-icon svg{width:10px;height:10px}
+.mdr-key{color:var(--text3);min-width:110px;flex-shrink:0}
+.mdr-val{color:var(--text);flex:1;font-weight:500}
+.mdr-match{font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;flex-shrink:0}
+.match-exact{background:var(--sagel);color:var(--saged)}
+.match-partial{background:var(--amberl);color:var(--amber)}
+.match-inferred{background:var(--slatel);color:var(--slate)}
+
+/* ── AUTOMATION STEPS ── */
+.auto-steps{display:flex;flex-direction:column;gap:0}
+.auto-step{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:.5px solid var(--border);position:relative}
+.auto-step:last-child{border-bottom:none}
+.as-left{display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;width:28px}
+.as-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.as-icon svg{width:13px;height:13px}
+.as-line{width:1.5px;flex:1;min-height:8px;background:var(--border);margin-top:3px}
+.auto-step:last-child .as-line{display:none}
+.as-body{flex:1;padding-top:3px}
+.as-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.as-sub{font-size:12px;color:var(--text3);line-height:1.55}
+.as-badge{font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;flex-shrink:0;margin-top:3px}
+.badge-auto{background:var(--sagel);color:var(--saged)}
+.badge-task{background:var(--amberl);color:var(--amber)}
+.badge-review{background:var(--rosel);color:var(--rosed)}
+.badge-hold{background:var(--slatel);color:var(--slate)}
+
+/* Toggle row */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.tr-text{}
+.tr-title{font-size:13px;color:var(--text);margin-bottom:1px}
+.tr-sub{font-size:11px;color:var(--text3)}
+.tog{width:34px;height:18px;border-radius:10px;cursor:pointer;position:relative;border:none;transition:background .15s;flex-shrink:0}
+.tog.on{background:var(--sage)}
+.tog.off{background:var(--stone3)}
+.tog-thumb{position:absolute;top:2px;width:14px;height:14px;background:white;border-radius:50%;transition:left .15s}
+.tog.on .tog-thumb{left:18px}
+.tog.off .tog-thumb{left:2px}
+
+/* Spouse section */
+.spouse-card{background:var(--warml);border:1px solid var(--amberb);border-radius:10px;padding:12px 14px;margin-top:12px;display:flex;align-items:flex-start;gap:10px}
+.sc-icon{width:28px;height:28px;background:var(--warm);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sc-icon svg{width:13px;height:13px;color:white}
+.sc-title{font-size:12px;font-weight:600;color:var(--warmd);margin-bottom:3px}
+.sc-sub{font-size:11px;color:var(--amber);line-height:1.6}
+.sc-action{padding:4px 10px;background:var(--warm);color:white;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px;display:inline-block}
+
+/* Action bar */
+.action-bar{display:flex;gap:8px;align-items:center;padding-top:16px;border-top:1px solid var(--border);margin-top:4px}
+.btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .13s;border:1px solid var(--border);background:white;color:var(--text2);display:flex;align-items:center;gap:6px}
+.btn svg{width:12px;height:12px}
+.btn:hover{background:var(--surf)}
+.btn-sage{background:var(--sage);color:white;border-color:var(--sage)}
+.btn-sage:hover{background:var(--saged)}
+.btn-rose{background:var(--rose);color:white;border-color:var(--rose)}
+.btn-rose:hover{opacity:.9}
+.btn-ghost{border-color:transparent;background:none;color:var(--text3)}
+.btn-ghost:hover{background:var(--surf);color:var(--text2)}
+
+/* ── AUDIT TRAIL ── */
+.audit-entry{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:9px}
+.ae-head{padding:10px 16px;background:var(--surf);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.ae-type{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.ae-ts{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+.ae-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.ae-body{padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px}
+.ae-field-label{font-size:10px;color:var(--text4);margin-bottom:2px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.ae-field-val{color:var(--text2);font-weight:500}
+.ae-hash{padding:7px 16px;border-top:.5px solid var(--border);font-size:10px;color:var(--text4);font-family:'DM Mono',monospace;display:flex;align-items:center;gap:6px;background:var(--surf)}
+.ae-hash-dot{width:5px;height:5px;border-radius:50%;background:var(--sage)}
+.immut{font-size:9px;font-weight:600;padding:1px 6px;border-radius:20px;background:var(--sagel);color:var(--saged);margin-left:auto}
+
+/* ── SETTINGS VIEW ── */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.setting-card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.scard-head{padding:12px 16px;background:var(--surf);border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+.scard-head svg{width:14px;height:14px;color:var(--text3)}
+.scard-body{padding:14px 16px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--border)}
+.setting-row:last-child{border-bottom:none}
+.sr-label{font-size:13px;color:var(--text);margin-bottom:1px}
+.sr-sub{font-size:11px;color:var(--text3)}
+.f-select{padding:5px 9px;border:1px solid var(--border);border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surf);outline:none;cursor:pointer}
+.f-select:focus{border-color:var(--warm)}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(26,31,46,.55);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(3px)}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:white;border-radius:16px;width:520px;max-width:90vw;overflow:hidden;transform:translateY(14px);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-head{background:var(--ink);padding:18px 22px;display:flex;align-items:center;gap:10px}
+.modal-title{font-family:'Libre Baskerville',serif;font-size:18px;color:white;flex:1;font-style:italic}
+.modal-close{background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.modal-body{padding:20px 22px}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--surf)}
+.mf-btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--border);background:white;color:var(--text2)}
+.mf-btn-sage{background:var(--sage);color:white;border-color:var(--sage)}
+.mf-input{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surf);outline:none;margin-top:5px}
+.mf-input:focus{border-color:var(--warm);background:white}
+.mf-label{font-size:12px;font-weight:600;color:var(--text2);margin-top:12px;margin-bottom:0}
+.mf-note{font-size:12px;color:var(--text3);background:var(--surf);border-radius:8px;padding:10px 12px;line-height:1.65;margin-top:8px}
+
+/* Snack */
+.snack{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:white;padding:10px 20px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:8px;opacity:0;transition:all .25s;pointer-events:none;z-index:300}
+.snack.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.snack.green{background:var(--sage)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-mark"><svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7.5" stroke="white" stroke-width="1.5"/><path d="M5.5 9.5C6.5 11.5 9 13 9 13s2.5-1.5 3.5-3.5S12 5 9 5 4.5 7.5 5.5 9.5z" fill="white" fill-opacity=".9"/></svg></div>
+  <span class="tb-name">Atlas</span>
+  <div class="tb-sep"></div>
+  <div class="tb-crumb">Data Health <span style="color:rgba(255,255,255,.2)">›</span> <b>Deceased Record Management</b></div>
+  <div class="tb-right">
+    <button class="tbtn tbtn-ghost">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 1v7M3 5.5l3 3 3-3"/><path d="M1.5 10.5h9"/></svg>Export log
+    </button>
+    <button class="tbtn tbtn-warm" onclick="openModal()">Run manual match now</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+        <path d="M12 3C12 3 9 1.5 7 3.5c-1.5 1.5-1 4.5 0 6L12 15l5-5.5c1-1.5 1.5-4.5 0-6C15 1.5 12 3 12 3z"/>
+        <path d="M12 15v6M9 19h6"/>
+      </svg>
+    </div>
+    <div>
+      <div class="hero-eyebrow">Diocese of Fort Worth · Deceased record management</div>
+      <div class="hero-title">Deceased Record Monitoring</div>
+      <div class="hero-sub">Monthly batch matching against LexisNexis and SSDI, with real-time obituary monitoring for major gift prospects via Legacy.com. All matches require staff confirmation before any record is changed.</div>
+    </div>
+    <div class="hero-stats">
+      <div class="hs"><div class="hs-val amber">14</div><div class="hs-lbl">Pending review</div></div>
+      <div class="hs"><div class="hs-val">247</div><div class="hs-lbl">Confirmed this year</div></div>
+      <div class="hs"><div class="hs-val sage">183</div><div class="hs-lbl">Auto-dismissed</div></div>
+      <div class="hs"><div class="hs-val rose">3</div><div class="hs-lbl">Estate alerts active</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <button class="tab active" onclick="setTab('queue',this)">Match review queue</button>
+  <button class="tab" onclick="setTab('confirm',this)">Confirm & process</button>
+  <button class="tab" onclick="setTab('audit',this)">Audit trail</button>
+  <button class="tab" onclick="setTab('settings',this)">Settings & sources</button>
+</div>
+
+<div class="main">
+
+  <!-- ══ MATCH QUEUE ══ -->
+  <div class="view active" id="view-queue">
+
+    <div class="alert-banner">
+      <div class="ab-icon"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M7 2v4M7 9v.5"/><path d="M1.5 12.5L7 1.5l5.5 11H1.5z"/></svg></div>
+      <div>
+        <div class="ab-title">14 matches pending review — most recent batch ran May 12, 2026</div>
+        <div class="ab-sub">3 matches are high-confidence (95%+) and should be confirmed or dismissed today. 2 matches involve donors with active bequest intentions — estate workflow will trigger automatically on confirmation.</div>
+      </div>
+      <button class="ab-cta">Review high-priority first</button>
+    </div>
+
+    <div class="queue-card">
+      <div class="qc-head">
+        <div class="qch-icon" style="background:var(--warml)"><svg viewBox="0 0 12 12" fill="none" stroke="var(--warm)" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="2.5"/><path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4"/></svg></div>
+        <span class="qch-title">Pending match review — 14 records</span>
+        <div style="display:flex;gap:6px;margin-left:auto">
+          <select class="f-select"><option>All sources</option><option>LexisNexis</option><option>Legacy.com</option><option>SSDI</option></select>
+          <select class="f-select"><option>All confidence</option><option>95%+ (high)</option><option>80–94%</option><option>Below 80%</option></select>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="match-table">
+          <thead>
+            <tr>
+              <th>Donor record</th>
+              <th>Match found</th>
+              <th>Source</th>
+              <th>Date of death</th>
+              <th>Confidence</th>
+              <th>Flags</th>
+              <th style="text-align:center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected" onclick="setTab('confirm',document.querySelectorAll('.tab')[1])">
+              <td>
+                <div style="font-size:13px;font-weight:500;color:var(--text)">O'Brien, James Patrick</div>
+                <div style="font-size:11px;color:var(--text3)">ID #4821 · Cathedral Parish · Age 72</div>
+              </td>
+              <td>
+                <div style="font-size:13px;font-weight:500;color:var(--text)">O'Brien, James P.</div>
+                <div style="font-size:11px;color:var(--text3)">Fort Worth, TX · DOB match</div>
+              </td>
+              <td><span class="source-pill src-lexis">LexisNexis</span></td>
+              <td style="font-family:'DM Mono',monospace;font-size:12px">Apr 28, 2026</td>
+              <td>
+                <div class="conf-wrap">
+                  <div class="conf-bar"><div class="conf-fill" style="width:98%;background:var(--sage)"></div></div>
+                  <span class="conf-val" style="color:var(--saged)">98%</span>
+                </div>
+              </td>
+              <td>
+                <div style="display:flex;flex-direction:column;gap:3px">
+                  <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;background:var(--rosel);color:var(--rosed)">⚠ Bequest on file</span>
+                  <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;background:var(--amberl);color:var(--amber)">Surviving spouse</span>
+                </div>
+              </td>
+              <td style="text-align:center">
+                <div style="display:flex;gap:5px;justify-content:center">
+                  <button class="tbl-btn btn-full" onclick="setTab('confirm',document.querySelectorAll('.tab')[1])">Review →</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-size:13px;font-weight:500;color:var(--text)">Walsh, Bishop Robert</div>
+                <div style="font-size:11px;color:var(--text3)">ID #1102 · Diocese · Age 81</div>
+              </td>
+              <td>
+                <div style="font-size:13px;font-weight:500;color:var(--text)">Walsh, Robert J.</div>
+                <div style="font-size:11px;color:var(--text3)">Fort Worth, TX · Legacy.com obituary</div>
+              </td>
+              <td><span class="source-pill src-legacy">Legacy.com</span></td>
+              <td style="font-family:'DM Mono',monospace;font-size:12px">May 3, 2026</td>
+              <td>
+                <div class="conf-wrap">
+                  <div class="conf-bar"><div class="conf-fill" style="width:96%;background:var(--sage)"></div></div>
+                  <span class="conf-val" style="color:var(--saged)">96%</span>
+                </div>
+              </td>
+              <td><span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;background:var(--rosel);color:var(--rosed)">⚠ Estate in pipeline</span></td>
+              <td style="text-align:center">
+                <div style="display:flex;gap:5px;justify-content:center">
+                  <button class="tbl-btn btn-confirm">Confirm</button>
+                  <button class="tbl-btn btn-dismiss">Dismiss</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-size:13px;font-weight:500;color:var(--text)">Sullivan, Margaret T.</div>
+                <div style="font-size:11px;color:var(--text3)">ID #2201 · Holy Cross · Age 74</div>
+              </td>
+              <td>
+                <div style="font-size:13px;font-weight:500;color:var(--text)">Sullivan, Margaret</div>
+                <div style="font-size:11px;color:var(--text3)">Fort Worth, TX · SSN partial match</div>
+              </td>
+              <td><span class="source-pill src-ssdi">SSDI</span></td>
+              <td style="font-family:'DM Mono',monospace;font-size:12px">May 7, 2026</td>
+              <td>
+                <div class="conf-wrap">
+                  <div class="conf-bar"><div class="conf-fill" style="width:91%;background:var(--sage)"></div></div>
+                  <span class="conf-val" style="color:var(--saged)">91%</span>
+                </div>
+              </td>
+              <td><span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;background:var(--amberl);color:var(--amber)">Legacy member</span></td>
+              <td style="text-align:center">
+                <div style="display:flex;gap:5px;justify-content:center">
+                  <button class="tbl-btn btn-confirm">Confirm</button>
+                  <button class="tbl-btn btn-dismiss">Dismiss</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-size:13px;font-weight:500;color:var(--text)">Harrington, David R.</div>
+                <div style="font-size:11px;color:var(--text3)">ID #4802 · Cathedral · Age 71</div>
+              </td>
+              <td>
+                <div style="font-size:13px;font-weight:500;color:var(--text)">Harrington, David</div>
+                <div style="font-size:11px;color:var(--text3)">Keller, TX (nearby)</div>
+              </td>
+              <td><span class="source-pill src-lexis">LexisNexis</span></td>
+              <td style="font-family:'DM Mono',monospace;font-size:12px">May 9, 2026</td>
+              <td>
+                <div class="conf-wrap">
+                  <div class="conf-bar"><div class="conf-fill" style="width:78%;background:var(--amber)"></div></div>
+                  <span class="conf-val" style="color:var(--amber)">78%</span>
+                </div>
+              </td>
+              <td><span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;background:var(--slatel);color:var(--slate)">Manual verify</span></td>
+              <td style="text-align:center">
+                <div style="display:flex;gap:5px;justify-content:center">
+                  <button class="tbl-btn btn-review">Review</button>
+                  <button class="tbl-btn btn-dismiss">Dismiss</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-size:13px;font-weight:500;color:var(--text)">Kim, Dr. Patricia</div>
+                <div style="font-size:11px;color:var(--text3)">ID #7701 · St. Michael's · Age 69</div>
+              </td>
+              <td>
+                <div style="font-size:13px;font-weight:500;color:var(--text)">Kim, Patricia A.</div>
+                <div style="font-size:11px;color:var(--text3)">Fort Worth, TX · DOB partial</div>
+              </td>
+              <td><span class="source-pill src-ssdi">SSDI</span></td>
+              <td style="font-family:'DM Mono',monospace;font-size:12px">Apr 19, 2026</td>
+              <td>
+                <div class="conf-wrap">
+                  <div class="conf-bar"><div class="conf-fill" style="width:62%;background:var(--stone3)"></div></div>
+                  <span class="conf-val" style="color:var(--stone)">62%</span>
+                </div>
+              </td>
+              <td><span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;background:var(--slatel);color:var(--slate)">Low confidence</span></td>
+              <td style="text-align:center">
+                <div style="display:flex;gap:5px;justify-content:center">
+                  <button class="tbl-btn btn-dismiss">Dismiss</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CONFIRM & PROCESS ══ -->
+  <div class="view" id="view-confirm">
+
+    <div style="font-size:13px;color:var(--text3);margin-bottom:4px;display:flex;align-items:center;gap:6px">
+      <button onclick="setTab('queue',document.querySelectorAll('.tab')[0])" style="background:none;border:none;cursor:pointer;color:var(--warm);font-size:13px;font-family:'DM Sans',sans-serif;padding:0">← Back to queue</button>
+      <span>·</span>
+      <span>Reviewing: O'Brien, James Patrick (#4821)</span>
+    </div>
+
+    <div class="confirm-shell">
+
+      <!-- LEFT: donor + match detail -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+
+        <div class="panel-card">
+          <div class="pc-head">
+            <div class="pch-icon" style="background:var(--bluep)"><svg viewBox="0 0 12 12" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="2.5"/><path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4"/></svg></div>
+            <span class="pch-title">Atlas donor record</span>
+          </div>
+          <div class="pc-body">
+            <div class="donor-confirm">
+              <div class="dc-av" style="background:linear-gradient(135deg,#1B4CD8,#0B3A9E)">JO</div>
+              <div>
+                <div class="dc-name">James Patrick O'Brien</div>
+                <div class="dc-sub">Cathedral Parish · Fort Worth, TX · Donor since 2012</div>
+              </div>
+            </div>
+            <div class="data-row"><span class="dr-key">Date of birth</span><span class="dr-val mono">Sep 4, 1953 (age 72)</span></div>
+            <div class="data-row"><span class="dr-key">Mailing address</span><span class="dr-val">124 Heritage Oak Dr, Fort Worth TX 76116</span></div>
+            <div class="data-row"><span class="dr-key">Lifetime giving (LTG)</span><span class="dr-val mono green">$47,500</span></div>
+            <div class="data-row"><span class="dr-key">Last gift</span><span class="dr-val mono">$2,500 — Apr 12, 2026</span></div>
+            <div class="data-row"><span class="dr-key">Pipeline stage</span><span class="dr-val">Cultivation · Major gift prospect</span></div>
+            <div class="data-row"><span class="dr-key">Bequest intention</span><span class="dr-val" style="color:var(--rosed);font-weight:600">✦ Confirmed — residual estate</span></div>
+            <div class="data-row"><span class="dr-key">Assigned officer</span><span class="dr-val">Mike Donovan</span></div>
+            <div class="data-row"><span class="dr-key">Surviving spouse</span><span class="dr-val amber">Patricia O'Brien (#4822)</span></div>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="pc-head deceased">
+            <div class="pch-icon" style="background:rgba(122,106,82,.2)"><svg viewBox="0 0 12 12" fill="none" stroke="var(--warm)" stroke-width="1.4" stroke-linecap="round"><path d="M6 1.5v7M3.5 6l2.5 3 2.5-3"/><path d="M2 10.5h8"/></svg></div>
+            <span class="pch-title">LexisNexis match — 98% confidence</span>
+            <span class="qch-badge" style="background:var(--sagel);color:var(--saged)">High confidence</span>
+          </div>
+          <div class="pc-body">
+            <div class="match-detail-row">
+              <div class="mdr-icon" style="background:var(--sagel)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--saged)" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 5l2 2 5-5"/></svg></div>
+              <span class="mdr-key">Full name</span>
+              <span class="mdr-val">O'Brien, James P.</span>
+              <span class="mdr-match match-exact">Exact</span>
+            </div>
+            <div class="match-detail-row">
+              <div class="mdr-icon" style="background:var(--sagel)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--saged)" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 5l2 2 5-5"/></svg></div>
+              <span class="mdr-key">Date of birth</span>
+              <span class="mdr-val">Sep 4, 1953</span>
+              <span class="mdr-match match-exact">Exact</span>
+            </div>
+            <div class="match-detail-row">
+              <div class="mdr-icon" style="background:var(--sagel)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--saged)" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 5l2 2 5-5"/></svg></div>
+              <span class="mdr-key">City / state</span>
+              <span class="mdr-val">Fort Worth, TX</span>
+              <span class="mdr-match match-exact">Exact</span>
+            </div>
+            <div class="match-detail-row">
+              <div class="mdr-icon" style="background:var(--amberl)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round"><path d="M5 2v3M5 7v.5"/><path d="M1 9.5L5 1.5 9 9.5H1z"/></svg></div>
+              <span class="mdr-key">Address</span>
+              <span class="mdr-val">124 Heritage Oak Dr (partial)</span>
+              <span class="mdr-match match-partial">Partial</span>
+            </div>
+            <div class="match-detail-row">
+              <div class="mdr-icon" style="background:var(--sagel)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--saged)" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 5l2 2 5-5"/></svg></div>
+              <span class="mdr-key">Date of death</span>
+              <span class="mdr-val" style="font-weight:600;color:var(--warmd)">April 28, 2026</span>
+              <span class="mdr-match match-exact">Confirmed</span>
+            </div>
+            <div class="match-detail-row">
+              <div class="mdr-icon" style="background:var(--slatel)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--slate)" stroke-width="1.5" stroke-linecap="round"><path d="M5 2v3M5 7v.5"/></svg></div>
+              <span class="mdr-key">Source</span>
+              <span class="mdr-val">LexisNexis Deceased Verification</span>
+              <span class="mdr-match match-inferred">API</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: automation + spouse + actions -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+
+        <div class="panel-card">
+          <div class="pc-head">
+            <div class="pch-icon" style="background:var(--sagel)"><svg viewBox="0 0 12 12" fill="none" stroke="var(--sage)" stroke-width="1.4" stroke-linecap="round"><path d="M2 6l2.5 2.5L10 3"/></svg></div>
+            <span class="pch-title">Automatic actions on confirmation</span>
+          </div>
+          <div class="pc-body">
+            <div class="auto-steps">
+              <div class="auto-step">
+                <div class="as-left"><div class="as-icon" style="background:var(--sagel)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--saged)" stroke-width="1.4" stroke-linecap="round"><path d="M2 6.5l3 3 6-6"/></svg></div><div class="as-line"></div></div>
+                <div class="as-body"><div class="as-title">Mark constituent deceased</div><div class="as-sub">Date of death Apr 28, 2026 recorded. Record flagged as deceased — will no longer appear in active donor lists.</div></div>
+                <span class="as-badge badge-auto">Auto</span>
+              </div>
+              <div class="auto-step">
+                <div class="as-left"><div class="as-icon" style="background:var(--sagel)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--saged)" stroke-width="1.4" stroke-linecap="round"><path d="M2 6.5l3 3 6-6"/></svg></div><div class="as-line"></div></div>
+                <div class="as-body"><div class="as-title">Remove from all active email workflows</div><div class="as-sub">Suppressed from CMA appeals, birthday automations, retention workflows, and campaign email lists immediately.</div></div>
+                <span class="as-badge badge-auto">Auto</span>
+              </div>
+              <div class="auto-step">
+                <div class="as-left"><div class="as-icon" style="background:var(--sagel)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--saged)" stroke-width="1.4" stroke-linecap="round"><path d="M2 6.5l3 3 6-6"/></svg></div><div class="as-line"></div></div>
+                <div class="as-body"><div class="as-title">Advance bequest to Estate / Probate stage</div><div class="as-sub">Confirmed bequest intention (residual estate, est. $400K–$750K) advanced from Cultivation to Estate / Probate in the planned giving pipeline.</div></div>
+                <span class="as-badge badge-auto">Auto</span>
+              </div>
+              <div class="auto-step">
+                <div class="as-left"><div class="as-icon" style="background:var(--amberl)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--amber)" stroke-width="1.4" stroke-linecap="round"><path d="M6.5 2v3.5M6.5 9v.5"/><path d="M1 12L6.5 1 12 12H1z"/></svg></div><div class="as-line"></div></div>
+                <div class="as-body"><div class="as-title">Officer task — contact estate and notify development director</div><div class="as-sub">Task assigned to Mike Donovan: locate executor, confirm estate attorney, and notify development director within 5 business days.</div></div>
+                <span class="as-badge badge-task">Officer task</span>
+              </div>
+              <div class="auto-step">
+                <div class="as-left"><div class="as-icon" style="background:var(--amberl)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--amber)" stroke-width="1.4" stroke-linecap="round"><path d="M6.5 2v3.5M6.5 9v.5"/><path d="M1 12L6.5 1 12 12H1z"/></svg></div><div class="as-line"></div></div>
+                <div class="as-body"><div class="as-title">Notify Bishop — LTG $47,500 donor</div><div class="as-sub">Bishop alert triggered — O'Brien's LTG and legacy society membership warrant personal acknowledgement to the family.</div></div>
+                <span class="as-badge badge-task">Officer task</span>
+              </div>
+              <div class="auto-step">
+                <div class="as-left"><div class="as-icon" style="background:var(--rosel)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--rosed)" stroke-width="1.4" stroke-linecap="round"><circle cx="6.5" cy="4.5" r="2.5"/><path d="M2 12c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4"/></svg></div><div class="as-line"></div></div>
+                <div class="as-body"><div class="as-title">Update surviving spouse record — Patricia O'Brien</div><div class="as-sub">Patricia O'Brien (#4822) will become primary household contact. Salutation updated. James's LTG preserved on household record for stewardship context. Review required before applying.</div></div>
+                <span class="as-badge badge-review">Review req.</span>
+              </div>
+              <div class="auto-step">
+                <div class="as-left"><div class="as-icon" style="background:var(--slatel)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--slate)" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="2" width="9" height="9" rx="1.5"/><path d="M4 5h5M4 7.5h3"/></svg></div></div>
+                <div class="as-body"><div class="as-title">Audit log entry created — immutable</div><div class="as-sub">All changes are permanently logged with timestamp, staff member, source data, and confidence score. Cannot be edited or deleted.</div></div>
+                <span class="as-badge badge-hold">Permanent</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spouse card -->
+        <div class="panel-card">
+          <div class="pc-head">
+            <div class="pch-icon" style="background:var(--amberl)"><svg viewBox="0 0 12 12" fill="none" stroke="var(--warm)" stroke-width="1.4" stroke-linecap="round"><path d="M6 2C5 2 3.5 2.5 3.5 4c0 2 1.5 4 2.5 4s2.5-2 2.5-4C8.5 2.5 7 2 6 2z"/><path d="M4 10h4"/></svg></div>
+            <span class="pch-title">Surviving spouse — requires attention</span>
+          </div>
+          <div class="pc-body">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+              <div class="dc-av" style="width:34px;height:34px;background:linear-gradient(135deg,#BE185D,#7F1154);font-size:12px">PO</div>
+              <div>
+                <div style="font-size:13px;font-weight:500;color:var(--text)">Patricia O'Brien</div>
+                <div style="font-size:11px;color:var(--text3)">Donor #4822 · Cathedral Parish · Age 69</div>
+              </div>
+            </div>
+            <div class="toggle-row">
+              <div class="tr-text"><div class="tr-title">Make Patricia the primary contact</div><div class="tr-sub">Update household primary from James → Patricia</div></div>
+              <button class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="tog-thumb"></div></button>
+            </div>
+            <div class="toggle-row">
+              <div class="tr-text"><div class="tr-title">Preserve James's LTG on household record</div><div class="tr-sub">$47,500 LTG remains visible for stewardship context</div></div>
+              <button class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="tog-thumb"></div></button>
+            </div>
+            <div class="toggle-row">
+              <div class="tr-text"><div class="tr-title">Update salutation to Patricia only</div><div class="tr-sub">Remove "Mr. & Mrs." — use "Mrs. O'Brien" going forward</div></div>
+              <button class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="tog-thumb"></div></button>
+            </div>
+            <div class="toggle-row">
+              <div class="tr-text"><div class="tr-title">Enrol Patricia in legacy stewardship workflow</div><div class="tr-sub">Bequest is household — Patricia should receive stewardship</div></div>
+              <button class="tog off" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="tog-thumb"></div></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-bar">
+          <button class="btn btn-ghost" onclick="setTab('queue',document.querySelectorAll('.tab')[0])">← Return to queue</button>
+          <div style="flex:1"></div>
+          <button class="btn btn-rose" onclick="dismiss()">
+            <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M2 2l8 8M10 2L2 10"/></svg>
+            Dismiss — not a match
+          </button>
+          <button class="btn btn-sage" onclick="confirm()">
+            <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg>
+            Confirm &amp; process all actions
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ AUDIT TRAIL ══ -->
+  <div class="view" id="view-audit">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:8px">
+      <div>
+        <div style="font-family:'Libre Baskerville',serif;font-size:18px;color:var(--text);margin-bottom:3px">Deceased record audit trail</div>
+        <div style="font-size:12px;color:var(--text3)">Immutable log · all entries permanent · Diocese of Fort Worth · 2026 YTD</div>
+      </div>
+      <div style="display:flex;gap:7px">
+        <select class="f-select"><option>All record types</option><option>Confirmed deceased</option><option>Dismissed match</option><option>Auto-dismissed</option></select>
+        <button class="btn" style="font-size:12px;padding:5px 12px">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="audit-entry">
+      <div class="ae-head">
+        <div style="width:26px;height:26px;background:var(--rosel);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 12 12" fill="none" stroke="var(--rosed)" stroke-width="1.4" stroke-linecap="round" width="12" height="12"><circle cx="6" cy="4.5" r="2.5"/><path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4"/></svg></div>
+        <span class="ae-type">Deceased confirmed — Walsh, Bishop Robert (#1102)</span>
+        <span class="ae-ts">May 10, 2026 · 9:22 AM</span>
+        <span class="ae-badge" style="background:var(--rosel);color:var(--rosed)">Confirmed</span>
+        <span class="immut">Immutable</span>
+      </div>
+      <div class="ae-body">
+        <div>
+          <div class="ae-field-label">Donor</div><div class="ae-field-val">Walsh, Bishop Robert (#1102) · Diocese · Age 81</div>
+        </div>
+        <div>
+          <div class="ae-field-label">Date of death</div><div class="ae-field-val">May 3, 2026</div>
+        </div>
+        <div>
+          <div class="ae-field-label">Source</div><div class="ae-field-val">Legacy.com obituary · 96% confidence</div>
+        </div>
+        <div>
+          <div class="ae-field-label">Confirmed by</div><div class="ae-field-val">K. Novicky · May 10, 2026</div>
+        </div>
+        <div style="grid-column:1/-1">
+          <div class="ae-field-label">Actions taken</div>
+          <div class="ae-field-val">Record marked deceased · Removed from all active workflows · Estate/probate stage advanced in planned giving pipeline · Officer task created for Mike D. · Bishop notified</div>
+        </div>
+      </div>
+      <div class="ae-hash"><div class="ae-hash-dot"></div>Audit hash: 8d2a4f7c1b9e035d6a7f82c3d94b10e5<span style="margin-left:10px;font-size:10px;color:var(--text4)">Entry cannot be modified or deleted</span></div>
+    </div>
+
+    <div class="audit-entry">
+      <div class="ae-head">
+        <div style="width:26px;height:26px;background:var(--slatel);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 12 12" fill="none" stroke="var(--slate)" stroke-width="1.4" stroke-linecap="round" width="12" height="12"><path d="M2 2l8 8M10 2L2 10"/></svg></div>
+        <span class="ae-type">Match dismissed — Costello, Frank (#3302)</span>
+        <span class="ae-ts">May 8, 2026 · 2:15 PM</span>
+        <span class="ae-badge" style="background:var(--slatel);color:var(--slate)">Dismissed</span>
+        <span class="immut">Immutable</span>
+      </div>
+      <div class="ae-body">
+        <div><div class="ae-field-label">Donor</div><div class="ae-field-val">Costello, Frank (#3302) · Holy Cross · Active donor</div></div>
+        <div><div class="ae-field-label">Match source</div><div class="ae-field-val">SSDI · 71% confidence · dismissed as false positive</div></div>
+        <div><div class="ae-field-label">Dismissed by</div><div class="ae-field-val">M. Donovan · May 8, 2026</div></div>
+        <div><div class="ae-field-label">Reason</div><div class="ae-field-val">Contacted donor directly — confirmed alive. SSDI match was a different Frank Costello, same city.</div></div>
+      </div>
+      <div class="ae-hash"><div class="ae-hash-dot"></div>Audit hash: f5b3c8a9e2d1074f38a6bc9d02e74a1f</div>
+    </div>
+
+    <div class="audit-entry">
+      <div class="ae-head">
+        <div style="width:26px;height:26px;background:var(--sagel);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 12 12" fill="none" stroke="var(--saged)" stroke-width="1.4" stroke-linecap="round" width="12" height="12"><circle cx="6" cy="6" r="4.5"/><path d="M6 4v3M6 8.5v.3"/></svg></div>
+        <span class="ae-type">Auto-dismissed — Morrison, Peter (#5501) · low confidence</span>
+        <span class="ae-ts">May 1, 2026 · 6:00 AM (batch run)</span>
+        <span class="ae-badge" style="background:var(--sagel);color:var(--saged)">Auto-dismissed</span>
+        <span class="immut">Immutable</span>
+      </div>
+      <div class="ae-body">
+        <div><div class="ae-field-label">Donor</div><div class="ae-field-val">Morrison, Peter (#5501) · St. Catherine's</div></div>
+        <div><div class="ae-field-label">Match source</div><div class="ae-field-val">LexisNexis · 54% confidence · below 65% auto-dismiss threshold</div></div>
+        <div><div class="ae-field-label">Action</div><div class="ae-field-val">Automatically dismissed — below confidence threshold. Logged for audit trail. No staff action required.</div></div>
+        <div><div class="ae-field-label">Batch run</div><div class="ae-field-val">May 2026 monthly batch · 847 records processed</div></div>
+      </div>
+      <div class="ae-hash"><div class="ae-hash-dot"></div>Audit hash: 3a7f9c2e8b14d05f61a2c98b4e7d03a1</div>
+    </div>
+  </div>
+
+  <!-- ══ SETTINGS ══ -->
+  <div class="view" id="view-settings">
+    <div class="settings-grid">
+
+      <div class="setting-card">
+        <div class="scard-head"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4.5v3.5L9 9.5"/></svg>Match schedule & sources</div>
+        <div class="scard-body">
+          <div class="setting-row">
+            <div><div class="sr-label">Monthly batch frequency</div><div class="sr-sub">Full database match against LexisNexis + SSDI</div></div>
+            <select class="f-select"><option>1st of each month</option><option>15th of each month</option><option>Weekly</option></select>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">LexisNexis deceased API</div><div class="sr-sub">Primary source — vital records + SSDI combined</div></div>
+            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--sagel);color:var(--saged)">● Connected</span>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">SSDI direct feed</div><div class="sr-sub">Social Security Death Index — monthly refresh</div></div>
+            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--sagel);color:var(--saged)">● Connected</span>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">Legacy.com obituary monitoring</div><div class="sr-sub">Real-time alerts for top 500 monitored donors</div></div>
+            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--sagel);color:var(--saged)">● Active</span>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">Legacy.com monitored list size</div><div class="sr-sub">Donors in major gift pipeline or legacy society</div></div>
+            <select class="f-select"><option>Top 500 donors</option><option>Top 250</option><option>Top 1,000</option><option>Custom list</option></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <div class="scard-head"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M7 2v4M7 9v.5"/><path d="M1.5 12.5L7 1.5l5.5 11H1.5z"/></svg>Confidence thresholds</div>
+        <div class="scard-body">
+          <div class="setting-row">
+            <div><div class="sr-label">Auto-confirm threshold</div><div class="sr-sub">Matches above this are confirmed without staff review</div></div>
+            <select class="f-select"><option>Disabled (always review)</option><option>99%+</option><option>98%+</option></select>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">Staff review threshold</div><div class="sr-sub">Matches above this go to the review queue</div></div>
+            <select class="f-select"><option>65%</option><option>70%</option><option>75% (recommended)</option><option>80%</option></select>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">Auto-dismiss threshold</div><div class="sr-sub">Matches below this are logged but not queued</div></div>
+            <select class="f-select"><option>Below 65%</option><option>Below 70%</option><option>Below 75%</option></select>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">Always review regardless of confidence</div><div class="sr-sub">Donors with bequest intentions or LTG above threshold</div></div>
+            <button class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="tog-thumb"></div></button>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">LTG threshold for always-review</div><div class="sr-sub">Donors above this are never auto-confirmed</div></div>
+            <select class="f-select"><option>$10,000 LTG</option><option>$25,000 LTG</option><option>$50,000 LTG</option></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <div class="scard-head"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M2 11L5 8l2 2 2-2.5 3 3"/></svg>Automatic actions on confirmation</div>
+        <div class="scard-body">
+          <div class="setting-row">
+            <div><div class="sr-label">Mark record deceased</div><div class="sr-sub">Always on — cannot be disabled</div></div>
+            <button class="tog on" style="opacity:.5;cursor:not-allowed"><div class="tog-thumb"></div></button>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">Remove from active email workflows</div><div class="sr-sub">Suppress from all campaign and automation sends</div></div>
+            <button class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="tog-thumb"></div></button>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">Advance bequest to estate/probate</div><div class="sr-sub">Only applies if a bequest intention is on file</div></div>
+            <button class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="tog-thumb"></div></button>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">Create officer task</div><div class="sr-sub">Notify assigned officer and development director</div></div>
+            <button class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="tog-thumb"></div></button>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">Bishop notification for LTG donors</div><div class="sr-sub">Alert when a legacy society member or major donor passes</div></div>
+            <button class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="tog-thumb"></div></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <div class="scard-head"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 3h11a.7.7 0 01.7.7v6.6a.7.7 0 01-.7.7H1.5a.7.7 0 01-.7-.7V3.7a.7.7 0 01.7-.7z"/><path d="M1.5 3.5l5.5 3.5 5.5-3.5"/></svg>Notifications & reporting</div>
+        <div class="scard-body">
+          <div class="setting-row">
+            <div><div class="sr-label">Notify development director on new matches</div><div class="sr-sub">Email alert when matches above threshold are queued</div></div>
+            <button class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="tog-thumb"></div></button>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">Monthly deceased record summary</div><div class="sr-sub">Report of all matches, confirmations, and dismissals</div></div>
+            <button class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="tog-thumb"></div></button>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">Real-time Legacy.com alerts</div><div class="sr-sub">Immediate notification when a monitored donor match is found</div></div>
+            <button class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="tog-thumb"></div></button>
+          </div>
+          <div class="setting-row">
+            <div><div class="sr-label">Legacy.com alert recipients</div><div class="sr-sub">Who receives real-time obituary alerts</div></div>
+            <select class="f-select"><option>Development director + assigned officer</option><option>Development director only</option><option>All gift officers</option></select>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- MANUAL MATCH MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Run manual match</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mf-note">A manual match runs the deceased verification APIs immediately against your selected record set. Standard monthly batch matches run automatically on the 1st of each month.</div>
+      <div class="mf-label" style="margin-top:12px">Match scope</div>
+      <select class="mf-input" style="margin-top:4px">
+        <option>All active donors (84,312 records)</option>
+        <option>Major gift pipeline donors only (148 records)</option>
+        <option>Legacy society members only (84 records)</option>
+        <option>Single donor — search by name</option>
+      </select>
+      <div class="mf-label">Sources to run</div>
+      <select class="mf-input" style="margin-top:4px">
+        <option>All sources (LexisNexis + SSDI + Legacy.com)</option>
+        <option>LexisNexis only</option>
+        <option>SSDI only</option>
+        <option>Legacy.com obituary search only</option>
+      </select>
+      <div class="mf-note" style="margin-top:10px">Estimated cost: $16.85 (84,312 records × $0.0002 avg). Cost is drawn from your LexisNexis API credit balance. Current balance: $284.40.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="mf-btn" onclick="closeModal()">Cancel</button>
+      <button class="mf-btn mf-btn-sage" onclick="closeModal();showSnack('Match job queued — results will appear in the review queue within 15 minutes','green')">Run match now</button>
+    </div>
+  </div>
+</div>
+
+<div class="snack" id="snack">
+  <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" width="14" height="14"><path d="M2 6l3 3 5-5"/></svg>
+  <span id="snack-text">Done</span>
+</div>
+
+<script>
+function setTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function confirm() {
+  showSnack('Confirmed — all actions processed. Audit entry created.', 'green');
+  setTab('queue', document.querySelectorAll('.tab')[0]);
+}
+function dismiss() {
+  showSnack('Match dismissed — audit entry logged.');
+  setTab('queue', document.querySelectorAll('.tab')[0]);
+}
+function showSnack(msg, type='') {
+  const s = document.getElementById('snack');
+  document.getElementById('snack-text').textContent = msg;
+  s.className = 'snack show' + (type ? ' ' + type : '');
+  setTimeout(() => s.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>

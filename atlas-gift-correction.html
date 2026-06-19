@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas — Gift Correction &amp; Reversal Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0E1E35;--navy2:#152844;--navy3:#1B3A6B;
+  --blue:#2563EB;--bluel:#DBEAFE;--bluep:#EFF6FF;
+  --green:#15803D;--greenl:#DCFCE7;--greend:#14532D;
+  --amber:#D97706;--amberl:#FEF3C7;--amberd:#78350F;
+  --rose:#BE185D;--rosel:#FCE7F3;--rosed:#881337;
+  --red:#DC2626;--redl:#FEE2E2;--redd:#7F1D1D;
+  --teal:#0D9488;--teall:#CCFBF1;
+  --orange:#EA580C;--orangel:#FFEDD5;
+  --text:#0F172A;--text2:#334155;--text3:#64748B;--text4:#94A3B8;
+  --border:#E2E8F0;--surf:#F8FAFC;
+}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',sans-serif;background:#EEF2F7;color:var(--text)}
+
+/* ── CHROME ── */
+.chrome{background:var(--navy);padding:0 28px;height:52px;display:flex;align-items:center;gap:14px}
+.chrome-mark{width:28px;height:28px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chrome-mark svg{width:13px;height:13px}
+.chrome-title{font-family:'DM Serif Display',serif;font-size:15px;color:white}
+.chrome-sep{width:1px;height:18px;background:rgba(255,255,255,.12)}
+.chrome-path{font-size:12px;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:6px}
+.chrome-path b{color:rgba(255,255,255,.78);font-weight:500}
+.chrome-right{margin-left:auto;display:flex;gap:8px}
+.cbtn{padding:5px 13px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;display:flex;align-items:center;gap:5px}
+.cbtn svg{width:11px;height:11px}
+.cbtn-ghost{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.7)}
+.cbtn-ghost:hover{background:rgba(255,255,255,.14)}
+
+/* ── MAIN LAYOUT ── */
+.page{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 52px)}
+
+/* ── LEFT PANEL — GIFT LOOKUP ── */
+.left-panel{background:white;border-right:1px solid var(--border);display:flex;flex-direction:column}
+.lp-head{padding:14px 16px 12px;border-bottom:1px solid var(--border)}
+.lp-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--text);margin-bottom:3px}
+.lp-sub{font-size:11px;color:var(--text3)}
+.lp-search-wrap{padding:10px 12px;border-bottom:1px solid var(--border)}
+.lp-search{width:100%;padding:7px 10px 7px 30px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;background:var(--surf);color:var(--text)}
+.lp-search:focus{border-color:var(--blue);background:white}
+.search-icon{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:var(--text4)}
+.search-icon svg{width:12px;height:12px}
+.search-wrap-rel{position:relative}
+
+/* Gift list */
+.gift-list{flex:1;overflow-y:auto}
+.gift-item{padding:11px 14px;border-bottom:.5px solid var(--border);cursor:pointer;transition:background .1s}
+.gift-item:hover{background:var(--surf)}
+.gift-item.selected{background:var(--bluep);border-left:3px solid var(--blue)}
+.gift-item.selected .gi-donor{color:var(--blue)}
+.gi-top{display:flex;align-items:baseline;gap:6px;margin-bottom:3px}
+.gi-donor{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.gi-amt{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--text)}
+.gi-meta{font-size:11px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap}
+.gi-badge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px}
+.gb-posted{background:var(--greenl);color:var(--greend)}
+.gb-reversed{background:var(--redl);color:var(--redd)}
+.gb-corrected{background:var(--bluep);color:var(--blue)}
+.gb-nsf{background:var(--orangel);color:var(--orange)}
+
+/* ── RIGHT PANEL ── */
+.right-panel{display:flex;flex-direction:column;overflow:hidden}
+
+/* Tabs */
+.rt-tabs{display:flex;background:white;border-bottom:1px solid var(--border);padding:0 24px;gap:0}
+.rt-tab{padding:13px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap;font-family:'DM Sans',sans-serif;background:none;border-left:none;border-right:none;border-top:none}
+.rt-tab:hover{color:var(--text2)}
+.rt-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+
+/* Right panel body */
+.rp-body{flex:1;overflow-y:auto;padding:24px}
+.panel-view{display:none}
+.panel-view.active{display:block}
+
+/* ── GIFT DETAIL CARD ── */
+.gift-detail-card{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.gdc-head{background:var(--navy);padding:14px 18px;display:flex;align-items:center;gap:12px}
+.gdc-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;margin-left:auto}
+.gdc-title{font-family:'DM Serif Display',serif;font-size:16px;color:white}
+.gdc-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px}
+.gdc-fields{display:grid;grid-template-columns:1fr 1fr;padding:14px 18px;gap:10px;border-bottom:1px solid var(--border)}
+.gdf-row{padding:6px 0;border-bottom:.5px solid var(--border)}
+.gdf-row:last-child{border-bottom:none}
+.gdf-label{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text4);margin-bottom:3px}
+.gdf-val{font-size:13px;color:var(--text);font-weight:500}
+.gdf-val.mono{font-family:'DM Mono',monospace}
+.gdf-val.green{color:var(--green)}
+.gdf-val.red{color:var(--red)}
+.gdc-warning{padding:10px 18px;background:var(--amberl);border-bottom:1px solid #FDE68A;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--amberd)}
+.gdc-warning svg{width:14px;height:14px;flex-shrink:0}
+
+/* ── CORRECTION WIZARD ── */
+.wizard-head{margin-bottom:20px}
+.wh-title{font-family:'DM Serif Display',serif;font-size:19px;color:var(--text);margin-bottom:4px}
+.wh-sub{font-size:13px;color:var(--text3);line-height:1.6}
+
+/* Step indicator */
+.step-indicator{display:flex;align-items:center;gap:0;margin-bottom:24px}
+.si-step{display:flex;align-items:center;flex:1}
+.si-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;transition:all .15s}
+.si-dot.done{background:var(--green);color:white}
+.si-dot.active{background:var(--blue);color:white}
+.si-dot.pending{background:var(--border);color:var(--text3)}
+.si-label{font-size:11px;font-weight:500;margin-left:6px;white-space:nowrap}
+.si-dot.active + .si-label{color:var(--blue);font-weight:600}
+.si-dot.done + .si-label{color:var(--green)}
+.si-dot.pending + .si-label{color:var(--text3)}
+.si-line{flex:1;height:1px;background:var(--border);margin:0 8px}
+.si-line.done{background:var(--green)}
+
+/* Step panels */
+.step-panel{display:none}
+.step-panel.active{display:block}
+
+/* Correction type cards */
+.correction-types{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.ct-card{border:1.5px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all .14s;background:white}
+.ct-card:hover{border-color:#94A3B8;background:var(--surf)}
+.ct-card.selected{border-color:var(--blue);background:var(--bluep)}
+.ct-card.selected .ct-title{color:var(--blue)}
+.ct-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.ct-icon svg{width:16px;height:16px}
+.ct-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+.ct-desc{font-size:12px;color:var(--text3);line-height:1.55}
+
+/* From/To comparison */
+.from-to-wrap{display:grid;grid-template-columns:1fr 40px 1fr;gap:0;align-items:start;margin-bottom:16px}
+.ft-col{background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.ft-col.to-col{border-color:var(--blue)}
+.ft-head{padding:9px 14px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.ft-col.from-col .ft-head{background:var(--redl);color:var(--redd)}
+.ft-col.to-col   .ft-head{background:var(--bluep);color:var(--blue)}
+.ft-body{padding:12px 14px}
+.ft-field{margin-bottom:10px}
+.ft-field:last-child{margin-bottom:0}
+.ft-label{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text4);margin-bottom:4px}
+.ft-value{font-size:13px;color:var(--text);font-weight:500;padding:6px 9px;border-radius:7px}
+.ft-value.readonly{background:var(--surf);border:1px solid var(--border)}
+.ft-value.editable{border:1px solid var(--border);outline:none;font-family:'DM Sans',sans-serif;cursor:text;width:100%}
+.ft-value.editable:focus{border-color:var(--blue);background:white}
+.ft-value.changed{background:var(--bluep);border-color:var(--bluel);color:var(--blue)}
+.ft-arrow{display:flex;align-items:center;justify-content:center;padding-top:40px;color:var(--text3)}
+.ft-arrow svg{width:18px;height:18px}
+
+/* Reason field */
+.reason-wrap{margin-bottom:16px}
+.reason-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.reason-select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;background:white;color:var(--text);cursor:pointer}
+.reason-select:focus{border-color:var(--blue)}
+.reason-notes{width:100%;margin-top:8px;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;min-height:72px;color:var(--text);background:white}
+.reason-notes:focus{border-color:var(--blue)}
+
+/* Receipt reissue toggle */
+.receipt-toggle{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.rt-text{flex:1}
+.rt-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.rt-sub{font-size:11px;color:var(--text3)}
+.toggle{width:36px;height:20px;border-radius:10px;cursor:pointer;position:relative;border:none;transition:background .15s;flex-shrink:0}
+.toggle.on{background:var(--blue)}
+.toggle.off{background:#CBD5E1}
+.toggle-thumb{position:absolute;top:2px;width:16px;height:16px;background:white;border-radius:50%;transition:left .15s}
+.toggle.on .toggle-thumb{left:18px}
+.toggle.off .toggle-thumb{left:2px}
+
+/* Confirmation summary */
+.confirm-summary{background:var(--greenl);border:1px solid #BBF7D0;border-radius:10px;padding:16px 18px;margin-bottom:16px}
+.cs-title{font-size:13px;font-weight:600;color:var(--greend);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cs-title svg{width:14px;height:14px}
+.cs-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid #BBF7D0;font-size:12px}
+.cs-row:last-child{border-bottom:none}
+.cs-key{color:var(--greend)}
+.cs-val{font-weight:600;color:var(--greend)}
+
+/* Audit trail */
+.audit-entry{background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px}
+.ae-head{padding:10px 14px;background:var(--surf);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.ae-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ae-icon svg{width:12px;height:12px}
+.ae-type{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.ae-ts{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+.ae-user{font-size:11px;color:var(--text3)}
+.ae-body{padding:11px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ae-field{font-size:11px}
+.ae-field-label{color:var(--text3);margin-bottom:2px}
+.ae-field-val{font-weight:500;color:var(--text)}
+.ae-field-change{display:flex;align-items:center;gap:5px;font-size:11px}
+.ae-old{color:var(--red);text-decoration:line-through;font-family:'DM Mono',monospace}
+.ae-new{color:var(--green);font-family:'DM Mono',monospace}
+.ae-arrow{color:var(--text3)}
+.ae-reason{padding:8px 14px;background:var(--amberl);border-top:1px solid #FDE68A;font-size:11px;color:var(--amberd);display:flex;gap:6px;align-items:flex-start}
+.ae-reason svg{width:11px;height:11px;flex-shrink:0;margin-top:1px}
+.ae-hash{padding:8px 14px;border-top:1px solid var(--border);font-size:10px;color:var(--text4);font-family:'DM Mono',monospace;display:flex;align-items:center;gap:6px}
+.ae-hash-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.immutable-badge{font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;background:var(--greenl);color:var(--greend);margin-left:auto}
+
+/* NSF Reversal */
+.nsf-card{background:var(--redl);border:1px solid #FECACA;border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;gap:12px}
+.nsf-icon{width:36px;height:36px;background:var(--red);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nsf-icon svg{width:16px;height:16px;color:white}
+.nsf-title{font-size:14px;font-weight:600;color:var(--redd);margin-bottom:3px}
+.nsf-sub{font-size:12px;color:#B91C1C;line-height:1.6}
+.nsf-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.nsf-field{background:white;border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.nsf-field-label{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.nsf-field-val{font-size:13px;font-weight:600;color:var(--text)}
+.nsf-field-val.mono{font-family:'DM Mono',monospace}
+.nsf-field-val.red{color:var(--red)}
+.nsf-field-input{width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;color:var(--text)}
+.nsf-field-input:focus{border-color:var(--red)}
+.nsf-impact{background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.ni-head{padding:9px 14px;background:var(--redl);border-bottom:1px solid #FECACA;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--redd)}
+.ni-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:.5px solid var(--border);font-size:12px}
+.ni-row:last-child{border-bottom:none}
+.ni-icon{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ni-icon svg{width:10px;height:10px}
+.ni-text{flex:1;color:var(--text2)}
+.ni-action{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.ni-auto{background:var(--greenl);color:var(--greend)}
+.ni-manual{background:var(--amberl);color:var(--amberd)}
+.ni-required{background:var(--redl);color:var(--redd)}
+
+/* Action buttons */
+.action-bar{display:flex;gap:8px;align-items:center;padding-top:16px;border-top:1px solid var(--border);margin-top:4px}
+.btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .13s;display:flex;align-items:center;gap:6px;border:1px solid var(--border);background:white;color:var(--text2)}
+.btn svg{width:12px;height:12px}
+.btn:hover{background:var(--surf)}
+.btn-primary{background:var(--blue);color:white;border-color:var(--blue)}
+.btn-primary:hover{background:#1D4ED8}
+.btn-red{background:var(--red);color:white;border-color:var(--red)}
+.btn-red:hover{background:#B91C1C}
+.btn-green{background:var(--green);color:white;border-color:var(--green)}
+.btn-green:hover{background:#126e31}
+.btn-ghost{background:none;border-color:transparent;color:var(--text3)}
+.btn-ghost:hover{background:var(--surf);color:var(--text2)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* No selection state */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;color:var(--text3)}
+.empty-state svg{width:40px;height:40px;color:var(--text4);margin-bottom:12px}
+.empty-state h3{font-size:15px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.empty-state p{font-size:13px;line-height:1.65;max-width:300px}
+
+/* Snack notification */
+.snack{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;opacity:0;transition:all .25s;pointer-events:none;z-index:100}
+.snack.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.snack svg{width:14px;height:14px;flex-shrink:0}
+.snack.green{background:var(--green)}
+.snack.red{background:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- CHROME -->
+<div class="chrome">
+  <div class="chrome-mark"><svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7.5" stroke="white" stroke-width="1.5"/><path d="M5.5 9.5C6.5 11.5 9 13 9 13s2.5-1.5 3.5-3.5S12 5 9 5 4.5 7.5 5.5 9.5z" fill="white" fill-opacity=".9"/></svg></div>
+  <div class="chrome-title">GiveCentral Atlas</div>
+  <div class="chrome-sep"></div>
+  <div class="chrome-path">Batch &amp; Gifts → <b>Gift Correction &amp; Reversal Center</b></div>
+  <div class="chrome-right">
+    <button class="cbtn cbtn-ghost">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 1v7M3 5.5l3 3 3-3"/><path d="M1.5 10.5h9"/></svg>
+      Export audit log
+    </button>
+    <button class="cbtn cbtn-ghost">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M6 4v3M6 8v.5"/></svg>
+      Help
+    </button>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ── LEFT PANEL ── -->
+  <div class="left-panel">
+    <div class="lp-head">
+      <div class="lp-title">Find a gift</div>
+      <div class="lp-sub">Search by donor, check #, batch ID, or amount</div>
+    </div>
+    <div class="lp-search-wrap">
+      <div class="search-wrap-rel">
+        <div class="search-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M8 8l2 2"/></svg></div>
+        <input type="text" class="lp-search" placeholder="Search gifts…" oninput="filterGifts(this.value)">
+      </div>
+    </div>
+    <div class="gift-list" id="gift-list"></div>
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="right-panel">
+    <div class="rt-tabs">
+      <button class="rt-tab active" onclick="setTab('correct',this)">Reclassify gift</button>
+      <button class="rt-tab" onclick="setTab('reversal',this)">Check return / NSF</button>
+      <button class="rt-tab" onclick="setTab('audit',this)">Audit trail</button>
+    </div>
+    <div class="rp-body">
+
+      <!-- ── RECLASSIFY TAB ── -->
+      <div class="panel-view active" id="tab-correct">
+        <div id="correct-empty" class="empty-state">
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="6" y="8" width="28" height="26" rx="3"/><path d="M13 16h14M13 22h10M13 28h7"/><path d="M26 6v6M32 9h-12"/></svg>
+          <h3>Select a gift to reclassify</h3>
+          <p>Choose any posted gift from the list to correct the donor, fund, amount, or GL code. All changes are logged in the immutable audit trail.</p>
+        </div>
+        <div id="correct-content" style="display:none">
+          <div class="wizard-head">
+            <div class="wh-title">Gift reclassification</div>
+            <div class="wh-sub">Correct donor, fund, or GL assignment. The original gift is reversed and a new corrected gift is posted. Both records appear in the audit trail.</div>
+          </div>
+
+          <!-- Step indicator -->
+          <div class="step-indicator" id="step-indicator">
+            <div class="si-step">
+              <div class="si-dot active" id="sd-1">1</div>
+              <span class="si-label">Choose correction type</span>
+            </div>
+            <div class="si-line" id="sl-1"></div>
+            <div class="si-step">
+              <div class="si-dot pending" id="sd-2">2</div>
+              <span class="si-label">Make corrections</span>
+            </div>
+            <div class="si-line" id="sl-2"></div>
+            <div class="si-step">
+              <div class="si-dot pending" id="sd-3">3</div>
+              <span class="si-label">Add reason</span>
+            </div>
+            <div class="si-line" id="sl-3"></div>
+            <div class="si-step">
+              <div class="si-dot pending" id="sd-4">4</div>
+              <span class="si-label">Confirm &amp; post</span>
+            </div>
+          </div>
+
+          <!-- Original gift summary -->
+          <div class="gift-detail-card" id="selected-gift-card">
+            <div class="gdc-head">
+              <div>
+                <div class="gdc-title" id="sgc-title">O'Brien, James — $2,500</div>
+                <div class="gdc-sub" id="sgc-sub">Batch #2026-0412 · Posted Apr 12, 2026 · Entry: K. Novicky</div>
+              </div>
+              <span class="gdc-badge" id="sgc-badge" style="background:rgba(37,99,235,.25);color:#93C5FD">Posted</span>
+            </div>
+            <div class="gdc-fields" id="sgc-fields"></div>
+          </div>
+
+          <!-- STEP 1: Correction type -->
+          <div class="step-panel active" id="step-1">
+            <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">What needs to be corrected?</div>
+            <div class="correction-types">
+              <div class="ct-card" onclick="selectCorrection('donor',this)">
+                <div class="ct-icon" style="background:var(--bluep)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="6" r="3.5"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5"/></svg></div>
+                <div class="ct-title">Wrong donor</div>
+                <div class="ct-desc">Gift was posted to the wrong donor record. Move to the correct individual or organisation.</div>
+              </div>
+              <div class="ct-card" onclick="selectCorrection('fund',this)">
+                <div class="ct-icon" style="background:var(--greenl)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="5" width="12" height="8" rx="1.5"/><path d="M5 5V3.5a1.5 1.5 0 013 0V5M10 5V3.5a1.5 1.5 0 013 0V5"/><path d="M5 10h6"/></svg></div>
+                <div class="ct-title">Wrong fund / GL</div>
+                <div class="ct-desc">Gift was applied to the wrong fund or GL code. Reassign to the correct fund.</div>
+              </div>
+              <div class="ct-card" onclick="selectCorrection('both',this)">
+                <div class="ct-icon" style="background:var(--purpl)"><svg viewBox="0 0 16 16" fill="none" stroke="#7C3AED" stroke-width="1.4" stroke-linecap="round"><path d="M3 8h10M8 3l5 5-5 5"/></svg></div>
+                <div class="ct-title">Wrong donor &amp; fund</div>
+                <div class="ct-desc">Both the donor assignment and the fund need to be corrected in one step.</div>
+              </div>
+              <div class="ct-card" onclick="selectCorrection('amount',this)">
+                <div class="ct-icon" style="background:var(--amberl)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--amber)" stroke-width="1.4" stroke-linecap="round"><path d="M8 2v12M5 5h6a2 2 0 010 4H5M5 9h7a2 2 0 010 4H5"/></svg></div>
+                <div class="ct-title">Amount correction</div>
+                <div class="ct-desc">Gift amount was entered incorrectly. Correct to the actual received amount.</div>
+              </div>
+            </div>
+            <div class="action-bar">
+              <button class="btn btn-ghost" onclick="clearSelection()">Cancel</button>
+              <button class="btn btn-primary" id="step1-next" disabled onclick="goStep(2)">Continue →</button>
+            </div>
+          </div>
+
+          <!-- STEP 2: Make corrections -->
+          <div class="step-panel" id="step-2">
+            <div class="from-to-wrap" id="from-to-panel"></div>
+            <div class="action-bar">
+              <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+              <button class="btn btn-primary" onclick="goStep(3)">Continue →</button>
+            </div>
+          </div>
+
+          <!-- STEP 3: Reason -->
+          <div class="step-panel" id="step-3">
+            <div class="reason-wrap">
+              <div class="reason-label">Reason for correction <span style="color:var(--red)">*</span></div>
+              <select class="reason-select" id="reason-select" onchange="checkReasonFilled()">
+                <option value="">— Select a reason —</option>
+                <option value="Data entry error — wrong donor selected">Data entry error — wrong donor selected</option>
+                <option value="Data entry error — wrong fund selected">Data entry error — wrong fund selected</option>
+                <option value="Donor requested reallocation">Donor requested reallocation</option>
+                <option value="Check written by joint account holder">Check written by joint account holder</option>
+                <option value="Transposition error — wrong amount">Transposition error — wrong amount</option>
+                <option value="OCR misread — check scan error">OCR misread — check scan error</option>
+                <option value="Fund closed — gift redirected">Fund closed — gift redirected</option>
+                <option value="Other (see notes)">Other (see notes)</option>
+              </select>
+              <textarea class="reason-notes" id="reason-notes" placeholder="Additional notes (optional) — these will appear permanently in the audit trail…" oninput="checkReasonFilled()"></textarea>
+            </div>
+
+            <div class="receipt-toggle">
+              <div class="rt-text">
+                <div class="rt-title">Reissue tax receipt to corrected donor</div>
+                <div class="rt-sub">A new receipt will be generated for the corrected record. The original receipt will be voided and logged.</div>
+              </div>
+              <button class="toggle on" id="receipt-toggle" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-thumb"></div></button>
+            </div>
+
+            <div style="background:var(--amberl);border:1px solid #FDE68A;border-radius:9px;padding:12px 14px;font-size:12px;color:var(--amberd);display:flex;gap:8px;align-items:flex-start;margin-bottom:4px">
+              <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" width="14" height="14" style="flex-shrink:0;margin-top:1px"><path d="M6.5 2v3.5M6.5 9v.5"/><path d="M1 12L6.5 1 12 12H1z"/></svg>
+              This correction will create a reversing entry on the original gift and a new corrected gift. Both will appear in the batch history and cannot be deleted — only the audit trail can document further changes.
+            </div>
+
+            <div class="action-bar">
+              <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+              <button class="btn btn-primary" id="step3-next" disabled onclick="goStep(4)">Review correction →</button>
+            </div>
+          </div>
+
+          <!-- STEP 4: Confirm -->
+          <div class="step-panel" id="step-4">
+            <div class="confirm-summary" id="confirm-summary">
+              <div class="cs-title"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="14" height="14"><path d="M2 7l3 3 7-7"/></svg> Review correction before posting</div>
+            </div>
+            <div style="background:var(--redl);border:1px solid #FECACA;border-radius:9px;padding:12px 14px;font-size:12px;color:var(--redd);margin-bottom:16px;display:flex;gap:8px;align-items:flex-start">
+              <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" width="14" height="14" style="flex-shrink:0;margin-top:1px"><path d="M2 2l9 9M11 2L2 11"/></svg>
+              Once posted, this correction is permanent. The reversing entry and new gift will both appear in the batch audit log and cannot be deleted.
+            </div>
+            <div class="action-bar">
+              <button class="btn btn-ghost" onclick="goStep(3)">← Back</button>
+              <button class="btn btn-green" onclick="postCorrection()">
+                <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg>
+                Post correction
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── REVERSAL TAB ── -->
+      <div class="panel-view" id="tab-reversal">
+        <div id="reversal-empty" class="empty-state">
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="4" y="10" width="32" height="22" rx="2.5"/><path d="M4 17h32M12 24h4M19 24h5M28 13h4M8 13h16"/></svg>
+          <h3>Select a gift to reverse</h3>
+          <p>Choose a posted gift from the left panel to process a check return, NSF, or voiding. The full impact on donor records and receipts is handled automatically.</p>
+        </div>
+        <div id="reversal-content" style="display:none">
+          <div class="wizard-head">
+            <div class="wh-title">Check return / NSF reversal</div>
+            <div class="wh-sub">Process a returned check or NSF. All downstream impacts — donor balance, tax receipt void, GL reversal — are handled automatically.</div>
+          </div>
+
+          <div class="nsf-card">
+            <div class="nsf-icon"><svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M8 3v5M8 11v.5"/><path d="M1.5 14L8 1.5 14.5 14H1.5z"/></svg></div>
+            <div>
+              <div class="nsf-title">Check return / NSF</div>
+              <div class="nsf-sub" id="nsf-gift-desc">Loading gift details…</div>
+            </div>
+          </div>
+
+          <div class="nsf-details">
+            <div class="nsf-field">
+              <div class="nsf-field-label">Return type</div>
+              <select class="nsf-field-input" id="nsf-type">
+                <option>NSF — insufficient funds</option>
+                <option>Account closed</option>
+                <option>Payment stopped by donor</option>
+                <option>Check stale / expired</option>
+                <option>Signature missing</option>
+                <option>Amount mismatch</option>
+                <option>Duplicate payment</option>
+              </select>
+            </div>
+            <div class="nsf-field">
+              <div class="nsf-field-label">Bank return date</div>
+              <input type="date" class="nsf-field-input" id="nsf-date">
+            </div>
+            <div class="nsf-field">
+              <div class="nsf-field-label">Bank reference / trace #</div>
+              <input type="text" class="nsf-field-input" id="nsf-ref" placeholder="e.g. TRC-20260512-4421">
+            </div>
+            <div class="nsf-field">
+              <div class="nsf-field-label">NSF bank fee charged</div>
+              <input type="text" class="nsf-field-input" id="nsf-fee" placeholder="$0.00 if none">
+            </div>
+          </div>
+
+          <div class="nsf-impact">
+            <div class="ni-head">Automatic actions on posting reversal</div>
+            <div class="ni-row">
+              <div class="ni-icon" style="background:var(--greenl)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 5l2 2 5-5"/></svg></div>
+              <div class="ni-text">Reversing entry posted to original batch — gift amount negated to $0 net</div>
+              <span class="ni-action ni-auto">Auto</span>
+            </div>
+            <div class="ni-row">
+              <div class="ni-icon" style="background:var(--greenl)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 5l2 2 5-5"/></svg></div>
+              <div class="ni-text">Donor's giving history updated — gift removed from YTD and LTG totals</div>
+              <span class="ni-action ni-auto">Auto</span>
+            </div>
+            <div class="ni-row">
+              <div class="ni-icon" style="background:var(--greenl)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 5l2 2 5-5"/></svg></div>
+              <div class="ni-text">Tax receipt voided and flagged in donor's receipt history</div>
+              <span class="ni-action ni-auto">Auto</span>
+            </div>
+            <div class="ni-row">
+              <div class="ni-icon" style="background:var(--greenl)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 5l2 2 5-5"/></svg></div>
+              <div class="ni-text">GL reversal entry generated for accounting export</div>
+              <span class="ni-action ni-auto">Auto</span>
+            </div>
+            <div class="ni-row">
+              <div class="ni-icon" style="background:var(--amberl)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--amber)" stroke-width="1.4" stroke-linecap="round"><path d="M5 2v3M5 7v.5"/><path d="M1 9.5L5 1l4 8.5H1z"/></svg></div>
+              <div class="ni-text">Gift officer task created — follow up with donor re: resubmission</div>
+              <span class="ni-action ni-manual">Officer task</span>
+            </div>
+            <div class="ni-row">
+              <div class="ni-icon" style="background:var(--redl)"><svg viewBox="0 0 10 10" fill="none" stroke="var(--red)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7"/></svg></div>
+              <div class="ni-text">Correction letter to donor — <strong>must be reviewed before sending</strong></div>
+              <span class="ni-action ni-required">Review req.</span>
+            </div>
+          </div>
+
+          <div class="reason-wrap">
+            <div class="reason-label">Staff notes for audit log</div>
+            <textarea class="reason-notes" placeholder="Add any additional context — conversation with donor, bank instructions, resubmission plan…" style="min-height:60px"></textarea>
+          </div>
+
+          <div class="action-bar">
+            <button class="btn btn-ghost" onclick="clearSelection()">Cancel</button>
+            <button class="btn btn-red" onclick="postReversal()">
+              <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M2 2l8 8M10 2L2 10"/></svg>
+              Post NSF reversal
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── AUDIT TRAIL TAB ── -->
+      <div class="panel-view" id="tab-audit">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);margin-bottom:3px">Correction &amp; reversal audit trail</div>
+            <div style="font-size:12px;color:var(--text3)">Immutable log · all entries are permanent · cannot be edited or deleted</div>
+          </div>
+          <div style="display:flex;gap:7px">
+            <select class="nsf-field-input" style="width:auto;padding:5px 10px;font-size:12px">
+              <option>All correction types</option>
+              <option>Donor reclassification</option>
+              <option>Fund reclassification</option>
+              <option>NSF / check return</option>
+              <option>Amount correction</option>
+            </select>
+            <button class="btn btn-primary" style="font-size:12px;padding:5px 13px">Export CSV</button>
+          </div>
+        </div>
+        <div id="audit-entries"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="snack" id="snack">
+  <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg>
+  <span id="snack-text">Done</span>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const GIFTS = [
+  {id:'G001', donor:"O'Brien, James",      amt:2500,  fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0412", date:"Apr 12, 2026", check:"10441", officer:"Mike D.", status:"posted",    parish:"Cathedral"},
+  {id:'G002', donor:"Sullivan, Margaret",  amt:1000,  fund:"Cathedral Capital",    gl:"5200", batch:"2026-0412", date:"Apr 12, 2026", check:"8821",  officer:"Mike D.", status:"posted",    parish:"Cathedral"},
+  {id:'G003', donor:"Walsh, Thomas",       amt:500,   fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0412", date:"Apr 12, 2026", check:"10441", officer:"Sarah R.",status:"corrected", parish:"St. Michael's"},
+  {id:'G004', donor:"Harrington, David",  amt:5000,  fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0415", date:"Apr 15, 2026", check:"3301",  officer:"Mike D.", status:"reversed",  parish:"Cathedral"},
+  {id:'G005', donor:"Kim, Dr. Patricia",  amt:750,   fund:"General Fund",         gl:"4050", batch:"2026-0415", date:"Apr 15, 2026", check:"2219",  officer:"Janet W.",status:"posted",    parish:"Holy Cross"},
+  {id:'G006', donor:"Morrison, Peter",    amt:2000,  fund:"School Scholarship",   gl:"4300", batch:"2026-0415", date:"Apr 15, 2026", check:"9922",  officer:"Sarah R.",status:"posted",    parish:"St. Catherine's"},
+  {id:'G007', donor:"Mendez, Carlos",     amt:250,   fund:"Cathedral Capital",    gl:"5200", batch:"2026-0418", date:"Apr 18, 2026", check:"7711",  officer:"Janet W.",status:"nsf",       parish:"Cathedral"},
+  {id:'G008', donor:"Collins, Brian",     amt:1500,  fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0418", date:"Apr 18, 2026", check:"4456",  officer:"Mike D.", status:"posted",    parish:"Cathedral"},
+  {id:'G009', donor:"Fitzgerald, Anne",   amt:300,   fund:"General Fund",         gl:"4050", batch:"2026-0418", date:"Apr 18, 2026", check:"1122",  officer:"Janet W.",status:"posted",    parish:"Holy Cross"},
+  {id:'G010', donor:"Nguyen, Thomas",     amt:1200,  fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0420", date:"Apr 20, 2026", check:"5533",  officer:"Sarah R.",status:"posted",    parish:"St. Catherine's"},
+];
+
+const AUDIT_LOG = [
+  {
+    id:"AUD-001", type:"Donor reclassification", ts:"Apr 13, 2026 · 9:14 AM", user:"K. Novicky",
+    from:{donor:"Walsh, Susan (#4820)", fund:"CMA Annual Fund", amt:"$500.00", check:"#10441"},
+    to:  {donor:"Walsh, Thomas (#4821)", fund:"CMA Annual Fund", amt:"$500.00", check:"#10441"},
+    reason:"Data entry error — wrong donor selected. Walsh, Thomas wrote the check (confirmed by check signature). Walsh, Susan is his spouse.",
+    receiptAction:"New receipt issued to Walsh, Thomas (#4821). Original receipt #RCP-2026-0412-04 voided.",
+    hash:"3a7f9c2e8b14d05f61a2c98b4e7d03a1",
+  },
+  {
+    id:"AUD-002", type:"NSF reversal — insufficient funds", ts:"Apr 16, 2026 · 2:38 PM", user:"K. Novicky",
+    from:{donor:"Harrington, David (#4802)", fund:"CMA Annual Fund", amt:"$5,000.00", check:"#3301"},
+    to:  {donor:"—", fund:"—", amt:"$0.00 (reversed)", check:"NSF ref: TRC-20260416-9921"},
+    reason:"Bank returned check Apr 16 — insufficient funds. Tax receipt RCP-2026-0415-02 voided. Gift officer task created for Mike D. to contact donor. Donor confirmed resubmission expected by Apr 30.",
+    receiptAction:"Tax receipt #RCP-2026-0415-02 voided. Donor notified.",
+    hash:"8d2a4f7c1b9e035d6a7f82c3d94b10e5",
+  },
+  {
+    id:"AUD-003", type:"Fund reclassification", ts:"Apr 19, 2026 · 10:02 AM", user:"M. Donovan",
+    from:{donor:"Mendez, Carlos (#5201)", fund:"Cathedral Capital (GL 5200)", amt:"$250.00", check:"#7711"},
+    to:  {donor:"Mendez, Carlos (#5201)", fund:"CMA Annual Fund (GL 4100)", amt:"$250.00", check:"#7711"},
+    reason:"OCR misread — check scan assigned wrong fund. Donor memo line reads 'CMA'. Corrected by development director.",
+    receiptAction:"Receipt reissued to Mendez, Carlos with correct fund designation. Original voided.",
+    hash:"f5b3c8a9e2d1074f38a6bc9d02e74a1f",
+  },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let selectedGift = null;
+let correctionType = null;
+let currentStep = 1;
+
+// ── RENDER GIFT LIST ──────────────────────────────────────────────────────────
+function renderGiftList(filter='') {
+  const statusLabel = {posted:'Posted', corrected:'Corrected', reversed:'Reversed', nsf:'NSF'};
+  const statusClass = {posted:'gb-posted', corrected:'gb-corrected', reversed:'gb-reversed', nsf:'gb-nsf'};
+  const filtered = GIFTS.filter(g =>
+    !filter || g.donor.toLowerCase().includes(filter.toLowerCase()) ||
+    g.check.includes(filter) || g.batch.includes(filter) || g.fund.toLowerCase().includes(filter.toLowerCase())
+  );
+  document.getElementById('gift-list').innerHTML = filtered.map(g => `
+    <div class="gift-item ${selectedGift?.id===g.id?'selected':''}" onclick="selectGift('${g.id}')">
+      <div class="gi-top">
+        <span class="gi-donor">${g.donor}</span>
+        <span class="gi-amt">$${g.amt.toLocaleString()}</span>
+      </div>
+      <div class="gi-meta">
+        <span>${g.fund.split(' ').slice(0,2).join(' ')}</span>
+        <span>·</span>
+        <span>Chk #${g.check}</span>
+        <span>·</span>
+        <span>${g.date}</span>
+        <span class="gi-badge ${statusClass[g.status]}">${statusLabel[g.status]}</span>
+      </div>
+    </div>`).join('');
+}
+
+function filterGifts(v) { renderGiftList(v); }
+
+// ── SELECT GIFT ───────────────────────────────────────────────────────────────
+function selectGift(id) {
+  selectedGift = GIFTS.find(g => g.id === id);
+  correctionType = null;
+  currentStep = 1;
+  renderGiftList(document.querySelector('.lp-search').value);
+  renderSelectedGift();
+  resetWizard();
+  document.getElementById('correct-empty').style.display = 'none';
+  document.getElementById('correct-content').style.display = 'block';
+  document.getElementById('reversal-empty').style.display = 'none';
+  document.getElementById('reversal-content').style.display = 'block';
+
+  // Populate NSF section
+  document.getElementById('nsf-gift-desc').textContent =
+    `${selectedGift.donor} · $${selectedGift.amt.toLocaleString()} · Check #${selectedGift.check} · ${selectedGift.date}`;
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('nsf-date').value = today;
+}
+
+function renderSelectedGift() {
+  if (!selectedGift) return;
+  const g = selectedGift;
+  document.getElementById('sgc-title').textContent = `${g.donor} — $${g.amt.toLocaleString()}`;
+  document.getElementById('sgc-sub').textContent = `Batch #${g.batch} · Posted ${g.date} · Entry: ${g.officer}`;
+  const statusColors = {posted:'rgba(37,99,235,.25)',corrected:'rgba(13,148,136,.25)',reversed:'rgba(220,38,38,.25)',nsf:'rgba(234,88,12,.25)'};
+  const statusText = {posted:'#93C5FD',corrected:'#5EEAD4',reversed:'#FDA4AF',nsf:'#FDBA74'};
+  const statusLabel = {posted:'Posted',corrected:'Corrected',reversed:'Reversed',nsf:'NSF — Reversed'};
+  document.getElementById('sgc-badge').style.background = statusColors[g.status]||'rgba(37,99,235,.25)';
+  document.getElementById('sgc-badge').style.color = statusText[g.status]||'#93C5FD';
+  document.getElementById('sgc-badge').textContent = statusLabel[g.status]||g.status;
+  document.getElementById('sgc-fields').innerHTML = `
+    <div>
+      <div class="gdf-row"><div class="gdf-label">Donor</div><div class="gdf-val">${g.donor}</div></div>
+      <div class="gdf-row"><div class="gdf-label">Amount</div><div class="gdf-val mono green">$${g.amt.toLocaleString()}.00</div></div>
+      <div class="gdf-row"><div class="gdf-label">Payment method</div><div class="gdf-val">Check</div></div>
+    </div>
+    <div>
+      <div class="gdf-row"><div class="gdf-label">Fund</div><div class="gdf-val">${g.fund}</div></div>
+      <div class="gdf-row"><div class="gdf-label">GL code</div><div class="gdf-val mono">${g.gl}</div></div>
+      <div class="gdf-row"><div class="gdf-label">Check #</div><div class="gdf-val mono">${g.check}</div></div>
+    </div>`;
+}
+
+// ── CORRECTION TYPE ───────────────────────────────────────────────────────────
+function selectCorrection(type, el) {
+  correctionType = type;
+  document.querySelectorAll('.ct-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('step1-next').disabled = false;
+}
+
+// ── FROM/TO PANEL ─────────────────────────────────────────────────────────────
+function renderFromTo() {
+  if (!selectedGift || !correctionType) return;
+  const g = selectedGift;
+  let fields = '';
+  if (correctionType === 'donor' || correctionType === 'both') {
+    fields += `
+      <div class="ft-field">
+        <div class="ft-label">Donor</div>
+        <div class="ft-value readonly">${g.donor}</div>
+      </div>`;
+  }
+  if (correctionType === 'fund' || correctionType === 'both') {
+    fields += `
+      <div class="ft-field">
+        <div class="ft-label">Fund</div>
+        <div class="ft-value readonly">${g.fund}</div>
+      </div>
+      <div class="ft-field">
+        <div class="ft-label">GL code</div>
+        <div class="ft-value readonly mono">${g.gl}</div>
+      </div>`;
+  }
+  if (correctionType === 'amount') {
+    fields += `
+      <div class="ft-field">
+        <div class="ft-label">Amount</div>
+        <div class="ft-value readonly mono">$${g.amt.toLocaleString()}.00</div>
+      </div>`;
+  }
+
+  let toFields = '';
+  if (correctionType === 'donor' || correctionType === 'both') {
+    toFields += `
+      <div class="ft-field">
+        <div class="ft-label">Correct donor</div>
+        <input type="text" class="ft-value editable changed" value="${g.donor}" placeholder="Search donor name…" style="display:block">
+      </div>`;
+  }
+  if (correctionType === 'fund' || correctionType === 'both') {
+    toFields += `
+      <div class="ft-field">
+        <div class="ft-label">Correct fund</div>
+        <select class="ft-value editable changed" style="display:block;cursor:pointer">
+          <option ${g.fund==='CMA Annual Fund'?'selected':''}>CMA Annual Fund</option>
+          <option ${g.fund==='Cathedral Capital'?'selected':''}>Cathedral Capital</option>
+          <option ${g.fund==='General Fund'?'selected':''}>General Fund</option>
+          <option ${g.fund==='School Scholarship'?'selected':''}>School Scholarship</option>
+          <option ${g.fund==="Bishop's Annual Fund"?'selected':''}>Bishop's Annual Fund</option>
+        </select>
+      </div>
+      <div class="ft-field">
+        <div class="ft-label">GL code</div>
+        <input type="text" class="ft-value editable changed mono" value="${g.gl}" style="display:block">
+      </div>`;
+  }
+  if (correctionType === 'amount') {
+    toFields += `
+      <div class="ft-field">
+        <div class="ft-label">Corrected amount</div>
+        <input type="text" class="ft-value editable changed mono" value="$${g.amt.toLocaleString()}.00" style="display:block">
+      </div>`;
+  }
+
+  // always show amount and fund unchanged in other modes
+  if (correctionType === 'donor') {
+    fields += `<div class="ft-field"><div class="ft-label">Fund</div><div class="ft-value readonly">${g.fund}</div></div>
+               <div class="ft-field"><div class="ft-label">Amount</div><div class="ft-value readonly mono">$${g.amt.toLocaleString()}.00</div></div>`;
+    toFields+= `<div class="ft-field"><div class="ft-label">Fund</div><div class="ft-value readonly">${g.fund}</div></div>
+                <div class="ft-field"><div class="ft-label">Amount</div><div class="ft-value readonly mono">$${g.amt.toLocaleString()}.00</div></div>`;
+  }
+  if (correctionType === 'fund') {
+    fields = `<div class="ft-field"><div class="ft-label">Donor</div><div class="ft-value readonly">${g.donor}</div></div>
+              <div class="ft-field"><div class="ft-label">Amount</div><div class="ft-value readonly mono">$${g.amt.toLocaleString()}.00</div></div>` + fields;
+    toFields=`<div class="ft-field"><div class="ft-label">Donor</div><div class="ft-value readonly">${g.donor}</div></div>
+              <div class="ft-field"><div class="ft-label">Amount</div><div class="ft-value readonly mono">$${g.amt.toLocaleString()}.00</div></div>` + toFields;
+  }
+
+  document.getElementById('from-to-panel').innerHTML = `
+    <div class="ft-col from-col">
+      <div class="ft-head">Original (will be reversed)</div>
+      <div class="ft-body">${fields}</div>
+    </div>
+    <div class="ft-arrow">
+      <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 9h10M10 5l4 4-4 4"/></svg>
+    </div>
+    <div class="ft-col to-col">
+      <div class="ft-head">Corrected (new posted gift)</div>
+      <div class="ft-body">${toFields}</div>
+    </div>`;
+}
+
+// ── STEP NAV ─────────────────────────────────────────────────────────────────
+function goStep(n) {
+  currentStep = n;
+  document.querySelectorAll('.step-panel').forEach((p,i) => p.classList.toggle('active', i===n-1));
+  [1,2,3,4].forEach(i => {
+    const dot = document.getElementById('sd-'+i);
+    if (!dot) return;
+    dot.className = 'si-dot ' + (i < n ? 'done' : i === n ? 'active' : 'pending');
+    dot.textContent = i < n ? '✓' : i;
+    if (i < 4) {
+      const line = document.getElementById('sl-'+i);
+      if (line) line.classList.toggle('done', i < n);
+    }
+  });
+  if (n === 2) renderFromTo();
+  if (n === 4) renderConfirmSummary();
+}
+
+function renderConfirmSummary() {
+  const g = selectedGift;
+  const typeLabel = {donor:'Wrong donor corrected',fund:'Fund / GL corrected',both:'Donor and fund corrected',amount:'Amount corrected'};
+  const reason = document.getElementById('reason-select').value;
+  const receiptOn = document.getElementById('receipt-toggle').classList.contains('on');
+  document.getElementById('confirm-summary').innerHTML = `
+    <div class="cs-title"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="14" height="14"><path d="M2 7l3 3 7-7"/></svg>Correction summary — review before posting</div>
+    <div class="cs-row"><span class="cs-key">Original gift</span><span class="cs-val">${g.donor} · $${g.amt.toLocaleString()} · ${g.fund}</span></div>
+    <div class="cs-row"><span class="cs-key">Correction type</span><span class="cs-val">${typeLabel[correctionType]}</span></div>
+    <div class="cs-row"><span class="cs-key">Reason</span><span class="cs-val">${reason}</span></div>
+    <div class="cs-row"><span class="cs-key">Reversing entry</span><span class="cs-val">Will be created — ($${g.amt.toLocaleString()}) on batch ${g.batch}</span></div>
+    <div class="cs-row"><span class="cs-key">New corrected gift</span><span class="cs-val">Will be posted with corrected values</span></div>
+    <div class="cs-row"><span class="cs-key">Tax receipt</span><span class="cs-val">${receiptOn ? 'Original voided · New receipt issued' : 'No receipt change'}</span></div>
+    <div class="cs-row"><span class="cs-key">Audit entry</span><span class="cs-val">Permanent · cannot be edited or deleted</span></div>`;
+}
+
+function resetWizard() {
+  correctionType = null;
+  currentStep = 1;
+  document.querySelectorAll('.step-panel').forEach((p,i) => p.classList.toggle('active', i===0));
+  document.querySelectorAll('.ct-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('step1-next').disabled = true;
+  document.getElementById('step3-next').disabled = true;
+  if (document.getElementById('reason-select')) document.getElementById('reason-select').value = '';
+  [1,2,3,4].forEach(i => {
+    const dot = document.getElementById('sd-'+i);
+    if (dot) { dot.className = 'si-dot ' + (i===1?'active':'pending'); dot.textContent = i; }
+    if (i<4) { const l=document.getElementById('sl-'+i); if(l) l.classList.remove('done'); }
+  });
+}
+
+function checkReasonFilled() {
+  const v = document.getElementById('reason-select').value;
+  document.getElementById('step3-next').disabled = !v;
+}
+
+// ── POST ACTIONS ──────────────────────────────────────────────────────────────
+function postCorrection() {
+  if (!selectedGift) return;
+  const g = GIFTS.find(f => f.id===selectedGift.id);
+  g.status = 'corrected';
+  renderGiftList();
+  addAuditEntry({
+    id: 'AUD-NEW-'+(Date.now()),
+    type: {donor:'Donor reclassification',fund:'Fund reclassification',both:'Donor & fund reclassification',amount:'Amount correction'}[correctionType],
+    ts: 'Just now',
+    user: 'Current user',
+    from: {donor:g.donor, fund:g.fund, amt:'$'+g.amt.toLocaleString()+'.00', check:'#'+g.check},
+    to:   {donor:g.donor+' (corrected)', fund:g.fund+' (corrected)', amt:'$'+g.amt.toLocaleString()+'.00', check:'#'+g.check},
+    reason: document.getElementById('reason-select').value + (document.getElementById('reason-notes').value ? ' — '+document.getElementById('reason-notes').value : ''),
+    receiptAction: document.getElementById('receipt-toggle').classList.contains('on') ? 'Receipt reissued to corrected record.' : 'No receipt change.',
+    hash: Math.random().toString(36).substr(2,32),
+  });
+  showSnack('Correction posted and audit trail updated', 'green');
+  resetWizard();
+  clearSelection();
+  setTab('audit', document.querySelectorAll('.rt-tab')[2]);
+}
+
+function postReversal() {
+  if (!selectedGift) return;
+  const g = GIFTS.find(f => f.id===selectedGift.id);
+  g.status = 'reversed';
+  renderGiftList();
+  addAuditEntry({
+    id: 'AUD-NSF-'+(Date.now()),
+    type: 'NSF reversal — ' + (document.getElementById('nsf-type').value||'returned check'),
+    ts: 'Just now',
+    user: 'Current user',
+    from: {donor:g.donor, fund:g.fund, amt:'$'+g.amt.toLocaleString()+'.00', check:'#'+g.check},
+    to:   {donor:'—', fund:'—', amt:'$0.00 (reversed)', check:'NSF ref: '+(document.getElementById('nsf-ref').value||'TRC-pending')},
+    reason: 'Bank return: '+(document.getElementById('nsf-type').value||'NSF')+'. Return date: '+(document.getElementById('nsf-date').value||'today')+'. '+((document.querySelector('#tab-reversal textarea')||{}).value||''),
+    receiptAction: 'Tax receipt voided. Gift officer task created.',
+    hash: Math.random().toString(36).substr(2,32),
+  });
+  showSnack('NSF reversal posted — all downstream actions completed', 'red');
+  clearSelection();
+  setTab('audit', document.querySelectorAll('.rt-tab')[2]);
+}
+
+function addAuditEntry(entry) {
+  AUDIT_LOG.unshift(entry);
+  renderAuditLog();
+}
+
+function clearSelection() {
+  selectedGift = null;
+  renderGiftList();
+  document.getElementById('correct-empty').style.display='flex';
+  document.getElementById('correct-content').style.display='none';
+  document.getElementById('reversal-empty').style.display='flex';
+  document.getElementById('reversal-content').style.display='none';
+}
+
+// ── AUDIT RENDER ──────────────────────────────────────────────────────────────
+function renderAuditLog() {
+  const typeColors = {
+    'Donor reclassification':     {bg:var_('bluep'), ico:var_('blue')},
+    'Fund reclassification':      {bg:var_('greenl'),ico:var_('green')},
+    'Donor & fund reclassification':{bg:'#EDE9FE',ico:'#7C3AED'},
+    'Amount correction':          {bg:var_('amberl'),ico:var_('amber')},
+  };
+  document.getElementById('audit-entries').innerHTML = AUDIT_LOG.map(e => {
+    const isNSF = e.type.toLowerCase().includes('nsf') || e.type.toLowerCase().includes('reversal') || e.type.toLowerCase().includes('check return');
+    const iconBg  = isNSF ? 'var(--redl)' : 'var(--bluep)';
+    const iconStr = isNSF ? '#DC2626' : 'var(--blue)';
+    return `<div class="audit-entry">
+      <div class="ae-head">
+        <div class="ae-icon" style="background:${iconBg}">
+          ${isNSF
+            ? `<svg viewBox="0 0 12 12" fill="none" stroke="${iconStr}" stroke-width="1.4" stroke-linecap="round"><path d="M2 2l8 8M10 2L2 10"/></svg>`
+            : `<svg viewBox="0 0 12 12" fill="none" stroke="${iconStr}" stroke-width="1.4" stroke-linecap="round"><path d="M2 6h8M7 3l3 3-3 3"/></svg>`}
+        </div>
+        <span class="ae-type">${e.type}</span>
+        <span class="ae-ts">${e.ts}</span>
+        <span class="ae-user" style="margin-left:8px">· ${e.user}</span>
+        <span class="immutable-badge">Immutable</span>
+      </div>
+      <div class="ae-body">
+        <div>
+          <div class="ae-field" style="margin-bottom:6px">
+            <div class="ae-field-label" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);margin-bottom:4px">Original gift</div>
+            <div class="ae-field-change">
+              <span class="ae-old">${e.from.donor}</span>
+            </div>
+            <div class="ae-field-change">
+              <span class="ae-old">${e.from.fund}</span>
+            </div>
+            <div class="ae-field-change">
+              <span class="ae-old">${e.from.amt}</span>
+              <span class="ae-arrow">·</span>
+              <span style="font-size:11px;color:var(--text3)">Check ${e.from.check}</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="ae-field" style="margin-bottom:6px">
+            <div class="ae-field-label" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);margin-bottom:4px">Corrected to</div>
+            <div class="ae-field-change">
+              <span class="ae-new">${e.to.donor}</span>
+            </div>
+            <div class="ae-field-change">
+              <span class="ae-new">${e.to.fund}</span>
+            </div>
+            <div class="ae-field-change">
+              <span class="ae-new">${e.to.amt}</span>
+              <span class="ae-arrow">·</span>
+              <span style="font-size:11px;color:var(--text3)">${e.to.check}</span>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);padding-top:4px;border-top:.5px solid var(--border)">${e.receiptAction}</div>
+        </div>
+      </div>
+      <div class="ae-reason">
+        <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M5.5 2v3M5.5 7v.5"/><path d="M1 10L5.5 1 10 10H1z"/></svg>
+        <span><strong>Reason: </strong>${e.reason}</span>
+      </div>
+      <div class="ae-hash">
+        <div class="ae-hash-dot"></div>
+        Audit hash: ${e.hash}
+        <span style="margin-left:8px;font-size:10px;color:var(--text4)">Entry cannot be modified or deleted</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function var_(name) {
+  const map = {bluep:'#EFF6FF',greenl:'#DCFCE7',amberl:'#FEF3C7',blue:'#2563EB',green:'#15803D',amber:'#D97706'};
+  return map[name]||'#EEE';
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+function setTab(id, btn) {
+  document.querySelectorAll('.panel-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.rt-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── SNACK ─────────────────────────────────────────────────────────────────────
+function showSnack(msg, type='') {
+  const s = document.getElementById('snack');
+  document.getElementById('snack-text').textContent = msg;
+  s.className = 'snack show' + (type?' '+type:'');
+  setTimeout(()=>s.classList.remove('show'),3000);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+renderGiftList();
+renderAuditLog();
+</script>
+</body>
+</html>

@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas — Planned Giving</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0B1525;--ink2:#162035;--ink3:#1E2E48;
+  --gold:#A8760A;--gold2:#C49020;--goldl:#FDF6E3;--goldb:#FAECC0;--goldd:#6B4A04;
+  --navy:#0E1E35;--blue:#2563EB;--bluep:#EFF6FF;
+  --green:#166534;--greenl:#DCFCE7;--greend:#14532D;
+  --teal:#0D6E6E;--teall:#CCFBF1;
+  --rose:#9D174D;--rosel:#FCE7F3;
+  --slate:#475569;--slatel:#F1F5F9;
+  --text:#1E2D3D;--text2:#3D5166;--text3:#647B94;--text4:#94A8BC;
+  --border:#DDE6F0;--surf:#F7F9FC;--white:#FFFFFF;
+}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',sans-serif;background:#EEF2F8;color:var(--text);min-height:100vh}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--ink);padding:0 28px;height:54px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:60}
+.tb-mark{width:30px;height:30px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tb-mark svg{width:14px;height:14px}
+.tb-name{font-family:'Lora',serif;font-size:17px;color:white;font-style:italic}
+.tb-sep{width:1px;height:20px;background:rgba(255,255,255,.12)}
+.tb-trail{font-size:12px;color:rgba(255,255,255,.38);display:flex;align-items:center;gap:6px}
+.tb-trail b{color:rgba(255,255,255,.72);font-weight:500}
+.tb-trail s{color:rgba(255,255,255,.2);text-decoration:none}
+.tb-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tbtn{padding:5px 14px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;display:flex;align-items:center;gap:5px;border:none}
+.tbtn svg{width:11px;height:11px}
+.tbtn-ghost{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6)}
+.tbtn-ghost:hover{background:rgba(255,255,255,.13)}
+.tbtn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:white}
+.tbtn-gold:hover{opacity:.9}
+
+/* ── HERO ── */
+.module-hero{background:linear-gradient(135deg,#0B1525 0%,#14233A 50%,#1A2E40 100%);padding:32px 36px 28px;position:relative;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.05)}
+.mh-grain{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");pointer-events:none}
+.mh-glow{position:absolute;top:-80px;right:80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(168,118,10,.12) 0%,transparent 70%);pointer-events:none}
+.mh-inner{position:relative;max-width:1140px;margin:0 auto;display:flex;align-items:flex-start;gap:24px}
+.mh-icon{width:52px;height:52px;background:rgba(168,118,10,.2);border:1px solid rgba(168,118,10,.35);border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mh-icon svg{width:26px;height:26px;color:#D4A843}
+.mh-text{}
+.mh-eyebrow{font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:rgba(212,168,67,.6);margin-bottom:8px}
+.mh-title{font-family:'Lora',serif;font-size:28px;color:white;line-height:1.2;margin-bottom:6px;font-style:italic}
+.mh-sub{font-size:13px;color:rgba(255,255,255,.45);line-height:1.65;max-width:520px}
+.mh-stats{display:flex;gap:0;margin-left:auto;background:rgba(0,0,0,.25);border-radius:12px;overflow:hidden;flex-shrink:0;align-self:center}
+.mhs{padding:12px 20px;border-right:1px solid rgba(255,255,255,.07);text-align:center}
+.mhs:last-child{border-right:none}
+.mhs-val{font-family:'Lora',serif;font-size:22px;color:white;line-height:1;margin-bottom:3px}
+.mhs-val.gold{color:#D4A843}
+.mhs-val.green{color:#86EFAC}
+.mhs-lbl{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.32)}
+
+/* ── TAB NAV ── */
+.tab-nav{background:white;border-bottom:1px solid var(--border);padding:0 36px;display:flex;gap:0;max-width:none;overflow-x:auto}
+.tab{padding:13px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap;font-family:'DM Sans',sans-serif;background:none;border-top:none;border-left:none;border-right:none;border-bottom:2px solid transparent}
+.tab:hover{color:var(--text2)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);font-weight:600}
+
+/* ── MAIN CONTENT ── */
+.content{max-width:1140px;margin:0 auto;padding:28px 36px 80px;display:flex;flex-direction:column;gap:20px}
+
+/* ── VIEW PANELS ── */
+.view{display:none}
+.view.active{display:flex;flex-direction:column;gap:20px}
+
+/* ── LEGACY SOCIETY VIEW ── */
+.ls-banner{background:linear-gradient(135deg,var(--goldd),var(--gold));border-radius:16px;padding:24px 28px;display:flex;align-items:center;gap:20px;position:relative;overflow:hidden}
+.ls-banner::after{content:'✦';position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:80px;color:rgba(255,255,255,.07);pointer-events:none}
+.lsb-icon{width:44px;height:44px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lsb-icon svg{width:22px;height:22px;color:white}
+.lsb-title{font-family:'Lora',serif;font-size:19px;color:white;margin-bottom:4px}
+.lsb-sub{font-size:13px;color:rgba(255,255,255,.65);line-height:1.6}
+.lsb-nums{display:flex;gap:24px;margin-left:auto;flex-shrink:0}
+.lsb-stat{text-align:center}
+.lsb-val{font-family:'Lora',serif;font-size:28px;color:white;line-height:1}
+.lsb-lbl{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+.lsb-action{padding:8px 18px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;flex-shrink:0}
+.lsb-action:hover{background:rgba(255,255,255,.22)}
+
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* ── CARDS ── */
+.card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.card-head{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;background:var(--surf)}
+.ch-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ch-icon svg{width:12px;height:12px}
+.ch-title{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.ch-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.card-body{padding:14px 18px}
+
+/* Legacy member rows */
+.member-table{width:100%;border-collapse:collapse;font-size:12px}
+.member-table th{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text4);padding:7px 0;border-bottom:1px solid var(--border);text-align:left}
+.member-table td{padding:10px 0;border-bottom:.5px solid var(--border);vertical-align:middle}
+.member-table tr:last-child td{border-bottom:none}
+.member-table tr:hover td{background:var(--surf)}
+.member-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0}
+.member-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:1px}
+.member-sub{font-size:11px;color:var(--text3)}
+.legacy-tier{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.tier-founding{background:var(--goldl);color:var(--goldd)}
+.tier-benefactor{background:#F5F0FF;color:#4B21B5}
+.tier-member{background:var(--slatel);color:var(--slate)}
+.mono-amt{font-family:'DM Mono',monospace;font-size:12px}
+
+/* Stewardship items */
+.stew-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:.5px solid var(--border);font-size:12px}
+.stew-row:last-child{border-bottom:none}
+.stew-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.stew-body{flex:1;line-height:1.55;color:var(--text2)}
+.stew-due{font-size:11px;font-weight:600;flex-shrink:0;padding:2px 8px;border-radius:20px}
+.due-overdue{background:var(--rosel);color:var(--rose)}
+.due-soon{background:var(--goldb);color:var(--goldd)}
+.due-ok{background:var(--greenl);color:var(--greend)}
+
+/* Prospect card */
+.prospect-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:.5px solid var(--border);cursor:pointer;transition:background .1s}
+.prospect-row:last-child{border-bottom:none}
+.prospect-row:hover{background:var(--surf);margin:0 -18px;padding:9px 18px}
+.pr-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;flex-shrink:0}
+.pr-name{font-size:12px;font-weight:500;color:var(--text);flex:1}
+.pr-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.pr-signal{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px}
+.sig-strong{background:var(--goldl);color:var(--goldd)}
+.sig-medium{background:var(--slatel);color:var(--slate)}
+
+/* ── BEQUEST PIPELINE VIEW ── */
+.pipeline-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.ps-card{background:white;border:1px solid var(--border);border-radius:12px;padding:16px 18px;transition:all .15s;cursor:pointer}
+.ps-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(11,21,37,.07)}
+.ps-card.sel{border-color:var(--gold);box-shadow:0 0 0 3px rgba(168,118,10,.1)}
+.psc-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.psc-icon svg{width:16px;height:16px}
+.psc-val{font-family:'Lora',serif;font-size:24px;color:var(--text);line-height:1;margin-bottom:3px}
+.psc-lbl{font-size:11px;color:var(--text3)}
+.psc-sub{font-size:10px;color:var(--text4);margin-top:4px}
+
+/* Kanban-style pipeline */
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kol{background:var(--surf);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.kol-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px}
+.kol-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.kol-title{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.kol-count{font-size:11px;font-weight:600;padding:1px 7px;border-radius:20px;background:white;border:1px solid var(--border);color:var(--text3)}
+.kol-body{padding:8px}
+.bq-card{background:white;border:1px solid var(--border);border-radius:9px;padding:11px 13px;margin-bottom:7px;cursor:pointer;transition:all .12s}
+.bq-card:hover{border-color:var(--gold);box-shadow:0 2px 10px rgba(168,118,10,.08)}
+.bq-card:last-child{margin-bottom:0}
+.bq-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px}
+.bq-type{font-size:10px;color:var(--text3);margin-bottom:6px}
+.bq-amt{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--gold)}
+.bq-meta{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.bq-officer{font-size:10px;color:var(--text4)}
+.bq-due{font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px}
+.add-card{display:flex;align-items:center;justify-content:center;gap:5px;padding:9px;border:1px dashed var(--border);border-radius:8px;cursor:pointer;font-size:11px;color:var(--text4);background:none;width:100%;font-family:'DM Sans',sans-serif;transition:all .12s}
+.add-card:hover{border-color:var(--gold);color:var(--gold)}
+.add-card svg{width:11px;height:11px}
+
+/* ── QCD WORKFLOW VIEW ── */
+.qcd-banner{background:var(--greenl);border:1px solid #BBF7D0;border-radius:14px;padding:18px 22px;display:flex;align-items:flex-start;gap:14px;margin-bottom:0}
+.qcdb-icon{width:38px;height:38px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.qcdb-icon svg{width:17px;height:17px;color:white}
+.qcdb-title{font-size:14px;font-weight:600;color:var(--greend);margin-bottom:4px;font-family:'Lora',serif}
+.qcdb-body{font-size:12px;color:var(--green);line-height:1.7}
+
+.qcd-table{width:100%;border-collapse:collapse;font-size:12px}
+.qcd-table th{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.6);background:var(--ink);padding:9px 16px;border-right:1px solid rgba(255,255,255,.07);text-align:left;white-space:nowrap}
+.qcd-table th:last-child{border-right:none}
+.qcd-table td{padding:11px 16px;border-bottom:.5px solid var(--border);vertical-align:middle;color:var(--text2)}
+.qcd-table tr:hover td{background:var(--surf)}
+.qcd-table tr:last-child td{border-bottom:none}
+.qcd-status{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.qs-pending{background:var(--goldb);color:var(--goldd)}
+.qs-ack{background:var(--greenl);color:var(--greend)}
+.qs-review{background:var(--rosel);color:var(--rose)}
+
+/* IRS compliance box */
+.irs-box{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.irs-head{background:var(--ink);padding:14px 18px;display:flex;align-items:center;gap:10px}
+.irs-title{font-family:'Lora',serif;font-size:16px;color:white;font-style:italic;flex:1}
+.irs-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(168,118,10,.25);border:1px solid rgba(168,118,10,.4);color:#D4A843}
+.irs-body{padding:18px}
+.irs-rule{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:.5px solid var(--border);font-size:12px}
+.irs-rule:last-child{border-bottom:none}
+.irs-check{width:18px;height:18px;border-radius:50%;background:var(--greenl);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.irs-check svg{width:9px;height:9px;color:var(--green)}
+.irs-warn{width:18px;height:18px;border-radius:50%;background:var(--goldb);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.irs-warn svg{width:9px;height:9px;color:var(--goldd)}
+.irs-text{flex:1;color:var(--text2);line-height:1.55}
+.irs-text b{color:var(--text)}
+
+/* Letter preview */
+.letter-card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.lc-head{background:var(--surf);border-bottom:1px solid var(--border);padding:12px 18px;display:flex;align-items:center;gap:10px}
+.lc-title{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.lc-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--greenl);color:var(--greend)}
+.letter-paper{margin:16px;background:var(--goldl);border:1px solid var(--goldb);border-radius:10px;padding:22px 24px}
+.lp-org{font-family:'Lora',serif;font-size:14px;color:var(--goldd);font-weight:600;margin-bottom:2px}
+.lp-sub{font-size:11px;color:var(--gold);margin-bottom:14px}
+.lp-date{font-size:12px;color:var(--text3);margin-bottom:12px}
+.lp-addr{font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.7}
+.lp-salut{font-family:'Lora',serif;font-size:14px;color:var(--text);margin-bottom:10px}
+.lp-body{font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:12px}
+.lp-irs-box{background:white;border:1px solid var(--goldb);border-radius:8px;padding:12px 14px;margin:12px 0;font-size:12px;color:var(--goldd);line-height:1.7;font-style:italic}
+.lp-close{font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:14px}
+.lp-sig{font-family:'Lora',serif;font-size:14px;color:var(--text);margin-bottom:2px}
+.lp-sig-sub{font-size:11px;color:var(--text3)}
+.lp-actions{display:flex;gap:8px;padding:14px 18px;border-top:1px solid var(--border);background:var(--surf)}
+.la-btn{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--border);background:white;color:var(--text2);transition:all .12s}
+.la-btn:hover{background:var(--surf)}
+.la-btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:white;border:none}
+.la-btn-gold:hover{opacity:.9}
+
+/* ── GURU BOX ── */
+.guru-box{background:linear-gradient(135deg,#100825,#1A1040,#0E1E35);border-radius:14px;padding:18px;position:relative;overflow:hidden}
+.guru-box::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(124,58,237,.12);pointer-events:none}
+.guru-eyebrow{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(196,181,253,.5);margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.guru-eyebrow svg{width:12px;height:12px;color:#C4B5FD}
+.guru-chips{display:flex;flex-direction:column;gap:6px;margin-bottom:11px}
+.guru-chip{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:8px 12px;font-size:12px;color:rgba(255,255,255,.55);cursor:pointer;transition:all .12s;font-style:italic;line-height:1.5}
+.guru-chip:hover{background:rgba(255,255,255,.1);color:white;border-color:rgba(196,181,253,.3)}
+.guru-chip::before{content:'"';color:rgba(196,181,253,.35)}
+.guru-chip::after{content:'"';color:rgba(196,181,253,.35)}
+.guru-row{display:flex;gap:8px}
+.guru-input{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;font-size:12px;color:white;font-family:'DM Sans',sans-serif;outline:none}
+.guru-input::placeholder{color:rgba(255,255,255,.28)}
+.guru-input:focus{border-color:rgba(196,181,253,.4)}
+.guru-send{padding:8px 14px;background:#7C3AED;border:none;border-radius:8px;font-size:12px;font-weight:600;color:white;cursor:pointer;font-family:'DM Sans',sans-serif}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:fadeUp .35s ease both}
+.a1{animation-delay:.04s}.a2{animation-delay:.09s}.a3{animation-delay:.14s}.a4{animation-delay:.19s}.a5{animation-delay:.24s}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(11,21,37,.6);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px)}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:white;border-radius:16px;width:520px;max-width:90vw;overflow:hidden;transform:translateY(16px);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-head{background:var(--ink);padding:18px 22px;display:flex;align-items:center;gap:10px}
+.modal-title{font-family:'Lora',serif;font-size:18px;color:white;font-style:italic;flex:1}
+.modal-close{background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.6);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center}
+.modal-body{padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+.mf-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px}
+.mf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mf-input,.mf-select,.mf-textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surf);outline:none}
+.mf-input:focus,.mf-select:focus,.mf-textarea:focus{border-color:var(--gold);background:white}
+.mf-textarea{min-height:72px;resize:vertical}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--surf)}
+.mf-btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--border);background:white;color:var(--text2)}
+.mf-btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:white;border:none}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-mark"><svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7.5" stroke="white" stroke-width="1.5"/><path d="M5.5 9.5C6.5 11.5 9 13 9 13s2.5-1.5 3.5-3.5S12 5 9 5 4.5 7.5 5.5 9.5z" fill="white" fill-opacity=".9"/></svg></div>
+  <span class="tb-name">Atlas</span>
+  <div class="tb-sep"></div>
+  <div class="tb-trail">Fundraising <s>›</s> <b>Planned Giving</b></div>
+  <div class="tb-right">
+    <button class="tbtn tbtn-ghost">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6 1v7M3 5.5l3 3 3-3"/><path d="M1.5 10.5h9"/></svg>
+      Export report
+    </button>
+    <button class="tbtn tbtn-gold" onclick="openModal()">
+      <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
+      Log bequest intention
+    </button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="module-hero">
+  <div class="mh-grain"></div>
+  <div class="mh-glow"></div>
+  <div class="mh-inner">
+    <div class="mh-icon">
+      <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+        <path d="M13 3C13 3 10 1.5 8 3.5c-1.5 1.5-1 4 0 6L13 15l5-5.5c1-2 1.5-4.5 0-6C16 1.5 13 3 13 3z"/>
+        <path d="M13 15v8M9 20h8"/>
+      </svg>
+    </div>
+    <div class="mh-text">
+      <div class="mh-eyebrow">Planned giving · Diocese of Fort Worth</div>
+      <div class="mh-title">Legacy &amp; Planned Giving</div>
+      <div class="mh-sub">Legacy society stewardship, bequest intention tracking, and QCD workflow — connected to every donor's complete giving history in Atlas.</div>
+    </div>
+    <div class="mh-stats">
+      <div class="mhs"><div class="mhs-val gold">84</div><div class="mhs-lbl">Legacy members</div></div>
+      <div class="mhs"><div class="mhs-val">$14.2M</div><div class="mhs-lbl">Expectancy pipeline</div></div>
+      <div class="mhs"><div class="mhs-val green">$1.84M</div><div class="mhs-lbl">Received YTD</div></div>
+      <div class="mhs"><div class="mhs-val">23</div><div class="mhs-lbl">QCDs this year</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB NAV -->
+<div class="tab-nav">
+  <button class="tab active" onclick="setTab('legacy',this)">Legacy society</button>
+  <button class="tab" onclick="setTab('pipeline',this)">Bequest pipeline</button>
+  <button class="tab" onclick="setTab('qcd',this)">QCD / IRA rollovers</button>
+</div>
+
+<div class="content">
+
+  <!-- ══════════════════════════════════════════════
+       LEGACY SOCIETY VIEW
+  ══════════════════════════════════════════════ -->
+  <div class="view active" id="view-legacy">
+
+    <!-- Banner -->
+    <div class="ls-banner anim a1">
+      <div class="lsb-icon"><svg viewBox="0 0 22 22" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M11 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z"/></svg></div>
+      <div>
+        <div class="lsb-title">Bishop's Legacy Society — Diocese of Fort Worth</div>
+        <div class="lsb-sub">Recognising those who have included the Diocese in their estate plans. Three membership tiers based on confirmed gift type and lifetime giving history.</div>
+      </div>
+      <div class="lsb-nums">
+        <div class="lsb-stat"><div class="lsb-val">12</div><div class="lsb-lbl">Founding</div></div>
+        <div class="lsb-stat"><div class="lsb-val">28</div><div class="lsb-lbl">Benefactor</div></div>
+        <div class="lsb-stat"><div class="lsb-val">44</div><div class="lsb-lbl">Member</div></div>
+      </div>
+      <button class="lsb-action">Print society roster</button>
+    </div>
+
+    <div class="two-col anim a2">
+
+      <!-- Member table -->
+      <div class="card">
+        <div class="card-head">
+          <div class="ch-icon" style="background:var(--goldl)"><svg viewBox="0 0 12 12" fill="none" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="2.5"/><path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4"/></svg></div>
+          <span class="ch-title">Legacy society members</span>
+          <span class="ch-badge" style="background:var(--goldl);color:var(--goldd)">84 total</span>
+        </div>
+        <div class="card-body" style="padding:0 18px">
+          <table class="member-table">
+            <thead><tr><th style="width:32px"></th><th>Member</th><th>Tier</th><th>Gift type</th><th>LTG</th><th>Joined</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="member-av" style="background:linear-gradient(135deg,#1B4CD8,#0B3A9E)">JO</div></td>
+                <td><div class="member-name">O'Brien, James &amp; Patricia</div><div class="member-sub">Cathedral Parish</div></td>
+                <td><span class="legacy-tier tier-founding">✦ Founding</span></td>
+                <td style="color:var(--text3);font-size:11px">Bequest · CRT</td>
+                <td class="mono-amt">$47,500</td>
+                <td style="font-size:11px;color:var(--text3)">2019</td>
+              </tr>
+              <tr>
+                <td><div class="member-av" style="background:linear-gradient(135deg,#0D6E6E,#065151)">BW</div></td>
+                <td><div class="member-name">Walsh, Bishop Robert (estate)</div><div class="member-sub">Diocese</div></td>
+                <td><span class="legacy-tier tier-founding">✦ Founding</span></td>
+                <td style="color:var(--text3);font-size:11px">Bequest</td>
+                <td class="mono-amt">$312,000</td>
+                <td style="font-size:11px;color:var(--text3)">2015</td>
+              </tr>
+              <tr>
+                <td><div class="member-av" style="background:linear-gradient(135deg,#6D28D9,#4C1D95)">MS</div></td>
+                <td><div class="member-name">Sullivan, Margaret T.</div><div class="member-sub">Holy Cross Parish</div></td>
+                <td><span class="legacy-tier tier-benefactor">◆ Benefactor</span></td>
+                <td style="color:var(--text3);font-size:11px">Bequest · QCD</td>
+                <td class="mono-amt">$28,400</td>
+                <td style="font-size:11px;color:var(--text3)">2021</td>
+              </tr>
+              <tr>
+                <td><div class="member-av" style="background:linear-gradient(135deg,#D97706,#92400E)">DH</div></td>
+                <td><div class="member-name">Harrington, David &amp; Susan</div><div class="member-sub">Cathedral Parish</div></td>
+                <td><span class="legacy-tier tier-benefactor">◆ Benefactor</span></td>
+                <td style="color:var(--text3);font-size:11px">Bequest</td>
+                <td class="mono-amt">$18,750</td>
+                <td style="font-size:11px;color:var(--text3)">2022</td>
+              </tr>
+              <tr>
+                <td><div class="member-av" style="background:linear-gradient(135deg,#15803D,#064E32)">PK</div></td>
+                <td><div class="member-name">Kim, Dr. Patricia</div><div class="member-sub">St. Michael's</div></td>
+                <td><span class="legacy-tier tier-member">Member</span></td>
+                <td style="color:var(--text3);font-size:11px">Bequest</td>
+                <td class="mono-amt">$12,200</td>
+                <td style="font-size:11px;color:var(--text3)">2023</td>
+              </tr>
+              <tr>
+                <td><div class="member-av" style="background:linear-gradient(135deg,#B01C5A,#7F1154)">PM</div></td>
+                <td><div class="member-name">Morrison, Peter &amp; Clare</div><div class="member-sub">St. Catherine's</div></td>
+                <td><span class="legacy-tier tier-member">Member</span></td>
+                <td style="color:var(--text3);font-size:11px">Bequest</td>
+                <td class="mono-amt">$9,800</td>
+                <td style="font-size:11px;color:var(--text3)">2024</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+
+        <!-- Stewardship actions -->
+        <div class="card anim a3">
+          <div class="card-head">
+            <div class="ch-icon" style="background:var(--rosel)"><svg viewBox="0 0 12 12" fill="none" stroke="var(--rose)" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="3" width="9" height="8" rx="1.5"/><path d="M1.5 6.5h9M4 3V1.5M8 3V1.5"/></svg></div>
+            <span class="ch-title">Stewardship actions due</span>
+            <span class="ch-badge" style="background:var(--rosel);color:var(--rose)">4 overdue</span>
+          </div>
+          <div class="card-body">
+            <div class="stew-row">
+              <div class="stew-dot" style="background:var(--rose)"></div>
+              <div class="stew-body"><b>O'Brien, James</b> — Annual legacy society letter from Bishop. Member since 2019 — no letter sent in 2026.</div>
+              <span class="stew-due due-overdue">Overdue</span>
+            </div>
+            <div class="stew-row">
+              <div class="stew-dot" style="background:var(--rose)"></div>
+              <div class="stew-body"><b>Harrington, David &amp; Susan</b> — 2nd anniversary recognition. Joined legacy society May 2022.</div>
+              <span class="stew-due due-overdue">Overdue</span>
+            </div>
+            <div class="stew-row">
+              <div class="stew-dot" style="background:var(--gold)"></div>
+              <div class="stew-body"><b>Sullivan, Margaret</b> — Birthday acknowledgement. DOB May 28 — in 9 days.</div>
+              <span class="stew-due due-soon">May 28</span>
+            </div>
+            <div class="stew-row">
+              <div class="stew-dot" style="background:var(--gold)"></div>
+              <div class="stew-body"><b>Kim, Patricia</b> — 1-year anniversary thank-you call from development director.</div>
+              <span class="stew-due due-soon">Jun 3</span>
+            </div>
+            <div class="stew-row">
+              <div class="stew-dot" style="background:var(--green)"></div>
+              <div class="stew-body"><b>Morrison, Peter &amp; Clare</b> — Annual impact letter — scheduled for June 1.</div>
+              <span class="stew-due due-ok">Jun 1</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prospect identification -->
+        <div class="card anim a4">
+          <div class="card-head">
+            <div class="ch-icon" style="background:var(--goldl)"><svg viewBox="0 0 12 12" fill="none" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round"><path d="M6 1.5l1.5 3L11 5 8.5 7.5l.5 3.5L6 9.5 3 11l.5-3.5L1 5l3.5-.5z"/></svg></div>
+            <span class="ch-title">Guru-identified prospects</span>
+            <span class="ch-badge" style="background:var(--goldl);color:var(--goldd)">Not yet approached</span>
+          </div>
+          <div class="card-body">
+            <div class="prospect-row">
+              <div class="pr-av" style="background:#1B4CD8">WA</div>
+              <div><div class="pr-name">Andrews, William &amp; Grace</div><div class="pr-sub">Age 74 · LTG $42K · iWave capacity $250K+</div></div>
+              <span class="pr-signal sig-strong">Strong</span>
+            </div>
+            <div class="prospect-row">
+              <div class="pr-av" style="background:#6D28D9">RN</div>
+              <div><div class="pr-name">Nguyen, Robert &amp; Helen</div><div class="pr-sub">Age 71 · LTG $28K · QCD donor · no bequest on file</div></div>
+              <span class="pr-signal sig-strong">Strong</span>
+            </div>
+            <div class="prospect-row">
+              <div class="pr-av" style="background:#0D6E6E">CM</div>
+              <div><div class="pr-name">McCarthy, Colleen</div><div class="pr-sub">Age 68 · LTG $19K · 22-year donor</div></div>
+              <span class="pr-signal sig-medium">Moderate</span>
+            </div>
+            <div class="prospect-row">
+              <div class="pr-av" style="background:#B01C5A">TF</div>
+              <div><div class="pr-name">Fitzgerald, Thomas &amp; Anne</div><div class="pr-sub">Age 66 · LTG $14K · RE board member</div></div>
+              <span class="pr-signal sig-medium">Moderate</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Guru box -->
+    <div class="guru-box anim a5">
+      <div class="guru-eyebrow"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M6 4v3M6 8.5v.3"/></svg>Guru AI — legacy &amp; planned giving queries</div>
+      <div class="guru-chips">
+        <div class="guru-chip" onclick="fillGuru(this)">Show me donors over 70 with lifetime giving above $25,000 and no bequest intention on file</div>
+        <div class="guru-chip" onclick="fillGuru(this)">Which legacy society members have not received a stewardship communication in over 12 months</div>
+        <div class="guru-chip" onclick="fillGuru(this)">List QCD donors who gave last year but have not given this year — sorted by last gift amount</div>
+      </div>
+      <div class="guru-row">
+        <input class="guru-input" id="guru-input" type="text" placeholder="Ask Guru about planned giving prospects, legacy stewardship, or QCD patterns…">
+        <button class="guru-send" onclick="sendGuru()">Ask ↗</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       BEQUEST PIPELINE VIEW
+  ══════════════════════════════════════════════ -->
+  <div class="view" id="view-pipeline">
+
+    <div class="pipeline-summary anim a1">
+      <div class="ps-card">
+        <div class="psc-icon" style="background:var(--goldl)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"><path d="M8 2l2 5h5l-4 3 1.5 5L8 12l-4.5 3L5 10 1 7h5z"/></svg></div>
+        <div class="psc-val">28</div>
+        <div class="psc-lbl">Intention confirmed</div>
+        <div class="psc-sub">$8.4M estimated value</div>
+      </div>
+      <div class="ps-card">
+        <div class="psc-icon" style="background:var(--bluep)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round"><path d="M2 8h12M8 2l6 6-6 6"/></svg></div>
+        <div class="psc-val">19</div>
+        <div class="psc-lbl">In cultivation</div>
+        <div class="psc-sub">$4.1M estimated value</div>
+      </div>
+      <div class="ps-card">
+        <div class="psc-icon" style="background:var(--greenl)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="5" width="12" height="9" rx="2"/><path d="M5 5V3.5a3 3 0 016 0V5"/></svg></div>
+        <div class="psc-val">7</div>
+        <div class="psc-lbl">In probate / estate</div>
+        <div class="psc-sub">$1.84M expected receipt</div>
+      </div>
+      <div class="ps-card">
+        <div class="psc-icon" style="background:var(--teall)"><svg viewBox="0 0 16 16" fill="none" stroke="var(--teal)" stroke-width="1.5" stroke-linecap="round"><path d="M2 12l3-4 2.5 2.5 3-4 3 4"/></svg></div>
+        <div class="psc-val">$14.2M</div>
+        <div class="psc-lbl">Total expectancy pipeline</div>
+        <div class="psc-sub">All stages combined</div>
+      </div>
+    </div>
+
+    <div class="kanban anim a2">
+      <!-- Identification -->
+      <div class="kol">
+        <div class="kol-head">
+          <div class="kol-dot" style="background:#94A3B8"></div>
+          <span class="kol-title">Identification</span>
+          <span class="kol-count">12</span>
+        </div>
+        <div class="kol-body">
+          <div class="bq-card">
+            <div class="bq-name">McCarthy, Colleen</div>
+            <div class="bq-type">Suspected bequest · signals from QCD pattern</div>
+            <div class="bq-amt">Unknown</div>
+            <div class="bq-meta"><span class="bq-officer">Assigned: Janet W.</span><span class="bq-due" style="background:var(--bluep);color:var(--blue)">First contact</span></div>
+          </div>
+          <div class="bq-card">
+            <div class="bq-name">Fitzgerald, Thomas &amp; Anne</div>
+            <div class="bq-type">Bequest prospect · iWave signal + age 66</div>
+            <div class="bq-amt">Est. $75K–$150K</div>
+            <div class="bq-meta"><span class="bq-officer">Assigned: Mike D.</span><span class="bq-due" style="background:var(--amberl);color:var(--amberd)">Approach soon</span></div>
+          </div>
+          <div class="bq-card">
+            <div class="bq-name">Andrews, William &amp; Grace</div>
+            <div class="bq-type">Bequest prospect · age 74 · high capacity</div>
+            <div class="bq-amt">Est. $200K+</div>
+            <div class="bq-meta"><span class="bq-officer">Assigned: Mike D.</span><span class="bq-due" style="background:var(--rosel);color:var(--rose)">Priority</span></div>
+          </div>
+          <button class="add-card" onclick="openModal()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>Add prospect</button>
+        </div>
+      </div>
+
+      <!-- Cultivation -->
+      <div class="kol">
+        <div class="kol-head">
+          <div class="kol-dot" style="background:#3B82F6"></div>
+          <span class="kol-title">Cultivation</span>
+          <span class="kol-count">19</span>
+        </div>
+        <div class="kol-body">
+          <div class="bq-card">
+            <div class="bq-name">Nguyen, Robert &amp; Helen</div>
+            <div class="bq-type">Bequest conversation in progress</div>
+            <div class="bq-amt">Est. $120K–$200K</div>
+            <div class="bq-meta"><span class="bq-officer">Assigned: Sarah R.</span><span class="bq-due" style="background:var(--greenl);color:var(--greend)">On track</span></div>
+          </div>
+          <div class="bq-card">
+            <div class="bq-name">Burke, Catherine &amp; James</div>
+            <div class="bq-type">CRT conversation — meeting Jun 8</div>
+            <div class="bq-amt">Est. $350K–$500K</div>
+            <div class="bq-meta"><span class="bq-officer">Assigned: Mike D.</span><span class="bq-due" style="background:var(--amberl);color:var(--amberd)">Jun 8 meeting</span></div>
+          </div>
+          <div class="bq-card">
+            <div class="bq-name">Ryan, Michael &amp; Patricia</div>
+            <div class="bq-type">Legacy society interest — attorney referral</div>
+            <div class="bq-amt">Est. $85K</div>
+            <div class="bq-meta"><span class="bq-officer">Assigned: Janet W.</span><span class="bq-due" style="background:var(--greenl);color:var(--greend)">Active</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Intention confirmed -->
+      <div class="kol">
+        <div class="kol-head">
+          <div class="kol-dot" style="background:var(--gold2)"></div>
+          <span class="kol-title">Intention confirmed</span>
+          <span class="kol-count">28</span>
+        </div>
+        <div class="kol-body">
+          <div class="bq-card" style="border-color:var(--goldb)">
+            <div class="bq-name">O'Brien, James &amp; Patricia</div>
+            <div class="bq-type">Bequest — residual estate · pledge card signed</div>
+            <div class="bq-amt">Est. $400K–$750K</div>
+            <div class="bq-meta"><span class="bq-officer">Assigned: Mike D.</span><span class="bq-due" style="background:var(--goldl);color:var(--goldd)">✦ Founding</span></div>
+          </div>
+          <div class="bq-card" style="border-color:var(--goldb)">
+            <div class="bq-name">Harrington, David &amp; Susan</div>
+            <div class="bq-type">Bequest — specific amount $250K</div>
+            <div class="bq-amt">$250,000</div>
+            <div class="bq-meta"><span class="bq-officer">Assigned: Mike D.</span><span class="bq-due" style="background:var(--goldl);color:var(--goldd)">Confirmed</span></div>
+          </div>
+          <div class="bq-card" style="border-color:var(--goldb)">
+            <div class="bq-name">Sullivan, Margaret T.</div>
+            <div class="bq-type">Bequest + QCD ongoing</div>
+            <div class="bq-amt">Est. $150K</div>
+            <div class="bq-meta"><span class="bq-officer">Assigned: Sarah R.</span><span class="bq-due" style="background:var(--goldl);color:var(--goldd)">Active stewardship</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estate / probate -->
+      <div class="kol">
+        <div class="kol-head">
+          <div class="kol-dot" style="background:var(--green)"></div>
+          <span class="kol-title">Estate / probate</span>
+          <span class="kol-count">7</span>
+        </div>
+        <div class="kol-body">
+          <div class="bq-card" style="border-color:#BBF7D0">
+            <div class="bq-name">Walsh, Bishop Robert (estate)</div>
+            <div class="bq-type">Probate complete · distribution pending</div>
+            <div class="bq-amt">$312,000 expected</div>
+            <div class="bq-meta"><span class="bq-officer">Estate attorney: T. Moore</span><span class="bq-due" style="background:var(--greenl);color:var(--greend)">Q3 2026</span></div>
+          </div>
+          <div class="bq-card" style="border-color:#BBF7D0">
+            <div class="bq-name">Costello, Barbara (estate)</div>
+            <div class="bq-type">In probate — 6 months remaining est.</div>
+            <div class="bq-amt">$84,000 expected</div>
+            <div class="bq-meta"><span class="bq-officer">Executor: Frank Costello</span><span class="bq-due" style="background:var(--amberl);color:var(--amberd)">Q4 2026</span></div>
+          </div>
+          <div class="bq-card" style="border-color:#BBF7D0">
+            <div class="bq-name">Grant, Thomas (estate)</div>
+            <div class="bq-type">Estate opened — executor contacted</div>
+            <div class="bq-amt">$45,000 expected</div>
+            <div class="bq-meta"><span class="bq-officer">Executor: Sarah Grant</span><span class="bq-due" style="background:var(--bluep);color:var(--blue)">2027</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       QCD WORKFLOW VIEW
+  ══════════════════════════════════════════════ -->
+  <div class="view" id="view-qcd">
+
+    <div class="qcd-banner anim a1">
+      <div class="qcdb-icon"><svg viewBox="0 0 17 17" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="2" width="13" height="13" rx="2"/><path d="M5 8.5l2 2 5-5"/></svg></div>
+      <div>
+        <div class="qcdb-title">Qualified Charitable Distribution (QCD) workflow</div>
+        <div class="qcdb-body">Gifts made directly from an IRA to the Diocese by donors aged 70½ or older. Hard credit goes directly to the donor — no goods or services language on the acknowledgement. Atlas automatically applies the correct IRS-compliant acknowledgement template when a gift is coded as QCD. <b>23 QCDs received in 2026 · $184,200 total.</b></div>
+      </div>
+    </div>
+
+    <div class="two-col anim a2">
+
+      <div class="card">
+        <div class="card-head">
+          <div class="ch-icon" style="background:var(--greenl)"><svg viewBox="0 0 12 12" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M2 10l2.5-2.5 2 2 2.5-3 2.5 3"/><path d="M2 2v10h10"/></svg></div>
+          <span class="ch-title">QCD gifts — 2026 YTD</span>
+          <span class="ch-badge" style="background:var(--greenl);color:var(--greend)">23 gifts · $184,200</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="qcd-table">
+            <thead>
+              <tr>
+                <th>Donor</th>
+                <th>IRA custodian</th>
+                <th style="text-align:right">Amount</th>
+                <th>Fund</th>
+                <th>Date received</th>
+                <th>Acknowledgement</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div style="font-size:13px;font-weight:500;color:var(--text)">Sullivan, Margaret T.</div><div style="font-size:11px;color:var(--text3)">Age 74 · DOB Mar 12, 1952</div></td>
+                <td style="font-size:12px;color:var(--text3)">Fidelity Investments</td>
+                <td style="font-family:'DM Mono',monospace;font-weight:500;text-align:right">$10,000</td>
+                <td style="font-size:12px;color:var(--text3)">CMA Annual Fund</td>
+                <td style="font-size:12px;color:var(--text3)">Apr 15, 2026</td>
+                <td><span class="qcd-status qs-ack">✓ Sent Apr 16</span></td>
+              </tr>
+              <tr>
+                <td><div style="font-size:13px;font-weight:500;color:var(--text)">O'Brien, James</div><div style="font-size:11px;color:var(--text3)">Age 72 · DOB Sep 4, 1953</div></td>
+                <td style="font-size:12px;color:var(--text3)">Vanguard</td>
+                <td style="font-family:'DM Mono',monospace;font-weight:500;text-align:right">$25,000</td>
+                <td style="font-size:12px;color:var(--text3)">Cathedral Capital</td>
+                <td style="font-size:12px;color:var(--text3)">May 2, 2026</td>
+                <td><span class="qcd-status qs-ack">✓ Sent May 3</span></td>
+              </tr>
+              <tr>
+                <td><div style="font-size:13px;font-weight:500;color:var(--text)">Harrington, David</div><div style="font-size:11px;color:var(--text3)">Age 71 · DOB Jan 28, 1955</div></td>
+                <td style="font-size:12px;color:var(--text3)">Schwab</td>
+                <td style="font-family:'DM Mono',monospace;font-weight:500;text-align:right">$15,000</td>
+                <td style="font-size:12px;color:var(--text3)">CMA Annual Fund</td>
+                <td style="font-size:12px;color:var(--text3)">May 8, 2026</td>
+                <td><span class="qcd-status qs-pending">Pending review</span></td>
+              </tr>
+              <tr>
+                <td><div style="font-size:13px;font-weight:500;color:var(--text)">Walsh, Thomas</div><div style="font-size:11px;color:var(--text3)">Age 69 · ⚠ under 70½</div></td>
+                <td style="font-size:12px;color:var(--text3)">Fidelity Investments</td>
+                <td style="font-family:'DM Mono',monospace;font-weight:500;text-align:right">$5,000</td>
+                <td style="font-size:12px;color:var(--text3)">General Fund</td>
+                <td style="font-size:12px;color:var(--text3)">May 10, 2026</td>
+                <td><span class="qcd-status qs-review">Age review req.</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+
+        <div class="irs-box anim a3">
+          <div class="irs-head">
+            <div style="width:28px;height:28px;background:rgba(168,118,10,.25);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 13 13" fill="none" stroke="#D4A843" stroke-width="1.3" stroke-linecap="round" width="13" height="13"><path d="M6.5 2v3.5M6.5 9v.5"/><path d="M1 12L6.5 1 12 12H1z"/></svg></div>
+            <span class="irs-title">IRS compliance rules — auto-applied by Atlas</span>
+            <span class="irs-badge">IRS Notice 2007-7</span>
+          </div>
+          <div class="irs-body">
+            <div class="irs-rule">
+              <div class="irs-check"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg></div>
+              <div class="irs-text"><b>Donor must be age 70½ or older</b> at time of distribution. Atlas flags donors under this threshold and holds the QCD coding for review.</div>
+            </div>
+            <div class="irs-rule">
+              <div class="irs-check"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg></div>
+              <div class="irs-text"><b>Transfer must be direct from IRA custodian</b> to the Diocese. Donor cannot receive the funds first. Atlas records the custodian name on every QCD gift.</div>
+            </div>
+            <div class="irs-rule">
+              <div class="irs-check"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg></div>
+              <div class="irs-text"><b>Acknowledgement must state no goods or services</b> were provided in exchange. The Atlas QCD template includes this language automatically.</div>
+            </div>
+            <div class="irs-rule">
+              <div class="irs-check"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg></div>
+              <div class="irs-text"><b>Annual QCD limit: $105,000 per donor</b> (2026, indexed). Atlas tracks cumulative QCDs per donor per calendar year and alerts when approaching the limit.</div>
+            </div>
+            <div class="irs-rule">
+              <div class="irs-warn"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 2v2.5M4.5 7v.3"/><path d="M1 8.5L4.5 1.5 8 8.5H1z"/></svg></div>
+              <div class="irs-text"><b>QCDs cannot be made to donor-advised funds.</b> If a donor attempts a QCD to a DAF-held fund, Atlas flags for review before the gift is coded.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="letter-card anim a4">
+          <div class="lc-head">
+            <div class="ch-icon" style="background:var(--goldl)"><svg viewBox="0 0 12 12" fill="none" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h9a.7.7 0 01.7.7v6a.7.7 0 01-.7.7h-9a.7.7 0 01-.7-.7V3.7a.7.7 0 01.7-.7z"/><path d="M1.5 3.5l4.5 3 4.5-3"/></svg></div>
+            <span class="ch-title">QCD acknowledgement — IRS-compliant template</span>
+            <span class="lc-badge">Auto-generated on posting</span>
+          </div>
+          <div class="letter-paper">
+            <div class="lp-org">Catholic Diocese of Fort Worth</div>
+            <div class="lp-sub">Development Office · 800 West Loop 820 South · Fort Worth, TX 76108</div>
+            <div class="lp-date">May 3, 2026</div>
+            <div class="lp-addr">Mr. James O'Brien<br>124 Heritage Oak Drive<br>Fort Worth, TX 76116</div>
+            <div class="lp-salut">Dear James,</div>
+            <div class="lp-body">We are grateful to confirm the receipt of a Qualified Charitable Distribution from your Individual Retirement Account to the Catholic Diocese of Fort Worth.</div>
+            <div class="lp-irs-box">
+              <b>Gift details for IRS purposes:</b><br>
+              Amount received: $25,000.00<br>
+              Date of distribution: May 2, 2026<br>
+              Fund designated: Cathedral Restoration Capital Campaign<br>
+              IRA custodian: Vanguard<br><br>
+              <b>Important:</b> No goods or services were provided to you in exchange for this contribution. This letter serves as your written acknowledgement for IRS purposes. The Diocese of Fort Worth is a 501(c)(3) organisation (EIN: [XX-XXXXXXX]).
+            </div>
+            <div class="lp-close">Your generosity directly supports the restoration of our Cathedral and the mission of the Diocese. We are deeply grateful.</div>
+            <div class="lp-sig">Kaitlyn Novicky</div>
+            <div class="lp-sig-sub">Development Associate · Catholic Diocese of Fort Worth</div>
+          </div>
+          <div class="lp-actions">
+            <button class="la-btn-gold la-btn">Send to donor</button>
+            <button class="la-btn">Download PDF</button>
+            <button class="la-btn">Edit template</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- LOG BEQUEST INTENTION MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Log bequest intention</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="mf-label">Donor</div>
+        <input class="mf-input" type="text" placeholder="Search donor name or ID…">
+      </div>
+      <div class="mf-grid">
+        <div>
+          <div class="mf-label">Gift type</div>
+          <select class="mf-select">
+            <option>Bequest — specific amount</option>
+            <option>Bequest — percentage of estate</option>
+            <option>Bequest — residual estate</option>
+            <option>Bequest — contingent</option>
+            <option>Charitable remainder trust</option>
+            <option>Charitable lead trust</option>
+            <option>Gift annuity</option>
+            <option>Life insurance</option>
+            <option>QCD / IRA rollover (recurring)</option>
+          </select>
+        </div>
+        <div>
+          <div class="mf-label">Estimated value</div>
+          <input class="mf-input" type="text" placeholder="$0.00 or Unknown">
+        </div>
+      </div>
+      <div class="mf-grid">
+        <div>
+          <div class="mf-label">Fund designation</div>
+          <select class="mf-select">
+            <option>As directed by donor</option>
+            <option>CMA Annual Fund</option>
+            <option>Cathedral Capital</option>
+            <option>General unrestricted</option>
+            <option>Endowment</option>
+            <option>School scholarship</option>
+          </select>
+        </div>
+        <div>
+          <div class="mf-label">Legacy society tier</div>
+          <select class="mf-select">
+            <option>Member (standard)</option>
+            <option>◆ Benefactor ($10K+ LTG)</option>
+            <option>✦ Founding ($50K+ LTG)</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <div class="mf-label">Date intention confirmed</div>
+        <input class="mf-input" type="date">
+      </div>
+      <div>
+        <div class="mf-label">Notes (conversation summary, documentation on file, etc.)</div>
+        <textarea class="mf-textarea" placeholder="Note the conversation, any documentation signed, attorney name if known, specific wishes the donor expressed…"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="mf-btn" onclick="closeModal()">Cancel</button>
+      <button class="mf-btn mf-btn-gold" onclick="closeModal()">Save intention</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function setTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('view-' + id).classList.add('active');
+}
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function fillGuru(el) {
+  document.getElementById('guru-input').value = el.textContent.trim();
+  document.getElementById('guru-input').focus();
+}
+function sendGuru() {
+  const v = document.getElementById('guru-input').value.trim();
+  if (!v) return;
+  document.getElementById('guru-input').value = '';
+  document.getElementById('guru-input').placeholder = '✓ Query sent to Guru — results loading…';
+  setTimeout(() => { document.getElementById('guru-input').placeholder = 'Ask Guru about planned giving prospects, legacy stewardship, or QCD patterns…'; }, 2500);
+}
+</script>
+</body>
+</html>
