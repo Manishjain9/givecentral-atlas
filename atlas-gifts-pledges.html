@@ -321,6 +321,31 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .gt-row .amt { font-weight:600; text-align:right; font-variant-numeric:tabular-nums; }
 .kebab { width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:6px; cursor:pointer; color:var(--text-3); }
 .kebab:hover { background:var(--surface); color:var(--text); }
+/* row actions menu */
+.gt-menu{position:fixed;z-index:100020;min-width:194px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 14px 40px rgba(15,23,42,.18);padding:5px;display:none}
+.gt-menu.show{display:block}
+.gt-menu button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;color:var(--text-2);padding:8px 10px;border-radius:7px;cursor:pointer}
+.gt-menu button:hover{background:var(--surface);color:var(--text)}
+.gt-menu button svg{width:13px;height:13px;flex-shrink:0;color:var(--text-3)}
+.gt-menu button.danger{color:var(--rose)}
+.gt-menu button.danger svg{color:var(--rose)}
+.gt-menu .sep{height:1px;background:var(--border-soft);margin:4px 2px}
+.gt-scrim{position:fixed;inset:0;background:rgba(15,23,42,.4);opacity:0;pointer-events:none;transition:opacity .2s;z-index:100025}
+.gt-scrim.show{opacity:1;pointer-events:auto}
+.void-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-46%) scale(.98);width:420px;max-width:92vw;background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.3);z-index:100026;opacity:0;pointer-events:none;transition:.2s}
+.void-modal.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.void-modal .vm-h{padding:18px 20px 4px;display:flex;gap:12px;align-items:flex-start}
+.void-modal .vm-ic{width:38px;height:38px;border-radius:10px;background:var(--rose-light);color:var(--rose);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.void-modal .vm-ic svg{width:18px;height:18px}
+.void-modal .vm-t{font-size:17px;font-weight:700;color:var(--text)}
+.void-modal .vm-b{padding:6px 20px 16px 70px;font-size:13px;color:var(--text-2);line-height:1.55}
+.void-modal .vm-card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 13px;margin-top:10px;font-size:12.5px}
+.void-modal .vm-card b{color:var(--text)}
+.void-modal .vm-f{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.void-modal .vbtn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border-radius:8px;padding:8px 16px;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text-2)}
+.void-modal .vbtn.danger{background:var(--rose);border-color:var(--rose);color:#fff}
+.gt-row.voided{opacity:.55}
+.gt-row.voided .amt{text-decoration:line-through}
 
 .tag { display:inline-flex; font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:5px; }
 .tag.blue { background:var(--blue-light); color:var(--blue); }
@@ -1999,6 +2024,71 @@ body {
 
   /* ─── Initial render ─── */
   if (document.getElementById('ph-rows')) applyFilters();
+})();
+</script>
+
+<!-- ── Recent-gifts row actions menu + void modal ── -->
+<div class="gt-menu" id="gt-menu"></div>
+<div class="gt-scrim" id="gt-scrim" onclick="closeVoid()"></div>
+<div class="void-modal" id="void-modal" role="dialog" aria-modal="true"></div>
+<script id="gt-row-actions">
+(function(){
+  var menu = document.getElementById('gt-menu');
+  var vm = document.getElementById('void-modal');
+  var scrim = document.getElementById('gt-scrim');
+  var curRow = null;
+  function ggToast(m){ var t=document.getElementById('atlas-rescue-toast'); if(!t){alert(m);return;} var x=t.querySelector('.msg'); if(x)x.textContent=m; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},2300); }
+  function closeMenu(){ menu.classList.remove('show'); }
+  function rowInfo(row){
+    var donor=(row.querySelector('.nm')||{}).textContent||'this gift';
+    var amt=(row.querySelector('.amt')||{}).textContent||'';
+    var rc=row.children[4]; var rtext=rc?rc.textContent.trim():'';
+    return { donor:donor, amt:amt, issued:/issued/i.test(rtext), href:row.getAttribute('href')||'atlas-donor-360.html', row:row };
+  }
+  window.openGiftMenu=function(e, kebab){
+    e.preventDefault(); e.stopPropagation();
+    curRow = kebab.closest('.gt-row'); var info=rowInfo(curRow);
+    var ICO={view:"<path d='M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z'/><circle cx='7' cy='7' r='1.8'/>",
+      edit:"<path d='M2 12l1-3 6.5-6.5 2 2L5 11z'/>",
+      resend:"<rect x='1.5' y='3' width='11' height='8' rx='1.5'/><path d='M1.5 4L7 8l5.5-4'/>",
+      void:"<circle cx='7' cy='7' r='5.5'/><path d='M3.2 3.2l7.6 7.6'/>"};
+    function btn(act,label,cls){ return '<button class="'+(cls||'')+'" onclick="ggAction(\''+act+'\')"><svg viewBox=\'0 0 14 14\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'>'+ICO[act]+'</svg>'+label+'</button>'; }
+    var html = btn('view','View') + btn('edit','Edit');
+    if(info.issued) html += btn('resend','Resend receipt');
+    html += '<div class="sep"></div>' + btn('void','Void gift','danger');
+    menu.innerHTML = html;
+    menu.classList.add('show');
+    var r=kebab.getBoundingClientRect(), mw=menu.offsetWidth, mh=menu.offsetHeight;
+    var left=Math.min(r.right-mw, window.innerWidth-mw-8); if(left<8)left=8;
+    var top=r.bottom+6; if(top+mh>window.innerHeight-8) top=r.top-mh-6;
+    menu.style.left=left+'px'; menu.style.top=top+'px';
+  };
+  window.ggAction=function(a){
+    closeMenu(); if(!curRow) return; var info=rowInfo(curRow);
+    if(a==='view') window.location=info.href;
+    else if(a==='edit') window.location='atlas-gift-entry.html';
+    else if(a==='resend') ggToast('Receipt re-sent to '+info.donor);
+    else if(a==='void') openVoid(info);
+  };
+  window.openVoid=function(info){
+    vm.innerHTML='<div class="vm-h"><span class="vm-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 3v5M8 11v.5"/><path d="M1.5 14L8 1.5 14.5 14H1.5z"/></svg></span><div><div class="vm-t">Void this gift?</div></div></div>'
+      +'<div class="vm-b">Voiding reverses this gift — the donor’s totals are reduced and any issued receipt is marked void. This is written to the audit trail and cannot be undone.'
+      +'<div class="vm-card"><b>'+info.donor+'</b> · '+info.amt+'</div></div>'
+      +'<div class="vm-f"><button class="vbtn" onclick="closeVoid()">Cancel</button><button class="vbtn danger" onclick="confirmVoid()">Void gift</button></div>';
+    vm.classList.add('show'); scrim.classList.add('show');
+  };
+  window.closeVoid=function(){ vm.classList.remove('show'); scrim.classList.remove('show'); };
+  window.confirmVoid=function(){
+    if(curRow){ var info=rowInfo(curRow); curRow.classList.add('voided');
+      var rc=curRow.children[4]; if(rc) rc.innerHTML='<span class="tag" style="background:var(--rose-light);color:var(--rose)">Voided</span>';
+      ggToast('Gift voided · '+info.donor); }
+    closeVoid();
+  };
+  document.querySelectorAll('[data-gp-view="recent"] .gt-row .kebab').forEach(function(k){
+    k.addEventListener('click', function(e){ openGiftMenu(e, k); });
+  });
+  document.addEventListener('click', function(e){ if(!e.target.closest('#gt-menu') && !e.target.closest('.kebab')) closeMenu(); });
+  window.addEventListener('scroll', closeMenu, true);
 })();
 </script>
 
