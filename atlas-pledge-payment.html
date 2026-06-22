@@ -303,6 +303,23 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .pledge-pick .balance { font-weight:600; color:var(--text); text-align:right; font-variant-numeric:tabular-nums; }
 
 .row2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+/* soft-credit editor (matches pledge-create) */
+.soft-row{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:8px}
+.soft-row .sc-av{width:34px;height:34px;border-radius:50%;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.soft-row .sc-av-new{background:#EEF2F7;color:var(--text-3)}
+.soft-row .sc-nm{flex:1;font-weight:600;color:var(--text);font-size:13.5px;display:flex;align-items:center}
+.soft-row .sc-name{flex:1;min-width:0}
+.soft-row .sc-pct{width:62px;text-align:center;padding:6px 8px}
+.soft-row .sc-pctsign{color:var(--text-3);font-size:13px}
+.soft-row .sc-x{color:var(--text-3);cursor:pointer;font-size:20px;line-height:1;padding:0 2px}
+.soft-row .sc-x:hover{color:var(--rose)}
+.sc-status{border-radius:9px;padding:9px 13px;font-size:12.5px;font-weight:600;margin-top:2px}
+.sc-status.ok{background:var(--green-light);color:#166534}
+.sc-status.warn{background:var(--amber-light);color:#92400E}
+.sc-add{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--blue);background:var(--blue-pale);border:1px solid var(--blue-light);border-radius:8px;padding:7px 13px;cursor:pointer}
+.sc-add:hover{filter:brightness(.97)}
+.sc-even{font-size:12.5px;color:var(--text-3);cursor:pointer}
+.sc-even:hover{color:var(--blue);text-decoration:underline}
 .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
 
 .balance-impact { background:linear-gradient(135deg, var(--blue-pale), white); border:1px solid var(--blue-light); border-radius:11px; padding:18px 22px; }
@@ -685,7 +702,7 @@ body {
         <div class="row3">
           <div>
             <span class="lbl">Amount<span class="req">*</span></span>
-            <input class="fld" value="$10,000.00" style="font-size:18px;font-weight:600">
+            <input class="fld" id="pp-amt" value="$10,000.00" style="font-size:18px;font-weight:600" oninput="if(window.recomputeSoft)recomputeSoft()">
           </div>
           <div>
             <span class="lbl">Payment date<span class="req">*</span></span>
@@ -721,7 +738,31 @@ body {
       </div>
 
       <div class="pp-card">
-        <h3><span class="step">4</span> Notes</h3>
+        <h3><span class="step">4</span> Soft credits</h3>
+        <p class="muted" style="font-size:11.5px;margin:-6px 0 12px">Inherited from <strong>PL-2026-094</strong> — adjust if this payment should credit differently.</p>
+        <span class="lbl">Soft-credit recipients</span>
+        <div id="sc-list" style="margin-top:6px">
+          <div class="soft-row">
+            <div class="sc-av">PS</div>
+            <div class="sc-nm">Peter Smith <span style="margin-left:8px;font-size:10px;font-weight:600;color:var(--blue);background:var(--blue-pale);border-radius:20px;padding:2px 8px">spouse-linked</span></div>
+            <input class="sc-pct fld" value="100" oninput="recomputeSoft()">
+            <span class="sc-pctsign">%</span>
+            <span class="sc-x" onclick="removeRecipient(this)">×</span>
+          </div>
+        </div>
+        <div class="sc-status ok" id="sc-status">✓ 100% assigned — $10,000 total soft credited</div>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:10px">
+          <button class="sc-add" onclick="addRecipient()">+ Add recipient</button>
+          <span class="sc-even" onclick="distributeEvenly()">Distribute evenly</span>
+        </div>
+        <div class="row2 mt-12" style="margin-top:16px">
+          <div><span class="lbl">Solicitor (gift officer)</span><select class="fld"><option selected>Sarah Reynolds (you)</option><option>Bridget McCarthy</option></select></div>
+          <div><span class="lbl">Solicitation method</span><select class="fld"><option selected>In-person visit</option><option>Phone call</option><option>Email</option><option>Event</option><option>Mail</option></select></div>
+        </div>
+      </div>
+
+      <div class="pp-card">
+        <h3><span class="step">5</span> Notes</h3>
         <textarea class="fld" placeholder="Optional internal note">Margaret confirmed second instalment over phone on May 3. Check arrived in mail today, postmarked May 1.</textarea>
       </div>
 
@@ -1270,6 +1311,48 @@ body {
 })();
 </script>
 <!-- end Atlas Dead-CTA Rescue -->
+
+<script id="pp-soft-credits">
+(function(){
+  function recompute(){
+    var rows=document.querySelectorAll('#sc-list .soft-row'); var sum=0;
+    rows.forEach(function(r){ sum += parseFloat(r.querySelector('.sc-pct').value)||0; });
+    var af=document.getElementById('pp-amt');
+    var total=af?(parseFloat(af.value.replace(/[^0-9.]/g,''))||0):10000;
+    var credited=Math.round(total*sum/100);
+    var st=document.getElementById('sc-status'); if(!st)return;
+    if(Math.abs(sum-100)<0.01){ st.className='sc-status ok'; st.textContent='✓ 100% assigned — $'+credited.toLocaleString()+' total soft credited'; }
+    else if(sum>100){ st.className='sc-status warn'; st.textContent='⚠ '+sum+'% assigned — '+(sum-100)+'% over-allocated'; }
+    else { st.className='sc-status warn'; st.textContent='⚠ '+sum+'% assigned — '+(100-sum)+'% unassigned'; }
+  }
+  window.recomputeSoft=recompute;
+  window.addRecipient=function(){
+    var row=document.createElement('div'); row.className='soft-row';
+    row.innerHTML='<div class="sc-av sc-av-new">+</div>'
+      +'<input class="sc-name fld" placeholder="Search donor or type a name…" oninput="scNameInput(this)">'
+      +'<input class="sc-pct fld" value="0" oninput="recomputeSoft()"><span class="sc-pctsign">%</span>'
+      +'<span class="sc-x" onclick="removeRecipient(this)">×</span>';
+    document.getElementById('sc-list').appendChild(row); recompute();
+    var inp=row.querySelector('.sc-name'); if(inp) inp.focus();
+  };
+  window.scNameInput=function(el){
+    var av=el.closest('.soft-row').querySelector('.sc-av'); var v=(el.value||'').trim();
+    if(!v){ av.textContent='+'; av.classList.add('sc-av-new'); return; }
+    var p=v.replace(/[.'’,]/g,'').split(/[\s&]+/).filter(Boolean);
+    av.textContent=(((p[0]||'')[0]||'')+((p[1]||'')[0]||'')).toUpperCase()||'?'; av.classList.remove('sc-av-new');
+  };
+  window.removeRecipient=function(x){
+    if(document.querySelectorAll('#sc-list .soft-row').length<=1) return;
+    x.closest('.soft-row').remove(); recompute();
+  };
+  window.distributeEvenly=function(){
+    var rows=document.querySelectorAll('#sc-list .soft-row'); var n=rows.length;
+    var base=Math.floor(100/n), rem=100-base*n;
+    rows.forEach(function(r,i){ r.querySelector('.sc-pct').value=base+(i<rem?1:0); });
+    recompute();
+  };
+})();
+</script>
 
 </body>
 </html>
