@@ -871,7 +871,7 @@ body {
           <a class="btn btn-ghost" href="atlas-gift-entry.html">Record next instalment</a>
           <a class="btn btn-ghost" href="atlas-email-compose.html">Send pledge statement</a>
           <a class="btn btn-ghost" href="atlas-task-modal.html">Add reminder task</a>
-          <a class="btn btn-ghost" style="color:var(--rose)">Write off pledge</a>
+          <a class="btn btn-ghost" id="wo-trigger" style="color:var(--rose)" onclick="openWriteOff()">Write off pledge</a>
         </div>
       </div>
 
@@ -881,6 +881,99 @@ body {
 </div>
 
 </div>
+
+<!-- ════════════════════════════════════════════════════════
+     Write-off pledge · confirmation flow
+     ════════════════════════════════════════════════════════ -->
+<style>
+  #wo-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);z-index:100020;display:none;align-items:center;justify-content:center;padding:24px}
+  #wo-overlay.show{display:flex}
+  .wo-modal{background:#fff;border-radius:16px;width:100%;max-width:520px;box-shadow:0 24px 64px rgba(15,23,42,.28);overflow:hidden;animation:woUp .22s ease}
+  @keyframes woUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .wo-head{display:flex;gap:13px;align-items:flex-start;padding:20px 22px 14px}
+  .wo-ic{width:38px;height:38px;border-radius:10px;background:var(--rose-light);color:var(--rose);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .wo-ic svg{width:19px;height:19px}
+  .wo-head h3{font-size:17px;font-weight:700;color:var(--ink,#0E1E35);margin:0 0 2px}
+  .wo-head p{font-size:12.5px;color:#64748B;margin:0;line-height:1.45}
+  .wo-body{padding:0 22px 6px;max-height:60vh;overflow-y:auto}
+  .wo-warn{background:var(--rose-light);border:1px solid #FBCFE8;border-radius:9px;padding:11px 13px;font-size:12.5px;color:#9D174D;line-height:1.5;margin-bottom:14px}
+  .wo-warn strong{font-weight:700}
+  .wo-amt{display:flex;align-items:baseline;justify-content:space-between;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:9px;padding:12px 14px;margin-bottom:14px}
+  .wo-amt .l{font-size:12px;color:#64748B}
+  .wo-amt .v{font-family:'DM Serif Display',serif;font-size:22px;color:var(--rose)}
+  .wo-f{margin-bottom:13px}
+  .wo-f label{display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:5px}
+  .wo-f select,.wo-f textarea{width:100%;border:1px solid #CBD5E1;border-radius:8px;padding:9px 11px;font-size:13px;font-family:inherit;color:#0F172A;background:#fff}
+  .wo-f textarea{resize:vertical;min-height:62px}
+  .wo-ack{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;cursor:pointer;line-height:1.45;padding:2px 0 6px}
+  .wo-ack input{margin-top:2px;flex-shrink:0}
+  .wo-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 22px 20px;border-top:1px solid #F1F5F9;margin-top:6px}
+  .pl-tag.woff{background:var(--rose-light);color:var(--rose)}
+  .num.struck{text-decoration:line-through;opacity:.55}
+</style>
+<div id="wo-overlay" onclick="if(event.target===this)closeWriteOff()">
+  <div class="wo-modal" role="dialog" aria-modal="true" aria-labelledby="wo-title">
+    <div class="wo-head">
+      <div class="wo-ic"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6.5v4M10 13.4v.2"/><path d="M8.6 3.2 2.3 14a1.6 1.6 0 0 0 1.4 2.4h12.6A1.6 1.6 0 0 0 17.7 14L11.4 3.2a1.6 1.6 0 0 0-2.8 0Z"/></svg></div>
+      <div>
+        <h3 id="wo-title">Write off pledge</h3>
+        <p>PL-2026-094 · Margaret O'Brien · Cathedral Restoration</p>
+      </div>
+    </div>
+    <div class="wo-body">
+      <div class="wo-warn"><strong>This closes the outstanding balance and removes it from forecasts and pledge reports.</strong> A reversing audit entry is created and the donor's record is updated. This action can only be undone by re-opening the pledge.</div>
+      <div class="wo-amt"><span class="l">Balance to write off</span><span class="v" id="wo-amount">$20,000.00</span></div>
+      <div class="wo-f">
+        <label for="wo-reason">Reason <span style="color:var(--rose)">*</span></label>
+        <select id="wo-reason" onchange="woValidate()">
+          <option value="">Select a reason…</option>
+          <option>Donor deceased — no estate recovery</option>
+          <option>Donor financial hardship</option>
+          <option>Uncollectible after follow-up</option>
+          <option>Pledge cancelled by donor</option>
+          <option>Duplicate / entered in error</option>
+          <option>Other (note required)</option>
+        </select>
+      </div>
+      <div class="wo-f">
+        <label for="wo-note">Note for the audit trail</label>
+        <textarea id="wo-note" placeholder="Add context — referenced in the audit entry and visible to the DBA team." oninput="woValidate()"></textarea>
+      </div>
+      <label class="wo-ack">
+        <input type="checkbox" id="wo-ack" onchange="woValidate()">
+        <span>I confirm this write-off has DBA approval. Write-offs over $5,000 require sign-off per the gift acceptance policy.</span>
+      </label>
+    </div>
+    <div class="wo-foot">
+      <button class="btn btn-ghost" onclick="closeWriteOff()">Cancel</button>
+      <button class="btn btn-rose" id="wo-confirm" disabled onclick="confirmWriteOff()">Write off $20,000</button>
+    </div>
+  </div>
+</div>
+<script>
+function openWriteOff(){ document.getElementById('wo-overlay').classList.add('show'); woValidate(); }
+function closeWriteOff(){ document.getElementById('wo-overlay').classList.remove('show'); }
+function woValidate(){
+  var reason = document.getElementById('wo-reason').value;
+  var note = document.getElementById('wo-note').value.trim();
+  var ack = document.getElementById('wo-ack').checked;
+  var needsNote = reason.indexOf('Other') === 0;
+  var ok = !!reason && ack && (!needsNote || note.length > 2);
+  document.getElementById('wo-confirm').disabled = !ok;
+}
+function confirmWriteOff(){
+  closeWriteOff();
+  // Reflect the written-off state in the hero
+  var tag = document.querySelector('.pl-tag'); if(tag){ tag.classList.add('woff'); tag.textContent = '✕ Written off · ' + (document.getElementById('wo-reason').value.split('—')[0].split('(')[0].trim()); }
+  var out = document.querySelectorAll('.pl-stat .num')[1]; if(out){ out.classList.add('struck'); }
+  var statusNum = document.querySelectorAll('.pl-stat .num')[3]; if(statusNum){ statusNum.textContent = 'Written off'; statusNum.style.color = 'var(--rose)'; }
+  var statusLbl = document.querySelectorAll('.pl-stat .lbl')[3]; if(statusLbl){ statusLbl.textContent = 'Closed · audit logged'; }
+  var fill = document.querySelector('.pl-progress-fill'); if(fill){ fill.style.background = 'var(--rose)'; }
+  var trig = document.getElementById('wo-trigger'); if(trig){ trig.textContent = 'Pledge written off'; trig.style.pointerEvents='none'; trig.style.opacity='.5'; trig.removeAttribute('onclick'); }
+  if (window.atlasToast) window.atlasToast('Pledge written off · $20,000 closed · audit entry created · DBA approval recorded');
+}
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeWriteOff(); });
+</script>
 
 <!-- ════════════════════════════════════════════════════════
      Atlas Dead-CTA Rescue · v1
@@ -916,7 +1009,7 @@ body {
     'csv':                         { type:'toast', msg:'CSV exported · check downloads' },
     'report':                      { type:'toast', msg:'Report generated · opening in a new tab' },
     'open all notification preferences': { type:'route', dest:'atlas-notifications.html' },
-    'write off pledge':            { type:'toast', msg:'Pledge written off · audit entry created · DBA approval required' },
+    'write off pledge':            { type:'special', fn:'writeOff' },
     'already accepted →':          { type:'toast', msg:'Prospect already in pipeline · jumping to their card' },
     'gifts & pledges':             { type:'route', dest:'atlas-gifts-pledges.html' },
     'gifts &amp; pledges':         { type:'route', dest:'atlas-gifts-pledges.html' },
@@ -1088,6 +1181,7 @@ body {
 
   // ── Special handlers ──
   var RESCUE_SPECIALS = {
+    writeOff: function(){ if (typeof openWriteOff === 'function') openWriteOff(); },
     markAllRead: function(){
       // Find unread notification items and clear their unread state
       var marks = document.querySelectorAll('.unread, .nf-row.unread, .notif-unread, [data-unread="true"]');

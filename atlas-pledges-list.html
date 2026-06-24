@@ -660,21 +660,21 @@ body {
     <div class="kpi fulfilled"><div class="l"><span class="pip"></span>Fulfilled this year</div><div class="v">7</div><div class="d">$244k closed-won</div></div>
   </div>
 
-  <div class="tabs">
-    <div class="tab on">Active <span class="ct">28</span></div>
-    <div class="tab">Lapsed <span class="ct">2</span></div>
-    <div class="tab">Fulfilled <span class="ct">7</span></div>
-    <div class="tab">Written off <span class="ct">1</span></div>
-    <div class="tab">All <span class="ct">38</span></div>
+  <div class="tabs" id="pl-tabs">
+    <div class="tab on" data-status="active" onclick="plTab(this)">Active <span class="ct">0</span></div>
+    <div class="tab" data-status="lapsed" onclick="plTab(this)">Lapsed <span class="ct">0</span></div>
+    <div class="tab" data-status="fulfilled" onclick="plTab(this)">Fulfilled <span class="ct">0</span></div>
+    <div class="tab" data-status="writtenoff" onclick="plTab(this)">Written off <span class="ct">0</span></div>
+    <div class="tab" data-status="all" onclick="plTab(this)">All <span class="ct">0</span></div>
   </div>
 
-  <div class="filterbar">
-    <div class="filter-chip applied">Status: Active <span style="margin-left:4px">×</span></div>
-    <div class="filter-chip">Campaign</div>
-    <div class="filter-chip">Solicitor</div>
-    <div class="filter-chip">Due range</div>
-    <div class="filter-chip">Amount</div>
-    <div class="right">Showing 8 of 28 · sort by Next due ↑</div>
+  <div class="filterbar" id="pl-filterbar">
+    <div class="filter-chip applied" id="chip-status" onclick="plClearStatus()">Status: Active <span style="margin-left:4px">×</span></div>
+    <div class="filter-chip" data-facet="campaign" onclick="plOpenFacet(event,this,'campaign')">Campaign <span class="cv"></span></div>
+    <div class="filter-chip" data-facet="solicitor" onclick="plOpenFacet(event,this,'solicitor')">Solicitor <span class="cv"></span></div>
+    <div class="filter-chip" data-facet="due" onclick="plOpenFacet(event,this,'due')">Due range <span class="cv"></span></div>
+    <div class="filter-chip" data-facet="amount" onclick="plOpenFacet(event,this,'amount')">Amount <span class="cv"></span></div>
+    <div class="right" id="pl-showing">Showing 0 of 0</div>
   </div>
 
   <div class="pledge-table">
@@ -696,7 +696,7 @@ body {
       <div class="due"><b>Jun 30, 2027</b><span>14d reminder set</span></div>
       <div class="amt">$20,000.00</div>
       <div>SR</div>
-      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+      <div class="kebab" role="button" tabindex="0" aria-label="Pledge actions" onclick="openPledgeMenu(event,this)"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
     </a>
 
     <a class="pl-row" href="atlas-pledge-detail.html">
@@ -706,7 +706,7 @@ body {
       <div class="due"><b>Jul 15, 2026</b><span>quarterly</span></div>
       <div class="amt">$37,500.00</div>
       <div>BM</div>
-      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+      <div class="kebab" role="button" tabindex="0" aria-label="Pledge actions" onclick="openPledgeMenu(event,this)"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
     </a>
 
     <a class="pl-row" href="atlas-pledge-detail.html">
@@ -716,7 +716,7 @@ body {
       <div class="due"><b>May 16, 2026</b><span style="color:var(--amber);font-weight:600">12 days</span></div>
       <div class="amt">$25,000.00</div>
       <div>SR</div>
-      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+      <div class="kebab" role="button" tabindex="0" aria-label="Pledge actions" onclick="openPledgeMenu(event,this)"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
     </a>
 
     <a class="pl-row" href="atlas-pledge-detail.html">
@@ -726,7 +726,7 @@ body {
       <div class="due"><b>Sep 1, 2026</b><span>annual</span></div>
       <div class="amt">$25,000.00</div>
       <div>BM</div>
-      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+      <div class="kebab" role="button" tabindex="0" aria-label="Pledge actions" onclick="openPledgeMenu(event,this)"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
     </a>
 
     <a class="pl-row" href="atlas-pledge-detail.html">
@@ -736,7 +736,7 @@ body {
       <div class="due"><b style="color:var(--rose)">82d overdue</b><span>last contact Apr 18</span></div>
       <div class="amt">$4,000.00</div>
       <div>BM</div>
-      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+      <div class="kebab" role="button" tabindex="0" aria-label="Pledge actions" onclick="openPledgeMenu(event,this)"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
     </a>
 
     <a class="pl-row" href="atlas-pledge-detail.html">
@@ -746,7 +746,7 @@ body {
       <div class="due"><b>May 15, 2026</b><span>monthly · 11 days</span></div>
       <div class="amt">$8,000.00</div>
       <div>SR</div>
-      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+      <div class="kebab" role="button" tabindex="0" aria-label="Pledge actions" onclick="openPledgeMenu(event,this)"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
     </a>
 
     <a class="pl-row" href="atlas-pledge-detail.html">
@@ -756,7 +756,7 @@ body {
       <div class="due"><b>Dec 31, 2026</b><span>annual</span></div>
       <div class="amt">$176,000.00</div>
       <div>BM</div>
-      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+      <div class="kebab" role="button" tabindex="0" aria-label="Pledge actions" onclick="openPledgeMenu(event,this)"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
     </a>
 
     <a class="pl-row" href="atlas-pledge-detail.html">
@@ -766,7 +766,37 @@ body {
       <div class="due"><b>Jun 1, 2026</b><span>annual · 28 days</span></div>
       <div class="amt">$50,000.00</div>
       <div>SR</div>
-      <div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+      <div class="kebab" role="button" tabindex="0" aria-label="Pledge actions" onclick="openPledgeMenu(event,this)"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+
+    <a class="pl-row" href="atlas-pledge-detail.html">
+      <div class="name"><span class="av" style="background:var(--teal)">D</span><div class="nm-text"><div class="nm">Donovan Estate</div><div class="sub">$120k · Planned Giving · bequest</div></div></div>
+      <div><span class="tag green">Fulfilled</span></div>
+      <div class="progress"><div class="bar"><div class="bar-f" style="width:100%;background:var(--green)"></div></div><span class="pct">100%</span></div>
+      <div class="due"><b>Completed</b><span>Mar 2, 2026</span></div>
+      <div class="amt">$0.00</div>
+      <div>BM</div>
+      <div class="kebab" role="button" tabindex="0" aria-label="Pledge actions" onclick="openPledgeMenu(event,this)"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+
+    <a class="pl-row" href="atlas-pledge-detail.html">
+      <div class="name"><span class="av" style="background:var(--green)">S</span><div class="nm-text"><div class="nm">St. Brigid Guild</div><div class="sub">$15k · Annual Fund</div></div></div>
+      <div><span class="tag green">Fulfilled</span></div>
+      <div class="progress"><div class="bar"><div class="bar-f" style="width:100%;background:var(--green)"></div></div><span class="pct">100%</span></div>
+      <div class="due"><b>Completed</b><span>Apr 28, 2026</span></div>
+      <div class="amt">$0.00</div>
+      <div>SR</div>
+      <div class="kebab" role="button" tabindex="0" aria-label="Pledge actions" onclick="openPledgeMenu(event,this)"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
+    </a>
+
+    <a class="pl-row" href="atlas-pledge-detail.html">
+      <div class="name"><span class="av" style="background:var(--rose)">C</span><div class="nm-text"><div class="nm">Callahan Memorial</div><div class="sub">$10k · Cathedral · 2-year</div></div></div>
+      <div><span class="tag rose">Written off</span></div>
+      <div class="progress"><div class="bar"><div class="bar-f" style="width:30%;background:var(--rose)"></div></div><span class="pct">30%</span></div>
+      <div class="due"><b>—</b><span>closed Feb 11, 2026</span></div>
+      <div class="amt" style="text-decoration:line-through;opacity:.5">$7,000.00</div>
+      <div>BM</div>
+      <div class="kebab" role="button" tabindex="0" aria-label="Pledge actions" onclick="openPledgeMenu(event,this)"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>
     </a>
 
   </div>
@@ -774,6 +804,468 @@ body {
 </div>
 
 </div>
+
+<!-- ════════════════════════════════════════════════════════
+     Per-row pledge actions menu (⋯)
+     ════════════════════════════════════════════════════════ -->
+<style>
+  #pl-menu{position:fixed;z-index:100030;min-width:206px;background:#fff;border:1px solid #E2E8F0;border-radius:11px;box-shadow:0 14px 40px rgba(15,23,42,.18);padding:6px;display:none;font-family:'DM Sans',sans-serif;animation:plMenuIn .14s ease}
+  #pl-menu.show{display:block}
+  @keyframes plMenuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  #pl-menu .pm-head{font-size:11px;color:#94A3B8;font-weight:600;padding:6px 10px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #pl-menu .pm-item{display:flex;align-items:center;gap:10px;padding:8px 10px;font-size:13px;color:#1E293B;border-radius:7px;cursor:pointer;white-space:nowrap}
+  #pl-menu .pm-item:hover{background:#F1F5F9}
+  #pl-menu .pm-item svg{width:15px;height:15px;flex-shrink:0;color:#64748B}
+  #pl-menu .pm-sep{height:1px;background:#F1F5F9;margin:5px 4px}
+  #pl-menu .pm-item.danger{color:var(--rose,#BE185D)}
+  #pl-menu .pm-item.danger svg{color:var(--rose,#BE185D)}
+  #pl-menu .pm-item.danger:hover{background:var(--rose-light,#FCE7F3)}
+  #pl-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#0F172A;color:#fff;padding:12px 18px;border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.2);font-size:13px;font-family:'DM Sans',sans-serif;z-index:100040;display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;max-width:460px}
+  #pl-toast.show{opacity:1;transform:translateX(-50%);pointer-events:auto}
+  #pl-toast .ico{width:22px;height:22px;border-radius:50%;background:#15803D;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+</style>
+<div id="pl-menu">
+  <div class="pm-head" id="pm-head">Pledge</div>
+  <div id="pm-items"></div>
+</div>
+<div id="pl-toast"><span class="ico">✓</span><span class="msg"></span></div>
+<script>
+(function(){
+  var menu = document.getElementById('pl-menu');
+  var toastEl = document.getElementById('pl-toast');
+  var ctx = { name:'', sub:'', amt:'', due:'', solicitor:'', row:null };
+  function plToast(msg){
+    toastEl.querySelector('.msg').textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(function(){ toastEl.classList.remove('show'); }, 3200);
+  }
+  window.__plToast = plToast;
+
+  // Icons keyed by action
+  var ICON = {
+    view:'<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7s2.2-4 6-4 6 4 6 4-2.2 4-6 4-6-4-6-4z"/><circle cx="7" cy="7" r="1.7"/></svg>',
+    payment:'<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1" y="3" width="12" height="8" rx="1.5"/><path d="M1 6h12"/></svg>',
+    schedule:'<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="10" rx="1.5"/><path d="M1.5 5.5h11M4.5 1v2.5M9.5 1v2.5"/></svg>',
+    reminder:'<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5a4 4 0 0 0-4 4c0 3-1.2 4-1.2 4h10.4S11 8.5 11 5.5a4 4 0 0 0-4-4zM5.6 12a1.5 1.5 0 0 0 2.8 0"/></svg>',
+    writeoff:'<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5v3M7 9.6v.2"/><path d="M6 2.2 1.4 10A1.1 1.1 0 0 0 2.4 11.6h9.2A1.1 1.1 0 0 0 12.6 10L8 2.2a1.1 1.1 0 0 0-2 0z"/></svg>',
+    receipt:'<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 1.5h8v11l-2-1.2-2 1.2-2-1.2-2 1.2z"/><path d="M5 4.5h4M5 7h4"/></svg>',
+    statement:'<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 1.5h6l2 2v9H3z"/><path d="M5 6h4M5 8.5h4"/></svg>',
+    audit:'<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="4.2"/><path d="M9 9l3 3"/></svg>',
+    reopen:'<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7a5 5 0 1 1 1.6 3.7"/><path d="M2 11V8h3"/></svg>'
+  };
+  var LABEL = { view:'View pledge', payment:'Record payment', schedule:'Edit schedule', reminder:'Send reminder',
+    writeoff:'Write off pledge', receipt:'View receipt', statement:'Pledge statement', audit:'View audit entry', reopen:'Re-open pledge' };
+
+  // Status → ordered action list. "-" = separator before the next item.
+  var MENUS = {
+    active:    ['view','payment','schedule','reminder','-','writeoff'],
+    lapsed:    ['view','payment','schedule','reminder','-','writeoff'],
+    fulfilled: ['view','receipt','statement'],
+    writtenoff:['view','audit','-','reopen']
+  };
+  var DANGER = { writeoff:true };
+
+  function statusOf(tagTxt){
+    var t = (tagTxt||'').toLowerCase();
+    if (t.indexOf('written off')>=0) return 'writtenoff';
+    if (t.indexOf('fulfilled')>=0) return 'fulfilled';
+    if (t.indexOf('lapsed')>=0) return 'lapsed';
+    return 'active';
+  }
+
+  window.openPledgeMenu = function(ev, el){
+    ev.preventDefault(); ev.stopPropagation();
+    var row = el.closest('.pl-row');
+    ctx.row  = row;
+    ctx.name = row ? ((row.querySelector('.nm')||{}).textContent || 'pledge') : 'pledge';
+    ctx.sub  = row ? ((row.querySelector('.sub')||{}).textContent || '') : '';
+    ctx.amt  = row ? ((row.querySelector('.amt')||{}).textContent || '') : '';
+    var dueB = row && row.querySelector('.due b'); ctx.due = dueB ? dueB.textContent : '';
+    var cells = row ? row.children : []; ctx.solicitor = cells.length>=6 ? (cells[5].textContent||'').trim() : '';
+    ctx.status = statusOf(row ? (row.querySelector('.tag')||{}).textContent : '');
+    window.__plCtx = ctx;
+    document.getElementById('pm-head').textContent = ctx.name + (ctx.sub ? ' · ' + ctx.sub : '');
+    // Build status-appropriate items
+    var items = MENUS[ctx.status] || MENUS.active;
+    document.getElementById('pm-items').innerHTML = items.map(function(a){
+      if (a === '-') return '<div class="pm-sep"></div>';
+      return '<div class="pm-item'+(DANGER[a]?' danger':'')+'" data-act="'+a+'">'+ICON[a]+LABEL[a]+'</div>';
+    }).join('');
+    // Position near the kebab, keep on-screen
+    var r = el.getBoundingClientRect();
+    menu.classList.add('show');
+    var mw = menu.offsetWidth, mh = menu.offsetHeight;
+    var left = Math.min(r.right - mw, window.innerWidth - mw - 8);
+    var top  = r.bottom + 6;
+    if (top + mh > window.innerHeight - 8) top = r.top - mh - 6;
+    menu.style.left = Math.max(8, left) + 'px';
+    menu.style.top  = Math.max(8, top) + 'px';
+  };
+  function closeMenu(){ menu.classList.remove('show'); }
+  menu.addEventListener('click', function(ev){
+    var item = ev.target.closest('.pm-item'); if(!item) return;
+    var act = item.getAttribute('data-act');
+    closeMenu();
+    if (act === 'view'){ plToast('Opening pledge · ' + ctx.name); setTimeout(function(){ window.location='atlas-pledge-detail.html'; }, 260); }
+    else if (act === 'payment'){ plToast('Recording payment · ' + ctx.name); setTimeout(function(){ window.location='atlas-pledge-payment.html'; }, 260); }
+    else if (act === 'schedule'){ openPlModal('schedule'); }
+    else if (act === 'reminder'){ openPlModal('reminder'); }
+    else if (act === 'writeoff'){ openPlModal('writeoff'); }
+    else if (act === 'receipt'){ plToast('Opening receipt · ' + ctx.name); setTimeout(function(){ window.location='atlas-receipt-preview.html'; }, 260); }
+    else if (act === 'statement'){ plToast('Pledge statement generated · ' + ctx.name + ' · PDF ready to download'); }
+    else if (act === 'audit'){ plToast('Opening audit entry · ' + ctx.name + ' · write-off reason, approver & timestamp'); }
+    else if (act === 'reopen'){ plReopen(); }
+  });
+  function plReopen(){
+    var row = ctx.row; if(!row){ plToast('Pledge re-opened · ' + ctx.name); return; }
+    var tag = row.querySelector('.tag'); if(tag){ tag.className='tag amber'; tag.textContent='Re-opened · review schedule'; }
+    var amt = row.querySelector('.amt'); if(amt){ amt.style.textDecoration='none'; amt.style.opacity='1'; }
+    var barf = row.querySelector('.bar-f'); if(barf){ barf.style.background='var(--blue)'; }
+    plToast('Pledge re-opened · ' + ctx.name + ' · balance restored to forecasts · audit entry created');
+    if (window.__plReindex) window.__plReindex();
+  }
+  document.addEventListener('click', function(ev){ if (menu.classList.contains('show') && !menu.contains(ev.target) && !ev.target.closest('.kebab')) closeMenu(); });
+  document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') closeMenu(); });
+  window.addEventListener('scroll', closeMenu, true);
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════════════
+     Pledge action modals · Edit schedule / Send reminder / Write off
+     ════════════════════════════════════════════════════════ -->
+<style>
+  #plm-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);z-index:100050;display:none;align-items:center;justify-content:center;padding:24px}
+  #plm-overlay.show{display:flex}
+  .plm{background:#fff;border-radius:16px;width:100%;max-width:540px;box-shadow:0 24px 64px rgba(15,23,42,.28);overflow:hidden;animation:plmUp .2s ease;font-family:'DM Sans',sans-serif}
+  @keyframes plmUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .plm-head{display:flex;gap:13px;align-items:flex-start;padding:20px 22px 12px}
+  .plm-ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .plm-ic svg{width:19px;height:19px}
+  .plm-head h3{font-size:17px;font-weight:700;color:#0E1E35;margin:0 0 2px}
+  .plm-head p{font-size:12.5px;color:#64748B;margin:0;line-height:1.45}
+  .plm-body{padding:4px 22px 8px;max-height:62vh;overflow-y:auto}
+  .plm-f{margin-bottom:13px}
+  .plm-f label{display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:5px}
+  .plm-f input,.plm-f select,.plm-f textarea{width:100%;border:1px solid #CBD5E1;border-radius:8px;padding:9px 11px;font-size:13px;font-family:inherit;color:#0F172A;background:#fff;box-sizing:border-box}
+  .plm-f textarea{resize:vertical;min-height:60px}
+  .plm-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .plm-inst{display:grid;grid-template-columns:24px 1fr 1.1fr;gap:9px;align-items:center;margin-bottom:8px}
+  .plm-inst .n{width:24px;height:24px;border-radius:50%;background:#EEF2F7;color:#475569;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .plm-inst.paid .n{background:#15803D;color:#fff}
+  .plm-inst input{border:1px solid #CBD5E1;border-radius:7px;padding:7px 9px;font-size:12.5px;font-family:inherit;color:#0F172A;width:100%;box-sizing:border-box}
+  .plm-inst input:disabled{background:#F1F5F9;color:#94A3B8}
+  .plm-warn{background:#FCE7F3;border:1px solid #FBCFE8;border-radius:9px;padding:11px 13px;font-size:12.5px;color:#9D174D;line-height:1.5;margin-bottom:13px}
+  .plm-amt{display:flex;align-items:baseline;justify-content:space-between;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:9px;padding:11px 13px;margin-bottom:13px}
+  .plm-amt .l{font-size:12px;color:#64748B}.plm-amt .v{font-family:'DM Serif Display',serif;font-size:21px;color:#BE185D}
+  .plm-ack{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#475569;cursor:pointer;line-height:1.45;padding:2px 0 6px}
+  .plm-ack input{margin-top:2px;flex-shrink:0;width:auto}
+  .plm-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #CBD5E1;border-radius:99px;padding:6px 13px;font-size:12.5px;color:#334155;cursor:pointer;margin-right:7px;margin-bottom:7px}
+  .plm-chip input{display:none}
+  .plm-chip.sel{border-color:#2563EB;background:#EFF6FF;color:#1D4ED8;font-weight:600}
+  .plm-prev{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:9px;padding:12px 14px;font-size:12.5px;color:#334155;line-height:1.55}
+  .plm-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 22px 20px;border-top:1px solid #F1F5F9;margin-top:6px}
+  .plm .btn{font-family:inherit}
+</style>
+<div id="plm-overlay" onclick="if(event.target===this)closePlModal()">
+  <div class="plm" role="dialog" aria-modal="true"><div id="plm-content"></div></div>
+</div>
+<script>
+(function(){
+  var overlay = document.getElementById('plm-overlay');
+  var content = document.getElementById('plm-content');
+  var current = null;
+  function ctx(){ return window.__plCtx || {name:'this pledge',sub:'',amt:'$0.00',due:'',solicitor:''}; }
+  function esc(s){ return (s||'').replace(/[<>&]/g,''); }
+
+  var RENDER = {
+    schedule: function(){
+      var c = ctx();
+      return ''+
+      '<div class="plm-head"><div class="plm-ic" style="background:#EFF6FF;color:#2563EB"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="3.5" width="15" height="14" rx="2"/><path d="M2.5 7.5h15M6.5 1.5v3M13.5 1.5v3"/></svg></div>'+
+        '<div><h3>Edit payment schedule</h3><p>'+esc(c.name)+' · '+esc(c.sub)+'</p></div></div>'+
+      '<div class="plm-body">'+
+        '<div class="plm-inst paid"><div class="n">✓</div><input value="May 4, 2026" disabled><input value="$10,000.00 · paid" disabled></div>'+
+        '<div class="plm-inst"><div class="n">2</div><input type="text" value="Jun 30, 2027" id="plm-d2"><input type="text" value="$10,000.00" id="plm-a2"></div>'+
+        '<div class="plm-inst"><div class="n">3</div><input type="text" value="Jun 30, 2028" id="plm-d3"><input type="text" value="$10,000.00" id="plm-a3"></div>'+
+        '<div class="plm-f" style="margin-top:6px"><label>Reschedule reason (logged to pledge history)</label>'+
+          '<select id="plm-sreason"><option>Donor request — cash-flow timing</option><option>Align to fiscal year</option><option>Consolidate remaining balance</option><option>Other</option></select></div>'+
+        '<label class="plm-ack"><input type="checkbox" id="plm-snotify" checked><span>Email the updated schedule to the donor and assigned solicitor ('+esc(c.solicitor||'unassigned')+').</span></label>'+
+      '</div>'+
+      '<div class="plm-foot"><button class="btn btn-ghost" onclick="closePlModal()">Cancel</button>'+
+        '<button class="btn btn-primary" onclick="plSave(\'schedule\')">Save schedule</button></div>';
+    },
+    reminder: function(){
+      var c = ctx();
+      return ''+
+      '<div class="plm-head"><div class="plm-ic" style="background:#FEF3C7;color:#D97706"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 2.2a5.2 5.2 0 0 0-5.2 5.2c0 4-1.6 5.2-1.6 5.2h13.6s-1.6-1.2-1.6-5.2A5.2 5.2 0 0 0 10 2.2zM8 16.5a2 2 0 0 0 4 0"/></svg></div>'+
+        '<div><h3>Send pledge reminder</h3><p>'+esc(c.name)+' · '+esc(c.amt)+' outstanding · next due '+esc(c.due||'—')+'</p></div></div>'+
+      '<div class="plm-body">'+
+        '<div class="plm-f"><label>Channel</label><div>'+
+          '<label class="plm-chip sel" data-ch="Email"><input type="radio" name="plm-ch" checked>✉ Email</label>'+
+          '<label class="plm-chip" data-ch="SMS"><input type="radio" name="plm-ch">SMS</label>'+
+          '<label class="plm-chip" data-ch="Letter"><input type="radio" name="plm-ch">Printed letter</label>'+
+        '</div></div>'+
+        '<div class="plm-f"><label>Template</label><select id="plm-rtpl">'+
+          '<option>Friendly reminder — instalment coming due</option>'+
+          '<option>Overdue notice — gentle</option>'+
+          '<option>Year-end pledge statement</option>'+
+          '<option>Thank-you + remaining balance</option></select></div>'+
+        '<div class="plm-f"><label>Preview</label><div class="plm-prev" id="plm-rprev"></div></div>'+
+        '<label class="plm-ack"><input type="checkbox" id="plm-rcc"><span>Copy the assigned solicitor ('+esc(c.solicitor||'unassigned')+') on this reminder.</span></label>'+
+      '</div>'+
+      '<div class="plm-foot"><button class="btn btn-ghost" onclick="closePlModal()">Cancel</button>'+
+        '<button class="btn btn-primary" onclick="plSave(\'reminder\')">Send reminder</button></div>';
+    },
+    writeoff: function(){
+      var c = ctx();
+      return ''+
+      '<div class="plm-head"><div class="plm-ic" style="background:#FCE7F3;color:#BE185D"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6.5v4M10 13.4v.2"/><path d="M8.6 3.2 2.3 14a1.6 1.6 0 0 0 1.4 2.4h12.6A1.6 1.6 0 0 0 17.7 14L11.4 3.2a1.6 1.6 0 0 0-2.8 0Z"/></svg></div>'+
+        '<div><h3>Write off pledge</h3><p>'+esc(c.name)+' · '+esc(c.sub)+'</p></div></div>'+
+      '<div class="plm-body">'+
+        '<div class="plm-warn"><strong>This closes the outstanding balance and removes it from forecasts and pledge reports.</strong> A reversing audit entry is created and the donor record is updated.</div>'+
+        '<div class="plm-amt"><span class="l">Balance to write off</span><span class="v">'+esc(c.amt||'$0.00')+'</span></div>'+
+        '<div class="plm-f"><label>Reason <span style="color:#BE185D">*</span></label><select id="plm-wreason" onchange="plWoValidate()">'+
+          '<option value="">Select a reason…</option>'+
+          '<option>Donor deceased — no estate recovery</option>'+
+          '<option>Donor financial hardship</option>'+
+          '<option>Uncollectible after follow-up</option>'+
+          '<option>Pledge cancelled by donor</option>'+
+          '<option>Duplicate / entered in error</option>'+
+          '<option>Other (note required)</option></select></div>'+
+        '<div class="plm-f"><label>Note for the audit trail</label><textarea id="plm-wnote" placeholder="Add context — referenced in the audit entry." oninput="plWoValidate()"></textarea></div>'+
+        '<label class="plm-ack"><input type="checkbox" id="plm-wack" onchange="plWoValidate()"><span>I confirm this write-off has DBA approval. Write-offs over $5,000 require sign-off per the gift acceptance policy.</span></label>'+
+      '</div>'+
+      '<div class="plm-foot"><button class="btn btn-ghost" onclick="closePlModal()">Cancel</button>'+
+        '<button class="btn btn-rose" id="plm-wgo" disabled onclick="plSave(\'writeoff\')">Write off '+esc(c.amt||'')+'</button></div>';
+    }
+  };
+
+  window.openPlModal = function(type){
+    current = type;
+    content.innerHTML = RENDER[type]();
+    overlay.classList.add('show');
+    if (type === 'reminder'){
+      content.querySelectorAll('.plm-chip').forEach(function(ch){
+        ch.addEventListener('click', function(){
+          content.querySelectorAll('.plm-chip').forEach(function(x){x.classList.remove('sel')});
+          ch.classList.add('sel');
+        });
+      });
+      var tpl = document.getElementById('plm-rtpl');
+      var prev = document.getElementById('plm-rprev');
+      var c = ctx();
+      function upd(){
+        var map = {
+          'Friendly reminder — instalment coming due':'Dear '+c.name+', a warm thank-you for your pledge. This is a friendly note that your next instalment is coming due'+(c.due?(' on '+c.due):'')+'. '+(c.amt?('Remaining balance: '+c.amt+'. '):'')+'Any questions? Just reply.',
+          'Overdue notice — gentle':'Dear '+c.name+', our records show an instalment on your pledge is now past due. '+(c.amt?('Outstanding balance: '+c.amt+'. '):'')+'If circumstances have changed, we’d be glad to adjust your schedule.',
+          'Year-end pledge statement':'Dear '+c.name+', enclosed is your year-end pledge statement summarising payments received and your remaining commitment'+(c.amt?(' of '+c.amt):'')+'. Thank you for your generosity.',
+          'Thank-you + remaining balance':'Dear '+c.name+', thank you for your continued support! '+(c.amt?('Your remaining pledge balance is '+c.amt+'. '):'')+'We’re grateful for your partnership.'
+        };
+        prev.textContent = map[tpl.value] || '';
+      }
+      tpl.addEventListener('change', upd); upd();
+    }
+  };
+  window.closePlModal = function(){ overlay.classList.remove('show'); };
+  window.plWoValidate = function(){
+    var reason = document.getElementById('plm-wreason').value;
+    var note = (document.getElementById('plm-wnote').value||'').trim();
+    var ack = document.getElementById('plm-wack').checked;
+    var needsNote = reason.indexOf('Other') === 0;
+    document.getElementById('plm-wgo').disabled = !(reason && ack && (!needsNote || note.length>2));
+  };
+  window.plSave = function(type){
+    var c = ctx();
+    closePlModal();
+    if (type === 'schedule'){
+      window.__plToast('Schedule updated · '+c.name+' · revised instalments saved & logged to pledge history');
+    } else if (type === 'reminder'){
+      var ch = (content.querySelector('.plm-chip.sel')||{}).getAttribute ? content.querySelector('.plm-chip.sel').getAttribute('data-ch') : 'Email';
+      window.__plToast('Reminder sent via '+ch+' · '+c.name+' · logged on the donor timeline');
+    } else if (type === 'writeoff'){
+      // reflect written-off state on the row
+      if (c.row){
+        var tag = c.row.querySelector('.tag'); if(tag){ tag.className='tag rose'; tag.textContent='Written off'; }
+        var amt = c.row.querySelector('.amt'); if(amt){ amt.style.textDecoration='line-through'; amt.style.opacity='.5'; }
+        var barf = c.row.querySelector('.bar-f'); if(barf){ barf.style.background='#BE185D'; }
+      }
+      window.__plToast('Pledge written off · '+c.name+' · '+(c.amt||'')+' closed · audit entry created · DBA approval recorded');
+      if (window.__plReindex) window.__plReindex();
+    }
+  };
+  document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') closePlModal(); });
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════════════
+     Tabs + facet filters · functional
+     ════════════════════════════════════════════════════════ -->
+<style>
+  #pl-facet{position:fixed;z-index:100045;min-width:190px;background:#fff;border:1px solid #E2E8F0;border-radius:11px;box-shadow:0 14px 40px rgba(15,23,42,.18);padding:6px;display:none;font-family:'DM Sans',sans-serif;animation:plMenuIn .14s ease}
+  #pl-facet.show{display:block}
+  #pl-facet .fh{font-size:11px;color:#94A3B8;font-weight:600;padding:6px 10px 4px}
+  #pl-facet .fi{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;font-size:13px;color:#1E293B;border-radius:7px;cursor:pointer;white-space:nowrap}
+  #pl-facet .fi:hover{background:#F1F5F9}
+  #pl-facet .fi.sel{color:#1D4ED8;font-weight:600;background:#EFF6FF}
+  #pl-facet .fi .tick{opacity:0}
+  #pl-facet .fi.sel .tick{opacity:1}
+  #pl-facet .fsep{height:1px;background:#F1F5F9;margin:5px 4px}
+  .filter-chip .cv{font-weight:700}
+  .pl-row.pl-hidden{display:none !important}
+  #pl-empty{display:none;padding:34px 16px;text-align:center;color:var(--text-3);font-size:13px}
+  #pl-empty.show{display:block}
+</style>
+<div id="pl-facet"></div>
+<script>
+(function(){
+  var REF = new Date(2026,4,4); // prototype "today" · May 4 2026
+  var rows = [];
+  var state = { status:'active', campaign:null, solicitor:null, due:null, amount:null };
+
+  function campaignOf(sub){
+    if (/cathedral/i.test(sub)) return 'Cathedral Restoration';
+    if (/planned|bequest|estate|5-year/i.test(sub)) return 'Planned Giving';
+    if (/annual|multi-fund/i.test(sub)) return 'Annual Fund';
+    return 'Other';
+  }
+  function statusOf(tagTxt){
+    var t = tagTxt.toLowerCase();
+    if (t.indexOf('written off')>=0) return 'writtenoff';
+    if (t.indexOf('fulfilled')>=0) return 'fulfilled';
+    if (t.indexOf('lapsed')>=0) return 'lapsed';
+    return 'active'; // active + due soon
+  }
+  function dueDaysOf(b){
+    var m = b.match(/(\d+)\s*d\s*overdue/i);
+    if (m) return -parseInt(m[1],10);
+    if (/completed|—/i.test(b)) return null;
+    var d = new Date(b);
+    if (isNaN(d)) return null;
+    return Math.round((d - REF)/86400000);
+  }
+  function amountOf(txt){ return parseFloat((txt||'').replace(/[^0-9.]/g,'')) || 0; }
+
+  function index(){
+    rows = [].slice.call(document.querySelectorAll('.pl-row')).map(function(el){
+      var sub = (el.querySelector('.sub')||{}).textContent || '';
+      var tag = (el.querySelector('.tag')||{}).textContent || '';
+      var dueB = el.querySelector('.due b'); var dueTxt = dueB ? dueB.textContent : '';
+      var cells = el.children;
+      return {
+        el: el,
+        status: statusOf(tag),
+        campaign: campaignOf(sub),
+        solicitor: (cells.length>=6 ? (cells[5].textContent||'').trim() : ''),
+        amount: amountOf((el.querySelector('.amt')||{}).textContent),
+        dueDays: dueDaysOf(dueTxt)
+      };
+    });
+  }
+
+  function matchDue(r){
+    if (!state.due) return true;
+    if (r.dueDays === null) return false;
+    if (state.due==='overdue')  return r.dueDays < 0;
+    if (state.due==='30')       return r.dueDays >= 0 && r.dueDays <= 30;
+    if (state.due==='90')       return r.dueDays >= 0 && r.dueDays <= 90;
+    if (state.due==='year')     return r.dueDays >= -365 && r.dueDays <= 240;
+    return true;
+  }
+  function matchAmount(r){
+    if (!state.amount) return true;
+    var a = r.amount;
+    if (state.amount==='lt10')   return a < 10000;
+    if (state.amount==='10-50')  return a >= 10000 && a < 50000;
+    if (state.amount==='50-100') return a >= 50000 && a < 100000;
+    if (state.amount==='gt100')  return a >= 100000;
+    return true;
+  }
+
+  function apply(){
+    var shown = 0;
+    rows.forEach(function(r){
+      var ok = (state.status==='all' || r.status===state.status)
+        && (!state.campaign || r.campaign===state.campaign)
+        && (!state.solicitor || r.solicitor===state.solicitor)
+        && matchDue(r) && matchAmount(r);
+      r.el.classList.toggle('pl-hidden', !ok);
+      if (ok) shown++;
+    });
+    // tab counts (status only, ignoring other facets so counts are stable)
+    var counts = {active:0,lapsed:0,fulfilled:0,writtenoff:0,all:rows.length};
+    rows.forEach(function(r){ if(counts[r.status]!=null) counts[r.status]++; });
+    document.querySelectorAll('#pl-tabs .tab').forEach(function(t){
+      var s = t.getAttribute('data-status');
+      t.querySelector('.ct').textContent = s==='all' ? counts.all : counts[s];
+      t.classList.toggle('on', s===state.status);
+    });
+    // KPI band sync
+    setKpi('active', counts.active); setKpi('lapsed', counts.lapsed); setKpi('fulfilled', counts.fulfilled);
+    // status chip
+    var label = {active:'Active',lapsed:'Lapsed',fulfilled:'Fulfilled',writtenoff:'Written off',all:'All'}[state.status];
+    var sc = document.getElementById('chip-status');
+    if (state.status==='all'){ sc.style.display='none'; }
+    else { sc.style.display=''; sc.innerHTML = 'Status: '+label+' <span style="margin-left:4px">×</span>'; }
+    // showing text
+    document.getElementById('pl-showing').textContent = 'Showing '+shown+' of '+rows.length+' · sort by Next due ↑';
+    document.getElementById('pl-empty').classList.toggle('show', shown===0);
+  }
+  function setKpi(cls, n){ var v = document.querySelector('.kpi.'+cls+' .v'); if(v) v.textContent = n; }
+
+  window.plTab = function(el){ state.status = el.getAttribute('data-status'); apply(); };
+  window.plClearStatus = function(){ state.status = 'all'; apply(); };
+
+  var FACETS = {
+    campaign: { title:'Campaign', opts:[['Cathedral Restoration','Cathedral Restoration'],['Annual Fund','Annual Fund'],['Planned Giving','Planned Giving']] },
+    solicitor:{ title:'Solicitor', opts:[['SR','Sarah Reynolds (SR)'],['BM','Brian Murphy (BM)']] },
+    due:      { title:'Due range', opts:[['overdue','Overdue'],['30','Next 30 days'],['90','Next 90 days'],['year','This fiscal year']] },
+    amount:   { title:'Amount', opts:[['lt10','Under $10k'],['10-50','$10k – $50k'],['50-100','$50k – $100k'],['gt100','Over $100k']] }
+  };
+  var facetEl = document.getElementById('pl-facet');
+  window.plOpenFacet = function(ev, chip, facet){
+    ev.preventDefault(); ev.stopPropagation();
+    var cfg = FACETS[facet];
+    var cur = state[facet];
+    facetEl.innerHTML = '<div class="fh">'+cfg.title+'</div>' +
+      cfg.opts.map(function(o){
+        return '<div class="fi'+(cur===o[0]?' sel':'')+'" data-v="'+o[0]+'"><span>'+o[1]+'</span><span class="tick">✓</span></div>';
+      }).join('') +
+      '<div class="fsep"></div><div class="fi" data-v="__clear"><span>Clear filter</span></div>';
+    facetEl.classList.add('show');
+    var r = chip.getBoundingClientRect();
+    var fw = facetEl.offsetWidth, fh = facetEl.offsetHeight;
+    var left = Math.min(r.left, window.innerWidth - fw - 8);
+    var top = r.bottom + 6; if (top+fh > window.innerHeight-8) top = r.top - fh - 6;
+    facetEl.style.left = Math.max(8,left)+'px'; facetEl.style.top = Math.max(8,top)+'px';
+    facetEl.onclick = function(e){
+      var fi = e.target.closest('.fi'); if(!fi) return;
+      var v = fi.getAttribute('data-v');
+      state[facet] = (v==='__clear') ? null : v;
+      // chip applied state + value label
+      var labelMap = {}; cfg.opts.forEach(function(o){ labelMap[o[0]] = o[1]; });
+      var cv = chip.querySelector('.cv');
+      if (state[facet]){ chip.classList.add('applied'); cv.textContent = ' · ' + (facet==='solicitor'? v : labelMap[v]); }
+      else { chip.classList.remove('applied'); cv.textContent=''; }
+      facetEl.classList.remove('show');
+      apply();
+    };
+  };
+  document.addEventListener('click', function(e){ if (facetEl.classList.contains('show') && !facetEl.contains(e.target) && !e.target.closest('.filter-chip')) facetEl.classList.remove('show'); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') facetEl.classList.remove('show'); });
+
+  // empty-state row
+  var tableEl = document.querySelector('.pledge-table');
+  if (tableEl && !document.getElementById('pl-empty')){
+    var empty = document.createElement('div'); empty.id='pl-empty';
+    empty.textContent = 'No pledges match these filters. Try clearing a filter or switching tabs.';
+    tableEl.appendChild(empty);
+  }
+
+  window.__plReindex = function(){ index(); apply(); };
+  index(); apply();
+})();
+</script>
 
 <!-- ════════════════════════════════════════════════════════
      Atlas Dead-CTA Rescue · v1
