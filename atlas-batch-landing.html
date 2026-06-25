@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Atlas — Batch Entry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:        #0E1E35;
+  --navy-2:      #152844;
+  --navy-3:      #1E3A5F;
+  --blue:        #2563EB;
+  --blue-mid:    #3B82F6;
+  --blue-light:  #DBEAFE;
+  --blue-pale:   #EFF6FF;
+  --teal:        #0D9488;
+  --teal-light:  #CCFBF1;
+  --green:       #15803D;
+  --green-light: #DCFCE7;
+  --amber:       #D97706;
+  --amber-light: #FEF3C7;
+  --rose:        #BE185D;
+  --rose-light:  #FCE7F3;
+  --purple:      #7C3AED;
+  --purple-light:#EDE9FE;
+  --gold:        #B45309;
+  --text:        #0F172A;
+  --text-2:      #334155;
+  --text-3:      #64748B;
+  --border:      #E2E8F0;
+  --border-soft: #EDF2F7;
+  --surface:     #F8FAFC;
+  --white:       #FFFFFF;
+  --sidebar-w:   220px;
+  --shadow-sm:   0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.05);
+  --shadow-md:   0 4px 16px rgba(15,23,42,.06), 0 2px 4px rgba(15,23,42,.04);
+}
+
+html { font-size: 14px; -webkit-font-smoothing: antialiased; }
+body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+
+/* ══ SIDEBAR ══ */
+.sidebar {
+  width: var(--sidebar-w); background: var(--navy);
+  min-height: 100vh; display: flex; flex-direction: column;
+  flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 18px 18px 14px; display: flex; align-items: center; gap: 11px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.logo-mark {
+      width: 52px; height: 40px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border-radius: 0;
+    }
+.logo-mark svg { width: 52px; height: 40px; }
+.logo-text-wrap { display: flex; flex-direction: column; }
+.logo-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: white; line-height: 1; }
+.logo-sub  { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-top: 3px; }
+
+.sidebar-search {
+  margin: 12px 12px 6px; background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1); border-radius: 8px;
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  cursor: pointer;
+}
+.sidebar-search svg { width: 13px; height: 13px; color: rgba(255,255,255,.3); flex-shrink: 0; }
+.sidebar-search input {
+  background: none; border: none; outline: none; width: 100%;
+  font-size: 12px; color: rgba(255,255,255,.6); font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+}
+.sidebar-search input::placeholder { color: rgba(255,255,255,.3); }
+
+.nav-group { padding: 8px 8px 0; }
+.nav-label { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.28); padding: 0 10px; margin-bottom: 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px; padding: 8px 10px;
+  border-radius: 7px; font-size: 12px; font-weight: 500;
+  color: rgba(255,255,255,.55); cursor: pointer; transition: all .15s; margin-bottom: 1px;
+}
+.nav-item:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.85); }
+.nav-item.active { background: var(--blue); color: white; }
+.nav-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto; background: rgba(255,255,255,.12); color: rgba(255,255,255,.6);
+  border-radius: 10px; padding: 1px 7px; font-size: 10px; font-weight: 600;
+}
+.nav-item.active .nav-badge { background: rgba(255,255,255,.2); color: white; }
+.nav-badge.alert { background: #EF4444; color: white; }
+
+.sidebar-user {
+  margin-top: auto; padding: 12px; border-top: 1px solid rgba(255,255,255,.08);
+  display: flex; align-items: center; gap: 9px;
+  cursor: pointer; transition: background .15s;
+}
+.sidebar-user:hover { background: rgba(255,255,255,.04); }
+.user-avatar {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.user-name { font-size: 12px; font-weight: 500; color: rgba(255,255,255,.75); }
+.user-role { font-size: 10px; color: rgba(255,255,255,.35); margin-top: 1px; }
+
+/* ══ MAIN ══ */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.topbar {
+  background: white; border-bottom: 1px solid var(--border);
+  padding: 0 24px; height: 52px;
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.topbar-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.topbar-date { font-size: 12px; color: var(--text-3); }
+.topbar-search {
+  flex: 1;
+  max-width: 460px; margin: 0 18px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  display: flex; align-items: center; gap: 8px; padding: 7px 12px;
+  cursor: text;
+}
+.topbar-search svg { width: 13px; height: 13px; color: var(--text-3); }
+.topbar-search input { background: none; border: none; outline: none; width: 100%; font-size: 12.5px; color: var(--text); font-family: 'DM Sans', sans-serif; }
+.topbar-search input::placeholder { color: var(--text-3); }
+.topbar-search kbd {
+  margin-left: auto; font-size: 10.5px; font-family: 'DM Sans';
+  background: white; border: 1px solid var(--border); border-radius: 4px;
+  padding: 1px 6px; color: var(--text-3);
+}
+.topbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.tb-btn {
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+  padding: 7px 13px; border-radius: 8px; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.tb-btn svg { width: 12px; height: 12px; }
+.tb-ghost   { background: none; border: 1px solid var(--border); color: var(--text-2); }
+.tb-ghost:hover { background: var(--surface); border-color: #94A3B8; }
+.tb-primary { background: var(--blue); border: none; color: white; box-shadow: 0 1px 4px rgba(37,99,235,.3); }
+.tb-primary:hover { background: #1D4ED8; }
+.tb-notif {
+  width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
+  background: none; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative; transition: background .15s;
+}
+.tb-notif:hover { background: var(--surface); }
+.tb-notif svg { width: 15px; height: 15px; color: var(--text-2); }
+.notif-dot {
+  position: absolute; top: 7px; right: 7px;
+  width: 7px; height: 7px; background: #EF4444; border-radius: 50%;
+  border: 2px solid white;
+}
+
+.dash { padding: 24px; overflow-y: auto; }
+
+/* ══ Common Cards & helpers (used across screens) ══ */
+.card {
+  background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+}
+.card-header {
+  padding: 14px 18px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.card-title { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+.card-action { font-size: 11px; font-weight: 500; color: var(--blue); cursor: pointer; display: flex; align-items: center; gap: 3px; }
+.card-action:hover { color: #1D4ED8; }
+.card-action svg { width: 10px; height: 10px; }
+.card-body { padding: 14px 18px 18px; }
+
+/* ══ Page header (titles + crumb + actions) ══ */
+.page-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  margin-bottom: 20px;
+}
+.crumb { font-size: 12px; color: var(--text-3); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.crumb a { color: var(--blue); }
+.crumb a:hover { text-decoration: underline; }
+.crumb svg { width: 10px; height: 10px; }
+.page-title {
+  font-family: 'DM Serif Display', serif; font-size: 28px; letter-spacing: -.02em;
+  color: var(--text); line-height: 1.1;
+}
+.page-sub { color: var(--text-3); font-size: 13px; margin-top: 4px; }
+
+/* ══ Tags & badges (shared) ══ */
+.tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10.5px; font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.tag.blue  { background: var(--blue-light);  color: var(--blue); }
+.tag.green { background: var(--green-light); color: var(--green); }
+.tag.amber { background: var(--amber-light); color: var(--amber); }
+.tag.rose  { background: var(--rose-light);  color: var(--rose); }
+.tag.purple{ background: var(--purple-light);color: var(--purple); }
+.tag.grey  { background: var(--surface);     color: var(--text-3); border: 1px solid var(--border); }
+.tag.gold  { background: #FEF3C7;            color: var(--gold); }
+
+/* ══ Inputs ══ */
+.lbl { display: block; font-size: 11px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+.lbl .req { color: var(--rose); margin-left: 2px; }
+.fld {
+  width: 100%; font-size: 13px; font-family: 'DM Sans', sans-serif;
+  padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: white; color: var(--text); transition: border-color .15s, box-shadow .15s;
+}
+.fld:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.10); }
+.fld[disabled] { background: var(--surface); color: var(--text-3); }
+.fld::placeholder { color: #94A3B8; }
+textarea.fld { min-height: 90px; resize: vertical; line-height: 1.5; }
+select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M3 5l3 3 3-3z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+
+.btn {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+  padding: 9px 16px; border-radius: 8px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid transparent; transition: background .15s, border-color .15s, color .15s;
+}
+.btn svg { width: 13px; height: 13px; }
+.btn-primary { background: var(--blue); color: white; box-shadow: 0 1px 4px rgba(37,99,235,.25); }
+.btn-primary:hover { background: #1D4ED8; }
+.btn-ghost   { background: white; border-color: var(--border); color: var(--text-2); }
+.btn-ghost:hover { background: var(--surface); border-color: #94A3B8; }
+.btn-rose    { background: var(--rose); color: white; }
+.btn-rose:hover { background: #9D174D; }
+.btn-link    { background: none; color: var(--blue); padding: 6px 8px; }
+.btn-link:hover { color: #1D4ED8; }
+
+/* helpful utilities */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.gap-4 { gap: 4px; } .gap-6 { gap: 6px; } .gap-8 { gap: 8px; } .gap-10 { gap: 10px; } .gap-12 { gap: 12px; } .gap-16 { gap: 16px; } .gap-20 { gap: 20px; }
+.grow { flex: 1; }
+.muted { color: var(--text-3); }
+.mono  { font-variant-numeric: tabular-nums; }
+.mt-4 { margin-top: 4px; } .mt-8 { margin-top: 8px; } .mt-12 { margin-top: 12px; } .mt-16 { margin-top: 16px; } .mt-24 { margin-top: 24px; }
+.mb-4 { margin-bottom: 4px; } .mb-8 { margin-bottom: 8px; } .mb-12 { margin-bottom: 12px; } .mb-16 { margin-bottom: 16px; } .mb-24 { margin-bottom: 24px; }
+
+/* Slide-over drawer (used on log-activity, task-modal screens) */
+.scrim { position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 30; }
+.drawer {
+  position: fixed; right: 0; top: 0; bottom: 0; width: 560px; max-width: 100vw;
+  background: white; box-shadow: -16px 0 40px rgba(15,23,42,.10); z-index: 31;
+  display: flex; flex-direction: column;
+}
+.drawer-head {
+  padding: 18px 22px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  flex-shrink: 0;
+}
+.drawer-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); letter-spacing: -.01em; }
+.drawer-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.drawer-x {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); background: white; cursor: pointer;
+}
+.drawer-x:hover { background: var(--surface); }
+.drawer-x svg { width: 13px; height: 13px; color: var(--text-2); }
+.drawer-body { flex: 1; overflow-y: auto; padding: 22px; }
+.drawer-foot {
+  padding: 14px 22px; border-top: 1px solid var(--border);
+  background: var(--surface); display: flex; align-items: center; gap: 8px; justify-content: flex-end;
+  flex-shrink: 0;
+}
+.drawer-foot .left { margin-right: auto; font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+
+
+.kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+.kpi { background:white; border:1px solid var(--border); border-radius:12px; padding:16px 18px; cursor:pointer; transition:border-color .15s; }
+.kpi:hover { border-color:#94A3B8; }
+.kpi .l { font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); margin-bottom:8px; }
+.kpi .v { font-family:'DM Serif Display',serif; font-size:24px; line-height:1; color:var(--navy); }
+.kpi .v.green { color:var(--green); }
+.kpi .v.amber { color:var(--amber); }
+.kpi .delta { font-size:11.5px; color:var(--text-3); margin-top:6px; }
+.kpi .delta.up { color:var(--green); font-weight:600; }
+.kpi .delta.dn { color:var(--rose); font-weight:600; }
+
+.tabs { display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:18px; }
+.tab { padding:10px 14px; cursor:pointer; font-size:13px; font-weight:500; color:var(--text-3); border-bottom:2px solid transparent; }
+.tab.on { color:var(--blue); border-color:var(--blue); font-weight:600; }
+.tab .ct { font-size:10.5px; padding:1px 7px; border-radius:99px; background:var(--surface); margin-left:6px; }
+.tab.on .ct { background:var(--blue-pale); color:var(--blue); }
+
+.quick-row { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:22px; }
+@media (max-width: 1100px) { .quick-row { grid-template-columns:repeat(3,1fr); } }
+@media (max-width: 720px)  { .quick-row { grid-template-columns:repeat(2,1fr); } }
+.qa-card { display:flex; align-items:center; gap:12px; padding:14px 16px; background:white; border:1px solid var(--border); border-radius:12px; cursor:pointer; transition:border-color .15s, transform .15s; text-decoration:none; color:inherit; }
+.qa-card:hover { border-color:var(--blue); transform:translateY(-1px); }
+.qa-card .ico { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.qa-card .ico.blue { background:var(--blue-light); color:var(--blue); }
+.qa-card .ico.green { background:var(--green-light); color:var(--green); }
+.qa-card .ico.amber { background:var(--amber-light); color:var(--amber); }
+.qa-card .ico.purple { background:var(--purple-light); color:var(--purple); }
+.qa-card .ico svg { width:16px; height:16px; }
+.qa-card .nm { font-weight:600; font-size:13.5px; color:var(--navy); }
+.qa-card .desc { font-size:11.5px; color:var(--text-3); margin-top:2px; }
+
+.gift-table { background:white; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.gt-head, .gt-row { display:grid; grid-template-columns: 1.4fr 110px 1fr 100px 100px 110px 36px; gap:14px; align-items:center; padding:11px 18px; }
+.gt-head { background:var(--surface); border-bottom:1px solid var(--border); font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); }
+.gt-row { border-bottom:1px solid var(--border-soft); font-size:13px; cursor:pointer; }
+.gt-row:hover { background:var(--blue-pale); }
+.gt-row:last-child { border-bottom:none; }
+.gt-row .name { display:flex; align-items:center; gap:10px; }
+.gt-row .av { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:700; flex-shrink:0; }
+.gt-row .nm-text .nm { font-weight:500; color:var(--text); }
+.gt-row .nm-text .sub { font-size:11px; color:var(--text-3); margin-top:2px; }
+.gt-row .amt { font-weight:600; text-align:right; font-variant-numeric:tabular-nums; }
+.kebab { width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:6px; cursor:pointer; color:var(--text-3); }
+.kebab:hover { background:var(--surface); color:var(--text); }
+/* row actions menu */
+.gt-menu{position:fixed;z-index:100020;min-width:194px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 14px 40px rgba(15,23,42,.18);padding:5px;display:none}
+.gt-menu.show{display:block}
+.gt-menu button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;color:var(--text-2);padding:8px 10px;border-radius:7px;cursor:pointer}
+.gt-menu button:hover{background:var(--surface);color:var(--text)}
+.gt-menu button svg{width:13px;height:13px;flex-shrink:0;color:var(--text-3)}
+.gt-menu button.danger{color:var(--rose)}
+.gt-menu button.danger svg{color:var(--rose)}
+.gt-menu .sep{height:1px;background:var(--border-soft);margin:4px 2px}
+.gt-scrim{position:fixed;inset:0;background:rgba(15,23,42,.4);opacity:0;pointer-events:none;transition:opacity .2s;z-index:100025}
+.gt-scrim.show{opacity:1;pointer-events:auto}
+.void-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-46%) scale(.98);width:420px;max-width:92vw;background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.3);z-index:100026;opacity:0;pointer-events:none;transition:.2s}
+.void-modal.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.void-modal .vm-h{padding:18px 20px 4px;display:flex;gap:12px;align-items:flex-start}
+.void-modal .vm-ic{width:38px;height:38px;border-radius:10px;background:var(--rose-light);color:var(--rose);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.void-modal .vm-ic svg{width:18px;height:18px}
+.void-modal .vm-t{font-size:17px;font-weight:700;color:var(--text)}
+.void-modal .vm-b{padding:6px 20px 16px 70px;font-size:13px;color:var(--text-2);line-height:1.55}
+.void-modal .vm-card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 13px;margin-top:10px;font-size:12.5px}
+.void-modal .vm-card b{color:var(--text)}
+.void-modal .vm-f{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.void-modal .vbtn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border-radius:8px;padding:8px 16px;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text-2)}
+.void-modal .vbtn.danger{background:var(--rose);border-color:var(--rose);color:#fff}
+.gt-row.voided{opacity:.55}
+.gt-row.voided .amt{text-decoration:line-through}
+
+.tag { display:inline-flex; font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:5px; }
+.tag.blue { background:var(--blue-light); color:var(--blue); }
+.tag.green { background:var(--green-light); color:var(--green); }
+.tag.amber { background:var(--amber-light); color:var(--amber); }
+.tag.rose { background:var(--rose-light); color:var(--rose); }
+.tag.purple { background:var(--purple-light); color:var(--purple); }
+.tag.grey { background:var(--surface); color:var(--text-3); border:1px solid var(--border); }
+
+.pager { padding:10px 18px; display:flex; align-items:center; gap:14px; font-size:12px; color:var(--text-3); border-top:1px solid var(--border-soft); }
+
+/* ═══ Posted history — expanded filters + KPIs + drawer ═══ */
+.ph-filters { display:flex; gap:8px; align-items:center; padding:14px 0 12px; flex-wrap:wrap; }
+/* Recent gifts toolbar lives inside the bordered .gift-table card — inset it
+   to the row gutter (18px) so controls don't overlap the card's side stroke. */
+#rg-toolbar { padding:14px 18px; border-bottom:1px solid var(--border); }
+.ph-filter { padding:7px 11px; border:1px solid var(--border); border-radius:8px; font-size:12px; font-family:'DM Sans',sans-serif; color:var(--text-2); background:white; cursor:pointer; outline:none; }
+.ph-filter:focus { border-color:var(--blue); }
+.ph-search { padding:7px 11px; border:1px solid var(--border); border-radius:8px; font-size:12px; font-family:'DM Sans',sans-serif; color:var(--text); background:white; outline:none; min-width:200px; }
+.ph-search:focus { border-color:var(--blue); }
+.ph-spacer { flex:1; }
+.ph-export-btn { padding:7px 12px; border:1px solid var(--border); border-radius:8px; font-size:12px; font-weight:500; color:var(--text-2); background:white; cursor:pointer; display:inline-flex; align-items:center; gap:6px; font-family:'DM Sans',sans-serif; }
+.ph-export-btn:hover { border-color:var(--blue); color:var(--blue); background:var(--blue-pale); }
+.ph-export-btn svg { width:11px; height:11px; }
+
+.ph-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
+.ph-kpi { background:white; border:1px solid var(--border); border-radius:10px; padding:11px 14px; }
+.ph-kpi-lbl { font-size:9.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-3); }
+.ph-kpi-val { font-family:'DM Serif Display',serif; font-size:20px; color:var(--text); line-height:1; margin-top:4px; }
+.ph-kpi-val.green { color:var(--green); }
+.ph-kpi-val.amber { color:var(--amber); }
+.ph-kpi-meta { font-size:10.5px; color:var(--text-3); margin-top:4px; }
+
+/* Drawer */
+.pb-drawer-scrim { position:fixed; inset:0; background:rgba(15,23,42,.5); display:none; z-index:150; backdrop-filter:blur(2px); }
+.pb-drawer-scrim.show { display:block; }
+.pb-drawer { position:fixed; top:0; right:0; bottom:0; width:540px; max-width:92vw; background:white; box-shadow:-8px 0 32px rgba(15,23,42,.16); z-index:160; transform:translateX(100%); transition:transform .25s ease-out; display:flex; flex-direction:column; }
+.pb-drawer.show { transform:translateX(0); }
+.pb-drawer-head { padding:18px 22px 16px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; gap:11px; }
+.pb-drawer-title-wrap { flex:1; min-width:0; }
+.pb-drawer-eyebrow { font-size:9.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--green); }
+.pb-drawer-title { font-family:'DM Serif Display',serif; font-size:22px; color:var(--text); font-weight:500; margin-top:5px; line-height:1.2; }
+.pb-drawer-sub { display:block; font-size:11.5px; color:var(--text-3); margin-top:4px; }
+.pb-drawer-close { width:30px; height:30px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-size:22px; color:var(--text-3); }
+.pb-drawer-close:hover { background:var(--surface); color:var(--text); }
+.pb-drawer-body { flex:1; overflow-y:auto; padding:18px 22px; }
+.pb-drawer-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:6px; }
+.pb-stat { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 12px; }
+.pb-stat-lbl { display:block; font-size:9.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-3); }
+.pb-stat-val { display:block; font-family:'DM Serif Display',serif; font-size:18px; color:var(--text); line-height:1; margin-top:4px; }
+.pb-stat-val.green { color:var(--green); }
+.pb-section-title { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-3); margin:18px 0 8px; }
+.pb-audit { display:flex; flex-direction:column; gap:7px; }
+.pb-audit-row { display:flex; gap:10px; align-items:flex-start; padding:8px 10px; background:var(--surface); border:1px solid var(--border); border-radius:7px; font-size:12px; }
+.pb-audit-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:6px; }
+.pb-audit-body { flex:1; }
+.pb-audit-action { font-weight:600; color:var(--text); font-size:12px; }
+.pb-audit-meta { font-size:11px; color:var(--text-3); margin-top:1px; }
+.pb-fund-list { display:flex; flex-direction:column; gap:6px; }
+.pb-fund-row { display:flex; align-items:center; gap:10px; padding:8px 11px; background:var(--surface); border:1px solid var(--border); border-radius:7px; font-size:12px; }
+.pb-fund-bar { flex:1; height:5px; background:var(--border); border-radius:3px; overflow:hidden; max-width:160px; }
+.pb-fund-fill { height:100%; background:var(--blue); border-radius:3px; }
+.pb-fund-name { font-weight:500; color:var(--text-2); min-width:120px; }
+.pb-fund-amt { font-weight:600; color:var(--text); font-variant-numeric:tabular-nums; }
+.pb-gifts { border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.pb-gift { display:grid; grid-template-columns:1fr 90px 70px; gap:10px; padding:9px 11px; border-bottom:1px solid var(--border-soft); font-size:12px; }
+.pb-gift:last-child { border-bottom:none; }
+.pb-gift-name { font-weight:500; color:var(--text); }
+.pb-gift-fund { font-size:10.5px; color:var(--text-3); margin-top:1px; }
+.pb-gift-type { font-size:10.5px; color:var(--text-3); text-align:right; align-self:center; }
+.pb-gift-amt { font-weight:600; color:var(--text); text-align:right; font-variant-numeric:tabular-nums; align-self:center; }
+.pb-drawer-foot { padding:14px 22px; background:var(--surface); border-top:1px solid var(--border); display:flex; gap:8px; align-items:center; }
+.pb-spacer { flex:1; }
+.pb-btn { padding:8px 14px; border-radius:7px; font-size:12px; font-weight:500; cursor:pointer; display:inline-flex; align-items:center; gap:6px; font-family:'DM Sans',sans-serif; }
+.pb-btn svg { width:11px; height:11px; }
+.pb-btn.ghost { background:white; border:1px solid var(--border); color:var(--text-2); }
+.pb-btn.ghost:hover { background:var(--blue-pale); border-color:var(--blue); color:var(--blue); }
+.pb-btn.primary { background:var(--blue); color:white; border:none; }
+.pb-btn.primary:hover { background:#1D4ED8; }
+@media (max-width:720px){
+  .ph-kpis { grid-template-columns:repeat(2,1fr); }
+  .pb-drawer-stats { grid-template-columns:repeat(2,1fr); }
+}
+.pager .nav { margin-left:auto; display:flex; gap:4px; }
+.pager .nav button { width:28px; height:28px; border-radius:6px; border:1px solid var(--border); background:white; cursor:pointer; font-size:12px; color:var(--text-2); }
+.pager .nav button.cur { background:var(--blue); border-color:var(--blue); color:white; }
+
+</style>
+
+
+<style id="atlas-sidebar-fix">
+/* Minimal sidebar fix — keeps the CEO's per-page .main / .content
+   layouts untouched. We ONLY:
+     1. Pin the sidebar to the viewport with position:fixed
+     2. Reserve a 220px gutter on the body via padding-left
+     3. Normalize the sidebar's internal flex layout (logo + search top,
+        nav scrolls middle, user block bottom)
+     4. Force SVG icon sizes in the sidebar (some screens lost them) */
+
+html, body { overflow-x: hidden !important; }
+body {
+  padding-left: 220px !important;
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
+}
+*, *::before, *::after { box-sizing: border-box; }
+
+.sidebar {
+  width: 220px !important;
+  background: var(--navy, #0E1E35) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  overflow: hidden !important;          /* sidebar itself does NOT scroll */
+  display: flex !important;
+  flex-direction: column !important;
+  flex-shrink: 0 !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Logo + search are direct flex children that never scroll */
+.sidebar > .sidebar-logo,
+.sidebar > a > .sidebar-search,
+.sidebar > .sidebar-search,
+.sidebar-logo,
+.sidebar-search {
+  position: static !important;
+  flex-shrink: 0 !important;
+  background: var(--navy, #0E1E35) !important;
+  z-index: 2;
+}
+
+/* Fix oversized search icon — explicit 13×13 wins over any inheriting style */
+.sidebar-search {
+  margin: 12px 12px 6px !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.sidebar-search svg {
+  width: 13px !important;
+  height: 13px !important;
+  flex-shrink: 0 !important;
+  color: rgba(255,255,255,.4) !important;
+}
+.sidebar-search input {
+  font-size: 12px !important;
+  height: auto !important;
+  background: none !important;
+  border: none !important;
+  outline: none !important;
+  width: 100% !important;
+}
+/* Logo mark sizing — same fix prevents the brand SVG from ballooning */
+.sidebar-logo .logo-mark {
+  width: 52px !important;
+  height: 40px !important;
+  flex-shrink: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+.sidebar-logo .logo-mark svg {
+  width: 52px !important;
+  height: 40px !important;
+}
+
+/* The MIDDLE area is the only scrollable child */
+.sidebar-scroll {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 0 !important;        /* critical: lets flex item shrink */
+  display: flex !important;
+  flex-direction: column !important;
+}
+.sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.10); border-radius: 4px; }
+.sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.18); }
+
+/* User block sits at the bottom of the sidebar, never scrolls */
+.sidebar-user {
+  position: static !important;
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+  background: var(--navy, #0E1E35) !important;
+}
+
+/* .main is intentionally NOT overridden — each page keeps its own layout. */
+</style>
+
+<style id="atlas-sidebar-logo-canon">
+  /* Atlas sidebar logo — canonical styling injected to guarantee
+     consistent stacking (Atlas above, By GiveCentral below) across every screen. */
+  .sidebar-logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: 11px !important;
+    padding: 18px 18px 14px !important;
+    border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  }
+  .sidebar-logo .logo-mark {
+    width: 52px !important;
+    height: 40px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+  }
+  .sidebar-logo .logo-mark svg {
+    width: 52px !important;
+    height: 40px !important;
+  }
+  .sidebar-logo .logo-text-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 3px !important;
+  }
+  .sidebar-logo .logo-name {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 20px !important;
+    color: white !important;
+    line-height: 1 !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+  }
+  .sidebar-logo .logo-sub {
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    letter-spacing: .1em !important;
+    text-transform: uppercase !important;
+    color: rgba(255,255,255,.35) !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+  }
+</style>
+<style id="ur-nav-underline-fix">.nav-item,.nav-item:link,.nav-item:visited,.nav-item:hover,.nav-item:focus,.nav-item:active,.sidebar-item,.sidebar-item:hover{text-decoration:none}</style>
+</head>
+<body>
+
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
+          <circle cx="22" cy="92" r="4" fill="white"/>
+          <circle cx="58" cy="58" r="5" fill="white"/>
+          <circle cx="98" cy="38" r="5.5" fill="white"/>
+          <circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
+          <circle cx="138" cy="24" r="7" fill="#C8A04A"/>
+          <circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="logo-text-wrap">
+        <span class="logo-name">Atlas</span>
+        <span class="logo-sub">By GiveCentral</span>
+      </div>
+    </div>
+
+    <a href="atlas-search.html" style="display:block;text-decoration:none">
+      <div class="sidebar-search">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+        <input type="text" placeholder="Search donors, gifts…" readonly>
+      </div>
+    </a>
+
+    <div class="sidebar-scroll">
+
+    <div class="nav-group">
+      <div class="nav-label">Main</div>
+      <a class="nav-item" href="atlas-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="atlas-donors-list.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>
+        Donors
+        <span class="nav-badge">3,847</span>
+      </a>
+      <a class="nav-item active" href="atlas-gifts-pledges.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>
+        Gifts &amp; pledges
+        <span class="nav-badge">142</span>
+      </a>
+      <a class="nav-item" href="atlas-campaign-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>
+        Campaigns
+      </a>
+      <a class="nav-item" href="atlas-reports.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>
+        Reports
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Fundraising</div>
+      <a class="nav-item" href="atlas-pipeline.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
+        Prospect pipeline
+        <span class="nav-badge">28</span>
+      </a>
+      <a class="nav-item" href="atlas-tasks.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>
+        Tasks &amp; reminders
+        <span class="nav-badge alert">7</span>
+      </a>
+      <a class="nav-item" href="atlas-communications.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>
+        Communications
+      </a>
+      <a class="nav-item" href="atlas-events-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>
+        Events
+      </a>
+      <a class="nav-item" href="atlas-volunteer-management.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
+        Volunteers
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Intelligence</div>
+      <a class="nav-item" href="atlas-guru-ai.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>
+        Guru AI
+      </a>
+      <a class="nav-item" href="atlas-reports.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>
+        Analytics
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Admin</div>
+      <a class="nav-item" href="atlas-users-roles.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
+        Users &amp; roles
+      </a>
+      <a class="nav-item" href="atlas-tags.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/></svg>Tags &amp; Segment</a>
+      <a class="nav-item" href="atlas-integrations.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>
+        Integrations
+      </a>
+      <a class="nav-item" href="atlassmarttriggers.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.6 1.5L3 8h3.7l-.6 4.6L11 5.9H7.4z"/></svg>Smart Triggers</a>
+      <a class="nav-item" href="atlas-sync.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>
+        Sync
+      </a>
+      <a class="nav-item" href="atlas-location-manage.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>
+        Location portal
+      </a>
+    </div>
+
+    </div><!-- /.sidebar-scroll -->
+
+    <div class="sidebar-user">
+      <div class="user-avatar">SR</div>
+      <div>
+        <div class="user-name">Sarah Reynolds</div>
+        <div class="user-role">Development Director</div>
+      </div>
+    </div>
+  </aside>
+
+<div class="main">
+
+<div class="topbar">
+  <span class="topbar-title">Batch entry</span>
+  <span class="topbar-date">Monday, May 4, 2026</span>
+  <a href="atlas-search.html" class="topbar-search">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+    <input type="text" placeholder="Search donors, gifts, campaigns…" readonly style="cursor:pointer">
+    <kbd>⌘K</kbd>
+  </a>
+  <div class="topbar-right">
+    
+    <a href="atlas-guided-tour.html" class="tb-notif" title="Take the tour" style="position:relative">
+      <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><path d="M7.5 4v.5M6.5 7c0-1 .5-1.5 1-1.5s1 .5 1 1-.5 1-1 1.5v.5M7.5 11v.5"/></svg>
+    </a>
+    <a href="atlas-notifications.html" class="tb-notif" title="Notifications">
+      <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.5 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5zM6 13a1.5 1.5 0 003 0"/></svg>
+      <div class="notif-dot"></div>
+    </a>
+  </div>
+</div>
+
+<div class="dash">
+<style id="bl-css">
+  .bl-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:26px}
+  .bl-stat{background:#fff;border:1px solid var(--border);border-radius:14px;padding:15px 18px;box-shadow:var(--shadow-sm)}
+  .bl-stat .l{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+  .bl-stat .dot{width:8px;height:8px;border-radius:50%}
+  .bl-stat .v{font-family:'DM Serif Display',serif;font-size:30px;line-height:1;color:var(--text)}
+  .bl-stat.amber .v{color:var(--amber)} .bl-stat.green .v{color:var(--green)} .bl-stat.rose .v{color:var(--rose)} .bl-stat.purple .v{color:var(--purple)}
+  .bl-stat .d{font-size:12.5px;color:var(--text-3);margin-top:7px}
+  .bl-sec-h{font-size:15px;font-weight:700;color:var(--text);margin:4px 0 12px;display:flex;align-items:baseline;gap:10px}
+  .bl-sec-sub{font-size:12.5px;font-weight:400;color:var(--text-3)}
+  .bl-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+  .bl-act{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;display:flex;flex-direction:column;gap:11px;transition:.13s;text-decoration:none;text-align:left}
+  .bl-act:hover{border-color:#94A3B8;box-shadow:var(--shadow-md);transform:translateY(-1px)}
+  .bl-act .ic{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+  .bl-act .ic svg{width:19px;height:19px}
+  .bl-act .t{font-size:14.5px;font-weight:700;color:var(--text)}
+  .bl-act .s{font-size:12px;color:var(--text-3);line-height:1.4}
+  .bl-table{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:28px;box-shadow:var(--shadow-sm)}
+  .bl-tr{display:grid;grid-template-columns:2.3fr 1.7fr .85fr .6fr 1fr 1.15fr .85fr;align-items:center;padding:0 18px;min-height:60px;border-top:1px solid var(--border)}
+  .bl-tr.head{min-height:42px;border-top:none;background:var(--surface)}
+  .bl-tr:not(.head):hover{background:var(--surface)}
+  .bl-th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3)}
+  .bl-th.r,.bl-amt{text-align:right}
+  .bl-bn{font-weight:600;color:var(--text);font-size:14px}
+  .bl-meta{font-size:12px;color:var(--text-3);margin-top:2px}
+  .bl-cell{font-size:13px;color:var(--text-2)}
+  .bl-amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--text)}
+  .bl-pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;display:inline-flex;gap:6px;align-items:center}
+  .bl-pill .pd{width:6px;height:6px;border-radius:50%}
+  .bl-draft{background:var(--amber-light);color:#92400E} .bl-draft .pd{background:var(--amber)}
+  .bl-posted{background:var(--green-light);color:var(--green)} .bl-posted .pd{background:var(--green)}
+  .bl-exc{background:var(--rose-light);color:var(--rose)} .bl-exc .pd{background:var(--rose)}
+  .bl-go{font-size:13px;font-weight:600;color:var(--blue);text-decoration:none;cursor:pointer;justify-self:start}
+  .bl-go:hover{text-decoration:underline}
+  .bl-two{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:10px}
+  .bl-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:6px 20px 12px;box-shadow:var(--shadow-sm)}
+  .bl-card .ch{font-size:14px;font-weight:700;color:var(--text);padding:14px 0 2px;display:flex;align-items:baseline;gap:9px}
+  .bl-card .ch .sub{font-size:12px;font-weight:400;color:var(--text-3)}
+  .bl-li{display:flex;align-items:center;gap:13px;padding:13px 0;border-top:1px solid var(--border-soft)}
+  .bl-li .li-ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .bl-li .li-ic svg{width:16px;height:16px}
+  .bl-li .li-b{flex:1;min-width:0}
+  .bl-li .li-t{font-size:13.5px;font-weight:600;color:var(--text)}
+  .bl-li .li-s{font-size:12px;color:var(--text-3);margin-top:1px}
+  /* modal */
+  .bl-ov{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:1000;padding:24px}
+  .bl-ov.show{display:flex}
+  .bl-modal{background:#fff;border-radius:16px;width:100%;max-width:580px;box-shadow:0 24px 64px rgba(15,23,42,.28);overflow:hidden;animation:blUp .2s ease}
+  @keyframes blUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .bl-mh{display:flex;gap:13px;align-items:flex-start;padding:20px 22px 14px}
+  .bl-mic{width:40px;height:40px;border-radius:10px;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .bl-mic svg{width:20px;height:20px}
+  .bl-mh h3{font-size:18px;font-weight:700;color:var(--text);margin:0 0 2px}
+  .bl-mh p{font-size:12.5px;color:var(--text-3);margin:0}
+  .bl-mb{padding:4px 22px 8px}
+  .bl-fg{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  .bl-f{margin-bottom:13px}
+  .bl-f.full{grid-column:1 / -1}
+  .bl-f label{display:block;font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:5px}
+  .bl-f input,.bl-f select{width:100%;border:1px solid #CBD5E1;border-radius:8px;padding:9px 11px;font-size:13px;font-family:inherit;color:var(--text);background:#fff;box-sizing:border-box}
+  .bl-mf{display:flex;justify-content:flex-end;gap:9px;padding:14px 22px 20px;border-top:1px solid #F1F5F9;margin-top:8px}
+  .bl-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#0F172A;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;z-index:1100;opacity:0;transition:.2s;pointer-events:none}
+  .bl-toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+
+  <div class="page-head">
+    <div>
+      <div class="crumb"><a href="atlas-dashboard.html">Atlas</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <a href="atlas-gifts-pledges.html">Gifts &amp; pledges</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <span>Batch entry</span></div>
+      <div class="page-title">Batch entry</div>
+      <div class="page-sub">Spreadsheet-style entry for 5+ gifts. Start a new batch, resume a draft, or open a posted batch.</div>
+    </div>
+    <div class="flex gap-8">
+      <button class="btn btn-ghost" onclick="openNewBatch('import')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 9V2M4 5l3-3 3 3M2 10v2h10v-2"/></svg> Import CSV / Excel</button>
+      <button class="btn btn-primary" onclick="openNewBatch()"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg> New batch</button>
+    </div>
+  </div>
+
+  <div class="bl-stats">
+    <div class="bl-stat amber"><div class="l"><span class="dot" style="background:var(--amber)"></span>Drafts in progress</div><div class="v">3</div><div class="d">$67,840 entered, not yet posted</div></div>
+    <div class="bl-stat green"><div class="l"><span class="dot" style="background:var(--green)"></span>Posted this quarter</div><div class="v">12</div><div class="d">$312,400 across 4 folders</div></div>
+    <div class="bl-stat rose"><div class="l"><span class="dot" style="background:var(--rose)"></span>Needs attention</div><div class="v">9</div><div class="d">exceptions across 2 batches</div></div>
+    <div class="bl-stat purple"><div class="l"><span class="dot" style="background:var(--purple)"></span>Templates</div><div class="v">3</div><div class="d">reusable column layouts</div></div>
+  </div>
+
+  <div class="bl-sec-h">Start a batch</div>
+  <div class="bl-actions">
+    <a class="bl-act" onclick="openNewBatch()"><div class="ic" style="background:var(--blue-pale);color:var(--blue)"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="2" width="14" height="14" rx="2"/><path d="M9 6v6M6 9h6"/></svg></div><div class="t">Blank batch</div><div class="s">Empty grid — name it and start typing gifts.</div></a>
+    <a class="bl-act" onclick="openNewBatch('import')"><div class="ic" style="background:var(--green-light);color:var(--green)"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 12V3M5.5 6.5L9 3l3.5 3.5M3 13v2h12v-2"/></svg></div><div class="t">Import CSV / Excel</div><div class="s">Map columns from a file, then review.</div></a>
+    <a class="bl-act" onclick="openNewBatch('template')"><div class="ic" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2.5" y="2.5" width="13" height="13" rx="2"/><path d="M2.5 6.5h13M6.5 6.5v9"/></svg></div><div class="t">From template</div><div class="s">Reuse a saved column layout & defaults.</div></a>
+    <a class="bl-act" href="atlas-batch-entry.html"><div class="ic" style="background:var(--amber-light);color:#92400E"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 9a6 6 0 1 1 1.8 4.3M3 13v-3.5h3.5"/></svg></div><div class="t">Resume last draft</div><div class="s">Easter Offertory · 31 gifts · edited 2h ago</div></a>
+  </div>
+
+  <div class="bl-sec-h">Recent batches <span class="bl-sec-sub">latest across all your folders</span></div>
+  <div class="bl-table">
+    <div class="bl-tr head"><div class="bl-th">Batch</div><div class="bl-th">Folder · fund</div><div class="bl-th">Date</div><div class="bl-th">Gifts</div><div class="bl-th r">Total</div><div class="bl-th">Status</div><div class="bl-th">Action</div></div>
+
+    <div class="bl-tr"><div><div class="bl-bn">Easter Offertory</div><div class="bl-meta">edited 2h ago · Sarah Reynolds</div></div><div class="bl-cell">2026 — CMA · CMA</div><div class="bl-cell">May 2</div><div class="bl-cell">31</div><div class="bl-amt">$9,210.00</div><div><span class="bl-pill bl-draft"><span class="pd"></span>Draft</span></div><a class="bl-go" href="atlas-batch-entry.html">Resume →</a></div>
+
+    <div class="bl-tr"><div><div class="bl-bn">Stock Gifts — April</div><div class="bl-meta">edited yesterday · Daniel Cho</div></div><div class="bl-cell">Cathedral Capital</div><div class="bl-cell">Apr 19</div><div class="bl-cell">4</div><div class="bl-amt">$52,090.00</div><div><span class="bl-pill bl-draft"><span class="pd"></span>Draft</span></div><a class="bl-go" href="atlas-batch-entry.html">Resume →</a></div>
+
+    <div class="bl-tr"><div><div class="bl-bn">Online Giving Export</div><div class="bl-meta">edited May 1 · auto-import</div></div><div class="bl-cell">2026 — CMA</div><div class="bl-cell">May 1</div><div class="bl-cell">16</div><div class="bl-amt">$6,540.00</div><div><span class="bl-pill bl-draft"><span class="pd"></span>Draft</span></div><a class="bl-go" href="atlas-batch-entry.html">Resume →</a></div>
+
+    <div class="bl-tr"><div><div class="bl-bn">Spring Gala Pledges</div><div class="bl-meta">3 rows need review</div></div><div class="bl-cell">Cathedral Capital</div><div class="bl-cell">Apr 28</div><div class="bl-cell">12</div><div class="bl-amt">$42,000.00</div><div><span class="bl-pill bl-exc"><span class="pd"></span>Exceptions · 3</span></div><a class="bl-go" href="atlas-batch-exceptions.html">Review →</a></div>
+
+    <div class="bl-tr"><div><div class="bl-bn">Memorial Gifts</div><div class="bl-meta">6 rows need review</div></div><div class="bl-cell">General Fund</div><div class="bl-cell">May 3</div><div class="bl-cell">6</div><div class="bl-amt">$3,800.00</div><div><span class="bl-pill bl-exc"><span class="pd"></span>Exceptions · 6</span></div><a class="bl-go" href="atlas-batch-exceptions.html">Review →</a></div>
+
+    <div class="bl-tr"><div><div class="bl-bn">April Mail Response</div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">2026 — CMA · CMA</div><div class="bl-cell">Apr 18</div><div class="bl-cell">14</div><div class="bl-amt">$14,975.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><a class="bl-go" href="atlas-batch-entry.html">Open</a></div>
+
+    <div class="bl-tr"><div><div class="bl-bn">Q1 Major Gifts</div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">Cathedral Capital</div><div class="bl-cell">Mar 31</div><div class="bl-cell">8</div><div class="bl-amt">$185,000.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><a class="bl-go" href="atlas-batch-entry.html">Open</a></div>
+
+    <div class="bl-tr"><div><div class="bl-bn">Lenten Appeal</div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">2026 — CMA</div><div class="bl-cell">Feb 28</div><div class="bl-cell">18</div><div class="bl-amt">$19,200.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><a class="bl-go" href="atlas-batch-entry.html">Open</a></div>
+  </div>
+
+  <div class="bl-two">
+    <div class="bl-card">
+      <div class="ch">Drafts to resume <span class="sub">3 unposted</span></div>
+      <div class="bl-li"><div class="li-ic" style="background:var(--amber-light);color:#92400E"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3h12M2 7h12M2 11h8"/></svg></div><div class="li-b"><div class="li-t">Easter Offertory</div><div class="li-s">31 gifts · $9,210 · edited 2h ago</div></div><a class="bl-go" href="atlas-batch-entry.html">Resume →</a></div>
+      <div class="bl-li"><div class="li-ic" style="background:var(--amber-light);color:#92400E"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 12l4-5 3 2 5-6"/></svg></div><div class="li-b"><div class="li-t">Stock Gifts — April</div><div class="li-s">4 gifts · $52,090 · edited yesterday</div></div><a class="bl-go" href="atlas-batch-entry.html">Resume →</a></div>
+      <div class="bl-li"><div class="li-ic" style="background:var(--amber-light);color:#92400E"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 2v12M2 8h12"/></svg></div><div class="li-b"><div class="li-t">Online Giving Export</div><div class="li-s">16 gifts · $6,540 · edited May 1</div></div><a class="bl-go" href="atlas-batch-entry.html">Resume →</a></div>
+    </div>
+    <div class="bl-card">
+      <div class="ch">Templates <span class="sub">reusable layouts</span></div>
+      <div class="bl-li"><div class="li-ic" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M2 6h12M6 6v8"/></svg></div><div class="li-b"><div class="li-t">CMA Mail Response</div><div class="li-s">9 columns · used 14 times</div></div><a class="bl-go" onclick="openNewBatch('template','CMA Mail Response')">Use →</a></div>
+      <div class="bl-li"><div class="li-ic" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M2 6h12M6 6v8"/></svg></div><div class="li-b"><div class="li-t">Major Gift Pledge</div><div class="li-s">11 columns · used 6 times</div></div><a class="bl-go" onclick="openNewBatch('template','Major Gift Pledge')">Use →</a></div>
+      <div class="bl-li"><div class="li-ic" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M2 6h12M6 6v8"/></svg></div><div class="li-b"><div class="li-t">Online Giving Export</div><div class="li-s">8 columns · used 22 times</div></div><a class="bl-go" onclick="openNewBatch('template','Online Giving Export')">Use →</a></div>
+    </div>
+  </div>
+
+</div>
+<!-- /.main wrapper closed below -->
+
+<!-- New batch setup modal -->
+<div class="bl-ov" id="nb-ov" onclick="if(event.target===this)closeNewBatch()">
+  <div class="bl-modal" role="dialog" aria-modal="true">
+    <div class="bl-mh">
+      <div class="bl-mic"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2.5" y="2.5" width="15" height="15" rx="2.5"/><path d="M10 7v6M7 10h6"/></svg></div>
+      <div><h3 id="nb-title">Start a new batch</h3><p>Name it and set its home so every gift posts to the right place.</p></div>
+    </div>
+    <div class="bl-mb">
+      <div class="bl-f full"><label>Batch name</label><input id="nb-name" type="text" placeholder="e.g., May Mail Response"></div>
+      <div class="bl-fg">
+        <div class="bl-f"><label>Folder / campaign</label><select id="nb-folder"><option>2026 — CMA</option><option>2026 — Cathedral Capital</option><option>General Fund</option><option>+ New folder…</option></select></div>
+        <div class="bl-f"><label>Default fund</label><select id="nb-fund"><option>CMA Annual Fund</option><option>Cathedral Capital Fund</option><option>General Fund</option><option>Marian Congress</option></select></div>
+        <div class="bl-f"><label>Start from</label><select id="nb-start"><option value="blank">Blank grid</option><option value="CMA Mail Response">Template · CMA Mail Response</option><option value="Major Gift Pledge">Template · Major Gift Pledge</option><option value="Online Giving Export">Template · Online Giving Export</option><option value="import">Import CSV / Excel</option></select></div>
+        <div class="bl-f"><label>Entry date</label><input id="nb-date" type="text" value="05/04/2026"></div>
+        <div class="bl-f"><label>Expected gift count <span style="color:var(--text-3);font-weight:400">(optional)</span></label><input id="nb-count" type="text" placeholder="for reconciliation"></div>
+        <div class="bl-f"><label>Expected total <span style="color:var(--text-3);font-weight:400">(optional)</span></label><input id="nb-total" type="text" placeholder="$0.00"></div>
+      </div>
+    </div>
+    <div class="bl-mf">
+      <button class="btn btn-ghost" onclick="closeNewBatch()">Cancel</button>
+      <button class="btn btn-primary" id="nb-go" onclick="createBatch()">Create &amp; open batch</button>
+    </div>
+  </div>
+</div>
+<div class="bl-toast" id="bl-toast"></div>
+
+</div><!-- /.main -->
+
+<script>
+(function(){
+  var ov=document.getElementById('nb-ov');
+  window.openNewBatch=function(mode,tpl){
+    var start=document.getElementById('nb-start'), title=document.getElementById('nb-title'), go=document.getElementById('nb-go');
+    title.textContent='Start a new batch'; go.textContent='Create & open batch';
+    if(mode==='import'){ start.value='import'; title.textContent='Import a batch from a file'; go.textContent='Continue to column mapping'; }
+    else if(mode==='template'){ start.value=tpl||'CMA Mail Response'; title.textContent='New batch from template'; }
+    else { start.value='blank'; }
+    ov.classList.add('show');
+    setTimeout(function(){ document.getElementById('nb-name').focus(); },60);
+  };
+  window.closeNewBatch=function(){ ov.classList.remove('show'); };
+  window.createBatch=function(){
+    closeNewBatch();
+    var t=document.getElementById('bl-toast');
+    var nm=(document.getElementById('nb-name').value||'New batch').trim();
+    t.textContent='Opening “'+nm+'” · grid ready'; t.classList.add('show');
+    setTimeout(function(){ window.location='atlas-batch-entry.html'; }, 650);
+  };
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeNewBatch(); });
+})();
+</script>
+
+</body>
+</html>
