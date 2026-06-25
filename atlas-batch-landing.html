@@ -794,6 +794,42 @@ body {
   /* modal */
   .bl-ov{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:1000;padding:24px}
   .bl-ov.show{display:flex}
+  /* new-batch split menu */
+  .nb-menu{position:fixed;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 14px 40px rgba(15,23,42,.18);padding:6px;display:none;z-index:1200;min-width:264px}
+  .nb-menu.show{display:block}
+  .nb-menu .it{display:flex;gap:12px;align-items:center;padding:9px 10px;border-radius:9px;cursor:pointer}
+  .nb-menu .it:hover{background:var(--surface)}
+  .nb-menu .it .ic{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .nb-menu .it .ic svg{width:17px;height:17px}
+  .nb-menu .it .t{font-size:13.5px;font-weight:600;color:var(--text)}
+  .nb-menu .it .s{font-size:11.5px;color:var(--text-3)}
+  /* batch search */
+  .bl-search{margin-left:auto;display:flex;align-items:center;gap:7px;border:1px solid var(--border);border-radius:9px;padding:6px 11px;background:#fff;width:250px}
+  .bl-search input{border:none;outline:none;font-family:inherit;font-size:12.5px;width:100%;color:var(--text);background:none}
+  /* folders / campaigns — scalable chip bar */
+  .bl-fbar{display:flex;gap:8px;overflow-x:auto;padding:2px 0 9px;margin-bottom:20px;scrollbar-width:thin}
+  .bl-fbar::-webkit-scrollbar{height:6px}
+  .bl-fbar::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px}
+  .bl-fchip{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex-shrink:0;background:#fff;border:1px solid var(--border);border-radius:99px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--text-2);cursor:pointer;transition:.12s}
+  .bl-fchip:hover{border-color:#94A3B8}
+  .bl-fchip.on{background:var(--blue-pale);border-color:var(--blue-light);color:var(--blue)}
+  .bl-fchip .ct{font-size:11px;font-weight:700;background:var(--surface-2);color:var(--text-3);border-radius:99px;padding:1px 8px}
+  .bl-fchip.on .ct{background:#fff;color:var(--blue)}
+  .bl-fchip .dotf{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .bl-fchip-new{border-style:dashed;color:var(--text-3)}
+  .bl-fchip-new:hover{color:var(--blue);border-color:var(--blue)}
+  /* import wizard bits */
+  .bl-step{display:flex;gap:8px;margin-top:9px}
+  .bl-step span{font-size:11px;font-weight:600;padding:3px 11px;border-radius:99px;background:var(--surface);color:var(--text-3);border:1px solid var(--border)}
+  .bl-step span.on{background:var(--blue-pale);color:var(--blue);border-color:var(--blue-light)}
+  .map-row{display:grid;grid-template-columns:1fr 22px 1fr;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--border-soft)}
+  .map-row .src .s1{font-size:13px;font-weight:600;color:var(--text)} .map-row .src .s2{font-size:11px;color:var(--text-3)}
+  .map-row .arr{text-align:center;color:var(--text-3)}
+  .map-row select{border:1px solid #CBD5E1;border-radius:8px;padding:7px 9px;font-size:12.5px;font-family:inherit;width:100%;color:var(--text);background:#fff}
+  .cov{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 10px}
+  .cov span{font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+  .bl-dz{border:2px dashed var(--border);border-radius:10px;padding:22px;text-align:center;cursor:pointer;background:var(--surface);transition:all .14s}
+  .bl-dz svg{margin-bottom:8px}
   .bl-modal{background:#fff;border-radius:16px;width:100%;max-width:580px;box-shadow:0 24px 64px rgba(15,23,42,.28);overflow:hidden;animation:blUp .2s ease}
   @keyframes blUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   .bl-mh{display:flex;gap:13px;align-items:flex-start;padding:20px 22px 14px}
@@ -818,9 +854,13 @@ body {
       <div class="page-title">Batch entry</div>
       <div class="page-sub">Spreadsheet-style entry for 5+ gifts. Start a new batch, resume a draft, or open a posted batch.</div>
     </div>
-    <div class="flex gap-8">
-      <button class="btn btn-ghost" onclick="openNewBatch('import')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 9V2M4 5l3-3 3 3M2 10v2h10v-2"/></svg> Import CSV / Excel</button>
-      <button class="btn btn-primary" onclick="openNewBatch()"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg> New batch</button>
+    <div class="flex gap-8" style="position:relative">
+      <button class="btn btn-ghost" onclick="openImport()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V2.5M4.5 5L7 2.5 9.5 5"/><path d="M2 10v1.2a.8.8 0 0 0 .8.8h8.4a.8.8 0 0 0 .8-.8V10"/></svg> Import CSV / Excel</button>
+      <button class="btn btn-primary" onclick="toggleNewBatchMenu(event)"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg> New batch <svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" style="margin-left:1px;width:9px;height:9px"><path d="M2 4l3 3 3-3"/></svg></button>
+      <div id="nb-menu" class="nb-menu">
+        <div class="it" onclick="openNewBatch('gift')"><div class="ic" style="background:var(--blue-pale);color:var(--blue)"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="2" width="14" height="14" rx="2"/><path d="M2 6.5h14M6 6.5v9.5"/></svg></div><div><div class="t">Gift batch entry</div><div class="s">Spreadsheet of individual gifts</div></div></div>
+        <div class="it" onclick="openNewBatch('pledge')"><div class="ic" style="background:var(--amber-light);color:#92400E"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="3" width="14" height="12" rx="2"/><path d="M6 3v12M11 3v12"/></svg></div><div><div class="t">Pledge batch entry</div><div class="s">Multi-payment commitments</div></div></div>
+      </div>
     </div>
   </div>
 
@@ -833,15 +873,27 @@ body {
 
   <div class="bl-sec-h">Start a batch</div>
   <div class="bl-actions">
-    <a class="bl-act" onclick="openNewBatch()"><div class="ic" style="background:var(--blue-pale);color:var(--blue)"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="2" width="14" height="14" rx="2"/><path d="M9 6v6M6 9h6"/></svg></div><div class="t">Blank batch</div><div class="s">Empty grid — name it and start typing gifts.</div></a>
-    <a class="bl-act" onclick="openNewBatch('import')"><div class="ic" style="background:var(--green-light);color:var(--green)"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 12V3M5.5 6.5L9 3l3.5 3.5M3 13v2h12v-2"/></svg></div><div class="t">Import CSV / Excel</div><div class="s">Map columns from a file, then review.</div></a>
-    <a class="bl-act" onclick="openNewBatch('template')"><div class="ic" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2.5" y="2.5" width="13" height="13" rx="2"/><path d="M2.5 6.5h13M6.5 6.5v9"/></svg></div><div class="t">From template</div><div class="s">Reuse a saved column layout & defaults.</div></a>
+    <a class="bl-act" onclick="openNewBatch('gift')"><div class="ic" style="background:var(--blue-pale);color:var(--blue)"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="2" width="14" height="14" rx="2"/><path d="M9 6v6M6 9h6"/></svg></div><div class="t">Blank gift batch</div><div class="s">Empty grid — name it and start typing gifts.</div></a>
+    <a class="bl-act" onclick="openImport()"><div class="ic" style="background:var(--green-light);color:var(--green)"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 12V3M5.5 6.5L9 3l3.5 3.5M3 13v2h12v-2"/></svg></div><div class="t">Import CSV / Excel</div><div class="s">Upload a file, map columns, then review.</div></a>
+    <a class="bl-act" onclick="openTemplate()"><div class="ic" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2.5" y="2.5" width="13" height="13" rx="2"/><path d="M2.5 6.5h13M6.5 6.5v9"/></svg></div><div class="t">From template</div><div class="s">Reuse a saved column layout & defaults.</div></a>
     <a class="bl-act" href="atlas-batch-entry.html"><div class="ic" style="background:var(--amber-light);color:#92400E"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 9a6 6 0 1 1 1.8 4.3M3 13v-3.5h3.5"/></svg></div><div class="t">Resume last draft</div><div class="s">Easter Offertory · 31 gifts · edited 2h ago</div></a>
   </div>
 
-  <div class="bl-sec-h">Recent batches <span class="bl-sec-sub">latest across all your folders</span></div>
-  <div class="bl-table">
+  <div class="bl-sec-h">Folders &amp; campaigns <span class="bl-sec-sub">click to filter · scroll for more</span></div>
+  <div class="bl-fbar" id="bl-flds">
+    <div class="bl-fchip on" onclick="blFolderAll(this)">All folders <span class="ct">8</span></div>
+    <div class="bl-fchip" onclick="blFolder('2026 — CMA',this)"><span class="dotf" style="background:var(--blue)"></span>2026 — CMA <span class="ct">4</span></div>
+    <div class="bl-fchip" onclick="blFolder('Cathedral Capital',this)"><span class="dotf" style="background:var(--purple)"></span>Cathedral Capital <span class="ct">3</span></div>
+    <div class="bl-fchip" onclick="blFolder('General Fund',this)"><span class="dotf" style="background:var(--amber)"></span>General Fund <span class="ct">1</span></div>
+    <div class="bl-fchip bl-fchip-new" id="bl-newfld" onclick="blNewFolder()">+ New folder</div>
+  </div>
+
+  <div class="bl-sec-h">Recent batches <span class="bl-sec-sub">latest across all your folders</span>
+    <div class="bl-search"><svg viewBox="0 0 14 14" fill="none" stroke="var(--text-3)" stroke-width="1.5" stroke-linecap="round" style="width:13px;height:13px;flex-shrink:0"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="bl-search" oninput="blSearch(this.value)" placeholder="Search batches or folders…"></div>
+  </div>
+  <div class="bl-table" id="bl-table">
     <div class="bl-tr head"><div class="bl-th">Batch</div><div class="bl-th">Folder · fund</div><div class="bl-th">Date</div><div class="bl-th">Gifts</div><div class="bl-th r">Total</div><div class="bl-th">Status</div><div class="bl-th">Action</div></div>
+    <div class="bl-empty" id="bl-empty" style="display:none;padding:26px;text-align:center;color:var(--text-3);font-size:13px">No batches match your search.</div>
 
     <div class="bl-tr"><div><div class="bl-bn">Easter Offertory</div><div class="bl-meta">edited 2h ago · Sarah Reynolds</div></div><div class="bl-cell">2026 — CMA · CMA</div><div class="bl-cell">May 2</div><div class="bl-cell">31</div><div class="bl-amt">$9,210.00</div><div><span class="bl-pill bl-draft"><span class="pd"></span>Draft</span></div><a class="bl-go" href="atlas-batch-entry.html">Resume →</a></div>
 
@@ -849,15 +901,15 @@ body {
 
     <div class="bl-tr"><div><div class="bl-bn">Online Giving Export</div><div class="bl-meta">edited May 1 · auto-import</div></div><div class="bl-cell">2026 — CMA</div><div class="bl-cell">May 1</div><div class="bl-cell">16</div><div class="bl-amt">$6,540.00</div><div><span class="bl-pill bl-draft"><span class="pd"></span>Draft</span></div><a class="bl-go" href="atlas-batch-entry.html">Resume →</a></div>
 
-    <div class="bl-tr"><div><div class="bl-bn">Spring Gala Pledges</div><div class="bl-meta">3 rows need review</div></div><div class="bl-cell">Cathedral Capital</div><div class="bl-cell">Apr 28</div><div class="bl-cell">12</div><div class="bl-amt">$42,000.00</div><div><span class="bl-pill bl-exc"><span class="pd"></span>Exceptions · 3</span></div><a class="bl-go" href="atlas-batch-exceptions.html">Review →</a></div>
+    <div class="bl-tr"><div><div class="bl-bn">Spring Gala Pledges</div><div class="bl-meta">3 rows need review</div></div><div class="bl-cell">Cathedral Capital</div><div class="bl-cell">Apr 28</div><div class="bl-cell">12</div><div class="bl-amt">$42,000.00</div><div><span class="bl-pill bl-exc"><span class="pd"></span>Exceptions · 3</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-exceptions.html">Resolve</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Removed from review')">Remove</a></div></div>
 
-    <div class="bl-tr"><div><div class="bl-bn">Memorial Gifts</div><div class="bl-meta">6 rows need review</div></div><div class="bl-cell">General Fund</div><div class="bl-cell">May 3</div><div class="bl-cell">6</div><div class="bl-amt">$3,800.00</div><div><span class="bl-pill bl-exc"><span class="pd"></span>Exceptions · 6</span></div><a class="bl-go" href="atlas-batch-exceptions.html">Review →</a></div>
+    <div class="bl-tr"><div><div class="bl-bn">Memorial Gifts</div><div class="bl-meta">6 rows need review</div></div><div class="bl-cell">General Fund</div><div class="bl-cell">May 3</div><div class="bl-cell">6</div><div class="bl-amt">$3,800.00</div><div><span class="bl-pill bl-exc"><span class="pd"></span>Exceptions · 6</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-exceptions.html">Resolve</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Removed from review')">Remove</a></div></div>
 
-    <div class="bl-tr"><div><div class="bl-bn">April Mail Response</div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">2026 — CMA · CMA</div><div class="bl-cell">Apr 18</div><div class="bl-cell">14</div><div class="bl-amt">$14,975.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><a class="bl-go" href="atlas-batch-entry.html">Open</a></div>
+    <div class="bl-tr"><div><div class="bl-bn">April Mail Response</div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">2026 — CMA · CMA</div><div class="bl-cell">Apr 18</div><div class="bl-cell">14</div><div class="bl-amt">$14,975.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-entry.html">View</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Batch removed from list')">Remove</a></div></div>
 
-    <div class="bl-tr"><div><div class="bl-bn">Q1 Major Gifts</div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">Cathedral Capital</div><div class="bl-cell">Mar 31</div><div class="bl-cell">8</div><div class="bl-amt">$185,000.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><a class="bl-go" href="atlas-batch-entry.html">Open</a></div>
+    <div class="bl-tr"><div><div class="bl-bn">Q1 Major Gifts</div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">Cathedral Capital</div><div class="bl-cell">Mar 31</div><div class="bl-cell">8</div><div class="bl-amt">$185,000.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-entry.html">View</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Batch removed from list')">Remove</a></div></div>
 
-    <div class="bl-tr"><div><div class="bl-bn">Lenten Appeal</div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">2026 — CMA</div><div class="bl-cell">Feb 28</div><div class="bl-cell">18</div><div class="bl-amt">$19,200.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><a class="bl-go" href="atlas-batch-entry.html">Open</a></div>
+    <div class="bl-tr"><div><div class="bl-bn">Lenten Appeal</div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">2026 — CMA</div><div class="bl-cell">Feb 28</div><div class="bl-cell">18</div><div class="bl-amt">$19,200.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-entry.html">View</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Batch removed from list')">Remove</a></div></div>
   </div>
 
   <div class="bl-two">
@@ -869,31 +921,32 @@ body {
     </div>
     <div class="bl-card">
       <div class="ch">Templates <span class="sub">reusable layouts</span></div>
-      <div class="bl-li"><div class="li-ic" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M2 6h12M6 6v8"/></svg></div><div class="li-b"><div class="li-t">CMA Mail Response</div><div class="li-s">9 columns · used 14 times</div></div><a class="bl-go" onclick="openNewBatch('template','CMA Mail Response')">Use →</a></div>
-      <div class="bl-li"><div class="li-ic" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M2 6h12M6 6v8"/></svg></div><div class="li-b"><div class="li-t">Major Gift Pledge</div><div class="li-s">11 columns · used 6 times</div></div><a class="bl-go" onclick="openNewBatch('template','Major Gift Pledge')">Use →</a></div>
-      <div class="bl-li"><div class="li-ic" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M2 6h12M6 6v8"/></svg></div><div class="li-b"><div class="li-t">Online Giving Export</div><div class="li-s">8 columns · used 22 times</div></div><a class="bl-go" onclick="openNewBatch('template','Online Giving Export')">Use →</a></div>
+      <div class="bl-li"><div class="li-ic" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M2 6h12M6 6v8"/></svg></div><div class="li-b"><div class="li-t">CMA Mail Response</div><div class="li-s">9 columns · used 14 times</div></div><a class="bl-go" onclick="useTemplateDirect('CMA Mail Response')">Use →</a></div>
+      <div class="bl-li"><div class="li-ic" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M2 6h12M6 6v8"/></svg></div><div class="li-b"><div class="li-t">Major Gift Pledge</div><div class="li-s">11 columns · used 6 times</div></div><a class="bl-go" onclick="useTemplateDirect('Major Gift Pledge')">Use →</a></div>
+      <div class="bl-li"><div class="li-ic" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M2 6h12M6 6v8"/></svg></div><div class="li-b"><div class="li-t">Online Giving Export</div><div class="li-s">8 columns · used 22 times</div></div><a class="bl-go" onclick="useTemplateDirect('Online Giving Export')">Use →</a></div>
     </div>
   </div>
 
 </div>
 <!-- /.main wrapper closed below -->
 
-<!-- New batch setup modal -->
+<!-- ═══ New batch modal (Gift OR Pledge) ═══ -->
 <div class="bl-ov" id="nb-ov" onclick="if(event.target===this)closeNewBatch()">
   <div class="bl-modal" role="dialog" aria-modal="true">
     <div class="bl-mh">
-      <div class="bl-mic"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2.5" y="2.5" width="15" height="15" rx="2.5"/><path d="M10 7v6M7 10h6"/></svg></div>
-      <div><h3 id="nb-title">Start a new batch</h3><p>Name it and set its home so every gift posts to the right place.</p></div>
+      <div class="bl-mic" id="nb-ic"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2.5" y="2.5" width="15" height="15" rx="2.5"/><path d="M2.5 7h15M7 7v10.5"/></svg></div>
+      <div><h3 id="nb-title">New gift batch</h3><p id="nb-sub">Spreadsheet entry for individual gifts. Name it and set its home.</p></div>
     </div>
     <div class="bl-mb">
-      <div class="bl-f full"><label>Batch name</label><input id="nb-name" type="text" placeholder="e.g., May Mail Response"></div>
+      <div class="bl-f full"><label id="nb-namelabel">Batch name</label><input id="nb-name" type="text" placeholder="e.g., May Mail Response"></div>
       <div class="bl-fg">
-        <div class="bl-f"><label>Folder / campaign</label><select id="nb-folder"><option>2026 — CMA</option><option>2026 — Cathedral Capital</option><option>General Fund</option><option>+ New folder…</option></select></div>
+        <div class="bl-f"><label>Folder / campaign</label><select id="nb-folder" onchange="onFolderChange(this,'nb-newfolder')"><option>2026 — CMA</option><option>2026 — Cathedral Capital</option><option>General Fund</option><option value="__new">+ Create new folder…</option></select></div>
         <div class="bl-f"><label>Default fund</label><select id="nb-fund"><option>CMA Annual Fund</option><option>Cathedral Capital Fund</option><option>General Fund</option><option>Marian Congress</option></select></div>
-        <div class="bl-f"><label>Start from</label><select id="nb-start"><option value="blank">Blank grid</option><option value="CMA Mail Response">Template · CMA Mail Response</option><option value="Major Gift Pledge">Template · Major Gift Pledge</option><option value="Online Giving Export">Template · Online Giving Export</option><option value="import">Import CSV / Excel</option></select></div>
+      </div>
+      <div class="bl-f full" id="nb-newfolder" style="display:none"><label>New folder name</label><input type="text" placeholder="e.g., 2026 — Spring Appeal"></div>
+      <div class="bl-fg">
         <div class="bl-f"><label>Entry date</label><input id="nb-date" type="text" value="05/04/2026"></div>
-        <div class="bl-f"><label>Expected gift count <span style="color:var(--text-3);font-weight:400">(optional)</span></label><input id="nb-count" type="text" placeholder="for reconciliation"></div>
-        <div class="bl-f"><label>Expected total <span style="color:var(--text-3);font-weight:400">(optional)</span></label><input id="nb-total" type="text" placeholder="$0.00"></div>
+        <div class="bl-f"><label id="nb-countlabel">Expected gift count <span style="color:var(--text-3);font-weight:400">(optional)</span></label><input id="nb-count" type="text" placeholder="for reconciliation"></div>
       </div>
     </div>
     <div class="bl-mf">
@@ -902,31 +955,215 @@ body {
     </div>
   </div>
 </div>
+
+<!-- ═══ Import modal (2 steps: file+folder → map columns) ═══ -->
+<div class="bl-ov" id="im-ov" onclick="if(event.target===this)closeImport()">
+  <div class="bl-modal" role="dialog" aria-modal="true" style="max-width:620px">
+    <div class="bl-mh">
+      <div class="bl-mic" style="background:var(--green-light);color:var(--green)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13V3M6.5 6.5L10 3l3.5 3.5"/><path d="M3.5 13.5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2"/></svg></div>
+      <div style="flex:1"><h3>Import gifts</h3><p>Upload a file, choose where it lands, then map the columns.</p>
+        <div class="bl-step"><span id="im-d1" class="on">1 · File &amp; folder</span><span id="im-d2">2 · Map columns</span></div></div>
+    </div>
+    <div class="bl-mb" id="im-step1">
+      <div class="bl-dz" onclick="document.getElementById('im-file').click()" id="im-dz">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 18v-5M9.5 15.5L12 13l2.5 2.5"/></svg>
+        <div style="font-size:13px;font-weight:600;color:var(--text-2)" id="im-dz-msg">Click to choose a file · or drop CSV / Excel here</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:4px">.csv, .xlsx, .xls · max 10MB</div>
+        <input type="file" id="im-file" accept=".csv,.xlsx,.xls" style="display:none">
+      </div>
+      <div class="bl-fg" style="margin-top:12px">
+        <div class="bl-f"><label>Folder / campaign</label><select id="im-folder" onchange="onFolderChange(this,'im-newfolder')"><option>2026 — CMA</option><option>2026 — Cathedral Capital</option><option>General Fund</option><option value="__new">+ Create new folder…</option></select></div>
+        <div class="bl-f"><label>Template for mapping</label><select id="im-tpl"><option>Auto-detect</option><option>CMA Mail Response</option><option>Major Gift Pledge</option><option>Online Giving Export</option></select></div>
+      </div>
+      <div class="bl-f full" id="im-newfolder" style="display:none"><label>New folder name</label><input type="text" placeholder="e.g., 2026 — Spring Appeal"></div>
+    </div>
+    <div class="bl-mb" id="im-step2" style="display:none">
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Match each column in your file to an Atlas field. Required: <strong>Donor, Date, Amount</strong>.</div>
+      <div class="cov" id="im-cov"></div>
+      <div id="im-map"></div>
+    </div>
+    <div class="bl-mf">
+      <button class="btn btn-ghost" id="im-cancel" onclick="closeImport()">Cancel</button>
+      <button class="btn btn-primary" id="im-next" onclick="importToMapping()">Continue to mapping →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Template modal (choose a saved layout) ═══ -->
+<div class="bl-ov" id="tpl-ov" onclick="if(event.target===this)closeTemplate()">
+  <div class="bl-modal" role="dialog" aria-modal="true">
+    <div class="bl-mh">
+      <div class="bl-mic" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2.5" y="2.5" width="15" height="15" rx="2.5"/><path d="M2.5 7h15M7 7v10.5"/></svg></div>
+      <div><h3>New batch from template</h3><p>Reuse a saved column layout and defaults — no setup needed.</p></div>
+    </div>
+    <div class="bl-mb">
+      <div class="bl-f full"><label>Template</label><select id="tpl-pick" onchange="renderTplCols()"><option data-cols="Donor · Date · Fund · Amount · Check # · Appeal">CMA Mail Response · 9 columns</option><option data-cols="Donor · Pledge amount · Schedule · Fund · Start date · Soft credits">Major Gift Pledge · 11 columns</option><option data-cols="Constituent · Txn date · Designation · Gross amount · Payment type · Txn ID">Online Giving Export · 8 columns</option></select></div>
+      <div class="bl-f full"><label>Batch name</label><input id="tpl-name" type="text" placeholder="e.g., May CMA Mail Response"></div>
+      <div class="bl-f full"><label>Folder / campaign</label><select id="tpl-folder" onchange="onFolderChange(this,'tpl-newfolder')"><option>2026 — CMA</option><option>2026 — Cathedral Capital</option><option>General Fund</option><option value="__new">+ Create new folder…</option></select></div>
+      <div class="bl-f full" id="tpl-newfolder" style="display:none"><label>New folder name</label><input type="text" placeholder="e.g., 2026 — Spring Appeal"></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-size:12px;color:var(--text-2)"><strong style="color:var(--text)">Columns:</strong> <span id="tpl-cols">Donor · Date · Fund · Amount · Check # · Appeal</span></div>
+    </div>
+    <div class="bl-mf">
+      <button class="btn btn-ghost" onclick="closeTemplate()">Cancel</button>
+      <button class="btn btn-primary" onclick="createFromTemplate()">Create batch from template</button>
+    </div>
+  </div>
+</div>
+
 <div class="bl-toast" id="bl-toast"></div>
 
 </div><!-- /.main -->
 
 <script>
 (function(){
-  var ov=document.getElementById('nb-ov');
-  window.openNewBatch=function(mode,tpl){
-    var start=document.getElementById('nb-start'), title=document.getElementById('nb-title'), go=document.getElementById('nb-go');
-    title.textContent='Start a new batch'; go.textContent='Create & open batch';
-    if(mode==='import'){ start.value='import'; title.textContent='Import a batch from a file'; go.textContent='Continue to column mapping'; }
-    else if(mode==='template'){ start.value=tpl||'CMA Mail Response'; title.textContent='New batch from template'; }
-    else { start.value='blank'; }
-    ov.classList.add('show');
+  var toastEl=document.getElementById('bl-toast');
+  function toast(m){ toastEl.textContent=m; toastEl.classList.add('show'); clearTimeout(toastEl._t); toastEl._t=setTimeout(function(){toastEl.classList.remove('show');},2600); }
+  function go(url,msg){ toast(msg); setTimeout(function(){ window.location=url; },650); }
+
+  // ── New-batch split menu ──
+  window.toggleNewBatchMenu=function(e){
+    e.stopPropagation();
+    var m=document.getElementById('nb-menu');
+    if(m.classList.contains('show')){ m.classList.remove('show'); return; }
+    var b=(e.currentTarget||e.target.closest('button')).getBoundingClientRect();
+    m.classList.add('show');
+    var mw=m.offsetWidth||264;
+    m.style.left=Math.max(8, b.right-mw)+'px';
+    m.style.top=(b.bottom+6)+'px';
+  };
+  document.addEventListener('click',function(e){ var m=document.getElementById('nb-menu'); if(m&&m.classList.contains('show')&&!e.target.closest('#nb-menu')&&!e.target.closest('[onclick*="toggleNewBatchMenu"]')) m.classList.remove('show'); });
+
+  // ── New folder reveal ──
+  window.onFolderChange=function(sel,inputId){ var inp=document.getElementById(inputId); if(inp) inp.style.display = sel.value==='__new'?'block':'none'; };
+
+  // ── New batch modal (gift / pledge) ──
+  var nbTarget='atlas-batch-entry.html', nbKind='gift';
+  window.openNewBatch=function(kind){
+    document.getElementById('nb-menu').classList.remove('show');
+    nbKind = kind==='pledge'?'pledge':'gift';
+    nbTarget = nbKind==='pledge'?'atlas-batch-pledge-entry.html':'atlas-batch-entry.html';
+    document.getElementById('nb-title').textContent = nbKind==='pledge'?'New pledge batch':'New gift batch';
+    document.getElementById('nb-sub').textContent = nbKind==='pledge'?'Batch-enter multi-payment pledge commitments. Name it and set its home.':'Spreadsheet entry for individual gifts. Name it and set its home.';
+    document.getElementById('nb-countlabel').innerHTML = (nbKind==='pledge'?'Expected pledge count':'Expected gift count')+' <span style="color:var(--text-3);font-weight:400">(optional)</span>';
+    document.getElementById('nb-ic').style.background = nbKind==='pledge'?'var(--amber-light)':'var(--blue-pale)';
+    document.getElementById('nb-ic').style.color = nbKind==='pledge'?'#92400E':'var(--blue)';
+    document.getElementById('nb-ov').classList.add('show');
     setTimeout(function(){ document.getElementById('nb-name').focus(); },60);
   };
-  window.closeNewBatch=function(){ ov.classList.remove('show'); };
-  window.createBatch=function(){
-    closeNewBatch();
-    var t=document.getElementById('bl-toast');
-    var nm=(document.getElementById('nb-name').value||'New batch').trim();
-    t.textContent='Opening “'+nm+'” · grid ready'; t.classList.add('show');
-    setTimeout(function(){ window.location='atlas-batch-entry.html'; }, 650);
+  window.closeNewBatch=function(){ document.getElementById('nb-ov').classList.remove('show'); };
+  window.createBatch=function(){ closeNewBatch(); var nm=(document.getElementById('nb-name').value||(nbKind==='pledge'?'New pledge batch':'New gift batch')).trim(); go(nbTarget,'Opening “'+nm+'” · '+(nbKind==='pledge'?'pledge ':'')+'grid ready'); };
+
+  // ── Import wizard ──
+  var ATLAS=[['','— Ignore —'],['donor','Donor name'],['date','Gift date'],['fund','Fund'],['type','Gift type'],['amount','Amount'],['pay','Payment method'],['ref','Check / Ref #'],['gl','GL code'],['note','Note']];
+  var TPL_SRC={
+    'Auto-detect':['Donor','Gift Date','Fund','Amount','Payment method','Check / Ref','GL code','Note'],
+    'CMA Mail Response':['Donor','Date','Fund','Amount','Check #','Appeal'],
+    'Major Gift Pledge':['Donor','Pledge amount','Fund','Schedule','Start date'],
+    'Online Giving Export':['Constituent','Txn date','Designation','Gross amount','Payment type','Txn ID']
   };
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeNewBatch(); });
+  function autoField(h){h=h.toLowerCase().replace(/[^a-z]/g,'');
+    if(/donor|name|constituent/.test(h))return 'donor'; if(/date/.test(h))return 'date';
+    if(/fund|designation/.test(h))return 'fund'; if(/type|method|payment/.test(h))return /type/.test(h)?'type':'pay';
+    if(/amount|amt|gross/.test(h))return 'amount'; if(/check|ref|txn|transaction/.test(h))return 'ref';
+    if(/gl|account/.test(h))return 'gl'; if(/note|memo|appeal/.test(h))return 'note'; return '';}
+  var imMap=[];
+  window.openImport=function(){
+    document.getElementById('nb-menu').classList.remove('show');
+    document.getElementById('im-step1').style.display='block'; document.getElementById('im-step2').style.display='none';
+    document.getElementById('im-d1').classList.add('on'); document.getElementById('im-d2').classList.remove('on');
+    document.getElementById('im-next').textContent='Continue to mapping →'; document.getElementById('im-next').setAttribute('onclick','importToMapping()');
+    document.getElementById('im-cancel').textContent='Cancel'; document.getElementById('im-cancel').setAttribute('onclick','closeImport()');
+    document.getElementById('im-dz-msg').textContent='Click to choose a file · or drop CSV / Excel here';
+    document.getElementById('im-dz').style.borderColor='var(--border)'; document.getElementById('im-dz').style.background='var(--surface)';
+    document.getElementById('im-ov').classList.add('show');
+  };
+  window.closeImport=function(){ document.getElementById('im-ov').classList.remove('show'); };
+  document.getElementById('im-file').addEventListener('change',function(){ if(this.files&&this.files[0]){ var f=this.files[0]; document.getElementById('im-dz-msg').innerHTML='✓ <strong>'+f.name+'</strong> — '+Math.round(f.size/1024)+' KB ready'; document.getElementById('im-dz').style.borderColor='var(--green)'; document.getElementById('im-dz').style.background='var(--green-light)'; }});
+  window.importToMapping=function(){
+    var tpl=document.getElementById('im-tpl').value; var src=TPL_SRC[tpl]||TPL_SRC['Auto-detect'];
+    imMap=src.map(function(h){return {src:h, field:autoField(h)};});
+    renderMap();
+    document.getElementById('im-step1').style.display='none'; document.getElementById('im-step2').style.display='block';
+    document.getElementById('im-d2').classList.add('on');
+    document.getElementById('im-next').textContent='Import & open batch'; document.getElementById('im-next').setAttribute('onclick','importFinish()');
+    document.getElementById('im-cancel').textContent='← Back'; document.getElementById('im-cancel').setAttribute('onclick','importBack()');
+  };
+  window.importBack=function(){
+    document.getElementById('im-step2').style.display='none'; document.getElementById('im-step1').style.display='block';
+    document.getElementById('im-d2').classList.remove('on');
+    document.getElementById('im-next').textContent='Continue to mapping →'; document.getElementById('im-next').setAttribute('onclick','importToMapping()');
+    document.getElementById('im-cancel').textContent='Cancel'; document.getElementById('im-cancel').setAttribute('onclick','closeImport()');
+  };
+  window.imSetField=function(i,v){ imMap[i].field=v; renderCov(); };
+  function renderMap(){
+    document.getElementById('im-map').innerHTML=imMap.map(function(m,i){
+      return '<div class="map-row"><div class="src"><div class="s1">'+m.src+'</div><div class="s2">your column</div></div><div class="arr">→</div><select onchange="imSetField('+i+',this.value)">'+ATLAS.map(function(f){return '<option value="'+f[0]+'"'+(f[0]===m.field?' selected':'')+'>'+f[1]+(['donor','date','amount'].indexOf(f[0])>=0?' *':'')+'</option>';}).join('')+'</select></div>';
+    }).join('');
+    renderCov();
+  }
+  function renderCov(){
+    var have={}; imMap.forEach(function(m){if(m.field)have[m.field]=1;});
+    var req=[['donor','Donor name'],['date','Gift date'],['amount','Amount']];
+    document.getElementById('im-cov').innerHTML=req.map(function(r){var ok=!!have[r[0]];return '<span style="background:'+(ok?'var(--green-light)':'var(--rose-light)')+';color:'+(ok?'var(--green)':'var(--rose)')+'">'+(ok?'✓':'✕')+' '+r[1]+'</span>';}).join('');
+    var ready=req.every(function(r){return have[r[0]];});
+    var btn=document.getElementById('im-next'); if(document.getElementById('im-step2').style.display!=='none'){ btn.disabled=!ready; btn.style.opacity=ready?'1':'.5'; btn.style.cursor=ready?'pointer':'not-allowed'; }
+  }
+  window.importFinish=function(){
+    var have={}; imMap.forEach(function(m){if(m.field)have[m.field]=1;});
+    if(!(have.donor&&have.date&&have.amount)){ toast('Map Donor, Date and Amount first'); return; }
+    closeImport(); go('atlas-batch-entry.html','Importing · columns mapped · opening batch');
+  };
+
+  // ── Template modal ──
+  window.openTemplate=function(){ document.getElementById('nb-menu').classList.remove('show'); renderTplCols(); document.getElementById('tpl-ov').classList.add('show'); };
+  window.closeTemplate=function(){ document.getElementById('tpl-ov').classList.remove('show'); };
+  window.renderTplCols=function(){ var o=document.getElementById('tpl-pick').selectedOptions[0]; document.getElementById('tpl-cols').textContent=o.getAttribute('data-cols')||''; };
+  window.createFromTemplate=function(){ closeTemplate(); var t=document.getElementById('tpl-pick').value.split(' · ')[0]; var nm=(document.getElementById('tpl-name').value||t).trim(); go('atlas-batch-entry.html','Opening “'+nm+'” from '+t+' template'); };
+
+  // ── Bottom templates list → open clean batch directly (no popup) ──
+  window.useTemplateDirect=function(name){ go('atlas-batch-entry.html','Opening clean batch · '+name+' template applied'); };
+
+  // ── Batch search + folder filter ──
+  var blQ='', blFolderFilter='';
+  function blApply(){
+    var rows=document.querySelectorAll('#bl-table .bl-tr:not(.head)'); var shown=0;
+    rows.forEach(function(r){ var t=r.textContent.toLowerCase();
+      var mq=!blQ||t.indexOf(blQ)>=0;
+      var mf=!blFolderFilter||t.indexOf(blFolderFilter.toLowerCase())>=0;
+      var m=mq&&mf; r.style.display=m?'':'none'; if(m)shown++; });
+    document.getElementById('bl-empty').style.display=shown?'none':'block';
+  }
+  window.blSearch=function(q){ blQ=(q||'').toLowerCase().trim(); blApply(); };
+  function setActiveChip(el){ document.querySelectorAll('#bl-flds .bl-fchip').forEach(function(c){c.classList.remove('on');}); if(el) el.classList.add('on'); }
+  window.blFolderAll=function(el){ blFolderFilter=''; setActiveChip(el); blApply(); };
+  window.blFolder=function(name,el){
+    if(blFolderFilter===name){ blFolderFilter=''; setActiveChip(document.querySelector('#bl-flds .bl-fchip')); toast('Showing all folders'); }
+    else { blFolderFilter=name; setActiveChip(el); toast('Filtered to “'+name+'”'); }
+    blApply();
+  };
+  function resetNewChip(){ document.getElementById('bl-newfld').innerHTML='+ New folder'; }
+  function addFolderChip(nm){
+    var wrap=document.getElementById('bl-flds'), newc=document.getElementById('bl-newfld');
+    var el=document.createElement('div'); el.className='bl-fchip';
+    el.innerHTML='<span class="dotf" style="background:var(--green)"></span>'+nm+' <span class="ct">0</span>';
+    el.addEventListener('click',function(){ window.blFolder(nm,el); });
+    wrap.insertBefore(el,newc);
+  }
+  window.blNewFolder=function(){
+    var c=document.getElementById('bl-newfld');
+    c.innerHTML='<input id="nf-input" placeholder="Folder name…" style="border:none;outline:none;font-family:inherit;font-size:13px;width:140px;background:none;color:var(--text)">';
+    var inp=document.getElementById('nf-input'); inp.focus();
+    inp.addEventListener('click',function(e){ e.stopPropagation(); });
+    inp.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){ var nm=(inp.value||'').trim(); resetNewChip(); if(nm){ addFolderChip(nm); toast('Folder “'+nm+'” created'); } }
+      else if(e.key==='Escape'){ resetNewChip(); }
+    });
+  };
+
+  // ── Remove a batch row ──
+  window.blRemove=function(el,msg){ var r=el.closest('.bl-tr'); if(r) r.remove(); toast(msg||'Removed'); };
+
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeNewBatch(); closeImport(); closeTemplate(); document.getElementById('nb-menu').classList.remove('show'); } });
 })();
 </script>
 

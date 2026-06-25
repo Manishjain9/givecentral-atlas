@@ -1262,7 +1262,7 @@
     </div>
     <div class="bt-section bt-section-right">
       <button class="bt-action" onclick="openModal('import')" title="Import CSV / Excel">
-        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1v7M3 5.5l3 3 3-3"/><path d="M1.5 10.5h9"/></svg>
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7.8V1.8M3.5 4.3L6 1.8 8.5 4.3"/><path d="M2 8.7v1.1a.8.8 0 0 0 .8.8h6.4a.8.8 0 0 0 .8-.8V8.7"/></svg>
         Import
       </button>
       <button class="bt-action" onclick="openModal('accuracy-settings')" title="Accuracy engine settings">
@@ -2767,42 +2767,240 @@ window.__pickedImportFile = null;
   });
 })();
 
+// Sample template — download + inline view
+function downloadSampleCsv(){
+  var headers=['Donor name','Gift date','Fund','Gift type','Amount','Payment method','Check / Ref #','GL code','Note'];
+  var rows=[
+    ["O'Brien, James",'04/18/2026','CMA Annual Fund','Check','500.00','Check','10441','4100','Spring appeal'],
+    ['Sullivan, Margaret','04/18/2026','CMA Annual Fund','Credit card','250.00','Credit card','CC-2290','4100',''],
+    ['Kim, Patricia','04/19/2026','Cathedral Capital Fund','Stock','9870.00','Stock transfer','DTC-7755','4150','78 sh NVDA']
+  ];
+  var csv=[headers].concat(rows).map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  try{
+    var blob=new Blob([csv],{type:'text/csv'}); var url=URL.createObjectURL(blob);
+    var a=document.createElement('a'); a.href=url; a.download='atlas-gift-import-template.csv'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},800);
+  }catch(_){}
+  batchToast('Sample CSV downloaded · fill it in, then upload');
+}
+function toggleSampleView(){
+  var s=document.getElementById('import-sample'); var b=document.getElementById('import-view-btn'); if(!s) return;
+  var open = s.style.display!=='none';
+  s.style.display = open?'none':'block';
+  if(b) b.textContent = open?'View columns':'Hide columns';
+}
+
+// Format validation — block import (and posting) when the file doesn't match
+function normHdr(h){ return (h||'').toLowerCase().replace(/[^a-z]/g,''); }
+function validatePicked(file){
+  var btn  = document.getElementById('import-preview-btn');
+  var err  = document.getElementById('import-error');
+  var zone = document.getElementById('import-dropzone');
+  var msg  = document.getElementById('import-dz-msg');
+  function setBtn(on){ if(!btn) return; btn.disabled=!on; btn.style.opacity=on?'1':'.5'; btn.style.cursor=on?'pointer':'not-allowed'; }
+  function fail(html){ window.__importValid=false; setBtn(false); if(err){err.style.display='block';err.innerHTML=html;} if(zone){zone.style.borderColor='var(--rose)';zone.style.background='var(--rosel)';} if(msg) msg.innerHTML='✕ <strong>'+file.name+'</strong> — format problem (see below)'; }
+  function pass(note){ window.__importValid=true; setBtn(true); if(err) err.style.display='none'; if(zone){zone.style.borderColor='var(--green)';zone.style.background='var(--greenl)';} if(msg) msg.innerHTML='✓ <strong>'+file.name+'</strong> — '+Math.round(file.size/1024)+' KB · '+note; }
+  var name=(file.name||'').toLowerCase();
+  if(!/\.(csv|xlsx|xls)$/.test(name)){ fail('<strong>Unsupported file type.</strong> Upload a .csv, .xlsx or .xls file. <a href="#" onclick="downloadSampleCsv();return false" style="color:#9D174D;font-weight:600">Download the template →</a>'); return; }
+  if(/\.(xlsx|xls)$/.test(name)){ pass('Excel — columns mapped on the next step'); return; }
+  var reader=new FileReader();
+  reader.onload=function(){
+    var text=String(reader.result||'');
+    var firstLine=(text.split(/\r?\n/)[0]||'');
+    var hdrs=firstLine.split(',').map(normHdr);
+    var have={donor:false,date:false,amount:false};
+    hdrs.forEach(function(h){ if(/donor|name|constituent/.test(h))have.donor=true; if(/date/.test(h))have.date=true; if(/amount|amt|gift/.test(h))have.amount=true; });
+    var missing=[]; if(!have.donor)missing.push('Donor name'); if(!have.date)missing.push('Gift date'); if(!have.amount)missing.push('Amount');
+    if(!firstLine.trim()){ fail('<strong>The file looks empty.</strong> Add a header row and at least one gift. <a href="#" onclick="downloadSampleCsv();return false" style="color:#9D174D;font-weight:600">Download the template →</a>'); return; }
+    if(missing.length){ fail('<strong>This file isn’t in the right format.</strong><br>Missing required column'+(missing.length>1?'s':'')+': <strong>'+missing.join(', ')+'</strong>.<br>Match the header names in the template, then re-upload. <a href="#" onclick="downloadSampleCsv();return false" style="color:#9D174D;font-weight:600">Download template →</a>'); return; }
+    var n=text.split(/\r?\n/).filter(function(l){return l.trim();}).length-1;
+    pass('format looks good · '+(n>0?n:'?')+' row'+(n===1?'':'s')+' detected');
+  };
+  reader.onerror=function(){ fail('Could not read the file. Try again, or download the template.'); };
+  reader.readAsText(file);
+}
+
 function wireImportZone(){
   var input = document.getElementById('import-file-input');
   var zone  = document.getElementById('import-dropzone');
-  var msg   = document.getElementById('import-dz-msg');
   if (!input || !zone) return;
+  window.__importValid = false; window.__pickedImportFile = null;
   input.addEventListener('change', function(){
-    if (input.files && input.files[0]) {
-      window.__pickedImportFile = input.files[0];
-      if (msg) msg.innerHTML = '✓ <strong>' + input.files[0].name + '</strong> — ' + Math.round(input.files[0].size/1024) + ' KB ready';
-      zone.style.borderColor = 'var(--green)';
-      zone.style.background  = 'var(--greenl)';
-    }
+    if (input.files && input.files[0]) { window.__pickedImportFile = input.files[0]; validatePicked(input.files[0]); }
   });
   zone.addEventListener('dragover', function(e){ e.preventDefault(); zone.style.borderColor='var(--blue)'; });
-  zone.addEventListener('dragleave', function(){ zone.style.borderColor='var(--border)'; });
+  zone.addEventListener('dragleave', function(){ if(!window.__pickedImportFile) zone.style.borderColor='var(--border)'; });
   zone.addEventListener('drop', function(e){
     e.preventDefault();
     if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
       window.__pickedImportFile = e.dataTransfer.files[0];
-      input.files = e.dataTransfer.files;
-      if (msg) msg.innerHTML = '✓ <strong>' + window.__pickedImportFile.name + '</strong> — ' + Math.round(window.__pickedImportFile.size/1024) + ' KB ready';
-      zone.style.borderColor = 'var(--green)';
-      zone.style.background  = 'var(--greenl)';
+      try { input.files = e.dataTransfer.files; } catch(_){}
+      validatePicked(window.__pickedImportFile);
     }
   });
 }
 function triggerImportPreview(){
-  if (!window.__pickedImportFile) {
-    // No file picked — prompt
-    batchToast('Pick or drop a file first');
-    var input = document.getElementById('import-file-input');
-    if (input) input.click();
+  var input = document.getElementById('import-file-input');
+  if (!window.__pickedImportFile) { batchToast('Choose or drop a file first'); if (input) input.click(); return; }
+  if (!window.__importValid) {
+    var err=document.getElementById('import-error');
+    if (err){ err.style.display='block'; err.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+    batchToast('Can’t import — fix the file format first');
     return;
   }
-  handleImportFile(window.__pickedImportFile);
-  window.__pickedImportFile = null;
+  openImportWizard(window.__pickedImportFile);
+}
+
+/* ════════════════════════════════════════════════════════════
+   IMPORT WIZARD · Map columns → Review (validate + dedupe) → Import
+   ════════════════════════════════════════════════════════════ */
+var ATLAS_FIELDS=[['donor','Donor name',true],['date','Gift date',true],['fund','Fund',false],['type','Gift type',false],['amount','Amount',true],['pay','Payment method',false],['ref','Check / Ref #',false],['gl','GL code',false],['note','Note',false]];
+var IMP={};
+
+function parseCsvLine(line){
+  var out=[],cur='',q=false;
+  for(var i=0;i<line.length;i++){var c=line[i];
+    if(q){ if(c==='"'){ if(line[i+1]==='"'){cur+='"';i++;} else q=false; } else cur+=c; }
+    else { if(c==='"')q=true; else if(c===','){out.push(cur);cur='';} else cur+=c; }
+  }
+  out.push(cur); return out.map(function(s){return s.trim();});
+}
+function parseCSV(text){
+  var lines=text.split(/\r?\n/).filter(function(l){return l.trim().length;});
+  if(!lines.length) return {headers:[],rows:[]};
+  return {headers:parseCsvLine(lines[0]), rows:lines.slice(1).map(parseCsvLine)};
+}
+var DEMO_IMPORT={headers:['Donor','Gift Date','Fund','Type','Amount','Method','Ref','GL','Memo'],rows:[
+  ['O\'Brien, James','04/18/2026','CMA Annual Fund','Check','500.00','Check','10441','4100','Spring appeal'],
+  ['Anne Reilly','04/18/2026','CMA Annual Fund','Check','250.00','Check','CSV-2','4100',''],
+  ['Patricia Mathias','04/18/2026','Cathedral Capital Fund','Check','5000.00','Check','CSV-3','5001',''],
+  ['Sullivan, Margaret','04/18/2026','CMA Annual Fund','Credit card','250.00','Credit card','CC-2290','4100',''],
+  ['','04/18/2026','General Fund','Check','75.00','Check','CSV-5','','missing donor'],
+  ['Brian Walsh','','CMA Annual Fund','Check','100.00','Check','CSV-6','4100','missing date'],
+  ['Kim, Patricia','04/19/2026','Cathedral Capital Fund','Stock','not a number','Stock transfer','DTC-1','4150','bad amount'],
+  ['Thomas Sullivan','04/19/2026','CMA Annual Fund','Check','1500.00','Check','CSV-8','4100','']
+]};
+function headerSig(h){return h.map(function(x){return x.toLowerCase().replace(/[^a-z]/g,'');}).join('|');}
+function autoMapCols(headers){
+  var rx={donor:/donor|name|constituent/,date:/date/,fund:/fund|campaign|designation/,type:/gifttype|type/,amount:/amount|amt/,pay:/payment|method|pay/,ref:/check|ref|reference|transaction/,gl:/gl|account/,note:/note|memo|comment/};
+  return headers.map(function(h){var n=h.toLowerCase().replace(/[^a-z]/g,'');for(var f in rx){if(rx[f].test(n))return f;}return '';});
+}
+function detectTemplate(name){name=(name||'').toLowerCase();if(/online|export|givecentral/.test(name))return 'Online Giving Export';if(/mail|cma/.test(name))return 'CMA Mail Response';if(/pledge|major|capital/.test(name))return 'Major Gift Pledge';return '';}
+
+function openImportWizard(file){
+  function setup(headers,rows){
+    IMP={file:file,headers:headers,rows:rows,step:'map',remembered:false,tpl:detectTemplate(file&&file.name)};
+    var sig=headerSig(headers),saved=null;
+    try{var s=localStorage.getItem('atlas-import-map-'+sig);if(s)saved=JSON.parse(s);}catch(_){ }
+    if(saved&&saved.length===headers.length){IMP.colField=saved;IMP.remembered=true;}
+    else IMP.colField=autoMapCols(headers);
+    if(typeof closeModal==='function')closeModal();
+    showWizard();renderWizard();
+  }
+  var name=(file&&file.name||'').toLowerCase();
+  if(/\.(xlsx|xls)$/.test(name)||!file){ setup(DEMO_IMPORT.headers,DEMO_IMPORT.rows); return; }
+  var r=new FileReader();
+  r.onload=function(){var p=parseCSV(String(r.result||''));if(!p.headers.length){setup(DEMO_IMPORT.headers,DEMO_IMPORT.rows);return;}setup(p.headers,p.rows);};
+  r.onerror=function(){setup(DEMO_IMPORT.headers,DEMO_IMPORT.rows);};
+  r.readAsText(file);
+}
+
+function ensureWizardEl(){
+  var el=document.getElementById('imp-wiz'); if(el) return el;
+  el=document.createElement('div'); el.id='imp-wiz';
+  el.style.cssText='position:fixed;inset:0;background:rgba(14,30,53,.5);backdrop-filter:blur(2px);z-index:100000;display:none;align-items:center;justify-content:center;padding:24px;font-family:\'DM Sans\',sans-serif';
+  el.innerHTML='<div style="background:#fff;border-radius:16px;width:100%;max-width:760px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(15,23,42,.3);overflow:hidden">'
+    +'<div style="padding:18px 22px 0;display:flex;align-items:flex-start;justify-content:space-between"><div><div style="font-family:\'DM Serif Display\',serif;font-size:20px;color:var(--text)">Import gifts</div><div id="iw-steps" style="display:flex;gap:8px;margin-top:10px"></div></div><div onclick="closeWizard()" style="cursor:pointer;color:var(--text3);font-size:20px;line-height:1;padding:2px 6px">×</div></div>'
+    +'<div id="iw-body" style="padding:16px 22px;overflow-y:auto;flex:1"></div>'
+    +'<div id="iw-foot" style="padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:10px"></div></div>';
+  document.body.appendChild(el);
+  el.addEventListener('click',function(e){if(e.target===el)closeWizard();});
+  return el;
+}
+function showWizard(){ensureWizardEl().style.display='flex';}
+function closeWizard(){var el=document.getElementById('imp-wiz');if(el)el.style.display='none';}
+
+function stepDots(active){
+  var steps=[['map','1 · Map columns'],['review','2 · Review & import']];
+  return steps.map(function(s){var on=s[0]===active;return '<span style="font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:99px;background:'+(on?'var(--bluep)':'var(--surf)')+';color:'+(on?'var(--blue)':'var(--text3)')+';border:1px solid '+(on?'var(--bluel)':'var(--border)')+'">'+s[1]+'</span>';}).join('');
+}
+function reqCoverage(){var have={};IMP.colField.forEach(function(f){if(f)have[f]=1;});return [['donor','Donor name'],['date','Gift date'],['amount','Amount']].map(function(r){return {key:r[0],label:r[1],ok:!!have[r[0]]};});}
+
+function renderWizard(){
+  var el=ensureWizardEl();
+  document.getElementById('iw-steps').innerHTML=stepDots(IMP.step);
+  var body=document.getElementById('iw-body'), foot=document.getElementById('iw-foot');
+  if(IMP.step==='map'){
+    var note=IMP.remembered?'✓ <strong>Mapping remembered</strong> from your last import of a file like this.':(IMP.tpl?('Looks like a <strong>'+IMP.tpl+'</strong> export — columns auto-mapped.'):'Columns auto-detected — review the matches below.');
+    var opts=function(sel){return '<option value="">— Ignore —</option>'+ATLAS_FIELDS.map(function(f){return '<option value="'+f[0]+'"'+(sel===f[0]?' selected':'')+'>'+f[1]+(f[2]?' *':'')+'</option>';}).join('');};
+    var rowsHtml=IMP.headers.map(function(h,i){var sample=(IMP.rows[0]&&IMP.rows[0][i])||'';return '<div style="display:grid;grid-template-columns:1fr 24px 1fr;gap:12px;align-items:center;padding:8px 0;border-top:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600;color:var(--text)">'+(h||'(unnamed)')+'</div><div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">e.g. '+(sample||'—')+'</div></div><div style="text-align:center;color:var(--text3)">→</div><select data-col="'+i+'" onchange="wizSetCol(this)" class="form-select" style="font-size:12.5px;padding:7px 10px">'+opts(IMP.colField[i])+'</select></div>';}).join('');
+    var cov=reqCoverage();
+    var covHtml=cov.map(function(c){return '<span style="font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:99px;background:'+(c.ok?'var(--greenl)':'var(--rosel)')+';color:'+(c.ok?'var(--green)':'var(--rose)')+'">'+(c.ok?'✓':'✕')+' '+c.label+'</span>';}).join(' ');
+    body.innerHTML='<div style="background:var(--bluep);border:1px solid var(--bluel);border-radius:9px;padding:10px 13px;font-size:12.5px;color:#1D4ED8;margin-bottom:12px">'+note+'</div>'
+      +'<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:6px">'+covHtml+'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 24px 1fr;gap:12px;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text3);padding-bottom:4px"><div>Your column</div><div></div><div>Atlas field</div></div>'
+      +rowsHtml;
+    var ready=cov.every(function(c){return c.ok;});
+    foot.innerHTML='<button class="btn btn-ghost" onclick="closeWizard()">Cancel</button><button class="btn btn-blue" id="iw-continue" onclick="wizGoReview()"'+(ready?'':' disabled style="opacity:.5;cursor:not-allowed"')+'>Continue to review →</button>';
+  } else {
+    var data=wizComputeParsed();
+    var ready=data.filter(function(r){return r.kind!=='error';}).length;
+    var errs=data.filter(function(r){return r.kind==='error';}).length;
+    var dups=data.filter(function(r){return r.kind==='dup';}).length;
+    function tile(v,l,col){return '<div style="flex:1;background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:11px 13px"><div style="font-family:\'DM Serif Display\',serif;font-size:22px;color:'+col+'">'+v+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">'+l+'</div></div>';}
+    var badge=function(r){if(r.kind==='error')return '<span style="font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--rosel);color:var(--rose)">Error · '+r.msg+'</span>';if(r.kind==='dup')return '<span style="font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--amberl);color:var(--amber)">Possible dup · '+r.msg+'</span>';return '<span style="font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--greenl);color:var(--green)">Ready</span>';};
+    var shown=data.slice(0,14);
+    var tbl=shown.map(function(r){return '<tr><td style="padding:7px 10px;border-top:1px solid var(--border);font-size:12.5px;color:var(--text)">'+(r.obj.donor||'<span style=\"color:var(--rose)\">—</span>')+'</td><td style="padding:7px 10px;border-top:1px solid var(--border);font-size:12.5px;color:var(--text2)">'+(r.obj.date||'—')+'</td><td style="padding:7px 10px;border-top:1px solid var(--border);font-size:12.5px;color:var(--text2);text-align:right">'+(r.obj.amount||'—')+'</td><td style="padding:7px 10px;border-top:1px solid var(--border)">'+badge(r)+'</td></tr>';}).join('');
+    body.innerHTML='<div style="display:flex;gap:10px;margin-bottom:14px">'+tile(data.length,'Rows parsed','var(--text)')+tile(ready,'Ready to import','var(--green)')+tile(errs,'Need attention','var(--rose)')+tile(dups,'Possible duplicates','var(--amber)')+'</div>'
+      +'<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden"><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:8px 10px;background:var(--surf);font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase">Donor</th><th style="text-align:left;padding:8px 10px;background:var(--surf);font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase">Date</th><th style="text-align:right;padding:8px 10px;background:var(--surf);font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase">Amount</th><th style="text-align:left;padding:8px 10px;background:var(--surf);font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase">Status</th></tr></thead><tbody>'+tbl+'</tbody></table></div>'
+      +(data.length>14?'<div style="padding:8px 10px;font-size:11.5px;color:var(--text3);border-top:1px solid var(--border)">+ '+(data.length-14)+' more rows</div>':'')+'</div>'
+      +(errs>0?'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--rosel);border:1px solid #FBCFE8;border-radius:9px;padding:10px 13px;margin-top:12px"><span style="font-size:12.5px;color:#9D174D"><strong>'+errs+' row'+(errs>1?'s':'')+' can’t be imported</strong> and won’t post. Fix them and re-upload.</span><button class="btn btn-ghost" style="font-size:12px;padding:6px 11px" onclick="wizDownloadFailed()">Download failed rows</button></div>':'')
+      +'<div id="iw-progress" style="display:none;margin-top:14px"><div style="font-size:12px;color:var(--text2);margin-bottom:6px" id="iw-prog-label">Importing…</div><div style="height:8px;background:var(--surf);border-radius:6px;overflow:hidden"><div id="iw-prog-bar" style="height:100%;width:0;background:var(--blue);border-radius:6px;transition:width .12s"></div></div></div>';
+    foot.innerHTML='<button class="btn btn-ghost" onclick="IMP.step=\'map\';renderWizard()">← Back to mapping</button><button class="btn btn-green" id="iw-import" onclick="wizDoImport()">Import '+ready+' gift'+(ready===1?'':'s')+(dups?' ('+dups+' flagged)':'')+'</button>';
+  }
+}
+function wizSetCol(sel){IMP.colField[parseInt(sel.getAttribute('data-col'))]=sel.value;renderWizard();}
+function wizGoReview(){var cov=reqCoverage();if(!cov.every(function(c){return c.ok;})){batchToast('Map Donor, Date and Amount to continue');return;}IMP.step='review';renderWizard();}
+function wizComputeParsed(){
+  var existing={};(typeof DONOR_DB!=='undefined'?DONOR_DB.map(function(d){return d.name;}):[]).concat(BATCH_ROWS.map(function(r){return r.donor;})).forEach(function(n){var k=normName(n);if(k)existing[k]=n;});
+  return IMP.rows.map(function(row){
+    var o={};IMP.colField.forEach(function(f,i){if(f)o[f]=(row[i]||'').trim();});
+    var errs=[];
+    if(!o.donor)errs.push('missing donor');
+    var amt=parseFloat((o.amount||'').replace(/[^0-9.]/g,''));if(!(amt>0))errs.push('invalid amount');
+    if(!o.date||!/\d/.test(o.date))errs.push('missing date');
+    if(errs.length)return {obj:o,kind:'error',msg:errs.join(', '),amt:amt};
+    var dupOf=existing[normName(o.donor)];
+    if(dupOf)return {obj:o,kind:'dup',msg:dupOf,amt:amt};
+    return {obj:o,kind:'ready',amt:amt};
+  });
+}
+function normName(s){var t=(s||'').toLowerCase().match(/[a-z]+/g)||[];return t.sort().join('');}
+function wizDownloadFailed(){
+  var cols=IMP.headers.concat(['Import error']);
+  var parsed=wizComputeParsed(); var out=[cols.map(csvCell).join(',')]; var data=parsed.filter(function(r){return r.kind==='error';});
+  parsed.forEach(function(r,i){ if(r.kind==='error'){ out.push(IMP.rows[i].concat([r.msg]).map(csvCell).join(',')); } });
+  var blob=new Blob([out.join('\n')],{type:'text/csv'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='import-failed-rows.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},800);
+  batchToast(data.length+' failed row'+(data.length>1?'s':'')+' downloaded · fix and re-upload');
+}
+function csvCell(c){return '"'+String(c==null?'':c).replace(/"/g,'""')+'"';}
+function wizDoImport(){
+  var data=wizComputeParsed();
+  var keep=data.filter(function(r){return r.kind!=='error';});
+  var dups=data.filter(function(r){return r.kind==='dup';}).length;
+  var errs=data.length-keep.length;
+  var prog=document.getElementById('iw-progress'),bar=document.getElementById('iw-prog-bar'),lab=document.getElementById('iw-prog-label'),btn=document.getElementById('iw-import');
+  if(prog)prog.style.display='block'; if(btn){btn.disabled=true;btn.style.opacity=.6;}
+  var p=0;var iv=setInterval(function(){p+=14;if(bar)bar.style.width=Math.min(100,p)+'%';if(lab)lab.textContent='Importing… '+Math.min(100,p)+'%';
+    if(p>=100){clearInterval(iv);
+      var nextId=BATCH_ROWS.length?Math.max.apply(null,BATCH_ROWS.map(function(r){return r.id;}))+1:1;
+      keep.forEach(function(r){var o=r.obj;BATCH_ROWS.push({id:nextId++,donorId:null,donor:o.donor||'',date:o.date||'04/18/2026',fund:o.fund||'CMA Annual Fund',type:o.type||'Check',amt:parseFloat((o.amount||'0').replace(/[^0-9.]/g,''))||0,pay:o.pay||'Check',ref:o.ref||'',gl:o.gl||'',note:'imported'+(r.kind==='dup'?' · review duplicate':'')});});
+      try{localStorage.setItem('atlas-import-map-'+headerSig(IMP.headers),JSON.stringify(IMP.colField));}catch(_){ }
+      if(typeof revalidateAll==='function')revalidateAll();
+      closeWizard();
+      batchToast('Imported '+keep.length+' gift'+(keep.length===1?'':'s')+(errs?' · '+errs+' skipped (errors)':'')+(dups?' · '+dups+' flagged as possible duplicates':''));
+    }
+  },90);
 }
 
 // Working Import — real file input + smoke-test populates grid
@@ -3086,16 +3284,34 @@ const MODALS = {
       </div>`,
     foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-purp" onclick="closeModal()">Save settings</button>`
   },
-  'import':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><path d="M6.5 1v7M4 5.5l2.5 2.5 2.5-2.5"/><path d="M1.5 10.5h10"/></svg>`, iconBg:'var(--bluep)', title:'Import gifts',
+  'import':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 1.5H3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V4z"/><path d="M8.5 1.5V4H11"/><path d="M6.5 9.5v-3.2M5 7.8l1.5-1.5L8 7.8"/></svg>`, iconBg:'var(--bluep)', title:'Import gifts',
     body:`
+      <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--bluep);border:1px solid var(--bluel);border-radius:10px;padding:11px 13px;margin-bottom:12px">
+        <div style="font-size:12.5px;color:#1D4ED8;line-height:1.45"><strong>First import?</strong> Start from our template so your columns line up.</div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button class="btn btn-ghost" style="padding:6px 11px;font-size:12px" onclick="downloadSampleCsv()"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><path d="M6.5 1.5v6.5M4 5.5l2.5 2.5L9 5.5"/><path d="M2 10.5h9"/></svg> Sample CSV</button>
+          <button class="btn btn-ghost" style="padding:6px 11px;font-size:12px" id="import-view-btn" onclick="toggleSampleView()">View columns</button>
+        </div>
+      </div>
+      <div id="import-sample" style="display:none;border:1px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:12px">
+        <div style="background:var(--surf);padding:7px 11px;font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--text3)">REQUIRED FORMAT · EXAMPLE ROWS</div>
+        <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap">
+          <thead><tr>${['Donor name *','Gift date *','Fund','Gift type','Amount *','Payment method','Check / Ref #','GL code','Note'].map(h=>`<th style="text-align:left;padding:6px 9px;background:var(--surf);color:var(--text3);font-weight:700;border-bottom:1px solid var(--border)">${h}</th>`).join('')}</tr></thead>
+          <tbody>
+            <tr>${["O'Brien, James","04/18/2026","CMA Annual Fund","Check","500.00","Check","10441","4100","Spring appeal"].map(c=>`<td style="padding:6px 9px;border-bottom:1px solid var(--border);color:var(--text2)">${c}</td>`).join('')}</tr>
+            <tr>${["Sullivan, Margaret","04/18/2026","CMA Annual Fund","Credit card","250.00","Credit card","CC-2290","4100",""].map(c=>`<td style="padding:6px 9px;color:var(--text2)">${c}</td>`).join('')}</tr>
+          </tbody></table></div>
+        <div style="padding:7px 11px;font-size:11px;color:var(--text3);border-top:1px solid var(--border)"><strong>*</strong> Donor name, Gift date and Amount are required. Header names must match (extra columns are ignored).</div>
+      </div>
       <input type="file" id="import-file-input" accept=".csv,.xlsx,.xls" style="display:none">
-      <div id="import-dropzone" onclick="document.getElementById('import-file-input').click()" style="border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;background:var(--surf);margin-bottom:10px;transition:all .14s">
-        <div style="font-size:26px;margin-bottom:8px">📁</div>
+      <div id="import-dropzone" onclick="document.getElementById('import-file-input').click()" style="border:2px dashed var(--border);border-radius:10px;padding:22px;text-align:center;cursor:pointer;background:var(--surf);margin-bottom:10px;transition:all .14s">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 18v-5M9.5 15.5L12 13l2.5 2.5"/></svg>
         <div style="font-size:13px;font-weight:600;color:var(--text2)" id="import-dz-msg">Click to choose a file · or drop CSV / Excel here</div>
         <div style="font-size:11px;color:var(--text3);margin-top:4px">.csv, .xlsx, .xls · max 10MB</div>
       </div>
+      <div id="import-error" style="display:none;background:var(--rosel);border:1px solid #FBCFE8;border-radius:9px;padding:11px 13px;margin-bottom:10px;font-size:12.5px;color:#9D174D;line-height:1.5"></div>
       <div class="form-row"><label class="form-label">Apply template for column mapping</label><select class="form-select"><option>Auto-detect</option><option>CMA Mail Response</option><option>Major Gift Pledge</option><option>Online Giving Export</option></select></div>`,
-    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-blue" id="import-preview-btn" onclick="triggerImportPreview()">Import &amp; preview</button>`
+    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-blue" id="import-preview-btn" onclick="triggerImportPreview()" disabled style="opacity:.5;cursor:not-allowed">Import &amp; preview</button>`
   },
   'new-folder':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--amber)" stroke-width="1.4" stroke-linecap="round"><path d="M1 2.5h3l1.5 1.5H12a.7.7 0 01.7.7v6.3a.7.7 0 01-.7.7H1a.7.7 0 01-.7-.7V3.2A.7.7 0 011 2.5z"/><path d="M7 5.5v3M5.5 7h3"/></svg>`, iconBg:'var(--amberl)', title:'New folder',
     body:`<div class="form-row"><label class="form-label">Folder name <span>*</span></label><input class="form-input" placeholder="e.g. 2026 — Annual Appeal"></div>`,
