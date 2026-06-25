@@ -1249,7 +1249,7 @@
   <!-- ══ Horizontal batch toolbar — now hosts the page title (Back + "Batch entry") on the left ══ -->
   <div class="batch-toolbar">
     <div class="bt-section">
-      <a href="atlas-gifts-pledges.html" class="bt-back" title="Back to Gifts &amp; Pledges (Esc)" id="batch-back">
+      <a href="atlas-batch-landing.html" class="bt-back" title="Back to Batch entry (Esc)" id="batch-back">
         <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M7.5 2L3 6l4.5 4"/></svg>
       </a>
       <span class="bt-title">Batch entry</span>
@@ -3024,7 +3024,21 @@ const MODALS = {
   'new-template':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--purp)" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="2" width="9" height="9" rx="1.5"/><path d="M5 6.5h3M6.5 5v3"/></svg>`, iconBg:'var(--purpl)', title:'New template',
     body:`<div class="form-row"><label class="form-label">Template name <span>*</span></label><input class="form-input" placeholder="e.g. Stock Gift Entry"></div>
       <div class="form-row"><label class="form-label">Start from</label><select class="form-select"><option>Blank</option><option>Copy: CMA Mail Response</option><option>Copy: Major Gift Pledge</option><option>Copy: current batch</option></select></div>
-      <div class="form-row"><label class="form-label">Default outlier threshold</label><div style="display:flex;align-items:center;gap:10px;padding:8px 0"><input type="range" min="2" max="10" value="3" style="flex:1;accent-color:var(--purp)"><span style="font-size:12px;font-weight:700;color:var(--purp)">3×</span></div><span class="form-hint">Flag amounts more than this multiple of the donor's giving history</span></div>`,
+      <div class="form-row">
+        <label class="form-label">Columns in this template</label>
+        <span class="form-hint" style="display:block;margin-bottom:7px">Choose which columns the template starts with. Required columns are always included.</span>
+        <div id="tpl-cols" style="display:flex;flex-direction:column;gap:5px;max-height:228px;overflow-y:auto;padding-right:2px">
+          ${[['Donor',1,1],['Gift date',1,1],['Fund / campaign',0,1],['Gift type',0,1],['Amount',1,1],['Payment method',0,1],['Check / ref #',0,1],['GL code',0,1],['Note',0,1],['Entity',0,0],['Solicitor',0,0],['Pledge reference',0,0]].map(co=>`
+            <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:var(--surf);border:1px solid var(--border);border-radius:7px">
+              <svg viewBox="0 0 8 10" fill="none" stroke="var(--text3)" stroke-width="1.1" stroke-linecap="round" width="8" height="10"><path d="M1 2h6M1 5h6M1 8h6"/></svg>
+              <span style="flex:1;font-size:12px;color:var(--text)">${co[0]}</span>
+              ${co[1]
+                ? `<span class="tpl-req" style="font-size:10px;font-weight:600;color:var(--purp);background:var(--purpl);border:1px solid #DDD6FE;border-radius:20px;padding:3px 9px">Required</span>`
+                : `<div class="tpl-col-tog" data-on="${co[2]}" onclick="tplToggleCol(this)" style="cursor:pointer;border-radius:20px;border:1px solid var(--border);padding:3px 9px;background:${co[2]?'var(--purpl)':'var(--surf)'}"><span style="font-size:10px;font-weight:600;color:${co[2]?'var(--purp)':'var(--text3)'}">${co[2]?'Shown':'Hidden'}</span></div>`}
+            </div>`).join('')}
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:7px"><span id="tpl-col-count">9</span> of 12 columns included</div>
+      </div>`,
     foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-purp" onclick="createTemplateFromModal()">Create template</button>`
   },
   'new-batch':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="2" width="9" height="9" rx="1.5"/><path d="M5 6.5h3M6.5 5v3"/></svg>`, iconBg:'var(--bluep)', title:'New batch',
@@ -3102,6 +3116,22 @@ const MODALS = {
     foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-blue" onclick="closeModal()">Apply</button>`
   },
 };
+
+// New-template column picker toggle
+function tplToggleCol(el){
+  var on = el.getAttribute('data-on')==='1';
+  el.setAttribute('data-on', on?'0':'1');
+  el.style.background = on?'var(--surf)':'var(--purpl)';
+  var s = el.querySelector('span');
+  s.style.color = on?'var(--text3)':'var(--purp)';
+  s.textContent = on?'Hidden':'Shown';
+  tplRecount();
+}
+function tplRecount(){
+  var req = document.querySelectorAll('#tpl-cols .tpl-req').length;
+  var on  = document.querySelectorAll('#tpl-cols .tpl-col-tog[data-on="1"]').length;
+  var el  = document.getElementById('tpl-col-count'); if(el) el.textContent = (req+on);
+}
 
 let currentModalRid = null;
 function openModal(type, rid) {
