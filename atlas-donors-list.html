@@ -729,6 +729,7 @@ body {
     <div class="view-chip">Major prospects <span class="ct">28</span></div>
     <div class="view-chip">New this year <span class="ct">163</span></div>
     <div class="view-chip">Pending review <span class="ct" style="background:var(--rose-light);color:var(--rose)">9</span></div>
+    <div class="view-chip" id="view-archived">Archived <span class="ct" id="view-archived-count" style="background:var(--surface);color:var(--text-3);border:1px solid var(--border)">1</span></div>
     <div class="view-chip"><span class="new">+ Saved view</span></div>
   </div>
 
@@ -2209,18 +2210,60 @@ body {
   .dt-empty{padding:34px 20px;text-align:center;color:var(--text-3,#64748B);font-size:13px;}
   .dt-empty-clear{margin-left:6px;background:none;border:none;color:var(--blue,#2563EB);font-weight:600;cursor:pointer;font-size:13px;}
   .dt-empty-clear:hover{text-decoration:underline;}
+  .donor-table .dt-row.archived{opacity:.66;}
+  .donor-table .dt-row.archived:hover{opacity:.82;}
+  .donor-table .dt-row.archived .nm-text .nm::after{content:'Archived';margin-left:8px;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3,#64748B);background:var(--surface,#F8FAFC);border:1px solid var(--border,#E2E8F0);border-radius:5px;padding:1px 6px;vertical-align:middle;}
+  #atlas-rescue-toast .toast-undo{margin-left:4px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.32);color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:3px 11px;border-radius:6px;cursor:pointer;}
+  #atlas-rescue-toast .toast-undo:hover{background:rgba(255,255,255,.28);}
 </style>
 <script id="dl-wire">
 (function(){
   if (window.__dlWired) return; window.__dlWired = true;
 
-  function toast(msg){
+  function toast(msg, undoFn){
     var t = document.getElementById('atlas-rescue-toast');
     if (!t) { console.log(msg); return; }
     t.querySelector('.msg').textContent = msg;
+    var oldU = t.querySelector('.toast-undo');
+    if (oldU) oldU.remove();
+    var dur = 2200;
+    if (typeof undoFn === 'function') {
+      dur = 5500;
+      var u = document.createElement('button');
+      u.className = 'toast-undo';
+      u.type = 'button';
+      u.textContent = 'Undo';
+      u.addEventListener('click', function(){ undoFn(); t.classList.remove('show'); clearTimeout(window.__dlToastT); });
+      t.appendChild(u);
+    }
     t.classList.add('show');
     clearTimeout(window.__dlToastT);
-    window.__dlToastT = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+    window.__dlToastT = setTimeout(function(){ t.classList.remove('show'); }, dur);
+  }
+
+  // === ARCHIVE / UNARCHIVE state + helpers ===
+  window.__archivedView = window.__archivedView || false;
+  function reapplyDonorList(){ if (typeof window.__dlApplyFilters === 'function') window.__dlApplyFilters(); }
+  function updateArchivedChipCount(){
+    var c = document.getElementById('view-archived-count');
+    if (c) c.textContent = document.querySelectorAll('.donor-table .dt-row.archived').length;
+  }
+  function archiveRow(row, name){
+    if (!confirm('Archive ' + name + '? They will be hidden from active lists.')) return;
+    row.classList.add('archived');
+    reapplyDonorList();
+    updateArchivedChipCount();
+    toast(name + ' archived \u00b7 open the Archived view to restore', function(){
+      row.classList.remove('archived'); reapplyDonorList(); updateArchivedChipCount();
+    });
+  }
+  function unarchiveRow(row, name){
+    row.classList.remove('archived');
+    reapplyDonorList();
+    updateArchivedChipCount();
+    toast(name + ' restored to active donors', function(){
+      row.classList.add('archived'); reapplyDonorList(); updateArchivedChipCount();
+    });
   }
 
   // ═══ 1. SAVED VIEW chips (LYBUNT / SYBUNT / etc.) ═══
@@ -2230,8 +2273,10 @@ body {
       if (chip.querySelector('.new')) return;
       document.querySelectorAll('.view-chip').forEach(function(x){ x.classList.remove('active'); });
       chip.classList.add('active');
+      window.__archivedView = (chip.id === 'view-archived');
+      reapplyDonorList();
       var label = chip.firstChild ? chip.firstChild.textContent.trim() : 'view';
-      toast('Switched to view · ' + label);
+      toast(window.__archivedView ? 'Showing archived donors · use the ⋯ menu to unarchive' : ('Switched to view · ' + label));
     });
   });
 
@@ -2284,6 +2329,8 @@ body {
     chip.addEventListener('click', function(){
       document.querySelectorAll('.view-chip').forEach(function(x){ x.classList.remove('active'); });
       chip.classList.add('active');
+      window.__archivedView = false;
+      reapplyDonorList();
       toast('Switched to view · ' + name);
     });
     row.insertBefore(chip, addChip);
@@ -2395,14 +2442,16 @@ body {
     var emptyEl = document.getElementById('dt-empty');
     function applyFilters(){
       var visible = 0;
+      var av = !!window.__archivedView;
       rows.forEach(function(r){
-        var ok = rowMatches(r.__data);
+        var arch = r.classList.contains('archived');
+        var ok = av ? arch : (rowMatches(r.__data) && !arch);
         r.style.display = ok ? '' : 'none';
         if (ok) visible++;
       });
       if (emptyEl) emptyEl.style.display = visible === 0 ? '' : 'none';
       var rightStrong = document.querySelector('.filterbar .right strong');
-      if (rightStrong) rightStrong.textContent = visible + ' of 632';
+      if (rightStrong) rightStrong.textContent = av ? (visible + ' archived') : (visible + ' of 632');
       var pagerStrong = document.querySelectorAll('.pager strong')[0];
       if (pagerStrong) pagerStrong.textContent = visible === 0 ? '0' : '1–' + visible;
     }
@@ -2507,6 +2556,7 @@ body {
 
     // initial paint (honours the pre-applied Type + Capacity chips)
     renderChips();
+    window.__dlApplyFilters = applyFilters;
     applyFilters();
   })();
 
@@ -2550,6 +2600,7 @@ body {
         if (firstText) name = firstText;
       }
 
+      var isArchived = row.classList.contains('archived');
       var items = [
         { label:'View profile', icon:'M7 6.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM2.5 13c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5', action:function(){ window.location='atlas-donor-360.html'; } },
         { label:'Edit constituent', icon:'M3 10l5-5 2 2-5 5h-2v-2zM8 5l2 2', action:function(){ window.location='atlas-edit-constituent.html'; } },
@@ -2557,9 +2608,13 @@ body {
         { label:'Log activity', icon:'M2 4h10v6H2zM2 6h10M5 4v2', action:function(){ window.location='atlas-log-activity.html'; } },
         { label:'Send email', icon:'M2 3h10v8H2zM2 4l5 4 5-4', action:function(){ window.location='atlas-email-compose.html'; } },
         { label:'Add task', icon:'M3 7l2 2 5-5M7 3h3M3 11h7', action:function(){ window.location='atlas-task-modal.html'; } },
-        { label:'Merge duplicate', icon:'M5 5l-3 3M9 5l3 3M7 2v8', action:function(){ window.location='atlas-merge.html'; } },
-        { label:'Archive donor', icon:'M2 4h10M3 4v8h8V4M5 7h4', action:function(){ if (confirm('Archive ' + name + '? They will be hidden from active lists.')) { row.classList.add('dim'); toast(name + ' archived · find them in Filters → Archived'); } }, danger:true }
+        { label:'Merge duplicate', icon:'M5 5l-3 3M9 5l3 3M7 2v8', action:function(){ window.location='atlas-merge.html'; } }
       ];
+      if (isArchived) {
+        items.push({ label:'Unarchive donor', icon:'M2 4h10M3 4v8h8V4M7 10V6M5 8l2-2 2 2', action:function(){ unarchiveRow(row, name); } });
+      } else {
+        items.push({ label:'Archive donor', icon:'M2 4h10M3 4v8h8V4M5 7h4', action:function(){ archiveRow(row, name); }, danger:true });
+      }
 
       menuEl.innerHTML = '<div class="nm-head"><strong>' + name + '</strong></div>' + items.map(function(it){
         return '<a href="#" class="'+(it.danger?'danger':'')+'"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="'+it.icon+'"/></svg>'+it.label+'</a>';
@@ -2607,6 +2662,14 @@ body {
     ts.addEventListener('click', function(){ window.location = 'atlas-search.html'; });
     ts.addEventListener('focus', function(){ this.blur(); window.location = 'atlas-search.html'; });
   }
+
+  // === Seed one archived donor so the Archived view demonstrates Unarchive ===
+  (function(){
+    var all = document.querySelectorAll('.donor-table .dt-row');
+    if (all.length) all[all.length - 1].classList.add('archived');
+    updateArchivedChipCount();
+    reapplyDonorList();
+  })();
 })();
 </script>
 
