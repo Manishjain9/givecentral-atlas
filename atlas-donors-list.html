@@ -709,7 +709,7 @@ body {
       <div class="page-sub">3,847 constituents — 2,184 individuals · 982 households · 681 organizations</div>
     </div>
     <div class="flex gap-8" style="align-items:center">
-      <button class="btn btn-ghost" onclick="alert('CSV upload modal would open')">
+      <button class="btn btn-ghost" onclick="atlasAlert('Import donors','Drag a CSV or Excel file here — or pick one from your computer — and map the columns in the next step.')">
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1.5v8M3.5 5.5L7 1.5l3.5 4M2 12h10"/></svg>
         Import CSV
       </button>
@@ -1594,7 +1594,7 @@ body {
         ],
         cta: 'Create event →',
         onSave: function(vals){
-          if (!vals['ne-name']) { alert('Name the event before saving.'); return false; }
+          if (!vals['ne-name']) { atlasAlert('Name required','Give the event a name before saving.',{icon:'warn'}); return false; }
           showToast('Event created · "' + vals['ne-name'] + '" · opening gala management');
           setTimeout(function(){ window.location = 'atlas-gala-management.html'; }, 600);
           return true;
@@ -1802,7 +1802,7 @@ body {
         else {
           var nameFld = drawer.querySelector('#rpt-name');
           var name = nameFld ? nameFld.value.trim() : '';
-          if (!name) { alert('Name your report before saving.'); nameFld && nameFld.focus(); return; }
+          if (!name) { atlasAlert('Name required','Name your report before saving.',{icon:'warn'}); nameFld && nameFld.focus(); return; }
           closeDrawer();
           showToast('Saved · "' + name + '" appears in Reports → Saved views');
         }
@@ -2249,12 +2249,18 @@ body {
     if (c) c.textContent = document.querySelectorAll('.donor-table .dt-row.archived').length;
   }
   function archiveRow(row, name){
-    if (!confirm('Archive ' + name + '? They will be hidden from active lists.')) return;
-    row.classList.add('archived');
-    reapplyDonorList();
-    updateArchivedChipCount();
-    toast(name + ' archived \u00b7 open the Archived view to restore', function(){
-      row.classList.remove('archived'); reapplyDonorList(); updateArchivedChipCount();
+    atlasConfirm({
+      title: 'Archive ' + name + '?',
+      message: 'They\u2019ll be hidden from active lists. You can restore them anytime from the <strong>Archived</strong> view.',
+      icon: 'danger', danger: true, confirmText: 'Archive donor',
+      onConfirm: function(){
+        row.classList.add('archived');
+        reapplyDonorList();
+        updateArchivedChipCount();
+        toast(name + ' archived \u00b7 open the Archived view to restore', function(){
+          row.classList.remove('archived'); reapplyDonorList(); updateArchivedChipCount();
+        });
+      }
     });
   }
   function unarchiveRow(row, name){
@@ -2592,7 +2598,7 @@ body {
       var row = k.closest('.dt-row');
       if (!row) return;
       // Pull donor name from row
-      var nameEl = row.querySelector('.dt-name, .nm, .name, [class*="name"]');
+      var nameEl = row.querySelector('.nm') || row.querySelector('.dt-name, .name, [class*="name"]');
       var name = nameEl ? nameEl.textContent.trim().split('\n')[0].slice(0, 60) : 'donor';
       // If we can't find it, fall back to first significant cell text
       if (name === 'donor') {
@@ -2670,6 +2676,63 @@ body {
     updateArchivedChipCount();
     reapplyDonorList();
   })();
+})();
+</script>
+
+<!-- ════ Atlas-themed dialog (replaces native alert/confirm) ════ -->
+<style>
+  #ax-ov{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);z-index:100090;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',-apple-system,sans-serif}
+  #ax-ov.show{display:flex}
+  #ax-ov .ax-box{background:#fff;border-radius:16px;width:100%;max-width:430px;box-shadow:0 24px 64px rgba(15,23,42,.30);overflow:hidden;animation:axUp .18s ease}
+  @keyframes axUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  #ax-ov .ax-bd{display:flex;gap:14px;padding:22px 22px 8px}
+  #ax-ov .ax-ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  #ax-ov .ax-ic svg{width:21px;height:21px}
+  #ax-ov .ax-tt{font-size:17px;font-weight:700;color:#0F172A;margin:1px 0 5px}
+  #ax-ov .ax-msg{font-size:13.5px;color:#475569;line-height:1.55;margin:0}
+  #ax-ov .ax-ft{display:flex;justify-content:flex-end;gap:9px;padding:16px 22px 20px}
+  #ax-ov .ax-btn{font-family:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:9px 16px;cursor:pointer;border:1px solid transparent}
+  #ax-ov .ax-ghost{background:#fff;border-color:#E2E8F0;color:#334155}
+  #ax-ov .ax-ghost:hover{background:#F8FAFC;border-color:#94A3B8}
+  #ax-ov .ax-primary{background:#2563EB;color:#fff}
+  #ax-ov .ax-primary:hover{background:#1D4ED8}
+  #ax-ov .ax-danger{background:#BE185D;color:#fff}
+  #ax-ov .ax-danger:hover{background:#9D174D}
+</style>
+<div id="ax-ov"><div class="ax-box">
+  <div class="ax-bd"><div class="ax-ic" id="ax-ic"></div><div><h3 class="ax-tt" id="ax-tt"></h3><p class="ax-msg" id="ax-msg"></p></div></div>
+  <div class="ax-ft" id="ax-ft"></div>
+</div></div>
+<script>
+(function(){
+  var ICONS={
+    danger:['#FCE7F3','#BE185D','<path d="M2.5 4.5h16v3.5h-16zM4 8v9.5a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V8M8 11.5h5"/>'],
+    warn:['#FEF3C7','#D97706','<path d="M10 7.5v4M10 14.3v.2"/><path d="M8.6 3.4 2.6 14a1.6 1.6 0 0 0 1.4 2.4h12A1.6 1.6 0 0 0 17.4 14L11.4 3.4a1.6 1.6 0 0 0-2.8 0Z"/>'],
+    info:['#EFF6FF','#2563EB','<circle cx="10" cy="10" r="7.5"/><path d="M10 9.3v4.2M10 6.4v.2"/>'],
+    success:['#DCFCE7','#15803D','<circle cx="10" cy="10" r="7.5"/><path d="M6.5 10.2l2.2 2.2 4.8-4.8"/>']
+  };
+  function el(id){ return document.getElementById(id); }
+  function close(){ el('ax-ov').classList.remove('show'); }
+  window.axClose=close;
+  function dialog(o){
+    var ov=el('ax-ov'); var ic=ICONS[o.icon]||ICONS[o.danger?'danger':'info'];
+    el('ax-ic').style.background=ic[0]; el('ax-ic').style.color=ic[1];
+    el('ax-ic').innerHTML='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+ic[2]+'</svg>';
+    el('ax-tt').textContent=o.title||'';
+    el('ax-msg').innerHTML=o.message||'';
+    var ft=el('ax-ft'); ft.innerHTML='';
+    if(!o.alert){
+      var cancel=document.createElement('button'); cancel.className='ax-btn ax-ghost'; cancel.textContent=o.cancelText||'Cancel';
+      cancel.onclick=function(){ close(); if(o.onCancel)o.onCancel(); }; ft.appendChild(cancel);
+    }
+    var ok=document.createElement('button'); ok.className='ax-btn '+(o.danger?'ax-danger':'ax-primary'); ok.textContent=o.confirmText||(o.alert?'Got it':'OK');
+    ok.onclick=function(){ close(); if(o.onConfirm)o.onConfirm(); }; ft.appendChild(ok);
+    ov.classList.add('show'); setTimeout(function(){ ok.focus(); },40);
+  }
+  window.atlasConfirm=function(o){ dialog(o||{}); };
+  window.atlasAlert=function(title,message,o){ o=o||{}; dialog({title:title,message:message,alert:true,icon:o.icon||'info',confirmText:o.confirmText||'Got it'}); };
+  document.getElementById('ax-ov').addEventListener('click',function(e){ if(e.target===this) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
 })();
 </script>
 

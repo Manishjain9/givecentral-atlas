@@ -1614,21 +1614,13 @@ body {
           <div class="review-row"><span class="l">Initial note</span><span class="v" style="font-style:italic;color:var(--text-2)">"Met at Cathedral Easter Mass · husband Peter introduced…"<small>Will be saved as first Action on her timeline</small></span></div>
         </div>
 
-        <div style="background:#FFFBEB;border:1px solid #FBBF24;border-radius:11px;padding:16px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start">
-          <div style="width:30px;height:30px;border-radius:8px;background:var(--amber);color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700">!</div>
-          <div style="flex:1;font-size:12.5px;color:#78350F">
-            <strong>Duplicate check complete.</strong> Atlas scanned existing constituents and found no matches above the 0.85 confidence threshold, so this record is safe to create. Atlas keeps checking after creation — any potential duplicate that surfaces later is captured and routed to your <a href="atlas-duplicates.html" style="color:var(--blue)">Duplicate review queue</a> to merge or dismiss.
-          </div>
-        </div>
+        <div id="dup-banner" style="margin-bottom:14px"></div>
 
         <div class="wiz-foot">
-          <div class="left">
-            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--green)"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg>
-            Ready to create
-          </div>
+          <div class="left" id="dup-foot-status"></div>
           <button class="btn btn-ghost" data-go="4">← Back</button>
           <button class="btn btn-ghost" onclick="alert('Saved as draft')">Save draft &amp; exit</button>
-          <button class="btn btn-primary" onclick="alert('Constituent created · ID #C-018472 · Catherine Romano added to St. Mary\'s Cathedral'); window.location='atlas-donor-360.html'">
+          <button class="btn btn-primary" id="dup-create-btn" onclick="alert('Constituent created · ID #C-018472 · Catherine Romano added to St. Mary\'s Cathedral'); window.location='atlas-donor-360.html'">
             <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M3 7l3 3 5-6"/></svg>
             Create constituent
           </button>
@@ -2769,6 +2761,117 @@ body {
 })();
 </script>
 <!-- end Atlas Dead-CTA Rescue -->
+
+<script id="dup-review-banner">
+(function(){
+  var el = document.getElementById('dup-banner'); if (!el) return;
+  var statusEl = document.getElementById('dup-foot-status');
+  var createBtn = document.getElementById('dup-create-btn');
+  var resolved = false;
+  var DB = "font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:7px;cursor:pointer;text-decoration:none;border:1px solid var(--border);background:#fff;color:var(--text-2);white-space:nowrap";
+  var DBP = "font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:7px;cursor:pointer;text-decoration:none;border:1px solid var(--blue);background:var(--blue);color:#fff;white-space:nowrap";
+
+  function foundHTML(){
+    return '<div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:11px;padding:16px">'
+      + '<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px">'
+        + '<div style="width:30px;height:30px;border-radius:8px;background:var(--rose);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700">!</div>'
+        + '<div style="flex:1;font-size:12.5px;color:#7F1D1D"><strong>1 possible duplicate found.</strong> A record scored <strong>0.92</strong> — above the 0.85 confidence threshold. Review it before creating so you don’t split this donor’s history across two records.</div>'
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #FECACA;border-radius:10px;padding:11px 13px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
+        + '<div style="width:34px;height:34px;border-radius:50%;background:#D97706;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0">CR</div>'
+        + '<div style="flex:1;min-width:140px"><div style="font-weight:600;font-size:13px;color:var(--text)">Catherine Romano <span style="margin-left:6px;font-size:10.5px;font-weight:700;color:var(--rose);background:var(--rose-light);border-radius:20px;padding:2px 8px">0.92 match</span></div><div style="font-size:11.5px;color:var(--text-3);margin-top:2px">First-time donor · Mar 2026 · St. Mary’s Cathedral · same email domain</div></div>'
+        + '<div style="display:flex;gap:6px;flex-shrink:0">'
+          + '<a href="atlas-donor-360.html" style="'+DB+'">Open record</a>'
+          + '<a href="atlas-merge.html" style="'+DBP+'">Merge →</a>'
+          + '<button type="button" style="'+DB+'" onclick="dismissDup()">Not a duplicate</button>'
+        + '</div>'
+      + '</div></div>';
+  }
+  function clearHTML(){
+    return '<div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:11px;padding:16px;display:flex;gap:12px;align-items:flex-start">'
+      + '<div style="width:30px;height:30px;border-radius:8px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        + '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7l3 3 5-6"/></svg></div>'
+      + '<div style="flex:1;font-size:12.5px;color:#166534">' + (resolved
+          ? '<strong>Marked “not a duplicate.”</strong> The possible match was dismissed — this record is safe to create. '
+          : '<strong>Duplicate check complete.</strong> No matches above the 0.85 confidence threshold — safe to create. ')
+        + 'Atlas keeps checking after creation; any match that surfaces later is routed to your <a href="atlas-duplicates.html" style="color:var(--blue)">Duplicate review queue</a> to merge or dismiss.</div>'
+      + '</div>';
+  }
+  function render(){
+    if (resolved) {
+      el.innerHTML = clearHTML();
+      if (statusEl) statusEl.innerHTML = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--green)"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg> Ready to create';
+      if (createBtn) { createBtn.className = 'btn btn-primary'; createBtn.innerHTML = '<svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M3 7l3 3 5-6"/></svg> Create constituent'; }
+    } else {
+      el.innerHTML = foundHTML();
+      if (statusEl) statusEl.innerHTML = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--rose)"><path d="M7 2v3.5M7 8.5v.4"/><path d="M1.5 12L7 2l5.5 10z"/></svg> <span style="color:var(--rose)">Review the possible duplicate first</span>';
+      if (createBtn) { createBtn.className = 'btn btn-ghost'; createBtn.innerHTML = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 7l3 3 5-6"/></svg> Create anyway'; }
+    }
+  }
+  window.dismissDup = function(){ resolved = true; render(); };
+  render();
+})();
+</script>
+
+
+<!-- ════ Atlas-themed dialog (replaces native alert/confirm) — auto-injected ════ -->
+<style>
+  #ax-ov{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);z-index:2147483000;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',-apple-system,sans-serif}
+  #ax-ov.show{display:flex}
+  #ax-ov .ax-box{background:#fff;border-radius:16px;width:100%;max-width:430px;box-shadow:0 24px 64px rgba(15,23,42,.30);overflow:hidden;animation:axUp .18s ease}
+  @keyframes axUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  #ax-ov .ax-bd{display:flex;gap:14px;padding:22px 22px 8px}
+  #ax-ov .ax-ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  #ax-ov .ax-ic svg{width:21px;height:21px}
+  #ax-ov .ax-tt{font-size:17px;font-weight:700;color:#0F172A;margin:1px 0 5px}
+  #ax-ov .ax-msg{font-size:13.5px;color:#475569;line-height:1.55;margin:0}
+  #ax-ov .ax-ft{display:flex;justify-content:flex-end;gap:9px;padding:16px 22px 20px}
+  #ax-ov .ax-btn{font-family:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:9px 16px;cursor:pointer;border:1px solid transparent}
+  #ax-ov .ax-ghost{background:#fff;border-color:#E2E8F0;color:#334155}
+  #ax-ov .ax-ghost:hover{background:#F8FAFC;border-color:#94A3B8}
+  #ax-ov .ax-primary{background:#2563EB;color:#fff}
+  #ax-ov .ax-primary:hover{background:#1D4ED8}
+  #ax-ov .ax-danger{background:#BE185D;color:#fff}
+  #ax-ov .ax-danger:hover{background:#9D174D}
+  #ax-ov .ax-gold{background:#B45309;color:#fff}
+  #ax-ov .ax-gold:hover{background:#92400E}
+</style>
+<div id="ax-ov"><div class="ax-box">
+  <div class="ax-bd"><div class="ax-ic" id="ax-ic"></div><div><h3 class="ax-tt" id="ax-tt"></h3><p class="ax-msg" id="ax-msg"></p></div></div>
+  <div class="ax-ft" id="ax-ft"></div>
+</div></div>
+<script>
+(function(){
+  if(window.__axInit) return; window.__axInit=true;
+  var ICONS={
+    danger:['#FCE7F3','#BE185D','<path d="M2.5 4.5h16v3.5h-16zM4 8v9.5a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V8M8 11.5h5"/>'],
+    warn:['#FEF3C7','#D97706','<path d="M10 7.5v4M10 14.3v.2"/><path d="M8.6 3.4 2.6 14a1.6 1.6 0 0 0 1.4 2.4h12A1.6 1.6 0 0 0 17.4 14L11.4 3.4a1.6 1.6 0 0 0-2.8 0Z"/>'],
+    info:['#EFF6FF','#2563EB','<circle cx="10" cy="10" r="7.5"/><path d="M10 9.3v4.2M10 6.4v.2"/>'],
+    success:['#DCFCE7','#15803D','<circle cx="10" cy="10" r="7.5"/><path d="M6.5 10.2l2.2 2.2 4.8-4.8"/>'],
+    docusign:['#FBF4E8','#B45309','<rect x="3" y="2.5" width="14" height="15" rx="2"/><path d="M6 7h8M6 10h5M6 13l1.4 1.4L10.5 11.3"/>']
+  };
+  function el(id){ return document.getElementById(id); }
+  function close(){ var o=el('ax-ov'); if(o) o.classList.remove('show'); }
+  window.axClose=close;
+  function dialog(o){
+    var ov=el('ax-ov'); if(!ov) return; var ic=ICONS[o.icon]||ICONS[o.danger?'danger':'info'];
+    el('ax-ic').style.background=ic[0]; el('ax-ic').style.color=ic[1];
+    el('ax-ic').innerHTML='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+ic[2]+'</svg>';
+    el('ax-tt').textContent=o.title||''; el('ax-tt').style.display=o.title?'':'none'; el('ax-msg').innerHTML=o.message||'';
+    var ft=el('ax-ft'); ft.innerHTML='';
+    if(!o.alert){ var c=document.createElement('button'); c.className='ax-btn ax-ghost'; c.textContent=o.cancelText||'Cancel'; c.onclick=function(){ close(); if(o.onCancel)o.onCancel(); }; ft.appendChild(c); }
+    var ok=document.createElement('button'); ok.className='ax-btn '+(o.btn==='gold'?'ax-gold':(o.danger?'ax-danger':'ax-primary')); ok.textContent=o.confirmText||(o.alert?'Got it':'OK');
+    ok.onclick=function(){ close(); if(o.onConfirm)o.onConfirm(); }; ft.appendChild(ok);
+    ov.classList.add('show'); setTimeout(function(){ try{ok.focus();}catch(e){} },40);
+  }
+  window.atlasConfirm=function(o){ dialog(o||{}); };
+  window.atlasAlert=function(title,message,o){ o=o||{}; dialog({title:title,message:message,alert:true,icon:o.icon||'info',btn:o.btn,confirmText:o.confirmText||'Got it',onConfirm:o.onConfirm}); };
+  // theme all native alert() calls automatically
+  window.alert=function(m){ atlasAlert('Atlas', String(m==null?'':m)); };
+  var ov=el('ax-ov'); if(ov) ov.addEventListener('click',function(e){ if(e.target===this) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
+</script>
 
 </body>
 </html>
