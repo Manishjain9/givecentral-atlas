@@ -1193,7 +1193,7 @@ body {
       <!-- Step 4: Designation -->
       <div class="entry-card">
         <h3><span class="step">4</span> Designation</h3>
-        <div class="row3">
+        <div class="row2">
           <div>
             <span class="lbl">Campaign</span>
             <select class="fld">
@@ -1211,9 +1211,20 @@ body {
               <option>Online giving</option>
             </select>
           </div>
+        </div>
+        <div class="row2" style="margin-top:12px">
+          <div>
+            <span class="lbl">Legal entity<span class="req">*</span></span>
+            <select class="fld" id="ge-entity" onchange="geEntityChange(this.value)">
+              <option selected>Diocese of Albany</option>
+              <option>St. Mary&rsquo;s Parish</option>
+              <option>Catholic Schools of Albany</option>
+              <option>St. Agnes Cemetery</option>
+            </select>
+          </div>
           <div>
             <span class="lbl">Fund<span class="req">*</span></span>
-            <select class="fld">
+            <select class="fld" id="ge-fund" onchange="geFundChange()">
               <option>Cathedral Restoration · GL 4001</option>
               <option>General Operating · GL 4000</option>
               <option>Scholarship · GL 4200</option>
@@ -1221,7 +1232,7 @@ body {
           </div>
         </div>
         <p class="muted" style="font-size:11.5px;margin-top:10px;">
-          Legal entity: <strong style="color:var(--text-2)">Diocese of Albany</strong> · GL chart will export to QuickBooks Online tonight.
+          Legal entity: <strong style="color:var(--text-2)" id="ge-entity-note">Diocese of Albany</strong> · funds are filtered by entity · the entity owns the receipt EIN · GL chart exports to QuickBooks Online tonight.
         </p>
       </div>
 
@@ -1289,7 +1300,7 @@ body {
         </div>
         <div class="sum-row">
           <span class="l">Designation</span>
-          <span class="v">Cathedral Restoration<small>Cathedral Capital · Spring '26 appeal · GL 4001</small></span>
+          <span class="v"><span id="ge-sum-fund">Cathedral Restoration</span><small id="ge-sum-desig">Cathedral Capital · Spring '26 appeal · GL 4001</small></span>
         </div>
         <div class="sum-row">
           <span class="l">Soft credit</span>
@@ -1297,7 +1308,7 @@ body {
         </div>
         <div class="sum-row">
           <span class="l">Legal entity</span>
-          <span class="v">Diocese of Albany<small>EIN 14-•••2401</small></span>
+          <span class="v"><span id="ge-sum-entity">Diocese of Albany</span><small id="ge-sum-ein">EIN 14-•••2401</small></span>
         </div>
 
         <div class="sum-receipt">
@@ -1309,7 +1320,7 @@ body {
         </div>
 
         <div class="sum-actions">
-          <button class="primary" onclick="alert('Gift saved · receipt #R-2026-1842 emailed to margaret.obrien@email.com'); window.location='atlas-donor-360.html'">
+          <button class="primary" onclick="atlasConfirm({icon:'success',title:'Gift saved',message:'receipt #R-2026-1842 emailed to margaret.obrien@email.com',confirmText:'View donor',cancelText:'Stay here',onConfirm:function(){window.location='atlas-donor-360.html';}})">
             Save &amp; issue receipt
             <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M2 6l3 3 5-6"/></svg>
           </button>
@@ -1515,6 +1526,33 @@ body {
 
     // Component library — keep dead (intentional demos)
   };
+
+  // ── Legal entity → Fund filtering (mirrors atlas-pledge-create) ──
+  // Each fund belongs to exactly one legal entity (its own EIN).
+  var GE_ENTITIES = {
+    'Diocese of Albany':          { ein:'EIN 14-•••2401', funds:['Cathedral Restoration · GL 4001','General Operating · GL 4000','Bishop’s Annual Appeal · GL 4100','Scholarship · GL 4200','Catholic Charities · GL 4300'] },
+    'St. Mary’s Parish':      { ein:'EIN 14-•••5108', funds:['Parish Operating · GL 5100','Building Fund · GL 5200','Outreach & Missions · GL 5300'] },
+    'Catholic Schools of Albany': { ein:'EIN 14-•••6620', funds:['Scholarship Fund · GL 6100','Tuition Assistance · GL 6200','Capital Improvements · GL 6300'] },
+    'St. Agnes Cemetery':         { ein:'EIN 14-•••7733', funds:['Perpetual Care · GL 7100','Memorial Fund · GL 7200'] }
+  };
+  function geGl(f){ var m=(f||'').match(/GL\s*([0-9]+)/); return m?('GL '+m[1]):''; }
+  function geFundName(f){ return (f||'').split(' · ')[0]; }
+  function geUpdateSummary(){
+    var ent=document.getElementById('ge-entity'), fund=document.getElementById('ge-fund');
+    if(!ent||!fund) return;
+    var fn=document.getElementById('ge-sum-fund'); if(fn) fn.textContent=geFundName(fund.value);
+    var ds=document.getElementById('ge-sum-desig'); if(ds) ds.textContent='Cathedral Capital · Spring ’26 appeal · '+geGl(fund.value);
+    var se=document.getElementById('ge-sum-entity'); if(se) se.textContent=ent.value;
+    var ein=document.getElementById('ge-sum-ein'); if(ein) ein.textContent=(GE_ENTITIES[ent.value]||{}).ein||'';
+    var note=document.getElementById('ge-entity-note'); if(note) note.textContent=ent.value;
+  }
+  window.geEntityChange=function(entity){
+    var fund=document.getElementById('ge-fund');
+    var cfg=GE_ENTITIES[entity]||{funds:[]};
+    if(fund) fund.innerHTML=cfg.funds.map(function(f,i){return '<option'+(i===0?' selected':'')+'>'+f+'</option>';}).join('');
+    geUpdateSummary();
+  };
+  window.geFundChange=function(){ geUpdateSummary(); };
 
   // ── Toast helper ──
   var toast = document.getElementById('atlas-rescue-toast');

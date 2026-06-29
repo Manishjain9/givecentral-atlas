@@ -818,6 +818,14 @@ body {
   .bl-fchip .dotf{width:8px;height:8px;border-radius:50%;flex-shrink:0}
   .bl-fchip-new{border-style:dashed;color:var(--text-3)}
   .bl-fchip-new:hover{color:var(--blue);border-color:var(--blue)}
+  /* batch kind badge + type segmented filter */
+  .bl-kind{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:1px 6px;border-radius:5px;margin-left:8px;vertical-align:middle}
+  .bl-kind.gift{background:var(--blue-pale);color:var(--blue)}
+  .bl-kind.pledge{background:var(--amber-light);color:#92400E}
+  .bl-seg{display:inline-flex;border:1px solid var(--border);border-radius:9px;overflow:hidden;background:#fff;flex-shrink:0}
+  .bl-seg button{border:none;background:#fff;font-family:inherit;font-size:12px;font-weight:600;color:var(--text-2);padding:6px 13px;cursor:pointer;border-right:1px solid var(--border)}
+  .bl-seg button:last-child{border-right:none}
+  .bl-seg button.on{background:var(--blue-pale);color:var(--blue)}
   /* import wizard bits */
   .bl-step{display:flex;gap:8px;margin-top:9px}
   .bl-step span{font-size:11px;font-weight:600;padding:3px 11px;border-radius:99px;background:var(--surface);color:var(--text-3);border:1px solid var(--border)}
@@ -874,6 +882,7 @@ body {
   <div class="bl-sec-h">Start a batch</div>
   <div class="bl-actions">
     <a class="bl-act" onclick="openNewBatch('gift')"><div class="ic" style="background:var(--blue-pale);color:var(--blue)"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="2" width="14" height="14" rx="2"/><path d="M9 6v6M6 9h6"/></svg></div><div class="t">Blank gift batch</div><div class="s">Empty grid — name it and start typing gifts.</div></a>
+    <a class="bl-act" onclick="openNewBatch('pledge')"><div class="ic" style="background:var(--amber-light);color:#92400E"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="3" width="14" height="12" rx="2"/><path d="M6 3v12M11 3v12"/></svg></div><div class="t">Blank pledge batch</div><div class="s">Empty grid — record multi-payment commitments.</div></a>
     <a class="bl-act" onclick="openImport()"><div class="ic" style="background:var(--green-light);color:var(--green)"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 12V3M5.5 6.5L9 3l3.5 3.5M3 13v2h12v-2"/></svg></div><div class="t">Import CSV / Excel</div><div class="s">Upload a file, map columns, then review.</div></a>
     <a class="bl-act" onclick="openTemplate()"><div class="ic" style="background:var(--purple-light);color:var(--purple)"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2.5" y="2.5" width="13" height="13" rx="2"/><path d="M2.5 6.5h13M6.5 6.5v9"/></svg></div><div class="t">From template</div><div class="s">Reuse a saved column layout & defaults.</div></a>
     <a class="bl-act" href="atlas-batch-entry.html"><div class="ic" style="background:var(--amber-light);color:#92400E"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 9a6 6 0 1 1 1.8 4.3M3 13v-3.5h3.5"/></svg></div><div class="t">Resume last draft</div><div class="s">Easter Offertory · 31 gifts · edited 2h ago</div></a>
@@ -881,35 +890,46 @@ body {
 
   <div class="bl-sec-h">Folders &amp; campaigns <span class="bl-sec-sub">click to filter · scroll for more</span></div>
   <div class="bl-fbar" id="bl-flds">
-    <div class="bl-fchip on" onclick="blFolderAll(this)">All folders <span class="ct">8</span></div>
-    <div class="bl-fchip" onclick="blFolder('2026 — CMA',this)"><span class="dotf" style="background:var(--blue)"></span>2026 — CMA <span class="ct">4</span></div>
-    <div class="bl-fchip" onclick="blFolder('Cathedral Capital',this)"><span class="dotf" style="background:var(--purple)"></span>Cathedral Capital <span class="ct">3</span></div>
+    <div class="bl-fchip on" onclick="blFolderAll(this)">All folders <span class="ct">10</span></div>
+    <div class="bl-fchip" onclick="blFolder('2026 — CMA',this)"><span class="dotf" style="background:var(--blue)"></span>2026 — CMA <span class="ct">5</span></div>
+    <div class="bl-fchip" onclick="blFolder('Cathedral Capital',this)"><span class="dotf" style="background:var(--purple)"></span>Cathedral Capital <span class="ct">4</span></div>
     <div class="bl-fchip" onclick="blFolder('General Fund',this)"><span class="dotf" style="background:var(--amber)"></span>General Fund <span class="ct">1</span></div>
     <div class="bl-fchip bl-fchip-new" id="bl-newfld" onclick="blNewFolder()">+ New folder</div>
   </div>
 
-  <div class="bl-sec-h">Recent batches <span class="bl-sec-sub">latest across all your folders</span>
-    <div class="bl-search"><svg viewBox="0 0 14 14" fill="none" stroke="var(--text-3)" stroke-width="1.5" stroke-linecap="round" style="width:13px;height:13px;flex-shrink:0"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="bl-search" oninput="blSearch(this.value)" placeholder="Search batches or folders…"></div>
+  <div class="bl-sec-h">Recent batches <span class="bl-sec-sub">gift &amp; pledge batches</span>
+    <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
+      <div class="bl-seg" id="bl-typeseg">
+        <button class="on" onclick="blType('',this)">All</button>
+        <button onclick="blType('gift',this)">Gifts</button>
+        <button onclick="blType('pledge',this)">Pledges</button>
+      </div>
+      <div class="bl-search"><svg viewBox="0 0 14 14" fill="none" stroke="var(--text-3)" stroke-width="1.5" stroke-linecap="round" style="width:13px;height:13px;flex-shrink:0"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="bl-search" oninput="blSearch(this.value)" placeholder="Search batches or folders…"></div>
+    </div>
   </div>
   <div class="bl-table" id="bl-table">
-    <div class="bl-tr head"><div class="bl-th">Batch</div><div class="bl-th">Folder · fund</div><div class="bl-th">Date</div><div class="bl-th">Gifts</div><div class="bl-th r">Total</div><div class="bl-th">Status</div><div class="bl-th">Action</div></div>
+    <div class="bl-tr head"><div class="bl-th">Batch</div><div class="bl-th">Folder · fund</div><div class="bl-th">Date</div><div class="bl-th">Entries</div><div class="bl-th r">Total</div><div class="bl-th">Status</div><div class="bl-th">Action</div></div>
     <div class="bl-empty" id="bl-empty" style="display:none;padding:26px;text-align:center;color:var(--text-3);font-size:13px">No batches match your search.</div>
 
-    <div class="bl-tr"><div><div class="bl-bn">Easter Offertory</div><div class="bl-meta">edited 2h ago · Sarah Reynolds</div></div><div class="bl-cell">2026 — CMA · CMA</div><div class="bl-cell">May 2</div><div class="bl-cell">31</div><div class="bl-amt">$9,210.00</div><div><span class="bl-pill bl-draft"><span class="pd"></span>Draft</span></div><a class="bl-go" href="atlas-batch-entry.html">Resume →</a></div>
+    <div class="bl-tr" data-kind="pledge"><div><div class="bl-bn">Capital Pledges — Q2 <span class="bl-kind pledge">Pledge</span></div><div class="bl-meta">edited 1h ago · Daniel Cho</div></div><div class="bl-cell">Cathedral Capital</div><div class="bl-cell">May 1</div><div class="bl-cell">6 pledges</div><div class="bl-amt">$480,000.00</div><div><span class="bl-pill bl-draft"><span class="pd"></span>Draft</span></div><a class="bl-go" href="atlas-batch-pledge-entry.html">Resume →</a></div>
 
-    <div class="bl-tr"><div><div class="bl-bn">Stock Gifts — April</div><div class="bl-meta">edited yesterday · Daniel Cho</div></div><div class="bl-cell">Cathedral Capital</div><div class="bl-cell">Apr 19</div><div class="bl-cell">4</div><div class="bl-amt">$52,090.00</div><div><span class="bl-pill bl-draft"><span class="pd"></span>Draft</span></div><a class="bl-go" href="atlas-batch-entry.html">Resume →</a></div>
+    <div class="bl-tr" data-kind="gift"><div><div class="bl-bn">Easter Offertory <span class="bl-kind gift">Gift</span></div><div class="bl-meta">edited 2h ago · Sarah Reynolds</div></div><div class="bl-cell">2026 — CMA · CMA</div><div class="bl-cell">May 2</div><div class="bl-cell">31 gifts</div><div class="bl-amt">$9,210.00</div><div><span class="bl-pill bl-draft"><span class="pd"></span>Draft</span></div><a class="bl-go" href="atlas-batch-entry.html">Resume →</a></div>
 
-    <div class="bl-tr"><div><div class="bl-bn">Online Giving Export</div><div class="bl-meta">edited May 1 · auto-import</div></div><div class="bl-cell">2026 — CMA</div><div class="bl-cell">May 1</div><div class="bl-cell">16</div><div class="bl-amt">$6,540.00</div><div><span class="bl-pill bl-draft"><span class="pd"></span>Draft</span></div><a class="bl-go" href="atlas-batch-entry.html">Resume →</a></div>
+    <div class="bl-tr" data-kind="gift"><div><div class="bl-bn">Stock Gifts — April <span class="bl-kind gift">Gift</span></div><div class="bl-meta">edited yesterday · Daniel Cho</div></div><div class="bl-cell">Cathedral Capital</div><div class="bl-cell">Apr 19</div><div class="bl-cell">4 gifts</div><div class="bl-amt">$52,090.00</div><div><span class="bl-pill bl-draft"><span class="pd"></span>Draft</span></div><a class="bl-go" href="atlas-batch-entry.html">Resume →</a></div>
 
-    <div class="bl-tr"><div><div class="bl-bn">Spring Gala Pledges</div><div class="bl-meta">3 rows need review</div></div><div class="bl-cell">Cathedral Capital</div><div class="bl-cell">Apr 28</div><div class="bl-cell">12</div><div class="bl-amt">$42,000.00</div><div><span class="bl-pill bl-exc"><span class="pd"></span>Exceptions · 3</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-exceptions.html">Resolve</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Removed from review')">Remove</a></div></div>
+    <div class="bl-tr" data-kind="pledge"><div><div class="bl-bn">Annual Fund Pledges <span class="bl-kind pledge">Pledge</span></div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">2026 — CMA · CMA</div><div class="bl-cell">Apr 30</div><div class="bl-cell">22 pledges</div><div class="bl-amt">$54,200.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-pledge-entry.html">View</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Batch removed from list')">Remove</a></div></div>
 
-    <div class="bl-tr"><div><div class="bl-bn">Memorial Gifts</div><div class="bl-meta">6 rows need review</div></div><div class="bl-cell">General Fund</div><div class="bl-cell">May 3</div><div class="bl-cell">6</div><div class="bl-amt">$3,800.00</div><div><span class="bl-pill bl-exc"><span class="pd"></span>Exceptions · 6</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-exceptions.html">Resolve</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Removed from review')">Remove</a></div></div>
+    <div class="bl-tr" data-kind="gift"><div><div class="bl-bn">Online Giving Export <span class="bl-kind gift">Gift</span></div><div class="bl-meta">edited May 1 · auto-import</div></div><div class="bl-cell">2026 — CMA</div><div class="bl-cell">May 1</div><div class="bl-cell">16 gifts</div><div class="bl-amt">$6,540.00</div><div><span class="bl-pill bl-draft"><span class="pd"></span>Draft</span></div><a class="bl-go" href="atlas-batch-entry.html">Resume →</a></div>
 
-    <div class="bl-tr"><div><div class="bl-bn">April Mail Response</div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">2026 — CMA · CMA</div><div class="bl-cell">Apr 18</div><div class="bl-cell">14</div><div class="bl-amt">$14,975.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-entry.html">View</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Batch removed from list')">Remove</a></div></div>
+    <div class="bl-tr" data-kind="pledge"><div><div class="bl-bn">Spring Gala Pledges <span class="bl-kind pledge">Pledge</span></div><div class="bl-meta">3 rows need review</div></div><div class="bl-cell">Cathedral Capital</div><div class="bl-cell">Apr 28</div><div class="bl-cell">12 pledges</div><div class="bl-amt">$42,000.00</div><div><span class="bl-pill bl-exc"><span class="pd"></span>Exceptions · 3</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-exceptions.html">Resolve</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Removed from review')">Remove</a></div></div>
 
-    <div class="bl-tr"><div><div class="bl-bn">Q1 Major Gifts</div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">Cathedral Capital</div><div class="bl-cell">Mar 31</div><div class="bl-cell">8</div><div class="bl-amt">$185,000.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-entry.html">View</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Batch removed from list')">Remove</a></div></div>
+    <div class="bl-tr" data-kind="gift"><div><div class="bl-bn">Memorial Gifts <span class="bl-kind gift">Gift</span></div><div class="bl-meta">6 rows need review</div></div><div class="bl-cell">General Fund</div><div class="bl-cell">May 3</div><div class="bl-cell">6 gifts</div><div class="bl-amt">$3,800.00</div><div><span class="bl-pill bl-exc"><span class="pd"></span>Exceptions · 6</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-exceptions.html">Resolve</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Removed from review')">Remove</a></div></div>
 
-    <div class="bl-tr"><div><div class="bl-bn">Lenten Appeal</div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">2026 — CMA</div><div class="bl-cell">Feb 28</div><div class="bl-cell">18</div><div class="bl-amt">$19,200.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-entry.html">View</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Batch removed from list')">Remove</a></div></div>
+    <div class="bl-tr" data-kind="gift"><div><div class="bl-bn">April Mail Response <span class="bl-kind gift">Gift</span></div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">2026 — CMA · CMA</div><div class="bl-cell">Apr 18</div><div class="bl-cell">14 gifts</div><div class="bl-amt">$14,975.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-entry.html">View</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Batch removed from list')">Remove</a></div></div>
+
+    <div class="bl-tr" data-kind="gift"><div><div class="bl-bn">Q1 Major Gifts <span class="bl-kind gift">Gift</span></div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">Cathedral Capital</div><div class="bl-cell">Mar 31</div><div class="bl-cell">8 gifts</div><div class="bl-amt">$185,000.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-entry.html">View</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Batch removed from list')">Remove</a></div></div>
+
+    <div class="bl-tr" data-kind="gift"><div><div class="bl-bn">Lenten Appeal <span class="bl-kind gift">Gift</span></div><div class="bl-meta">posted · reconciled</div></div><div class="bl-cell">2026 — CMA</div><div class="bl-cell">Feb 28</div><div class="bl-cell">18 gifts</div><div class="bl-amt">$19,200.00</div><div><span class="bl-pill bl-posted"><span class="pd"></span>Posted</span></div><div style="display:flex;gap:11px"><a class="bl-go" href="atlas-batch-entry.html">View</a><a class="bl-go" style="color:var(--text-3)" onclick="blRemove(this,'Batch removed from list')">Remove</a></div></div>
   </div>
 
   <div class="bl-two">
@@ -1124,16 +1144,18 @@ body {
   window.useTemplateDirect=function(name){ go('atlas-batch-entry.html','Opening clean batch · '+name+' template applied'); };
 
   // ── Batch search + folder filter ──
-  var blQ='', blFolderFilter='';
+  var blQ='', blFolderFilter='', blKind='';
   function blApply(){
     var rows=document.querySelectorAll('#bl-table .bl-tr:not(.head)'); var shown=0;
     rows.forEach(function(r){ var t=r.textContent.toLowerCase();
       var mq=!blQ||t.indexOf(blQ)>=0;
       var mf=!blFolderFilter||t.indexOf(blFolderFilter.toLowerCase())>=0;
-      var m=mq&&mf; r.style.display=m?'':'none'; if(m)shown++; });
+      var mk=!blKind||r.getAttribute('data-kind')===blKind;
+      var m=mq&&mf&&mk; r.style.display=m?'':'none'; if(m)shown++; });
     document.getElementById('bl-empty').style.display=shown?'none':'block';
   }
   window.blSearch=function(q){ blQ=(q||'').toLowerCase().trim(); blApply(); };
+  window.blType=function(kind,el){ blKind=kind; document.querySelectorAll('#bl-typeseg button').forEach(function(b){b.classList.remove('on');}); el.classList.add('on'); blApply(); };
   function setActiveChip(el){ document.querySelectorAll('#bl-flds .bl-fchip').forEach(function(c){c.classList.remove('on');}); if(el) el.classList.add('on'); }
   window.blFolderAll=function(el){ blFolderFilter=''; setActiveChip(el); blApply(); };
   window.blFolder=function(name,el){

@@ -734,7 +734,7 @@ body {
             </select>
           </div>
         </div>
-        <div class="row3 mt-12" style="margin-top:12px">
+        <div class="row2 mt-12" style="margin-top:12px">
           <div>
             <span class="lbl">Campaign</span>
             <select class="fld">
@@ -748,11 +748,23 @@ body {
               <option selected>Spring 2026 — major donor cultivation</option>
             </select>
           </div>
+        </div>
+        <div class="row2 mt-12" style="margin-top:12px">
+          <div>
+            <span class="lbl">Legal entity<span class="req">*</span></span>
+            <select class="fld" id="entity-select" onchange="onEntityChange(this.value)">
+              <option selected>Diocese of Albany</option>
+              <option>St. Mary&rsquo;s Parish</option>
+              <option>Catholic Schools of Albany</option>
+              <option>St. Agnes Cemetery</option>
+            </select>
+          </div>
           <div>
             <span class="lbl">Fund<span class="req">*</span></span>
-            <select class="fld">
+            <select class="fld" id="fund-select" onchange="onFundChange()">
               <option selected>Cathedral Restoration · GL 4001</option>
             </select>
+            <span class="lbl" style="margin-top:6px;display:block;color:var(--text-3,#64748B);font-weight:400;font-size:11.5px">Funds are filtered by the selected entity. The entity owns the receipt EIN.</span>
           </div>
         </div>
       </div>
@@ -868,7 +880,7 @@ body {
         <div class="sum-row"><span class="l">Donor</span><span class="v">Margaret O'Brien</span></div>
         <div class="sum-row"><span class="l">Frequency</span><span class="v">Annual · 3 instalments</span></div>
         <div class="sum-row"><span class="l">First due</span><span class="v">Jun 30, 2026</span></div>
-        <div class="sum-row"><span class="l">Designation</span><span class="v">Cathedral Restoration<small style="display:block;font-size:11px;color:rgba(255,255,255,.5)">GL 4001 · Diocese of Albany</small></span></div>
+        <div class="sum-row"><span class="l">Designation</span><span class="v"><span id="sum-fund">Cathedral Restoration</span><small id="sum-fundsub" style="display:block;font-size:11px;color:rgba(255,255,255,.5)">GL 4001 · Diocese of Albany</small></span></div>
         <div class="sum-row"><span class="l">Soft credit</span><span class="v">Peter Smith (100%)</span></div>
         <div class="sum-row"><span class="l">Reminder</span><span class="v">14d before each instalment</span></div>
 
@@ -1436,11 +1448,73 @@ body {
 
   var ESTATE_HTML =
     '<div class="info-bar purple"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7L8 2.5 13.5 7M4 6.5V13h8V6.5"/></svg><div>Estate / bequest — records donor’s planned gift intention · no payment schedule</div></div>'
-    + '<div class="info-bar purple"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5M8 11v.4"/></svg><div>No payment schedule is generated for estate pledges. <code>expected_installments[] = []</code> on create — pledge balance stays at $0 until the estate distributes and a Pledge Payment is recorded. Lapse rule is not applicable. Use the <strong>Internal note</strong> field in Section 4 to capture bequest details (type, status, attorney contact, expected range).</div></div>'
-    + '<div class="row2 mt-12" style="margin-top:6px">'
+    + '<div class="info-bar purple"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5M8 11v.4"/></svg><div>No payment schedule is generated for estate pledges. <code>expected_installments[] = []</code> on create — the pledge balance stays at $0 until the estate distributes and a Pledge Payment is recorded. Lapse rule is not applicable. The fields below are saved as bequest metadata on the pledge — feed the planned-giving pipeline and reports.</div></div>'
+    // ── Bequest status (planned-giving lifecycle) ──
+    + '<span class="lbl mt-12" style="margin-top:14px;display:block">Bequest status</span>'
+    + '<div class="freq-grid" style="grid-template-columns:repeat(5,1fr)">'
+      + '<div class="freq-pill on" style="white-space:nowrap">Intention expressed</div>'
+      + '<div class="freq-pill" style="white-space:nowrap">Documented</div>'
+      + '<div class="freq-pill" style="white-space:nowrap">Confirmed</div>'
+      + '<div class="freq-pill" style="white-space:nowrap">In probate</div>'
+      + '<div class="freq-pill" style="white-space:nowrap">Realized</div>'
+    + '</div>'
+    // ── Type + documentation ──
+    + '<div class="row2 mt-12" style="margin-top:14px">'
+      + '<div><span class="lbl">Bequest type</span><select class="fld"><option selected>Will</option><option>Living trust</option><option>Retirement plan beneficiary</option><option>Life insurance beneficiary</option><option>Charitable remainder trust</option><option>Charitable gift annuity</option><option>Real estate</option><option>Other</option></select></div>'
+      + '<div><span class="lbl">Documentation on file</span><select class="fld"><option selected>None yet</option><option>Verbal intention</option><option>Letter of intent</option><option>Executed will / trust</option><option>Beneficiary designation form</option></select></div>'
+    + '</div>'
+    // ── Expected value range (estates are uncertain) ──
+    + '<div class="row3 mt-12" style="margin-top:14px">'
+      + '<div><span class="lbl">Estimated value — low</span><input class="fld" placeholder="$ optional"></div>'
+      + '<div><span class="lbl">Estimated value — high</span><input class="fld" placeholder="$ optional"></div>'
+      + '<div><span class="lbl">Confidence</span><select class="fld"><option selected>Unconfirmed estimate</option><option>Donor-stated</option><option>Documented amount</option></select></div>'
+    + '</div>'
+    // ── Attorney / executor contact ──
+    + '<span class="lbl mt-12" style="margin-top:16px;display:block">Attorney / executor contact <span style="color:var(--text-3,#64748B);font-weight:400">(optional)</span></span>'
+    + '<div class="row3" style="margin-top:6px">'
+      + '<div><span class="lbl">Name</span><input class="fld" placeholder="e.g. Margaret Doyle, Esq."></div>'
+      + '<div><span class="lbl">Firm</span><input class="fld" placeholder="e.g. Doyle & Park LLP"></div>'
+      + '<div><span class="lbl">Email or phone</span><input class="fld" placeholder="contact@firm.com"></div>'
+    + '</div>'
+    // ── Timeframe + stewardship ──
+    + '<div class="row2 mt-12" style="margin-top:14px">'
+      + '<div><span class="lbl">Expected realization</span><select class="fld"><option selected>Unknown / on passing</option><option>Within 1 year</option><option>1–3 years</option><option>3–5 years</option><option>5+ years</option></select></div>'
       + '<div><span class="lbl">Pledge reminder</span><select class="fld"><option selected>None</option><option>Annual stewardship touch</option></select></div>'
+    + '</div>'
+    + '<div class="row2 mt-12" style="margin-top:14px">'
       + '<div><span class="lbl">Lapse rule</span><select class="fld"><option selected>Manual review only — no auto-lapse</option></select></div>'
+      + '<div><span class="lbl">Assigned officer</span><select class="fld"><option selected>Sarah Reynolds — Planned Giving</option><option>Daniel Cho — Major Gifts</option><option>Unassigned</option></select></div>'
     + '</div>';
+
+  // ── Legal entity → Fund filtering ──────────────────────────
+  // Each fund belongs to exactly one legal entity (its own EIN).
+  // Picking the entity narrows the fund list; the fund carries GL + entity.
+  var ENTITY_FUNDS = {
+    'Diocese of Albany':          ['Cathedral Restoration · GL 4001','Bishop’s Annual Appeal · GL 4100','Clergy Care & Retirement · GL 4200','Catholic Charities · GL 4300'],
+    'St. Mary’s Parish':      ['Parish Operating · GL 5100','Building Fund · GL 5200','Outreach & Missions · GL 5300'],
+    'Catholic Schools of Albany': ['Scholarship Fund · GL 6100','Tuition Assistance · GL 6200','Capital Improvements · GL 6300'],
+    'St. Agnes Cemetery':         ['Perpetual Care · GL 7100','Memorial Fund · GL 7200']
+  };
+  function glFromFund(f){ var m=(f||'').match(/GL\s*([0-9]+)/); return m?('GL '+m[1]):''; }
+  function fundName(f){ return (f||'').split(' · ')[0]; }
+  function updateDesignationSummary(){
+    var ent = document.getElementById('entity-select');
+    var fund = document.getElementById('fund-select');
+    if(!ent||!fund) return;
+    var nm = document.getElementById('sum-fund');
+    var sub = document.getElementById('sum-fundsub');
+    if(nm) nm.textContent = fundName(fund.value);
+    if(sub) sub.textContent = (glFromFund(fund.value) + ' · ' + ent.value).replace(/^ · /,'');
+  }
+  window.onEntityChange = function(entity){
+    var fund = document.getElementById('fund-select');
+    var funds = ENTITY_FUNDS[entity] || [];
+    if(fund){
+      fund.innerHTML = funds.map(function(f,i){ return '<option'+(i===0?' selected':'')+'>'+f+'</option>'; }).join('');
+    }
+    updateDesignationSummary();
+  };
+  window.onFundChange = function(){ updateDesignationSummary(); };
 
   window.onPledgeType = function(t){
     if (t === 'Matching') { sec3Title.textContent = 'Matching pledge details'; sec3Body.innerHTML = MATCHING_HTML; }
