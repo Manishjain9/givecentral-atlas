@@ -1425,25 +1425,45 @@ body {
   var SCHEDULE_HTML = sec3Body.innerHTML;
 
   var MATCHING_HTML =
-    '<div class="info-bar green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h12M5 5L2 8l3 3M11 5l3 3-3 3"/></svg><div>Matching pledge — donor commits to match qualifying gifts up to a cap · payment is triggered, not scheduled</div></div>'
-    + '<span class="lbl">Match ratio<span class="req">*</span></span>'
-    + '<div class="freq-grid">'
-      + '<div class="freq-pill on">1:1 <small>dollar-for-dollar</small></div>'
-      + '<div class="freq-pill">2:1 <small>pledgor doubles</small></div>'
-      + '<div class="freq-pill">1:2 <small>pledgor halves</small></div>'
-      + '<div class="freq-pill">Custom</div>'
+    '<div class="mb-root">'
+    + '<div class="mb-banner" style="margin-bottom:26px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2BA45F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>'
+      + '<span>Matching pledge — donor commits to match qualifying gifts up to a cap · payment is triggered, not scheduled</span></div>'
+    // match ratio
+    + '<div class="mb-field"><span class="mb-lab">Match ratio <span class="req">*</span></span>'
+      + '<div class="mb-seg" id="mb-ratioSeg">'
+        + '<button class="on" data-mult="1" data-label="1:1"><span class="big">1:1</span><span class="sub">dollar-for-dollar</span></button>'
+        + '<button data-mult="2" data-label="2:1"><span class="big">2:1</span><span class="sub">pledgor doubles</span></button>'
+        + '<button data-mult="0.5" data-label="1:2"><span class="big">1:2</span><span class="sub">pledgor halves</span></button>'
+        + '<button data-mult="custom" data-label="custom"><span class="big">Custom</span><span class="sub">&nbsp;</span></button>'
+      + '</div>'
+      + '<div class="mb-custom" id="mb-customRatio">'
+        + '<div><span class="cl">Pledgor gives</span><div class="mb-dollar mini"><span>$</span><input type="number" id="mb-cDonor" value="1" min="0" step="0.5"></div></div>'
+        + '<div class="colon" style="margin-top:18px">:</div>'
+        + '<div><span class="cl">per qualifying</span><div class="mb-dollar mini"><span>$</span><input type="number" id="mb-cQual" value="1" min="0" step="0.5"></div></div>'
+      + '</div>'
     + '</div>'
-    + '<div class="row3 mt-12" style="margin-top:14px">'
-      + '<div><span class="lbl">Match cap<span class="req">*</span></span><input class="fld" value="$30,000.00" style="font-weight:600"></div>'
-      + '<div><span class="lbl">Eligible from</span><input type="date" class="fld" value="2026-05-04"></div>'
-      + '<div><span class="lbl">Eligible until</span><input type="date" class="fld" value="2026-12-31"></div>'
+    // cap + eligibility
+    + '<div class="mb-grid mb-g3">'
+      + '<div class="mb-field"><span class="mb-lab">Match cap <span class="req">*</span></span><div class="mb-dollar"><span>$</span><input type="number" id="mb-cap" value="30000"></div></div>'
+      + '<div class="mb-field"><span class="mb-lab">Eligible from</span><input type="date" value="2026-05-04"></div>'
+      + '<div class="mb-field"><span class="mb-lab">Eligible until</span><input type="date" value="2026-12-31"></div>'
     + '</div>'
-    + '<span class="lbl mt-12" style="margin-top:14px;display:block">Qualifying gifts scope</span>'
-    + '<select class="fld"><option selected>All gifts to Cathedral Restoration · GL 4001</option><option>All gifts to Cathedral Capital Campaign 2026</option><option>New donors only</option></select>'
-    + '<div class="info-bar green mt-12" style="margin-top:14px"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M5.5 8l1.8 1.8L11 6"/></svg><div>At 1:1 match with a $30,000 cap, pledge is triggered by up to $30,000 in qualifying gifts. <strong>No fixed payment schedule.</strong> Payment processed manually when matching gifts are confirmed. <code>expected_installments[] = []</code></div></div>'
-    + '<div class="row2 mt-12" style="margin-top:6px">'
-      + '<div><span class="lbl">Match confirmation required</span><select class="fld"><option selected>Yes — manual approval before payment</option><option>No — auto-pay on threshold</option></select></div>'
-      + '<div><span class="lbl">Notification</span><select class="fld"><option selected>Notify me when match threshold reached</option><option>Notify finance team</option><option>None</option></select></div>'
+    // qualifying scope
+    + '<div class="mb-field"><span class="mb-lab">Qualifying gifts scope</span><select>'
+      + '<option>All gifts to Cathedral Restoration · GL 4001</option>'
+      + '<option>All gifts to the Cathedral Capital Campaign 2026</option>'
+      + '<option>New &amp; increased gifts only · Cathedral Restoration</option>'
+      + '<option>All gifts to the Diocese of Albany</option>'
+      + '<option>Custom segment…</option>'
+    + '</select></div>'
+    // live calc banner
+    + '<div class="mb-banner mb-calc" id="mb-calcBanner"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2BA45F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+      + '<span id="mb-calcText"></span></div>'
+    // confirmation + notification
+    + '<div class="mb-grid mb-g2">'
+      + '<div class="mb-field" style="margin-bottom:0"><span class="mb-lab">Match confirmation required</span><select><option>Yes — manual approval before payment</option><option>No — auto-trigger when threshold reached</option></select></div>'
+      + '<div class="mb-field" style="margin-bottom:0"><span class="mb-lab">Notification</span><select><option>Notify me when match threshold reached</option><option>Notify me on each qualifying gift</option><option>Notify when eligibility window closes</option><option>No notifications</option></select></div>'
+    + '</div>'
     + '</div>';
 
   var ESTATE_HTML =
@@ -1505,7 +1525,7 @@ body {
       + '<div class="eb-field"><span class="eb-lab">Assigned officer</span><select><option>Sarah Reynolds — Planned Giving</option><option>Bridget McCarthy — Major Gifts</option></select></div>'
     + '</div>'
     // recognition + legacy society
-    + '<div class="eb-grp eb-prop"><div class="eb-grp-lab">Recognition &amp; legacy society</div><div class="eb-grid eb-g3">'
+    + '<div class="eb-grp eb-prop"><div class="eb-grp-lab">Recognition &amp; legacy society <span class="opt">(optional)</span></div><div class="eb-grid eb-g3">'
       + '<div class="eb-field" style="margin-bottom:0"><span class="eb-lab">Legacy society</span><select><option>Not enrolled</option><option>Invited</option><option>Member — Heritage Society</option></select></div>'
       + '<div class="eb-field" style="margin-bottom:0"><span class="eb-lab">Recognition name</span><input type="text" placeholder="e.g. The O\'Brien Family"></div>'
       + '<div class="eb-field" style="margin-bottom:0"><span class="eb-lab">Anonymity</span><div class="eb-switchrow"><div class="t">Anonymous gift<small>Exclude from donor listings</small></div><span class="eb-switch off" id="eb-anonSwitch" role="switch" aria-checked="false"></span></div></div>'
@@ -1553,7 +1573,29 @@ body {
     else { sec3Title.textContent = 'Schedule'; sec3Body.innerHTML = SCHEDULE_HTML; }
     bindPills();
     if (t === 'Estate / bequest') bindEstate();
+    if (t === 'Matching') bindMatching();
   };
+  function bindMatching(){
+    var root = sec3Body.querySelector('.mb-root'); if(!root) return;
+    var seg = root.querySelector('#mb-ratioSeg'), custom = root.querySelector('#mb-customRatio');
+    var capEl = root.querySelector('#mb-cap'), cDonor = root.querySelector('#mb-cDonor'), cQual = root.querySelector('#mb-cQual');
+    var calcText = root.querySelector('#mb-calcText');
+    var mult = 1, label = '1:1';
+    function fmt(n){ return '$' + Math.round(n).toLocaleString(); }
+    function render(){
+      var cap = Number(capEl.value || 0), m = mult, lab = label;
+      if(mult === 'custom'){ var dv = Number(cDonor.value || 0), qv = Number(cQual.value || 0); m = qv ? dv/qv : 0; lab = (dv||0) + ':' + (qv||0); }
+      var maxQual = m ? cap/m : 0;
+      calcText.innerHTML = 'At ' + lab + ' match with a ' + fmt(cap) + ' cap, pledge is triggered by up to <b>' + fmt(maxQual) + '</b> in qualifying gifts. '
+        + '<b>No fixed payment schedule.</b> Payment processed manually when matching gifts are confirmed. <code>expected_installments[] = []</code>';
+    }
+    seg.addEventListener('click', function(e){ var b = e.target.closest('button'); if(!b) return;
+      seg.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); }); b.classList.add('on');
+      mult = b.dataset.mult; label = b.dataset.label;
+      custom.classList.toggle('show', mult === 'custom'); render(); });
+    [capEl, cDonor, cQual].forEach(function(el){ el.addEventListener('input', render); });
+    render();
+  }
   function bindEstate(){
     var root = sec3Body.querySelector('.eb-root'); if(!root) return;
     var doc = root.querySelector('#eb-docSelect');
@@ -1692,6 +1734,39 @@ body {
   .eb-switchrow{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid var(--eb-border-strong);border-radius:10px;padding:12px 14px}
   .eb-switchrow .t{font-size:14px}
   .eb-switchrow .t small{display:block;color:var(--eb-muted);font-size:12.5px;margin-top:2px}
+
+  /* ── Matching pledge (scoped) ── */
+  .mb-root{--mb-blue:#2563EB;--mb-blue-soft:#EFF6FF;--mb-border-strong:#D5DBE5;--mb-text:#1A2332;--mb-muted:#6B7686;--mb-label:#7E8796;--mb-green-bg:#E9F7EE;--mb-green-text:#1E7A45;--mb-green-strong:#16653A}
+  .mb-root .mb-lab{display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--mb-label);margin-bottom:9px}
+  .mb-root .mb-lab .req{color:var(--mb-blue)}
+  .mb-root .mb-field{margin-bottom:22px}
+  .mb-root .mb-grid{display:grid;gap:22px 26px}
+  .mb-root .mb-g2{grid-template-columns:1fr 1fr}
+  .mb-root .mb-g3{grid-template-columns:1fr 1fr 1fr}
+  @media(max-width:720px){.mb-root .mb-g2,.mb-root .mb-g3{grid-template-columns:1fr}}
+  .mb-root input[type=text],.mb-root input[type=date],.mb-root input[type=number],.mb-root select{width:100%;font:inherit;font-size:15px;color:var(--mb-text);background:#fff;border:1px solid var(--mb-border-strong);border-radius:10px;padding:13px 15px;outline:none;transition:border-color .12s,box-shadow .12s}
+  .mb-root input:focus,.mb-root select:focus{border-color:var(--mb-blue);box-shadow:0 0 0 3px var(--mb-blue-soft)}
+  .mb-root select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:42px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7686' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 15px center}
+  .mb-root .mb-seg{display:flex;gap:14px;flex-wrap:wrap}
+  .mb-root .mb-seg button{flex:1 1 0;min-width:140px;font:inherit;color:var(--mb-text);background:#fff;border:1px solid var(--mb-border-strong);border-radius:12px;padding:15px 12px;cursor:pointer;transition:all .12s;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .mb-root .mb-seg button .big{font-size:15px;font-weight:600}
+  .mb-root .mb-seg button .sub{font-size:12.5px;color:var(--mb-muted)}
+  .mb-root .mb-seg button:hover{border-color:#B9C2D2}
+  .mb-root .mb-seg button.on{border-color:var(--mb-blue);background:var(--mb-blue-soft);box-shadow:0 0 0 1px var(--mb-blue) inset}
+  .mb-root .mb-seg button.on .sub{color:var(--mb-blue)}
+  .mb-root .mb-dollar{position:relative}
+  .mb-root .mb-dollar span{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#5C6473;font-size:15px}
+  .mb-root .mb-dollar input{padding-left:30px}
+  .mb-root .mb-banner{display:flex;gap:13px;border-radius:14px;padding:16px 20px;font-size:14.5px;line-height:1.5;background:var(--mb-green-bg);color:var(--mb-green-text)}
+  .mb-root .mb-banner svg{flex:none;margin-top:2px}
+  .mb-root .mb-banner b{color:var(--mb-green-strong);font-weight:700}
+  .mb-root .mb-banner code{font-family:ui-monospace,Menlo,Consolas,monospace;background:rgba(30,122,69,.12);color:var(--mb-green-strong);padding:1px 6px;border-radius:6px;font-size:12.5px}
+  .mb-root .mb-calc{margin:24px 0}
+  .mb-root .mb-custom{display:none;align-items:center;gap:12px;margin-top:14px}
+  .mb-root .mb-custom.show{display:flex}
+  .mb-root .mb-custom .mini{width:120px}
+  .mb-root .mb-custom .colon{font-size:18px;color:var(--mb-muted);font-weight:600}
+  .mb-root .mb-custom .cl{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mb-label);display:block;margin-bottom:6px}
 </style>
 <div id="ax-ov"><div class="ax-box">
   <div class="ax-bd"><div class="ax-ic" id="ax-ic"></div><div><h3 class="ax-tt" id="ax-tt"></h3><p class="ax-msg" id="ax-msg"></p></div></div>
