@@ -661,7 +661,7 @@ body {
     <main>
 
       <div class="sb-card">
-        <input class="name-input" value="LYBUNT — Cathedral $500+ donors not yet given in 2026">
+        <input class="name-input" id="seg-name" value="LYBUNT — Cathedral $500+ donors not yet given in 2026">
         <p class="muted" style="font-size:12.5px;margin-top:4px">Save this segment to use as a saved view, mailing list, or appeal-recipient list.</p>
       </div>
 
@@ -669,129 +669,11 @@ body {
       <div class="sb-card">
         <h3 style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:14px">Rules</h3>
 
-        <div class="rule-group and">
-          <span class="grouplabel">all of (AND)</span>
-
-          <!-- Rule 1 -->
-          <div class="rule-row">
-            <select class="fld">
-              <option>Lifetime giving</option>
-              <option selected>Total giving · 2025</option>
-              <option>Last gift amount</option>
-              <option>Last gift date</option>
-              <option>Recurring status</option>
-              <option>Constituent type</option>
-              <option>Parish</option>
-              <option>Tag / interest</option>
-              <option>Constituent code</option>
-              <option>Wealth Engine ask range</option>
-            </select>
-            <select class="fld">
-              <option>=</option>
-              <option>≠</option>
-              <option>&lt;</option>
-              <option>≤</option>
-              <option selected>≥</option>
-              <option>&gt;</option>
-              <option>contains</option>
-              <option>between</option>
-              <option>is empty</option>
-              <option>is not empty</option>
-            </select>
-            <input class="fld" value="$500.00" style="font-weight:600">
-            <button class="x-btn">×</button>
-          </div>
-
-          <!-- Rule 2 -->
-          <div class="rule-row">
-            <select class="fld">
-              <option>Lifetime giving</option>
-              <option>Total giving · 2025</option>
-              <option>Last gift amount</option>
-              <option selected>Last gift date</option>
-              <option>Recurring status</option>
-            </select>
-            <select class="fld">
-              <option>=</option>
-              <option>≠</option>
-              <option selected>before</option>
-              <option>after</option>
-              <option>between</option>
-            </select>
-            <input class="fld" value="Jan 1, 2026">
-            <button class="x-btn">×</button>
-          </div>
-
-          <!-- Rule 3 -->
-          <div class="rule-row">
-            <select class="fld">
-              <option>Lifetime giving</option>
-              <option>Last gift</option>
-              <option selected>Tag / interest</option>
-              <option>Parish</option>
-              <option>Constituent code</option>
-            </select>
-            <select class="fld">
-              <option selected>contains</option>
-              <option>does not contain</option>
-              <option>=</option>
-            </select>
-            <input class="fld" value="Cathedral capital">
-            <button class="x-btn">×</button>
-          </div>
-
-          <div style="margin-top:12px">
-            <span class="add-rule"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5.5 2v7M2 5.5h7"/></svg> Add rule</span>
-            <span class="add-rule"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="1.5" width="8" height="8" rx="1"/><path d="M1.5 4h8M4 1.5v8"/></svg> Add nested group</span>
-          </div>
-        </div>
-
-        <!-- Connector -->
-        <div style="text-align:center;margin:8px 0">
-          <span class="connector and">AND</span>
-          <span class="muted" style="font-size:11.5px;margin-left:10px">switch to <span class="connector or">OR</span> ?</span>
-        </div>
-
-        <!-- Nested OR group -->
-        <div class="rule-group or">
-          <span class="grouplabel">any of (OR)</span>
-
-          <div class="rule-row">
-            <select class="fld">
-              <option selected>Parish</option>
-              <option>Tag / interest</option>
-            </select>
-            <select class="fld"><option selected>=</option></select>
-            <input class="fld" value="St. Mary's Cathedral">
-            <button class="x-btn">×</button>
-          </div>
-
-          <div class="rule-row">
-            <select class="fld">
-              <option selected>Parish</option>
-            </select>
-            <select class="fld"><option selected>=</option></select>
-            <input class="fld" value="St. Catherine of Siena">
-            <button class="x-btn">×</button>
-          </div>
-
-          <div class="rule-row">
-            <select class="fld">
-              <option selected>Tag / interest</option>
-            </select>
-            <select class="fld"><option selected>=</option></select>
-            <input class="fld" value="Cathedral committee member">
-            <button class="x-btn">×</button>
-          </div>
-
-          <div style="margin-top:12px">
-            <span class="add-rule"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5.5 2v7M2 5.5h7"/></svg> Add rule</span>
-          </div>
-        </div>
+        <div id="rules-root"></div>
 
         <p class="muted" style="font-size:12px;margin-top:8px;display:flex;align-items:start;gap:8px">
-          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--blue);flex-shrink:0;margin-top:1px"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.5M7 9v.5"/></svg>
-          <span>This reads as: <strong style="color:var(--text)">"Donors who gave ≥ $500 in 2025 AND haven't given in 2026 AND have the 'Cathedral capital' tag, AND attend either St. Mary's, St. Catherine's, or are on the Cathedral committee."</strong></span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--blue);flex:0 0 14px;width:14px;height:14px;margin-top:1px"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.5M7 9v.5"/></svg>
+          <span>This reads as: <strong id="reads-as" style="color:var(--text)"></strong></span>
         </p>
       </div>
 
@@ -823,7 +705,7 @@ body {
         <h4>Live match count</h4>
         <div class="sub">Refreshes 200ms after each rule change.</div>
 
-        <div class="match-num">47</div>
+        <div class="match-num" id="match-num">47</div>
         <div class="match-lbl">donors match these rules right now</div>
 
         <div class="preview-stats">
@@ -858,11 +740,11 @@ body {
         </div>
 
         <div class="actions">
-          <button class="primary" onclick="alert('Segment saved as live view: \'LYBUNT — Cathedral $500+ donors not yet given in 2026\''); window.location='atlas-donors-list.html'">
+          <button class="primary" onclick="atlasConfirm({icon:'success',title:'Segment saved as live view: \'LYBUNT — Cathedral $500+ donors not yet given in 2026\'',message:'',confirmText:'View list',cancelText:'Stay here',onConfirm:function(){window.location='atlas-donors-list.html';}})">
             Save segment
           </button>
-          <button class="ghost" onclick="alert('Exported · CSV downloaded · 47 donors')">Export 47 to CSV</button>
-          <button class="ghost" onclick="window.location='atlas-email-compose.html'">Use as email recipient list</button>
+          <button class="ghost" onclick="openExportModal()">Export 47 to CSV</button>
+          <button class="ghost" onclick="openRecipientModal()">Use as email recipient list</button>
         </div>
       </div>
     </aside>
@@ -872,6 +754,329 @@ body {
 </div>
 
 </div>
+
+<!-- ════════════════════════════════════════════════════════
+     Per-segment loader · one builder drives all 12 segments
+     (?seg=<slug>). Renders that segment's name, rules,
+     plain-language summary, and live match count.
+     ════════════════════════════════════════════════════════ -->
+<script id="seg-loader">
+(function(){
+  var FIELDS=['Lifetime giving','Total giving · current year','Total giving · prior year','Total giving · 2025','Last gift amount','Last gift date','First gift date','Recurring status','Recurring stopped date','Active pledge','Installment overdue','Constituent type','Parish','Tag / interest','Constituent code','Wealth Engine ask range','Confidence','Email','Record status'];
+  var OPS=['=','≠','<','≤','≥','>','contains','does not contain','before','after','between','is empty','is not empty'];
+  function slug(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+  function escA(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+  var SEGMENTS={
+    'lybunt':{name:'LYBUNT — gave last year, not yet this year',count:312,reads:'Donors who gave last calendar year but have not yet given in the current year.',groups:[{type:'and',rules:[{f:'Total giving · prior year',op:'≥',v:'$1.00'},{f:'Total giving · current year',op:'=',v:'$0.00'}]}]},
+    'sybunt':{name:'SYBUNT — gave a prior year, nothing this year',count:540,reads:'Donors who gave in some prior year but have given nothing in the current year.',groups:[{type:'and',rules:[{f:'Lifetime giving',op:'≥',v:'$1.00'},{f:'Total giving · prior year',op:'=',v:'$0.00'},{f:'Total giving · current year',op:'=',v:'$0.00'}]}]},
+    'active-recurring-givers':{name:'Active recurring givers',count:286,reads:'All donors with an active GiveCentral recurring subscription.',groups:[{type:'and',rules:[{f:'Recurring status',op:'=',v:'Active'}]}]},
+    'new-donors-this-year':{name:'New donors this year',count:134,reads:'Donors whose first-ever gift was this calendar year.',groups:[{type:'and',rules:[{f:'First gift date',op:'after',v:'Jan 1, 2026'}]}]},
+    'lapsed-donors-18-months':{name:'Lapsed donors (18+ months)',count:421,reads:'Donors whose last gift was more than 18 months ago, with no active pledge.',groups:[{type:'and',rules:[{f:'Last gift date',op:'before',v:'Dec 30, 2024'},{f:'Active pledge',op:'=',v:'No'}]}]},
+    'lapsed-recurring':{name:'Lapsed recurring',count:63,reads:'Donors whose recurring subscription stopped within the last 90 days.',groups:[{type:'and',rules:[{f:'Recurring status',op:'=',v:'Stopped'},{f:'Recurring stopped date',op:'after',v:'Mar 31, 2026'}]}]},
+    'open-pledge-holders':{name:'Open pledge holders',count:198,reads:'All donors with at least one active pledge.',groups:[{type:'and',rules:[{f:'Active pledge',op:'=',v:'Yes'}]}]},
+    'at-risk-pledges':{name:'At-risk pledges',count:27,reads:'Donors with a pledge where an installment is 14+ days overdue.',groups:[{type:'and',rules:[{f:'Active pledge',op:'=',v:'Yes'},{f:'Installment overdue',op:'≥',v:'14 days'}]}]},
+    'high-capacity-unasked':{name:'High capacity — unasked',count:88,reads:'Donors with a Wealth Engine ask range ≥ $5,000 who have not given this year.',groups:[{type:'and',rules:[{f:'Wealth Engine ask range',op:'≥',v:'$5,000'},{f:'Total giving · current year',op:'=',v:'$0.00'}]}]},
+    'major-prospects-25k':{name:'Major prospects — $25k+',count:41,reads:'Donors with lifetime giving or ask range ≥ $25,000 and confidence at least Medium.',groups:[{type:'and',rules:[{f:'Confidence',op:'≥',v:'Medium'}]},{type:'or',rules:[{f:'Lifetime giving',op:'≥',v:'$25,000'},{f:'Wealth Engine ask range',op:'≥',v:'$25,000'}]}]},
+    'no-email-on-file':{name:'No email on file',count:372,reads:'All donors with no deliverable primary email address.',groups:[{type:'and',rules:[{f:'Email',op:'is empty',v:''}]}]},
+    'pending-review':{name:'Pending review',count:56,reads:'All donors awaiting Database Admin verification after an import or sync.',groups:[{type:'and',rules:[{f:'Record status',op:'=',v:'Pending verification'}]}]}
+  };
+
+  function sel(opts,val){
+    var has=opts.indexOf(val)>-1, o='';
+    if(!has && val) o+='<option selected>'+escA(val)+'</option>';
+    opts.forEach(function(x){ o+='<option'+((x===val&&has)?' selected':'')+'>'+x+'</option>'; });
+    return '<select class="fld">'+o+'</select>';
+  }
+  function ruleRow(r){
+    var money=/^\$/.test(r.v||'');
+    return '<div class="rule-row">'+sel(FIELDS,r.f)+sel(OPS,r.op)+
+      '<input class="fld" value="'+escA(r.v)+'"'+(money?' style="font-weight:600"':'')+'>'+
+      '<button class="x-btn" data-act="del">×</button></div>';
+  }
+  function groupHtml(g,isFirst){
+    var label=g.type==='or'?'any of (OR)':'all of (AND)';
+    var rows=g.rules.map(ruleRow).join('');
+    var adds='<span class="add-rule" data-act="addrule"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5.5 2v7M2 5.5h7"/></svg> Add rule</span>';
+    if(isFirst) adds+='<span class="add-rule" data-act="addgroup"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="1.5" width="8" height="8" rx="1"/><path d="M1.5 4h8M4 1.5v8"/></svg> Add nested group</span>';
+    return '<div class="rule-group '+g.type+'"><span class="grouplabel">'+label+'</span>'+rows+'<div style="margin-top:12px">'+adds+'</div></div>';
+  }
+  function connector(){
+    return '<div style="text-align:center;margin:8px 0"><span class="connector and">AND</span><span class="muted" style="font-size:11.5px;margin-left:10px">switch to <span class="connector or">OR</span> ?</span></div>';
+  }
+  function renderRules(groups){
+    var root=document.getElementById('rules-root'); if(!root) return;
+    var h=''; groups.forEach(function(g,i){ if(i) h+=connector(); h+=groupHtml(g,i===0); });
+    root.innerHTML=h;
+  }
+  function blankRow(){ return '<div class="rule-row">'+sel(FIELDS,'')+sel(OPS,'=')+'<input class="fld" value="">'+'<button class="x-btn" data-act="del">×</button></div>'; }
+
+  function init(){
+    var id=slug(new URLSearchParams(location.search).get('seg')||'');
+    var cfg=SEGMENTS[id];
+    var isNew=!cfg;
+    if(isNew) cfg={name:'',count:0,reads:'Add rules above to define who this segment includes.',groups:[{type:'and',rules:[{f:'Total giving · current year',op:'≥',v:'$1.00'}]}]};
+    var nameEl=document.getElementById('seg-name');
+    if(nameEl){ nameEl.value=cfg.name; if(isNew) nameEl.placeholder='Untitled segment'; }
+    renderRules(cfg.groups);
+    var reads=document.getElementById('reads-as'); if(reads) reads.textContent='"'+cfg.reads+'"';
+    var mn=document.getElementById('match-num'); if(mn) mn.textContent=cfg.count;
+    window.__SEGCOUNT=cfg.count;
+    var sub=document.getElementById('rl-total'); if(sub) sub.textContent=cfg.count;
+
+    // rule add / delete (visual, same as the original prototype)
+    var root=document.getElementById('rules-root');
+    if(root && !root.__wired){ root.__wired=true;
+      root.addEventListener('click',function(e){
+        var del=e.target.closest('.x-btn[data-act="del"]'); if(del){ var row=del.closest('.rule-row'); if(row) row.remove(); return; }
+        var a=e.target.closest('.add-rule'); if(!a) return;
+        if(a.getAttribute('data-act')==='addrule'){ a.closest('div').insertAdjacentHTML('beforebegin',blankRow()); }
+        else { root.insertAdjacentHTML('beforeend', connector()+groupHtml({type:'or',rules:[{f:'Parish',op:'=',v:''}]},false)); }
+      });
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════════════
+     CSV Export · column picker + preview
+     ════════════════════════════════════════════════════════ -->
+<style id="xp-css">
+  #xp-ov{position:fixed;inset:0;background:rgba(14,30,53,.46);backdrop-filter:blur(2px);z-index:100020;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',sans-serif}
+  #xp-ov.show{display:flex}
+  .xp-card{background:#fff;border-radius:16px;width:100%;max-width:680px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(15,23,42,.28);overflow:hidden}
+  .xp-head{padding:20px 24px 14px;border-bottom:1px solid var(--border)}
+  .xp-head .t{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text)}
+  .xp-head .s{font-size:12.5px;color:var(--text-3);margin-top:4px}
+  .xp-body{padding:16px 24px;overflow-y:auto;flex:1}
+  .xp-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .xp-bar .lbl{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)}
+  .xp-bar .links{display:flex;gap:14px}
+  .xp-bar .links a{font-size:12px;font-weight:600;color:var(--blue);cursor:pointer}
+  .xp-grp{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:14px 0 8px}
+  .xp-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .xp-col{display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid var(--border);border-radius:9px;cursor:pointer;font-size:13px;color:var(--text);background:#fff;transition:.1s}
+  .xp-col:hover{border-color:#94A3B8}
+  .xp-col.on{border-color:var(--blue);background:var(--blue-pale)}
+  .xp-col input{width:15px;height:15px;accent-color:var(--blue);cursor:pointer}
+  .xp-col.on span{color:var(--blue);font-weight:600}
+  .xp-prev-h{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin:18px 0 8px}
+  .xp-prev-wrap{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .xp-prev-scroll{overflow-x:auto}
+  table.xp-prev{border-collapse:collapse;font-size:12px;white-space:nowrap;min-width:100%}
+  .xp-prev th{background:var(--surface);text-align:left;padding:7px 11px;font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--text-3);border-bottom:1px solid var(--border)}
+  .xp-prev td{padding:7px 11px;border-bottom:1px solid var(--border);color:var(--text-2)}
+  .xp-prev tr:last-child td{border-bottom:none}
+  .xp-empty{padding:16px;text-align:center;font-size:12.5px;color:var(--text-3)}
+  .xp-foot{padding:14px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .xp-count{font-size:12.5px;color:var(--text-2)}
+  .xp-count b{color:var(--text)}
+  .xp-actions{display:flex;gap:9px}
+  .xp-btn{font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;border-radius:9px;padding:9px 18px;border:1px solid transparent;cursor:pointer}
+  .xp-btn.ghost{background:#fff;border-color:var(--border);color:var(--text)}
+  .xp-btn.ghost:hover{border-color:#94A3B8}
+  .xp-btn.blue{background:var(--blue);color:#fff}.xp-btn.blue:hover{background:#1D4ED8}
+  .xp-btn[disabled]{opacity:.5;cursor:not-allowed}
+</style>
+<div id="xp-ov" onclick="if(event.target===this)closeExportModal()">
+  <div class="xp-card">
+    <div class="xp-head">
+      <div class="t">Export segment to CSV</div>
+      <div class="s">Choose the columns to include. The preview shows exactly what each row will contain.</div>
+    </div>
+    <div class="xp-body">
+      <div class="xp-bar">
+        <span class="lbl">Columns</span>
+        <div class="links"><a onclick="xpAll(true)">Select all</a><a onclick="xpAll(false)">Clear</a><a onclick="xpReset()">Reset to default</a></div>
+      </div>
+      <div id="xp-groups"></div>
+      <div class="xp-prev-h">Preview — first 2 of <span id="xp-prevtotal">47</span> donors</div>
+      <div class="xp-prev-wrap"><div class="xp-prev-scroll" id="xp-prev"></div></div>
+    </div>
+    <div class="xp-foot">
+      <div class="xp-count"><b id="xp-n">0</b> columns · <span id="xp-total">47</span> donors</div>
+      <div class="xp-actions">
+        <button class="xp-btn ghost" onclick="closeExportModal()">Cancel</button>
+        <button class="xp-btn blue" id="xp-go" onclick="xpExport()">Download CSV</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script id="xp-js">
+(function(){
+  // column catalogue + sample donor data (mirrors the live preview list)
+  var COLS=[
+    {k:'name',label:'Donor name',grp:'Identity',def:true},
+    {k:'email',label:'Email',grp:'Identity',def:true},
+    {k:'phone',label:'Phone',grp:'Identity',def:false},
+    {k:'address',label:'Mailing address',grp:'Identity',def:false},
+    {k:'parish',label:'Parish',grp:'Identity',def:true},
+    {k:'g2025',label:'2025 giving',grp:'Giving',def:true},
+    {k:'g2026',label:'2026 giving',grp:'Giving',def:false},
+    {k:'lifetime',label:'Lifetime giving',grp:'Giving',def:false},
+    {k:'lastDate',label:'Last gift date',grp:'Giving',def:true},
+    {k:'lastAmt',label:'Last gift amount',grp:'Giving',def:false},
+    {k:'recurring',label:'Recurring status',grp:'Giving',def:false},
+    {k:'pledge',label:'Pledge balance',grp:'Giving',def:false},
+    {k:'tags',label:'Tags',grp:'Insight',def:true},
+    {k:'ask',label:'Wealth ask range',grp:'Insight',def:false},
+    {k:'officer',label:'Gift officer',grp:'Insight',def:false}
+  ];
+  var ROWS=[
+    {name:"Eleanor Whitmore",email:"eleanor.whitmore@example.com",phone:"(518) 555-0142",address:"14 Maple Ave, Albany NY",parish:"St. Anthony",g2025:"$2,500",g2026:"$0",lifetime:"$14,200",lastDate:"2025-11-12",lastAmt:"$2,500",recurring:"No",pledge:"$0",tags:"Cathedral capital",ask:"$1,500–$3,000",officer:"David R."},
+    {name:"Fitzgerald Family",email:"fitzgerald@example.com",phone:"(518) 555-0199",address:"3 Cathedral Pl, Albany NY",parish:"St. Joseph's",g2025:"$10,000",g2026:"$0",lifetime:"$58,000",lastDate:"2025-12-20",lastAmt:"$10,000",recurring:"No",pledge:"$25,000",tags:"Cathedral capital; Major donor",ask:"$5,000–$10,000",officer:"Karen M."},
+    {name:"Catherine Romano",email:"c.romano@example.com",phone:"(518) 555-0177",address:"88 Mary St, Albany NY",parish:"St. Mary's",g2025:"$500",g2026:"$0",lifetime:"$3,100",lastDate:"2025-06-01",lastAmt:"$500",recurring:"Yes",pledge:"$0",tags:"Cathedral capital",ask:"$1,000–$2,000",officer:"David R."},
+    {name:"David Chen",email:"d.chen@example.com",phone:"(518) 555-0163",address:"21 Joseph Rd, Albany NY",parish:"St. Joseph's",g2025:"$1,200",g2026:"$0",lifetime:"$6,400",lastDate:"2025-09-15",lastAmt:"$1,200",recurring:"Yes",pledge:"$0",tags:"Cathedral capital",ask:"$1,500–$3,000",officer:"David R."}
+  ];
+  function selectedKeys(){ return [].slice.call(document.querySelectorAll('#xp-groups input:checked')).map(function(i){return i.getAttribute('data-k');}); }
+  function selectedCols(){ var s=selectedKeys(); return COLS.filter(function(c){return s.indexOf(c.k)>-1;}); }
+  function renderGroups(setDefault){
+    var grps=['Identity','Giving','Insight'], html='';
+    grps.forEach(function(g){
+      html+='<div class="xp-grp">'+g+'</div><div class="xp-cols">';
+      COLS.filter(function(c){return c.grp===g;}).forEach(function(c){
+        var on = setDefault ? c.def : document.querySelector('#xp-groups input[data-k="'+c.k+'"]') ? document.querySelector('#xp-groups input[data-k="'+c.k+'"]').checked : c.def;
+        html+='<label class="xp-col'+(on?' on':'')+'"><input type="checkbox" data-k="'+c.k+'"'+(on?' checked':'')+'><span>'+c.label+'</span></label>';
+      });
+      html+='</div>';
+    });
+    document.getElementById('xp-groups').innerHTML=html;
+    document.querySelectorAll('#xp-groups input').forEach(function(i){ i.addEventListener('change',sync); });
+    sync();
+  }
+  function sync(){
+    document.querySelectorAll('#xp-groups .xp-col').forEach(function(l){ var inp=l.querySelector('input'); l.classList.toggle('on',inp.checked); });
+    var cols=selectedCols();
+    document.getElementById('xp-n').textContent=cols.length;
+    var go=document.getElementById('xp-go'); go.disabled=cols.length===0;
+    // preview
+    var prev=document.getElementById('xp-prev');
+    if(!cols.length){ prev.innerHTML='<div class="xp-empty">Select at least one column to preview the export.</div>'; return; }
+    var h='<table class="xp-prev"><thead><tr>'+cols.map(function(c){return '<th>'+c.label+'</th>';}).join('')+'</tr></thead><tbody>';
+    ROWS.slice(0,2).forEach(function(r){ h+='<tr>'+cols.map(function(c){return '<td>'+(r[c.k]||'')+'</td>';}).join('')+'</tr>'; });
+    h+='</tbody></table>';
+    prev.innerHTML=h;
+  }
+  window.openExportModal=function(){ var n=window.__SEGCOUNT||47; var a=document.getElementById('xp-total'),b=document.getElementById('xp-prevtotal'); if(a)a.textContent=n; if(b)b.textContent=n; renderGroups(true); document.getElementById('xp-ov').classList.add('show'); };
+  window.closeExportModal=function(){ document.getElementById('xp-ov').classList.remove('show'); };
+  window.xpAll=function(on){ document.querySelectorAll('#xp-groups input').forEach(function(i){ i.checked=on; }); sync(); };
+  window.xpReset=function(){ renderGroups(true); };
+  window.xpExport=function(){
+    var cols=selectedCols(); if(!cols.length) return;
+    var esc=function(v){ v=String(v==null?'':v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+    var lines=[cols.map(function(c){return esc(c.label);}).join(',')];
+    ROWS.forEach(function(r){ lines.push(cols.map(function(c){return esc(r[c.k]);}).join(',')); });
+    var blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'});
+    var url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url; a.download='segment-export.csv'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},800);
+    closeExportModal();
+    var t=document.getElementById('atlas-rescue-toast');
+    if(t){ t.querySelector('.msg').textContent='Exported · '+(window.__SEGCOUNT||47)+' donors · '+cols.length+' columns · CSV downloaded'; t.classList.add('show'); clearTimeout(t._x); t._x=setTimeout(function(){t.classList.remove('show');},2800); }
+  };
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════════════
+     Email recipient list · preview + select before compose
+     ════════════════════════════════════════════════════════ -->
+<style id="rl-css">
+  #rl-ov{position:fixed;inset:0;background:rgba(14,30,53,.46);backdrop-filter:blur(2px);z-index:100020;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',sans-serif}
+  #rl-ov.show{display:flex}
+  .rl-card{background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(15,23,42,.28);overflow:hidden}
+  .rl-head{padding:20px 24px 14px;border-bottom:1px solid var(--border)}
+  .rl-head .t{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text)}
+  .rl-head .s{font-size:12.5px;color:var(--text-3);margin-top:4px}
+  .rl-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border)}
+  .rl-bar .lbl{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)}
+  .rl-bar .links{display:flex;gap:14px}
+  .rl-bar .links a{font-size:12px;font-weight:600;color:var(--blue);cursor:pointer}
+  .rl-body{overflow-y:auto;flex:1}
+  .rl-row{display:flex;align-items:center;gap:12px;padding:11px 24px;border-bottom:1px solid var(--border);cursor:pointer}
+  .rl-row:hover{background:var(--surface)}
+  .rl-row input{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
+  .rl-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0}
+  .rl-info{min-width:0;flex:1}
+  .rl-nm{font-size:13.5px;font-weight:600;color:var(--text)}
+  .rl-sub{font-size:11.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rl-more{font-size:13px;color:var(--text-2)}
+  .rl-foot{padding:14px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .rl-count{font-size:12.5px;color:var(--text-2)}
+  .rl-count b{color:var(--text)}
+  .rl-actions{display:flex;gap:9px}
+  .rl-search{flex:1;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 11px;margin-right:14px}
+  .rl-search:focus{outline:none;border-color:var(--blue);background:#fff}
+  .rl-none{padding:26px;text-align:center;font-size:13px;color:var(--text-3)}
+</style>
+<div id="rl-ov" onclick="if(event.target===this)closeRecipientModal()">
+  <div class="rl-card">
+    <div class="rl-head">
+      <div class="t">Email recipient list</div>
+      <div class="s">Review who will receive this — deselect anyone before you compose.</div>
+    </div>
+    <div class="rl-bar">
+      <input id="rl-search" class="rl-search" type="search" placeholder="Search recipients by name, email or parish…" oninput="rlRender()">
+      <div class="links"><a onclick="rlAll(true)">Select all</a><a onclick="rlAll(false)">Deselect all</a></div>
+    </div>
+    <div class="rl-body" id="rl-body"></div>
+    <div class="rl-foot">
+      <div class="rl-count"><b id="rl-n">0</b> of <span id="rl-total">47</span> selected</div>
+      <div class="rl-actions">
+        <button class="xp-btn ghost" onclick="closeRecipientModal()">Cancel</button>
+        <button class="xp-btn blue" id="rl-go" onclick="rlCompose()">Compose email →</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script id="rl-js">
+(function(){
+  var COLORS=['#BE185D','#7C3AED','#15803D','#2563EB','#D97706','#0E1E35'];
+  var PARISH=["St. Mary's","St. Joseph's","St. Anthony","St. Catherine's","Cathedral","St. Patrick's","Holy Family","St. Augustine"];
+  var FIRST=['Eleanor','Fitzgerald','Catherine','David','Margaret','James','Patricia','Brian','Anne','Thomas','Maria','Robert','Helen','Daniel','Susan','Michael','Joan','Peter','Grace','Paul','Rita','Frank','Dorothy','Edward','Clara','George','Agnes','Henry','Rose','Albert','Lucy','Charles','Ruth','Vincent','Marie','Joseph','Teresa','Francis','Eileen','John','Bernadette','Stephen','Monica','Philip','Veronica','Martin','Sheila'];
+  var LAST=['Whitmore','Fitzgerald','Romano','Chen','O\'Brien','Sullivan','Mathias','Walsh','Reilly','Donnelly','Murphy','Kelly','Byrne','Ryan','Gallagher','Doyle','Brennan','Lynch','Carroll','Nolan','Healy','Flynn','Boyle','Casey','Hayes','Quinn','Moran','Dunne','Kennedy','Burke','Cahill','Daly','Fagan','Hogan','Joyce','Keane','Lowry','Madden','Nugent','Power','Roche','Tobin','Whelan','Barry','Conway','Egan','Foley'];
+  // Build recipients for the active segment (deterministic so the demo is stable)
+  var RCP=[], selected={};
+  function buildRecipients(){
+    var N=window.__SEGCOUNT||47; RCP=[]; selected={};
+    for(var i=0;i<N;i++){
+      var fn=FIRST[i%FIRST.length], ln=LAST[(i*7+3)%LAST.length];
+      var name=fn+' '+ln;
+      var email=(fn[0]+'.'+ln.replace(/[^a-z]/gi,'')).toLowerCase()+(i>FIRST.length?(i):'')+'@example.com';
+      RCP.push({id:i,name:name,email:email,parish:PARISH[i%PARISH.length],c:COLORS[i%COLORS.length]});
+      selected[i]=true;
+    }
+  }
+  function initials(n){ var p=n.split(' '); return ((p[0]||'')[0]||'')+((p[1]||'')[0]||''); }
+  function selCount(){ return RCP.filter(function(r){return selected[r.id];}).length; }
+  function visible(){ var q=(document.getElementById('rl-search').value||'').toLowerCase().trim();
+    if(!q) return RCP.slice();
+    return RCP.filter(function(r){ return (r.name+' '+r.email+' '+r.parish).toLowerCase().indexOf(q)>-1; }); }
+  function syncFoot(){
+    var t=selCount();
+    document.getElementById('rl-n').textContent=t;
+    var go=document.getElementById('rl-go');
+    go.disabled=t===0; go.style.opacity=t===0?'.5':''; go.style.cursor=t===0?'not-allowed':'pointer';
+    go.textContent='Compose email · '+t+' →';
+  }
+  window.rlRender=function(){
+    var vis=visible(), h='';
+    if(!vis.length){ h='<div class="rl-none">No recipients match your search.</div>'; }
+    else vis.forEach(function(r){
+      h+='<label class="rl-row"><input type="checkbox" data-id="'+r.id+'"'+(selected[r.id]?' checked':'')+' onchange="rlToggle('+r.id+',this.checked)">'+
+         '<span class="rl-av" style="background:'+r.c+'">'+initials(r.name)+'</span>'+
+         '<span class="rl-info"><span class="rl-nm">'+r.name+'</span><div class="rl-sub">'+r.email+' · '+r.parish+'</div></span></label>';
+    });
+    document.getElementById('rl-body').innerHTML=h;
+    syncFoot();
+  };
+  window.rlToggle=function(id,on){ selected[id]=on; syncFoot(); };
+  window.rlAll=function(on){ visible().forEach(function(r){ selected[r.id]=on; }); rlRender(); };
+  window.openRecipientModal=function(){ buildRecipients(); var s=document.getElementById('rl-search'); if(s) s.value=''; var tot=document.getElementById('rl-total'); if(tot) tot.textContent=RCP.length; rlRender(); document.getElementById('rl-ov').classList.add('show'); };
+  window.closeRecipientModal=function(){ document.getElementById('rl-ov').classList.remove('show'); };
+  window.rlCompose=function(){ if(selCount()===0) return; window.location='atlas-email-compose.html'; };
+})();
+</script>
 
 <!-- ════════════════════════════════════════════════════════
      Atlas Dead-CTA Rescue · v1

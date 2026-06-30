@@ -1447,43 +1447,74 @@ body {
     + '</div>';
 
   var ESTATE_HTML =
-    '<div class="info-bar purple"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7L8 2.5 13.5 7M4 6.5V13h8V6.5"/></svg><div>Estate / bequest — records donor’s planned gift intention · no payment schedule</div></div>'
-    + '<div class="info-bar purple"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5M8 11v.4"/></svg><div>No payment schedule is generated for estate pledges. <code>expected_installments[] = []</code> on create — the pledge balance stays at $0 until the estate distributes and a Pledge Payment is recorded. Lapse rule is not applicable. The fields below are saved as bequest metadata on the pledge — feed the planned-giving pipeline and reports.</div></div>'
-    // ── Bequest status (planned-giving lifecycle) ──
-    + '<span class="lbl mt-12" style="margin-top:14px;display:block">Bequest status</span>'
-    + '<div class="freq-grid" style="grid-template-columns:repeat(5,1fr)">'
-      + '<div class="freq-pill on" style="white-space:nowrap">Intention expressed</div>'
-      + '<div class="freq-pill" style="white-space:nowrap">Documented</div>'
-      + '<div class="freq-pill" style="white-space:nowrap">Confirmed</div>'
-      + '<div class="freq-pill" style="white-space:nowrap">In probate</div>'
-      + '<div class="freq-pill" style="white-space:nowrap">Realized</div>'
+    '<div class="eb-root">'
+    + '<div class="eb-banner"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5B4FB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+      + '<div>No payment schedule is generated for estate pledges. <code>expected_installments[] = []</code> on create — the pledge balance stays at $0 until the estate distributes and a Pledge Payment is recorded. Lapse rule is not applicable. The fields below are saved as bequest metadata on the pledge — feed the planned-giving pipeline and reports.</div></div>'
+    // Bequest status
+    + '<div class="eb-field"><span class="eb-lab">Bequest status</span><div class="eb-seg" id="eb-statusSeg">'
+      + '<button data-v="intention">Intention expressed</button>'
+      + '<button data-v="documented">Documented</button>'
+      + '<button data-v="confirmed">Confirmed</button>'
+      + '<button data-v="probate">In probate</button>'
+      + '<button data-v="realized" class="on">Realized</button>'
+    + '</div></div>'
+    + '<div class="eb-warn" id="eb-realizedWarn"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+      + '<span>A realized bequest should have documentation on file and a recorded realized amount. Add both before saving, or move status back to <b>In probate</b>.</span></div>'
+    // type + documentation
+    + '<div class="eb-grid eb-g2">'
+      + '<div class="eb-field"><span class="eb-lab">Bequest type</span><select><option>Will</option><option>Charitable remainder trust</option><option>Charitable lead trust</option><option>Charitable gift annuity</option><option>Retirement account (IRA) beneficiary</option><option>Life insurance beneficiary</option><option>Donor-advised fund successor</option><option>Real estate / property</option><option>Other</option></select></div>'
+      + '<div class="eb-field"><span class="eb-lab">Documentation on file</span><select id="eb-docSelect"><option>None yet</option><option>Verbal intention only</option><option>Signed intention form</option><option>Copy of will / trust language</option><option>Executed legal document</option></select></div>'
     + '</div>'
-    // ── Type + documentation ──
-    + '<div class="row2 mt-12" style="margin-top:14px">'
-      + '<div><span class="lbl">Bequest type</span><select class="fld"><option selected>Will</option><option>Living trust</option><option>Retirement plan beneficiary</option><option>Life insurance beneficiary</option><option>Charitable remainder trust</option><option>Charitable gift annuity</option><option>Real estate</option><option>Other</option></select></div>'
-      + '<div><span class="lbl">Documentation on file</span><select class="fld"><option selected>None yet</option><option>Verbal intention</option><option>Letter of intent</option><option>Executed will / trust</option><option>Beneficiary designation form</option></select></div>'
+    // proposed: revocability + structure + intention date
+    + '<div class="eb-grid eb-g3">'
+      + '<div class="eb-field eb-prop"><span class="eb-lab">Revocability</span><div class="eb-seg compact"><button class="on">Revocable</button><button>Irrevocable</button></div><div class="eb-hint">Drives whether finance can recognize the gift and whether it counts in forecasts.</div></div>'
+      + '<div class="eb-field eb-prop"><span class="eb-lab">Bequest structure</span><select><option>Specific dollar amount (pecuniary)</option><option>Percentage of residuary estate</option><option>Specific asset</option><option>Contingent / remainder</option></select></div>'
+      + '<div class="eb-field eb-prop"><span class="eb-lab">Intention date</span><input type="date"><div class="eb-hint">When the intention was first expressed — used for pipeline aging.</div></div>'
     + '</div>'
-    // ── Expected value range (estates are uncertain) ──
-    + '<div class="row3 mt-12" style="margin-top:14px">'
-      + '<div><span class="lbl">Estimated value — low</span><input class="fld" placeholder="$ optional"></div>'
-      + '<div><span class="lbl">Estimated value — high</span><input class="fld" placeholder="$ optional"></div>'
-      + '<div><span class="lbl">Confidence</span><select class="fld"><option selected>Unconfirmed estimate</option><option>Donor-stated</option><option>Documented amount</option></select></div>'
+    // estimated value + confidence
+    + '<div class="eb-grid eb-g3">'
+      + '<div class="eb-field"><span class="eb-lab">Estimated value — low</span><div class="eb-dollar"><span>$</span><input type="number" placeholder="optional"></div></div>'
+      + '<div class="eb-field"><span class="eb-lab">Estimated value — high</span><div class="eb-dollar"><span>$</span><input type="number" placeholder="optional"></div></div>'
+      + '<div class="eb-field"><span class="eb-lab">Confidence</span><select><option>Unconfirmed estimate</option><option>Donor-stated</option><option>Documented in will / trust</option><option>Confirmed by executor</option></select></div>'
     + '</div>'
-    // ── Attorney / executor contact ──
-    + '<span class="lbl mt-12" style="margin-top:16px;display:block">Attorney / executor contact <span style="color:var(--text-3,#64748B);font-weight:400">(optional)</span></span>'
-    + '<div class="row3" style="margin-top:6px">'
-      + '<div><span class="lbl">Name</span><input class="fld" placeholder="e.g. Margaret Doyle, Esq."></div>'
-      + '<div><span class="lbl">Firm</span><input class="fld" placeholder="e.g. Doyle & Park LLP"></div>'
-      + '<div><span class="lbl">Email or phone</span><input class="fld" placeholder="contact@firm.com"></div>'
+    // realized block
+    + '<div class="eb-realized eb-prop" id="eb-realizedBlock"><div class="eb-grp-lab">Realized amount <span class="opt">— recorded when the estate distributes</span></div>'
+      + '<div class="eb-grid eb-g2">'
+        + '<div class="eb-field"><span class="eb-lab">Gross estate value</span><div class="eb-dollar"><span>$</span><input type="number" placeholder="0.00"></div></div>'
+        + '<div class="eb-field"><span class="eb-lab">Net to organization</span><div class="eb-dollar"><span>$</span><input type="number" placeholder="0.00"></div></div>'
+      + '</div></div>'
+    // restriction / purpose
+    + '<div class="eb-grid eb-g2">'
+      + '<div class="eb-field eb-prop"><span class="eb-lab">Designation per bequest language</span><div class="eb-seg compact"><button class="on">Unrestricted</button><button>Restricted</button></div></div>'
+      + '<div class="eb-field eb-prop"><span class="eb-lab">Purpose / restriction note</span><input type="text" placeholder="e.g. as stated in will — for cathedral restoration only"></div>'
     + '</div>'
-    // ── Timeframe + stewardship ──
-    + '<div class="row2 mt-12" style="margin-top:14px">'
-      + '<div><span class="lbl">Expected realization</span><select class="fld"><option selected>Unknown / on passing</option><option>Within 1 year</option><option>1–3 years</option><option>3–5 years</option><option>5+ years</option></select></div>'
-      + '<div><span class="lbl">Pledge reminder</span><select class="fld"><option selected>None</option><option>Annual stewardship touch</option></select></div>'
+    // attorney / executor
+    + '<div class="eb-grp"><div class="eb-grp-lab">Attorney / executor contact <span class="opt">(optional)</span></div><div class="eb-grid eb-g3">'
+      + '<div class="eb-field" style="margin-bottom:0"><span class="eb-lab">Name</span><input type="text" placeholder="e.g. Margaret Doyle, Esq."></div>'
+      + '<div class="eb-field" style="margin-bottom:0"><span class="eb-lab">Firm</span><input type="text" placeholder="e.g. Doyle &amp; Park LLP"></div>'
+      + '<div class="eb-field" style="margin-bottom:0"><span class="eb-lab">Email or phone</span><input type="text" placeholder="contact@firm.com"></div>'
+    + '</div></div>'
+    // expected realization + pledge reminder
+    + '<div class="eb-grid eb-g2" style="margin-top:24px">'
+      + '<div class="eb-field"><span class="eb-lab">Expected realization</span><select><option>Unknown / on passing</option><option>Estimated (actuarial)</option><option>Within 1 year</option><option>1–5 years</option><option>5+ years</option></select></div>'
+      + '<div class="eb-field"><span class="eb-lab">Pledge reminder</span><select><option>None</option><option>Annual stewardship touchpoint</option><option>Biennial review</option></select></div>'
     + '</div>'
-    + '<div class="row2 mt-12" style="margin-top:14px">'
-      + '<div><span class="lbl">Lapse rule</span><select class="fld"><option selected>Manual review only — no auto-lapse</option></select></div>'
-      + '<div><span class="lbl">Assigned officer</span><select class="fld"><option selected>Sarah Reynolds — Planned Giving</option><option>Daniel Cho — Major Gifts</option><option>Unassigned</option></select></div>'
+    // lapse rule + assigned officer
+    + '<div class="eb-grid eb-g2">'
+      + '<div class="eb-field"><span class="eb-lab">Lapse rule</span><select><option>Manual review only — no auto-lapse</option></select></div>'
+      + '<div class="eb-field"><span class="eb-lab">Assigned officer</span><select><option>Sarah Reynolds — Planned Giving</option><option>Bridget McCarthy — Major Gifts</option></select></div>'
+    + '</div>'
+    // recognition + legacy society
+    + '<div class="eb-grp eb-prop"><div class="eb-grp-lab">Recognition &amp; legacy society</div><div class="eb-grid eb-g3">'
+      + '<div class="eb-field" style="margin-bottom:0"><span class="eb-lab">Legacy society</span><select><option>Not enrolled</option><option>Invited</option><option>Member — Heritage Society</option></select></div>'
+      + '<div class="eb-field" style="margin-bottom:0"><span class="eb-lab">Recognition name</span><input type="text" placeholder="e.g. The O\'Brien Family"></div>'
+      + '<div class="eb-field" style="margin-bottom:0"><span class="eb-lab">Anonymity</span><div class="eb-switchrow"><div class="t">Anonymous gift<small>Exclude from donor listings</small></div><span class="eb-switch off" id="eb-anonSwitch" role="switch" aria-checked="false"></span></div></div>'
+    + '</div></div>'
+    // tribute + contingency
+    + '<div class="eb-grid eb-g2 eb-prop" style="margin-top:24px">'
+      + '<div class="eb-field" style="margin-bottom:0"><span class="eb-lab">Tribute / in memory of <span class="opt">(optional)</span></span><input type="text" placeholder="e.g. In memory of John O\'Brien"></div>'
+      + '<div class="eb-field" style="margin-bottom:0"><span class="eb-lab">Contingency conditions <span class="opt">(optional)</span></span><input type="text" placeholder="e.g. only if spouse predeceases"></div>'
+    + '</div>'
     + '</div>';
 
   // ── Legal entity → Fund filtering ──────────────────────────
@@ -1521,7 +1552,26 @@ body {
     else if (t === 'Estate / bequest') { sec3Title.textContent = 'Estate & bequest details'; sec3Body.innerHTML = ESTATE_HTML; }
     else { sec3Title.textContent = 'Schedule'; sec3Body.innerHTML = SCHEDULE_HTML; }
     bindPills();
+    if (t === 'Estate / bequest') bindEstate();
   };
+  function bindEstate(){
+    var root = sec3Body.querySelector('.eb-root'); if(!root) return;
+    var doc = root.querySelector('#eb-docSelect');
+    function ebStatus(v){
+      var block = root.querySelector('#eb-realizedBlock'), warn = root.querySelector('#eb-realizedWarn');
+      var active = (v === 'probate' || v === 'realized');
+      if(block) block.classList.toggle('dim', !active);
+      var inconsistent = (v === 'realized' && doc && doc.value === 'None yet');
+      if(warn) warn.classList.toggle('show', inconsistent);
+    }
+    root.querySelectorAll('.eb-seg').forEach(function(seg){
+      seg.onclick = function(e){ var b = e.target.closest('button'); if(!b) return; seg.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); }); b.classList.add('on'); if(seg.id === 'eb-statusSeg') ebStatus(b.dataset.v); };
+    });
+    var anon = root.querySelector('#eb-anonSwitch');
+    if(anon) anon.onclick = function(){ var on = anon.classList.toggle('off') === false; anon.setAttribute('aria-checked', String(on)); };
+    if(doc) doc.onchange = function(){ var cur = root.querySelector('#eb-statusSeg button.on'); if(cur) ebStatus(cur.dataset.v); };
+    ebStatus('realized');
+  }
   function bindPills(){
     sec3Body.querySelectorAll('.freq-pill').forEach(function(p){
       p.onclick = function(){
@@ -1597,6 +1647,51 @@ body {
   #ax-ov .ax-primary:hover{background:#1D4ED8}
   #ax-ov .ax-gold{background:#B45309;color:#fff}
   #ax-ov .ax-gold:hover{background:#92400E}
+</style>
+<style id="eb-css">
+  .eb-root{--eb-blue:#2563EB;--eb-blue-soft:#EFF6FF;--eb-border:#E4E8EF;--eb-border-strong:#D5DBE5;--eb-text:#1A2332;--eb-muted:#6B7686;--eb-label:#8A94A6;--eb-prop-bg:#EDE9FE;--eb-prop-text:#7C3AED;--eb-amber-bg:#FEF3C7;--eb-amber-text:#92400E;--eb-lav-bg:#F0ECFB;--eb-lav-text:#5B4FB0;--eb-lav-code:#5340A8}
+  .eb-legend{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+  .eb-tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--eb-muted)}
+  .eb-dot{width:9px;height:9px;border-radius:50%;background:var(--eb-prop-text);display:inline-block}
+  .eb-switchlbl{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--eb-text);cursor:pointer;user-select:none}
+  .eb-switch{position:relative;width:38px;height:22px;border-radius:99px;background:var(--eb-blue);transition:background .15s;flex:none;cursor:pointer}
+  .eb-switch::after{content:"";position:absolute;top:2px;left:18px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .eb-switch.off{background:#C7CEDA}
+  .eb-switch.off::after{left:2px}
+  .eb-banner{background:var(--eb-lav-bg);border-radius:14px;padding:16px 20px;display:flex;gap:14px;font-size:14px;color:var(--eb-lav-text);margin-bottom:22px;line-height:1.55}
+  .eb-banner svg{flex:none;margin-top:2px}
+  .eb-banner code{font-family:ui-monospace,Menlo,Consolas,monospace;background:rgba(91,79,176,.13);color:var(--eb-lav-code);padding:1px 6px;border-radius:6px;font-size:12.5px}
+  .eb-field{margin-bottom:22px}
+  .eb-lab{display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--eb-label);margin-bottom:8px}
+  .eb-lab .opt{color:#B3BBC8;font-weight:600;text-transform:none;letter-spacing:0}
+  .eb-hint{font-size:12px;color:var(--eb-muted);margin-top:7px;line-height:1.4}
+  .eb-grid{display:grid;gap:22px 26px}
+  .eb-g2{grid-template-columns:1fr 1fr}
+  .eb-g3{grid-template-columns:1fr 1fr 1fr}
+  @media(max-width:720px){.eb-g2,.eb-g3{grid-template-columns:1fr}}
+  .eb-root input[type=text],.eb-root input[type=date],.eb-root input[type=number],.eb-root select,.eb-root textarea{width:100%;font:inherit;font-size:14.5px;color:var(--eb-text);background:#fff;border:1px solid var(--eb-border-strong);border-radius:10px;padding:12px 14px;outline:none;transition:border-color .12s,box-shadow .12s}
+  .eb-root input::placeholder{color:#AEB6C2}
+  .eb-root input:focus,.eb-root select:focus,.eb-root textarea:focus{border-color:var(--eb-blue);box-shadow:0 0 0 3px var(--eb-blue-soft)}
+  .eb-root select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7686' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;cursor:pointer}
+  .eb-seg{display:flex;gap:10px;flex-wrap:wrap}
+  .eb-seg button{flex:1 1 auto;min-width:120px;font:inherit;font-size:14px;font-weight:500;color:var(--eb-text);background:#fff;border:1px solid var(--eb-border-strong);border-radius:10px;padding:13px 10px;cursor:pointer;transition:all .12s}
+  .eb-seg button:hover{border-color:#B9C2D2}
+  .eb-seg button.on{border-color:var(--eb-blue);background:var(--eb-blue-soft);color:var(--eb-blue);font-weight:600;box-shadow:0 0 0 1px var(--eb-blue) inset}
+  .eb-seg.compact button{min-width:0;flex:1 1 0}
+  .eb-dollar{position:relative}
+  .eb-dollar span{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9098A6;font-size:14.5px}
+  .eb-root .eb-dollar input{padding-left:30px}
+  .eb-grp{border-top:1px dashed var(--eb-border);padding-top:22px;margin-top:4px}
+  .eb-grp-lab{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--eb-text);margin-bottom:16px}
+  .eb-grp-lab .opt{color:#B3BBC8;font-weight:600;text-transform:none;letter-spacing:0}
+  .eb-realized{background:#FAFBFD;border:1px solid var(--eb-border);border-radius:14px;padding:20px 22px 4px;margin-bottom:22px}
+  .eb-realized.dim{opacity:.5}
+  .eb-warn{display:none;align-items:center;gap:10px;background:var(--eb-amber-bg);color:var(--eb-amber-text);border-radius:10px;padding:11px 14px;font-size:13px;margin:-6px 0 22px;line-height:1.4}
+  .eb-warn.show{display:flex}
+  .eb-warn svg{flex:none}
+  .eb-switchrow{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid var(--eb-border-strong);border-radius:10px;padding:12px 14px}
+  .eb-switchrow .t{font-size:14px}
+  .eb-switchrow .t small{display:block;color:var(--eb-muted);font-size:12.5px;margin-top:2px}
 </style>
 <div id="ax-ov"><div class="ax-box">
   <div class="ax-bd"><div class="ax-ic" id="ax-ic"></div><div><h3 class="ax-tt" id="ax-tt"></h3><p class="ax-msg" id="ax-msg"></p></div></div>
