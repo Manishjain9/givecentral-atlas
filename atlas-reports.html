@@ -649,6 +649,7 @@ body {
       <div class="page-sub">Pre-built standard reports and saved views your team uses every week.</div>
     </div>
     <div class="flex gap-8">
+      <a class="btn btn-ghost" href="#saved" onclick="if(window.sbmShow){sbmShow();return false;}"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2l1.4 4.2L13 6.6l-3.4 2.8.9 4.4L7 11.6 3.5 13.8l.9-4.4L1 6.6l4.6-.4z"/></svg> Saved views</a>
       <a class="btn btn-ghost" href="atlas-report-queue-scheduler.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 8.5h5"/></svg> Queue &amp; schedule</a>
       <button class="btn btn-ghost"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.5M7 9v.5"/></svg> Schedule a recurring report</button>
       <button class="btn btn-primary"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg> Build a custom report</button>
@@ -696,7 +697,7 @@ body {
       <h4 style="margin-top:14px">Mine</h4>
       <div class="cat-row">
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2l1.5 3 3.5.5-2.5 2.5.5 3.5L7 9.5 4 11.5l.5-3.5L2 5.5 5.5 5z"/></svg>
-        Saved by me <span class="ct">5</span>
+        Saved by me <span class="ct" id="sbm-count">5</span>
       </div>
       <div class="cat-row">
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.5M7 9v.5"/></svg>
@@ -969,57 +970,17 @@ body {
       </div>
 
       <!-- Saved views -->
-      <div class="r-section">
+      <div class="r-section" id="saved">
         <h3>Saved by me</h3>
-        <p class="desc">Reports you've configured with custom filters or columns.</p>
-        <div class="r-grid">
-
-          
-    <a class="r-card" href="atlas-report-gifts-by-date.html">
-      <div class="head">
-        <div class="ico blue"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2l1.5 3 3.5.5-2.5 2.5.5 3.5L7 9.5 4 11.5l.5-3.5L2 5.5 5.5 5z"/></svg></div>
-        <div class="nm">Cathedral campaign — major donors only</div>
-        <div class="right"><span class="tag green">Scheduled</span></div>
-      </div>
-      <div class="desc">Gifts &gt; $5,000 to Cathedral Capital, with soft credits and pledge balance.</div>
-      <div class="meta">
-        <span>Last run: <strong style="color:var(--text-2)">Today, 9:02 AM</strong></span>
-        <span class="dot"></span>
-        <span>Weekly Mon 8 AM</span>
-      </div>
-    </a>
-
-          
-    <a class="r-card" href="atlas-report-constituent-giving.html">
-      <div class="head">
-        <div class="ico rose"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 7l4-2 5 4 2-1"/><circle cx="11" cy="3" r="1.5"/></svg></div>
-        <div class="nm">My LYBUNT outreach list</div>
-        <div class="right"><span class="tag green">Scheduled</span></div>
-      </div>
-      <div class="desc">Donors who gave in 2025 but not 2026 — within my portfolio. For weekly outreach.</div>
-      <div class="meta">
-        <span>Last run: <strong style="color:var(--text-2)">May 1, 2026</strong></span>
-        <span class="dot"></span>
-        <span>Weekly Fri 5 PM</span>
-      </div>
-    </a>
-
-          
-    <a class="r-card" href="atlas-report-pledge-balance.html">
-      <div class="head">
-        <div class="ico amber"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.5M7 9v.5"/></svg></div>
-        <div class="nm">Bridget&#39;s queue — pledges due 30d</div>
-        <div class="right"><span class="tag green">Scheduled</span></div>
-      </div>
-      <div class="desc">Pledges Bridget owns with instalments due in next 30 days.</div>
-      <div class="meta">
-        <span>Last run: <strong style="color:var(--text-2)">Today, 6:00 AM</strong></span>
-        <span class="dot"></span>
-        <span>Daily 6 AM</span>
-      </div>
-    </a>
-
+        <p class="desc">Reports you've configured with custom filters or columns. Open one to run it against live data.</p>
+        <div class="sbm-filter" id="sbm-filter">
+          <button class="on" data-f="all">All</button>
+          <button data-f="me">Just me</button>
+          <button data-f="team">My team</button>
+          <button data-f="all-org">Everyone</button>
         </div>
+        <div class="r-grid" id="sbm-grid"></div>
+        <div class="sbm-empty" id="sbm-empty" style="display:none">No saved views yet. Open a report, set your filters, and choose <b>Save as view</b>.</div>
       </div>
 
       <!-- Phase 2 / Phase 3 placeholders -->
@@ -1816,6 +1777,76 @@ body {
   window.alert=function(m){ atlasAlert('Atlas', String(m==null?'':m)); };
   var ov=el('ax-ov'); if(ov) ov.addEventListener('click',function(e){ if(e.target===this) close(); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
+</script>
+
+<!-- ════ Saved by me · single home for saved views ════ -->
+<style>
+  #sbm-filter{display:inline-flex;background:var(--surface-2,#F1F5F9);border-radius:9px;padding:3px;margin:0 0 16px}
+  #sbm-filter button{font-family:inherit;font-size:12.5px;font-weight:600;border:0;background:transparent;color:var(--text-3,#64748B);padding:6px 13px;border-radius:7px;cursor:pointer}
+  #sbm-filter button.on{background:#fff;color:var(--ink,#0F172A);box-shadow:0 1px 2px rgba(15,23,42,.08)}
+  #sbm-grid .r-card{cursor:default}
+  .sbm-acts{display:flex;gap:8px;margin-top:13px;padding-top:13px;border-top:1px solid var(--border-soft,#EEF1F6)}
+  .sbm-acts a,.sbm-acts button{font-family:inherit;font-size:12.5px;font-weight:600;border-radius:8px;padding:7px 12px;border:1px solid var(--border,#E5E9F0);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .sbm-acts .sbm-open{background:var(--blue,#2563EB);color:#fff;border-color:var(--blue,#2563EB)}
+  .sbm-acts .sbm-open:hover{background:#1D4ED8}
+  .sbm-acts .sbm-open svg{width:13px;height:13px}
+  .sbm-acts .sbm-remove{background:#fff;color:var(--text-2,#475569)}
+  .sbm-acts .sbm-remove:hover{border-color:var(--rose,#BE185D);color:var(--rose,#BE185D)}
+  .sbm-empty{padding:28px;border:1px dashed var(--border,#E5E9F0);border-radius:12px;text-align:center;color:var(--text-3,#64748B);font-size:13.5px}
+</style>
+<script>
+(function(){
+  var KEY='atlas-saved-views';
+  var SEED=[
+    {id:'seed1',name:'Major donors $50k+',report:'Constituent giving summary',url:'atlas-report-constituent-giving.html',visibility:'My team',filters:['Capacity: $50k+','Sort: Lifetime ↓'],date:'Apr 2, 2026'},
+    {id:'seed2',name:'Constituent giving — April 2026',report:'Constituent giving summary',url:'atlas-report-constituent-giving.html',visibility:'Just me',filters:['Sort: Lifetime ↓'],date:'Apr 12, 2026'},
+    {id:'seed3',name:'Gifts by fund — YTD',report:'Gifts by fund',url:'atlas-report-gifts-by-fund.html',visibility:'Everyone in the diocese',filters:['This year'],date:'Mar 28, 2026'}
+  ];
+  function load(){ try{ var s=localStorage.getItem(KEY); if(s===null){ localStorage.setItem(KEY,JSON.stringify(SEED)); return SEED.slice(); } return JSON.parse(s)||[]; }catch(e){ return SEED.slice(); } }
+  function save(a){ try{ localStorage.setItem(KEY,JSON.stringify(a)); }catch(e){} }
+  var esc=function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  var COLS=['blue','rose','amber','green','purple'];
+  var filter='all';
+  function visShort(v){ return (v||'').replace(/ in the diocese/,''); }
+  function matchVis(v){ if(filter==='all')return true; if(filter==='me')return /just me/i.test(v.visibility); if(filter==='team')return /team/i.test(v.visibility); if(filter==='all-org')return /every/i.test(v.visibility); return true; }
+  function render(){
+    var grid=document.getElementById('sbm-grid'); if(!grid) return;
+    var all=load(), arr=all.filter(matchVis);
+    grid.innerHTML='';
+    document.getElementById('sbm-empty').style.display=arr.length?'none':'';
+    arr.forEach(function(v,i){
+      var filt=(v.filters&&v.filters.length)?v.filters.join(' · '):'No filters';
+      var col=COLS[i%COLS.length];
+      var card=document.createElement('div'); card.className='r-card';
+      card.innerHTML='<div class="head">'
+        + '<div class="ico '+col+'"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2l1.5 3 3.5.5-2.5 2.5.5 3.5L7 9.5 4 11.5l.5-3.5L2 5.5 5.5 5z"/></svg></div>'
+        + '<div class="nm">'+esc(v.name)+'</div>'
+        + '<div class="right"><span class="tag" style="background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB)">'+esc(visShort(v.visibility))+'</span></div>'
+        + '</div>'
+        + '<div class="desc">'+esc(v.report||'')+(filt!=='No filters'?' · '+esc(filt):'')+'</div>'
+        + '<div class="meta"><span>Saved <strong style="color:var(--text-2)">'+esc(v.date||'')+'</strong></span></div>'
+        + '<div class="sbm-acts"><a class="sbm-open" href="'+esc(v.url||'#')+'">Open report <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3h7v7M11 3L4 10"/></svg></a>'
+        + '<button class="sbm-remove" data-id="'+esc(v.id)+'">Remove</button></div>';
+      grid.appendChild(card);
+    });
+    grid.querySelectorAll('.sbm-remove').forEach(function(b){ b.onclick=function(){ sbmRemove(b.getAttribute('data-id')); }; });
+    var c=document.getElementById('sbm-count'); if(c) c.textContent=load().length;
+  }
+  window.sbmRemove=function(id){
+    var rec=load().filter(function(v){return v.id===id;})[0];
+    var name=rec?rec.name:'this view';
+    var go=function(){ save(load().filter(function(v){return v.id!==id;})); render(); if(window.showToast) showToast('Saved view removed'); };
+    if(window.atlasConfirm) atlasConfirm({icon:'danger',danger:true,title:'Remove saved view?',message:'<strong>'+esc(name)+'</strong> will be removed from your views.',confirmText:'Remove',cancelText:'Cancel',onConfirm:go});
+    else go();
+  };
+  window.sbmShow=function(){
+    var sec=document.getElementById('saved'); if(sec&&sec.scrollIntoView) sec.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+  var fb=document.getElementById('sbm-filter');
+  if(fb) fb.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; fb.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); filter=b.dataset.f; render(); });
+  render();
+  if(location.hash==='#saved') setTimeout(function(){ var s=document.getElementById('saved'); if(s&&s.scrollIntoView) s.scrollIntoView({block:'start'}); },120);
 })();
 </script>
 
