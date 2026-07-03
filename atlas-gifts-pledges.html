@@ -1936,7 +1936,7 @@ body {
       return '<div style="padding:36px 18px;text-align:center;color:var(--text-3);font-style:italic;font-size:13px">No posted batches match these filters</div>';
     }
     return rows.map(function(b){
-      return '<a class="gt-row" href="javascript:void(0)" onclick="event.preventDefault();openPostedDrawer(\'' + b.id + '\')">' +
+      return '<a class="gt-row" data-bid="' + b.id + '" href="javascript:void(0)" onclick="event.preventDefault();openPostedDrawer(\'' + b.id + '\')">' +
         '<div class="name"><span class="av" style="background:' + b.posterColor + '">B</span>' +
           '<div class="nm-text"><div class="nm">' + b.name + '</div><div class="sub">' + b.id + ' · ' + b.folder + '</div></div>' +
         '</div>' +
@@ -1945,7 +1945,7 @@ body {
         '<div><strong style="color:var(--text)">' + b.gifts + '</strong> gifts · <strong>' + fmtMoneyFull(b.total) + '</strong></div>' +
         '<div><span class="tag green">Posted · locked</span></div>' +
         '<div class="amt">' + reconcileTag(b.reconcile) + '</div>' +
-        '<div class="kebab" onclick="event.preventDefault();event.stopPropagation();if(window.atlasToast)atlasToast(\'Batch actions: Audit report · Reverse · Export · View receipts\')"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>' +
+        '<div class="kebab" onclick="event.preventDefault();event.stopPropagation();openBatchMenu(event,this)"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>' +
       '</a>';
     }).join('');
   }
@@ -2138,6 +2138,73 @@ body {
     k.addEventListener('click', function(e){ openPledgeMenu(e, k); });
   });
 
+  /* ── Shared menu helpers for the other tabs ── */
+  var MICO={
+    view:"<path d='M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z'/><circle cx='7' cy='7' r='1.7'/>",
+    edit:"<path d='M2 12l1-3 6.5-6.5 2 2L5 11z'/>",
+    method:"<rect x='1.5' y='3.5' width='11' height='7' rx='1.2'/><path d='M1.5 6h11'/>",
+    pause:"<path d='M5 3.5v7M9 3.5v7'/>",
+    cancel:"<circle cx='7' cy='7' r='5.3'/><path d='M5 5l4 4M9 5l-4 4'/>",
+    resolve:"<circle cx='7' cy='7' r='5.3'/><path d='M4.6 7l1.7 1.7L9.6 5.4'/>",
+    merge:"<path d='M3.5 2v3c0 2.5 3 2.5 3 5v2'/><path d='M10.5 6H6.5M8.5 4l2 2-2 2'/>",
+    fix:"<path d='M9.4 2.2a2.4 2.4 0 00-2.9 2.9L2 9.6 4.4 12l4.5-4.5a2.4 2.4 0 002.9-2.9L10.1 6.2 8.8 5.9 8.5 4.6z'/>",
+    assign:"<circle cx='5' cy='4.5' r='2.2'/><path d='M1.5 12c0-2 1.5-3.3 3.5-3.3M9 5.5h3.5M11 4v3'/>",
+    ignore:"<path d='M1 7s2.5-4 6-4c1 0 1.9.3 2.7.7M13 7s-2.5 4-6 4c-1 0-1.9-.3-2.7-.7'/><path d='M1.5 1.5l11 11'/>",
+    queue:"<path d='M2 3.5h10M2 7h10M2 10.5h6'/>",
+    audit:"<path d='M3 1.5h5l3 3V12H3z'/><path d='M3.7 5.5h4M3.7 7.5h4M3.7 9.5h2.5'/>",
+    gl:"<path d='M7 1.5v7M4 5.5L7 8.5l3-3'/><path d='M2 11h10'/>",
+    reverse:"<path d='M2.5 6.5a5 5 0 119 3'/><path d='M2.5 3v3.5H6'/>",
+    receipts:"<path d='M3.5 1.5h7v11l-1.75-1.1L7 12.5l-1.75-1.1L3.5 12.5z'/><path d='M5.3 4.5h3.4M5.3 6.5h3.4'/>"
+  };
+  function mb(fn,act,label,ico,cls){ return '<button class="'+(cls||'')+'" onclick="'+fn+'(\''+act+'\')"><svg viewBox=\'0 0 14 14\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'>'+MICO[ico]+'</svg>'+label+'</button>'; }
+  function showMenu(kebab, html){
+    menu.innerHTML=html; menu.classList.add('show');
+    var r=kebab.getBoundingClientRect(), mw=menu.offsetWidth, mh=menu.offsetHeight;
+    var left=Math.min(r.right-mw, window.innerWidth-mw-8); if(left<8)left=8;
+    var top=r.bottom+6; if(top+mh>window.innerHeight-8) top=r.top-mh-6;
+    menu.style.left=left+'px'; menu.style.top=top+'px';
+  }
+
+  /* ── Recurring row menu ── */
+  var curRec=null;
+  window.openRecurringMenu=function(e,kebab){ e.preventDefault(); e.stopPropagation(); curRec=kebab.closest('.gt-row');
+    showMenu(kebab, mb('ggRec','view','View donor','view')+mb('ggRec','edit','Edit amount / cadence','edit')+mb('ggRec','method','Update payment method','method')+mb('ggRec','pause','Pause plan','pause')+'<div class="sep"></div>'+mb('ggRec','cancel','Cancel recurring gift','cancel','danger')); };
+  window.ggRec=function(a){ closeMenu(); if(!curRec) return; var row=curRec, donor=(row.querySelector('.nm')||{}).textContent||'this donor';
+    if(a==='view') window.location=row.getAttribute('href')||'atlas-donor-360.html';
+    else if(a==='edit') openEditRecurring(row, donor);
+    else if(a==='method') ggToast('Secure card-update link sent to '+donor);
+    else if(a==='pause'){ if(window.atlasConfirm) atlasConfirm({icon:'warn',title:'Pause this recurring gift?',message:'Charges for <strong>'+donor+'</strong> will pause until you resume. No charge will be made on the next cycle.',confirmText:'Pause plan',cancelText:'Cancel',onConfirm:function(){ var c=row.children[3]; if(c) c.innerHTML='<span class="tag" style="background:var(--amber-light);color:var(--amber)">Paused</span>'; ggToast('Recurring gift paused · '+donor); }}); else ggToast('Recurring gift paused'); }
+    else if(a==='cancel'){ if(window.atlasConfirm) atlasConfirm({icon:'danger',danger:true,title:'Cancel recurring gift?',message:'Ends the recurring plan for <strong>'+donor+'</strong>. A final acknowledgement will be sent. This can’t be undone.',confirmText:'Cancel plan',cancelText:'Keep it',onConfirm:function(){ var m=row.children[4]; if(m) m.innerHTML='<span class="tag" style="background:var(--rose-light);color:var(--rose)">Cancelled</span>'; row.style.opacity='.6'; ggToast('Recurring gift cancelled · '+donor); }}); else ggToast('Recurring gift cancelled'); } };
+  document.querySelectorAll('[data-gp-view="recurring"] .gt-row .kebab').forEach(function(k){ k.addEventListener('click', function(e){ openRecurringMenu(e,k); }); });
+
+  /* ── Pending review row menu ── */
+  var curPend=null;
+  window.openPendingMenu=function(e,kebab){ e.preventDefault(); e.stopPropagation(); curPend=kebab.closest('.gt-row');
+    var t=((curPend.children[3]||{}).textContent||'').toLowerCase();
+    var mid = /duplicate/.test(t) ? mb('ggPend','merge','Merge records','merge')
+            : /validation/.test(t) ? mb('ggPend','fix','Fix in batch','fix')
+            : mb('ggPend','pick','Pick correct donor','assign');
+    showMenu(kebab, mb('ggPend','review','Review issue','resolve')+mid+mb('ggPend','assign','Assign to me','assign')+'<div class="sep"></div>'+mb('ggPend','dismiss','Dismiss exception','ignore','danger')); };
+  window.ggPend=function(a){ closeMenu(); if(!curPend) return; var row=curPend, issue=(row.querySelector('.nm')||{}).textContent||'this exception';
+    if(a==='review') window.location=row.getAttribute('href')||'atlas-duplicates.html';
+    else if(a==='merge') window.location='atlas-merge.html';
+    else if(a==='fix') window.location='atlas-batch-entry.html';
+    else if(a==='pick') ggToast('Donor picker · resolve “'+issue+'”');
+    else if(a==='assign') ggToast('Assigned to you · '+issue);
+    else if(a==='dismiss'){ if(window.atlasConfirm) atlasConfirm({icon:'warn',title:'Dismiss this exception?',message:'“'+issue+'” will be removed from the review queue. You can re-flag it later from the audit trail.',confirmText:'Dismiss',cancelText:'Cancel',onConfirm:function(){ row.style.opacity='.5'; var c=row.children[3]; if(c) c.innerHTML='<span class="tag" style="background:var(--surface);color:var(--text-3)">Dismissed</span>'; ggToast('Exception dismissed'); }}); else ggToast('Exception dismissed'); } };
+  document.querySelectorAll('[data-gp-view="pending"] .gt-row .kebab').forEach(function(k){ k.addEventListener('click', function(e){ openPendingMenu(e,k); }); });
+
+  /* ── Posted batch row menu (rows are re-rendered, so wired via inline onclick) ── */
+  var curBatchId=null;
+  window.openBatchMenu=function(e,kebab){ e.preventDefault(); e.stopPropagation(); var row=kebab.closest('.gt-row'); curBatchId=row?row.getAttribute('data-bid'):null;
+    showMenu(kebab, mb('ggBatch','view','View batch details','view')+mb('ggBatch','audit','Audit report (PDF)','audit')+mb('ggBatch','gl','Export to GL','gl')+mb('ggBatch','receipts','View receipts','receipts')+'<div class="sep"></div>'+mb('ggBatch','reverse','Reverse batch','reverse','danger')); };
+  window.ggBatch=function(a){ closeMenu();
+    if(a==='view'){ if(window.openPostedDrawer && curBatchId) openPostedDrawer(curBatchId); }
+    else if(a==='audit') ggToast('Audit report generated · PDF downloading');
+    else if(a==='gl') ggToast('GL export started · file ready in ~30s');
+    else if(a==='receipts') ggToast('Opening receipts for this batch');
+    else if(a==='reverse'){ if(window.atlasConfirm) atlasConfirm({icon:'danger',danger:true,title:'Reverse this posted batch?',message:'Posting is locked. Reversing creates offsetting entries for every gift in the batch and writes an immutable audit record. Requires DBA approval.',confirmText:'Request reversal',cancelText:'Cancel',onConfirm:function(){ ggToast('Batch reversal requested · pending DBA approval · audit entry created'); }}); else ggToast('Batch reversal requested'); } };
+
   document.addEventListener('click', function(e){ if(!e.target.closest('#gt-menu') && !e.target.closest('.kebab')) closeMenu(); });
   window.addEventListener('scroll', closeMenu, true);
 })();
@@ -2200,6 +2267,75 @@ body {
   window.alert=function(m){ atlasAlert('Atlas', String(m==null?'':m)); };
   var ov=el('ax-ov'); if(ov) ov.addEventListener('click',function(e){ if(e.target===this) close(); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
+</script>
+
+<!-- ═══ Edit recurring gift · modal ═══ -->
+<style>
+  #er-ov{position:fixed;inset:0;background:rgba(15,23,42,.46);backdrop-filter:blur(2px);z-index:100060;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',sans-serif}
+  #er-ov.show{display:flex}
+  .er-box{background:#fff;border-radius:16px;width:100%;max-width:440px;box-shadow:0 24px 64px rgba(15,23,42,.3);overflow:hidden}
+  .er-hd{padding:20px 22px 6px}
+  .er-tt{font-size:18px;font-weight:700;color:#0F172A;display:flex;align-items:center;gap:9px}
+  .er-tt svg{width:17px;height:17px;color:#2563EB}
+  .er-sub{font-size:12.5px;color:#64748B;margin-top:5px}
+  .er-bd{padding:14px 22px 4px}
+  .er-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .er-lab{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#64748B;margin-bottom:6px}
+  .er-f{width:100%;font:inherit;font-size:14px;color:#1E293B;background:#fff;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px;margin-bottom:14px;outline:none}
+  .er-f:focus{border-color:#2563EB;box-shadow:0 0 0 3px #EFF6FF}
+  select.er-f{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394A3B8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:11px 7px;padding-right:34px;cursor:pointer}
+  .er-note{font-size:11.5px;color:#475569;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px;line-height:1.45;margin-bottom:6px}
+  .er-ft{display:flex;justify-content:flex-end;gap:9px;padding:16px 22px 20px}
+  .er-btn{font-family:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:9px 16px;cursor:pointer;border:1px solid transparent}
+  .er-ghost{background:#fff;border-color:#E2E8F0;color:#334155}.er-ghost:hover{border-color:#94A3B8}
+  .er-primary{background:#2563EB;color:#fff}.er-primary:hover{background:#1D4ED8}
+</style>
+<div id="er-ov" onclick="if(event.target===this)closeEditRecurring()">
+  <div class="er-box">
+    <div class="er-hd">
+      <div class="er-tt"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 12l1-3 6.5-6.5 2 2L5 11z"/></svg> Edit recurring gift</div>
+      <div class="er-sub" id="er-sub">Update the amount, cadence or charge day. Takes effect on the next cycle.</div>
+    </div>
+    <div class="er-bd">
+      <div class="er-row2">
+        <div><label class="er-lab">Amount</label><input class="er-f" id="er-amt" value="$50.00"></div>
+        <div><label class="er-lab">Frequency</label><select class="er-f" id="er-freq"><option selected>Monthly</option><option>Quarterly</option><option>Semi-annual</option><option>Annual</option></select></div>
+      </div>
+      <div class="er-row2">
+        <div><label class="er-lab">Charge day</label><select class="er-f" id="er-day"><option>1st</option><option>15th</option><option>Last day</option></select></div>
+        <div><label class="er-lab">Next charge</label><input class="er-f" id="er-next" type="date" value="2026-06-01"></div>
+      </div>
+      <div class="er-note">Payment method is unchanged. To update the card, use “Update payment method.”</div>
+    </div>
+    <div class="er-ft">
+      <button class="er-btn er-ghost" onclick="closeEditRecurring()">Cancel</button>
+      <button class="er-btn er-primary" onclick="saveEditRecurring()">Save changes</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var erRow=null;
+  window.openEditRecurring=function(row, donor){
+    erRow=row;
+    var amtEl=row.querySelector('.amt strong'); if(amtEl) document.getElementById('er-amt').value=amtEl.textContent.trim();
+    document.getElementById('er-sub').textContent='Recurring gift · '+(donor||'donor')+' · takes effect next cycle.';
+    document.getElementById('er-ov').classList.add('show');
+    setTimeout(function(){ document.getElementById('er-amt').focus(); },40);
+  };
+  window.closeEditRecurring=function(){ document.getElementById('er-ov').classList.remove('show'); };
+  window.saveEditRecurring=function(){
+    if(erRow){
+      var amt=(document.getElementById('er-amt').value||'').trim();
+      var freq=document.getElementById('er-freq').value;
+      var day=document.getElementById('er-day').value;
+      var aEl=erRow.querySelector('.amt strong'); if(aEl && amt) aEl.textContent=amt.replace(/\.00$/,'');
+      var cad=erRow.children[3]; if(cad) cad.innerHTML='<span class="tag blue">'+freq+' · '+day+'</span>';
+    }
+    closeEditRecurring();
+    if(window.atlasToast) atlasToast('Recurring gift updated · applies on next charge');
+  };
 })();
 </script>
 
