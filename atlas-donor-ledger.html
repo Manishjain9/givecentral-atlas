@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Atlas — Giving ledger · Margaret Sullivan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0E1E35; --navy-2:#152844; --navy-3:#1E3A5F;
+  --blue:#2563EB; --blue-mid:#3B82F6; --blue-light:#DBEAFE; --blue-pale:#EFF6FF;
+  --gold:#B45309; --gold-light:#FEF3C7;
+  --teal:#0D9488; --teal-light:#CCFBF1;
+  --rose:#BE185D; --rose-light:#FCE7F3;
+  --green:#15803D; --green-light:#DCFCE7;
+  --amber:#D97706; --amber-light:#FEF3C7;
+  --purple:#7C3AED; --purple-light:#EDE9FE;
+  --text:#0F172A; --text-2:#334155; --text-3:#64748B;
+  --border:#E2E8F0; --surface:#F8FAFC; --white:#FFFFFF;
+  --sidebar-w:220px;
+}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);min-height:100vh;display:flex}
+
+/* ── Sidebar ── */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100}
+.sidebar-logo{display:flex;align-items:center;gap:11px;padding:20px 16px 16px}
+.sidebar-logo-mark{width:42px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.sidebar-logo-mark svg{width:42px;height:32px}
+.sidebar-logo-name{font-family:'DM Serif Display',serif;font-size:19px;letter-spacing:-.01em;color:white;line-height:1}
+.sidebar-logo-sub{font-size:9px;color:rgba(255,255,255,.4);letter-spacing:.14em;text-transform:uppercase;margin-top:3px}
+.sidebar-logo-text{display:flex;flex-direction:column}
+.sidebar-search{margin:0 10px 12px;background:rgba(255,255,255,.07);border-radius:8px;display:flex;align-items:center;gap:7px;padding:7px 10px}
+.sidebar-search svg{opacity:.4;flex-shrink:0;width:13px;height:13px}
+.sidebar-search input{background:none;border:none;outline:none;font-size:12px;color:rgba(255,255,255,.7);font-family:'DM Sans',sans-serif;width:100%}
+.sidebar-search input::placeholder{color:rgba(255,255,255,.3)}
+.nav-group{padding:0 8px}
+.nav-group-label{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:8px 8px 4px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;transition:all .15s;margin-bottom:1px}
+.nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
+.nav-item.active{background:var(--blue);color:white}
+.nav-item svg{width:14px;height:14px;flex-shrink:0;opacity:.7}
+.nav-item.active svg{opacity:1}
+.nav-badge{margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.6);border-radius:10px;padding:1px 7px;font-size:10px;font-weight:600}
+.nav-badge.alert{background:#EF4444;color:white}
+.sidebar-user{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:9px}
+.sidebar-avatar{width:30px;height:30px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0}
+.sidebar-user-name{font-size:12px;font-weight:600;color:white}
+.sidebar-user-role{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px}
+
+/* ── Main ── */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;margin-left:var(--sidebar-w)}
+
+/* ── Topbar ── */
+.topbar{height:52px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50;flex-shrink:0}
+.breadcrumb{display:flex;align-items:center;gap:7px;font-size:12px}
+.breadcrumb a{color:var(--text-3);text-decoration:none}
+.breadcrumb a:hover{color:var(--blue)}
+.breadcrumb span{color:var(--text);font-weight:500}
+.breadcrumb svg{width:10px;height:10px;color:var(--text-3)}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.tb-btn{display:flex;align-items:center;gap:5px;padding:6px 13px;border-radius:7px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tb-btn svg{width:11px;height:11px}
+.tb-ghost{background:none;border:1px solid var(--border);color:var(--text-2)}
+.tb-ghost:hover{border-color:#94A3B8;background:var(--surface)}
+.tb-primary{background:var(--blue);border:none;color:white;box-shadow:0 1px 4px rgba(37,99,235,.3)}
+.tb-primary:hover{background:#1D4ED8}
+
+/* ── Page header ── */
+.page-hdr{padding:22px 24px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.page-hdr-left{}
+.back-link{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-3);text-decoration:none;margin-bottom:8px}
+.back-link:hover{color:var(--blue)}
+.back-link svg{width:11px;height:11px}
+.page-title-row{display:flex;align-items:center;gap:10px}
+.page-title{font-family:'DM Serif Display',serif;font-size:24px;color:var(--text);letter-spacing:-.01em}
+.donor-chip{display:inline-flex;align-items:center;gap:6px;background:var(--blue-pale);border:1px solid var(--blue-light);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;text-decoration:none}
+.donor-chip:hover{background:var(--blue-light)}
+.donor-chip svg{width:13px;height:13px;flex:0 0 13px}
+.page-sub{font-size:12px;color:var(--text-3);margin-top:4px}
+
+/* ── Summary stats strip ── */
+.stats-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;padding:18px 24px 0}
+.stat-card{background:white;border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stat-label{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:5px}
+.stat-value{font-family:'DM Serif Display',serif;font-size:20px;letter-spacing:-.02em;color:var(--text)}
+.stat-value.green{color:var(--green)}
+.stat-value.amber{color:var(--amber)}
+.stat-value.blue{color:var(--blue)}
+.stat-sub{font-size:10px;color:var(--text-3);margin-top:3px}
+
+/* ── Insights + pledge overview row ── */
+.ins-row{display:grid;grid-template-columns:1.5fr 1fr;gap:12px;padding:16px 24px 0}
+@media(max-width:900px){.ins-row{grid-template-columns:1fr}}
+.ins-card{background:white;border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.ins-h{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.ins-h .sub{font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3)}
+.ins-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+@media(max-width:640px){.ins-grid{grid-template-columns:1fr}}
+.trend{display:flex;align-items:flex-end;gap:6px;height:66px}
+.trend .tb{flex:1;background:var(--blue-light);border-radius:4px 4px 0 0;min-height:4px;transition:.15s}
+.trend .tb.cur{background:var(--blue)}
+.trend .tb:hover{opacity:.8}
+.trend-x{display:flex;gap:6px;margin-top:6px}
+.trend-x span{flex:1;text-align:center;font-size:9px;color:var(--text-3)}
+.ins-chips{display:flex;flex-direction:column;gap:9px;justify-content:center}
+.ins-chip{display:flex;align-items:flex-start;gap:9px;font-size:11.5px;color:var(--text-2);line-height:1.35}
+.ins-chip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.ins-chip b{color:var(--text)}
+.pl-name{font-size:13px;font-weight:600;color:var(--text)}
+.pl-sub{font-size:11px;color:var(--text-3);margin-top:2px}
+.pl-bar{height:8px;background:var(--surface);border-radius:99px;overflow:hidden;margin:12px 0 8px}
+.pl-fill{height:100%;background:var(--green);border-radius:99px}
+.pl-meta{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-2)}
+.pl-meta b{color:var(--text)}
+.pl-next{margin-top:10px;font-size:11.5px;color:var(--amber);background:var(--amber-light);border-radius:7px;padding:6px 10px;display:flex;align-items:center;gap:6px}
+.pl-next svg{width:12px;height:12px;flex-shrink:0}
+
+/* ── Row kebab menu ── */
+.kebab{width:26px;height:26px;border-radius:6px;border:1px solid transparent;background:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--text-3);opacity:0;transition:opacity .15s}
+.gift-row:hover .kebab,.pending-row:hover .kebab{opacity:1}
+.kebab:hover{background:var(--surface);border-color:var(--border);color:var(--text)}
+.kebab svg{width:14px;height:14px}
+#row-menu{position:fixed;z-index:9000;min-width:184px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 14px 40px rgba(15,23,42,.18);padding:6px;display:none;font-family:'DM Sans',sans-serif}
+#row-menu.show{display:block}
+#row-menu .mi{padding:8px 11px;font-size:12.5px;color:var(--text);border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:9px;white-space:nowrap}
+#row-menu .mi:hover{background:var(--surface)}
+#row-menu .mi svg{width:13px;height:13px;color:var(--text-3)}
+#row-menu .mi.danger{color:var(--rose)}#row-menu .mi.danger svg{color:var(--rose)}
+#row-menu .msep{height:1px;background:var(--border);margin:5px 4px}
+
+/* ── Sortable headers ── */
+.gift-tbl th.sortable{cursor:pointer;user-select:none}
+.gift-tbl th.sortable:hover{color:var(--text)}
+.sort-caret{font-size:8px;margin-left:3px;opacity:.55}
+
+/* ── Controls ── */
+.controls-bar{display:flex;align-items:center;gap:10px;padding:18px 24px 0;flex-wrap:wrap}
+.year-chips{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.year-chip{padding:4px 11px;border-radius:20px;font-size:11.5px;font-weight:500;border:1px solid var(--border);background:white;color:var(--text-2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.year-chip:hover{border-color:#94A3B8;color:var(--text)}
+.year-chip.active{background:var(--navy);border-color:var(--navy);color:white}
+.controls-sep{width:1px;height:22px;background:var(--border);flex-shrink:0}
+.filter-sel{appearance:none;background:white;border:1px solid var(--border);border-radius:7px;padding:5px 28px 5px 10px;font-size:11.5px;font-family:'DM Sans',sans-serif;color:var(--text-2);cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394A3B8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;background-size:9px}
+.filter-sel:hover{border-color:#94A3B8}
+.controls-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.count-label{font-size:11.5px;color:var(--text-3)}
+.ledger-search{display:flex;align-items:center;gap:9px;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:9px 14px;flex:1 1 280px;min-width:240px;transition:border-color .12s,box-shadow .12s}
+.ledger-search:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-pale)}
+.ledger-search svg{width:16px;height:16px;color:var(--text-3);flex-shrink:0}
+.ledger-search input{border:none;outline:none;font:inherit;font-size:13.5px;color:var(--text);width:100%;background:none}
+.ledger-search input::placeholder{color:#94A3B8}
+
+/* ── Table wrapper ── */
+.table-wrap{padding:14px 24px 40px}
+
+/* ── Year group header ── */
+.year-group{margin-bottom:0}
+.year-group-head{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin:16px 0 0;cursor:pointer}
+.year-group-head:hover{background:#EEF2FF}
+.ygr-year{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:7px}
+.ygr-arrow{transition:transform .2s;display:inline-block}
+.ygr-arrow.open{transform:rotate(90deg)}
+.ygr-count{font-size:10px;font-weight:500;background:var(--blue-light);color:var(--blue);border-radius:10px;padding:1px 7px}
+.ygr-total{font-size:13px;font-weight:700;color:var(--green);text-align:right}
+.ygr-sub{font-size:11px;color:var(--text-3);grid-column:2 / -2}
+
+/* ── Gift table ── */
+.gift-tbl{width:100%;border-collapse:collapse;background:white;border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;overflow:hidden;table-layout:fixed}
+/* Shared column widths so every year table lines up (col 8 = injected Running, col 9 = actions) */
+.gift-tbl th:nth-child(1),.gift-tbl td:nth-child(1){width:104px !important}
+.gift-tbl th:nth-child(2),.gift-tbl td:nth-child(2){width:auto !important}
+.gift-tbl th:nth-child(3),.gift-tbl td:nth-child(3){width:118px !important}
+.gift-tbl th:nth-child(4),.gift-tbl td:nth-child(4){width:96px !important}
+.gift-tbl th:nth-child(5),.gift-tbl td:nth-child(5){width:96px !important}
+.gift-tbl th:nth-child(6),.gift-tbl td:nth-child(6){width:118px !important}
+.gift-tbl th:nth-child(7),.gift-tbl td:nth-child(7){width:110px !important;text-align:right}
+.gift-tbl th:nth-child(8),.gift-tbl td:nth-child(8){width:104px !important;text-align:right}
+.gift-tbl th:nth-child(9),.gift-tbl td:nth-child(9){width:96px !important}
+.gift-tbl th{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);padding:9px 14px;text-align:left;background:white;border-bottom:1px solid var(--border)}
+.gift-tbl th:last-child{text-align:right}
+.gift-tbl td{padding:11px 14px;font-size:12px;border-bottom:.5px solid var(--border);color:var(--text-2);vertical-align:middle}
+.gift-tbl tr:last-child td{border-bottom:none}
+.gift-tbl tr.gift-row:hover td{background:var(--blue-pale);cursor:pointer}
+.gift-tbl tr.pending-row td{background:#FFFBEB}
+.gift-tbl tr.pending-row:hover td{background:#FEF3C7}
+
+/* Inline amount */
+.amt{font-size:13px;font-weight:600;color:var(--text);text-align:right;white-space:nowrap}
+.amt.pending{color:var(--amber)}
+
+/* Date cell */
+.date-cell{white-space:nowrap;color:var(--text-3);font-size:11.5px}
+
+/* Campaign cell */
+.camp-name{font-size:12.5px;font-weight:500;color:var(--text)}
+.camp-sub{font-size:10.5px;color:var(--text-3);margin-top:2px}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:600;white-space:nowrap}
+.badge svg{width:9px;height:9px}
+.badge-issued{background:var(--green-light);color:var(--green)}
+.badge-pending{background:var(--amber-light);color:var(--amber)}
+.badge-blocked{background:var(--rose-light);color:var(--rose)}
+.badge-noreceipt{background:#F1F5F9;color:var(--text-3)}
+.badge-exported{background:var(--teal-light);color:var(--teal)}
+.badge-gl-pending{background:var(--amber-light);color:var(--amber)}
+.badge-gl-na{background:#F1F5F9;color:var(--text-3)}
+
+.type-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10.5px;font-weight:600}
+.type-online{background:var(--blue-light);color:var(--blue)}
+.type-check{background:#F1F5F9;color:var(--text-2)}
+.type-pledge{background:var(--purple-light);color:var(--purple)}
+.type-pledge-pmt{background:#EDE9FE;color:var(--purple)}
+
+/* Batch ref */
+.batch-ref{font-size:11px;color:var(--blue);font-family:monospace;cursor:pointer}
+.batch-ref:hover{text-decoration:underline}
+
+/* Soft credit */
+.soft-none{color:var(--text-3);font-size:11px}
+.soft-yes{font-size:11px;color:var(--teal);font-weight:500}
+
+/* Row actions */
+.row-actions{display:flex;align-items:center;justify-content:flex-end;gap:4px;opacity:0;transition:opacity .15s}
+.gift-row:hover .row-actions{opacity:1}
+.pending-row:hover .row-actions{opacity:1}
+.row-btn{padding:3px 8px;border-radius:5px;font-size:10.5px;font-weight:500;border:1px solid var(--border);background:white;color:var(--text-2);cursor:pointer;white-space:nowrap}
+.row-btn:hover{border-color:#94A3B8;color:var(--text)}
+.row-btn.primary{background:var(--blue);border-color:var(--blue);color:white}
+
+/* Year total row */
+.year-total-row td{background:var(--surface);font-weight:600;color:var(--text);font-size:12px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+
+/* No-data state */
+.no-data{padding:32px;text-align:center;color:var(--text-3);font-size:12.5px}
+
+/* Toast */
+#ledger-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#0F172A;color:white;padding:11px 18px;border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.2);font-size:12.5px;font-family:'DM Sans',sans-serif;z-index:10000;display:flex;align-items:center;gap:9px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;max-width:420px}
+#ledger-toast.show{opacity:1;transform:translateX(-50%)}
+#ledger-toast .ico{width:20px;height:20px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-mark">
+      <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="2"/>
+        <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="2"/>
+        <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="2"/>
+        <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.6"/>
+        <circle cx="22" cy="92" r="5" fill="white"/>
+        <circle cx="58" cy="58" r="6" fill="white"/>
+        <circle cx="98" cy="38" r="6.5" fill="white"/>
+        <circle cx="110" cy="78" r="4.5" fill="rgba(255,255,255,.65)"/>
+        <circle cx="138" cy="24" r="8" fill="#C8A04A"/>
+        <circle cx="138" cy="24" r="11.5" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1.4"/>
+      </svg>
+    </div>
+    <div class="sidebar-logo-text">
+      <span class="sidebar-logo-name">Atlas</span>
+      <span class="sidebar-logo-sub">By GiveCentral</span>
+    </div>
+  </div>
+  <div class="sidebar-search">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+    <input type="text" placeholder="Search donors, gifts…" readonly>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-label">Main</div>
+    <div class="nav-item" onclick="window.location='atlas-dashboard.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item active" onclick="window.location='atlas-donors-list.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>
+      Donors
+      <span class="nav-badge">3,847</span>
+    </div>
+    <div class="nav-item" onclick="window.location='atlas-gifts-pledges.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>
+      Gifts &amp; pledges
+      <span class="nav-badge">142</span>
+    </div>
+    <div class="nav-item" onclick="window.location='atlas-campaign-dashboard.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>
+      Campaigns
+    </div>
+    <div class="nav-item" onclick="window.location='atlas-reports.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>
+      Reports
+    </div>
+  </div>
+  <div class="nav-group" style="margin-top:8px">
+    <div class="nav-group-label">Fundraising</div>
+    <div class="nav-item" onclick="window.location='atlas-pipeline.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
+      Prospect pipeline
+      <span class="nav-badge">28</span>
+    </div>
+    <div class="nav-item" onclick="window.location='atlas-tasks.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>
+      Tasks &amp; reminders
+      <span class="nav-badge alert">7</span>
+    </div>
+    <div class="nav-item" onclick="window.location='atlas-communications.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>
+      Communications
+    </div>
+    <div class="nav-item" onclick="window.location='atlas-events-dashboard.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>
+      Events
+    </div>
+    <div class="nav-item" onclick="window.location='atlas-volunteer-management.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
+      Volunteers
+    </div>
+  </div>
+  <div class="nav-group" style="margin-top:8px">
+    <div class="nav-group-label">Intelligence</div>
+    <div class="nav-item" onclick="window.location='atlas-guru-ai.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>
+      Guru AI
+    </div>
+    <div class="nav-item" onclick="window.location='atlas-reports.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>
+      Analytics
+    </div>
+  </div>
+  <div class="nav-group" style="margin-top:8px">
+    <div class="nav-group-label">Admin</div>
+    <div class="nav-item" onclick="window.location='atlas-users-roles.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
+      Users &amp; roles
+    </div>
+    <div class="nav-item" onclick="window.location='atlas-tags.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/></svg>
+      Tags &amp; Segment
+    </div>
+    <div class="nav-item" onclick="window.location='atlas-integrations.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>
+      Integrations
+    </div>
+    <div class="nav-item" onclick="window.location='atlassmarttriggers.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.6 1.5L3 8h3.7l-.6 4.6L11 5.9H7.4z"/></svg>
+      Smart Triggers
+    </div>
+    <div class="nav-item" onclick="window.location='atlas-sync.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>
+      Sync
+    </div>
+    <div class="nav-item" onclick="window.location='atlas-location-manage.html'">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>
+      Location portal
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="sidebar-avatar">SR</div>
+    <div>
+      <div class="sidebar-user-name">Sarah Reynolds</div>
+      <div class="sidebar-user-role">Development Director</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<div class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="breadcrumb">
+      <a href="atlas-donors-list.html">Donors</a>
+      <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 2l4 3-4 3"/></svg>
+      <a href="atlas-donor-360.html">Margaret T. Sullivan</a>
+      <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 2l4 3-4 3"/></svg>
+      <span>Giving ledger</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="tb-btn tb-ghost" onclick="openYearEnd()">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="2" y="1.5" width="8" height="9" rx="1.2"/><path d="M4 4.5h4M4 6.5h4M4 8.5h2"/></svg>
+        Year-end statement
+      </button>
+      <button class="tb-btn tb-ghost" onclick="exportLedgerCSV()">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 1.5v7M3.5 6l2.5 2.5L9 6M2 9.5v1h8v-1"/></svg>
+        Export CSV
+      </button>
+      <button class="tb-btn tb-primary" onclick="window.location='atlas-gift-entry.html'">
+        <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
+        Record gift
+      </button>
+    </div>
+  </div>
+
+  <!-- Page header -->
+  <div class="page-hdr">
+    <div class="page-hdr-left">
+      <div class="page-title-row">
+        <div class="page-title">Giving ledger</div>
+        <a class="donor-chip" href="atlas-donor-360.html">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="6" cy="4" r="2.5"/><path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4"/></svg>
+          Margaret T. Sullivan
+        </a>
+      </div>
+      <div class="page-sub">Complete gift history · Diocese of Albany · Donor since 2012</div>
+    </div>
+  </div>
+
+  <!-- Summary stats -->
+  <div class="stats-strip">
+    <div class="stat-card">
+      <div class="stat-label">Lifetime giving</div>
+      <div class="stat-value green">$72,800</div>
+      <div class="stat-sub">All received gifts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">FY 2026 received</div>
+      <div class="stat-value blue">$3,500</div>
+      <div class="stat-sub">Jan – Jun 2026</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Pending balance</div>
+      <div class="stat-value amber">$1,900</div>
+      <div class="stat-sub">CMA installment 3 · Jun 15</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total gifts</div>
+      <div class="stat-value">26</div>
+      <div class="stat-sub">25 received · 1 pending</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Largest single gift</div>
+      <div class="stat-value">$8,500</div>
+      <div class="stat-sub">Mar 10, 2024 · CMA</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg annual</div>
+      <div class="stat-value">$5,600</div>
+      <div class="stat-sub">Over 13 years</div>
+    </div>
+  </div>
+
+  <!-- Insights + open pledge -->
+  <div class="ins-row">
+    <div class="ins-card">
+      <div class="ins-h"><span>Giving overview</span><span class="sub">Received per fiscal year</span></div>
+      <div class="ins-grid">
+        <div>
+          <div class="trend" id="trend"></div>
+          <div class="trend-x" id="trend-x"></div>
+        </div>
+        <div class="ins-chips" id="ins-chips"></div>
+      </div>
+    </div>
+    <div class="ins-card">
+      <div class="ins-h">Open pledge</div>
+      <div class="pl-name">CMA 2026 · Pledge PLG-2026-001</div>
+      <div class="pl-sub">Catholic Ministry Appeal · $5,000 total · 3 installments</div>
+      <div class="pl-bar"><div class="pl-fill" style="width:62%"></div></div>
+      <div class="pl-meta"><span><b>$3,100</b> paid · 62%</span><span><b>$1,900</b> remaining</span></div>
+      <div class="pl-next"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M6 3.5v2.5l1.5 1"/></svg> Next installment · $1,900 due Jun 15, 2026</div>
+    </div>
+  </div>
+
+  <!-- Controls bar -->
+  <div class="controls-bar">
+    <div class="year-chips">
+      <span class="year-chip active" data-year="all" onclick="filterYear(this,'all')">All years</span>
+      <span class="year-chip" data-year="2026" onclick="filterYear(this,'2026')">2026</span>
+      <span class="year-chip" data-year="2025" onclick="filterYear(this,'2025')">2025</span>
+      <span class="year-chip" data-year="2024" onclick="filterYear(this,'2024')">2024</span>
+      <span class="year-chip" data-year="2023" onclick="filterYear(this,'2023')">2023</span>
+      <span class="year-chip" data-year="2022" onclick="filterYear(this,'2022')">2022</span>
+      <span class="year-chip" data-year="2021" onclick="filterYear(this,'2021')">2021</span>
+      <span class="year-chip" data-year="pre2021" onclick="filterYear(this,'pre2021')">2020 &amp; earlier</span>
+    </div>
+    <div class="controls-sep"></div>
+    <select class="filter-sel" id="type-filter" onchange="filterType()">
+      <option value="all">All types</option>
+      <option value="Online">Online gift</option>
+      <option value="Cash">Cash / Check</option>
+      <option value="Pledge payment">Pledge payment</option>
+    </select>
+    <select class="filter-sel" id="amount-filter" onchange="updateTypeFilter()">
+      <option value="0">Any amount</option>
+      <option value="1000">$1,000+</option>
+      <option value="5000">$5,000+</option>
+      <option value="10000">$10,000+</option>
+    </select>
+    <select class="filter-sel" id="receipt-filter" onchange="updateTypeFilter()">
+      <option value="all">All receipts</option>
+      <option value="Issued">Issued</option>
+      <option value="Pending">Pending</option>
+    </select>
+    <select class="filter-sel" id="sort-sel" onchange="sortLedger()">
+      <option value="date-desc">Newest first</option>
+      <option value="date-asc">Oldest first</option>
+      <option value="amt-desc">Largest first</option>
+      <option value="amt-asc">Smallest first</option>
+    </select>
+    <div class="ledger-search">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l3 3"/></svg>
+      <input id="ledger-search" type="search" placeholder="Search gifts by fund, campaign, batch or type…" oninput="updateTypeFilter()">
+    </div>
+    <div class="controls-right">
+      <span class="count-label" id="row-count">26 gifts</span>
+    </div>
+  </div>
+
+  <!-- Table area -->
+  <div class="table-wrap" id="ledger-body">
+
+    <!-- ══ 2026 ══ -->
+    <div class="year-group" data-year="2026">
+      <div class="year-group-head" onclick="toggleYear('2026',this)">
+        <div class="ygr-year">
+          <span class="ygr-arrow open" id="arr-2026">▶</span>
+          FY 2026
+          <span class="ygr-count">3 gifts</span>
+        </div>
+        <div></div>
+        <div class="ygr-total">$5,400 <span style="font-size:10px;font-weight:400;color:var(--text-3)">($3,500 received + $1,900 pending)</span></div>
+      </div>
+      <table class="gift-tbl" id="tbl-2026">
+        <thead>
+          <tr>
+            <th style="width:100px">Date</th>
+            <th>Campaign / Fund</th>
+            <th style="width:110px">Type</th>
+            <th style="width:90px">Receipt</th>
+            <th style="width:90px">GL</th>
+            <th style="width:110px">Batch</th>
+            <th style="width:80px;text-align:right">Amount</th>
+            <th style="width:80px"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="pending-row" data-type="Pledge payment">
+            <td class="date-cell">Jun 15, 2026</td>
+            <td>
+              <div class="camp-name">CMA 2026 — Installment 3 of 3</div>
+              <div class="camp-sub">Catholic Ministry Appeal · Pledge PLG-2026-001</div>
+            </td>
+            <td><span class="type-badge type-pledge-pmt">Pledge payment</span></td>
+            <td><span class="badge badge-pending">
+              <svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="4.5" cy="4.5" r="3.5"/><path d="M4.5 3v2l1 1"/></svg>
+              Pending
+            </span></td>
+            <td><span class="badge badge-gl-na">Not yet</span></td>
+            <td><span style="font-size:11px;color:var(--text-3)">—</span></td>
+            <td class="amt pending">$1,900.00</td>
+            <td><div class="row-actions"><button class="row-btn primary" onclick="toast('Payment recorded · receipt queued')">Record payment</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Online" onclick="toast('Opening gift record G-2026-0318')">
+            <td class="date-cell">Mar 15, 2026</td>
+            <td>
+              <div class="camp-name">Catholic Ministry Appeal 2026</div>
+              <div class="camp-sub">CMA Spring appeal · GL 4001-Diocese</div>
+            </td>
+            <td><span class="type-badge type-online">Online gift</span></td>
+            <td><span class="badge badge-issued">
+              <svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>
+              Issued
+            </span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2026-031')">BX-2026-031</span></td>
+            <td class="amt">$2,500.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Pledge payment" onclick="toast('Opening gift record G-2026-0042')">
+            <td class="date-cell">Jan 3, 2026</td>
+            <td>
+              <div class="camp-name">CMA 2026 — Installment 2 of 3</div>
+              <div class="camp-sub">Catholic Ministry Appeal · Pledge PLG-2026-001</div>
+            </td>
+            <td><span class="type-badge type-pledge-pmt">Pledge payment</span></td>
+            <td><span class="badge badge-issued">
+              <svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>
+              Issued
+            </span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2026-004')">BX-2026-004</span></td>
+            <td class="amt">$1,000.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ 2025 ══ -->
+    <div class="year-group" data-year="2025">
+      <div class="year-group-head" onclick="toggleYear('2025',this)">
+        <div class="ygr-year"><span class="ygr-arrow open" id="arr-2025">▶</span>FY 2025 <span class="ygr-count">3 gifts</span></div>
+        <div></div>
+        <div class="ygr-total">$10,500</div>
+      </div>
+      <table class="gift-tbl" id="tbl-2025">
+        <thead><tr><th style="width:100px">Date</th><th>Campaign / Fund</th><th style="width:110px">Type</th><th style="width:90px">Receipt</th><th style="width:90px">GL</th><th style="width:110px">Batch</th><th style="width:80px;text-align:right">Amount</th><th style="width:80px"></th></tr></thead>
+        <tbody>
+          <tr class="gift-row" data-type="Online" onclick="toast('Opening gift record G-2025-1824')">
+            <td class="date-cell">Nov 28, 2025</td>
+            <td><div class="camp-name">Giving Tuesday · St. Michael's</div><div class="camp-sub">Annual Fund · Online campaign · GL 4002</div></td>
+            <td><span class="type-badge type-online">Online gift</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2025-182')">BX-2025-182</span></td>
+            <td class="amt">$500.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Pledge payment" onclick="toast('Opening gift record G-2025-1441')">
+            <td class="date-cell">Sep 10, 2025</td>
+            <td><div class="camp-name">CMA 2026 — Installment 1 of 3</div><div class="camp-sub">Catholic Ministry Appeal · Pledge PLG-2026-001</div></td>
+            <td><span class="type-badge type-pledge-pmt">Pledge payment</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2025-144')">BX-2025-144</span></td>
+            <td class="amt">$2,100.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Cash" onclick="toast('Opening gift record G-2025-0312')">
+            <td class="date-cell">Mar 12, 2025</td>
+            <td><div class="camp-name">Catholic Ministry Appeal 2025</div><div class="camp-sub">CMA Annual · Cash/Check · GL 4001-Diocese</div></td>
+            <td><span class="type-badge type-check">Cash / Check</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2025-031')">BX-2025-031</span></td>
+            <td class="amt">$7,900.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ 2024 ══ -->
+    <div class="year-group" data-year="2024">
+      <div class="year-group-head" onclick="toggleYear('2024',this)">
+        <div class="ygr-year"><span class="ygr-arrow open" id="arr-2024">▶</span>FY 2024 <span class="ygr-count">3 gifts</span></div>
+        <div></div>
+        <div class="ygr-total">$11,200</div>
+      </div>
+      <table class="gift-tbl" id="tbl-2024">
+        <thead><tr><th style="width:100px">Date</th><th>Campaign / Fund</th><th style="width:110px">Type</th><th style="width:90px">Receipt</th><th style="width:90px">GL</th><th style="width:110px">Batch</th><th style="width:80px;text-align:right">Amount</th><th style="width:80px"></th></tr></thead>
+        <tbody>
+          <tr class="gift-row" data-type="Online" onclick="toast('Opening gift record G-2024-1891')">
+            <td class="date-cell">Dec 20, 2024</td>
+            <td><div class="camp-name">Year-end · General Fund</div><div class="camp-sub">Diocese General · Online giving · GL 4002</div></td>
+            <td><span class="type-badge type-online">Online gift</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2024-189')">BX-2024-189</span></td>
+            <td class="amt">$500.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Pledge payment" onclick="toast('Opening gift record G-2024-1424')">
+            <td class="date-cell">Sep 15, 2024</td>
+            <td><div class="camp-name">CMA 2025 — Installment 1 of 2</div><div class="camp-sub">Catholic Ministry Appeal · Pledge PLG-2024-001</div></td>
+            <td><span class="type-badge type-pledge-pmt">Pledge payment</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2024-142')">BX-2024-142</span></td>
+            <td class="amt">$2,200.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Cash" onclick="toast('Opening gift record G-2024-0284')">
+            <td class="date-cell">Mar 10, 2024</td>
+            <td><div class="camp-name">Catholic Ministry Appeal 2024</div><div class="camp-sub">CMA Annual · Cash/Check · GL 4001-Diocese</div></td>
+            <td><span class="type-badge type-check">Cash / Check</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2024-028')">BX-2024-028</span></td>
+            <td class="amt">$8,500.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ 2023 ══ -->
+    <div class="year-group" data-year="2023">
+      <div class="year-group-head" onclick="toggleYear('2023',this)">
+        <div class="ygr-year"><span class="ygr-arrow open" id="arr-2023">▶</span>FY 2023 <span class="ygr-count">3 gifts</span></div>
+        <div></div>
+        <div class="ygr-total">$9,000</div>
+      </div>
+      <table class="gift-tbl" id="tbl-2023">
+        <thead><tr><th style="width:100px">Date</th><th>Campaign / Fund</th><th style="width:110px">Type</th><th style="width:90px">Receipt</th><th style="width:90px">GL</th><th style="width:110px">Batch</th><th style="width:80px;text-align:right">Amount</th><th style="width:80px"></th></tr></thead>
+        <tbody>
+          <tr class="gift-row" data-type="Online" onclick="toast('Opening gift record G-2023-1901')">
+            <td class="date-cell">Nov 28, 2023</td>
+            <td><div class="camp-name">Giving Tuesday</div><div class="camp-sub">Annual Fund · Online campaign · GL 4002</div></td>
+            <td><span class="type-badge type-online">Online gift</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2023-190')">BX-2023-190</span></td>
+            <td class="amt">$500.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Online" onclick="toast('Opening gift record G-2023-0621')">
+            <td class="date-cell">Apr 15, 2023</td>
+            <td><div class="camp-name">Catholic Charities Albany — General</div><div class="camp-sub">Catholic Charities entity · GL 4010-CC</div></td>
+            <td><span class="type-badge type-online">Online gift</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2023-062')">BX-2023-062</span></td>
+            <td class="amt">$1,500.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Cash" onclick="toast('Opening gift record G-2023-0252')">
+            <td class="date-cell">Mar 5, 2023</td>
+            <td><div class="camp-name">Catholic Ministry Appeal 2023</div><div class="camp-sub">CMA Annual · Cash/Check · GL 4001-Diocese</div></td>
+            <td><span class="type-badge type-check">Cash / Check</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2023-025')">BX-2023-025</span></td>
+            <td class="amt">$7,000.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ 2022 ══ -->
+    <div class="year-group" data-year="2022">
+      <div class="year-group-head" onclick="toggleYear('2022',this)">
+        <div class="ygr-year"><span class="ygr-arrow open" id="arr-2022">▶</span>FY 2022 <span class="ygr-count">3 gifts</span></div>
+        <div></div>
+        <div class="ygr-total">$7,200</div>
+      </div>
+      <table class="gift-tbl" id="tbl-2022">
+        <thead><tr><th style="width:100px">Date</th><th>Campaign / Fund</th><th style="width:110px">Type</th><th style="width:90px">Receipt</th><th style="width:90px">GL</th><th style="width:110px">Batch</th><th style="width:80px;text-align:right">Amount</th><th style="width:80px"></th></tr></thead>
+        <tbody>
+          <tr class="gift-row" data-type="Online" onclick="toast('Opening gift record G-2022-1784')">
+            <td class="date-cell">Dec 18, 2022</td>
+            <td><div class="camp-name">Year-end · General Fund</div><div class="camp-sub">Diocese General · Online · GL 4002</div></td>
+            <td><span class="type-badge type-online">Online gift</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2022-178')">BX-2022-178</span></td>
+            <td class="amt">$700.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Online" onclick="toast('Opening gift record G-2022-1602')">
+            <td class="date-cell">Nov 27, 2022</td>
+            <td><div class="camp-name">Giving Tuesday</div><div class="camp-sub">Annual Fund · Online campaign · GL 4002</div></td>
+            <td><span class="type-badge type-online">Online gift</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2022-160')">BX-2022-160</span></td>
+            <td class="amt">$500.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Cash" onclick="toast('Opening gift record G-2022-0221')">
+            <td class="date-cell">Mar 8, 2022</td>
+            <td><div class="camp-name">Catholic Ministry Appeal 2022</div><div class="camp-sub">CMA Annual · Cash/Check · GL 4001-Diocese</div></td>
+            <td><span class="type-badge type-check">Cash / Check</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2022-022')">BX-2022-022</span></td>
+            <td class="amt">$6,000.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ 2021 ══ -->
+    <div class="year-group" data-year="2021">
+      <div class="year-group-head" onclick="toggleYear('2021',this)">
+        <div class="ygr-year"><span class="ygr-arrow open" id="arr-2021">▶</span>FY 2021 <span class="ygr-count">3 gifts</span></div>
+        <div></div>
+        <div class="ygr-total">$6,500</div>
+      </div>
+      <table class="gift-tbl" id="tbl-2021">
+        <thead><tr><th style="width:100px">Date</th><th>Campaign / Fund</th><th style="width:110px">Type</th><th style="width:90px">Receipt</th><th style="width:90px">GL</th><th style="width:110px">Batch</th><th style="width:80px;text-align:right">Amount</th><th style="width:80px"></th></tr></thead>
+        <tbody>
+          <tr class="gift-row" data-type="Online" onclick="toast('Opening gift record G-2021-1554')">
+            <td class="date-cell">Nov 28, 2021</td>
+            <td><div class="camp-name">Giving Tuesday</div><div class="camp-sub">Annual Fund · Online campaign · GL 4002</div></td>
+            <td><span class="type-badge type-online">Online gift</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2021-155')">BX-2021-155</span></td>
+            <td class="amt">$500.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Pledge payment" onclick="toast('Opening gift record G-2021-1211')">
+            <td class="date-cell">Sep 20, 2021</td>
+            <td><div class="camp-name">CMA 2021 — Pledge payment</div><div class="camp-sub">Catholic Ministry Appeal · Pledge PLG-2021-001</div></td>
+            <td><span class="type-badge type-pledge-pmt">Pledge payment</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2021-121')">BX-2021-121</span></td>
+            <td class="amt">$1,000.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Cash" onclick="toast('Opening gift record G-2021-0302')">
+            <td class="date-cell">Mar 15, 2021</td>
+            <td><div class="camp-name">Catholic Ministry Appeal 2021</div><div class="camp-sub">CMA Annual · Cash/Check · GL 4001-Diocese</div></td>
+            <td><span class="type-badge type-check">Cash / Check</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2021-030')">BX-2021-030</span></td>
+            <td class="amt">$5,000.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ 2020 & EARLIER ══ -->
+    <div class="year-group" data-year="pre2021">
+      <div class="year-group-head" onclick="toggleYear('pre2021',this)">
+        <div class="ygr-year"><span class="ygr-arrow open" id="arr-pre2021">▶</span>2020 &amp; earlier <span class="ygr-count">11 gifts</span></div>
+        <div></div>
+        <div class="ygr-total">$20,400</div>
+      </div>
+      <table class="gift-tbl" id="tbl-pre2021">
+        <thead><tr><th style="width:100px">Date</th><th>Campaign / Fund</th><th style="width:110px">Type</th><th style="width:90px">Receipt</th><th style="width:90px">GL</th><th style="width:110px">Batch</th><th style="width:80px;text-align:right">Amount</th><th style="width:80px"></th></tr></thead>
+        <tbody>
+          <tr class="gift-row" data-type="Online" onclick="toast('Opening gift record G-2020-1102')">
+            <td class="date-cell">Sep 12, 2020</td>
+            <td><div class="camp-name">COVID-19 Parish Relief Fund</div><div class="camp-sub">Diocese Emergency Fund · GL 4005</div></td>
+            <td><span class="type-badge type-online">Online gift</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2020-110')">BX-2020-110</span></td>
+            <td class="amt">$800.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Cash" onclick="toast('Opening gift record G-2020-0192')">
+            <td class="date-cell">Mar 1, 2020</td>
+            <td><div class="camp-name">Catholic Ministry Appeal 2020</div><div class="camp-sub">CMA Annual · Cash/Check · GL 4001-Diocese</div></td>
+            <td><span class="type-badge type-check">Cash / Check</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2020-019')">BX-2020-019</span></td>
+            <td class="amt">$2,000.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Cash" onclick="toast('Opening gift record G-2019-0212')">
+            <td class="date-cell">Mar 3, 2019</td>
+            <td><div class="camp-name">Catholic Ministry Appeal 2019</div><div class="camp-sub">CMA Annual · Cash/Check · GL 4001-Diocese</div></td>
+            <td><span class="type-badge type-check">Cash / Check</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2019-021')">BX-2019-021</span></td>
+            <td class="amt">$5,000.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Online">
+            <td class="date-cell">Dec 22, 2018</td>
+            <td><div class="camp-name">Christmas · St. Michael's Parish</div><div class="camp-sub">Parish Annual · GL 4003</div></td>
+            <td><span class="type-badge type-online">Online gift</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2018-168')">BX-2018-168</span></td>
+            <td class="amt">$500.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Cash">
+            <td class="date-cell">Mar 4, 2018</td>
+            <td><div class="camp-name">Catholic Ministry Appeal 2018</div><div class="camp-sub">CMA Annual · Cash/Check · GL 4001-Diocese</div></td>
+            <td><span class="type-badge type-check">Cash / Check</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2018-019')">BX-2018-019</span></td>
+            <td class="amt">$4,000.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Online">
+            <td class="date-cell">Nov 26, 2017</td>
+            <td><div class="camp-name">Giving Tuesday</div><div class="camp-sub">Annual Fund · Online campaign · GL 4002</div></td>
+            <td><span class="type-badge type-online">Online gift</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2017-148')">BX-2017-148</span></td>
+            <td class="amt">$700.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Cash">
+            <td class="date-cell">Mar 6, 2017</td>
+            <td><div class="camp-name">Catholic Ministry Appeal 2017</div><div class="camp-sub">CMA Annual · Cash/Check · GL 4001-Diocese</div></td>
+            <td><span class="type-badge type-check">Cash / Check</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2017-018')">BX-2017-018</span></td>
+            <td class="amt">$2,500.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Cash">
+            <td class="date-cell">Mar 5, 2016</td>
+            <td><div class="camp-name">Catholic Ministry Appeal 2016</div><div class="camp-sub">CMA Annual · Cash/Check · GL 4001-Diocese</div></td>
+            <td><span class="type-badge type-check">Cash / Check</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2016-019')">BX-2016-019</span></td>
+            <td class="amt">$3,500.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Cash">
+            <td class="date-cell">Mar 8, 2015</td>
+            <td><div class="camp-name">Catholic Ministry Appeal 2015</div><div class="camp-sub">CMA Annual · Cash/Check · GL 4001-Diocese</div></td>
+            <td><span class="type-badge type-check">Cash / Check</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2015-018')">BX-2015-018</span></td>
+            <td class="amt">$2,000.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Cash">
+            <td class="date-cell">Mar 3, 2014</td>
+            <td><div class="camp-name">Catholic Ministry Appeal 2014</div><div class="camp-sub">CMA Annual · Cash/Check · GL 4001-Diocese</div></td>
+            <td><span class="type-badge type-check">Cash / Check</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2014-016')">BX-2014-016</span></td>
+            <td class="amt">$1,800.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+          <tr class="gift-row" data-type="Cash">
+            <td class="date-cell">Mar 10, 2013</td>
+            <td><div class="camp-name">Catholic Ministry Appeal 2013</div><div class="camp-sub">CMA Annual · Cash/Check · GL 4001-Diocese</div></td>
+            <td><span class="type-badge type-check">Cash / Check</span></td>
+            <td><span class="badge badge-issued"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5l2 2 4-4"/></svg>Issued</span></td>
+            <td><span class="badge badge-exported">Exported</span></td>
+            <td><span class="batch-ref" onclick="event.stopPropagation();toast('Opening batch BX-2013-014')">BX-2013-014</span></td>
+            <td class="amt">$1,600.00</td>
+            <td><div class="row-actions"><button class="row-btn" onclick="event.stopPropagation();window.location='atlas-receipt-preview.html'">Receipt</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Lifetime total strip -->
+    <div style="background:white;border:1px solid var(--border);border-radius:8px;margin-top:16px;display:flex;align-items:center;justify-content:space-between;padding:14px 20px">
+      <span style="font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.06em">Lifetime total · 26 gift records</span>
+      <span style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--green);letter-spacing:-.02em">$72,800.00 <span style="font-size:12px;font-weight:400;color:var(--text-3);font-family:'DM Sans',sans-serif">received</span> <span style="font-size:13px;font-weight:600;color:var(--amber);font-family:'DM Sans',sans-serif">+ $1,900 pending</span></span>
+    </div>
+
+  </div><!-- /table-wrap -->
+
+</div><!-- /main -->
+
+<!-- Toast -->
+<div id="ledger-toast"><span class="ico">✓</span><span class="msg" id="ledger-toast-msg"></span></div>
+
+<!-- ═══ Year-end statement · modal + printable document ═══ -->
+<style>
+  #ye-ov{position:fixed;inset:0;background:rgba(15,23,42,.46);backdrop-filter:blur(2px);z-index:10001;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',sans-serif}
+  #ye-ov.show{display:flex}
+  .ye-box{background:#fff;border-radius:16px;width:100%;max-width:460px;box-shadow:0 24px 64px rgba(15,23,42,.3);overflow:hidden}
+  .ye-hd{padding:20px 22px 6px}
+  .ye-tt{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);display:flex;align-items:center;gap:9px}
+  .ye-tt svg{width:18px;height:18px;color:var(--blue)}
+  .ye-sub{font-size:12.5px;color:var(--text-3);margin-top:5px}
+  .ye-bd{padding:14px 22px 4px}
+  .ye-lab{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px}
+  .ye-f{width:100%;font:inherit;font-size:14px;color:var(--text);background:#fff;border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:14px;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394A3B8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;cursor:pointer}
+  .ye-f:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-pale)}
+  .ye-preview{border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:12px 14px;font-size:12.5px;color:var(--text-2);margin-bottom:6px}
+  .ye-preview .r{display:flex;justify-content:space-between;padding:2px 0}
+  .ye-preview .r b{color:var(--text)}
+  .ye-ft{display:flex;justify-content:flex-end;gap:9px;padding:16px 22px 20px}
+  .ye-btn{font-family:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:9px 16px;cursor:pointer;border:1px solid transparent}
+  .ye-ghost{background:#fff;border-color:var(--border);color:var(--text-2)}.ye-ghost:hover{border-color:#94A3B8}
+  .ye-primary{background:var(--blue);color:#fff}.ye-primary:hover{background:#1D4ED8}
+
+  /* Printable statement (hidden on screen, shown for print) */
+  #stmt{display:none}
+  @media print{
+    body{background:#fff}
+    body *{visibility:hidden}
+    #stmt, #stmt *{visibility:visible}
+    #stmt{display:block;position:absolute;left:0;top:0;width:100%;padding:0}
+    #ye-ov{display:none !important}
+  }
+  #stmt{font-family:'DM Sans',sans-serif;color:#0F172A;padding:40px;max-width:720px;margin:0 auto}
+  #stmt .st-org{font-family:'DM Serif Display',serif;font-size:22px}
+  #stmt .st-org-sub{font-size:12px;color:#64748B;margin-top:2px}
+  #stmt .st-title{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:26px 0 4px}
+  #stmt .st-meta{font-size:12.5px;color:#334155;line-height:1.6}
+  #stmt table{width:100%;border-collapse:collapse;margin:18px 0;font-size:13px}
+  #stmt th{text-align:left;border-bottom:2px solid #0F172A;padding:7px 8px;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+  #stmt td{border-bottom:1px solid #E2E8F0;padding:7px 8px}
+  #stmt th.n,#stmt td.n{text-align:right}
+  #stmt .st-total{display:flex;justify-content:space-between;font-size:15px;font-weight:700;border-top:2px solid #0F172A;padding-top:10px;margin-top:2px}
+  #stmt .st-note{font-size:11.5px;color:#475569;line-height:1.5;margin-top:22px;border-top:1px solid #E2E8F0;padding-top:14px}
+</style>
+<div id="ye-ov" onclick="if(event.target===this)closeYearEnd()">
+  <div class="ye-box">
+    <div class="ye-hd">
+      <div class="ye-tt"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="1.5" width="10" height="11" rx="1.4"/><path d="M4 4.5h6M4 7h6M4 9.5h3"/></svg> Year-end giving statement</div>
+      <div class="ye-sub">A consolidated, IRS-ready summary of tax-deductible gifts for the selected year.</div>
+    </div>
+    <div class="ye-bd">
+      <label class="ye-lab" for="ye-year">Tax year</label>
+      <select class="ye-f" id="ye-year" onchange="yePreview()"></select>
+      <div class="ye-preview" id="ye-preview"></div>
+    </div>
+    <div class="ye-ft">
+      <button class="ye-btn ye-ghost" onclick="closeYearEnd()">Cancel</button>
+      <button class="ye-btn ye-primary" onclick="printYearEnd()">Generate &amp; save PDF</button>
+    </div>
+  </div>
+</div>
+<div id="stmt"></div>
+<div id="row-menu"></div>
+
+<script>
+/* ── Year-end giving statement ── */
+var YE_ORG = { name:'Diocese of Albany', addr:'40 North Main Ave · Albany, NY 12203', ein:'EIN 14-•••2401' };
+var YE_DONOR = { name:'Margaret T. Sullivan', addr:'14 Bayshore Blvd · Tampa, FL 33606' };
+function yeYears(){
+  var ys = {};
+  document.querySelectorAll('.gift-tbl tbody tr').forEach(function(r){
+    if (r.classList.contains('pending-row')) return;              // tax statement = received only
+    var d = r.querySelector('.date-cell'); if(!d) return;
+    var m = d.textContent.trim().match(/(20\d\d)/); if(m) ys[m[1]] = 1;
+  });
+  return Object.keys(ys).sort().reverse();
+}
+function yeRows(year){
+  var rows = [];
+  document.querySelectorAll('.gift-tbl tbody tr').forEach(function(r){
+    if (r.classList.contains('pending-row')) return;
+    var d = r.querySelector('.date-cell'); if(!d) return;
+    if (d.textContent.indexOf(year) === -1) return;
+    var camp = r.querySelector('.camp-name'), type = r.querySelector('.type-badge'), amt = r.querySelector('.amt');
+    rows.push({ date:d.textContent.trim(),
+      fund: camp ? camp.textContent.trim() : '',
+      type: type ? type.textContent.trim() : '',
+      amt: amt ? (parseFloat(amt.textContent.replace(/[^0-9.]/g,''))||0) : 0 });
+  });
+  return rows;
+}
+function money(n){ return '$' + Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+window.openYearEnd = function(){
+  var sel = document.getElementById('ye-year');
+  sel.innerHTML = yeYears().map(function(y){ return '<option value="'+y+'">'+y+'</option>'; }).join('');
+  yePreview();
+  document.getElementById('ye-ov').classList.add('show');
+};
+window.closeYearEnd = function(){ document.getElementById('ye-ov').classList.remove('show'); };
+window.yePreview = function(){
+  var y = document.getElementById('ye-year').value;
+  var rows = yeRows(y), total = rows.reduce(function(s,r){return s+r.amt;},0);
+  document.getElementById('ye-preview').innerHTML =
+    '<div class="r"><span>Donor</span><b>'+YE_DONOR.name+'</b></div>'+
+    '<div class="r"><span>Tax year</span><b>'+y+'</b></div>'+
+    '<div class="r"><span>Receipted gifts</span><b>'+rows.length+'</b></div>'+
+    '<div class="r"><span>Total tax-deductible</span><b style="color:var(--green)">'+money(total)+'</b></div>';
+};
+window.printYearEnd = function(){
+  var y = document.getElementById('ye-year').value;
+  var rows = yeRows(y), total = rows.reduce(function(s,r){return s+r.amt;},0);
+  var today = new Date().toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('stmt').innerHTML =
+    '<div class="st-org">'+YE_ORG.name+'</div>'+
+    '<div class="st-org-sub">'+YE_ORG.addr+' · '+YE_ORG.ein+'</div>'+
+    '<div class="st-title">Annual Giving Statement — Tax Year '+y+'</div>'+
+    '<div class="st-meta"><strong>'+YE_DONOR.name+'</strong><br>'+YE_DONOR.addr+'<br>Statement generated '+today+'</div>'+
+    '<table><thead><tr><th>Date</th><th>Campaign / fund</th><th>Type</th><th class="n">Amount</th></tr></thead><tbody>'+
+      rows.map(function(r){ return '<tr><td>'+r.date+'</td><td>'+r.fund+'</td><td>'+r.type+'</td><td class="n">'+money(r.amt)+'</td></tr>'; }).join('')+
+    '</tbody></table>'+
+    '<div class="st-total"><span>Total tax-deductible contributions</span><span>'+money(total)+'</span></div>'+
+    '<div class="st-note">No goods or services were provided in exchange for these contributions, except intangible religious benefits. This letter serves as your official receipt — please retain it for your tax records. '+YE_ORG.name+' is a tax-exempt organization under IRC §501(c)(3).</div>';
+  closeYearEnd();
+  setTimeout(function(){ window.print(); toast('Year-end statement ready · use your browser’s Save as PDF'); }, 60);
+};
+
+/* ── Year group toggle ── */
+function toggleYear(yr, headEl) {
+  var tbl = document.getElementById('tbl-' + yr);
+  var arr = document.getElementById('arr-' + yr);
+  if (!tbl) return;
+  var isOpen = tbl.style.display !== 'none';
+  tbl.style.display = isOpen ? 'none' : 'table';
+  arr.textContent = isOpen ? '▶' : '▶';
+  arr.style.transform = isOpen ? '' : 'rotate(90deg)';
+}
+
+/* ── Open all by default ── */
+document.querySelectorAll('.ygr-arrow').forEach(function(a) {
+  a.style.transform = 'rotate(90deg)';
+});
+
+/* ── Year chip filter ── */
+function filterYear(chipEl, yr) {
+  document.querySelectorAll('.year-chip').forEach(function(c){ c.classList.remove('active'); });
+  chipEl.classList.add('active');
+  var groups = document.querySelectorAll('.year-group');
+  groups.forEach(function(g){
+    if (yr === 'all') {
+      g.style.display = '';
+    } else {
+      g.style.display = (g.dataset.year === yr) ? '' : 'none';
+    }
+  });
+  updateTypeFilter();
+}
+
+/* ── Type filter ── */
+function filterType() {
+  updateTypeFilter();
+}
+function updateTypeFilter() {
+  var sel = document.getElementById('type-filter').value;
+  var sEl = document.getElementById('ledger-search');
+  var q = sEl ? (sEl.value||'').toLowerCase().trim() : '';
+  var minAmt = parseFloat((document.getElementById('amount-filter')||{}).value || '0') || 0;
+  var rcpt = (document.getElementById('receipt-filter')||{}).value || 'all';
+  var rows = document.querySelectorAll('.gift-row, .pending-row');
+  var vis = 0;
+  rows.forEach(function(r){
+    var grp = r.closest('.year-group');
+    if (grp && grp.style.display === 'none') { r.style.display='none'; return; }
+    var typeOk = (sel === 'all' || r.dataset.type === sel);
+    var searchOk = (!q || r.textContent.toLowerCase().indexOf(q) > -1);
+    var amtEl = r.querySelector('.amt');
+    var amt = amtEl ? (parseFloat(amtEl.textContent.replace(/[^0-9.]/g,''))||0) : 0;
+    var amtOk = amt >= minAmt;
+    var isPending = r.classList.contains('pending-row');
+    var rcptOk = (rcpt === 'all') || (rcpt === 'Pending' ? isPending : !isPending);
+    if (typeOk && searchOk && amtOk && rcptOk) { r.style.display = ''; vis++; }
+    else { r.style.display = 'none'; }
+  });
+  document.getElementById('row-count').textContent = vis + ' gift' + (vis !== 1 ? 's' : '');
+  // hide year groups that ended up empty
+  document.querySelectorAll('.year-group').forEach(function(g){
+    if (g.style.display === 'none') return;
+    var any = [].slice.call(g.querySelectorAll('.gift-row, .pending-row')).some(function(r){ return r.style.display !== 'none'; });
+    var tbl = g.querySelector('.gift-tbl'); if(tbl) tbl.style.display = any ? '' : 'none';
+  });
+}
+
+/* ── Sort (within each year group, preserves grouping) ── */
+function sortLedger(){
+  var mode = (document.getElementById('sort-sel')||{}).value || 'date-desc';
+  document.querySelectorAll('.gift-tbl tbody').forEach(function(tb){
+    var rows = [].slice.call(tb.children);
+    rows.sort(function(a,b){
+      var da=Date.parse((a.querySelector('.date-cell')||{}).textContent||'')||0;
+      var db=Date.parse((b.querySelector('.date-cell')||{}).textContent||'')||0;
+      var aa=parseFloat(((a.querySelector('.amt')||{}).textContent||'').replace(/[^0-9.]/g,''))||0;
+      var ab=parseFloat(((b.querySelector('.amt')||{}).textContent||'').replace(/[^0-9.]/g,''))||0;
+      if(mode==='date-asc') return da-db;
+      if(mode==='amt-desc') return ab-aa;
+      if(mode==='amt-asc') return aa-ab;
+      return db-da; // date-desc default
+    });
+    rows.forEach(function(r){ tb.appendChild(r); });
+  });
+}
+
+/* ── Insights: annual trend chart + chips ── */
+function computeInsights(){
+  var byYear = {};
+  document.querySelectorAll('.gift-tbl tbody tr').forEach(function(r){
+    if (r.classList.contains('pending-row')) return;
+    var d=r.querySelector('.date-cell'); var a=r.querySelector('.amt'); if(!d||!a) return;
+    var m=d.textContent.match(/(20\d\d)/); if(!m) return;
+    byYear[m[1]] = (byYear[m[1]]||0) + (parseFloat(a.textContent.replace(/[^0-9.]/g,''))||0);
+  });
+  var years = Object.keys(byYear).sort();
+  var recent = years.slice(-8);
+  var max = Math.max.apply(null, recent.map(function(y){return byYear[y];}).concat([1]));
+  var curYear = String(new Date().getFullYear());
+  var trend = document.getElementById('trend'), tx = document.getElementById('trend-x');
+  if(trend){ trend.innerHTML = recent.map(function(y){
+    var h = Math.max(4, Math.round(byYear[y]/max*100));
+    return '<div class="tb'+(y===curYear||y===recent[recent.length-1]?' cur':'')+'" style="height:'+h+'%" title="'+y+': $'+Math.round(byYear[y]).toLocaleString()+'"></div>';
+  }).join(''); }
+  if(tx){ tx.innerHTML = recent.map(function(y){ return '<span>’'+y.slice(2)+'</span>'; }).join(''); }
+  // chips: YoY (last two full years), largest year, next installment
+  var chips=[];
+  // YoY on the last two COMPLETE years (drop the in-progress latest year)
+  var complete = years.slice(0, years.length-1);
+  if(complete.length>=2){
+    var last=complete[complete.length-1], prev=complete[complete.length-2];
+    var a1=byYear[prev], a2=byYear[last], pct = a1? Math.round((a2-a1)/a1*100):0;
+    var up = pct>=0;
+    chips.push({c:up?'var(--green)':'var(--amber)', h:(up?'Up ':'Down ')+Math.abs(pct)+'% YoY', s:last+' vs '+prev+' · $'+Math.round(a2).toLocaleString()+' vs $'+Math.round(a1).toLocaleString()});
+  }
+  var big = years.reduce(function(m,y){ return byYear[y]>byYear[m]?y:m; }, years[0]);
+  chips.push({c:'var(--blue)', h:'Largest year · '+big, s:'$'+Math.round(byYear[big]).toLocaleString()+' received'});
+  chips.push({c:'var(--amber)', h:'Next installment due', s:'$1,900 · CMA 2026 · Jun 15, 2026'});
+  var el=document.getElementById('ins-chips');
+  if(el){ el.innerHTML = chips.map(function(c){ return '<div class="ins-chip"><span class="dot" style="background:'+c.c+'"></span><span><b>'+c.h+'</b><br>'+c.s+'</span></div>'; }).join(''); }
+}
+
+/* ── Row actions kebab menu ── */
+var RM_ROW=null;
+function addRowMenus(){
+  document.querySelectorAll('.gift-tbl tbody tr').forEach(function(r){
+    var acts=r.querySelector('.row-actions'); if(!acts||acts.querySelector('.kebab')) return;
+    var b=document.createElement('button'); b.className='kebab'; b.title='Actions';
+    b.innerHTML='<svg viewBox="0 0 14 14" fill="currentColor"><circle cx="7" cy="2.5" r="1.3"/><circle cx="7" cy="7" r="1.3"/><circle cx="7" cy="11.5" r="1.3"/></svg>';
+    b.onclick=function(e){ e.stopPropagation(); openRowMenu(r, b); };
+    acts.appendChild(b);
+  });
+}
+function openRowMenu(row, btn){
+  RM_ROW=row;
+  var menu=document.getElementById('row-menu');
+  var pending=row.classList.contains('pending-row');
+  var fund=(row.querySelector('.camp-name')||{}).textContent||'this gift';
+  menu.innerHTML =
+    (pending ? '<div class="mi" data-a="pay"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>Record payment</div>'
+             : '<div class="mi" data-a="view"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>View gift record</div>')
+    + '<div class="mi" data-a="receipt"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="3" y="1.5" width="8" height="11" rx="1"/><path d="M5 4.5h4M5 7h4M5 9.5h2"/></svg>'+(pending?'Preview receipt':'Reissue receipt')+'</div>'
+    + '<div class="mi" data-a="soft"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.3"/><path d="M1 12c0-2 1.6-3.3 4-3.3M9 5.5h3.5M11 4v3"/></svg>Add soft credit</div>'
+    + '<div class="msep"></div>'
+    + '<div class="mi danger" data-a="correct"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 019-3M12 7a5 5 0 01-9 3M9 1.5V4H11.5M5 12.5V10H2.5"/></svg>Correct / reverse</div>';
+  menu.classList.add('show');
+  var rct=btn.getBoundingClientRect(), mw=menu.offsetWidth;
+  menu.style.left=Math.min(rct.right-mw, window.innerWidth-mw-8)+'px';
+  menu.style.top=(rct.bottom+6)+'px';
+}
+function rowMenuAct(a){
+  var menu=document.getElementById('row-menu'); menu.classList.remove('show');
+  if(a==='view')     toast('Opening gift record');
+  else if(a==='pay') window.location='atlas-pledge-payment.html';
+  else if(a==='receipt') window.location='atlas-receipt-preview.html';
+  else if(a==='soft')    toast('Soft-credit editor · attribute to another constituent');
+  else if(a==='correct') window.location='atlas-gift-correction-center.html';
+}
+document.addEventListener('click', function(e){
+  var mi=e.target.closest('#row-menu .mi'); if(mi){ rowMenuAct(mi.getAttribute('data-a')); return; }
+  if(!e.target.closest('#row-menu') && !e.target.closest('.kebab')) { var m=document.getElementById('row-menu'); if(m) m.classList.remove('show'); }
+});
+window.addEventListener('scroll', function(){ var m=document.getElementById('row-menu'); if(m) m.classList.remove('show'); }, true);
+
+/* ── Running balance column (cumulative received, chronological) ── */
+function addRunningColumn() {
+  document.querySelectorAll('.gift-tbl thead tr').forEach(function(hr){
+    if (hr.querySelector('.run-th')) return;
+    var th = document.createElement('th');
+    th.className = 'run-th'; th.textContent = 'Running'; th.style.width = '92px'; th.style.textAlign = 'right';
+    hr.insertBefore(th, hr.lastElementChild);
+  });
+  var all = [].slice.call(document.querySelectorAll('.gift-tbl tbody tr')).map(function(r){
+    var d = r.querySelector('.date-cell'), a = r.querySelector('.amt');
+    return { r:r, ts: d ? (Date.parse(d.textContent.trim())||0) : 0,
+             amt: a ? (parseFloat(a.textContent.replace(/[^0-9.]/g,''))||0) : 0,
+             pending: r.classList.contains('pending-row') };
+  });
+  all.sort(function(a,b){ return a.ts - b.ts; });
+  var run = 0;
+  all.forEach(function(x){ if(!x.pending) run += x.amt; x.run = run; });
+  all.forEach(function(x){
+    if (x.r.querySelector('.run-cell')) return;
+    var td = document.createElement('td');
+    td.className = 'run-cell';
+    td.style.textAlign = 'right'; td.style.fontFamily = 'monospace'; td.style.whiteSpace = 'nowrap'; td.style.color = 'var(--text-3)'; td.style.fontSize = '11.5px';
+    td.textContent = x.pending ? '—' : ('$' + Math.round(x.run).toLocaleString());
+    x.r.insertBefore(td, x.r.lastElementChild);
+  });
+}
+
+/* ── Real CSV export (all rows, incl. running balance) ── */
+function exportLedgerCSV() {
+  var head = ['Date','Campaign / fund','Type','Receipt','GL','Batch','Amount','Running total','Status'];
+  var out = [head];
+  var all = [].slice.call(document.querySelectorAll('.gift-tbl tbody tr')).map(function(r){
+    var g=function(sel){ var e=r.querySelector(sel); return e?e.textContent.replace(/\s+/g,' ').trim():''; };
+    return { ts: Date.parse(g('.date-cell'))||0,
+      row:[ g('.date-cell'), g('.camp-name'), g('.type-badge'),
+            g('.badge:nth-of-type(1)')|| (r.querySelector('.badge')?r.querySelector('.badge').textContent.trim():''),
+            '', g('.batch-ref'), g('.amt'),
+            (r.querySelector('.run-cell')?r.querySelector('.run-cell').textContent.trim():''),
+            r.classList.contains('pending-row')?'Pending':'Received' ] };
+  });
+  all.sort(function(a,b){ return b.ts - a.ts; });
+  all.forEach(function(x){ out.push(x.row); });
+  var csv = out.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  var blob = new Blob([csv], {type:'text/csv'}), url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = 'margaret-sullivan-giving-ledger.csv'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 600);
+  toast('Ledger exported · CSV downloaded');
+}
+
+/* ── Toast ── */
+function toast(msg) {
+  var t = document.getElementById('ledger-toast');
+  document.getElementById('ledger-toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+/* init */
+addRunningColumn();
+addRowMenus();
+computeInsights();
+sortLedger();
+updateTypeFilter();
+</script>
+</body>
+</html>

@@ -2087,6 +2087,57 @@ body {
   document.querySelectorAll('[data-gp-view="recent"] .gt-row .kebab').forEach(function(k){
     k.addEventListener('click', function(e){ openGiftMenu(e, k); });
   });
+
+  /* ── Open-pledge row menu ── */
+  var curPledge=null;
+  var PICO={ view:"<path d='M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z'/><circle cx='7' cy='7' r='1.8'/>",
+    pay:"<path d='M7 1.5v11M2 6.5h10'/>",
+    remind:"<path d='M7 1.8a3.3 3.3 0 013.3 3.3c0 3.8 1.4 4.7 1.4 4.7H2.3s1.4-.9 1.4-4.7A3.3 3.3 0 017 1.8z'/><path d='M5.6 11.7a1.5 1.5 0 002.8 0'/>",
+    edit:"<path d='M2 12l1-3 6.5-6.5 2 2L5 11z'/>",
+    write:"<path d='M7 2l5.5 10h-11z'/><path d='M7 6.2v2.6M7 10.2v.4'/>" };
+  function pBtn(act,label,cls){ return '<button class="'+(cls||'')+'" onclick="ggPledge(\''+act+'\')"><svg viewBox=\'0 0 14 14\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'>'+PICO[act]+'</svg>'+label+'</button>'; }
+  window.openPledgeMenu=function(e, kebab){
+    e.preventDefault(); e.stopPropagation();
+    curPledge = kebab.closest('.gt-row');
+    var stTxt = (curPledge.children[4]||{}).textContent||'';
+    var overdue = /overdue/i.test(stTxt), reminder = /reminder/i.test(stTxt);
+    var html = pBtn('view','View pledge') + pBtn('pay','Record payment');
+    html += pBtn('remind', (overdue||reminder) ? 'Send reminder now' : 'Send reminder');
+    html += pBtn('edit','Edit schedule');
+    html += '<div class="sep"></div>' + pBtn('write','Write off pledge','danger');
+    menu.innerHTML = html; menu.classList.add('show');
+    var r=kebab.getBoundingClientRect(), mw=menu.offsetWidth, mh=menu.offsetHeight;
+    var left=Math.min(r.right-mw, window.innerWidth-mw-8); if(left<8)left=8;
+    var top=r.bottom+6; if(top+mh>window.innerHeight-8) top=r.top-mh-6;
+    menu.style.left=left+'px'; menu.style.top=top+'px';
+  };
+  window.ggPledge=function(a){
+    closeMenu(); if(!curPledge) return;
+    var row=curPledge;
+    var href=row.getAttribute('href')||'atlas-pledge-detail.html';
+    var donor=(row.querySelector('.nm')||{}).textContent||'this pledge';
+    if(a==='view') window.location=href;
+    else if(a==='pay') window.location='atlas-pledge-payment.html';
+    else if(a==='edit') window.location='atlas-pledge-detail.html#edit-schedule';
+    else if(a==='remind'){
+      if(window.atlasConfirm) atlasConfirm({icon:'info',title:'Send payment reminder?',
+        message:'A reminder email will be sent to <strong>'+donor+'</strong> with the next installment amount, due date, and a secure payment link.',
+        confirmText:'Send reminder',cancelText:'Cancel',
+        onConfirm:function(){ var st=row.children[4]; if(st) st.innerHTML='<span class="tag" style="background:var(--blue-light);color:#1D4ED8">Reminder sent</span>'; ggToast('Reminder sent to '+donor); }});
+      else ggToast('Reminder sent to '+donor);
+    }
+    else if(a==='write'){
+      if(window.atlasConfirm) atlasConfirm({icon:'danger',danger:true,title:'Write off this pledge?',
+        message:'Marks the remaining balance on <strong>'+donor+'</strong>’s pledge as uncollectible. This needs DBA approval and writes an immutable audit entry. Payments already recorded are unaffected.',
+        confirmText:'Write off',cancelText:'Cancel',
+        onConfirm:function(){ var st=row.children[4]; if(st) st.innerHTML='<span class="tag" style="background:var(--rose-light);color:var(--rose)">Written off</span>'; row.style.opacity='.6'; ggToast('Pledge written off · '+donor+' · audit entry created'); }});
+      else ggToast('Pledge written off · '+donor);
+    }
+  };
+  document.querySelectorAll('[data-gp-view="pledges"] .gt-row .kebab').forEach(function(k){
+    k.addEventListener('click', function(e){ openPledgeMenu(e, k); });
+  });
+
   document.addEventListener('click', function(e){ if(!e.target.closest('#gt-menu') && !e.target.closest('.kebab')) closeMenu(); });
   window.addEventListener('scroll', closeMenu, true);
 })();
