@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GiveCentral Atlas — Cathedral Capital 2026</title>
+<title>GiveCentral Atlas — Build outreach list</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -663,7 +663,7 @@ body {
 <div class="main">
 
 <div class="topbar">
-  <span class="topbar-title">Campaign · Cathedral Capital 2026</span>
+  <span class="topbar-title">Build outreach list · Cathedral Capital 2026</span>
   <span class="topbar-date">Monday, May 4, 2026</span>
   <a href="atlas-search.html" class="topbar-search">
     <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
@@ -683,452 +683,243 @@ body {
 </div>
 
 <div class="dash">
-
   <div class="page-head">
     <div>
-      <div class="crumb"><a href="atlas-dashboard.html">Atlas</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <a href="atlas-campaign-dashboard.html">Campaigns</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <span>Cathedral Capital 2026</span></div>
+      <div class="crumb"><a href="atlas-dashboard.html">Atlas</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <a href="atlas-campaign-dashboard.html">Campaigns</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <a href="atlas-campaign-detail.html">Cathedral Capital 2026</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <span>Build outreach list</span></div>
+      <div class="page-title">Build outreach list</div>
+      <div class="page-sub">Target donors inside <strong>Cathedral Capital Campaign 2026</strong> for cultivation, appeals, or stewardship — the audience is pre-scoped to this campaign.</div>
     </div>
     <div class="flex gap-8">
-      <a class="btn btn-ghost" href="atlas-campaign-outreach.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h10M4 7h6M6 10h2"/></svg>
-        Build outreach list
-      </a>
-      <a class="btn btn-ghost" href="atlas-campaign-report.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 12V4M7 12V2M11 12V8"/></svg>
-        Campaign report
-      </a>
-      <a class="btn btn-primary" href="atlas-pledge-create.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg>
-        New pledge
-      </a>
+      <button class="btn btn-ghost" onclick="atlasToast('List exported · CSV of matching donors downloading')">Export CSV</button>
+      <button class="btn btn-primary" onclick="saveSegment()"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M3 3h8v8l-4-2-4 2z"/></svg> Save as segment</button>
     </div>
   </div>
 
-  <!-- Hero -->
-  <div class="cmp-hero">
-    <div class="cmp-hero-inner">
-      <span class="cmp-tag">★ Capital campaign · 2026</span>
-      <h1 class="cmp-h">Cathedral Capital Campaign 2026</h1>
-      <p class="cmp-d">Restoring the 1888 cathedral — bell-tower masonry, lead flashing, stained-glass conservation. 1:1 matched gifts up to $250,000 (anonymous family). Public phase: Jan 1 – Jun 30, 2026.</p>
+  <div class="ol-grid">
+    <!-- Filters -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Audience filters</span><span class="card-action" onclick="resetFilters()" style="cursor:pointer">Reset all</span></div>
+      <div class="card-body">
+        <div class="ol-f"><span class="lbl">Relationship to this campaign</span>
+          <select class="fld" id="f-rel" onchange="recount()">
+            <option>Any relationship</option><option>Gave to this campaign</option><option>Pledged — not fully paid</option><option>Lapsed — gave last year, not this</option><option>Never gave to this campaign</option>
+          </select></div>
+        <div class="ol-f"><span class="lbl">Gift / pledge size</span>
+          <select class="fld" id="f-size" onchange="recount()"><option>Any size</option><option>$1 – $999</option><option>$1,000 – $9,999</option><option>$10,000+</option><option>Major ($25k+)</option></select></div>
+        <div class="ol-f"><span class="lbl">Assigned solicitor</span>
+          <select class="fld" id="f-sol" onchange="recount()"><option>Any solicitor</option><option>Sarah Reynolds</option><option>Bridget McCarthy</option><option>Julia Kelleher</option><option>Unassigned</option></select></div>
+        <div class="ol-f"><span class="lbl">Wealth capacity (screened)</span>
+          <select class="fld" id="f-wealth" onchange="recount()"><option>Any capacity</option><option>High ($100k+ capacity)</option><option>Medium ($10k–$100k)</option><option>Not yet screened</option></select></div>
+        <div class="ol-f"><span class="lbl">Last contacted</span>
+          <select class="fld" id="f-contact" onchange="recount()"><option>Any time</option><option>More than 90 days ago</option><option>More than 180 days ago</option><option>Never contacted</option></select></div>
+        <div class="ol-f"><span class="lbl">Parish / location</span>
+          <select class="fld" id="f-parish" onchange="recount()"><option>All locations</option><option>Cathedral parish</option><option>St. Mary's</option><option>Diocese-wide</option></select></div>
+        <div class="ol-f"><span class="lbl">Tags</span>
+          <div class="ol-chips">
+            <span class="ol-chip" onclick="toggleChip(this)">Board member</span>
+            <span class="ol-chip" onclick="toggleChip(this)">Recurring donor</span>
+            <span class="ol-chip" onclick="toggleChip(this)">Event attendee</span>
+            <span class="ol-chip" onclick="toggleChip(this)">DAF donor</span>
+            <span class="ol-chip" onclick="toggleChip(this)">Volunteer</span>
+          </div></div>
+        <label class="ol-check"><input type="checkbox" id="f-dnc" checked onchange="recount()"> Exclude do-not-contact &amp; opted-out donors</label>
+      </div>
+    </div>
 
-      <div class="cmp-progress">
-        <div class="cmp-bar"><div class="cmp-bar-fill" style="width:60%"></div></div>
+    <!-- Preview + actions -->
+    <div>
+      <div class="card ol-countcard">
+        <div class="card-body" style="display:flex;align-items:center;gap:16px">
+          <div><div class="ol-bignum">≈ <span id="ol-count">342</span></div><div class="muted" style="font-size:12px">donors match · <span id="ol-note">gave to this campaign, all sizes</span></div></div>
+          <div style="margin-left:auto;text-align:right">
+            <div class="ol-sub"><span id="ol-selcount">0</span> selected</div>
+            <div class="muted" style="font-size:11.5px">from the preview below</div>
+          </div>
+        </div>
       </div>
 
-      <div class="cmp-stats">
-        <div class="cmp-stat"><div class="num gold">$1.20M</div><div class="lbl">Raised · 60% to goal</div></div>
-        <div class="cmp-stat"><div class="num">$2.00M</div><div class="lbl">Public goal</div></div>
-        <div class="cmp-stat"><div class="num green">847</div><div class="lbl">Donors · ↑ 38% vs. last year</div></div>
-        <div class="cmp-stat"><div class="num amber">43d</div><div class="lbl">Remaining in public phase</div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Preview — matching donors</span>
+          <label class="ol-selectall"><input type="checkbox" id="ol-all" onchange="toggleAll(this)"> Select all shown</label>
+        </div>
+        <div class="card-body" style="padding-top:8px">
+          <div class="cdp-search" style="margin-bottom:12px"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input type="text" id="ol-search" placeholder="Search preview…" oninput="filterPreview(this.value)"></div>
+          <div id="ol-list"></div>
+          <div class="cdp-empty" id="ol-empty">No donors in the preview match your search.</div>
+          <div class="cdp-foot">Preview shows a sample of 12 · the full match set is used when you save or export.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Actions on this audience</span></div>
+        <div class="card-body ol-actions">
+          <button class="btn btn-ghost" onclick="needSel()||atlasToast('Assigned '+selCount()+' donors to a solicitor for cultivation')">Assign to solicitor</button>
+          <a class="btn btn-ghost" href="atlas-email-compose.html">Compose appeal email</a>
+          <button class="btn btn-ghost" onclick="needSel()||atlasToast('Follow-up tasks created for '+selCount()+' donors · due in 7 days')">Add follow-up tasks</button>
+          <button class="btn btn-ghost" onclick="needSel()||atlasToast(selCount()+' donors added to the prospect pipeline')">Add to pipeline</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <div class="tab on" data-tab="overview" onclick="switchTab('overview',this)">Overview</div>
-    <div class="tab" data-tab="donors" onclick="switchTab('donors',this)">Donors <span class="ct">847</span></div>
-    <div class="tab" data-tab="pledges" onclick="switchTab('pledges',this)">Pledges <span class="ct">28</span></div>
-    <div class="tab" data-tab="solicitors" onclick="switchTab('solicitors',this)">Solicitors <span class="ct">5</span></div>
-    <div class="tab" data-tab="activity" onclick="switchTab('activity',this)">Activity <span class="ct">142</span></div>
-    <div class="tab" data-tab="settings" onclick="switchTab('settings',this)">Settings</div>
+  <!-- Save as segment modal -->
+  <div class="ol-ov" id="seg-ov">
+    <div class="ol-modal">
+      <div class="ol-mhead">
+        <div class="ol-mic"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h10v12l-5-3-5 3z"/></svg></div>
+        <div><div class="ol-mtitle">Save as segment</div><div class="ol-msub">Saved segments live in Tags &amp; Segments and refresh automatically as donors qualify.</div></div>
+        <button class="ol-mx" onclick="closeSeg()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg></button>
+      </div>
+      <div class="ol-mbody">
+        <div class="ol-summary" id="seg-summary"></div>
+        <div style="margin-top:14px"><span class="lbl">Segment name<span class="req">*</span></span><input class="fld" id="seg-name"></div>
+        <div style="margin-top:12px"><span class="lbl">Description <span class="muted" style="text-transform:none;font-weight:400">(optional)</span></span><textarea class="fld" id="seg-desc" style="min-height:60px" placeholder="What this list is for…"></textarea></div>
+        <div class="row2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div><span class="lbl">Visibility</span><select class="fld" id="seg-vis"><option>My team</option><option>Just me</option><option>Everyone</option></select></div>
+          <div><span class="lbl">Keep in sync?</span><select class="fld" id="seg-sync"><option>Dynamic — auto-update as donors qualify</option><option>Static — freeze today's list</option></select></div>
+        </div>
+        <label class="ol-check" style="margin-top:12px"><input type="checkbox" id="seg-selonly"> Save only the <b id="seg-selnum" style="margin:0 3px">0</b> donors I selected (instead of the full match set)</label>
+      </div>
+      <div class="ol-mfoot">
+        <span class="muted" style="margin-right:auto;font-size:12px" id="seg-footnote"></span>
+        <button class="btn btn-ghost" onclick="closeSeg()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmSaveSegment()">Save segment</button>
+      </div>
+    </div>
   </div>
 
-  <div id="pane-overview" class="tabpane on">
-  <div class="cd-grid">
-
-    <main>
-
-      <!-- Financial summary -->
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Financial summary</span>
-          <span class="card-action" onclick="atlasToast('Reconciling to QuickBooks Fund 4001 · $1.20M received matches GL 100% as of last night · opening Sync')" style="cursor:pointer">Reconcile to GL →</span>
-        </div>
-        <div class="card-body">
-          <div class="fin-grid">
-            <div class="fin-card pledged">
-              <div class="lbl">Pledged</div>
-              <div class="val">$2.04M</div>
-              <div class="sub"><b>28 active pledges</b> · $1.84M outstanding</div>
-            </div>
-            <div class="fin-card received">
-              <div class="lbl">Received</div>
-              <div class="val">$1.20M</div>
-              <div class="sub"><b>847 gifts</b> incl. pledge payments and one-time gifts</div>
-            </div>
-            <div class="fin-card outstanding">
-              <div class="lbl">Outstanding</div>
-              <div class="val">$1.84M</div>
-              <div class="sub"><b>Pledged minus paid</b> · $86k due in 30 days</div>
-            </div>
-          </div>
-          <p class="muted" style="font-size:11.5px;margin-top:14px">Reconciles to QuickBooks Fund 4001 (Cathedral Restoration) at <strong style="color:var(--green)">100% match</strong> as of last night's export.</p>
-        </div>
-      </div>
-
-      <!-- Hierarchy -->
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Hierarchy — Campaign → Appeal → Fund</span>
-          <a class="card-action" href="atlas-campaign-create.html" style="cursor:pointer">+ Add appeal</a>
-        </div>
-        <div class="card-body" style="padding:0 22px 14px">
-
-          <div class="tree-node" style="padding-top:14px">
-            <div class="ico-sm c">C</div>
-            <div class="body"><div class="nm">Cathedral Capital Campaign 2026</div><div class="meta">Goal $2.0M · 6-month public phase</div></div>
-            <div class="progress"><div class="bar"><div class="bar-f" style="width:60%"></div></div><span class="pct">60%</span></div>
-            <div class="v">$1.20M / $2.00M</div>
-            <div class="v" style="color:var(--text-3)">— ROI</div>
-            <div></div>
-          </div>
-
-          <div class="tree-node" style="padding-left:32px">
-            <div class="ico-sm a">A</div>
-            <div class="body"><div class="nm">Spring 2026 — major donor cultivation</div><div class="meta">Lead-gift outreach · top 50 prospects</div></div>
-            <div class="progress"><div class="bar"><div class="bar-f" style="width:75%"></div></div><span class="pct">75%</span></div>
-            <div class="v">$600k / $800k</div>
-            <div class="v" style="color:var(--green)">14:1</div>
-            <div style="text-align:right">›</div>
-          </div>
-
-          <div class="tree-node" style="padding-left:64px">
-            <div class="ico-sm f">F</div>
-            <div class="body"><div class="nm">Cathedral Restoration · GL 4001</div><div class="meta">Diocese of Albany · matched 1:1</div></div>
-            <div class="progress"><div class="bar"><div class="bar-f" style="width:75%"></div></div><span class="pct">75%</span></div>
-            <div class="v">$600k / $800k</div>
-            <div></div>
-            <div style="text-align:right">›</div>
-          </div>
-
-          <div class="tree-node" style="padding-left:32px">
-            <div class="ico-sm a">A</div>
-            <div class="body"><div class="nm">Online giving — public campaign page</div><div class="meta">GiveCentral form: cathedral-2026</div></div>
-            <div class="progress"><div class="bar"><div class="bar-f" style="width:48%"></div></div><span class="pct">48%</span></div>
-            <div class="v">$480k / $1.00M</div>
-            <div class="v" style="color:var(--green)">22:1</div>
-            <div style="text-align:right">›</div>
-          </div>
-
-          <div class="tree-node" style="padding-left:64px">
-            <div class="ico-sm f">F</div>
-            <div class="body"><div class="nm">Cathedral Restoration · GL 4001 (shared)</div><div class="meta">Routed via online form</div></div>
-            <div class="progress"><div class="bar"><div class="bar-f" style="width:50%"></div></div><span class="pct">50%</span></div>
-            <div class="v">$400k / $800k</div>
-            <div></div>
-            <div style="text-align:right">›</div>
-          </div>
-
-          <div class="tree-node" style="padding-left:64px">
-            <div class="ico-sm f">F</div>
-            <div class="body"><div class="nm">Music Ministry · GL 4002</div><div class="meta">For matched gifts only</div></div>
-            <div class="progress"><div class="bar"><div class="bar-f" style="width:40%;background:var(--amber)"></div></div><span class="pct">40%</span></div>
-            <div class="v">$80k / $200k</div>
-            <div></div>
-            <div style="text-align:right">›</div>
-          </div>
-
-          <div class="tree-node" style="padding-left:32px">
-            <div class="ico-sm a">A</div>
-            <div class="body"><div class="nm">Bishop's Annual Gala 2026</div><div class="meta">Apr 24 · table sponsorships</div></div>
-            <div class="progress"><div class="bar"><div class="bar-f" style="width:60%"></div></div><span class="pct">60%</span></div>
-            <div class="v">$120k / $200k</div>
-            <div class="v" style="color:var(--green)">8:1</div>
-            <div style="text-align:right">›</div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- YoY -->
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Year-over-year — same campaign window (Jan – May)</span>
-          <a class="card-action" href="atlas-report-detail.html" style="cursor:pointer">View 5-year trend →</a>
-        </div>
-        <div class="card-body">
-          <div class="yoy-row">
-            <span class="yr cur">2026 ★</span>
-            <div class="yo-bar"><div class="yo-bar-f cur" style="width:100%"></div></div>
-            <span class="v" style="color:var(--blue)">$1.20M</span>
-          </div>
-          <div class="yoy-row">
-            <span class="yr">2025</span>
-            <div class="yo-bar"><div class="yo-bar-f prev" style="width:71%"></div></div>
-            <span class="v">$854k</span>
-          </div>
-          <div class="yoy-row">
-            <span class="yr">2024</span>
-            <div class="yo-bar"><div class="yo-bar-f prev" style="width:54%"></div></div>
-            <span class="v">$648k</span>
-          </div>
-          <div class="yoy-row">
-            <span class="yr">2023</span>
-            <div class="yo-bar"><div class="yo-bar-f prev" style="width:42%"></div></div>
-            <span class="v">$502k</span>
-          </div>
-          <p class="muted" style="font-size:12px;margin-top:14px;display:flex;align-items:center;gap:8px">
-            <span style="color:var(--green);font-weight:700">↑ +41%</span> vs. same window last year ·
-            <span style="color:var(--green);font-weight:700">↑ +85%</span> vs. 2023
-          </p>
-        </div>
-      </div>
-
-    </main>
-
-    <!-- Right rail -->
-    <aside>
-
-      <div class="card">
-        <div class="card-header"><span class="card-title">Solicitor leaderboard</span><span class="card-action" onclick="switchTab('solicitors')" style="cursor:pointer">All →</span></div>
-        <div class="card-body">
-
-          <div class="sol-row">
-            <div class="av" style="background:var(--rose)">SR</div>
-            <div class="nm-text"><div class="nm">Sarah Reynolds</div><div class="meta">Dev Director · 18 prospects</div></div>
-            <span class="v">$486k</span>
-            <span class="v">12</span>
-            <span class="delta up">↑ 28%</span>
-          </div>
-
-          <div class="sol-row">
-            <div class="av" style="background:var(--purple)">BM</div>
-            <div class="nm-text"><div class="nm">Bridget McCarthy</div><div class="meta">Dev Director · 15 prospects</div></div>
-            <span class="v">$324k</span>
-            <span class="v">9</span>
-            <span class="delta up">↑ 14%</span>
-          </div>
-
-          <div class="sol-row">
-            <div class="av" style="background:var(--green)">JK</div>
-            <div class="nm-text"><div class="nm">Julia Kelleher</div><div class="meta">Officer · 22 prospects</div></div>
-            <span class="v">$198k</span>
-            <span class="v">7</span>
-            <span class="delta up">↑ 8%</span>
-          </div>
-
-          <div class="sol-row">
-            <div class="av" style="background:var(--blue)">DC</div>
-            <div class="nm-text"><div class="nm">Daniel Cho</div><div class="meta">DB Admin · 0 prospects</div></div>
-            <span class="v">$98k</span>
-            <span class="v">— </span>
-            <span class="delta">data entry only</span>
-          </div>
-
-          <div class="sol-row">
-            <div class="av" style="background:var(--text-3)">UK</div>
-            <div class="nm-text"><div class="nm">Unattributed</div><div class="meta">Online + walk-in</div></div>
-            <span class="v">$94k</span>
-            <span class="v">819</span>
-            <span class="delta">smaller gifts</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><span class="card-title">Top recent gifts</span><span class="card-action" onclick="switchTab('activity')" style="cursor:pointer">All 142 →</span></div>
-        <div class="card-body" id="ov-topgifts" style="padding:0 22px 14px">
-          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:12.5px">
-            <div><div style="font-weight:500">Margaret O'Brien</div><div style="color:var(--text-3);font-size:11px">May 4 · cash · matched</div></div>
-            <div style="font-weight:600;font-variant-numeric:tabular-nums">$10,000</div>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:12.5px">
-            <div><div style="font-weight:500">Robert &amp; Susan Lin</div><div style="color:var(--text-3);font-size:11px">May 3 · check</div></div>
-            <div style="font-weight:600;font-variant-numeric:tabular-nums">$25,000</div>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:12.5px">
-            <div><div style="font-weight:500">Schwab Charitable (DAF)</div><div style="color:var(--text-3);font-size:11px">May 2 · soft credit Margaret</div></div>
-            <div style="font-weight:600;font-variant-numeric:tabular-nums">$15,000</div>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:12.5px">
-            <div><div style="font-weight:500">Anthony Riccardi</div><div style="color:var(--text-3);font-size:11px">Apr 22 · 100 sh AAPL</div></div>
-            <div style="font-weight:600;font-variant-numeric:tabular-nums">$18.4k</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><span class="card-title">Quick actions</span></div>
-        <div class="card-body" style="display:flex;flex-direction:column;gap:8px">
-          <a class="btn btn-ghost" href="atlas-campaign-outreach.html">Build cultivation list</a>
-          <a class="btn btn-ghost" href="atlas-pipeline.html">Open prospects (pipeline)</a>
-          <a class="btn btn-ghost" href="atlas-email-compose.html">Send campaign update</a>
-          <a class="btn btn-ghost" href="atlas-campaign-report.html">Open campaign report</a>
-        </div>
-      </div>
-
-    </aside>
-
-  </div>
-  </div><!-- /#pane-overview -->
-
-  <style id="cd-panes">
-    .tabpane{ display:none; } .tabpane.on{ display:block; }
-    .cdp-toolbar{ display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
-    .cdp-search{ flex:1; max-width:340px; display:flex; align-items:center; gap:8px; background:white; border:1px solid var(--border); border-radius:9px; padding:8px 12px; }
-    .cdp-search svg{ width:14px; height:14px; color:var(--text-3); flex-shrink:0; }
-    .cdp-search input{ border:none; outline:none; background:none; width:100%; font-size:13px; font-family:'DM Sans',sans-serif; color:var(--text); }
-    .cdp-spacer{ flex:1; }
-    .cdp-table{ width:100%; border-collapse:collapse; font-size:13px; }
-    .cdp-table th{ text-align:left; font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); padding:9px 12px; border-bottom:1px solid var(--border); background:var(--surface); }
-    .cdp-table th.cdp-num, .cdp-table td.cdp-num{ text-align:right; }
-    .cdp-table td{ padding:11px 12px; border-bottom:1px solid var(--border-soft); }
-    .cdp-table tbody tr{ cursor:pointer; transition:background .12s; }
-    .cdp-table tbody tr:hover{ background:var(--blue-pale); }
-    .cdp-num{ font-variant-numeric:tabular-nums; }
-    .cdp-empty{ padding:28px; text-align:center; color:var(--text-3); font-size:13px; display:none; }
-    .cdp-foot{ font-size:12px; color:var(--text-3); padding:12px 4px 0; }
-    .act-item{ display:flex; gap:12px; padding:12px 2px; border-bottom:1px solid var(--border-soft); }
-    .act-item:last-child{ border-bottom:none; }
-    .act-dot{ width:9px; height:9px; border-radius:50%; margin-top:5px; flex-shrink:0; }
-    .act-item .a-main{ font-size:13px; color:var(--text); } .act-item .a-main b{ font-weight:600; }
-    .act-item .a-meta{ font-size:11.5px; color:var(--text-3); margin-top:2px; }
-    .act-item .a-amt{ margin-left:auto; font-weight:600; font-variant-numeric:tabular-nums; font-size:12.5px; white-space:nowrap; }
-    .set-row{ display:flex; padding:10px 0; border-bottom:1px dashed var(--border-soft); font-size:13px; }
-    .set-row:last-child{ border-bottom:none; }
-    .set-row .k{ width:190px; color:var(--text-3); flex-shrink:0; }
-    .set-row .v{ color:var(--text); font-weight:500; }
-    .mini-bar{ height:5px; background:var(--border-soft); border-radius:99px; overflow:hidden; width:96px; display:inline-block; vertical-align:middle; margin-right:8px; }
-    .mini-bar-f{ height:100%; background:var(--green); border-radius:99px; }
-    .danger-zone{ border:1px solid #FBCFE8; background:#FFF1F5; border-radius:12px; padding:16px 18px; margin-top:16px; }
-    .danger-zone h4{ font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--rose); margin-bottom:10px; }
+  <style id="ol-css">
+    select.fld{ background-position:right 12px center !important; background-size:10px 10px !important; padding-right:34px !important; text-overflow:ellipsis; }
+    .ol-grid{ display:grid; grid-template-columns:340px 1fr; gap:22px; align-items:start; }
+    .ol-ov{ position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:100030; display:none; align-items:center; justify-content:center; padding:24px; }
+    .ol-ov.open{ display:flex; }
+    .ol-modal{ background:white; border-radius:16px; width:100%; max-width:500px; box-shadow:0 24px 60px rgba(15,23,42,.24); display:flex; flex-direction:column; max-height:88vh; overflow:hidden; }
+    .ol-mhead{ display:flex; gap:12px; align-items:flex-start; padding:18px 20px 14px; border-bottom:1px solid var(--border); }
+    .ol-mic{ width:38px; height:38px; border-radius:10px; background:var(--blue-light); color:var(--blue); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .ol-mic svg{ width:19px; height:19px; }
+    .ol-mtitle{ font-family:'DM Serif Display',serif; font-size:19px; color:var(--navy); letter-spacing:-.01em; }
+    .ol-msub{ font-size:12px; color:var(--text-3); margin-top:3px; }
+    .ol-mx{ margin-left:auto; width:28px; height:28px; border-radius:8px; border:1px solid var(--border); background:white; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .ol-mx svg{ width:13px; height:13px; color:var(--text-2); }
+    .ol-mbody{ padding:16px 20px; overflow-y:auto; }
+    .ol-mfoot{ padding:14px 20px; border-top:1px solid var(--border); background:var(--surface); display:flex; align-items:center; gap:8px; }
+    .ol-summary{ background:var(--blue-pale); border:1px solid var(--blue-light); border-radius:10px; padding:12px 14px; font-size:12.5px; color:var(--text-2); line-height:1.5; }
+    .ol-summary b{ color:var(--navy); }
+    .ol-f{ margin-bottom:14px; }
+    .ol-chips{ display:flex; flex-wrap:wrap; gap:7px; }
+    .ol-chip{ padding:6px 11px; border:1.5px solid var(--border); border-radius:99px; font-size:12px; color:var(--text-2); cursor:pointer; user-select:none; transition:all .12s; }
+    .ol-chip:hover{ border-color:#93C5FD; }
+    .ol-chip.on{ background:var(--blue); border-color:var(--blue); color:white; font-weight:600; }
+    .ol-check{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-2); margin-top:6px; cursor:pointer; }
+    .ol-countcard{ background:linear-gradient(135deg,var(--blue-pale),white); border-color:var(--blue-light); }
+    .ol-bignum{ font-family:'DM Serif Display',serif; font-size:32px; color:var(--navy); line-height:1; }
+    .ol-sub{ font-size:13px; font-weight:600; color:var(--blue); }
+    .ol-selectall{ font-size:12px; color:var(--text-2); display:flex; align-items:center; gap:7px; cursor:pointer; }
+    .ol-row{ display:flex; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px solid var(--border-soft); cursor:pointer; }
+    .ol-row:hover{ background:var(--surface); }
+    .ol-row .av{ width:32px; height:32px; border-radius:50%; color:white; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .ol-row .nm{ font-weight:500; font-size:13px; } .ol-row .mt{ font-size:11.5px; color:var(--text-3); margin-top:1px; }
+    .ol-row .amt{ margin-left:auto; font-weight:600; font-variant-numeric:tabular-nums; font-size:12.5px; }
+    .ol-row input{ width:16px; height:16px; }
+    .ol-actions{ display:flex; flex-wrap:wrap; gap:8px; }
+    .cdp-search{ display:flex; align-items:center; gap:8px; background:white; border:1px solid var(--border); border-radius:9px; padding:8px 12px; }
+    .cdp-search svg{ width:14px; height:14px; color:var(--text-3); flex-shrink:0; } .cdp-search input{ border:none; outline:none; background:none; width:100%; font-size:13px; font-family:'DM Sans',sans-serif; }
+    .cdp-empty{ display:none; padding:20px; text-align:center; color:var(--text-3); font-size:13px; } .cdp-foot{ font-size:11.5px; color:var(--text-3); padding-top:10px; }
   </style>
 
-  <!-- ══ DONORS ══ -->
-  <div id="pane-donors" class="tabpane">
-    <div class="card"><div class="card-body">
-      <div class="cdp-toolbar">
-        <div class="cdp-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input type="text" placeholder="Search 847 campaign donors…" oninput="filterTable(this,'donor-tbody','donor-empty')"></div>
-        <div class="cdp-spacer"></div>
-        <button class="btn btn-ghost" onclick="atlasToast('Exporting 847 campaign donors · CSV downloading')">Export CSV</button>
-        <a class="btn btn-primary" href="atlas-pledge-create.html">+ New pledge</a>
-      </div>
-      <table class="cdp-table">
-        <thead><tr><th>Donor</th><th>Type</th><th class="cdp-num">To this campaign</th><th>Last gift</th><th>Solicitor</th></tr></thead>
-        <tbody id="donor-tbody">
-          <tr onclick="window.location='atlas-donor-360.html'"><td>Anonymous (matching family)</td><td><span class="tag purple">Major</span></td><td class="cdp-num">$250,000</td><td>Jan 15</td><td>Sarah Reynolds</td></tr>
-          <tr onclick="window.location='atlas-donor-360.html'"><td>The Delaney Foundation</td><td><span class="tag blue">Foundation</span></td><td class="cdp-num">$150,000</td><td>Apr 10</td><td>Bridget McCarthy</td></tr>
-          <tr onclick="window.location='atlas-donor-360.html'"><td>Robert &amp; Susan Lin</td><td><span class="tag purple">Major</span></td><td class="cdp-num">$125,000</td><td>May 3</td><td>Sarah Reynolds</td></tr>
-          <tr onclick="window.location='atlas-donor-360.html'"><td>Margaret O'Brien</td><td><span class="tag purple">Major</span></td><td class="cdp-num">$92,500</td><td>May 4</td><td>Bridget McCarthy</td></tr>
-          <tr onclick="window.location='atlas-donor-360.html'"><td>Anthony Riccardi</td><td><span class="tag green">Stock</span></td><td class="cdp-num">$68,400</td><td>Apr 22</td><td>Sarah Reynolds</td></tr>
-          <tr onclick="window.location='atlas-donor-360.html'"><td>Kevin &amp; Anne Doyle</td><td><span class="tag purple">Major</span></td><td class="cdp-num">$50,000</td><td>Apr 28</td><td>Julia Kelleher</td></tr>
-          <tr onclick="window.location='atlas-donor-360.html'"><td>Schwab Charitable (DAF)</td><td><span class="tag blue">DAF</span></td><td class="cdp-num">$45,000</td><td>May 2</td><td>Sarah Reynolds</td></tr>
-          <tr onclick="window.location='atlas-donor-360.html'"><td>St. Mary's Parish</td><td><span class="tag grey">Parish</span></td><td class="cdp-num">$38,000</td><td>Apr 15</td><td>Julia Kelleher</td></tr>
-          <tr onclick="window.location='atlas-donor-360.html'"><td>Patricia Nguyen</td><td><span class="tag grey">Mid-level</span></td><td class="cdp-num">$25,000</td><td>May 1</td><td>Bridget McCarthy</td></tr>
-          <tr onclick="window.location='atlas-donor-360.html'"><td>James Sullivan</td><td><span class="tag grey">Mid-level</span></td><td class="cdp-num">$20,000</td><td>Apr 19</td><td>Julia Kelleher</td></tr>
-        </tbody>
-      </table>
-      <div class="cdp-empty" id="donor-empty">No donors match your search.</div>
-      <div class="cdp-foot">Showing top 10 of <strong>847</strong> donors · sorted by total to campaign. <a href="atlas-donors-list.html" style="color:var(--blue)">Open full donor list →</a></div>
-    </div></div>
-  </div>
-
-  <!-- ══ PLEDGES ══ -->
-  <div id="pane-pledges" class="tabpane">
-    <div class="card"><div class="card-body">
-      <div class="cdp-toolbar">
-        <div class="cdp-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input type="text" placeholder="Search 28 active pledges…" oninput="filterTable(this,'pledge-tbody','pledge-empty')"></div>
-        <div class="cdp-spacer"></div>
-        <button class="btn btn-ghost" onclick="atlasToast('Exporting 28 pledges · CSV downloading')">Export CSV</button>
-        <a class="btn btn-primary" href="atlas-pledge-create.html">+ New pledge</a>
-      </div>
-      <table class="cdp-table">
-        <thead><tr><th>Donor</th><th class="cdp-num">Pledged</th><th class="cdp-num">Paid</th><th class="cdp-num">Outstanding</th><th>Next due</th><th>Status</th></tr></thead>
-        <tbody id="pledge-tbody">
-          <tr onclick="window.location='atlas-pledge-detail.html'"><td>Anonymous (matching family)</td><td class="cdp-num">$250,000</td><td class="cdp-num">$125,000</td><td class="cdp-num">$125,000</td><td>Rolling</td><td><span class="tag green">On track</span></td></tr>
-          <tr onclick="window.location='atlas-pledge-detail.html'"><td>The Delaney Foundation</td><td class="cdp-num">$150,000</td><td class="cdp-num">$50,000</td><td class="cdp-num">$100,000</td><td>Jul 15, 2026</td><td><span class="tag green">On track</span></td></tr>
-          <tr onclick="window.location='atlas-pledge-detail.html'"><td>Robert &amp; Susan Lin</td><td class="cdp-num">$125,000</td><td class="cdp-num">$60,000</td><td class="cdp-num">$65,000</td><td>Jun 1, 2026</td><td><span class="tag green">On track</span></td></tr>
-          <tr onclick="window.location='atlas-pledge-detail.html'"><td>Margaret O'Brien</td><td class="cdp-num">$92,500</td><td class="cdp-num">$92,500</td><td class="cdp-num">$0</td><td>—</td><td><span class="tag blue">Fulfilled</span></td></tr>
-          <tr onclick="window.location='atlas-pledge-detail.html'"><td>Kevin &amp; Anne Doyle</td><td class="cdp-num">$50,000</td><td class="cdp-num">$12,500</td><td class="cdp-num">$37,500</td><td>Jun 1, 2026</td><td><span class="tag green">On track</span></td></tr>
-          <tr onclick="window.location='atlas-pledge-detail.html'"><td>St. Mary's Parish</td><td class="cdp-num">$38,000</td><td class="cdp-num">$19,000</td><td class="cdp-num">$19,000</td><td>Jun 30, 2026</td><td><span class="tag green">On track</span></td></tr>
-          <tr onclick="window.location='atlas-pledge-detail.html'"><td>Patricia Nguyen</td><td class="cdp-num">$25,000</td><td class="cdp-num">$6,250</td><td class="cdp-num">$18,750</td><td>May 15, 2026</td><td><span class="tag amber">Due soon</span></td></tr>
-          <tr onclick="window.location='atlas-pledge-detail.html'"><td>James Sullivan</td><td class="cdp-num">$20,000</td><td class="cdp-num">$5,000</td><td class="cdp-num">$15,000</td><td>Apr 1, 2026</td><td><span class="tag rose">Overdue</span></td></tr>
-        </tbody>
-      </table>
-      <div class="cdp-empty" id="pledge-empty">No pledges match your search.</div>
-      <div class="cdp-foot"><strong>28 active pledges</strong> · $2.04M pledged · $1.84M outstanding · $86k due in 30 days. <a href="atlas-pledges-list.html" style="color:var(--blue)">Open full pledge list →</a></div>
-    </div></div>
-  </div>
-
-  <!-- ══ SOLICITORS ══ -->
-  <div id="pane-solicitors" class="tabpane">
-    <div class="card">
-      <div class="card-header"><span class="card-title">Solicitor performance · vs. target</span><span class="card-action" onclick="atlasToast('Target editor · set per-officer goals for this campaign')" style="cursor:pointer">Set targets →</span></div>
-      <div class="card-body">
-        <table class="cdp-table">
-          <thead><tr><th>Solicitor</th><th class="cdp-num">Target</th><th class="cdp-num">Raised</th><th>% to target</th><th class="cdp-num">Gifts</th><th class="cdp-num">Prospects</th></tr></thead>
-          <tbody>
-            <tr onclick="window.location='atlas-pipeline.html'"><td>Sarah Reynolds <span class="muted">· Dev Director</span></td><td class="cdp-num">$500k</td><td class="cdp-num">$486k</td><td><span class="mini-bar"><span class="mini-bar-f" style="width:97%"></span></span>97%</td><td class="cdp-num">12</td><td class="cdp-num">18</td></tr>
-            <tr onclick="window.location='atlas-pipeline.html'"><td>Bridget McCarthy <span class="muted">· Dev Director</span></td><td class="cdp-num">$350k</td><td class="cdp-num">$324k</td><td><span class="mini-bar"><span class="mini-bar-f" style="width:93%"></span></span>93%</td><td class="cdp-num">9</td><td class="cdp-num">15</td></tr>
-            <tr onclick="window.location='atlas-pipeline.html'"><td>Julia Kelleher <span class="muted">· Officer</span></td><td class="cdp-num">$250k</td><td class="cdp-num">$198k</td><td><span class="mini-bar"><span class="mini-bar-f" style="width:79%;background:var(--amber)"></span></span>79%</td><td class="cdp-num">7</td><td class="cdp-num">22</td></tr>
-            <tr onclick="window.location='atlas-pipeline.html'"><td>Daniel Cho <span class="muted">· DB Admin</span></td><td class="cdp-num">—</td><td class="cdp-num">$98k</td><td class="muted">data entry</td><td class="cdp-num">—</td><td class="cdp-num">0</td></tr>
-            <tr><td>Unattributed <span class="muted">· online + walk-in</span></td><td class="cdp-num">—</td><td class="cdp-num">$94k</td><td class="muted">smaller gifts</td><td class="cdp-num">819</td><td class="cdp-num">—</td></tr>
-          </tbody>
-        </table>
-        <div class="cdp-foot">3 officers carrying targets · <strong>$1.20M</strong> raised across all sources · 60% to the $2.0M goal.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ ACTIVITY ══ -->
-  <div id="pane-activity" class="tabpane">
-    <div class="card">
-      <div class="card-header"><span class="card-title">Campaign activity · 142 events</span>
-        <select class="fld" style="width:auto;font-size:12px;padding:6px 28px 6px 10px" onchange="filterActivity(this.value)">
-          <option value="all">All activity</option><option value="gift">Gifts only</option><option value="pledge">Pledges</option><option value="comm">Communications</option><option value="note">Notes &amp; tasks</option>
-        </select>
-      </div>
-      <div class="card-body" id="act-list">
-        <div class="act-item" data-kind="gift"><div class="act-dot" style="background:var(--green)"></div><div><div class="a-main"><b>Gift posted</b> — Margaret O'Brien (matched 1:1)</div><div class="a-meta">May 4, 9:12 AM · cash · receipt sent</div></div><div class="a-amt" style="color:var(--green)">+$10,000</div></div>
-        <div class="act-item" data-kind="pledge"><div class="act-dot" style="background:var(--blue)"></div><div><div class="a-main"><b>Pledge payment</b> — Robert &amp; Susan Lin</div><div class="a-meta">May 3 · check · $65k outstanding</div></div><div class="a-amt" style="color:var(--green)">+$25,000</div></div>
-        <div class="act-item" data-kind="gift"><div class="act-dot" style="background:var(--green)"></div><div><div class="a-main"><b>DAF gift</b> — Schwab Charitable (soft credit Margaret O'Brien)</div><div class="a-meta">May 2 · donor-advised fund</div></div><div class="a-amt" style="color:var(--green)">+$15,000</div></div>
-        <div class="act-item" data-kind="comm"><div class="act-dot" style="background:var(--blue-mid)"></div><div><div class="a-main"><b>Email sent</b> — "Spring restoration update" to 312 donors</div><div class="a-meta">May 2 · 61% open rate · Sarah Reynolds</div></div><div class="a-amt muted">312</div></div>
-        <div class="act-item" data-kind="note"><div class="act-dot" style="background:var(--purple)"></div><div><div class="a-main"><b>Note logged</b> — cultivation call with The Delaney Foundation</div><div class="a-meta">May 1 · Sarah Reynolds · next step: proposal</div></div></div>
-        <div class="act-item" data-kind="pledge"><div class="act-dot" style="background:var(--blue)"></div><div><div class="a-main"><b>Pledge created</b> — Patricia Nguyen · 4 instalments</div><div class="a-meta">May 1 · Bridget McCarthy</div></div><div class="a-amt">$25,000</div></div>
-        <div class="act-item" data-kind="gift"><div class="act-dot" style="background:var(--green)"></div><div><div class="a-main"><b>Stock gift</b> — 100 sh AAPL from Anthony Riccardi</div><div class="a-meta">Apr 22 · liquidated same day</div></div><div class="a-amt" style="color:var(--green)">+$18,400</div></div>
-        <div class="act-item" data-kind="note"><div class="act-dot" style="background:var(--teal)"></div><div><div class="a-main"><b>Task completed</b> — "Identify 5 prospects" (Julia Kelleher)</div><div class="a-meta">Apr 20 · 5 prospects added to pipeline</div></div></div>
-        <div class="act-item" data-kind="gift"><div class="act-dot" style="background:var(--green)"></div><div><div class="a-main"><b>Batch posted</b> — BX-2026-014 · 23 gifts</div><div class="a-meta">Apr 18 · Daniel Cho · reconciled to GL 4001</div></div><div class="a-amt" style="color:var(--green)">+$87,400</div></div>
-        <div class="act-item" data-kind="comm"><div class="act-dot" style="background:var(--amber)"></div><div><div class="a-main"><b>Reminder sent</b> — overdue pledge, James Sullivan</div><div class="a-meta">Apr 15 · automated · SMS + email</div></div></div>
-      </div>
-      <div class="cdp-empty" id="act-empty">No activity of this type.</div>
-      <div class="cdp-foot" style="padding:0 22px 16px">Showing 10 of <strong>142</strong> events. <a href="atlas-gifts-pledges.html" style="color:var(--blue)">Open gifts &amp; pledges →</a></div>
-    </div>
-  </div>
-
-  <!-- ══ SETTINGS ══ -->
-  <div id="pane-settings" class="tabpane">
-    <div class="card">
-      <div class="card-header"><span class="card-title">Campaign settings</span><a class="card-action" href="atlas-campaign-create.html" style="cursor:pointer">Edit campaign →</a></div>
-      <div class="card-body">
-        <div class="set-row"><span class="k">Campaign name</span><span class="v">Cathedral Capital Campaign 2026</span></div>
-        <div class="set-row"><span class="k">Internal code</span><span class="v">CC2026</span></div>
-        <div class="set-row"><span class="k">Type</span><span class="v"><span class="tag blue">Capital campaign</span></span></div>
-        <div class="set-row"><span class="k">Goal</span><span class="v">$2,000,000 <span class="muted">· stretch $2,500,000</span></span></div>
-        <div class="set-row"><span class="k">Public phase</span><span class="v">Jan 1 → Jun 30, 2026 <span class="muted">· quiet phase from Sep 2025</span></span></div>
-        <div class="set-row"><span class="k">Legal entity</span><span class="v">Diocese of Albany <span class="muted">· EIN 14-•••2401</span></span></div>
-        <div class="set-row"><span class="k">Primary fund</span><span class="v">Cathedral Restoration · GL 4001</span></div>
-        <div class="set-row"><span class="k">Public page</span><span class="v">givecentral.org/cathedral-2026</span></div>
-        <div class="set-row"><span class="k">Receipt rules</span><span class="v">Standard per-gift · named-gift pledges tracked multi-year</span></div>
-        <div class="set-row"><span class="k">Assigned solicitors</span><span class="v">Sarah Reynolds · Bridget McCarthy · Julia Kelleher</span></div>
-        <div class="set-row"><span class="k">Edit access</span><span class="v">Dev Directors only</span></div>
-
-        <div style="display:flex;gap:8px;margin-top:16px">
-          <a class="btn btn-primary" href="atlas-campaign-create.html">Edit campaign</a>
-          <button class="btn btn-ghost" onclick="atlasToast('Duplicating campaign · a draft copy will open in the editor')">Duplicate</button>
-          <button class="btn btn-ghost" onclick="atlasToast('Public page opening · givecentral.org/cathedral-2026')">View public page</button>
-        </div>
-
-        <div class="danger-zone">
-          <h4>Danger zone</h4>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-ghost" onclick="cdConfirm('Close this campaign?','No new gifts can be attributed after closing. Existing pledges keep their schedules.','Close campaign',function(){atlasToast('Campaign closed · marked complete · pledges continue on schedule');})">Close campaign</button>
-            <button class="btn btn-rose" onclick="cdConfirm('Archive this campaign?','It will be hidden from the active dashboard. You can restore it anytime from Archived.','Archive',function(){atlasToast('Campaign archived · restore anytime from Campaigns → Archived');})">Archive campaign</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <script id="ol-js">
+  (function(){
+    var DONORS=[
+      {ini:'AF',c:'#7C3AED',nm:'Anonymous (matching family)',mt:'Major · Sarah Reynolds',amt:'$250,000'},
+      {ini:'DF',c:'#2563EB',nm:'The Delaney Foundation',mt:'Foundation · Bridget McCarthy',amt:'$150,000'},
+      {ini:'RL',c:'#BE185D',nm:'Robert & Susan Lin',mt:'Major · Sarah Reynolds',amt:'$125,000'},
+      {ini:'MO',c:'#0D9488',nm:"Margaret O'Brien",mt:'Major · Bridget McCarthy',amt:'$92,500'},
+      {ini:'AR',c:'#15803D',nm:'Anthony Riccardi',mt:'Stock · Sarah Reynolds',amt:'$68,400'},
+      {ini:'KD',c:'#B45309',nm:'Kevin & Anne Doyle',mt:'Major · Julia Kelleher',amt:'$50,000'},
+      {ini:'PN',c:'#2563EB',nm:'Patricia Nguyen',mt:'Mid-level · Bridget McCarthy',amt:'$25,000'},
+      {ini:'JS',c:'#64748B',nm:'James Sullivan',mt:'Mid-level · Julia Kelleher',amt:'$20,000'},
+      {ini:'SM',c:'#7C3AED',nm:"St. Mary's Parish",mt:'Parish · Julia Kelleher',amt:'$38,000'},
+      {ini:'HT',c:'#0D9488',nm:'Helen Tobin',mt:'Recurring · unassigned',amt:'$4,800'},
+      {ini:'GW',c:'#BE185D',nm:'George Whelan',mt:'Event attendee · unassigned',amt:'$2,500'},
+      {ini:'CM',c:'#15803D',nm:'Carla Mendez',mt:'Volunteer · unassigned',amt:'$1,200'}
+    ];
+    function render(){
+      document.getElementById('ol-list').innerHTML = DONORS.map(function(d,i){
+        return '<label class="ol-row"><input type="checkbox" class="ol-cb" onchange="olSel()">'
+          +'<span class="av" style="background:'+d.c+'">'+d.ini+'</span>'
+          +'<span><span class="nm">'+d.nm+'</span><div class="mt">'+d.mt+'</div></span>'
+          +'<span class="amt">'+d.amt+'</span></label>';
+      }).join('');
+    }
+    window.olSel=function(){
+      var n=document.querySelectorAll('#ol-list .ol-cb:checked').length;
+      document.getElementById('ol-selcount').textContent=n;
+    };
+    window.selCount=function(){ return document.querySelectorAll('#ol-list .ol-cb:checked').length; };
+    window.needSel=function(){ if(selCount()===0){ atlasToast('Select at least one donor in the preview first'); return true; } return false; };
+    window.toggleAll=function(cb){ document.querySelectorAll('#ol-list .ol-row').forEach(function(r){ if(r.style.display!=='none'){ var b=r.querySelector('.ol-cb'); b.checked=cb.checked; } }); olSel(); };
+    window.filterPreview=function(q){ q=(q||'').toLowerCase(); var shown=0; document.querySelectorAll('#ol-list .ol-row').forEach(function(r){ var hit=r.textContent.toLowerCase().indexOf(q)!==-1; r.style.display=hit?'':'none'; if(hit)shown++; }); document.getElementById('ol-empty').style.display=shown?'none':'block'; };
+    window.toggleChip=function(el){ el.classList.toggle('on'); recount(); };
+    window.resetFilters=function(){ ['f-rel','f-size','f-sol','f-wealth','f-contact','f-parish'].forEach(function(id){ document.getElementById(id).selectedIndex=0; }); document.querySelectorAll('.ol-chip.on').forEach(function(c){ c.classList.remove('on'); }); document.getElementById('f-dnc').checked=true; recount(); atlasToast('Filters reset'); };
+    window.recount=function(){
+      var rel=document.getElementById('f-rel');
+      var base=[847,520,24,286,1268][rel.selectedIndex]||847;
+      var factor=1;
+      ['f-size','f-sol','f-wealth','f-contact','f-parish'].forEach(function(id){ if(document.getElementById(id).selectedIndex>0) factor*=0.6; });
+      var tags=document.querySelectorAll('.ol-chip.on').length; if(tags) factor*=Math.pow(0.7,tags);
+      if(document.getElementById('f-dnc').checked) factor*=0.96;
+      var n=Math.max(3,Math.round(base*factor));
+      document.getElementById('ol-count').textContent=n.toLocaleString();
+      var relTxt=rel.options[rel.selectedIndex].textContent.toLowerCase();
+      var extra=[]; if(document.getElementById('f-size').selectedIndex>0) extra.push(document.getElementById('f-size').value.toLowerCase());
+      if(tags) extra.push(tags+' tag'+(tags>1?'s':''));
+      document.getElementById('ol-note').textContent=relTxt+(extra.length?' · '+extra.join(' · '):' · all sizes');
+    };
+    function activeFilterSummary(){
+      var rel=document.getElementById('f-rel'); var parts=[rel.options[rel.selectedIndex].textContent];
+      [['f-size','size'],['f-sol','solicitor'],['f-wealth','capacity'],['f-contact','contact'],['f-parish','location']].forEach(function(p){
+        var s=document.getElementById(p[0]); if(s.selectedIndex>0) parts.push(s.options[s.selectedIndex].textContent);
+      });
+      var tags=[].map.call(document.querySelectorAll('.ol-chip.on'),function(c){return c.textContent;});
+      if(tags.length) parts.push('tags: '+tags.join(', '));
+      if(document.getElementById('f-dnc').checked) parts.push('excludes do-not-contact');
+      return parts;
+    }
+    window.saveSegment=function(){
+      var rel=document.getElementById('f-rel');
+      var count=document.getElementById('ol-count').textContent;
+      document.getElementById('seg-name').value='Cathedral 2026 — '+rel.options[rel.selectedIndex].textContent;
+      var parts=activeFilterSummary();
+      document.getElementById('seg-summary').innerHTML='<b>≈ '+count+' donors</b> match these rules:<br>'+parts.join(' · ');
+      var sel=selCount();
+      document.getElementById('seg-selnum').textContent=sel;
+      var selOnly=document.getElementById('seg-selonly'); selOnly.checked=false; selOnly.disabled=(sel===0);
+      document.getElementById('seg-footnote').textContent = sel? (sel+' selected in preview') : 'saves the full match set';
+      document.getElementById('seg-ov').classList.add('open');
+      setTimeout(function(){ try{document.getElementById('seg-name').focus();}catch(e){} },40);
+    };
+    window.closeSeg=function(){ document.getElementById('seg-ov').classList.remove('open'); };
+    window.confirmSaveSegment=function(){
+      var name=(document.getElementById('seg-name').value||'').trim();
+      if(!name){ atlasToast('Give the segment a name first'); return; }
+      var selOnly=document.getElementById('seg-selonly').checked;
+      var count=selOnly? selCount() : document.getElementById('ol-count').textContent;
+      var vis=document.getElementById('seg-vis').value;
+      var sync=/Dynamic/.test(document.getElementById('seg-sync').value)?'dynamic':'static';
+      try{
+        var segs=JSON.parse(localStorage.getItem('atlas-segments')||'[]');
+        segs.push({name:name,count:count,visibility:vis,sync:sync,campaign:'Cathedral Capital 2026',when:Date.now()});
+        localStorage.setItem('atlas-segments',JSON.stringify(segs));
+      }catch(e){}
+      closeSeg();
+      atlasToast('Segment saved · "'+name+'" ('+(selOnly?count+' selected':'≈'+count+' donors')+' · '+sync+') — added to Tags & Segments');
+    };
+    // scrim + escape close
+    document.getElementById('seg-ov').addEventListener('click',function(e){ if(e.target===this) closeSeg(); });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeSeg(); });
+    render(); recount();
+  })();
+  </script>
 
 </div>
 
@@ -1708,68 +1499,6 @@ body {
   window.alert=function(m){ atlasAlert('Atlas', String(m==null?'':m)); };
   var ov=el('ax-ov'); if(ov) ov.addEventListener('click',function(e){ if(e.target===this) close(); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
-})();
-</script>
-
-<script id="cd-controller">
-(function(){
-  function toast(m){ if(window.atlasToast) window.atlasToast(m); }
-
-  // ── Tab switching ──
-  window.switchTab = function(name, el){
-    document.querySelectorAll('.tabpane').forEach(function(p){ p.classList.remove('on'); });
-    var pane = document.getElementById('pane-'+name);
-    if (pane) pane.classList.add('on');
-    document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.dataset.tab===name); });
-    if (!el){ var t=document.querySelector('.tab[data-tab="'+name+'"]'); if(t){ document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');}); t.classList.add('on'); } }
-    try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(_){}
-  };
-
-  // ── Table search ──
-  window.filterTable = function(input, tbodyId, emptyId){
-    var q = (input.value||'').toLowerCase();
-    var rows = document.querySelectorAll('#'+tbodyId+' tr');
-    var shown = 0;
-    rows.forEach(function(r){ var hit = r.textContent.toLowerCase().indexOf(q)!==-1; r.style.display = hit?'':'none'; if(hit) shown++; });
-    var empty = document.getElementById(emptyId); if(empty) empty.style.display = shown?'none':'block';
-  };
-
-  // ── Activity filter ──
-  window.filterActivity = function(kind){
-    var items = document.querySelectorAll('#act-list .act-item');
-    var shown = 0;
-    items.forEach(function(it){
-      var k = it.dataset.kind;
-      var hit = kind==='all' || k===kind || (kind==='comm' && k==='comm') || (kind==='note' && k==='note');
-      it.style.display = hit?'':'none'; if(hit) shown++;
-    });
-    var empty = document.getElementById('act-empty'); if(empty) empty.style.display = shown?'none':'block';
-  };
-
-  // ── Themed confirm wrapper ──
-  window.cdConfirm = function(title, message, confirmText, onOk){
-    if (window.atlasConfirm){
-      atlasConfirm({icon: /archive|close/i.test(confirmText)?'warn':'info', title:title, message:message, confirmText:confirmText, cancelText:'Cancel', danger:/archive/i.test(confirmText), onConfirm:onOk});
-    } else { if (confirm(title+'\n\n'+message)) onOk(); }
-  };
-
-  // ── Overview row clicks ──
-  document.querySelectorAll('#pane-overview .tree-node').forEach(function(n){
-    n.addEventListener('click', function(){
-      var nm = (n.querySelector('.nm')||{}).textContent || 'this branch';
-      var val = (n.querySelector('.v')||{}).textContent || '';
-      toast('Opening “'+nm.trim()+'” · '+val.trim()+' · filtered gifts + funds for this branch');
-    });
-  });
-  document.querySelectorAll('#pane-overview .sol-row').forEach(function(r){
-    r.style.cursor='pointer';
-    r.addEventListener('click', function(){ switchTab('solicitors'); });
-  });
-  var tg = document.getElementById('ov-topgifts');
-  if (tg){ tg.querySelectorAll('div[style*="justify-content:space-between"]').forEach(function(row){
-    row.style.cursor='pointer';
-    row.addEventListener('click', function(){ window.location='atlas-donor-360.html'; });
-  }); }
 })();
 </script>
 

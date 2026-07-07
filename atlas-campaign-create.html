@@ -219,7 +219,7 @@ a { color: inherit; text-decoration: none; }
 .fld[disabled] { background: var(--surface); color: var(--text-3); }
 .fld::placeholder { color: #94A3B8; }
 textarea.fld { min-height: 90px; resize: vertical; line-height: 1.5; }
-select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M3 5l3 3 3-3z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M3 5l3 3 3-3z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 10px 10px; padding-right: 36px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
 
 .btn {
   font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
@@ -325,10 +325,14 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 
 /* Hierarchy builder */
 .hierarchy { background:var(--surface); border:1px solid var(--border); border-radius:11px; padding:18px; }
-.h-node { display:grid; grid-template-columns: 24px 32px 1fr 110px 110px 32px; gap:10px; align-items:center; padding:10px 8px; border-radius:8px; transition:background .12s; }
+.h-node { display:grid; grid-template-columns: 1fr 120px 32px; gap:12px; align-items:center; padding:10px 8px; border-radius:8px; transition:background .12s; }
 .h-node:hover { background:white; }
+.h-node .lead { display:flex; align-items:flex-start; gap:10px; min-width:0; }
+.h-node.lvl-a .lead { margin-left:26px; }
+.h-node.lvl-f .lead { margin-left:52px; }
+.h-node .txt { flex:1; min-width:0; }
 .h-node .indent {}
-.h-node .ico-sm { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:11px; font-weight:700; }
+.h-node .ico-sm { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:11px; font-weight:700; margin-top:2px; }
 .h-node .ico-sm.c { background:var(--purple); color:white; }
 .h-node .ico-sm.a { background:var(--blue); color:white; }
 .h-node .ico-sm.f { background:var(--green); color:white; }
@@ -352,8 +356,8 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 
 .add-node { padding:10px; border:1.5px dashed var(--border); border-radius:9px; font-size:12.5px; color:var(--text-3); cursor:pointer; display:flex; align-items:center; gap:8px; margin-top:6px; transition:border-color .12s, color .12s; }
 .add-node:hover { border-color:var(--blue); color:var(--blue); }
-.add-node.appeal { margin-left:32px; }
-.add-node.fund { margin-left:64px; }
+.add-node.appeal { margin-left:0; }
+.add-node.fund { margin-left:62px; }
 .add-node svg { width:13px; height:13px; }
 
 .goal-summary { margin-top:16px; padding:14px 16px; background:var(--blue-pale); border:1px solid var(--blue-light); border-radius:11px; display:flex; gap:14px; align-items:center; }
@@ -787,6 +791,11 @@ body {
         <h2 class="wiz-h">Goal &amp; timeline</h2>
         <p class="wiz-sub">Set your overall fundraising target and the campaign window. You can adjust these later — Atlas paces progress to whichever values you keep current.</p>
 
+        <div id="receipt-note" style="display:flex;gap:10px;align-items:flex-start;background:var(--blue-pale);border:1px solid var(--blue-light);border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:12.5px;color:var(--text-2);line-height:1.5">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="width:15px;height:15px;color:var(--blue);flex-shrink:0;margin-top:1px"><circle cx="7" cy="7" r="5.5"/><path d="M7 6.5v3.5M7 4v.5"/></svg>
+          <span id="receipt-note-text"></span>
+        </div>
+
         <div class="section-h">Campaign basics</div>
         <div class="row2">
           <div>
@@ -795,61 +804,15 @@ body {
           </div>
           <div>
             <span class="lbl">Internal code</span>
-            <input class="fld" value="CC2026" placeholder="Auto-generated">
+            <input class="fld" id="f-code" value="CC2026" placeholder="Auto-generated">
           </div>
         </div>
         <div class="mt-12" style="margin-top:12px">
           <span class="lbl">Public description</span>
-          <textarea class="fld" placeholder="Shown on donation forms and the location portal">Restoring the 1888 cathedral — bell-tower masonry, lead flashing, and stained-glass conservation. 1:1 matched gifts available up to $250,000.</textarea>
+          <textarea class="fld" id="f-desc" placeholder="Shown on donation forms and the location portal">Restoring the 1888 cathedral — bell-tower masonry, lead flashing, and stained-glass conservation. 1:1 matched gifts available up to $250,000.</textarea>
         </div>
 
-        <div class="section-h">Goal</div>
-        <div class="row3">
-          <div>
-            <span class="lbl">Total goal<span class="req">*</span></span>
-            <input class="fld" value="$2,000,000.00" style="font-size:18px;font-weight:600">
-          </div>
-          <div>
-            <span class="lbl">Stretch goal</span>
-            <input class="fld" value="$2,500,000.00" placeholder="Optional">
-          </div>
-          <div>
-            <span class="lbl">Currency</span>
-            <select class="fld"><option selected>USD</option><option>CAD</option><option>EUR</option></select>
-          </div>
-        </div>
-
-        <div class="section-h">Timeline</div>
-        <div class="row3">
-          <div>
-            <span class="lbl">Public start<span class="req">*</span></span>
-            <input class="fld" value="January 1, 2026">
-          </div>
-          <div>
-            <span class="lbl">Public end<span class="req">*</span></span>
-            <input class="fld" value="June 30, 2026">
-          </div>
-          <div>
-            <span class="lbl">Quiet phase</span>
-            <select class="fld"><option>No quiet phase</option><option selected>Started Sep 2025 · 4-month silent phase</option></select>
-          </div>
-        </div>
-
-        <div class="section-h">Recognition</div>
-        <div class="row2">
-          <div>
-            <span class="lbl">Recognition tiers</span>
-            <select class="fld">
-              <option>None</option>
-              <option selected>Bronze ($1k) · Silver ($5k) · Gold ($25k) · Platinum ($100k)</option>
-              <option>Custom tiers…</option>
-            </select>
-          </div>
-          <div>
-            <span class="lbl">Naming opportunities?</span>
-            <select class="fld"><option>No</option><option selected>Yes · 12 named opportunities</option></select>
-          </div>
-        </div>
+        <div id="gtr-render"></div>
 
         <div class="wiz-foot">
           <div class="left">
@@ -866,7 +829,7 @@ body {
         <h2 class="wiz-h">Build your hierarchy</h2>
         <p class="wiz-sub">Atlas pre-loaded the recommended hierarchy for your campaign type. Edit names and goals inline — add or remove appeals and funds as needed. Goals roll up automatically.</p>
 
-        <div class="hierarchy">
+        <div class="hierarchy" id="hierarchy-box">
 
           <!-- Campaign root -->
           <div class="h-node">
@@ -944,7 +907,7 @@ body {
             <div class="ico-sm f" style="grid-column:2;margin-left:48px">F</div>
             <div style="grid-column:3">
               <input class="nm-input fund" value="Music Ministry">
-              <input class="meta-input" value="GL 4002 · for matched gifts only · protected ladder">
+              <input class="meta-input" value="GL 4002 · for matched gifts only">
             </div>
             <div></div>
             <div><input class="goal-input" value="$200,000"></div>
@@ -993,7 +956,7 @@ body {
           </div>
         </div>
 
-        <div class="goal-summary">
+        <div class="goal-summary" id="goal-summary-box">
           <span class="l">Roll-up</span>
           <span class="v">3 appeals · 4 funds</span>
           <span class="v">$800k + $1.0M + $200k = <strong>$2.0M</strong></span>
@@ -1019,7 +982,7 @@ body {
         <div class="row2">
           <div>
             <span class="lbl">Primary legal entity<span class="req">*</span></span>
-            <select class="fld">
+            <select class="fld" id="f-entity">
               <option selected>Diocese of Albany (EIN 14-•••2401)</option>
               <option>Catholic Charities of Albany (EIN 14-•••5512)</option>
               <option>Diocesan Foundation (EIN 14-•••8847)</option>
@@ -1028,7 +991,7 @@ body {
           </div>
           <div>
             <span class="lbl">Cross-entity?</span>
-            <select class="fld">
+            <select class="fld" id="f-crossentity">
               <option selected>Single entity</option>
               <option>Allow funds across multiple entities</option>
             </select>
@@ -1036,30 +999,15 @@ body {
         </div>
 
         <div class="section-h">Solicitors assigned to this campaign</div>
-        <p class="muted" style="font-size:12px;margin-top:-6px;margin-bottom:10px">Click cards to add officers. Only assigned solicitors will see this campaign in their pipeline filter.</p>
+        <p class="muted" style="font-size:12px;margin-top:-6px;margin-bottom:10px">Search the team and click to assign. Only assigned solicitors will see this campaign in their pipeline filter.</p>
 
-        <div class="sol-grid">
-          <div class="sol-card on">
-            <div class="av" style="background:var(--rose)">SR</div>
-            <div class="body"><div class="nm">Sarah Reynolds</div><div class="role">Dev Director · 18 prospects · all entities</div></div>
-            <div class="check">✓</div>
-          </div>
-          <div class="sol-card on">
-            <div class="av" style="background:var(--purple)">BM</div>
-            <div class="body"><div class="nm">Bridget McCarthy</div><div class="role">Dev Director · 15 prospects · all entities</div></div>
-            <div class="check">✓</div>
-          </div>
-          <div class="sol-card on">
-            <div class="av" style="background:var(--green)">JK</div>
-            <div class="body"><div class="nm">Julia Kelleher</div><div class="role">Officer · 22 prospects · Diocese, Foundation</div></div>
-            <div class="check">✓</div>
-          </div>
-          <div class="sol-card">
-            <div class="av" style="background:var(--blue)">DC</div>
-            <div class="body"><div class="nm">Daniel Cho</div><div class="role">DB Admin · supports all officers</div></div>
-            <div class="check"></div>
-          </div>
+        <div class="sol-search">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+          <input type="text" id="sol-search" placeholder="Search by name or role…" oninput="filterSolicitors(this.value)">
+          <span id="sol-count" class="sol-count">3 assigned</span>
         </div>
+        <div class="sol-grid" id="sol-list"></div>
+        <div id="sol-empty" class="muted" style="display:none;font-size:12.5px;padding:14px 4px">No team members match your search.</div>
 
         <div class="section-h">Communications kickoff</div>
         <div class="row2">
@@ -1077,18 +1025,18 @@ body {
         <div class="row2">
           <div>
             <span class="lbl">Who can edit this campaign?</span>
-            <select class="fld"><option selected>Dev Directors only</option><option>Dev Directors + assigned solicitors</option><option>Custom…</option></select>
+            <select class="fld" id="f-editperm"><option selected>Dev Directors only</option><option>Dev Directors + assigned solicitors</option><option>Custom…</option></select>
           </div>
           <div>
             <span class="lbl">Public campaign page</span>
-            <select class="fld"><option selected>Yes — visible at givecentral.org/cathedral-2026</option><option>No — internal only</option></select>
+            <select class="fld" id="f-public"><option selected>Yes — visible at givecentral.org/cathedral-2026</option><option>No — internal only</option></select>
           </div>
         </div>
 
         <div class="wiz-foot">
           <div class="left">
             <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--green)"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg>
-            3 solicitors assigned · single-entity scope
+            <span id="team-foot">3 solicitors assigned · single-entity scope</span>
           </div>
           <button class="btn btn-ghost" data-go="3">← Back</button>
           <button class="btn btn-primary" data-go="5">Review &amp; create →</button>
@@ -1100,45 +1048,7 @@ body {
         <h2 class="wiz-h">Final check before creating</h2>
         <p class="wiz-sub">Click "Edit" on any block to jump back. Once created, the campaign appears in the Campaigns dashboard and assigned solicitors see it in their pipeline filter.</p>
 
-        <div class="review-block">
-          <h4>Type &amp; basics <a data-go="1">Edit →</a></h4>
-          <div class="review-row"><span class="l">Type</span><span class="v"><span class="tag blue">Capital campaign</span></span></div>
-          <div class="review-row"><span class="l">Name</span><span class="v">Cathedral Capital Campaign 2026 <small>internal code: CC2026</small></span></div>
-          <div class="review-row"><span class="l">Public description</span><span class="v" style="font-style:italic;color:var(--text-2)">"Restoring the 1888 cathedral — bell-tower masonry, lead flashing, and stained-glass conservation. 1:1 matched gifts available up to $250,000."</span></div>
-        </div>
-
-        <div class="review-block">
-          <h4>Goal &amp; dates <a data-go="2">Edit →</a></h4>
-          <div class="review-row"><span class="l">Total goal</span><span class="v">$2,000,000.00 USD <small>stretch goal $2,500,000.00</small></span></div>
-          <div class="review-row"><span class="l">Public phase</span><span class="v">Jan 1, 2026 → Jun 30, 2026 <small>6 months</small></span></div>
-          <div class="review-row"><span class="l">Quiet phase</span><span class="v">Sep 2025 (4-month silent phase)</span></div>
-          <div class="review-row"><span class="l">Recognition</span><span class="v">Bronze · Silver · Gold · Platinum tiers <small>12 named opportunities</small></span></div>
-        </div>
-
-        <div class="review-block">
-          <h4>Hierarchy <a data-go="3">Edit →</a></h4>
-          <div class="review-row"><span class="l">Structure</span><span class="v">3 appeals · 4 funds · 1 legal entity</span></div>
-          <div class="review-row"><span class="l">Spring cultivation</span><span class="v">$800k · 1 fund (Cathedral Restoration · GL 4001)</span></div>
-          <div class="review-row"><span class="l">Online giving</span><span class="v">$1.0M · 2 funds (Cathedral Restoration · Music Ministry)</span></div>
-          <div class="review-row"><span class="l">Bishop&#39;s Gala</span><span class="v">$200k · 1 fund (Cathedral Restoration)</span></div>
-          <div class="review-row"><span class="l">Roll-up</span><span class="v" style="color:var(--green);font-weight:600">✓ $800k + $1.0M + $200k = $2.0M (matches campaign goal)</span></div>
-        </div>
-
-        <div class="review-block">
-          <h4>Team <a data-go="4">Edit →</a></h4>
-          <div class="review-row"><span class="l">Legal entity</span><span class="v">Diocese of Albany <small>EIN 14-•••2401</small></span></div>
-          <div class="review-row"><span class="l">Solicitors</span><span class="v"><span class="tag blue">Sarah Reynolds</span><span class="tag blue">Bridget McCarthy</span><span class="tag blue">Julia Kelleher</span> <small>3 assigned</small></span></div>
-          <div class="review-row"><span class="l">Edit permissions</span><span class="v">Dev Directors only</span></div>
-          <div class="review-row"><span class="l">Public page</span><span class="v">Yes — <strong>givecentral.org/cathedral-2026</strong></span></div>
-          <div class="review-row"><span class="l">On create</span><span class="v">Launch email tomorrow 8 AM <small>kickoff tasks "Identify 5 prospects" auto-created · due May 11</small></span></div>
-        </div>
-
-        <div style="background:var(--green-light);border:1px solid #86EFAC;border-radius:11px;padding:16px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start">
-          <div style="width:30px;height:30px;border-radius:8px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700">✓</div>
-          <div style="flex:1;font-size:12.5px;color:#14532D;line-height:1.5">
-            <strong>All checks passed.</strong> GL codes are valid · solicitors have entity access · public URL is available · roll-up matches campaign goal. The campaign is ready to create.
-          </div>
-        </div>
+        <div id="review-render"></div>
 
         <div class="wiz-foot">
           <div class="left">
@@ -1147,7 +1057,7 @@ body {
           </div>
           <button class="btn btn-ghost" data-go="4">← Back</button>
           <button class="btn btn-ghost" onclick="alert('Saved as draft')">Save draft &amp; exit</button>
-          <button class="btn btn-primary" onclick="alert('Campaign created · ID #CC2026 · 3 solicitors notified · 3 kickoff tasks queued'); window.location='atlas-campaign-detail.html'">
+          <button class="btn btn-primary" onclick="createCampaign()">
             <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M3 7l3 3 5-6"/></svg>
             Create campaign
           </button>
@@ -1159,6 +1069,81 @@ body {
   </div>
 
 </div>
+
+<style id="cc-enhance">
+  .sol-search{ display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:8px 12px; margin-bottom:12px; }
+  .sol-search svg{ width:14px; height:14px; color:var(--text-3); flex-shrink:0; }
+  .sol-search input{ flex:1; border:none; background:none; outline:none; font-size:13px; font-family:'DM Sans',sans-serif; color:var(--text); }
+  .sol-count{ font-size:11.5px; font-weight:600; color:var(--blue); background:var(--blue-light); padding:3px 9px; border-radius:20px; flex-shrink:0; white-space:nowrap; }
+  #sol-list{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; max-height:296px; overflow-y:auto; padding:2px; }
+  #sol-list::-webkit-scrollbar{ width:6px; } #sol-list::-webkit-scrollbar-thumb{ background:#CBD5E1; border-radius:6px; }
+
+  .cc-ov{ position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:100020; display:none; align-items:center; justify-content:center; padding:24px; }
+  .cc-ov.open{ display:flex; }
+  .cc-modal{ background:white; border-radius:16px; width:100%; max-width:460px; box-shadow:0 24px 60px rgba(15,23,42,.24); overflow:hidden; display:flex; flex-direction:column; max-height:88vh; }
+  .cc-modal.wide{ max-width:580px; }
+  .cc-mhead{ padding:20px 22px 14px; border-bottom:1px solid var(--border); }
+  .cc-mtitle{ font-family:'DM Serif Display',serif; font-size:19px; color:var(--navy); letter-spacing:-.01em; }
+  .cc-msub{ font-size:12.5px; color:var(--text-3); margin-top:3px; }
+  .cc-mbody{ padding:18px 22px; overflow-y:auto; }
+  .cc-mfoot{ padding:14px 22px; border-top:1px solid var(--border); background:var(--surface); display:flex; gap:8px; justify-content:flex-end; }
+  .tier-row{ display:grid; grid-template-columns:1fr 130px 30px; gap:8px; margin-bottom:8px; align-items:center; }
+  .tier-row .x{ background:none; border:none; color:var(--text-3); cursor:pointer; font-size:16px; border-radius:6px; }
+  .tier-row .x:hover{ background:var(--rose-light); color:var(--rose); }
+  .add-tier{ font-size:12.5px; color:var(--blue); cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin-top:4px; font-weight:500; }
+  .add-tier svg{ width:12px; height:12px; }
+  .perm-opt{ display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border); border-radius:9px; margin-bottom:8px; cursor:pointer; }
+  .perm-opt.on{ border-color:var(--blue); background:var(--blue-pale); }
+  .perm-opt .pk{ width:18px; height:18px; border:1.5px solid var(--border); border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:11px; color:white; flex-shrink:0; }
+  .perm-opt.on .pk{ background:var(--blue); border-color:var(--blue); }
+  .perm-opt .pn{ font-size:13px; font-weight:500; color:var(--navy); }
+  .perm-opt .pr{ font-size:11.5px; color:var(--text-3); }
+
+  .cr-hero{ display:flex; gap:14px; align-items:flex-start; padding:22px 22px 4px; }
+  .cr-badge{ width:44px; height:44px; border-radius:12px; background:var(--green-light); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .cr-badge svg{ width:24px; height:24px; color:var(--green); }
+  .cr-summary{ margin:14px 22px; background:var(--surface); border:1px solid var(--border); border-radius:11px; padding:12px 16px; }
+  .cr-row{ display:flex; gap:12px; padding:5px 0; font-size:12.5px; border-bottom:1px dashed var(--border-soft); }
+  .cr-row:last-child{ border-bottom:none; }
+  .cr-row .k{ width:96px; color:var(--text-3); flex-shrink:0; }
+  .cr-row .v{ color:var(--text); font-weight:500; }
+  .cr-next{ margin:0 22px 10px; }
+  .cr-next h5{ font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); margin-bottom:8px; }
+  .cr-next .ni{ display:flex; gap:9px; align-items:flex-start; font-size:12.5px; color:var(--text-2); margin-bottom:7px; line-height:1.4; }
+  .cr-next .ni svg{ width:14px; height:14px; color:var(--green); flex-shrink:0; margin-top:1px; }
+  .cr-foot{ padding:14px 22px; border-top:1px solid var(--border); display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; align-items:center; background:var(--surface); }
+  .cr-foot .btn-link{ margin-right:auto; }
+</style>
+
+<!-- Generic custom-option modal -->
+<div class="cc-ov" id="opt-ov"><div class="cc-modal" id="opt-modal">
+  <div class="cc-mhead"><div class="cc-mtitle" id="opt-title">Custom</div><div class="cc-msub" id="opt-sub"></div></div>
+  <div class="cc-mbody" id="opt-body"></div>
+  <div class="cc-mfoot"><button class="btn btn-ghost" onclick="closeOpt(true)">Cancel</button><button class="btn btn-primary" onclick="saveOpt()">Save</button></div>
+</div></div>
+
+<!-- Custom edit-access modal -->
+<div class="cc-ov" id="perm-ov"><div class="cc-modal">
+  <div class="cc-mhead"><div class="cc-mtitle">Custom edit access</div><div class="cc-msub">Choose exactly who can edit this campaign.</div></div>
+  <div class="cc-mbody" id="perm-body"></div>
+  <div class="cc-mfoot"><button class="btn btn-ghost" onclick="closePerm(true)">Cancel</button><button class="btn btn-primary" onclick="savePerm()">Apply</button></div>
+</div></div>
+
+<!-- Rich Campaign-created modal -->
+<div class="cc-ov" id="created-ov"><div class="cc-modal wide">
+  <div class="cr-hero">
+    <div class="cr-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg></div>
+    <div><div class="cc-mtitle" id="cr-title">Campaign created</div><div class="cc-msub" id="cr-sub"></div></div>
+  </div>
+  <div class="cr-summary" id="cr-summary"></div>
+  <div class="cr-next"><h5>What happens next</h5><div id="cr-next-list"></div></div>
+  <div class="cr-foot">
+    <button class="btn btn-link" onclick="copyPublicLink()">Copy public link</button>
+    <button class="btn btn-ghost" onclick="window.location='atlas-campaign-dashboard.html'">Go to Campaigns</button>
+    <button class="btn btn-ghost" onclick="window.location.reload()">Create another</button>
+    <button class="btn btn-primary" onclick="window.location='atlas-campaign-detail.html'">View campaign</button>
+  </div>
+</div></div>
 
 <script>
   (function(){
@@ -1181,6 +1166,7 @@ body {
         else s.classList.remove('disabled');
       });
       if (n > maxReached) maxReached = n;
+      if (n === 5){ var rv = document.getElementById('review-render'); if (rv && window.TYPES_READY) rv.innerHTML = buildReview(TYPES[current]); }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -1194,29 +1180,571 @@ body {
       });
     });
 
+    /* ════════════════════════════════════════════════════
+       TYPE-DRIVEN FLOW · each campaign type re-renders
+       Goal/Timeline/Recognition, the pre-loaded hierarchy,
+       receipt-rule note, legal-entity default, and Review.
+       ════════════════════════════════════════════════════ */
+    var TYPES = {
+      capital: {
+        label:'Capital campaign',
+        code:'CC2026', name:'Cathedral Capital Campaign 2026',
+        desc:'Restoring the 1888 cathedral — bell-tower masonry, lead flashing, and stained-glass conservation. 1:1 matched gifts available up to $250,000.',
+        receipt:'Standard charitable receipts are issued per gift. Named-gift pledges are tracked on multi-year schedules; matched gifts are receipted at the donor’s portion only.',
+        entity:'Diocese of Albany (EIN 14-•••2401)', ein:'14-•••2401', slug:'cathedral-2026', publicNo:false,
+        permissions:'Dev Directors only',
+        onCreate:'Launch email tomorrow 8 AM · kickoff task “Identify 5 prospects” auto-created · due May 11',
+        goalFields:[
+          {lbl:'Total goal',req:1,big:1,val:'$2,000,000.00'},
+          {lbl:'Stretch goal',val:'$2,500,000.00',ph:'Optional'},
+          {lbl:'Currency',select:1,val:'USD',alt:['CAD','EUR']}
+        ],
+        timelineFields:[
+          {lbl:'Public start',req:1,val:'January 1, 2026'},
+          {lbl:'Public end',req:1,val:'June 30, 2026'},
+          {lbl:'Quiet phase',select:1,val:'Started Sep 2025 · 4-month silent phase',alt:['No quiet phase']}
+        ],
+        recognitionTitle:'Recognition',
+        recognitionFields:[
+          {lbl:'Recognition tiers',select:1,val:'Bronze ($1k) · Silver ($5k) · Gold ($25k) · Platinum ($100k)',alt:['None','Custom tiers…']},
+          {lbl:'Naming opportunities?',select:1,val:'Yes · 12 named opportunities',alt:['No']}
+        ],
+        reviewGoal:'$2,000,000.00 USD',  reviewGoalSmall:'stretch goal $2,500,000.00',
+        reviewTimeline:'Jan 1 → Jun 30, 2026', reviewTimelineSmall:'quiet phase from Sep 2025',
+        reviewRecognition:'Bronze · Silver · Gold · Platinum tiers', reviewRecognitionSmall:'12 named opportunities',
+        root:{name:'Cathedral Capital Campaign 2026', meta:'Goal $2.0M · 6-month public phase · Diocese of Albany', goal:'$2,000,000'},
+        appeals:[
+          {name:'Spring 2026 — major-donor cultivation', meta:'Lead-gift outreach · top 50 prospects', goal:'$800,000', add:'Add fund under Spring 2026',
+            funds:[{name:'Cathedral Restoration', meta:'GL 4001 · Diocese of Albany · matched 1:1', goal:'$800,000'}]},
+          {name:'Online giving — public campaign page', meta:'GiveCentral form: cathedral-2026 · Apple Pay / Google Pay / DAF', goal:'$1,000,000', add:'Add fund under Online giving',
+            funds:[{name:'Cathedral Restoration', meta:'GL 4001 (shared) · routed via online form', goal:'$800,000'},
+                   {name:'Music Ministry', meta:'GL 4002 · matched gifts only', goal:'$200,000'}]},
+          {name:'Bishop’s Annual Gala 2026', meta:'One-night event · table sponsorships · April 24', goal:'$200,000', add:'Add fund under Gala',
+            funds:[{name:'Cathedral Restoration', meta:'GL 4001 (shared) · gala net proceeds', goal:'$200,000'}]}
+        ],
+        rollupText:'$800k + $1.0M + $200k = <strong>$2.0M</strong>', rollupNote:'Matches campaign goal', rollupOk:true
+      },
+
+      annual: {
+        label:'Annual appeal',
+        code:'AA2026', name:'Annual Appeal 2026',
+        desc:'Our yearly diocesan appeal supporting parish ministries, Catholic education, and charitable outreach across the diocese.',
+        receipt:'Consolidated annual tax receipts are issued each January for the prior calendar year. Recurring and pledge instalments are auto-receipted as they post.',
+        entity:'Diocese of Albany (EIN 14-•••2401)', ein:'14-•••2401', slug:'annual-appeal-2026', publicNo:false,
+        permissions:'Dev Directors + assigned solicitors',
+        onCreate:'LYBUNT + SYBUNT reactivation segments queued · Spring mailing list export ready',
+        goalFields:[
+          {lbl:'Total goal',req:1,big:1,val:'$750,000.00'},
+          {lbl:'Stretch goal',val:'',ph:'Not used for annual appeals'},
+          {lbl:'Currency',select:1,val:'USD',alt:['CAD','EUR']}
+        ],
+        timelineFields:[
+          {lbl:'Appeal start',req:1,val:'January 1, 2026'},
+          {lbl:'Appeal end',req:1,val:'December 31, 2026'},
+          {lbl:'Quiet phase',select:1,val:'No quiet phase — annual appeals run fully public',alt:['Add a quiet phase…']}
+        ],
+        recognitionTitle:'Recognition',
+        recognitionFields:[
+          {lbl:'Donor acknowledgement',select:1,val:'Thank-you letter + annual tax receipt',alt:['Add honor-roll listing','None']},
+          {lbl:'Gift tiers / naming?',select:1,val:'No tiers — flat annual appeal',alt:['Add giving levels…']}
+        ],
+        reviewGoal:'$750,000.00 USD', reviewGoalSmall:'no stretch goal',
+        reviewTimeline:'Jan 1 → Dec 31, 2026', reviewTimelineSmall:'full calendar year · no quiet phase',
+        reviewRecognition:'Thank-you letter + annual receipt', reviewRecognitionSmall:'no gift tiers',
+        root:{name:'Annual Appeal 2026', meta:'Goal $750k · full-year appeal · Diocese of Albany', goal:'$750,000'},
+        appeals:[
+          {name:'Spring mailing', meta:'Direct mail · renewal + reactivation segments', goal:'$250,000', add:'Add fund under Spring mailing',
+            funds:[{name:'Annual Fund', meta:'GL 4100 · unrestricted operating', goal:'$250,000'}]},
+          {name:'Year-end appeal', meta:'Nov–Dec push · tax-deadline giving', goal:'$300,000', add:'Add fund under Year-end appeal',
+            funds:[{name:'Annual Fund', meta:'GL 4100 (shared) · unrestricted operating', goal:'$300,000'}]},
+          {name:'Online giving — evergreen form', meta:'GiveCentral form: annual-appeal-2026 · recurring enabled', goal:'$200,000', add:'Add fund under Online giving',
+            funds:[{name:'Annual Fund', meta:'GL 4100 (shared) · recurring + one-time', goal:'$200,000'}]}
+        ],
+        rollupText:'$250k + $300k + $200k = <strong>$750k</strong>', rollupNote:'Matches campaign goal', rollupOk:true
+      },
+
+      event: {
+        label:'Special / event',
+        code:'GALA26', name:'Bishop’s Annual Gala 2026',
+        desc:'One-night black-tie gala at the Albany Capital Center. Proceeds underwrite the seminarian education fund. Tables and sponsorships available.',
+        receipt:'Split-receipting applies — only the amount paid above the fair-market value of the ticket/benefit is tax-deductible. Set the FMV per seat before selling tickets.',
+        entity:'Catholic Charities of Albany (EIN 14-•••5512)', ein:'14-•••5512', slug:'bishops-gala-2026', publicNo:false,
+        permissions:'Dev Directors + assigned solicitors',
+        onCreate:'Event page drafted · seating chart + sponsor tiers created · comp-ticket list pending',
+        goalFields:[
+          {lbl:'Fundraising goal',req:1,big:1,val:'$200,000.00'},
+          {lbl:'Stretch goal',val:'',ph:'Not used for events'},
+          {lbl:'Currency',select:1,val:'USD',alt:['CAD','EUR']}
+        ],
+        timelineFields:[
+          {lbl:'Event date',req:1,val:'April 24, 2026'},
+          {lbl:'Ticket sales open',req:1,val:'February 1, 2026'},
+          {lbl:'Ticket sales close',req:1,val:'April 30, 2026'}
+        ],
+        recognitionTitle:'Tickets & fair-market value',
+        recognitionFields:[
+          {lbl:'Sponsorship levels',select:1,val:'Presenting $25k · Gold table $10k · Silver table $5k · Seat $250',alt:['Custom levels…','None']},
+          {lbl:'Fair-market value per seat',val:'$95.00 (dinner + program)'}
+        ],
+        reviewGoal:'$200,000.00 USD', reviewGoalSmall:'single-event goal · no stretch',
+        reviewTimeline:'Event Apr 24, 2026', reviewTimelineSmall:'ticket window Feb 1 → Apr 30',
+        reviewRecognition:'Sponsorship levels ($250–$25k)', reviewRecognitionSmall:'FMV $95/seat · split-receipted',
+        root:{name:'Bishop’s Annual Gala 2026', meta:'Goal $200k · one-night event · Catholic Charities', goal:'$200,000'},
+        appeals:[
+          {name:'Table sponsorships', meta:'Presenting / Gold / Silver tables · corporate + major donors', goal:'$120,000', add:'Add fund under Table sponsorships',
+            funds:[{name:'Seminarian Education Fund', meta:'GL 4300 · sponsorship (FMV split)', goal:'$120,000'}]},
+          {name:'Individual tickets', meta:'$250/seat · FMV $95 deducted', goal:'$40,000', add:'Add fund under Individual tickets',
+            funds:[{name:'Seminarian Education Fund', meta:'GL 4300 (shared) · ticket (FMV split)', goal:'$40,000'}]},
+          {name:'Online donation — can’t attend', meta:'GiveCentral form: bishops-gala-2026 · fully deductible', goal:'$40,000', add:'Add fund under Online donation',
+            funds:[{name:'Seminarian Education Fund', meta:'GL 4300 (shared) · no benefit · full receipt', goal:'$40,000'}]}
+        ],
+        rollupText:'$120k + $40k + $40k = <strong>$200k</strong>', rollupNote:'Matches campaign goal', rollupOk:true
+      },
+
+      memorial: {
+        label:'Memorial / planned giving',
+        code:'HS2026', name:'Heritage Society — Planned Giving',
+        desc:'Cultivating estate gifts and bequest intentions from our most loyal supporters. Multi-decade stewardship with no public dollar goal.',
+        receipt:'Bequest intentions are non-binding and are NOT receipted. A tax receipt is issued only when a gift is realized (estate settlement or matured life-income gift).',
+        entity:'Diocesan Foundation (EIN 14-•••8847)', ein:'14-•••8847', slug:'heritage-society', publicNo:true,
+        permissions:'Dev Directors only',
+        onCreate:'Heritage Society welcome series queued · planned-giving officer assigned · no public launch',
+        goalFields:[
+          {lbl:'Intention target (deferred)',big:1,val:'$5,000,000.00'},
+          {lbl:'Hard public goal?',select:1,val:'No — bequest intentions are non-binding',alt:['Set a public goal…']},
+          {lbl:'Currency',select:1,val:'USD',alt:['CAD','EUR']}
+        ],
+        timelineFields:[
+          {lbl:'Program start',req:1,val:'January 1, 2026'},
+          {lbl:'End date',select:1,val:'No fixed end — rolling, multi-decade',alt:['Set an end date…']},
+          {lbl:'Stewardship review',select:1,val:'Annual review each Q4',alt:['Semi-annual','Ad hoc']}
+        ],
+        recognitionTitle:'Recognition & legacy',
+        recognitionFields:[
+          {lbl:'Heritage Society',select:1,val:'Enroll — membership + annual-report listing',alt:['No enrollment']},
+          {lbl:'Legacy naming?',select:1,val:'Yes · endowment & memorial naming',alt:['No']}
+        ],
+        reviewGoal:'$5,000,000.00 (deferred)', reviewGoalSmall:'intention target · non-binding · no cash goal',
+        reviewTimeline:'Starts Jan 1, 2026', reviewTimelineSmall:'no fixed end · annual Q4 stewardship review',
+        reviewRecognition:'Heritage Society enrollment', reviewRecognitionSmall:'endowment & memorial naming',
+        root:{name:'Heritage Society — Planned Giving', meta:'Intention target $5.0M (deferred) · rolling · Diocesan Foundation', goal:'$5,000,000'},
+        appeals:[
+          {name:'Bequest intentions', meta:'Will/estate commitments · non-binding · deferred tracking', goal:'$3,000,000', add:'Add fund under Bequest intentions',
+            funds:[{name:'Endowment — unrestricted', meta:'GL 4500 · realized on estate settlement', goal:'$3,000,000'}]},
+          {name:'Estate-gift outreach', meta:'Top loyal donors · planned-giving officer cultivation', goal:'$1,500,000', add:'Add fund under Estate-gift outreach',
+            funds:[{name:'Endowment — unrestricted', meta:'GL 4500 (shared) · deferred', goal:'$1,500,000'}]},
+          {name:'Stewardship & recognition', meta:'Heritage Society events · legacy naming', goal:'$500,000', add:'Add fund under Stewardship',
+            funds:[{name:'Legacy Endowment', meta:'GL 4501 · named/memorial gifts', goal:'$500,000'}]}
+        ],
+        rollupText:'$3.0M + $1.5M + $500k = <strong>$5.0M</strong> deferred', rollupNote:'Intention roll-up (deferred, not cash)', rollupOk:true
+      }
+    };
+
+    var current = 'capital';
+
+    /* ── field / section builders ── */
+    function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function field(f){
+      var lbl = '<span class="lbl">'+f.lbl+(f.req?'<span class="req">*</span>':'')+'</span>';
+      var ctl;
+      if (f.select){
+        var alts = (f.alt||[]).map(function(o){ return '<option>'+esc(o)+'</option>'; }).join('');
+        ctl = '<select class="fld"><option selected>'+esc(f.val)+'</option>'+alts+'</select>';
+      } else {
+        ctl = '<input class="fld" value="'+esc(f.val)+'"'+(f.big?' style="font-size:18px;font-weight:600"':'')+(f.ph?' placeholder="'+esc(f.ph)+'"':'')+'>';
+      }
+      return '<div>'+lbl+ctl+'</div>';
+    }
+    function fieldRow(fields){
+      var cls = fields.length===3?'row3':(fields.length===2?'row2':'');
+      return '<div class="'+cls+'">'+fields.map(field).join('')+'</div>';
+    }
+    function section(title, fields){ return '<div class="section-h">'+title+'</div>'+fieldRow(fields); }
+    function buildGTR(t){
+      return section('Goal', t.goalFields)
+           + section('Timeline', t.timelineFields)
+           + section(t.recognitionTitle||'Recognition', t.recognitionFields);
+    }
+
+    /* ── hierarchy builders ── */
+    var PLUS = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg>';
+    function node(kind, name, meta, goal, opts){
+      opts = opts||{};
+      var nmCls = kind==='a'?' appeal':(kind==='f'?' fund':'');
+      var lead = '<div class="lead"><div class="ico-sm '+kind+'">'+kind.toUpperCase()+'</div>'
+               + '<div class="txt"><input class="nm-input'+nmCls+'" value="'+esc(name)+'"><input class="meta-input" value="'+esc(meta)+'"></div></div>';
+      if (kind==='c'){
+        return '<div class="h-node lvl-c">'+lead
+          +'<div><input class="goal-input" value="'+esc(goal)+'" readonly title="Auto = sum of appeal goals" style="background:var(--blue-pale);color:var(--blue);font-weight:600"></div>'
+          +'<div></div></div>';
+      }
+      return '<div class="h-node lvl-'+kind+'"'+(opts.mt?' style="margin-top:8px"':'')+'>'+lead
+        +'<div><input class="goal-input" value="'+esc(goal)+'"></div>'
+        +'<div><button class="x-btn">×</button></div></div>';
+    }
+    function addNode(cls, label, mt){ return '<div class="add-node '+cls+'"'+(mt?' style="margin-top:14px"':'')+'>'+PLUS+esc(label)+'</div>'; }
+    function buildHierarchy(t){
+      var h = node('c', t.root.name, t.root.meta, t.root.goal);
+      t.appeals.forEach(function(a,i){
+        h += node('a', a.name, a.meta, a.goal, {mt:i>0});
+        a.funds.forEach(function(f){ h += node('f', f.name, f.meta, f.goal); });
+        h += addNode('fund', a.add);
+      });
+      h += addNode('appeal', 'Add another appeal', true);
+      return h;
+    }
+    function countFunds(t){ var n=0; t.appeals.forEach(function(a){ n+=a.funds.length; }); return n; }
+    function buildSummary(t){
+      return '<span class="l">Roll-up</span>'
+        +'<span class="v">'+t.appeals.length+' appeals · '+countFunds(t)+' funds</span>'
+        +'<span class="v">'+t.rollupText+'</span>'
+        +'<span class="'+(t.rollupOk?'ok':'warn')+'">'+(t.rollupOk?'✓ ':'⚠ ')+t.rollupNote+'</span>';
+    }
+
+    /* ── review builder ── */
+    function rrow(l,v,small){ return '<div class="review-row"><span class="l">'+l+'</span><span class="v">'+v+(small?' <small>'+small+'</small>':'')+'</span></div>'; }
+    function liveVal(id, fb){ var e=document.getElementById(id); return (e && e.value) ? e.value : fb; }
+    function buildReview(t){
+      var struct = t.appeals.length+' appeals · '+countFunds(t)+' funds · 1 legal entity';
+      var appealRows = t.appeals.map(function(a){
+        var fundNames = a.funds.map(function(f){ return f.name; }).join(' · ');
+        return rrow(a.name, a.goal+' · '+a.funds.length+' fund'+(a.funds.length>1?'s':'')+' ('+fundNames+')');
+      }).join('');
+      // live values (fall back to type defaults before those fields exist)
+      var nm  = liveVal('campaign-name-input', t.name);
+      var cd  = liveVal('f-code', t.code);
+      var entLive = liveVal('f-entity', t.entity);
+      var entName = entLive.replace(/ \(EIN.*$/,'');
+      var einM = entLive.match(/EIN ([^)]+)/); var ein = einM ? einM[1] : t.ein;
+      var permLive = liveVal('f-editperm', t.permissions);
+      var pubEl = document.getElementById('f-public');
+      var pub = (pubEl && pubEl.selectedIndex===1) ? 'No — internal only'
+              : (t.publicNo ? 'No — internal only' : 'Yes — <strong>givecentral.org/'+t.slug+'</strong>');
+      var solNames = (typeof assignedNames==='function') ? assignedNames() : ['Sarah Reynolds','Bridget McCarthy','Julia Kelleher'];
+      var solTags = solNames.map(function(x){ return '<span class="tag blue">'+esc(x)+'</span>'; }).join('');
+      return ''
+      + '<div class="review-block"><h4>Type &amp; basics <a data-go="1">Edit →</a></h4>'
+        + rrow('Type','<span class="tag blue">'+t.label+'</span>')
+        + rrow('Name', esc(nm), 'internal code: '+esc(cd))
+        + '<div class="review-row"><span class="l">Public description</span><span class="v" style="font-style:italic;color:var(--text-2)">“'+esc(t.desc)+'”</span></div>'
+      + '</div>'
+      + '<div class="review-block"><h4>Goal &amp; dates <a data-go="2">Edit →</a></h4>'
+        + rrow('Goal', t.reviewGoal, t.reviewGoalSmall)
+        + rrow('Timeline', t.reviewTimeline, t.reviewTimelineSmall)
+        + rrow('Recognition', t.reviewRecognition, t.reviewRecognitionSmall)
+      + '</div>'
+      + '<div class="review-block"><h4>Hierarchy <a data-go="3">Edit →</a></h4>'
+        + rrow('Structure', struct)
+        + appealRows
+        + '<div class="review-row"><span class="l">Roll-up</span><span class="v" style="color:var(--green);font-weight:600">✓ '+t.rollupText.replace(/<\/?strong>/g,'')+' · '+t.rollupNote.toLowerCase()+'</span></div>'
+      + '</div>'
+      + '<div class="review-block"><h4>Team <a data-go="4">Edit →</a></h4>'
+        + rrow('Legal entity', esc(entName), 'EIN '+ein)
+        + rrow('Solicitors', solTags, solNames.length+' assigned')
+        + rrow('Edit permissions', esc(permLive))
+        + rrow('Public page', pub)
+        + rrow('On create', esc(t.onCreate))
+      + '</div>'
+      + '<div style="background:var(--green-light);border:1px solid #86EFAC;border-radius:11px;padding:16px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start">'
+        + '<div style="width:30px;height:30px;border-radius:8px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700">✓</div>'
+        + '<div style="flex:1;font-size:12.5px;color:#14532D;line-height:1.5"><strong>All checks passed.</strong> GL codes are valid · solicitors have entity access · '+(t.publicNo?'internal-only program':'public URL is available')+' · roll-up balanced. The campaign is ready to create.</div>'
+      + '</div>';
+    }
+
+    /* ── DOM helpers ── */
+    function setVal(id,v){ var e=document.getElementById(id); if(e) e.value=v; }
+    function setText(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+    function setSelect(id,val){ var s=document.getElementById(id); if(!s) return; for(var i=0;i<s.options.length;i++){ if(s.options[i].textContent===val){ s.selectedIndex=i; return; } } }
+
+    function rebindX(){ /* handled by delegation on #hierarchy-box */ }
+
+    function applyType(key){
+      var t = TYPES[key]; if(!t) return;
+      current = key;
+      setText('step1-sub', t.label);
+      setText('type-summary', t.label);
+      setVal('campaign-name-input', t.name);
+      setVal('f-code', t.code);
+      setVal('f-desc', t.desc);
+      var rn = document.getElementById('receipt-note-text');
+      if (rn) rn.innerHTML = '<strong>Receipt rules — '+t.label+':</strong> '+t.receipt;
+      var gtr = document.getElementById('gtr-render'); if (gtr) gtr.innerHTML = buildGTR(t);
+      var hb = document.getElementById('hierarchy-box'); if (hb) hb.innerHTML = buildHierarchy(t);
+      var gs = document.getElementById('goal-summary-box'); if (gs) gs.innerHTML = buildSummary(t);
+      rebindX();
+      setSelect('f-entity', t.entity);
+      var pub = document.getElementById('f-public');
+      if (pub){ pub.options[0].textContent = 'Yes — visible at givecentral.org/'+t.slug; pub.selectedIndex = t.publicNo ? 1 : 0; }
+      var rv = document.getElementById('review-render'); if (rv) rv.innerHTML = buildReview(t);
+    }
+    window.applyType = applyType;
+
+    /* ══ Internal code — auto-derived from the campaign name + year ══
+       Editable. Auto-fill stops the moment the user hand-edits the code. */
+    var codeManual = false;
+    function deriveCode(name){
+      var ym = String(name).match(/(19|20)\d{2}/);
+      var year = ym ? ym[0].slice(2) : String(new Date().getFullYear()).slice(2);
+      var words = String(name).replace(/[0-9]/g,'').split(/[^A-Za-z]+/)
+        .filter(function(w){ return w.length>2 && !/^(the|and|for|of|a|an|to)$/i.test(w); });
+      var ini = words.slice(0,3).map(function(w){ return w[0].toUpperCase(); }).join('');
+      return (ini||'CMP') + year;
+    }
+    (function(){
+      var nameEl = document.getElementById('campaign-name-input');
+      var codeEl = document.getElementById('f-code');
+      if (codeEl) codeEl.addEventListener('input', function(){ codeManual = true; });
+      if (nameEl) nameEl.addEventListener('input', function(){
+        if (!codeManual && codeEl) codeEl.value = deriveCode(nameEl.value);
+      });
+    })();
+
+    /* ══ Solicitor search + select ══ */
+    var SOLICITORS = [
+      {id:'sr', ini:'SR', c:'var(--rose)',   nm:'Sarah Reynolds',   role:'Dev Director · 18 prospects · all entities',        on:true},
+      {id:'bm', ini:'BM', c:'var(--purple)', nm:'Bridget McCarthy', role:'Dev Director · 15 prospects · all entities',        on:true},
+      {id:'jk', ini:'JK', c:'var(--green)',  nm:'Julia Kelleher',   role:'Officer · 22 prospects · Diocese, Foundation',      on:true},
+      {id:'dc', ini:'DC', c:'var(--blue)',   nm:'Daniel Cho',       role:'DB Admin · supports all officers',                  on:false},
+      {id:'mr', ini:'MR', c:'#0D9488',       nm:'Miguel Ramirez',   role:'Major Gifts Officer · 19 prospects · Diocese',      on:false},
+      {id:'ao', ini:'AO', c:'#B45309',       nm:'Aoife O’Brien',    role:'Planned Giving Officer · 11 prospects · Foundation',on:false},
+      {id:'tk', ini:'TK', c:'#7C3AED',       nm:'Tom Kowalski',     role:'Annual Fund Manager · all entities',                on:false},
+      {id:'gl', ini:'GL', c:'#BE185D',       nm:'Grace Lin',        role:'Stewardship Officer · 14 prospects · Diocese',      on:false},
+      {id:'st', ini:'ST', c:'#2563EB',       nm:'Sam Tran',         role:'Development Associate · supports events',           on:false}
+    ];
+    function assignedCount(){ return SOLICITORS.filter(function(s){ return s.on; }).length; }
+    function assignedNames(){ return SOLICITORS.filter(function(s){ return s.on; }).map(function(s){ return s.nm; }); }
+    function renderSolicitors(q){
+      q = (q||'').toLowerCase();
+      var list = document.getElementById('sol-list'); if(!list) return;
+      var matches = SOLICITORS.filter(function(s){ return !q || (s.nm+' '+s.role).toLowerCase().indexOf(q)!==-1; });
+      var empty = document.getElementById('sol-empty'); if(empty) empty.style.display = matches.length?'none':'block';
+      list.innerHTML = matches.map(function(s){
+        return '<div class="sol-card'+(s.on?' on':'')+'" data-id="'+s.id+'">'
+          +'<div class="av" style="background:'+s.c+'">'+s.ini+'</div>'
+          +'<div class="body"><div class="nm">'+esc(s.nm)+'</div><div class="role">'+esc(s.role)+'</div></div>'
+          +'<div class="check">'+(s.on?'✓':'')+'</div></div>';
+      }).join('');
+    }
+    function updateTeamFoot(){
+      var n = assignedCount();
+      var cnt = document.getElementById('sol-count'); if(cnt) cnt.textContent = n+' assigned';
+      var cross = document.getElementById('f-crossentity');
+      var scope = (cross && cross.selectedIndex===1) ? 'cross-entity scope' : 'single-entity scope';
+      var foot = document.getElementById('team-foot'); if(foot) foot.textContent = n+' solicitor'+(n!==1?'s':'')+' assigned · '+scope;
+    }
+    window.filterSolicitors = function(v){ renderSolicitors(v); };
+    var solList = document.getElementById('sol-list');
+    if (solList) solList.addEventListener('click', function(e){
+      var card = e.target.closest('.sol-card'); if(!card) return;
+      var s = SOLICITORS.filter(function(x){ return x.id===card.dataset.id; })[0]; if(!s) return;
+      s.on = !s.on;
+      card.classList.toggle('on', s.on);
+      card.querySelector('.check').textContent = s.on ? '✓' : '';
+      updateTeamFoot();
+    });
+    var crossEl = document.getElementById('f-crossentity');
+    if (crossEl) crossEl.addEventListener('change', updateTeamFoot);
+
+    /* ══ Hierarchy add / remove (delegated) ══ */
+    var hbox = document.getElementById('hierarchy-box');
+    if (hbox) hbox.addEventListener('click', function(e){
+      var x = e.target.closest('.x-btn');
+      if (x){ var nd = x.closest('.h-node'); if(nd) nd.remove(); return; }
+      var addF = e.target.closest('.add-node.fund');
+      if (addF){ addF.insertAdjacentHTML('beforebegin', node('f','New fund','GL —— · set GL account + entity','$0')); return; }
+      var addA = e.target.closest('.add-node.appeal');
+      if (addA){
+        var block = node('a','New appeal','Describe this appeal','$0',{mt:true})
+                  + node('f','New fund','GL —— · set GL account + entity','$0')
+                  + addNode('fund','Add fund under New appeal');
+        addA.insertAdjacentHTML('beforebegin', block);
+        return;
+      }
+    });
+
+    /* ══ Custom-option ("…") modal ══
+       Any <select> option whose text ends in "…" opens a builder.
+       Tiers/levels get a multi-row builder; everything else a single field. */
+    var optState = null; // {select, prevIndex, kind}
+    function ovOpen(id){ document.getElementById(id).classList.add('open'); }
+    function ovClose(id){ document.getElementById(id).classList.remove('open'); }
+    function tierRow(nm, amt){
+      return '<div class="tier-row"><input class="fld tr-nm" placeholder="Tier / level name" value="'+esc(nm||'')+'">'
+        +'<input class="fld tr-amt" placeholder="$ threshold" value="'+esc(amt||'')+'">'
+        +'<button class="x" onclick="this.closest(\'.tier-row\').remove()">×</button></div>';
+    }
+    window.addTierRow = function(){ document.getElementById('tier-list').insertAdjacentHTML('beforeend', tierRow()); };
+    function openOptModal(sel){
+      var txt = sel.options[sel.selectedIndex].textContent;
+      optState = { select: sel, prevIndex: sel.__prevIndex==null?0:sel.__prevIndex };
+      var isTiers = /tiers…|levels…/i.test(txt);
+      document.getElementById('opt-title').textContent = isTiers ? 'Add custom '+(/levels/i.test(txt)?'sponsorship levels':'recognition tiers') : txt.replace(/…$/,'');
+      document.getElementById('opt-sub').textContent  = isTiers ? 'Name each level and its dollar threshold. They’ll show on gift forms and the campaign page.' : 'Enter the detail for this campaign.';
+      optState.kind = isTiers ? 'tiers' : 'text';
+      if (isTiers){
+        document.getElementById('opt-body').innerHTML =
+          '<div id="tier-list">'+tierRow('Bronze','$1,000')+tierRow('Silver','$5,000')+'</div>'
+          +'<div class="add-tier" onclick="addTierRow()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg>Add another level</div>';
+      } else {
+        var ph = /quiet phase/i.test(txt) ? 'e.g. Started Sep 2025 · 4-month silent phase'
+               : /end date/i.test(txt)    ? 'e.g. December 31, 2030'
+               : /public goal/i.test(txt) ? 'e.g. $5,000,000.00'
+               : /giving levels/i.test(txt)? 'e.g. $100 · $500 · $1,000'
+               : 'Enter a value';
+        document.getElementById('opt-body').innerHTML = '<span class="lbl">Value</span><input class="fld" id="opt-input" placeholder="'+ph+'">';
+        setTimeout(function(){ var i=document.getElementById('opt-input'); if(i) i.focus(); }, 30);
+      }
+      ovOpen('opt-ov');
+    }
+    window.closeOpt = function(revert){
+      if (revert && optState && optState.select){ optState.select.selectedIndex = optState.prevIndex; }
+      ovClose('opt-ov'); optState = null;
+    };
+    window.saveOpt = function(){
+      if (!optState) { ovClose('opt-ov'); return; }
+      var sel = optState.select, val = '';
+      if (optState.kind === 'tiers'){
+        var rows = [].slice.call(document.querySelectorAll('#tier-list .tier-row'));
+        var parts = rows.map(function(r){
+          var n = r.querySelector('.tr-nm').value.trim(), a = r.querySelector('.tr-amt').value.trim();
+          return n ? (n + (a?' ('+a+')':'')) : '';
+        }).filter(Boolean);
+        if (!parts.length){ alert('Add at least one tier.'); return; }
+        val = parts.join(' · ');
+      } else {
+        val = (document.getElementById('opt-input').value || '').trim();
+        if (!val){ alert('Enter a value.'); return; }
+      }
+      // Insert the custom value as a new option before the "…" option, and select it
+      var customText = val;
+      var opt = document.createElement('option'); opt.textContent = customText;
+      sel.insertBefore(opt, sel.options[sel.selectedIndex]);
+      sel.value = customText; sel.__prevIndex = sel.selectedIndex;
+      ovClose('opt-ov'); optState = null;
+    };
+    // Delegated on .wiz-content so it also covers selects rebuilt by applyType().
+    var wc = document.querySelector('.wiz-content');
+    function rememberIndex(e){ var sel = e.target.closest && e.target.closest('select.fld'); if(sel) sel.__prevIndex = sel.selectedIndex; }
+    if (wc){
+      wc.addEventListener('focusin', rememberIndex);
+      wc.addEventListener('mousedown', rememberIndex);
+      wc.addEventListener('change', function(e){
+        var sel = e.target.closest('select.fld'); if(!sel) return;
+        var t = sel.options[sel.selectedIndex].textContent;
+        if (sel.id === 'f-editperm' && /^Custom…$/.test(t)) { openPerm(sel); return; }
+        if (/…$/.test(t)) { openOptModal(sel); return; }
+        sel.__prevIndex = sel.selectedIndex;
+      });
+    }
+
+    /* ══ Custom edit-access modal ══ */
+    var permState = null;
+    var PERM_OPTS = [
+      {id:'p-dd',  nm:'Development Directors', pr:'Sarah Reynolds · Bridget McCarthy', on:true},
+      {id:'p-mgo', nm:'Major Gift Officers',   pr:'Julia Kelleher · Miguel Ramirez',   on:false},
+      {id:'p-pgo', nm:'Planned Giving Officer', pr:'Aoife O’Brien',                    on:false},
+      {id:'p-dba', nm:'Database Administrator', pr:'Daniel Cho — full edit',           on:false},
+      {id:'p-fin', nm:'Finance (read + GL only)', pr:'Diocesan finance team',          on:false}
+    ];
+    function openPerm(sel){
+      permState = { select: sel, prevIndex: sel.__prevIndex==null?0:sel.__prevIndex };
+      document.getElementById('perm-body').innerHTML = PERM_OPTS.map(function(o){
+        return '<div class="perm-opt'+(o.on?' on':'')+'" data-id="'+o.id+'"><div class="pk">'+(o.on?'✓':'')+'</div>'
+          +'<div><div class="pn">'+o.nm+'</div><div class="pr">'+o.pr+'</div></div></div>';
+      }).join('');
+      ovOpen('perm-ov');
+    }
+    document.getElementById('perm-body').addEventListener('click', function(e){
+      var row = e.target.closest('.perm-opt'); if(!row) return;
+      var o = PERM_OPTS.filter(function(x){ return x.id===row.dataset.id; })[0]; if(!o) return;
+      o.on = !o.on; row.classList.toggle('on', o.on); row.querySelector('.pk').textContent = o.on?'✓':'';
+    });
+    window.closePerm = function(revert){
+      if (revert && permState && permState.select){ permState.select.selectedIndex = permState.prevIndex; }
+      ovClose('perm-ov'); permState = null;
+    };
+    window.savePerm = function(){
+      if (!permState){ ovClose('perm-ov'); return; }
+      var chosen = PERM_OPTS.filter(function(o){ return o.on; });
+      if (!chosen.length){ alert('Select at least one group.'); return; }
+      var label = 'Custom · ' + chosen.map(function(o){ return o.nm; }).join(', ');
+      var sel = permState.select;
+      var opt = document.createElement('option'); opt.textContent = label;
+      sel.insertBefore(opt, sel.options[sel.selectedIndex]);
+      sel.value = label; sel.__prevIndex = sel.selectedIndex;
+      ovClose('perm-ov'); permState = null;
+    };
+
+    /* ══ Rich "Campaign created" modal ══ */
+    function currentPublicUrl(){
+      var pub = document.getElementById('f-public');
+      if (pub && pub.selectedIndex===1) return null;
+      var t = TYPES[current]||TYPES.capital;
+      return 'givecentral.org/'+t.slug;
+    }
+    window.copyPublicLink = function(){
+      var url = currentPublicUrl() || (TYPES[current].slug);
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText('https://'+url);
+      if (window.atlasToast) atlasToast('Public link copied · https://'+url);
+      else if (window.showToast) showToast('Public link copied');
+    };
+    window.createCampaign = function(){
+      var t = TYPES[current] || TYPES.capital;
+      var name = (document.getElementById('campaign-name-input')||{}).value || t.name;
+      var code = (document.getElementById('f-code')||{}).value || t.code;
+      var goal = ((document.querySelector('#gtr-render input')||{}).value) || t.reviewGoal;
+      var entity = ((document.getElementById('f-entity')||{}).value || t.entity).replace(/ \(EIN.*$/,'');
+      var perm = (document.getElementById('f-editperm')||{}).value || t.permissions;
+      var nApp = t.appeals.length, nFund = countFunds(t);
+      var names = assignedNames(); var n = names.length;
+      var url = currentPublicUrl();
+      var emailSel = document.querySelector('#gtr-render') && document.querySelectorAll('.wiz-panel[data-panel="4"] select');
+      // summary
+      document.getElementById('cr-title').textContent = name;
+      document.getElementById('cr-sub').textContent = t.label + ' · ID #' + code + ' · ready in your dashboard';
+      document.getElementById('cr-summary').innerHTML =
+          '<div class="cr-row"><span class="k">Goal</span><span class="v">'+esc(goal)+(t.publicNo?' <span class="muted">(deferred)</span>':'')+'</span></div>'
+        + '<div class="cr-row"><span class="k">Structure</span><span class="v">'+nApp+' appeals · '+nFund+' funds</span></div>'
+        + '<div class="cr-row"><span class="k">Legal entity</span><span class="v">'+esc(entity)+'</span></div>'
+        + '<div class="cr-row"><span class="k">Solicitors</span><span class="v">'+n+' assigned <span class="muted">('+esc(names.slice(0,3).join(', '))+(n>3?' +'+(n-3):'')+')</span></span></div>'
+        + '<div class="cr-row"><span class="k">Edit access</span><span class="v">'+esc(perm)+'</span></div>'
+        + '<div class="cr-row"><span class="k">Public page</span><span class="v">'+(url?'givecentral.org/'+t.slug:'Internal only — no public page')+'</span></div>';
+      // next steps
+      var next = [];
+      if (url) next.push('Public campaign page is live at <strong>givecentral.org/'+t.slug+'</strong> and accepting gifts.');
+      next.push('Launch email queued to '+n+' assigned solicitor'+(n!==1?'s':'')+' · sending tomorrow 8 AM.');
+      next.push('Kickoff task “Identify 5 prospects” created for each solicitor · due in 7 days.');
+      if (t.label.indexOf('planned')>-1 || t.publicNo) next.push('Heritage Society stewardship series scheduled · deferred intentions tracked (no receipts until realized).');
+      else if (/event/i.test(t.label)) next.push('Fair-market-value split-receipting is armed — set the FMV per seat before selling tickets.');
+      else next.push('Gifts to this campaign will auto-receipt per your rules and roll up on the dashboard.');
+      document.getElementById('cr-next-list').innerHTML = next.map(function(s){
+        return '<div class="ni"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 7l3 3 5-6"/></svg><span>'+s+'</span></div>';
+      }).join('');
+      ovOpen('created-ov');
+    };
+    // click-scrim to dismiss any overlay
+    document.querySelectorAll('.cc-ov').forEach(function(ov){
+      ov.addEventListener('click', function(e){
+        if (e.target !== ov) return;
+        if (ov.id==='opt-ov') closeOpt(true);
+        else if (ov.id==='perm-ov') closePerm(true);
+        else ov.classList.remove('open');
+      });
+    });
+
     typeCards.forEach(function(c){
       c.addEventListener('click', function(){
         typeCards.forEach(function(x){ x.classList.remove('on'); });
         c.classList.add('on');
-        var t = c.querySelector('.t').textContent;
-        var sub = document.getElementById('step1-sub');
-        var summary = document.getElementById('type-summary');
-        if (sub) sub.textContent = t;
-        if (summary) summary.textContent = t;
+        applyType(c.dataset.type);
       });
     });
 
-    solCards.forEach(function(c){
-      c.addEventListener('click', function(){ c.classList.toggle('on'); });
-    });
-
-    // Remove a hierarchy node when its × is clicked
-    document.querySelectorAll('.hierarchy .x-btn').forEach(function(b){
-      b.addEventListener('click', function(){
-        var node = b.closest('.h-node');
-        if (node) node.style.display = 'none';
-      });
-    });
+    // Initial render for the default (Capital) selection
+    window.TYPES_READY = true;
+    applyType('capital');
+    renderSolicitors('');
+    updateTeamFoot();
   })();
 </script>
 

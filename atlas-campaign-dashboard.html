@@ -101,6 +101,22 @@
     .vt-btn { padding: 5px 11px; font-size: 11px; font-weight: 500; color: var(--text-3); cursor: pointer; border: none; background: none; font-family: 'DM Sans', sans-serif; transition: all .15s; display: flex; align-items: center; gap: 4px; }
     .vt-btn svg { width: 12px; height: 12px; }
     .vt-btn.active { background: white; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .cc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; padding:16px; }
+    .cc-card { border:1px solid var(--border); border-radius:12px; padding:16px; cursor:pointer; transition:box-shadow .15s,border-color .15s; background:white; }
+    .cc-card:hover { box-shadow:0 6px 18px rgba(15,23,42,.08); border-color:#CBD5E1; }
+    .cc-top { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+    .cc-ic { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .cc-ic svg { width:15px; height:15px; }
+    .cc-nm { font-size:13.5px; font-weight:600; color:var(--text); line-height:1.25; }
+    .cc-ty { font-size:11px; color:var(--text-3); margin-top:1px; }
+    .cc-amt { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
+    .cc-amt .big { font-size:18px; font-weight:700; color:var(--text); }
+    .cc-amt .goal { font-size:11.5px; color:var(--text-3); }
+    .cc-track { height:7px; background:var(--surface); border-radius:99px; overflow:hidden; position:relative; }
+    .cc-fill { height:100%; border-radius:99px; }
+    .cc-pace { position:absolute; top:-2px; width:2px; height:11px; background:var(--text-2); }
+    .cc-foot { display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:11.5px; }
+    .cc-pill { font-size:10.5px; font-weight:700; padding:2px 9px; border-radius:99px; }
     .status-pills { display: flex; gap: 5px; }
     .sp { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px solid var(--border); color: var(--text-3); cursor: pointer; background: white; transition: all .15s; user-select: none; }
     .sp:hover { border-color: #94A3B8; color: var(--text-2); }
@@ -572,8 +588,8 @@ body {
     <div class="topbar-sep"></div>
     <span class="topbar-sub">Diocese of St. Petersburg · FY 2026</span>
     <div class="topbar-right">
-      <button class="tb-btn tb-ghost"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 1v7M3 5.5l3 3 3-3"/><path d="M1.5 10.5h9"/></svg>Export</button>
-      <button class="tb-btn tb-primary"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>New campaign</button>
+      <button class="tb-btn tb-ghost" onclick="if(window.atlasToast)atlasToast('Campaign portfolio exported · CSV downloading')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 1v7M3 5.5l3 3 3-3"/><path d="M1.5 10.5h9"/></svg>Export</button>
+      <button class="tb-btn tb-primary" onclick="window.location.href='atlas-campaign-create.html'"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>New campaign</button>
     </div>
   </div>
 
@@ -626,8 +642,8 @@ body {
       <select class="ctrl-select"><option>All types</option><option>Annual appeal</option><option>Capital campaign</option><option>Special event</option></select>
       <div class="ctrl-sep"></div>
       <div class="view-toggle">
-        <button class="vt-btn active"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 3h9M1.5 6h9M1.5 9h9"/></svg>Table</button>
-        <button class="vt-btn"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1"/><rect x="6.5" y="1.5" width="4" height="4" rx="1"/><rect x="1.5" y="6.5" width="4" height="4" rx="1"/><rect x="6.5" y="6.5" width="4" height="4" rx="1"/></svg>Cards</button>
+        <button class="vt-btn active" onclick="setView('table',this)"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 3h9M1.5 6h9M1.5 9h9"/></svg>Table</button>
+        <button class="vt-btn" onclick="setView('cards',this)"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1"/><rect x="6.5" y="1.5" width="4" height="4" rx="1"/><rect x="1.5" y="6.5" width="4" height="4" rx="1"/><rect x="6.5" y="6.5" width="4" height="4" rx="1"/></svg>Cards</button>
       </div>
     </div>
 
@@ -635,7 +651,7 @@ body {
     <div class="main-grid">
 
       <!-- Campaign table -->
-      <div class="campaign-table-card">
+      <div class="campaign-table-card" id="camp-table-card">
         <div class="ct-head">
           <span class="ct-title">Campaign health</span>
           <span class="ct-count" id="ct-count">6 active campaigns</span>
@@ -657,6 +673,12 @@ body {
         </div>
       </div>
 
+      <!-- Campaign cards (toggle) -->
+      <div class="campaign-table-card" id="camp-cards" style="display:none">
+        <div class="ct-head"><span class="ct-title">Campaign health</span><span class="ct-count" id="cc-count"></span></div>
+        <div class="cc-grid" id="cc-body"></div>
+      </div>
+
       <!-- Guru AI panel -->
       <div class="guru-panel">
         <div class="guru-header">
@@ -667,22 +689,22 @@ body {
           <div class="guru-insight">
             <div class="gi-type git-pacing">Pacing alert</div>
             <div class="gi-text"><strong>Cathedral Capital Fund</strong> is 18% behind pace — at current trajectory it will reach $723K by year-end, $277K short of goal.</div>
-            <div class="gi-action"><button onclick="">View Cathedral campaign →</button></div>
+            <div class="gi-action"><button onclick="openDrawer(2)">View Cathedral campaign →</button></div>
           </div>
           <div class="guru-insight">
             <div class="gi-type git-overlap">Donor overlap</div>
             <div class="gi-text"><strong>47 CMA donors</strong> who gave $500+ last year haven't given to the Cathedral Fund yet. Combined 2025 giving: $68K — high conversion potential.</div>
-            <div class="gi-action"><button>Create outreach list →</button></div>
+            <div class="gi-action"><button onclick="window.location.href='atlas-segment-builder.html'">Create outreach list →</button></div>
           </div>
           <div class="guru-insight">
             <div class="gi-type git-lybunt">LYBUNT alert</div>
             <div class="gi-text">Across all active campaigns, <strong>163 LYBUNT donors</strong> gave $124K combined last year but haven't given this year. April 30 is optimal outreach timing.</div>
-            <div class="gi-action"><button>View 163 donors →</button></div>
+            <div class="gi-action"><button onclick="window.location.href='atlas-donors-list.html'">View 163 donors →</button></div>
           </div>
           <div class="guru-insight">
             <div class="gi-type git-pledge">Pledge urgency</div>
             <div class="gi-text"><strong>$86K in pledge installments</strong> are due in the next 30 days across 4 campaigns. 3 are already overdue by 2–5 days.</div>
-            <div class="gi-action"><button>Review overdue pledges →</button></div>
+            <div class="gi-action"><button onclick="window.location.href='atlas-pledges-list.html'">Review overdue pledges →</button></div>
           </div>
         </div>
         <div class="guru-query-wrap">
@@ -707,7 +729,7 @@ body {
   <div id="dd-body" style="flex:1;overflow-y:auto;display:flex;flex-direction:column"></div>
   <div class="dd-cta">
     <button class="dd-cta-btn dd-primary" onclick="window.location.href='atlas-campaign-portal.html'"><svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2-2 1.5 1.5 2-2 1.5 1.5"/><rect x="1.5" y="2" width="8" height="7" rx="1.2"/></svg>Full campaign portal</button>
-    <button class="dd-cta-btn dd-ghost"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M5.5 1v7M2.5 5l3 3 3-3"/><path d="M1 9.5h9"/></svg>Export PDF</button>
+    <button class="dd-cta-btn dd-ghost" onclick="if(window.atlasToast)atlasToast('Campaign summary PDF generated · downloading')"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M5.5 1v7M2.5 5l3 3 3-3"/><path d="M1 9.5h9"/></svg>Export PDF</button>
   </div>
 </div>
 
@@ -784,15 +806,56 @@ const CAMPAIGNS = [
 
 let selectedId = null;
 let currentFilter = 'all';
+let currentView = 'table';
 
-/* ── RENDER TABLE ── */
-function renderTable() {
-  const body = document.getElementById('ct-body');
-  const filtered = currentFilter === 'all' ? CAMPAIGNS
+function getFiltered(){
+  return currentFilter === 'all' ? CAMPAIGNS
     : currentFilter === 'active'    ? CAMPAIGNS.filter(c => c.status !== 'done' && c.days > 0)
     : currentFilter === 'upcoming'  ? CAMPAIGNS.filter(c => c.days > 180)
     : currentFilter === 'completed' ? CAMPAIGNS.filter(c => c.status === 'done')
     : CAMPAIGNS;
+}
+function render(){ currentView === 'cards' ? renderCards() : renderTable(); }
+function setView(view, btn){
+  currentView = view;
+  document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  document.getElementById('camp-table-card').style.display = view==='table' ? '' : 'none';
+  document.getElementById('camp-cards').style.display      = view==='cards' ? '' : 'none';
+  render();
+}
+function fmtK(n){ return n >= 1e6 ? '$'+(n/1e6).toFixed(2)+'M' : '$'+(n/1000).toFixed(0)+'K'; }
+function fmtGoal(n){ return n >= 1e6 ? '$'+(n/1e6).toFixed(1)+'M' : '$'+(n/1000).toFixed(0)+'K'; }
+function statusMeta(c){
+  return c.status==='on' ? {c:'var(--green)',bg:'var(--green-light,#DCFCE7)',fg:'#15803D'}
+       : c.status==='risk' ? {c:'var(--amber)',bg:'#FEF3C7',fg:'#D97706'}
+       : c.status==='behind' ? {c:'var(--rose)',bg:'#FCE7F3',fg:'#BE185D'}
+       : {c:'#1D4ED8',bg:'#DBEAFE',fg:'#1D4ED8'};
+}
+/* ── RENDER CARDS ── */
+function renderCards(){
+  const filtered = getFiltered();
+  document.getElementById('cc-count').textContent = filtered.length + ' campaign' + (filtered.length!==1?'s':'');
+  document.getElementById('cc-body').innerHTML = filtered.map(function(c){
+    const m = statusMeta(c);
+    const diff = c.pct - c.calPct;
+    const diffLabel = diff>0 ? '+'+diff+'% ahead' : diff<0 ? diff+'% behind' : 'on pace';
+    const daysLabel = c.status==='done' ? 'Completed' : c.days+' days left';
+    return '<div class="cc-card" onclick="openDrawer('+c.id+')">'
+      + '<div class="cc-top"><div class="cc-ic" style="background:'+c.iconBg+'"><svg viewBox="0 0 14 14" fill="none" stroke="'+c.iconStroke+'" stroke-width="1.5" stroke-linecap="round"><path d="M7 1v12M3 5h8"/></svg></div>'
+      + '<div><div class="cc-nm">'+c.name+'</div><div class="cc-ty">'+c.type+'</div></div></div>'
+      + '<div class="cc-amt"><span class="big">'+fmtK(c.raised)+'</span><span class="goal">of '+fmtGoal(c.goal)+' · '+c.pct+'%</span></div>'
+      + '<div class="cc-track"><div class="cc-fill" style="width:'+c.pct+'%;background:'+m.c+'"></div><div class="cc-pace" style="left:'+c.calPct+'%"></div></div>'
+      + '<div class="cc-foot"><span class="cc-pill" style="background:'+m.bg+';color:'+m.fg+'">'+c.statusLabel+'</span>'
+      + '<span style="color:'+(diff<0?'var(--amber)':'var(--text-3)')+'">'+diffLabel+' · '+daysLabel+'</span></div>'
+      + '</div>';
+  }).join('');
+}
+
+/* ── RENDER TABLE ── */
+function renderTable() {
+  const body = document.getElementById('ct-body');
+  const filtered = getFiltered();
 
   document.getElementById('ct-count').textContent = filtered.length + ' campaign' + (filtered.length!==1?'s':'');
 
@@ -943,13 +1006,13 @@ function filterStatus(el, val) {
   document.querySelectorAll('.sp').forEach(s => s.classList.remove('active'));
   el.classList.add('active');
   currentFilter = val;
-  renderTable();
+  render();
 }
 
 function sortBy(col) {
   // Simple toggle sort
   CAMPAIGNS.sort((a,b) => col==='days' ? a.days - b.days : a.status.localeCompare(b.status));
-  renderTable();
+  render();
 }
 
 function handleGuruQuery() {
