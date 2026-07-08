@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Atlas — Screen loader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+  :root{
+    --navy:#0E1E35; --blue:#2563EB; --gold:#C8A04A; --gold-2:#B45309; --green:#15803D;
+    --text:#0F172A; --text-2:#334155; --text-3:#64748B; --border:#E2E8F0; --surface:#F8FAFC;
+  }
+  html{ font-size:14px; -webkit-font-smoothing:antialiased; }
+  body{ font-family:'DM Sans',sans-serif; background:var(--surface); color:var(--text); min-height:100vh; }
+
+  /* ═══════════════════════════════════════════════════════════
+     ATLAS LOADER — general, use-anywhere
+     Default status auto-rotates neutral reassurance lines.
+     Override with show('custom text'). Long-wait escalation +
+     success beat built in. Checklist mode optional.
+     (this whole block is the reusable, copy-paste piece)
+     ═══════════════════════════════════════════════════════════ */
+  #atlas-loader{
+    position:fixed; inset:0; z-index:2147483200; display:none;
+    align-items:center; justify-content:center; background:var(--navy);
+    opacity:0; transition:opacity .4s ease;
+  }
+  #atlas-loader.show{ display:flex; opacity:1; }
+  #atlas-loader.leaving{ opacity:0; }
+  #atlas-loader::before{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(circle at 84% 16%, rgba(200,160,74,.16) 0%, transparent 52%),
+               radial-gradient(circle at 16% 86%, rgba(37,99,235,.20) 0%, transparent 54%);
+  }
+  .al-in{ display:flex; flex-direction:column; align-items:center; animation:al-rise .5s ease both; }
+  @keyframes al-rise{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+
+  .al-stage{ position:relative; width:240px; height:180px; display:flex; align-items:center; justify-content:center; }
+  .al-glow{ position:absolute; width:200px; height:200px; border-radius:50%;
+    background:radial-gradient(circle, rgba(200,160,74,.30) 0%, rgba(37,99,235,.10) 45%, transparent 70%);
+    animation:al-glow 3.4s ease-in-out infinite; }
+  .al-mk{ position:relative; width:210px; height:158px; display:block; overflow:visible; }
+  .al-mk line, .al-mk circle{ transform-box:fill-box; transform-origin:center; }
+  .al-orbit{ stroke:rgba(200,160,74,.35); stroke-width:1; stroke-dasharray:1.5 7; fill:none; animation:al-orbit 14s linear infinite; }
+  .al-line{ stroke:rgba(200,160,74,.5); stroke-width:1.5; }
+  .al-star{ fill:#fff; animation:al-twinkle 2.6s ease-in-out infinite; }
+  .al-s1{ animation-delay:0s; } .al-s2{ animation-delay:.5s; } .al-s3{ animation-delay:1s; }
+  .al-faint{ fill:rgba(255,255,255,.55); animation:al-twinkle 2.6s ease-in-out infinite; animation-delay:1.4s; }
+  .al-gold{ fill:#C8A04A; animation:al-goldpulse 2.6s ease-in-out infinite; filter:drop-shadow(0 0 5px rgba(252,211,77,.85)); }
+  .al-halo{ fill:none; stroke:#FCD34D; stroke-width:1.2; opacity:0; animation:al-halo 2.6s ease-out infinite; }
+  .al-halo2{ animation-delay:1.3s; }
+  .al-spark{ fill:#FCD34D; filter:drop-shadow(0 0 5px rgba(252,211,77,.95)); }
+
+  @keyframes al-glow{ 0%,100%{opacity:.4; transform:scale(.9)} 50%{opacity:.75; transform:scale(1.08)} }
+  @keyframes al-orbit{ to{ transform:rotate(360deg); } }
+  @keyframes al-twinkle{ 0%,100%{opacity:.45; transform:scale(.9)} 50%{opacity:1; transform:scale(1)} }
+  @keyframes al-goldpulse{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.18)} }
+  @keyframes al-halo{ 0%{opacity:.7; transform:scale(.5)} 70%{opacity:0} 100%{opacity:0; transform:scale(2.6)} }
+  @keyframes al-spin{ to{ transform:rotate(360deg); } }
+
+  /* ── Status line (rotating reassurance / custom / success) ── */
+  .al-status{ min-height:18px; margin-top:18px; text-align:center; font-size:12.5px; letter-spacing:.01em; color:rgba(219,234,254,.66); }
+  .al-status .al-txt{ display:inline; transition:opacity .28s ease; }
+  .al-status .al-dots::after{ content:''; animation:al-dots 1.4s steps(4,end) infinite; }
+  @keyframes al-dots{ 0%{content:''} 25%{content:'·'} 50%{content:'··'} 75%,100%{content:'···'} }
+  .al-status .al-check{ display:none; color:#86EFAC; font-weight:700; margin-right:6px; }
+  .al-status.ok{ color:#DCFCE7; }
+  .al-status.ok .al-dots{ display:none; }
+  .al-status.ok .al-check{ display:inline; }
+
+  /* ── Optional checklist mode ── */
+  .al-steps{ display:none; flex-direction:column; gap:11px; margin-top:22px; text-align:left; min-width:220px; }
+  .al-step{ display:flex; align-items:center; gap:11px; font-size:12.5px; color:rgba(219,234,254,.42); transition:color .3s ease; }
+  .al-step.active{ color:#fff; font-weight:500; }
+  .al-step.done{ color:rgba(219,234,254,.72); }
+  .al-mk-ic{ width:16px; height:16px; flex-shrink:0; border-radius:50%; box-sizing:border-box; display:flex; align-items:center; justify-content:center; }
+  .al-mk-ic.ring{ border:1.6px solid rgba(255,255,255,.22); }
+  .al-mk-ic.spin{ border:1.6px solid rgba(252,211,77,.28); border-top-color:#FCD34D; animation:al-spin .7s linear infinite; }
+  .al-mk-ic.ok{ background:#C8A04A; }
+  .al-mk-ic.ok svg{ width:9px; height:9px; stroke:#0E1E35; stroke-width:2.2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+
+  /* ── Long-wait escalation line ── */
+  .al-slow{ display:none; margin-top:12px; text-align:center; font-size:11.5px; color:rgba(252,211,77,.8); max-width:270px; line-height:1.5; }
+  .al-slow.show{ display:block; animation:al-rise .4s ease both; }
+
+  @media (prefers-reduced-motion: reduce){
+    .al-glow, .al-orbit, .al-star, .al-faint, .al-gold, .al-halo, .al-mk-ic.spin, .al-dots::after{ animation:none; opacity:1; }
+    .al-spark{ display:none; } .al-status .al-txt{ transition:none; }
+  }
+  /* ═══════════════ end reusable loader block ═══════════════ */
+
+  /* ── Demo page chrome (not part of the snippet) ── */
+  .wrap{ max-width:1000px; margin:0 auto; padding:40px 24px 80px; }
+  .eyebrow{ font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--blue); }
+  h1{ font-family:'DM Serif Display',serif; font-size:34px; letter-spacing:-.02em; margin:6px 0 8px; }
+  .lede{ color:var(--text-3); font-size:14px; max-width:680px; line-height:1.6; }
+  .card{ background:#fff; border:1px solid var(--border); border-radius:16px; overflow:hidden; margin-top:22px; }
+  .card-h{ padding:16px 20px; border-bottom:1px solid var(--border); font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); }
+  .card-b{ padding:22px; }
+  .preview{ background:var(--navy); border-radius:14px; height:340px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+  .preview::before{ content:''; position:absolute; inset:0; background:radial-gradient(circle at 84% 16%, rgba(200,160,74,.16) 0%, transparent 52%),radial-gradient(circle at 16% 86%, rgba(37,99,235,.2) 0%, transparent 54%); }
+  .btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+  .btn{ font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; padding:9px 16px; border-radius:9px; cursor:pointer; border:1px solid transparent; transition:all .15s; }
+  .btn-primary{ background:var(--blue); color:#fff; box-shadow:0 1px 4px rgba(37,99,235,.25); } .btn-primary:hover{ background:#1D4ED8; }
+  .btn-ghost{ background:#fff; border-color:var(--border); color:var(--text-2); } .btn-ghost:hover{ background:var(--surface); border-color:#94A3B8; }
+  .usage{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+  .usage .u{ border:1px solid var(--border); border-radius:11px; padding:14px 16px; }
+  .usage .u b{ font-size:13px; } .usage .u p{ font-size:12px; color:var(--text-3); margin-top:4px; line-height:1.5; }
+  .usage .u code{ background:var(--surface); border:1px solid var(--border); border-radius:5px; padding:1px 5px; font-family:'DM Mono',monospace; font-size:10.5px; color:var(--gold-2); }
+  pre{ background:#0F172A; color:#E2E8F0; border-radius:12px; padding:18px 20px; overflow:auto; font-family:'DM Mono',monospace; font-size:12px; line-height:1.65; position:relative; }
+  pre .cmt{ color:#7C93B3; } pre .tag{ color:#7DD3FC; } pre .str{ color:#FCD34D; } pre .fn{ color:#86EFAC; }
+  .copy{ position:absolute; top:12px; right:12px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); color:#E2E8F0; font-size:11px; font-weight:600; padding:5px 11px; border-radius:7px; cursor:pointer; font-family:'DM Sans',sans-serif; }
+  .copy:hover{ background:rgba(255,255,255,.18); }
+  .note{ font-size:12px; color:var(--text-3); margin-top:12px; line-height:1.6; }
+  .note code{ background:var(--surface); border:1px solid var(--border); border-radius:5px; padding:1px 6px; font-family:'DM Mono',monospace; font-size:11px; color:var(--gold-2); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div>
+    <div class="eyebrow">Atlas · Design system</div>
+    <h1>Screen loader</h1>
+    <p class="lede">One general loader for the whole platform. Call <code>atlasLoader.show()</code> anywhere and the status auto-rotates neutral reassurance lines. Pass your own text to override it, and it handles long waits and a success beat for you.</p>
+  </div>
+
+  <!-- Live preview (rotating status, looping) -->
+  <div class="card">
+    <div class="card-h">Live preview · default rotating status</div>
+    <div class="card-b">
+      <div class="preview">
+        <div class="al-in">
+          <div class="al-stage">
+            <div class="al-glow"></div>
+            <svg class="al-mk" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle class="al-orbit" cx="80" cy="58" r="64"/>
+              <line class="al-line" x1="22" y1="92" x2="58" y2="58"/>
+              <line class="al-line" x1="58" y1="58" x2="98" y2="38"/>
+              <line class="al-line" x1="98" y1="38" x2="138" y2="24"/>
+              <line class="al-line" x1="98" y1="38" x2="110" y2="78"/>
+              <circle class="al-star al-s1" cx="22"  cy="92" r="4"/>
+              <circle class="al-star al-s2" cx="58"  cy="58" r="5"/>
+              <circle class="al-star al-s3" cx="98"  cy="38" r="5.5"/>
+              <circle class="al-faint" cx="110" cy="78" r="3.5"/>
+              <circle class="al-halo"  cx="138" cy="24" r="7"/>
+              <circle class="al-halo al-halo2" cx="138" cy="24" r="7"/>
+              <circle class="al-gold" cx="138" cy="24" r="7"/>
+              <circle class="al-spark" r="2.6">
+                <animateMotion dur="2.8s" repeatCount="indefinite" path="M22 92 L58 58 L98 38 L138 24"/>
+                <animate attributeName="opacity" dur="2.8s" repeatCount="indefinite" values="0;1;1;1;0" keyTimes="0;0.06;0.5;0.9;1"/>
+              </circle>
+            </svg>
+          </div>
+          <div class="al-status"><span class="al-txt" id="pv-txt">Loading</span><span class="al-dots"></span></div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="atlasLoader.show()">Default (rotating)</button>
+        <button class="btn btn-ghost" onclick="atlasLoader.show('Posting batch BX-2026-014 · 22 gifts'); setTimeout(atlasLoader.hide,3000)">Custom text override</button>
+        <button class="btn btn-ghost" onclick="demoUpdate()">Update mid-load → success</button>
+        <button class="btn btn-ghost" onclick="atlasLoader.show(null,{slowAfter:1600})">Long-wait escalation</button>
+        <button class="btn btn-ghost" onclick="atlasLoader.hide()">Hide</button>
+      </div>
+      <p class="note">The preview loops the rotating lines. The buttons drive the real full-screen overlay. Long-wait note is set to appear after 1.6s here for the demo (defaults to ~7s, then escalates at ~14s).</p>
+    </div>
+  </div>
+
+  <!-- Usage -->
+  <div class="card">
+    <div class="card-h">Use it anywhere</div>
+    <div class="card-b">
+      <div class="usage">
+        <div class="u"><b>Default</b><p><code>atlasLoader.show()</code> — rotates "Loading → Getting things ready → Fetching your data → Almost there" until you hide it. No config.</p></div>
+        <div class="u"><b>Override</b><p><code>atlasLoader.show('Posting batch…')</code> shows your exact text. Update live with <code>setStatus('…')</code>.</p></div>
+        <div class="u"><b>Finish</b><p><code>atlasLoader.success('Saved')</code> shows a green ✓ for a beat, then fades out. Or just <code>hide()</code>.</p></div>
+        <div class="u"><b>Long waits</b><p>Automatic — a soft note fades in after <code>slowAfter</code> (default 7s) and escalates if it keeps going.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Integration snippet -->
+  <div class="card">
+    <div class="card-h">Drop-in include — paste once per screen (or in your layout)</div>
+    <div class="card-b">
+      <pre id="snippet"><button class="copy" onclick="copySnippet()">Copy</button><span class="cmt">&lt;!-- Paste this &lt;script&gt; anywhere. It self-injects the CSS + DOM + API. --&gt;</span>
+<span class="tag">&lt;script&gt;</span>
+(function(){
+  var css=document.createElement(<span class="str">'style'</span>);
+  css.textContent=
+   <span class="str">"#atlas-loader{position:fixed;inset:0;z-index:2147483200;display:none;align-items:center;justify-content:center;background:#0E1E35;opacity:0;transition:opacity .4s ease;font-family:'DM Sans',sans-serif}"</span>+
+   <span class="str">"#atlas-loader.show{display:flex;opacity:1}#atlas-loader.leaving{opacity:0}"</span>+
+   <span class="str">"#atlas-loader::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 84% 16%,rgba(200,160,74,.16),transparent 52%),radial-gradient(circle at 16% 86%,rgba(37,99,235,.2),transparent 54%)}"</span>+
+   <span class="str">".al-in{display:flex;flex-direction:column;align-items:center;animation:al-rise .5s ease both}@keyframes al-rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}"</span>+
+   <span class="str">".al-stage{position:relative;width:240px;height:180px;display:flex;align-items:center;justify-content:center}.al-glow{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(200,160,74,.3),rgba(37,99,235,.1) 45%,transparent 70%);animation:al-glow 3.4s ease-in-out infinite}"</span>+
+   <span class="str">".al-mk{position:relative;width:210px;height:158px;display:block;overflow:visible}.al-mk line,.al-mk circle{transform-box:fill-box;transform-origin:center}.al-orbit{stroke:rgba(200,160,74,.35);stroke-width:1;stroke-dasharray:1.5 7;fill:none;animation:al-orbit 14s linear infinite}.al-line{stroke:rgba(200,160,74,.5);stroke-width:1.5}"</span>+
+   <span class="str">".al-star{fill:#fff;animation:al-twinkle 2.6s ease-in-out infinite}.al-s1{animation-delay:0s}.al-s2{animation-delay:.5s}.al-s3{animation-delay:1s}.al-faint{fill:rgba(255,255,255,.55);animation:al-twinkle 2.6s ease-in-out infinite;animation-delay:1.4s}"</span>+
+   <span class="str">".al-gold{fill:#C8A04A;animation:al-goldpulse 2.6s ease-in-out infinite;filter:drop-shadow(0 0 5px rgba(252,211,77,.85))}.al-halo{fill:none;stroke:#FCD34D;stroke-width:1.2;opacity:0;animation:al-halo 2.6s ease-out infinite}.al-halo2{animation-delay:1.3s}.al-spark{fill:#FCD34D;filter:drop-shadow(0 0 5px rgba(252,211,77,.95))}"</span>+
+   <span class="str">"@keyframes al-glow{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:.75;transform:scale(1.08)}}@keyframes al-orbit{to{transform:rotate(360deg)}}@keyframes al-twinkle{0%,100%{opacity:.45;transform:scale(.9)}50%{opacity:1;transform:scale(1)}}@keyframes al-goldpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}@keyframes al-halo{0%{opacity:.7;transform:scale(.5)}70%{opacity:0}100%{opacity:0;transform:scale(2.6)}}@keyframes al-spin{to{transform:rotate(360deg)}}"</span>+
+   <span class="str">".al-status{min-height:18px;margin-top:18px;text-align:center;font-size:12.5px;color:rgba(219,234,254,.66)}.al-status .al-txt{display:inline;transition:opacity .28s ease}.al-status .al-dots::after{content:'';animation:al-dots 1.4s steps(4,end) infinite}@keyframes al-dots{0%{content:''}25%{content:'·'}50%{content:'··'}75%,100%{content:'···'}}"</span>+
+   <span class="str">".al-status .al-check{display:none;color:#86EFAC;font-weight:700;margin-right:6px}.al-status.ok{color:#DCFCE7}.al-status.ok .al-dots{display:none}.al-status.ok .al-check{display:inline}"</span>+
+   <span class="str">".al-steps{display:none;flex-direction:column;gap:11px;margin-top:22px;text-align:left;min-width:220px}.al-step{display:flex;align-items:center;gap:11px;font-size:12.5px;color:rgba(219,234,254,.42);transition:color .3s}.al-step.active{color:#fff;font-weight:500}.al-step.done{color:rgba(219,234,254,.72)}"</span>+
+   <span class="str">".al-mk-ic{width:16px;height:16px;flex-shrink:0;border-radius:50%;box-sizing:border-box;display:flex;align-items:center;justify-content:center}.al-mk-ic.ring{border:1.6px solid rgba(255,255,255,.22)}.al-mk-ic.spin{border:1.6px solid rgba(252,211,77,.28);border-top-color:#FCD34D;animation:al-spin .7s linear infinite}.al-mk-ic.ok{background:#C8A04A}.al-mk-ic.ok svg{width:9px;height:9px;stroke:#0E1E35;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}"</span>+
+   <span class="str">".al-slow{display:none;margin-top:12px;text-align:center;font-size:11.5px;color:rgba(252,211,77,.8);max-width:270px;line-height:1.5}.al-slow.show{display:block}"</span>+
+   <span class="str">"@media(prefers-reduced-motion:reduce){.al-glow,.al-orbit,.al-star,.al-faint,.al-gold,.al-halo,.al-mk-ic.spin{animation:none;opacity:1}.al-spark{display:none}.al-status .al-txt{transition:none}}"</span>;
+  document.head.appendChild(css);
+
+  var el=document.createElement(<span class="str">'div'</span>); el.id=<span class="str">'atlas-loader'</span>;
+  el.innerHTML=<span class="str">'&lt;div class="al-in"&gt;&lt;div class="al-stage"&gt;&lt;div class="al-glow"&gt;&lt;/div&gt;'</span>+
+   <span class="str">'&lt;svg class="al-mk" viewBox="0 0 160 120" fill="none" aria-hidden="true"&gt;'</span>+
+   <span class="str">'&lt;circle class="al-orbit" cx="80" cy="58" r="64"/&gt;&lt;line class="al-line" x1="22" y1="92" x2="58" y2="58"/&gt;&lt;line class="al-line" x1="58" y1="58" x2="98" y2="38"/&gt;&lt;line class="al-line" x1="98" y1="38" x2="138" y2="24"/&gt;&lt;line class="al-line" x1="98" y1="38" x2="110" y2="78"/&gt;'</span>+
+   <span class="str">'&lt;circle class="al-star al-s1" cx="22" cy="92" r="4"/&gt;&lt;circle class="al-star al-s2" cx="58" cy="58" r="5"/&gt;&lt;circle class="al-star al-s3" cx="98" cy="38" r="5.5"/&gt;&lt;circle class="al-faint" cx="110" cy="78" r="3.5"/&gt;&lt;circle class="al-halo" cx="138" cy="24" r="7"/&gt;&lt;circle class="al-halo al-halo2" cx="138" cy="24" r="7"/&gt;&lt;circle class="al-gold" cx="138" cy="24" r="7"/&gt;'</span>+
+   <span class="str">'&lt;circle class="al-spark" r="2.6"&gt;&lt;animateMotion dur="2.8s" repeatCount="indefinite" path="M22 92 L58 58 L98 38 L138 24"/&gt;&lt;animate attributeName="opacity" dur="2.8s" repeatCount="indefinite" values="0;1;1;1;0" keyTimes="0;0.06;0.5;0.9;1"/&gt;&lt;/circle&gt;&lt;/svg&gt;&lt;/div&gt;'</span>+
+   <span class="str">'&lt;div class="al-status" id="al-status" aria-live="polite"&gt;&lt;span class="al-check"&gt;&#10003;&lt;/span&gt;&lt;span class="al-txt"&gt;Loading&lt;/span&gt;&lt;span class="al-dots"&gt;&lt;/span&gt;&lt;/div&gt;'</span>+
+   <span class="str">'&lt;div class="al-steps" id="al-steps" aria-live="polite"&gt;&lt;/div&gt;&lt;div class="al-slow" id="al-slow"&gt;&lt;/div&gt;&lt;/div&gt;'</span>;
+  document.body.appendChild(el);
+
+  var ROTATE=[<span class="str">'Loading'</span>,<span class="str">'Getting things ready'</span>,<span class="str">'Fetching your data'</span>,<span class="str">'Almost there'</span>];
+  var slowT1,slowT2,rotTimer,steps=[],cur=0;
+  function E(id){return document.getElementById(id);}
+  function txt(){return el.querySelector(<span class="str">'#al-status .al-txt'</span>);}
+  function reveal(){el.classList.remove(<span class="str">'leaving'</span>);el.classList.add(<span class="str">'show'</span>);}
+  function reset(){E(<span class="str">'al-status'</span>).classList.remove(<span class="str">'ok'</span>);E(<span class="str">'al-status'</span>).style.display=<span class="str">'block'</span>;E(<span class="str">'al-steps'</span>).style.display=<span class="str">'none'</span>;}
+  function setLine(t){var e=txt();e.style.opacity=1;e.textContent=t;}
+  function fadeLine(t){var e=txt();e.style.opacity=0;setTimeout(function(){e.textContent=t;e.style.opacity=1;},260);}
+  function startRotate(){stopRotate();var i=0;setLine(ROTATE[0]);rotTimer=setInterval(function(){i=(i+1)%ROTATE.length;fadeLine(ROTATE[i]);},2600);}
+  function stopRotate(){clearInterval(rotTimer);rotTimer=null;}
+  function armSlow(first){clearTimeout(slowT1);clearTimeout(slowT2);var s=E(<span class="str">'al-slow'</span>);s.classList.remove(<span class="str">'show'</span>);var a=first==null?7000:first;
+    slowT1=setTimeout(function(){s.textContent=<span class="str">'Still working — this can take a moment…'</span>;s.classList.add(<span class="str">'show'</span>);},a);
+    slowT2=setTimeout(function(){s.textContent=<span class="str">'Almost there, hang tight…'</span>;},a*2);}
+  function marker(st){return st===<span class="str">'done'</span>?<span class="str">'&lt;span class="al-mk-ic ok"&gt;&lt;svg viewBox="0 0 14 14"&gt;&lt;path d="M3 7l3 3 5-6"/&gt;&lt;/svg&gt;&lt;/span&gt;'</span>:st===<span class="str">'active'</span>?<span class="str">'&lt;span class="al-mk-ic spin"&gt;&lt;/span&gt;'</span>:<span class="str">'&lt;span class="al-mk-ic ring"&gt;&lt;/span&gt;'</span>;}
+  function renderSteps(){E(<span class="str">'al-steps'</span>).innerHTML=steps.map(function(s,i){var st=i&lt;cur?<span class="str">'done'</span>:(i===cur?<span class="str">'active'</span>:<span class="str">'pending'</span>);return <span class="str">'&lt;div class="al-step '</span>+st+<span class="str">'"&gt;'</span>+marker(st)+<span class="str">'&lt;span&gt;'</span>+s+<span class="str">'&lt;/span&gt;&lt;/div&gt;'</span>;}).join(<span class="str">''</span>);}
+
+  window.atlasLoader={
+    <span class="fn">show</span>:function(msg,opts){opts=opts||{};reset();armSlow(opts.slowAfter);reveal();if(msg){stopRotate();setLine(msg);}else{startRotate();}},
+    <span class="fn">setStatus</span>:function(msg){stopRotate();setLine(msg);},
+    <span class="fn">checklist</span>:function(list,opts){opts=opts||{};stopRotate();steps=list.slice();cur=0;E(<span class="str">'al-status'</span>).style.display=<span class="str">'none'</span>;E(<span class="str">'al-steps'</span>).style.display=<span class="str">'flex'</span>;renderSteps();armSlow(opts.slowAfter);reveal();if(opts.auto){(function t(){setTimeout(function(){if(!el.classList.contains(<span class="str">'show'</span>))return;if(cur&lt;steps.length){cur++;renderSteps();t();}else if(opts.hideWhenDone){atlasLoader.done&&atlasLoader.success();}},opts.auto);})();}},
+    <span class="fn">completeStep</span>:function(){if(cur&lt;steps.length){cur++;renderSteps();}},
+    <span class="fn">success</span>:function(msg){stopRotate();clearTimeout(slowT1);clearTimeout(slowT2);E(<span class="str">'al-slow'</span>).classList.remove(<span class="str">'show'</span>);E(<span class="str">'al-steps'</span>).style.display=<span class="str">'none'</span>;var s=E(<span class="str">'al-status'</span>);s.style.display=<span class="str">'block'</span>;s.classList.add(<span class="str">'ok'</span>);setLine(msg||<span class="str">'Ready'</span>);setTimeout(atlasLoader.hide,650);},
+    <span class="fn">hide</span>:function(){stopRotate();clearTimeout(slowT1);clearTimeout(slowT2);el.classList.add(<span class="str">'leaving'</span>);setTimeout(function(){el.classList.remove(<span class="str">'show'</span>,<span class="str">'leaving'</span>);E(<span class="str">'al-slow'</span>).classList.remove(<span class="str">'show'</span>);E(<span class="str">'al-status'</span>).classList.remove(<span class="str">'ok'</span>);},400);}
+  };
+})();
+<span class="tag">&lt;/script&gt;</span>
+
+<span class="cmt">// Default — rotates reassurance lines, works on any screen:</span>
+atlasLoader.<span class="fn">show</span>();
+atlasLoader.<span class="fn">hide</span>();
+
+<span class="cmt">// Override with specific text when a screen has it:</span>
+atlasLoader.<span class="fn">show</span>(<span class="str">'Posting batch BX-2026-014 · 22 gifts'</span>);
+atlasLoader.<span class="fn">setStatus</span>(<span class="str">'Queuing receipts'</span>);   <span class="cmt">// update live</span>
+atlasLoader.<span class="fn">success</span>(<span class="str">'Batch posted'</span>);         <span class="cmt">// green ✓ beat, then fades</span>
+
+<span class="cmt">// Long-wait note is automatic; tune the first threshold:</span>
+atlasLoader.<span class="fn">show</span>(null, { slowAfter: 5000 });</pre>
+      <p class="note">API: <code>show(message?, {slowAfter})</code> · <code>setStatus(message)</code> · <code>success(message?)</code> · <code>hide()</code> · optional <code>checklist(steps, {auto, hideWhenDone})</code> + <code>completeStep()</code>. With no message, <code>show()</code> auto-rotates the general reassurance lines.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ The reusable loader, live on this page ═══════════════ -->
+<div id="atlas-loader">
+  <div class="al-in">
+    <div class="al-stage">
+      <div class="al-glow"></div>
+      <svg class="al-mk" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle class="al-orbit" cx="80" cy="58" r="64"/>
+        <line class="al-line" x1="22" y1="92" x2="58" y2="58"/>
+        <line class="al-line" x1="58" y1="58" x2="98" y2="38"/>
+        <line class="al-line" x1="98" y1="38" x2="138" y2="24"/>
+        <line class="al-line" x1="98" y1="38" x2="110" y2="78"/>
+        <circle class="al-star al-s1" cx="22"  cy="92" r="4"/>
+        <circle class="al-star al-s2" cx="58"  cy="58" r="5"/>
+        <circle class="al-star al-s3" cx="98"  cy="38" r="5.5"/>
+        <circle class="al-faint" cx="110" cy="78" r="3.5"/>
+        <circle class="al-halo"  cx="138" cy="24" r="7"/>
+        <circle class="al-halo al-halo2" cx="138" cy="24" r="7"/>
+        <circle class="al-gold" cx="138" cy="24" r="7"/>
+        <circle class="al-spark" r="2.6">
+          <animateMotion dur="2.8s" repeatCount="indefinite" path="M22 92 L58 58 L98 38 L138 24"/>
+          <animate attributeName="opacity" dur="2.8s" repeatCount="indefinite" values="0;1;1;1;0" keyTimes="0;0.06;0.5;0.9;1"/>
+        </circle>
+      </svg>
+    </div>
+    <div class="al-status" id="al-status" aria-live="polite"><span class="al-check">&#10003;</span><span class="al-txt">Loading</span><span class="al-dots"></span></div>
+    <div class="al-steps" id="al-steps" aria-live="polite"></div>
+    <div class="al-slow" id="al-slow"></div>
+  </div>
+</div>
+
+<script>
+  // ── Reusable API (markup already in the page) ──
+  var atlasLoader = (function(){
+    var ROTATE=['Loading','Getting things ready','Fetching your data','Almost there'];
+    var slowT1, slowT2, rotTimer, steps=[], cur=0;
+    function E(id){ return document.getElementById(id); }
+    function el(){ return E('atlas-loader'); }
+    function txt(){ return document.querySelector('#al-status .al-txt'); }
+    function reveal(){ el().classList.remove('leaving'); el().classList.add('show'); }
+    function reset(){ E('al-status').classList.remove('ok'); E('al-status').style.display='block'; E('al-steps').style.display='none'; }
+    function setLine(t){ var e=txt(); e.style.opacity=1; e.textContent=t; }
+    function fadeLine(t){ var e=txt(); e.style.opacity=0; setTimeout(function(){ e.textContent=t; e.style.opacity=1; }, 260); }
+    function startRotate(){ stopRotate(); var i=0; setLine(ROTATE[0]); rotTimer=setInterval(function(){ i=(i+1)%ROTATE.length; fadeLine(ROTATE[i]); }, 2600); }
+    function stopRotate(){ clearInterval(rotTimer); rotTimer=null; }
+    function armSlow(first){ clearTimeout(slowT1); clearTimeout(slowT2); var s=E('al-slow'); s.classList.remove('show'); var a=first==null?7000:first;
+      slowT1=setTimeout(function(){ s.textContent='Still working — this can take a moment…'; s.classList.add('show'); }, a);
+      slowT2=setTimeout(function(){ s.textContent='Almost there, hang tight…'; }, a*2); }
+    function marker(st){ return st==='done'?'<span class="al-mk-ic ok"><svg viewBox="0 0 14 14"><path d="M3 7l3 3 5-6"/></svg></span>':st==='active'?'<span class="al-mk-ic spin"></span>':'<span class="al-mk-ic ring"></span>'; }
+    function renderSteps(){ E('al-steps').innerHTML=steps.map(function(s,i){ var st=i<cur?'done':(i===cur?'active':'pending'); return '<div class="al-step '+st+'">'+marker(st)+'<span>'+s+'</span></div>'; }).join(''); }
+    return {
+      show:function(msg,opts){ opts=opts||{}; reset(); armSlow(opts.slowAfter); reveal(); if(msg){ stopRotate(); setLine(msg); } else { startRotate(); } },
+      setStatus:function(msg){ stopRotate(); setLine(msg); },
+      checklist:function(list,opts){ opts=opts||{}; stopRotate(); steps=list.slice(); cur=0; E('al-status').style.display='none'; E('al-steps').style.display='flex'; renderSteps(); armSlow(opts.slowAfter); reveal(); if(opts.auto){ (function t(){ setTimeout(function(){ if(!el().classList.contains('show'))return; if(cur<steps.length){ cur++; renderSteps(); t(); } else if(opts.hideWhenDone){ atlasLoader.success(); } }, opts.auto); })(); } },
+      completeStep:function(){ if(cur<steps.length){ cur++; renderSteps(); } },
+      success:function(msg){ stopRotate(); clearTimeout(slowT1); clearTimeout(slowT2); E('al-slow').classList.remove('show'); E('al-steps').style.display='none'; var s=E('al-status'); s.style.display='block'; s.classList.add('ok'); setLine(msg||'Ready'); setTimeout(atlasLoader.hide, 650); },
+      hide:function(){ stopRotate(); clearTimeout(slowT1); clearTimeout(slowT2); el().classList.add('leaving'); setTimeout(function(){ el().classList.remove('show','leaving'); E('al-slow').classList.remove('show'); E('al-status').classList.remove('ok'); }, 400); }
+    };
+  })();
+  window.atlasLoader = atlasLoader;
+
+  // ── Demo driver ──
+  function demoUpdate(){
+    atlasLoader.show('Validating 22 gifts');
+    setTimeout(function(){ atlasLoader.setStatus('Posting to GL 4001'); }, 1300);
+    setTimeout(function(){ atlasLoader.setStatus('Queuing receipts'); }, 2500);
+    setTimeout(function(){ atlasLoader.success('Batch posted'); }, 3600);
+  }
+
+  // ── Preview: loop the rotating lines inside the card ──
+  (function(){
+    var host=document.getElementById('pv-txt'); if(!host) return;
+    var R=['Loading','Getting things ready','Fetching your data','Almost there'], i=0;
+    setInterval(function(){ i=(i+1)%R.length; host.style.opacity=0; setTimeout(function(){ host.textContent=R[i]; host.style.opacity=1; }, 260); }, 2600);
+  })();
+
+  function copySnippet(){
+    var t=document.getElementById('snippet').innerText.replace(/^Copy\n/,'');
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){
+      var b=document.querySelector('.copy'); if(b){ var o=b.textContent; b.textContent='Copied ✓'; setTimeout(function(){ b.textContent=o; },1600); }
+    }).catch(function(){});
+  }
+</script>
+</body>
+</html>
