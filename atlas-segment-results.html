@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Atlas — Segment results</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:        #0E1E35;
+  --navy-2:      #152844;
+  --navy-3:      #1E3A5F;
+  --blue:        #2563EB;
+  --blue-mid:    #3B82F6;
+  --blue-light:  #DBEAFE;
+  --blue-pale:   #EFF6FF;
+  --teal:        #0D9488;
+  --teal-light:  #CCFBF1;
+  --green:       #15803D;
+  --green-light: #DCFCE7;
+  --amber:       #D97706;
+  --amber-light: #FEF3C7;
+  --rose:        #BE185D;
+  --rose-light:  #FCE7F3;
+  --purple:      #7C3AED;
+  --purple-light:#EDE9FE;
+  --gold:        #B45309;
+  --text:        #0F172A;
+  --text-2:      #334155;
+  --text-3:      #64748B;
+  --border:      #E2E8F0;
+  --border-soft: #EDF2F7;
+  --surface:     #F8FAFC;
+  --white:       #FFFFFF;
+  --sidebar-w:   220px;
+  --shadow-sm:   0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.05);
+  --shadow-md:   0 4px 16px rgba(15,23,42,.06), 0 2px 4px rgba(15,23,42,.04);
+}
+
+html { font-size: 14px; -webkit-font-smoothing: antialiased; }
+body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+
+/* ══ SIDEBAR ══ */
+.sidebar {
+  width: var(--sidebar-w); background: var(--navy);
+  min-height: 100vh; display: flex; flex-direction: column;
+  flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 18px 18px 14px; display: flex; align-items: center; gap: 11px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.logo-mark {
+      width: 52px; height: 40px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border-radius: 0;
+    }
+.logo-mark svg { width: 52px; height: 40px; }
+.logo-text-wrap { display: flex; flex-direction: column; }
+.logo-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: white; line-height: 1; }
+.logo-sub  { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-top: 3px; }
+
+.sidebar-search {
+  margin: 12px 12px 6px; background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1); border-radius: 8px;
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  cursor: pointer;
+}
+.sidebar-search svg { width: 13px; height: 13px; color: rgba(255,255,255,.3); flex-shrink: 0; }
+.sidebar-search input {
+  background: none; border: none; outline: none; width: 100%;
+  font-size: 12px; color: rgba(255,255,255,.6); font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+}
+.sidebar-search input::placeholder { color: rgba(255,255,255,.3); }
+
+.nav-group { padding: 8px 8px 0; }
+.nav-label { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.28); padding: 0 10px; margin-bottom: 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px; padding: 8px 10px;
+  border-radius: 7px; font-size: 12px; font-weight: 500;
+  color: rgba(255,255,255,.55); cursor: pointer; transition: all .15s; margin-bottom: 1px;
+}
+.nav-item:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.85); }
+.nav-item.active { background: var(--blue); color: white; }
+.nav-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto; background: rgba(255,255,255,.12); color: rgba(255,255,255,.6);
+  border-radius: 10px; padding: 1px 7px; font-size: 10px; font-weight: 600;
+}
+.nav-item.active .nav-badge { background: rgba(255,255,255,.2); color: white; }
+.nav-badge.alert { background: #EF4444; color: white; }
+
+.sidebar-user {
+  margin-top: auto; padding: 12px; border-top: 1px solid rgba(255,255,255,.08);
+  display: flex; align-items: center; gap: 9px;
+  cursor: pointer; transition: background .15s;
+}
+.sidebar-user:hover { background: rgba(255,255,255,.04); }
+.user-avatar {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.user-name { font-size: 12px; font-weight: 500; color: rgba(255,255,255,.75); }
+.user-role { font-size: 10px; color: rgba(255,255,255,.35); margin-top: 1px; }
+
+/* ══ MAIN ══ */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.topbar {
+  background: white; border-bottom: 1px solid var(--border);
+  padding: 0 24px; height: 52px;
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.topbar-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.topbar-date { font-size: 12px; color: var(--text-3); }
+.topbar-search {
+  flex: 1;
+  max-width: 460px; margin: 0 18px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  display: flex; align-items: center; gap: 8px; padding: 7px 12px;
+  cursor: text;
+}
+.topbar-search svg { width: 13px; height: 13px; color: var(--text-3); }
+.topbar-search input { background: none; border: none; outline: none; width: 100%; font-size: 12.5px; color: var(--text); font-family: 'DM Sans', sans-serif; }
+.topbar-search input::placeholder { color: var(--text-3); }
+.topbar-search kbd {
+  margin-left: auto; font-size: 10.5px; font-family: 'DM Sans';
+  background: white; border: 1px solid var(--border); border-radius: 4px;
+  padding: 1px 6px; color: var(--text-3);
+}
+.topbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.tb-btn {
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+  padding: 7px 13px; border-radius: 8px; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.tb-btn svg { width: 12px; height: 12px; }
+.tb-ghost   { background: none; border: 1px solid var(--border); color: var(--text-2); }
+.tb-ghost:hover { background: var(--surface); border-color: #94A3B8; }
+.tb-primary { background: var(--blue); border: none; color: white; box-shadow: 0 1px 4px rgba(37,99,235,.3); }
+.tb-primary:hover { background: #1D4ED8; }
+.tb-notif {
+  width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
+  background: none; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative; transition: background .15s;
+}
+.tb-notif:hover { background: var(--surface); }
+.tb-notif svg { width: 15px; height: 15px; color: var(--text-2); }
+.notif-dot {
+  position: absolute; top: 7px; right: 7px;
+  width: 7px; height: 7px; background: #EF4444; border-radius: 50%;
+  border: 2px solid white;
+}
+
+.dash { padding: 24px; overflow-y: auto; }
+
+/* ══ Common Cards & helpers (used across screens) ══ */
+.card {
+  background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+}
+.card-header {
+  padding: 14px 18px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.card-title { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+.card-action { font-size: 11px; font-weight: 500; color: var(--blue); cursor: pointer; display: flex; align-items: center; gap: 3px; }
+.card-action:hover { color: #1D4ED8; }
+.card-action svg { width: 10px; height: 10px; }
+.card-body { padding: 14px 18px 18px; }
+
+/* ══ Page header (titles + crumb + actions) ══ */
+.page-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  margin-bottom: 20px;
+}
+.crumb { font-size: 12px; color: var(--text-3); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.crumb a { color: var(--blue); }
+.crumb a:hover { text-decoration: underline; }
+.crumb svg { width: 10px; height: 10px; }
+.page-title {
+  font-family: 'DM Serif Display', serif; font-size: 28px; letter-spacing: -.02em;
+  color: var(--text); line-height: 1.1;
+}
+.page-sub { color: var(--text-3); font-size: 13px; margin-top: 4px; }
+
+/* ══ Tags & badges (shared) ══ */
+.tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10.5px; font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.tag.blue  { background: var(--blue-light);  color: var(--blue); }
+.tag.green { background: var(--green-light); color: var(--green); }
+.tag.amber { background: var(--amber-light); color: var(--amber); }
+.tag.rose  { background: var(--rose-light);  color: var(--rose); }
+.tag.purple{ background: var(--purple-light);color: var(--purple); }
+.tag.grey  { background: var(--surface);     color: var(--text-3); border: 1px solid var(--border); }
+.tag.gold  { background: #FEF3C7;            color: var(--gold); }
+
+/* ══ Inputs ══ */
+.lbl { display: block; font-size: 11px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+.lbl .req { color: var(--rose); margin-left: 2px; }
+.fld {
+  width: 100%; font-size: 13px; font-family: 'DM Sans', sans-serif;
+  padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: white; color: var(--text); transition: border-color .15s, box-shadow .15s;
+}
+.fld:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.10); }
+.fld[disabled] { background: var(--surface); color: var(--text-3); }
+.fld::placeholder { color: #94A3B8; }
+textarea.fld { min-height: 90px; resize: vertical; line-height: 1.5; }
+select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M3 5l3 3 3-3z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+
+.btn {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+  padding: 9px 16px; border-radius: 8px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid transparent; transition: background .15s, border-color .15s, color .15s;
+}
+.btn svg { width: 13px; height: 13px; }
+.btn-primary { background: var(--blue); color: white; box-shadow: 0 1px 4px rgba(37,99,235,.25); }
+.btn-primary:hover { background: #1D4ED8; }
+.btn-ghost   { background: white; border-color: var(--border); color: var(--text-2); }
+.btn-ghost:hover { background: var(--surface); border-color: #94A3B8; }
+.btn-rose    { background: var(--rose); color: white; }
+.btn-rose:hover { background: #9D174D; }
+.btn-link    { background: none; color: var(--blue); padding: 6px 8px; }
+.btn-link:hover { color: #1D4ED8; }
+
+/* helpful utilities */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.gap-4 { gap: 4px; } .gap-6 { gap: 6px; } .gap-8 { gap: 8px; } .gap-10 { gap: 10px; } .gap-12 { gap: 12px; } .gap-16 { gap: 16px; } .gap-20 { gap: 20px; }
+.grow { flex: 1; }
+.muted { color: var(--text-3); }
+.mono  { font-variant-numeric: tabular-nums; }
+.mt-4 { margin-top: 4px; } .mt-8 { margin-top: 8px; } .mt-12 { margin-top: 12px; } .mt-16 { margin-top: 16px; } .mt-24 { margin-top: 24px; }
+.mb-4 { margin-bottom: 4px; } .mb-8 { margin-bottom: 8px; } .mb-12 { margin-bottom: 12px; } .mb-16 { margin-bottom: 16px; } .mb-24 { margin-bottom: 24px; }
+
+/* Slide-over drawer (used on log-activity, task-modal screens) */
+.scrim { position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 30; }
+.drawer {
+  position: fixed; right: 0; top: 0; bottom: 0; width: 560px; max-width: 100vw;
+  background: white; box-shadow: -16px 0 40px rgba(15,23,42,.10); z-index: 31;
+  display: flex; flex-direction: column;
+}
+.drawer-head {
+  padding: 18px 22px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  flex-shrink: 0;
+}
+.drawer-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); letter-spacing: -.01em; }
+.drawer-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.drawer-x {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); background: white; cursor: pointer;
+}
+.drawer-x:hover { background: var(--surface); }
+.drawer-x svg { width: 13px; height: 13px; color: var(--text-2); }
+.drawer-body { flex: 1; overflow-y: auto; padding: 22px; }
+.drawer-foot {
+  padding: 14px 22px; border-top: 1px solid var(--border);
+  background: var(--surface); display: flex; align-items: center; gap: 8px; justify-content: flex-end;
+  flex-shrink: 0;
+}
+.drawer-foot .left { margin-right: auto; font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+
+
+.cmp-hero { background:linear-gradient(135deg, var(--navy) 0%, var(--navy-3) 100%); color:white; border-radius:16px; padding:28px 32px; margin-bottom:22px; position:relative; overflow:hidden; }
+.cmp-hero::before { content:''; position:absolute; inset:0; pointer-events:none; background:radial-gradient(circle at 90% 20%, rgba(196,151,58,.18), transparent 55%), radial-gradient(circle at 10% 90%, rgba(37,99,235,.15), transparent 60%); }
+.cmp-hero-inner { position:relative; }
+.cmp-tag { display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:99px; background:rgba(196,151,58,.18); border:1px solid rgba(196,151,58,.32); color:#FCD34D; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; margin-bottom:12px; }
+.cmp-h { font-family:'DM Serif Display',serif; font-size:32px; line-height:1.08; letter-spacing:-.4px; }
+.cmp-d { color:rgba(219,234,254,.75); font-size:13.5px; margin-top:6px; max-width:680px; }
+.cmp-progress { margin-top:22px; max-width:580px; }
+.cmp-bar { background:rgba(255,255,255,.10); border-radius:99px; height:8px; overflow:hidden; }
+.cmp-bar-fill { background:linear-gradient(90deg, #FCD34D, #C4973A); height:100%; border-radius:99px; }
+
+.cmp-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:24px; margin-top:22px; padding-top:22px; border-top:1px solid rgba(255,255,255,.10); position:relative; }
+.cmp-stat .num { font-family:'DM Serif Display',serif; font-size:30px; line-height:1; margin-bottom:6px; color:white; }
+.cmp-stat .num.gold { color:#FCD34D; }
+.cmp-stat .num.green { color:#86EFAC; }
+.cmp-stat .num.amber { color:#FCD34D; }
+.cmp-stat .lbl { font-size:11px; color:rgba(219,234,254,.65); text-transform:uppercase; letter-spacing:.05em; }
+
+.tabs { display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:22px; }
+.tab { padding:10px 14px; cursor:pointer; font-size:13px; font-weight:500; color:var(--text-3); border-bottom:2px solid transparent; }
+.tab.on { color:var(--blue); border-color:var(--blue); font-weight:600; }
+.tab .ct { font-size:10.5px; padding:1px 7px; border-radius:99px; background:var(--surface); margin-left:6px; }
+.tab.on .ct { background:var(--blue-pale); color:var(--blue); }
+
+.cd-grid { display:grid; grid-template-columns: 1.6fr 1fr; gap:22px; align-items:start; }
+
+.card { background:white; border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+.card + .card { margin-top:14px; }
+.card-header { padding:16px 22px 4px; display:flex; align-items:center; justify-content:space-between; }
+.card-title { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); }
+.card-action { font-size:11.5px; color:var(--blue); cursor:pointer; }
+.card-body { padding:14px 22px 20px; }
+
+/* Financial summary */
+.fin-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.fin-card { padding:18px 20px; border-radius:12px; }
+.fin-card.pledged { background:linear-gradient(135deg, var(--blue-pale), white); border:1px solid var(--blue-light); }
+.fin-card.received { background:linear-gradient(135deg, var(--green-light), white); border:1px solid #86EFAC; }
+.fin-card.outstanding { background:linear-gradient(135deg, var(--amber-light), white); border:1px solid #FBBF24; }
+.fin-card .lbl { font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.fin-card.pledged .lbl { color:var(--blue); }
+.fin-card.received .lbl { color:var(--green); }
+.fin-card.outstanding .lbl { color:var(--amber); }
+.fin-card .val { font-family:'DM Serif Display',serif; font-size:28px; line-height:1; }
+.fin-card.pledged .val { color:var(--navy); }
+.fin-card.received .val { color:var(--green); }
+.fin-card.outstanding .val { color:var(--amber); }
+.fin-card .sub { font-size:12px; color:var(--text-2); margin-top:6px; }
+.fin-card .sub b { color:var(--text); font-weight:600; }
+
+/* Hierarchy tree */
+.tree-node { display:grid; grid-template-columns:24px 1fr 110px 110px 110px 32px; gap:14px; align-items:center; padding:11px 14px; border-bottom:1px solid var(--border-soft); font-size:13px; cursor:pointer; transition:background .12s; }
+.tree-node:hover { background:var(--blue-pale); }
+.tree-node:last-child { border-bottom:none; }
+.tree-node .ico-sm { width:22px; height:22px; border-radius:5px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:10.5px; font-weight:700; }
+.tree-node .ico-sm.c { background:var(--purple); color:white; }
+.tree-node .ico-sm.a { background:var(--blue); color:white; }
+.tree-node .ico-sm.f { background:var(--green); color:white; }
+.tree-node .body .nm { font-weight:500; color:var(--text); }
+.tree-node .body .meta { font-size:11.5px; color:var(--text-3); margin-top:2px; }
+.tree-node .progress { display:flex; align-items:center; gap:6px; }
+.tree-node .progress .bar { flex:1; height:4px; background:var(--border-soft); border-radius:99px; overflow:hidden; }
+.tree-node .progress .bar-f { height:100%; border-radius:99px; background:var(--green); }
+.tree-node .progress .pct { font-size:11.5px; font-weight:600; color:var(--text-2); width:36px; text-align:right; }
+.tree-node .v { font-weight:500; text-align:right; font-variant-numeric:tabular-nums; font-size:12.5px; }
+
+/* YoY compare */
+.yoy-row { display:grid; grid-template-columns: 80px 1fr 90px; gap:14px; align-items:center; padding:9px 0; border-bottom:1px dashed var(--border-soft); font-size:13px; }
+.yoy-row:last-child { border-bottom:none; }
+.yoy-row .yr { color:var(--text-3); font-size:11.5px; font-weight:600; }
+.yoy-row .yr.cur { color:var(--blue); }
+.yoy-row .yo-bar { height:18px; background:var(--surface); border-radius:4px; overflow:hidden; position:relative; }
+.yoy-row .yo-bar-f { height:100%; border-radius:4px; }
+.yoy-row .yo-bar-f.cur { background:linear-gradient(90deg, var(--blue), var(--blue-mid)); }
+.yoy-row .yo-bar-f.prev { background:linear-gradient(90deg, var(--text-3), #94A3B8); }
+.yoy-row .v { font-weight:600; text-align:right; font-variant-numeric:tabular-nums; }
+
+/* Solicitor leaderboard */
+.sol-row { display:grid; grid-template-columns: 36px 1fr 90px 80px 80px; gap:12px; align-items:center; padding:11px 0; border-bottom:1px solid var(--border-soft); font-size:13px; }
+.sol-row:last-child { border-bottom:none; }
+.sol-row .av { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:700; flex-shrink:0; }
+.sol-row .nm-text .nm { font-weight:500; color:var(--text); }
+.sol-row .nm-text .meta { font-size:11.5px; color:var(--text-3); margin-top:2px; }
+.sol-row .v { font-weight:600; text-align:right; font-variant-numeric:tabular-nums; }
+.sol-row .delta { font-size:11.5px; color:var(--text-3); text-align:right; }
+.sol-row .delta.up { color:var(--green); font-weight:600; }
+
+.tag { display:inline-flex; font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:5px; }
+.tag.green { background:var(--green-light); color:var(--green); }
+.tag.amber { background:var(--amber-light); color:var(--amber); }
+.tag.blue { background:var(--blue-light); color:var(--blue); }
+.tag.purple { background:var(--purple-light); color:var(--purple); }
+
+</style>
+
+
+<style id="atlas-sidebar-fix">
+/* Minimal sidebar fix — keeps the CEO's per-page .main / .content
+   layouts untouched. We ONLY:
+     1. Pin the sidebar to the viewport with position:fixed
+     2. Reserve a 220px gutter on the body via padding-left
+     3. Normalize the sidebar's internal flex layout (logo + search top,
+        nav scrolls middle, user block bottom)
+     4. Force SVG icon sizes in the sidebar (some screens lost them) */
+
+html, body { overflow-x: hidden !important; }
+body {
+  padding-left: 220px !important;
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
+}
+*, *::before, *::after { box-sizing: border-box; }
+
+.sidebar {
+  width: 220px !important;
+  background: var(--navy, #0E1E35) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  overflow: hidden !important;          /* sidebar itself does NOT scroll */
+  display: flex !important;
+  flex-direction: column !important;
+  flex-shrink: 0 !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Logo + search are direct flex children that never scroll */
+.sidebar > .sidebar-logo,
+.sidebar > a > .sidebar-search,
+.sidebar > .sidebar-search,
+.sidebar-logo,
+.sidebar-search {
+  position: static !important;
+  flex-shrink: 0 !important;
+  background: var(--navy, #0E1E35) !important;
+  z-index: 2;
+}
+
+/* Fix oversized search icon — explicit 13×13 wins over any inheriting style */
+.sidebar-search {
+  margin: 12px 12px 6px !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.sidebar-search svg {
+  width: 13px !important;
+  height: 13px !important;
+  flex-shrink: 0 !important;
+  color: rgba(255,255,255,.4) !important;
+}
+.sidebar-search input {
+  font-size: 12px !important;
+  height: auto !important;
+  background: none !important;
+  border: none !important;
+  outline: none !important;
+  width: 100% !important;
+}
+/* Logo mark sizing — same fix prevents the brand SVG from ballooning */
+.sidebar-logo .logo-mark {
+  width: 52px !important;
+  height: 40px !important;
+  flex-shrink: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+.sidebar-logo .logo-mark svg {
+  width: 52px !important;
+  height: 40px !important;
+}
+
+/* The MIDDLE area is the only scrollable child */
+.sidebar-scroll {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 0 !important;        /* critical: lets flex item shrink */
+  display: flex !important;
+  flex-direction: column !important;
+}
+.sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.10); border-radius: 4px; }
+.sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.18); }
+
+/* User block sits at the bottom of the sidebar, never scrolls */
+.sidebar-user {
+  position: static !important;
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+  background: var(--navy, #0E1E35) !important;
+}
+
+/* .main is intentionally NOT overridden — each page keeps its own layout. */
+</style>
+
+<style id="atlas-sidebar-logo-canon">
+  /* Atlas sidebar logo — canonical styling injected to guarantee
+     consistent stacking (Atlas above, By GiveCentral below) across every screen. */
+  .sidebar-logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: 11px !important;
+    padding: 18px 18px 14px !important;
+    border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  }
+  .sidebar-logo .logo-mark {
+    width: 52px !important;
+    height: 40px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+  }
+  .sidebar-logo .logo-mark svg {
+    width: 52px !important;
+    height: 40px !important;
+  }
+  .sidebar-logo .logo-text-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 3px !important;
+  }
+  .sidebar-logo .logo-name {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 20px !important;
+    color: white !important;
+    line-height: 1 !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+  }
+  .sidebar-logo .logo-sub {
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    letter-spacing: .1em !important;
+    text-transform: uppercase !important;
+    color: rgba(255,255,255,.35) !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+  }
+</style>
+<style id="ur-nav-underline-fix">.nav-item,.nav-item:link,.nav-item:visited,.nav-item:hover,.nav-item:focus,.nav-item:active,.sidebar-item,.sidebar-item:hover{text-decoration:none}</style>
+</head>
+<body>
+
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
+          <circle cx="22" cy="92" r="4" fill="white"/>
+          <circle cx="58" cy="58" r="5" fill="white"/>
+          <circle cx="98" cy="38" r="5.5" fill="white"/>
+          <circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
+          <circle cx="138" cy="24" r="7" fill="#C8A04A"/>
+          <circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="logo-text-wrap">
+        <span class="logo-name">Atlas</span>
+        <span class="logo-sub">By GiveCentral</span>
+      </div>
+    </div>
+
+    <a href="atlas-search.html" style="display:block;text-decoration:none">
+      <div class="sidebar-search">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+        <input type="text" placeholder="Search donors, gifts…" readonly>
+      </div>
+    </a>
+
+    <div class="sidebar-scroll">
+
+    <div class="nav-group">
+      <div class="nav-label">Main</div>
+      <a class="nav-item" href="atlas-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="atlas-donors-list.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>
+        Donors
+        <span class="nav-badge">3,847</span>
+      </a>
+      <a class="nav-item" href="atlas-gifts-pledges.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>
+        Gifts &amp; pledges
+        <span class="nav-badge">142</span>
+      </a>
+      <a class="nav-item" href="atlas-campaign-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>
+        Campaigns
+      </a>
+      <a class="nav-item" href="atlas-reports.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>
+        Reports
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Fundraising</div>
+      <a class="nav-item" href="atlas-pipeline.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
+        Prospect pipeline
+        <span class="nav-badge">28</span>
+      </a>
+      <a class="nav-item" href="atlas-tasks.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>
+        Tasks &amp; reminders
+        <span class="nav-badge alert">7</span>
+      </a>
+      <a class="nav-item" href="atlas-communications.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>
+        Communications
+      </a>
+      <a class="nav-item" href="atlas-events-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>
+        Events
+      </a>
+      <a class="nav-item" href="atlas-volunteer-management.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
+        Volunteers
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Intelligence</div>
+      <a class="nav-item" href="atlas-guru-ai.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>
+        Guru AI
+      </a>
+      <a class="nav-item" href="atlas-reports.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>
+        Analytics
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Admin</div>
+      <a class="nav-item" href="atlas-users-roles.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
+        Users &amp; roles
+      </a>
+      <a class="nav-item active" href="atlas-tags.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/></svg>Tags &amp; Segment</a>
+      <a class="nav-item" href="atlas-integrations.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>
+        Integrations
+      </a>
+      <a class="nav-item" href="atlassmarttriggers.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.6 1.5L3 8h3.7l-.6 4.6L11 5.9H7.4z"/></svg>Smart Triggers</a>
+      <a class="nav-item" href="atlas-sync.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>
+        Sync
+      </a>
+      <a class="nav-item" href="atlas-location-manage.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>
+        Location portal
+      </a>
+    </div>
+
+    </div><!-- /.sidebar-scroll -->
+
+    <div class="sidebar-user">
+      <div class="user-avatar">SR</div>
+      <div>
+        <div class="user-name">Sarah Reynolds</div>
+        <div class="user-role">Development Director</div>
+      </div>
+    </div>
+  </aside>
+
+<div class="main">
+
+<div class="topbar">
+  <span class="topbar-title">Segment results</span>
+  <span class="topbar-date">Monday, May 4, 2026</span>
+  <a href="atlas-search.html" class="topbar-search">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+    <input type="text" placeholder="Search donors, gifts, campaigns…" readonly style="cursor:pointer">
+    <kbd>⌘K</kbd>
+  </a>
+  <div class="topbar-right">
+    
+    <a href="atlas-guided-tour.html" class="tb-notif" title="Take the tour" style="position:relative">
+      <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><path d="M7.5 4v.5M6.5 7c0-1 .5-1.5 1-1.5s1 .5 1 1-.5 1-1 1.5v.5M7.5 11v.5"/></svg>
+    </a>
+    <a href="atlas-notifications.html" class="tb-notif" title="Notifications">
+      <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.5 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5zM6 13a1.5 1.5 0 003 0"/></svg>
+      <div class="notif-dot"></div>
+    </a>
+  </div>
+</div>
+
+<div class="dash">
+  <div class="page-head">
+    <div>
+      <div class="crumb"><a href="atlas-dashboard.html">Atlas</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <a href="atlas-tags.html">Tags &amp; segments</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <span id="sr-crumb">Segment</span></div>
+      <div class="page-title" id="sr-name">Segment results</div>
+      <div class="page-sub" id="sr-desc">Saved filter · resolves live against donor data each time it opens.</div>
+    </div>
+    <div class="flex gap-8">
+      <button class="btn btn-ghost" id="sr-run" onclick="runSegment(this)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7a5 5 0 1 1-1.5-3.6M12 1.8v2.6H9.4"/></svg> Run now</button>
+      <button class="btn btn-ghost" onclick="if(window.atlasToast)atlasToast('Segment exported · CSV of all matching donors downloading')">Export CSV</button>
+      <a class="btn btn-ghost" id="sr-viewrules" href="atlas-tags.html">View rules</a>
+      <a class="btn btn-primary" href="atlas-campaign-outreach.html">Use in outreach →</a>
+    </div>
+  </div>
+
+  <div class="sr-stats">
+    <div class="sr-stat"><div class="sr-k" id="sr-stat-k">Donors in segment</div><div class="sr-v" id="sr-count" style="color:var(--purple)">0</div><div class="sr-s" id="sr-resolved">resolved live just now</div></div>
+    <div class="sr-stat"><div class="sr-k">Total given (lifetime)</div><div class="sr-v">$4.82M</div><div class="sr-s">across these donors</div></div>
+    <div class="sr-stat"><div class="sr-k">Avg gift</div><div class="sr-v">$1,240</div><div class="sr-s">last 12 months</div></div>
+    <div class="sr-stat"><div class="sr-k">New this year</div><div class="sr-v" style="color:var(--green)">312</div><div class="sr-s">first gift in 2026</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="sr-toolbar">
+        <label class="sr-all"><input type="checkbox" id="sr-selall" onclick="srToggleAll(this)"> Select all shown</label>
+        <div class="sr-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input type="text" placeholder="Search donors in this segment…" oninput="srFilter(this.value)"></div>
+        <span class="sr-shown" id="sr-shown">12 shown</span>
+      </div>
+
+      <div class="sr-bulk" id="sr-bulk">
+        <span id="sr-selcount">0 selected</span>
+        <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost" onclick="srBulk('outreach')">Add to outreach list</button>
+          <button class="btn btn-ghost" onclick="srBulk('email')">Compose email</button>
+          <button class="btn btn-ghost" onclick="srBulk('tag')">Apply tag</button>
+          <button class="btn btn-ghost" onclick="srBulk('export')">Export selected</button>
+        </div>
+      </div>
+
+      <table class="sr-table">
+        <thead><tr><th class="sr-cbcol"></th><th>Donor</th><th>Type</th><th>Last gift</th><th class="sr-num">Given (YTD)</th><th class="sr-num">Lifetime</th><th>Solicitor</th></tr></thead>
+        <tbody id="sr-tbody">
+          <tr onclick="srGo(event)"><td class="sr-cbcol"><input type="checkbox" class="sr-cb" onclick="event.stopPropagation();srSel()"></td><td>Margaret O'Brien</td><td><span class="tag purple">Major</span></td><td>May 4, 2026</td><td class="sr-num">$12,500</td><td class="sr-num">$184,250</td><td>Sarah Reynolds</td></tr>
+          <tr onclick="srGo(event)"><td class="sr-cbcol"><input type="checkbox" class="sr-cb" onclick="event.stopPropagation();srSel()"></td><td>Robert &amp; Susan Lin</td><td><span class="tag purple">Major</span></td><td>May 3, 2026</td><td class="sr-num">$25,000</td><td class="sr-num">$142,000</td><td>Sarah Reynolds</td></tr>
+          <tr onclick="srGo(event)"><td class="sr-cbcol"><input type="checkbox" class="sr-cb" onclick="event.stopPropagation();srSel()"></td><td>The Delaney Foundation</td><td><span class="tag blue">Foundation</span></td><td>Apr 10, 2026</td><td class="sr-num">$50,000</td><td class="sr-num">$310,000</td><td>Bridget McCarthy</td></tr>
+          <tr onclick="srGo(event)"><td class="sr-cbcol"><input type="checkbox" class="sr-cb" onclick="event.stopPropagation();srSel()"></td><td>Kevin &amp; Anne Doyle</td><td><span class="tag purple">Major</span></td><td>Apr 28, 2026</td><td class="sr-num">$12,500</td><td class="sr-num">$96,400</td><td>Julia Kelleher</td></tr>
+          <tr onclick="srGo(event)"><td class="sr-cbcol"><input type="checkbox" class="sr-cb" onclick="event.stopPropagation();srSel()"></td><td>Anthony Riccardi</td><td><span class="tag green">Stock</span></td><td>Apr 22, 2026</td><td class="sr-num">$18,400</td><td class="sr-num">$61,900</td><td>Sarah Reynolds</td></tr>
+          <tr onclick="srGo(event)"><td class="sr-cbcol"><input type="checkbox" class="sr-cb" onclick="event.stopPropagation();srSel()"></td><td>Patricia Nguyen</td><td><span class="tag grey">Mid-level</span></td><td>May 1, 2026</td><td class="sr-num">$6,250</td><td class="sr-num">$24,800</td><td>Bridget McCarthy</td></tr>
+          <tr onclick="srGo(event)"><td class="sr-cbcol"><input type="checkbox" class="sr-cb" onclick="event.stopPropagation();srSel()"></td><td>James Sullivan</td><td><span class="tag grey">Mid-level</span></td><td>Apr 19, 2026</td><td class="sr-num">$5,000</td><td class="sr-num">$31,500</td><td>Julia Kelleher</td></tr>
+          <tr onclick="srGo(event)"><td class="sr-cbcol"><input type="checkbox" class="sr-cb" onclick="event.stopPropagation();srSel()"></td><td>Helen Tobin</td><td><span class="tag teal">Recurring</span></td><td>May 2, 2026</td><td class="sr-num">$1,200</td><td class="sr-num">$9,600</td><td>Unassigned</td></tr>
+          <tr onclick="srGo(event)"><td class="sr-cbcol"><input type="checkbox" class="sr-cb" onclick="event.stopPropagation();srSel()"></td><td>George Whelan</td><td><span class="tag grey">Annual</span></td><td>Apr 15, 2026</td><td class="sr-num">$500</td><td class="sr-num">$4,150</td><td>Unassigned</td></tr>
+          <tr onclick="srGo(event)"><td class="sr-cbcol"><input type="checkbox" class="sr-cb" onclick="event.stopPropagation();srSel()"></td><td>Carla Mendez</td><td><span class="tag teal">Recurring</span></td><td>Apr 30, 2026</td><td class="sr-num">$600</td><td class="sr-num">$3,600</td><td>Unassigned</td></tr>
+          <tr onclick="srGo(event)"><td class="sr-cbcol"><input type="checkbox" class="sr-cb" onclick="event.stopPropagation();srSel()"></td><td>St. Mary's Parish</td><td><span class="tag grey">Parish</span></td><td>Apr 15, 2026</td><td class="sr-num">$19,000</td><td class="sr-num">$212,000</td><td>Julia Kelleher</td></tr>
+          <tr onclick="srGo(event)"><td class="sr-cbcol"><input type="checkbox" class="sr-cb" onclick="event.stopPropagation();srSel()"></td><td>Dr. Thomas Nguyen</td><td><span class="tag purple">Prospect</span></td><td>Mar 30, 2026</td><td class="sr-num">$0</td><td class="sr-num">$0</td><td>Sarah Reynolds</td></tr>
+        </tbody>
+      </table>
+      <div class="cdp-empty" id="sr-empty">No donors in this segment match your search.</div>
+      <div class="sr-foot">Showing a sample of <strong>12</strong> of <span id="sr-count2">0</span> matching donors · resolved live. <a href="atlas-donors-list.html" style="color:var(--blue)">Open in Donors list →</a></div>
+    </div>
+  </div>
+
+  <style id="sr-css">
+    .sr-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+    .sr-stat{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+    .sr-k{ font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); }
+    .sr-v{ font-family:'DM Serif Display',serif; font-size:24px; color:var(--navy); margin:6px 0 3px; line-height:1; }
+    .sr-s{ font-size:11px; color:var(--text-3); }
+    .sr-toolbar{ display:flex; align-items:center; gap:14px; margin-bottom:12px; flex-wrap:wrap; }
+    .sr-all{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-2); cursor:pointer; white-space:nowrap; }
+    .sr-search{ flex:1; min-width:220px; max-width:360px; display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:8px 12px; }
+    .sr-search svg{ width:14px; height:14px; color:var(--text-3); flex-shrink:0; } .sr-search input{ border:none; outline:none; background:none; width:100%; font-size:13px; font-family:'DM Sans',sans-serif; }
+    .sr-shown{ font-size:11.5px; color:var(--text-3); margin-left:auto; }
+    .sr-bulk{ display:none; align-items:center; gap:12px; background:var(--blue-pale); border:1px solid var(--blue-light); border-radius:10px; padding:10px 14px; margin-bottom:12px; font-size:12.5px; font-weight:600; color:var(--blue); }
+    .sr-bulk.show{ display:flex; }
+    .sr-table{ width:100%; border-collapse:collapse; font-size:13px; }
+    .sr-table th{ text-align:left; font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); padding:9px 12px; border-bottom:1px solid var(--border); background:var(--surface); }
+    .sr-table th.sr-num, .sr-table td.sr-num{ text-align:right; font-variant-numeric:tabular-nums; }
+    .sr-table td{ padding:11px 12px; border-bottom:1px solid var(--border-soft,#EDF2F7); }
+    .sr-cbcol{ width:34px; text-align:center; }
+    .sr-table tbody tr{ cursor:pointer; transition:background .12s; }
+    .sr-table tbody tr:hover{ background:var(--blue-pale); }
+    .sr-cb, #sr-selall{ width:15px; height:15px; }
+    .cdp-empty{ display:none; padding:26px; text-align:center; color:var(--text-3); font-size:13px; }
+    .sr-foot{ font-size:12px; color:var(--text-3); padding-top:12px; }
+    .tag.teal{ background:var(--teal-light,#CCFBF1); color:var(--teal,#0D9488); }
+    #sr-run.is-busy{ opacity:.75; pointer-events:none; }
+    .sr-spin{ width:12px; height:12px; border:2px solid rgba(100,116,139,.3); border-top-color:var(--blue); border-radius:50%; display:inline-block; vertical-align:-2px; margin-right:5px; animation:sr-spin .7s linear infinite; }
+    @keyframes sr-spin{ to{ transform:rotate(360deg); } }
+    #sr-count.sr-flash{ animation:sr-flash .6s ease; }
+    @keyframes sr-flash{ 0%{ opacity:.35; } 100%{ opacity:1; } }
+    @media(max-width:900px){ .sr-stats{ grid-template-columns:repeat(2,1fr); } }
+  </style>
+
+  <script id="sr-js">
+  (function(){
+    var SEG={
+      'lybunt':{n:'LYBUNT',d:'Gave last year but not yet this year — prime for a reactivation ask.'},
+      'sybunt':{n:'SYBUNT',d:'Gave in some prior year but not last year — lapsed longer-term.'},
+      'new-donors-this-year':{n:'New donors this year',d:'First-ever gift recorded in 2026.'},
+      'active-recurring-givers':{n:'Active recurring givers',d:'Hold a live GiveCentral recurring subscription.'},
+      'lapsed-donors-18-months':{n:'Lapsed donors (18+ months)',d:'No gift and no active pledge in 18+ months.'},
+      'major-gift-prospects':{n:'Major gift prospects',d:'Capacity and engagement indicate a major-gift ask.'},
+      'high-capacity-unasked':{n:'High capacity — unasked',d:'Ask range ≥ $5k with no gift this year.'},
+      'board-members':{n:'Board members',d:'Current diocesan or foundation board members.'},
+      'daf-donors':{n:'DAF donors',d:'Give through a donor-advised fund.'},
+      'event-attendees':{n:'Event attendees',d:'Attended a gala or diocesan event in the last 12 months.'}
+    };
+    function slug(){ var m=(location.search||'').match(/segment=([^&]+)/); return m?decodeURIComponent(m[1]):''; }
+    function titleCase(s){ return s.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); }
+    function segCount(n){ var h=0; for(var i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))>>>0; return 40+(h%1160); }
+    var tagM=(location.search||'').match(/tag=([^&]+)/);
+    var tagSlug = tagM ? decodeURIComponent(tagM[1]) : '';
+    var info, cnt, isTag=false;
+    if (tagSlug){
+      isTag=true;
+      var tn=titleCase(tagSlug);
+      info={n:tn, d:'Donors currently carrying the “'+tn+'” label · this list resolves live.'};
+      cnt=segCount(tn);
+      document.getElementById('sr-name').textContent='Tag · '+tn;
+      document.getElementById('sr-stat-k').textContent='Donors with tag';
+      var vr=document.getElementById('sr-viewrules'); if(vr){ vr.textContent='Manage tag'; vr.setAttribute('href','atlas-tags.html'); }
+      document.getElementById('sr-resolved').textContent='as of just now';
+    } else {
+      var s=slug(); info=SEG[s]||{n: s?titleCase(s):'Segment', d:'Saved filter · resolves live against donor data.'};
+      cnt=segCount(info.n);
+      document.getElementById('sr-name').textContent='Segment · '+info.n;
+    }
+    document.getElementById('sr-crumb').textContent=info.n;
+    document.getElementById('sr-desc').textContent=info.d;
+    document.getElementById('sr-count').textContent=cnt.toLocaleString();
+    document.getElementById('sr-count2').textContent=cnt.toLocaleString();
+
+    window.srGo=function(e){ if(e && e.target && e.target.closest('input')) return; window.location='atlas-donor-360.html'; };
+    window.srSel=function(){
+      var n=document.querySelectorAll('#sr-tbody .sr-cb:checked').length;
+      var bulk=document.getElementById('sr-bulk');
+      document.getElementById('sr-selcount').textContent=n+' selected';
+      bulk.classList.toggle('show', n>0);
+    };
+    window.srCount=function(){ return document.querySelectorAll('#sr-tbody .sr-cb:checked').length; };
+    window.srToggleAll=function(cb){ document.querySelectorAll('#sr-tbody tr').forEach(function(r){ if(r.style.display!=='none'){ var b=r.querySelector('.sr-cb'); if(b) b.checked=cb.checked; } }); srSel(); };
+    window.srFilter=function(q){ q=(q||'').toLowerCase(); var shown=0; document.querySelectorAll('#sr-tbody tr').forEach(function(r){ var hit=r.textContent.toLowerCase().indexOf(q)!==-1; r.style.display=hit?'':'none'; if(hit)shown++; }); document.getElementById('sr-empty').style.display=shown?'none':'block'; document.getElementById('sr-shown').textContent=shown+' shown'; };
+    window.srBulk=function(kind){
+      var n=srCount(); if(!n){ if(window.atlasToast)atlasToast('Select at least one donor first'); return; }
+      var msg={outreach:n+' donors added to an outreach list',email:'Composing an email to '+n+' donors',tag:'Tag applied to '+n+' donors',export:n+' donors exported · CSV downloading'}[kind];
+      if(window.atlasToast)atlasToast(msg);
+    };
+    window.runSegment=function(btn){
+      if(btn.classList.contains('is-busy')) return;
+      var orig=btn.innerHTML;
+      btn.classList.add('is-busy'); btn.innerHTML='<span class="sr-spin"></span> Running…';
+      setTimeout(function(){
+        btn.classList.remove('is-busy'); btn.innerHTML=orig;
+        // re-resolve: recompute against "live" data (small realistic drift)
+        var base=segCount(info.n), drift=Math.round((Math.random()*2-1)*(3+base*0.012)), nv=Math.max(1, base+drift);
+        var cEl=document.getElementById('sr-count'), c2=document.getElementById('sr-count2');
+        cEl.textContent=nv.toLocaleString(); if(c2) c2.textContent=nv.toLocaleString();
+        cEl.classList.remove('sr-flash'); void cEl.offsetWidth; cEl.classList.add('sr-flash');
+        var now=new Date(), t=now.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+        var r=document.getElementById('sr-resolved'); if(r) r.textContent=(isTag?'refreshed just now · ':'re-run just now · ')+t;
+        if(window.atlasToast)atlasToast(isTag ? 'Tag refreshed · '+nv.toLocaleString()+' donors carry this label' : 'Segment re-run · '+nv.toLocaleString()+' donors matched');
+      }, 950);
+    };
+  })();
+  </script>
+
+</div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     Atlas Dead-CTA Rescue · v1
+     Single click-delegation script that catches button/anchor
+     clicks whose text matches an entry in ACTIONS. Fires a toast,
+     navigates, opens a modal, or toggles a state as appropriate.
+     Safe to load on every page — no-ops when the text isn't in
+     ACTIONS, leaving page-native handlers and the wire-script alone.
+     ════════════════════════════════════════════════════════ -->
+<style id="atlas-rescue-css">
+  #atlas-rescue-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background:#0F172A; color:white; padding:12px 18px; border-radius:10px; box-shadow:0 8px 24px rgba(15,23,42,.20); font-size:13px; font-family:'DM Sans',sans-serif; z-index:100010; display:flex; align-items:center; gap:10px; opacity:0; transition:opacity .2s,transform .2s; pointer-events:none; max-width: 480px; }
+  #atlas-rescue-toast.show { opacity:1; transform:translateX(-50%); pointer-events:auto; }
+  #atlas-rescue-toast .ico { width:22px; height:22px; border-radius:50%; background:#15803D; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0; }
+  #atlas-rescue-toast .msg { line-height:1.4; }
+</style>
+<div id="atlas-rescue-toast"><span class="ico">✓</span><span class="msg"></span></div>
+<script id="atlas-rescue">
+(function(){
+  if (window.__atlasRescue) return; window.__atlasRescue = true;
+
+  // ── Text → Action lookup table ──
+  // Match is case-insensitive, EXACT trimmed text equality (to avoid false positives like "Export" matching "Export forecast")
+  var ACTIONS = {
+    // Late additions (final dead-end sweep)
+    'import csv':                  { type:'toast', msg:'CSV import started · drop or pick a file in the next step' },
+    'save draft':                  { type:'toast', msg:'Draft saved · resume anytime from Batches → Drafts' },
+    'csv file':                    { type:'toast', msg:'CSV import selected · choose file…' },
+    'excel':                       { type:'toast', msg:'Excel import selected · choose .xlsx file…' },
+    'pdf scan':                    { type:'toast', msg:'PDF OCR scan · drop a check image or pledge form' },
+    'make seasonal':               { type:'toast', msg:'Address marked seasonal · winter mail will route here' },
+    'remove':                      { type:'toast', msg:'Removed' },
+    'update':                      { type:'toast', msg:'Saved · changes synced to the donor record' },
+    'csv':                         { type:'toast', msg:'CSV exported · check downloads' },
+    'report':                      { type:'toast', msg:'Report generated · opening in a new tab' },
+    'open all notification preferences': { type:'route', dest:'atlas-notifications.html' },
+    'write off pledge':            { type:'toast', msg:'Pledge written off · audit entry created · DBA approval required' },
+    'already accepted →':          { type:'toast', msg:'Prospect already in pipeline · jumping to their card' },
+    'gifts & pledges':             { type:'route', dest:'atlas-gifts-pledges.html' },
+    'gifts &amp; pledges':         { type:'route', dest:'atlas-gifts-pledges.html' },
+    'edit →':                      { type:'toast', msg:'Step jump · returning to previous step to edit' },
+
+    // Generic exports / downloads → simulated toast
+    'export':                      { type:'toast', msg:'Export ready · CSV downloaded to your device' },
+    'export csv':                  { type:'toast', msg:'CSV exported · check your downloads' },
+    'export pdf':                  { type:'toast', msg:'PDF generated · downloading now' },
+    'export all':                  { type:'toast', msg:'Bulk export queued · ready in ~60 seconds' },
+    'export list':                 { type:'toast', msg:'List exported as CSV · check downloads' },
+    'export roster':               { type:'toast', msg:'Roster exported · CSV ready' },
+    'export forecast':             { type:'toast', msg:'Forecast exported · CSV downloaded' },
+    'export profile':              { type:'toast', msg:'Profile export queued · ready in 30 seconds' },
+    'export exception report':     { type:'toast', msg:'Exception report exported · CSV ready' },
+    'download csv':                { type:'toast', msg:'CSV downloaded' },
+    'download pdf':                { type:'toast', msg:'PDF downloaded' },
+    'download report':             { type:'toast', msg:'Report downloaded · PDF ready' },
+    'pdf report':                  { type:'toast', msg:'PDF report generated · downloading now' },
+
+    // Email / send actions
+    'email to donor':              { type:'toast', msg:'Receipt emailed · delivered to donor inbox' },
+    'email statement':             { type:'toast', msg:'Statement emailed · donor will receive shortly' },
+    'email':                       { type:'route', dest:'atlas-email-compose.html' },
+    'schedule send':               { type:'toast', msg:'Scheduled · will send tomorrow at 9 AM' },
+    'schedule a recurring report': { type:'toast', msg:'Recurring report set up · weekly Monday 8 AM' },
+    'promote':                     { type:'toast', msg:'Promotion drafted · review before scheduling send' },
+
+    // Sync & duplicate management
+    'force re-sync now':           { type:'toast', msg:'Sync started · this may take 60 seconds' },
+    're-scan now':                 { type:'toast', msg:'Duplicate scan started · ETA 30 seconds' },
+    'mark not duplicate':          { type:'toast', msg:'Marked as separate records · removed from queue' },
+    'keep both as separate':       { type:'toast', msg:'Records kept separate · removed from queue' },
+    'apply recommendations':       { type:'toast', msg:'Recommendations applied · 3 fields merged' },
+    "save as decision (don't merge yet)": { type:'toast', msg:'Decision saved · Atlas will re-surface in 14 days' },
+    'snooze':                      { type:'toast', msg:'Snoozed 7 days · we\'ll re-surface next week' },
+
+    // Notifications
+    'mark all as read':            { type:'special', fn:'markAllRead' },
+    'clear cleared':               { type:'toast', msg:'Cleared notifications removed' },
+
+    // Bulk actions
+    'add to outreach list':        { type:'toast', msg:'23 donors added to outreach list' },
+    'add task':                    { type:'route', dest:'atlas-task-modal.html' },
+    'tag':                         { type:'toast', msg:'Tag "Q2 outreach" applied to 23 donors' },
+    'dismiss':                     { type:'toast', msg:'Dismissed' },
+
+    // Direct routes to existing pages
+    'record payment':              { type:'route', dest:'atlas-pledge-payment.html' },
+    'add custom payment':          { type:'route', dest:'atlas-pledge-payment.html' },
+    'sign in to atlas →':          { type:'route', dest:'atlas-dashboard.html' },
+    'sign in to atlas':            { type:'route', dest:'atlas-dashboard.html' },
+    'sign in with password':       { type:'route', dest:'atlas-dashboard.html' },
+    'email me a sign-in link':     { type:'toast', msg:'Magic-link emailed · check your inbox' },
+    'new event':                   { type:'special', fn:'newEvent' },
+    'event page':                  { type:'route', dest:'atlas-gala-management.html' },
+    'view audit log':              { type:'special', fn:'auditLog' },
+    'view configuration':          { type:'route', dest:'atlas-sync.html' },
+    'edit configuration':          { type:'route', dest:'atlas-sync.html' },
+    'view full donor profile':     { type:'route', dest:'atlas-donor-360.html' },
+    'log a note after the call':   { type:'route', dest:'atlas-log-activity.html' },
+    'flag an issue with this brief': { type:'toast', msg:'Issue flagged · DBA team will review' },
+    'brief history':               { type:'toast', msg:'Showing last 12 briefs for this donor' },
+    'review overdue pledges →':    { type:'route', dest:'atlas-pledges-list.html' },
+    'review mapping →':            { type:'route', dest:'atlas-sync.html' },
+    'view in docusign':            { type:'toast', msg:'Opening DocuSign · external app' },
+    'view envelope':               { type:'toast', msg:'Envelope detail · opening in DocuSign' },
+    'view voided':                 { type:'toast', msg:'Voided envelopes · 2 records' },
+    'view posted batch':           { type:'route', dest:'atlas-gifts-pledges.html' },
+    'fix errors inline':           { type:'toast', msg:'Error-fix mode · click any flagged row to correct it' },
+    'post all 14 (including warnings)': { type:'toast', msg:'14 gifts posted · receipts queued' },
+    'assign to supervisor':        { type:'toast', msg:'Batch reassigned to supervisor for review' },
+
+    // Donor-portal recurring-gift actions
+    'pause':                       { type:'special', fn:'togglePause' },
+    'resume':                      { type:'special', fn:'togglePause' },
+    'resume now':                  { type:'special', fn:'togglePause' },
+    'extend pause':                { type:'toast', msg:'Pause extended · resumes in 60 days' },
+    'cancel this gift':            { type:'toast', msg:'Recurring gift cancelled · final receipt will be sent' },
+    'cancel permanently':          { type:'toast', msg:'Cancelled permanently · thank you for your support' },
+    'change amount':               { type:'toast', msg:'Opening amount editor · current: $50/month' },
+    'update card':                 { type:'toast', msg:'Card update form · current: Visa ending 4242' },
+    'change designation':          { type:'toast', msg:'Designation picker · current: Annual Fund' },
+    'pay now':                     { type:'route', dest:'atlas-donate-onetime.html' },
+    'receipt':                     { type:'route', dest:'atlas-receipt-preview.html' },
+
+    // Reports
+    'build a custom report':       { type:'special', fn:'buildReport' },
+    'save as view':                { type:'toast', msg:'Saved as view · access from Reports → Saved' },
+
+    // Add / config
+    'add location':                { type:'route', dest:'atlas-location-manage.html' },
+    'add another seat':            { type:'toast', msg:'Seat added · capacity now 32' },
+    'connect →':                   { type:'toast', msg:'OAuth flow starting · approve in popup' },
+    'disconnect':                  { type:'toast', msg:'Integration disconnected · sync paused' },
+    'screening history':           { type:'toast', msg:'Showing last 90 days of screenings' },
+
+    // Editor / filter / paginate
+    'filter':                      { type:'toast', msg:'Filter panel · pick fields below' },
+    'filter view':                 { type:'toast', msg:'Filter view · pick fields below' },
+    'set targets':                 { type:'toast', msg:'Target editor · set per-officer goals' },
+    'settings':                    { type:'toast', msg:'Settings panel' },
+    'discard changes':             { type:'toast', msg:'Changes discarded · restored from saved' },
+    'add another seat':            { type:'toast', msg:'Seat row added · fill in attendee details' },
+
+    // Donate confirmation share buttons
+    'share on x':                  { type:'toast', msg:'Sharing to X · opening compose window' },
+    'share on facebook':           { type:'toast', msg:'Sharing to Facebook · opening dialog' },
+    'share on linkedin':           { type:'toast', msg:'Sharing to LinkedIn · opening dialog' },
+    'copy link':                   { type:'special', fn:'copyLink' },
+
+    // Guru AI
+    'query history':               { type:'toast', msg:'Showing last 30 queries' },
+    'saved queries':               { type:'toast', msg:'Showing saved queries · 8 saved' },
+
+    // Component library — keep dead (intentional demos)
+  };
+
+  // ── Toast helper ──
+  var toast = document.getElementById('atlas-rescue-toast');
+  function showToast(msg){
+    if (!toast) return;
+    toast.querySelector('.msg').textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(function(){ toast.classList.remove('show'); }, 3200);
+  }
+  window.atlasToast = showToast;
+
+  // ── Click handler ──
+  document.addEventListener('click', function(e){
+    var el = e.target.closest('button, a');
+    if (!el) return;
+    // Skip if it has an existing href/onclick that isn't '#' or empty
+    var href = el.getAttribute('href');
+    if (href && href !== '#' && !el.dataset.atlasRescue) return;
+    var onc = el.getAttribute('onclick');
+    if (onc && onc.trim()) return;
+    // Skip if the click already had its default prevented by something earlier
+    if (e.defaultPrevented) return;
+
+    var txt = (el.textContent || '').trim().toLowerCase().replace(/\s+/g,' ');
+    if (!txt || txt.length > 80) return;
+
+    var act = ACTIONS[txt];
+    if (!act) {
+      // Try fuzzy: strip trailing arrows / counts / parens
+      var stripped = txt.replace(/\s*[→←]\s*$/,'').replace(/\s+\d+(\.\d+)?$/,'').replace(/\s*\(.*\)\s*$/,'').trim();
+      act = ACTIONS[stripped];
+    }
+    if (!act) return;
+
+    // Skip if a more specific page handler is going to fire (heuristic: button has an id that's referenced by scripts)
+    if (el.id) { /* not used currently */ }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (act.type === 'toast') {
+      showToast(act.msg);
+    } else if (act.type === 'route') {
+      showToast('Opening · ' + act.dest.replace('atlas-','').replace('.html','').replace(/-/g,' '));
+      setTimeout(function(){ window.location = act.dest; }, 250);
+    } else if (act.type === 'special') {
+      try { (RESCUE_SPECIALS[act.fn] || function(){})(el, e); }
+      catch(err){ console.error('rescue special failed', err); }
+    }
+  });
+
+  // ── Special handlers ──
+  var RESCUE_SPECIALS = {
+    markAllRead: function(){
+      // Find unread notification items and clear their unread state
+      var marks = document.querySelectorAll('.unread, .nf-row.unread, .notif-unread, [data-unread="true"]');
+      marks.forEach(function(n){ n.classList.remove('unread'); });
+      // Update badge counts
+      document.querySelectorAll('.unread-count, .nav-badge, .nf-count').forEach(function(b){ b.textContent = '0'; });
+      showToast('All notifications marked as read · 14 cleared');
+    },
+
+    togglePause: function(btn){
+      // Find the closest card-like ancestor and toggle paused state
+      var card = btn.closest('.gift-card, .rec-row, .recurring-card, .rg-row, [data-recurring], article, .card');
+      if (card) {
+        var paused = card.classList.toggle('paused');
+        if (paused) card.classList.remove('active');
+        else card.classList.add('active');
+        showToast(paused ? 'Recurring gift paused · resume anytime' : 'Recurring gift resumed · charges resume on next cycle');
+        // Update the button label if it says Pause/Resume
+        var curText = btn.textContent.trim().toLowerCase();
+        if (/pause/i.test(curText)) btn.textContent = 'Resume';
+        else if (/resume/i.test(curText)) btn.textContent = 'Pause';
+      } else {
+        showToast(btn.textContent.trim() + ' · status toggled');
+      }
+    },
+
+    copyLink: function(){
+      try { navigator.clipboard.writeText(window.location.href); } catch(_){}
+      showToast('Link copied to clipboard');
+    },
+
+    newEvent: function(){
+      // Open a slim event-creation modal
+      openSimpleModal({
+        title: 'Create new event',
+        sub: 'Quick-start · fill the basics, refine in the gala module',
+        fields: [
+          { id:'ne-name',  label:'Event name *',  type:'text',   placeholder:'e.g. Bishop\'s Annual Gala 2026' },
+          { id:'ne-type',  label:'Type',          type:'select', options:['Gala / dinner','Retreat','Cultivation lunch','Donor reception','Volunteer drive','Capital tour'] },
+          { id:'ne-date',  label:'Event date *',  type:'date',   value: new Date().toISOString().slice(0,10) },
+          { id:'ne-goal',  label:'Fundraising goal', type:'text', placeholder:'$50,000' },
+          { id:'ne-venue', label:'Venue',         type:'text',   placeholder:'e.g. Albany Capital Center' }
+        ],
+        cta: 'Create event →',
+        onSave: function(vals){
+          if (!vals['ne-name']) { alert('Name the event before saving.'); return false; }
+          showToast('Event created · "' + vals['ne-name'] + '" · opening gala management');
+          setTimeout(function(){ window.location = 'atlas-gala-management.html'; }, 600);
+          return true;
+        }
+      });
+    },
+
+    auditLog: function(){
+      // Open a slim audit-log modal showing the last 6 entries
+      var entries = [
+        { who:'Sarah Reynolds', what:'Created role "Custom · Region Coordinator"',     when:'12 min ago', tag:'role' },
+        { who:'Sarah Reynolds', what:'Invited jamie.morrison@diocese.org as Gift Officer', when:'Today, 9:14 AM', tag:'invite' },
+        { who:'Daniel Cho',     what:'Updated donor preferences for 24 records',         when:'Yesterday, 4:22 PM', tag:'data' },
+        { who:'System',         what:'Daily duplicate scan · 3 candidates surfaced',     when:'Yesterday, 6:00 AM', tag:'system' },
+        { who:'Bridget McCarthy', what:'Resigned consent for 1 donor (do-not-contact)',  when:'2 days ago',         tag:'consent' },
+        { who:'Sarah Reynolds', what:'Posted batch BX-2026-014 · 23 gifts · $87,400',    when:'3 days ago',         tag:'gift' }
+      ];
+      var html = '<div style="max-height:420px;overflow:auto">';
+      html += entries.map(function(e){
+        var col = {role:'#7C3AED', invite:'#2563EB', data:'#0D9488', system:'#64748B', consent:'#BE185D', gift:'#15803D'}[e.tag] || '#64748B';
+        return '<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #F1F5F9">' +
+                 '<div style="width:8px;height:8px;border-radius:50%;background:' + col + ';margin-top:6px;flex-shrink:0"></div>' +
+                 '<div style="flex:1">' +
+                   '<div style="font-size:13px;color:#0F172A">' + e.what + '</div>' +
+                   '<div style="font-size:11.5px;color:#64748B;margin-top:2px"><strong>' + e.who + '</strong> · ' + e.when + '</div>' +
+                 '</div>' +
+               '</div>';
+      }).join('');
+      html += '</div>';
+      openSimpleModal({
+        title: 'Audit log',
+        sub: 'Immutable 7-year record · all data + access changes',
+        rawBody: html,
+        cta: 'Export full log →',
+        onSave: function(){
+          showToast('Audit log export queued · CSV ready in 60s');
+          return true;
+        }
+      });
+    },
+
+    buildReport: function(){
+      // Open the Build-a-Custom-Report 4-step slide-over drawer
+      var existing = document.getElementById('rpt-drawer');
+      if (existing) { existing.remove(); document.getElementById('rpt-scrim').remove(); }
+      var scrim = document.createElement('div');
+      scrim.id = 'rpt-scrim';
+      scrim.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100020;opacity:0;transition:opacity .18s';
+      document.body.appendChild(scrim);
+      var drawer = document.createElement('aside');
+      drawer.id = 'rpt-drawer';
+      drawer.style.cssText = 'position:fixed;top:0;right:0;height:100vh;width:min(580px,94vw);background:white;z-index:100021;box-shadow:-16px 0 40px rgba(15,23,42,.18);transform:translateX(100%);transition:transform .22s cubic-bezier(.22,.61,.36,1);display:flex;flex-direction:column;font-family:DM Sans,sans-serif';
+      drawer.innerHTML =
+        '<style>' +
+          '#rpt-drawer .rh{padding:18px 22px 14px;background:linear-gradient(135deg,#0F172A,#2563EB);color:white;display:flex;align-items:flex-start;gap:12px}' +
+          '#rpt-drawer .rh h3{margin:0;font-family:DM Serif Display,serif;font-size:20px;font-weight:400}' +
+          '#rpt-drawer .rh .sub{font-size:12px;opacity:.86;margin-top:3px}' +
+          '#rpt-drawer .rx{margin-left:auto;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;cursor:pointer}' +
+          '#rpt-drawer .stepper{padding:14px 22px;display:flex;gap:10px;border-bottom:1px solid #F1F5F9;background:#FAFAFA}' +
+          '#rpt-drawer .stepper .st{flex:1;font-size:11px;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px}' +
+          '#rpt-drawer .stepper .st .dot{width:22px;height:22px;border-radius:50%;background:#E2E8F0;color:#64748B;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700}' +
+          '#rpt-drawer .stepper .st.cur .dot{background:#2563EB;color:white}' +
+          '#rpt-drawer .stepper .st.done .dot{background:#15803D;color:white}' +
+          '#rpt-drawer .body{padding:20px 22px;overflow:auto;flex:1}' +
+          '#rpt-drawer .sec{margin-bottom:16px}' +
+          '#rpt-drawer .lbl{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:8px}' +
+          '#rpt-drawer .fld{width:100%;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:DM Sans,sans-serif;color:#0F172A;box-sizing:border-box;outline:none}' +
+          '#rpt-drawer .fld:focus{border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.10)}' +
+          '#rpt-drawer .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}' +
+          '#rpt-drawer .ds{padding:14px 16px;border:1.5px solid #E2E8F0;border-radius:10px;cursor:pointer;transition:all .15s;background:white}' +
+          '#rpt-drawer .ds:hover{border-color:#93C5FD;background:#F0F9FF}' +
+          '#rpt-drawer .ds.sel{border-color:#2563EB;background:#EFF6FF;box-shadow:0 0 0 2px rgba(37,99,235,.10)}' +
+          '#rpt-drawer .ds .ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px;margin-bottom:7px}' +
+          '#rpt-drawer .ds .nm{font-size:13.5px;font-weight:600;color:#0F172A;margin-bottom:3px}' +
+          '#rpt-drawer .ds .dz{font-size:11px;color:#64748B;line-height:1.45}' +
+          '#rpt-drawer .cols{display:flex;flex-wrap:wrap;gap:6px}' +
+          '#rpt-drawer .col-chip{padding:6px 11px;border:1.5px solid #E2E8F0;border-radius:99px;font-size:12px;color:#475569;cursor:pointer;background:white;transition:all .12s;user-select:none}' +
+          '#rpt-drawer .col-chip:hover{border-color:#93C5FD}' +
+          '#rpt-drawer .col-chip.on{background:#2563EB;border-color:#2563EB;color:white;font-weight:600}' +
+          '#rpt-drawer .viz{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}' +
+          '#rpt-drawer .viz .vz{padding:14px 8px;border:1.5px solid #E2E8F0;border-radius:9px;text-align:center;cursor:pointer;font-size:11px;font-weight:600;color:#475569;transition:all .12s;background:white}' +
+          '#rpt-drawer .viz .vz:hover{border-color:#93C5FD}' +
+          '#rpt-drawer .viz .vz.sel{border-color:#2563EB;background:#EFF6FF;color:#2563EB}' +
+          '#rpt-drawer .viz .vz svg{width:26px;height:26px;margin-bottom:6px}' +
+          '#rpt-drawer .foot{padding:14px 22px;border-top:1px solid #F1F5F9;display:flex;gap:10px;background:#FAFAFA;align-items:center}' +
+          '#rpt-drawer .foot .l{font-size:11.5px;color:#64748B;display:flex;gap:6px;align-items:center}' +
+          '#rpt-drawer .btn-back{padding:8px 14px;background:white;border:1.5px solid #E2E8F0;border-radius:8px;font-size:12.5px;color:#475569;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:500}' +
+          '#rpt-drawer .btn-next{padding:8px 16px;background:linear-gradient(135deg,#2563EB,#1E40AF);color:white;border:none;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;margin-left:auto;box-shadow:0 4px 12px rgba(37,99,235,.25)}' +
+          '#rpt-drawer .pane{display:none}' +
+          '#rpt-drawer .pane.on{display:block;animation:fadeUp .22s ease}' +
+          '@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}' +
+        '</style>' +
+        '<div class="rh">' +
+          '<div style="width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.20);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M3 14l3-4 3 2 5-7"/><rect x="2" y="2" width="14" height="14" rx="1.5"/></svg></div>' +
+          '<div><h3>Build a custom report</h3><div class="sub">4 steps · save, schedule, or export as CSV / PDF</div></div>' +
+          '<div class="rx" id="rpt-x"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg></div>' +
+        '</div>' +
+        '<div class="stepper">' +
+          '<div class="st cur" data-i="1"><div class="dot">1</div>Dataset</div>' +
+          '<div class="st" data-i="2"><div class="dot">2</div>Columns</div>' +
+          '<div class="st" data-i="3"><div class="dot">3</div>Filters</div>' +
+          '<div class="st" data-i="4"><div class="dot">4</div>Save</div>' +
+        '</div>' +
+        '<div class="body">' +
+          '<div class="pane on" data-i="1">' +
+            '<div class="lbl">Pick a dataset</div>' +
+            '<div class="grid">' +
+              '<div class="ds sel" data-ds="gifts"><div class="ico" style="background:#2563EB">$</div><div class="nm">Gifts</div><div class="dz">All gifts, including pledge payments and recurring · 142,830 records</div></div>' +
+              '<div class="ds" data-ds="donors"><div class="ico" style="background:#7C3AED">P</div><div class="nm">Constituents</div><div class="dz">Individuals, households, organizations · 3,847 records</div></div>' +
+              '<div class="ds" data-ds="pledges"><div class="ico" style="background:#15803D">✓</div><div class="nm">Pledges</div><div class="dz">Pledge schedules + payment status · 218 active</div></div>' +
+              '<div class="ds" data-ds="campaigns"><div class="ico" style="background:#F59E0B">C</div><div class="nm">Campaigns</div><div class="dz">Goal vs. actual · appeal mix · 8 active</div></div>' +
+              '<div class="ds" data-ds="events"><div class="ico" style="background:#BE185D">E</div><div class="nm">Events</div><div class="dz">Galas, retreats · attendance + revenue · 14 records</div></div>' +
+              '<div class="ds" data-ds="custom"><div class="ico" style="background:#0D9488">✕</div><div class="nm">SQL · custom</div><div class="dz">Write your own query · advanced users only</div></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="pane" data-i="2">' +
+            '<div class="lbl">Pick columns <span style="font-weight:400;text-transform:none;color:#64748B;font-size:11px;margin-left:6px">click to toggle · drag in Phase 2 to reorder</span></div>' +
+            '<div class="cols" id="rpt-cols">' +
+              '<div class="col-chip on">Gift ID</div>' +
+              '<div class="col-chip on">Donor name</div>' +
+              '<div class="col-chip on">Amount</div>' +
+              '<div class="col-chip on">Gift date</div>' +
+              '<div class="col-chip">Campaign</div>' +
+              '<div class="col-chip">Appeal</div>' +
+              '<div class="col-chip">Fund / GL code</div>' +
+              '<div class="col-chip">Payment method</div>' +
+              '<div class="col-chip">Designation</div>' +
+              '<div class="col-chip">Soft credits</div>' +
+              '<div class="col-chip">Receipt #</div>' +
+              '<div class="col-chip">Officer</div>' +
+              '<div class="col-chip">Donor email</div>' +
+              '<div class="col-chip">Lifetime giving</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="pane" data-i="3">' +
+            '<div class="lbl">Date range</div>' +
+            '<div class="grid"><select class="fld"><option>This fiscal year (Jul 2025 – Jun 2026)</option><option>Last fiscal year</option><option>Last 30 days</option><option>Custom range</option></select><input class="fld" type="date" value="2025-07-01"></div>' +
+            '<div class="lbl" style="margin-top:14px">Filter by</div>' +
+            '<div class="grid">' +
+              '<div><select class="fld"><option>Campaign: All campaigns</option><option>Cathedral Capital 2026</option><option>Annual Appeal</option><option>Bishop\'s Gala</option></select></div>' +
+              '<div><select class="fld"><option>Fund: All funds</option><option>Cathedral Restoration</option><option>General Operating</option><option>Scholarship</option></select></div>' +
+              '<div><select class="fld"><option>Amount: Any</option><option>$1,000+</option><option>$10,000+</option><option>$50,000+</option></select></div>' +
+              '<div><select class="fld"><option>Status: All</option><option>Posted only</option><option>Pending</option><option>Voided excluded</option></select></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="pane" data-i="4">' +
+            '<div class="lbl">Visualization</div>' +
+            '<div class="viz">' +
+              '<div class="vz sel"><svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 10h18M9 5v14"/></svg>Table</div>' +
+              '<div class="vz"><svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linejoin="round"><path d="M3 19l5-7 4 3 6-9 3 5" stroke-linecap="round"/></svg>Line</div>' +
+              '<div class="vz"><svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="14" width="3" height="6"/><rect x="9" y="9" width="3" height="11"/><rect x="15" y="5" width="3" height="15"/></svg>Bar</div>' +
+              '<div class="vz"><svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l7 4" stroke-linecap="round"/></svg>Pie</div>' +
+            '</div>' +
+            '<div class="lbl" style="margin-top:18px">Report name <span style="color:#BE185D">*</span></div>' +
+            '<input class="fld" id="rpt-name" placeholder="e.g. Q2 Gift Officer performance">' +
+            '<div class="lbl" style="margin-top:14px">Schedule <span style="font-weight:400;text-transform:none;color:#64748B;font-size:11px;margin-left:6px">optional</span></div>' +
+            '<select class="fld" id="rpt-sched"><option>Don\'t schedule — run on demand</option><option>Daily · 7 AM</option><option>Weekly · Monday 8 AM</option><option>Monthly · 1st of month</option></select>' +
+          '</div>' +
+        '</div>' +
+        '<div class="foot">' +
+          '<div class="l"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="#15803D" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg>Auto-saved</div>' +
+          '<button class="btn-back" id="rpt-back" style="display:none">← Back</button>' +
+          '<button class="btn-next" id="rpt-next">Next: Columns →</button>' +
+        '</div>';
+      document.body.appendChild(drawer);
+
+      // Animate in
+      requestAnimationFrame(function(){ scrim.style.opacity = 1; drawer.style.transform = 'none'; });
+
+      // Step machine
+      var step = 1;
+      function show(n){
+        step = n;
+        drawer.querySelectorAll('.pane').forEach(function(p){ p.classList.toggle('on', +p.dataset.i === n); });
+        drawer.querySelectorAll('.st').forEach(function(s){
+          s.classList.remove('cur','done');
+          var i = +s.dataset.i;
+          if (i === n) s.classList.add('cur');
+          else if (i < n) s.classList.add('done');
+        });
+        drawer.querySelector('#rpt-back').style.display = n > 1 ? '' : 'none';
+        var next = drawer.querySelector('#rpt-next');
+        if (n === 1) next.textContent = 'Next: Columns →';
+        else if (n === 2) next.textContent = 'Next: Filters →';
+        else if (n === 3) next.textContent = 'Next: Save →';
+        else if (n === 4) next.textContent = 'Save report ✓';
+      }
+      drawer.querySelectorAll('.ds').forEach(function(d){
+        d.addEventListener('click', function(){
+          drawer.querySelectorAll('.ds').forEach(function(x){ x.classList.remove('sel'); });
+          d.classList.add('sel');
+        });
+      });
+      drawer.querySelectorAll('.col-chip').forEach(function(c){
+        c.addEventListener('click', function(){ c.classList.toggle('on'); });
+      });
+      drawer.querySelectorAll('.vz').forEach(function(v){
+        v.addEventListener('click', function(){
+          drawer.querySelectorAll('.vz').forEach(function(x){ x.classList.remove('sel'); });
+          v.classList.add('sel');
+        });
+      });
+      drawer.querySelector('#rpt-next').addEventListener('click', function(){
+        if (step < 4) show(step + 1);
+        else {
+          var nameFld = drawer.querySelector('#rpt-name');
+          var name = nameFld ? nameFld.value.trim() : '';
+          if (!name) { alert('Name your report before saving.'); nameFld && nameFld.focus(); return; }
+          closeDrawer();
+          showToast('Saved · "' + name + '" appears in Reports → Saved views');
+        }
+      });
+      drawer.querySelector('#rpt-back').addEventListener('click', function(){ if (step > 1) show(step - 1); });
+      function closeDrawer(){
+        scrim.style.opacity = 0;
+        drawer.style.transform = 'translateX(100%)';
+        setTimeout(function(){ scrim.remove(); drawer.remove(); }, 240);
+      }
+      drawer.querySelector('#rpt-x').addEventListener('click', closeDrawer);
+      scrim.addEventListener('click', closeDrawer);
+    }
+  };
+
+  // ── Simple modal builder (used by newEvent, auditLog) ──
+  function openSimpleModal(opts){
+    var sc = document.createElement('div');
+    sc.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100022;opacity:0;transition:opacity .15s';
+    var md = document.createElement('div');
+    md.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.97);width:min(520px,92vw);max-height:88vh;background:white;border-radius:14px;box-shadow:0 24px 64px rgba(15,23,42,.30);z-index:100023;opacity:0;transition:opacity .15s,transform .15s;font-family:DM Sans,sans-serif;overflow:hidden;display:flex;flex-direction:column';
+    var fldsHtml = '';
+    if (opts.fields) {
+      fldsHtml = opts.fields.map(function(f){
+        if (f.type === 'select') return '<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:6px">' + f.label + '</div><select id="' + f.id + '" style="width:100%;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:DM Sans,sans-serif;color:#0F172A;outline:none;box-sizing:border-box">' + f.options.map(function(o){ return '<option>' + o + '</option>'; }).join('') + '</select></div>';
+        return '<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:6px">' + f.label + '</div><input id="' + f.id + '" type="' + (f.type || 'text') + '" ' + (f.value ? 'value="' + f.value + '"' : '') + ' placeholder="' + (f.placeholder || '') + '" style="width:100%;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:DM Sans,sans-serif;color:#0F172A;outline:none;box-sizing:border-box"></div>';
+      }).join('');
+    }
+    md.innerHTML =
+      '<div style="padding:18px 22px 14px;background:linear-gradient(135deg,#1E3A8A,#2563EB);color:white;display:flex;align-items:flex-start;gap:12px">' +
+        '<div><div style="font-family:DM Serif Display,serif;font-size:20px">' + opts.title + '</div><div style="font-size:12px;opacity:.86;margin-top:3px">' + (opts.sub || '') + '</div></div>' +
+        '<div id="sm-x" style="margin-left:auto;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;cursor:pointer">×</div>' +
+      '</div>' +
+      '<div style="padding:18px 22px;overflow:auto;flex:1">' + (opts.rawBody || fldsHtml) + '</div>' +
+      '<div style="padding:14px 22px;border-top:1px solid #F1F5F9;display:flex;gap:10px;background:#FAFAFA">' +
+        '<button id="sm-cancel" style="padding:8px 14px;background:white;border:1.5px solid #E2E8F0;border-radius:8px;font-size:12.5px;color:#475569;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:500">Cancel</button>' +
+        '<button id="sm-save" style="padding:8px 16px;background:linear-gradient(135deg,#2563EB,#1E40AF);color:white;border:none;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;margin-left:auto">' + (opts.cta || 'Save') + '</button>' +
+      '</div>';
+    document.body.appendChild(sc);
+    document.body.appendChild(md);
+    requestAnimationFrame(function(){ sc.style.opacity = 1; md.style.opacity = 1; md.style.transform = 'translate(-50%,-50%) scale(1)'; });
+    function close(){ sc.style.opacity = 0; md.style.opacity = 0; md.style.transform = 'translate(-50%,-50%) scale(.97)'; setTimeout(function(){ sc.remove(); md.remove(); }, 180); }
+    md.querySelector('#sm-x').addEventListener('click', close);
+    md.querySelector('#sm-cancel').addEventListener('click', close);
+    sc.addEventListener('click', close);
+    md.querySelector('#sm-save').addEventListener('click', function(){
+      var vals = {};
+      if (opts.fields) opts.fields.forEach(function(f){ var el = md.querySelector('#' + f.id); if (el) vals[f.id] = el.value.trim(); });
+      var ok = opts.onSave ? opts.onSave(vals) : true;
+      if (ok !== false) close();
+    });
+  }
+  window.atlasOpenModal = openSimpleModal;
+})();
+</script>
+<!-- end Atlas Dead-CTA Rescue -->
+
+
+<!-- ════ Atlas-themed dialog (replaces native alert/confirm) — auto-injected ════ -->
+<style>
+  #ax-ov{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);z-index:2147483000;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',-apple-system,sans-serif}
+  #ax-ov.show{display:flex}
+  #ax-ov .ax-box{background:#fff;border-radius:16px;width:100%;max-width:430px;box-shadow:0 24px 64px rgba(15,23,42,.30);overflow:hidden;animation:axUp .18s ease}
+  @keyframes axUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  #ax-ov .ax-bd{display:flex;gap:14px;padding:22px 22px 8px}
+  #ax-ov .ax-ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  #ax-ov .ax-ic svg{width:21px;height:21px}
+  #ax-ov .ax-tt{font-size:17px;font-weight:700;color:#0F172A;margin:1px 0 5px}
+  #ax-ov .ax-msg{font-size:13.5px;color:#475569;line-height:1.55;margin:0}
+  #ax-ov .ax-ft{display:flex;justify-content:flex-end;gap:9px;padding:16px 22px 20px}
+  #ax-ov .ax-btn{font-family:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:9px 16px;cursor:pointer;border:1px solid transparent}
+  #ax-ov .ax-ghost{background:#fff;border-color:#E2E8F0;color:#334155}
+  #ax-ov .ax-ghost:hover{background:#F8FAFC;border-color:#94A3B8}
+  #ax-ov .ax-primary{background:#2563EB;color:#fff}
+  #ax-ov .ax-primary:hover{background:#1D4ED8}
+  #ax-ov .ax-danger{background:#BE185D;color:#fff}
+  #ax-ov .ax-danger:hover{background:#9D174D}
+  #ax-ov .ax-gold{background:#B45309;color:#fff}
+  #ax-ov .ax-gold:hover{background:#92400E}
+</style>
+<div id="ax-ov"><div class="ax-box">
+  <div class="ax-bd"><div class="ax-ic" id="ax-ic"></div><div><h3 class="ax-tt" id="ax-tt"></h3><p class="ax-msg" id="ax-msg"></p></div></div>
+  <div class="ax-ft" id="ax-ft"></div>
+</div></div>
+<script>
+(function(){
+  if(window.__axInit) return; window.__axInit=true;
+  var ICONS={
+    danger:['#FCE7F3','#BE185D','<path d="M2.5 4.5h16v3.5h-16zM4 8v9.5a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V8M8 11.5h5"/>'],
+    warn:['#FEF3C7','#D97706','<path d="M10 7.5v4M10 14.3v.2"/><path d="M8.6 3.4 2.6 14a1.6 1.6 0 0 0 1.4 2.4h12A1.6 1.6 0 0 0 17.4 14L11.4 3.4a1.6 1.6 0 0 0-2.8 0Z"/>'],
+    info:['#EFF6FF','#2563EB','<circle cx="10" cy="10" r="7.5"/><path d="M10 9.3v4.2M10 6.4v.2"/>'],
+    success:['#DCFCE7','#15803D','<circle cx="10" cy="10" r="7.5"/><path d="M6.5 10.2l2.2 2.2 4.8-4.8"/>'],
+    docusign:['#FBF4E8','#B45309','<rect x="3" y="2.5" width="14" height="15" rx="2"/><path d="M6 7h8M6 10h5M6 13l1.4 1.4L10.5 11.3"/>']
+  };
+  function el(id){ return document.getElementById(id); }
+  function close(){ var o=el('ax-ov'); if(o) o.classList.remove('show'); }
+  window.axClose=close;
+  function dialog(o){
+    var ov=el('ax-ov'); if(!ov) return; var ic=ICONS[o.icon]||ICONS[o.danger?'danger':'info'];
+    el('ax-ic').style.background=ic[0]; el('ax-ic').style.color=ic[1];
+    el('ax-ic').innerHTML='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+ic[2]+'</svg>';
+    el('ax-tt').textContent=o.title||''; el('ax-tt').style.display=o.title?'':'none'; el('ax-msg').innerHTML=o.message||'';
+    var ft=el('ax-ft'); ft.innerHTML='';
+    if(!o.alert){ var c=document.createElement('button'); c.className='ax-btn ax-ghost'; c.textContent=o.cancelText||'Cancel'; c.onclick=function(){ close(); if(o.onCancel)o.onCancel(); }; ft.appendChild(c); }
+    var ok=document.createElement('button'); ok.className='ax-btn '+(o.btn==='gold'?'ax-gold':(o.danger?'ax-danger':'ax-primary')); ok.textContent=o.confirmText||(o.alert?'Got it':'OK');
+    ok.onclick=function(){ close(); if(o.onConfirm)o.onConfirm(); }; ft.appendChild(ok);
+    ov.classList.add('show'); setTimeout(function(){ try{ok.focus();}catch(e){} },40);
+  }
+  window.atlasConfirm=function(o){ dialog(o||{}); };
+  window.atlasAlert=function(title,message,o){ o=o||{}; dialog({title:title,message:message,alert:true,icon:o.icon||'info',btn:o.btn,confirmText:o.confirmText||'Got it',onConfirm:o.onConfirm}); };
+  // theme all native alert() calls automatically
+  window.alert=function(m){ atlasAlert('Atlas', String(m==null?'':m)); };
+  var ov=el('ax-ov'); if(ov) ov.addEventListener('click',function(e){ if(e.target===this) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
+</script>
+
+</body>
+</html>
