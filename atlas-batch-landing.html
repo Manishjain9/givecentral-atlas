@@ -1007,6 +1007,7 @@ body {
         <div style="font-size:11px;color:var(--text-3);margin-top:4px">.csv, .xlsx, .xls · max 10MB</div>
         <input type="file" id="im-file" accept=".csv,.xlsx,.xls" style="display:none">
       </div>
+      <div class="bl-f full" style="margin-top:12px"><label>Batch name <span style="color:var(--rose)">*</span></label><input type="text" id="im-batchname" placeholder="e.g., May CMA Mail Response"></div>
       <div class="bl-fg" style="margin-top:12px">
         <div class="bl-f"><label>Folder / campaign</label><select id="im-folder" onchange="onFolderChange(this,'im-newfolder')"><option>2026 — CMA</option><option>2026 — Cathedral Capital</option><option>General Fund</option><option value="__new">+ Create new folder…</option></select></div>
         <div class="bl-f"><label>Template for mapping</label><select id="im-tpl"><option>Auto-detect</option><option>CMA Mail Response</option><option>Major Gift Pledge</option><option>Online Giving Export</option></select></div>
@@ -1111,11 +1112,18 @@ body {
     document.getElementById('im-cancel').textContent='Cancel'; document.getElementById('im-cancel').setAttribute('onclick','closeImport()');
     document.getElementById('im-dz-msg').textContent='Click to choose a file · or drop CSV / Excel here';
     document.getElementById('im-dz').style.borderColor='var(--border)'; document.getElementById('im-dz').style.background='var(--surface)';
+    var bn=document.getElementById('im-batchname'); if(bn){ bn.value=''; }
     document.getElementById('im-ov').classList.add('show');
   };
   window.closeImport=function(){ document.getElementById('im-ov').classList.remove('show'); };
-  document.getElementById('im-file').addEventListener('change',function(){ if(this.files&&this.files[0]){ var f=this.files[0]; document.getElementById('im-dz-msg').innerHTML='✓ <strong>'+f.name+'</strong> — '+Math.round(f.size/1024)+' KB ready'; document.getElementById('im-dz').style.borderColor='var(--green)'; document.getElementById('im-dz').style.background='var(--green-light)'; }});
+  function deriveBatchName(fname){
+    return (fname||'').replace(/\.[^.]+$/,'').replace(/[_\-]+/g,' ').replace(/\s+/g,' ').trim()
+      .replace(/\b\w/g,function(c){ return c.toUpperCase(); }) || 'Imported batch';
+  }
+  document.getElementById('im-file').addEventListener('change',function(){ if(this.files&&this.files[0]){ var f=this.files[0]; document.getElementById('im-dz-msg').innerHTML='✓ <strong>'+f.name+'</strong> — '+Math.round(f.size/1024)+' KB ready'; document.getElementById('im-dz').style.borderColor='var(--green)'; document.getElementById('im-dz').style.background='var(--green-light)'; var bn=document.getElementById('im-batchname'); if(bn && !bn.value.trim()){ bn.value=deriveBatchName(f.name); } }});
   window.importToMapping=function(){
+    var bn=(document.getElementById('im-batchname').value||'').trim();
+    if(!bn){ toast('Give the batch a name first'); document.getElementById('im-batchname').focus(); return; }
     var tpl=document.getElementById('im-tpl').value; var src=TPL_SRC[tpl]||TPL_SRC['Auto-detect'];
     imMap=src.map(function(h){return {src:h, field:autoField(h)};});
     renderMap();
@@ -1147,7 +1155,8 @@ body {
   window.importFinish=function(){
     var have={}; imMap.forEach(function(m){if(m.field)have[m.field]=1;});
     if(!(have.donor&&have.date&&have.amount)){ toast('Map Donor, Date and Amount first'); return; }
-    closeImport(); go('atlas-batch-entry.html','Importing · columns mapped · opening batch');
+    var bn=(document.getElementById('im-batchname').value||'').trim()||'Imported batch';
+    closeImport(); go('atlas-batch-entry.html','Importing “'+bn+'” · columns mapped · opening batch');
   };
 
   // ── Template modal ──
