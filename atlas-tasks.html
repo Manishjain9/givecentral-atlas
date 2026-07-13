@@ -1941,22 +1941,51 @@ body {
       setTimeout(function(){
         showCelebration('Snoozed for 2 hours', 'I\'ll surface this again at ' + ((h+2)%12 || 12) + (h+2 >= 12 ? ' PM' : ' AM'));
       }, 200);
+      setTimeout(function(){ card.style.display = 'none'; }, 1300);
     }
   });
 
-  // ── Smart filter pills ──
+  // ── Smart filter pills (saved views) — real filtering ──
+  function tkToast(msg){ if (window.atlasToast) window.atlasToast(msg); }
+  function parseAmt(txt){ var max=0,re=/\$\s*([\d,.]+)\s*([kKmM])?/g,m; while((m=re.exec(txt))){ var v=parseFloat(m[1].replace(/,/g,''))||0; var u=(m[2]||'').toLowerCase(); if(u==='k')v*=1e3; else if(u==='m')v*=1e6; if(v>max)max=v; } return max; }
+  function rowMatchesView(row, view){
+    var txt=row.textContent, cat=((row.querySelector('.cat')||{}).textContent||'').toLowerCase();
+    if(view==='today-50k')   return parseAmt(txt)>=50000;
+    if(view==='critical')    return !!row.querySelector('.pri-dot.crit');
+    if(view==='quick-wins')  return parseAmt(txt)<10000 && /thank|note|email|letter|log a|address|reminder|acknowledg/i.test(txt);
+    if(view==='stewardship') return cat.indexOf('steward')!==-1 || /thank|anniversary|milestone|steward|acknowledg/i.test(txt);
+    return true;
+  }
+  function refreshGroupVisibility(){
+    document.querySelectorAll('#tk-list-view .group-h').forEach(function(gh){
+      var list=gh.nextElementSibling;
+      if(!list || !list.classList.contains('tk-list')) return;
+      var any=Array.prototype.some.call(list.querySelectorAll('.tk-row'),function(r){return r.style.display!=='none';});
+      gh.style.display=any?'':'none'; list.style.display=any?'':'none';
+    });
+  }
+  function countView(view){ return Array.prototype.filter.call(document.querySelectorAll('#tk-list-view .tk-row'),function(r){return rowMatchesView(r,view);}).length; }
+  function applySavedView(view){
+    document.querySelectorAll('#tk-list-view .tk-row').forEach(function(r){ r.style.display = rowMatchesView(r,view)?'':'none'; });
+    refreshGroupVisibility();
+  }
+  function clearSavedView(){ document.querySelectorAll('#tk-list-view .tk-row').forEach(function(r){ r.style.display=''; }); refreshGroupVisibility(); }
+  // set real counts on each saved view
+  document.querySelectorAll('.sp-pill[data-view]').forEach(function(p){ var c=p.querySelector('.sp-count'); if(c) c.textContent=countView(p.dataset.view); });
   document.querySelectorAll('.sp-pill').forEach(function(p){
     p.addEventListener('click', function(){
       if (p.classList.contains('sp-customize')) {
         alert('Saved-view builder · combine filter chips + save as a named view (Phase 2 feature)');
         return;
       }
+      var wasOn = p.classList.contains('on');
       document.querySelectorAll('.sp-pill').forEach(function(x){ x.classList.remove('on'); });
+      if (wasOn){ clearSavedView(); tkToast('Saved view cleared · showing all tasks'); return; }
       p.classList.add('on');
-      // Visual hint that filter is applied
-      var rows = document.querySelectorAll('.tk-row');
-      rows.forEach(function(r){ r.style.opacity = '.95'; });
-      setTimeout(function(){ rows.forEach(function(r){ r.style.opacity = ''; }); }, 400);
+      applySavedView(p.dataset.view);
+      var vis = Array.prototype.filter.call(document.querySelectorAll('#tk-list-view .tk-row'),function(r){return r.style.display!=='none';}).length;
+      var name = (p.textContent||'').replace(/\s*\d+\s*$/,'').trim();
+      tkToast(name+' · '+vis+' task'+(vis!==1?'s':''));
     });
   });
 
@@ -2195,9 +2224,27 @@ body {
     }
   });
 
-  // ── Search tasks button ──
+  // ── Search tasks — inline, in-page filter ──
+  function taskSearch(q){
+    q=(q||'').toLowerCase().trim();
+    document.querySelectorAll('#tk-list-view .tk-row').forEach(function(r){ r.style.display = (!q || r.textContent.toLowerCase().indexOf(q)!==-1) ? '' : 'none'; });
+    if (typeof refreshGroupVisibility==='function') refreshGroupVisibility();
+  }
   var searchBtn = document.getElementById('search-tasks-btn');
-  if (searchBtn) searchBtn.addEventListener('click', function(){ window.location = 'atlas-search.html'; });
+  if (searchBtn) searchBtn.addEventListener('click', function(){
+    var f=document.getElementById('tk-search-field'); if(f){ f.querySelector('input').focus(); return; }
+    var wrap=document.createElement('div'); wrap.id='tk-search-field';
+    wrap.style.cssText='display:inline-flex;align-items:center;gap:6px;border:1px solid var(--blue);border-radius:8px;padding:6px 10px;background:#fff';
+    wrap.innerHTML='<svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="#64748B" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4"/><path d="M9 9l3 3"/></svg><input type="text" placeholder="Filter tasks by name, donor, category…" style="border:none;outline:none;font-family:inherit;font-size:13px;width:230px;background:none;color:var(--text)"><span title="Clear" style="cursor:pointer;color:var(--text-3);font-size:16px;line-height:1">×</span>';
+    searchBtn.style.display='none';
+    searchBtn.parentNode.insertBefore(wrap, searchBtn);
+    var inp=wrap.querySelector('input');
+    function closeSearch(){ inp.value=''; taskSearch(''); wrap.remove(); searchBtn.style.display=''; }
+    inp.addEventListener('input', function(){ taskSearch(inp.value); });
+    inp.addEventListener('keydown', function(e){ if(e.key==='Escape') closeSearch(); });
+    wrap.querySelector('span').addEventListener('click', closeSearch);
+    inp.focus();
+  });
 })();
 </script>
 
@@ -4373,6 +4420,206 @@ body {
   window.alert=function(m){ atlasAlert('Atlas', String(m==null?'':m)); };
   var ov=el('ax-ov'); if(ov) ov.addEventListener('click',function(e){ if(e.target===this) close(); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
+</script>
+
+<script id="tk-dead-cta-fixes">
+(function(){
+  if (window.__tkFixes) return; window.__tkFixes = true;
+  function toast(m){ if (window.atlasToast) window.atlasToast(m); }
+  function rows(){ return Array.prototype.slice.call(document.querySelectorAll('#tk-list-view .tk-row')); }
+  function owner(r){ var a=r.querySelector('.own-av'); return a ? a.textContent.trim() : ''; }
+  function refreshGroups(){
+    document.querySelectorAll('#tk-list-view .group-h').forEach(function(gh){
+      var list=gh.nextElementSibling; if(!list || !list.classList.contains('tk-list')) return;
+      var any=Array.prototype.some.call(list.querySelectorAll('.tk-row'),function(r){return r.style.display!=='none';});
+      gh.style.display=any?'':'none'; list.style.display=any?'':'none';
+    });
+  }
+  function clearNote(){ var n=document.getElementById('tk-empty-note'); if(n) n.remove(); }
+  function showNote(msg){ clearNote(); var lv=document.getElementById('tk-list-view'); if(!lv) return; var n=document.createElement('div'); n.id='tk-empty-note'; n.className='empty'; n.style.marginTop='10px'; n.textContent=msg; lv.appendChild(n); }
+  function clearPills(){ document.querySelectorAll('.sp-pill').forEach(function(x){ x.classList.remove('on'); }); }
+  function applyFilter(pred, label){
+    clearNote(); clearPills();
+    var shown=0; rows().forEach(function(r){ var ok=!pred||pred(r); r.style.display=ok?'':'none'; if(ok)shown++; });
+    refreshGroups();
+    if(shown===0 && label) showNote('No tasks in “'+label+'”.');
+    return shown;
+  }
+  function showAll(){ clearNote(); clearPills(); rows().forEach(function(r){ r.style.display=''; }); refreshGroups(); }
+
+  // ══ 0 · SEED REAL DATA (scopes + Delegated + Completed sets) ══
+  var KEBAB='<div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>';
+  function tkRow(o){
+    return '<div class="tk-row '+(o.cls||'')+'" data-scope="'+o.scope+'">'
+      +'<span class="cb"></span>'
+      +'<div class="body"><div class="ttl">'+o.ttl+'</div><div class="meta">'+(o.donor?'<span class="donor">'+o.donor+'</span><span>·</span>':'')+'<span>'+o.sub+'</span></div></div>'
+      +'<div class="due"><div class="d">'+o.date+'</div>'+(o.badge?'<div class="badge '+o.badgeCls+'">'+o.badge+'</div>':'')+'</div>'
+      +'<div class="pri-dot '+o.pri+'"><span class="d"></span>'+o.priLbl+'</div>'
+      +'<span class="cat">'+o.cat+'</span>'
+      +'<div class="own-av" style="background:'+o.avColor+'">'+o.av+'</div>'+KEBAB+'</div>';
+  }
+  function tkDone(ttl,who,when,cat){
+    return '<div class="tk-row" data-scope="completed" style="opacity:.75">'
+      +'<span class="cb" style="background:var(--green);border-color:var(--green);color:#fff;font-size:11px">✓</span>'
+      +'<div class="body"><div class="ttl" style="text-decoration:line-through;color:var(--text-3)">'+ttl+'</div><div class="meta"><span class="donor">'+who+'</span><span>·</span><span>'+cat+'</span></div></div>'
+      +'<div class="due"><div class="d">'+when+'</div><div class="badge" style="background:var(--green-light);color:var(--green)">Done</div></div>'
+      +'<div class="pri-dot low"><span class="d"></span>Done</div>'
+      +'<span class="cat">'+cat+'</span>'
+      +'<div class="own-av" style="background:var(--green)">SR</div>'+KEBAB+'</div>';
+  }
+  (function seed(){
+    // 1) tag existing open rows by owner
+    rows().forEach(function(r){ if(!r.dataset.scope) r.dataset.scope = (owner(r)==='SR' ? 'mine' : 'team'); });
+    var lv=document.getElementById('tk-list-view'); if(!lv) return;
+    // 2) Delegated group — tasks I handed to teammates (distinct from Team)
+    var delg='<div class="group-h"><span>Delegated · 2</span><span class="ct">handed to teammates</span><span class="line"></span></div>'
+      +'<div class="tk-list">'
+      + tkRow({scope:'delegated',ttl:'Draft major-gift proposal — Hartwell Foundation',donor:'Hartwell Foundation',sub:'Delegated to Bridget McCarthy · you’re watching',date:'May 6',badge:'Due May 6',badgeCls:'soon',pri:'high',priLbl:'High',cat:'Solicitation',av:'BM',avColor:'var(--purple)'})
+      + tkRow({scope:'delegated',ttl:'Prepare gift agreement — Nguyen family pledge',donor:'Nguyen Family',sub:'Delegated to Daniel Cho · data entry',date:'May 7',badge:'Due May 7',badgeCls:'soon',pri:'med',priLbl:'Medium',cat:'Admin',av:'DC',avColor:'var(--blue)'})
+      +'</div>';
+    lv.insertAdjacentHTML('beforeend', delg);
+    // 3) Completed view — 12 done today/this week (separate container)
+    var done=[
+      ['Thank-you call — Morrison Foundation $100k','Morrison Foundation','8:05 AM','Stewardship'],
+      ['Send receipt — Schwab DAF $15k','Schwab Charitable','9:20 AM','Stewardship'],
+      ['Approve acknowledgement letter — $10k gift','Fitzgerald Family','10:02 AM','Stewardship'],
+      ['Welcome email — 14 first-time donors','Auto-segment','10:40 AM','Stewardship'],
+      ['Pledge reminder — installment past due','Hennessy Family','11:15 AM','Solicitation'],
+      ['Log visit notes — estate-bequest review','Fitzgerald Family','Yesterday','Cultivation'],
+      ['Call — Catherine Walsh cultivation','Catherine Walsh','Yesterday','Cultivation'],
+      ['Send proposal — spring capital ask','The Delaney Foundation','Yesterday','Solicitation'],
+      ['Update address — returned mail','J. Alvarez','Yesterday','Admin'],
+      ['Post gift batch BX-2026-014 · 23 gifts','Daniel Cho','Yesterday','Admin'],
+      ['Anniversary card — first gift one year ago','David Chen','2 days ago','Stewardship'],
+      ['Q1 stewardship report to the board','Internal','2 days ago','Admin']
+    ];
+    var cv=document.createElement('div'); cv.id='tk-completed-view'; cv.style.display='none';
+    cv.innerHTML='<div class="group-h" style="color:var(--green)"><span>Completed today · 12</span><span class="ct">94% on-time</span><span class="line"></span></div><div class="tk-list">'+done.map(function(x){return tkDone(x[0],x[1],x[2],x[3]);}).join('')+'</div>';
+    lv.insertAdjacentElement('afterend', cv);
+  })();
+
+  // ══ 1 · TABS ══
+  var tabs = document.querySelectorAll('.tabs .tab');
+  var TAB_PRED = {
+    'All': null,
+    'Mine': function(r){ return r.dataset.scope==='mine'; },
+    'Team': function(r){ return r.dataset.scope==='team'; },
+    'Delegated': function(r){ return r.dataset.scope==='delegated'; }
+  };
+  var SLUG={All:'all',Mine:'mine',Team:'team',Delegated:'delegated',Completed:'completed'};
+  var NAME_BY_SLUG={all:'All',mine:'Mine',team:'Team',delegated:'Delegated',completed:'Completed'};
+  function activateTab(name){ tabs.forEach(function(t){ t.classList.toggle('on', t.dataset.tabName===name); }); }
+  function syncUrl(name){ try{ var u=new URL(window.location.href); u.searchParams.set('view', SLUG[name]||'all'); history.replaceState(null,'',u); }catch(e){} }
+  function showOpen(){ var lv=document.getElementById('tk-list-view'),cv=document.getElementById('tk-completed-view'); if(lv)lv.style.display=''; if(cv)cv.style.display='none'; }
+  function showDone(){ var lv=document.getElementById('tk-list-view'),cv=document.getElementById('tk-completed-view'); if(lv)lv.style.display='none'; if(cv)cv.style.display=''; }
+  function selectTab(name, silent){
+    activateTab(name); syncUrl(name);
+    if(name==='Completed'){ showDone(); clearNote(); if(!silent) toast('Completed · 12 today'); return; }
+    showOpen();
+    if(name==='All'){ showAll(); if(!silent) toast('All tasks'); return; }
+    var n=applyFilter(TAB_PRED[name], name); if(!silent) toast(name+' · '+n+' task'+(n!==1?'s':''));
+  }
+  tabs.forEach(function(t){
+    t.dataset.tabName = (t.textContent||'').replace(/\s*\d+\s*$/,'').trim();
+    t.style.cursor='pointer';
+  });
+  // Delegated on document (capture) — fires regardless of overlays / re-render / timing
+  document.addEventListener('click', function(e){
+    var tab = e.target.closest && e.target.closest('.tabs .tab');
+    if(tab && tab.dataset.tabName){ e.preventDefault(); selectTab(tab.dataset.tabName); return; }
+    var stat = e.target.closest && e.target.closest('.tk-stats .tk-stat');
+    if(stat){
+      if(e.target.closest('button')) return;                 // inner CTA handles itself
+      if(stat.id==='card-completed'){ selectTab('Completed'); return; }
+      activateTab('All'); showOpen();
+      if(stat.id==='card-overdue'){ applyFilter(function(r){return !!r.querySelector('.badge.overdue');},'Overdue'); toast('Overdue'); }
+      else if(stat.id==='card-today'){ applyFilter(function(r){return !!r.querySelector('.badge.today');},'Due today'); toast('Due today'); }
+      else if(stat.classList.contains('upcoming')){ applyFilter(function(r){return !r.querySelector('.badge.overdue') && !r.querySelector('.badge.today');},'This week'); toast('This week'); }
+    }
+  }, true);
+  // real counts on tabs (scope-based)
+  (function(){
+    function setCt(name,val){ tabs.forEach(function(t){ if(t.dataset.tabName===name){ var c=t.querySelector('.ct'); if(c) c.textContent=val; } }); }
+    function by(s){ return rows().filter(function(r){return r.dataset.scope===s;}).length; }
+    var completed=document.querySelectorAll('#tk-completed-view .tk-row').length;
+    setCt('All',rows().length); setCt('Mine',by('mine')); setCt('Team',by('team')); setCt('Delegated',by('delegated')); setCt('Completed',completed);
+  })();
+  // Deep-link: honour ?view= on load, and respond to back/forward
+  function tabFromUrl(silent){
+    var m=(location.search||'').match(/[?&]view=([^&]+)/);
+    var slug=m?decodeURIComponent(m[1]).toLowerCase():'all';
+    selectTab(NAME_BY_SLUG[slug]||'All', silent);
+  }
+  tabFromUrl(true);
+  window.addEventListener('popstate', function(){ tabFromUrl(true); });
+
+  // ══ 2 · FILTER CHIPS ══
+  var toolbar = document.querySelector('.tk-toolbar');
+  if (toolbar) toolbar.addEventListener('click', function(e){
+    var x=e.target.closest('.filter-chip.applied .x');
+    if(x){ var chip=x.closest('.filter-chip'); var lbl=(chip.textContent||'').replace('×','').trim(); chip.remove(); toast('Filter removed · '+lbl); return; }
+    var add=e.target.closest('.filter-chip:not(.applied)');
+    if(add){ openAddFilter(add); }
+  });
+  function openAddFilter(anchor){
+    var ex=document.getElementById('tk-af-menu'); if(ex){ ex.remove(); return; }
+    var opts=[['Owner','Bridget McCarthy'],['Priority','Critical'],['Category','Solicitation'],['Category','Stewardship'],['Due','Today'],['Due','This week']];
+    var m=document.createElement('div'); m.id='tk-af-menu'; var r=anchor.getBoundingClientRect();
+    m.style.cssText='position:absolute;z-index:1200;top:'+(r.bottom+window.scrollY+4)+'px;left:'+(r.left+window.scrollX)+'px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 30px rgba(15,23,42,.16);padding:6px;min-width:200px;font-size:13px';
+    m.innerHTML='<div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);padding:6px 10px">Add a filter</div>'+opts.map(function(o){return '<div class="af-item" data-f="'+o[0]+': '+o[1]+'" style="padding:8px 10px;border-radius:7px;cursor:pointer;color:var(--text-2)">'+o[0]+': <strong>'+o[1]+'</strong></div>';}).join('');
+    document.body.appendChild(m);
+    m.querySelectorAll('.af-item').forEach(function(it){
+      it.addEventListener('mouseenter',function(){ it.style.background='var(--surface)'; });
+      it.addEventListener('mouseleave',function(){ it.style.background=''; });
+      it.addEventListener('click', function(){
+        var chip=document.createElement('div'); chip.className='filter-chip applied'; chip.innerHTML=it.dataset.f+' <span class="x">×</span>';
+        anchor.parentNode.insertBefore(chip, anchor); m.remove(); toast('Filter added · '+it.dataset.f);
+      });
+    });
+    setTimeout(function(){ document.addEventListener('click', function c(ev){ if(!m.contains(ev.target)&&ev.target!==anchor){ m.remove(); document.removeEventListener('click',c);} }); },0);
+  }
+
+  // ══ 3 · ROW KEBAB (⋯) menu ══
+  var lv=document.getElementById('tk-list-view');
+  if (lv) lv.addEventListener('click', function(e){
+    var k=e.target.closest('.kebab'); if(!k) return;
+    e.stopPropagation(); e.preventDefault(); openKebab(k);
+  });
+  function openKebab(k){
+    var ex=document.getElementById('tk-kebab-menu'); var same=ex&&ex.__owner===k; if(ex) ex.remove(); if(same) return;
+    var row=k.closest('.tk-row');
+    var items=[['Complete task','done'],['Snooze 1 day','snooze'],['Reassign…','reassign'],['Edit task','edit'],['Open donor','donor'],['Delete task','delete']];
+    var m=document.createElement('div'); m.id='tk-kebab-menu'; m.__owner=k; var r=k.getBoundingClientRect();
+    m.style.cssText='position:absolute;z-index:1200;top:'+(r.bottom+window.scrollY+4)+'px;left:'+(r.right+window.scrollX-176)+'px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 30px rgba(15,23,42,.18);padding:6px;min-width:176px;font-size:13px';
+    m.innerHTML=items.map(function(o){ var dgr=o[1]==='delete'; return '<div class="km-item" data-a="'+o[1]+'" style="padding:8px 10px;border-radius:7px;cursor:pointer;color:'+(dgr?'var(--rose)':'var(--text-2)')+'">'+o[0]+'</div>'; }).join('');
+    document.body.appendChild(m);
+    m.querySelectorAll('.km-item').forEach(function(it){
+      it.addEventListener('mouseenter',function(){ it.style.background=it.dataset.a==='delete'?'var(--rose-light)':'var(--surface)'; });
+      it.addEventListener('mouseleave',function(){ it.style.background=''; });
+      it.addEventListener('click', function(){ kebabAct(it.dataset.a,row); m.remove(); });
+    });
+    setTimeout(function(){ document.addEventListener('click', function c(ev){ if(!m.contains(ev.target)){ m.remove(); document.removeEventListener('click',c);} }); },0);
+  }
+  function kebabAct(a,row){
+    var title=((row.querySelector('.ttl')||{}).textContent||'Task').trim();
+    if(a==='done'){ var cb=row.querySelector('.cb'); if(cb){ cb.click(); } else { row.style.opacity=.4; toast('Task completed'); } }
+    else if(a==='snooze'){ row.style.transition='opacity .25s'; row.style.opacity='.4'; setTimeout(function(){ row.style.display='none'; refreshGroups(); },260); toast('Snoozed 1 day · '+title.slice(0,34)); }
+    else if(a==='reassign'){ window.location='atlas-task-modal.html'; }
+    else if(a==='edit'){ if(window.openNewTaskModal){ window.openNewTaskModal(); } else { window.location='atlas-task-modal.html'; } }
+    else if(a==='donor'){ window.location='atlas-donor-360.html'; }
+    else if(a==='delete'){ row.style.transition='opacity .2s'; row.style.opacity='0'; setTimeout(function(){ row.style.display='none'; refreshGroups(); },200); toast('Task deleted · “'+title.slice(0,30)+'”'); }
+  }
+
+  // ══ 4 · STAT CARDS — clickable bodies (handled by the delegated listener above) ══
+  document.querySelectorAll('.tk-stats .tk-stat').forEach(function(s){ s.style.cursor='pointer'; });
+
+  // Safety: lift the interactive top strip above any stray transparent overlay
+  (function(){
+    var css=document.createElement('style');
+    css.textContent='.tk-stats,.tabs,.smart-pills,.tk-toolbar{position:relative;z-index:3}';
+    document.head.appendChild(css);
+  })();
 })();
 </script>
 

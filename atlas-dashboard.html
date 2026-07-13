@@ -689,19 +689,19 @@ body {
       <span class="topbar-title">Dashboard</span>
       <span class="topbar-date">Friday, April 3, 2026</span>
       <div class="topbar-right">
-        <button class="tb-btn tb-ghost">
+        <button class="tb-btn tb-ghost" id="tb-filter" onclick="openFilterView()">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M2 6h8M2 3h8M2 9h5"/></svg>
           Filter view
         </button>
-        <button class="tb-btn tb-ghost">
+        <button class="tb-btn tb-ghost" id="tb-schedule" onclick="openSchedule()">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="2" width="9" height="8" rx="1.2"/><path d="M1.5 5h9M4.5 2v2M7.5 2v2"/></svg>
           Schedule
         </button>
-        <button class="tb-btn tb-primary">
+        <button class="tb-btn tb-primary" id="tb-primary" onclick="primaryAction()">
           <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
-          Record gift
+          <span id="tb-primary-label">Record gift</span>
         </button>
-        <button class="tb-notif">
+        <button class="tb-notif" onclick="go('atlas-notifications.html')">
           <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.5 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5zM6 13a1.5 1.5 0 003 0"/></svg>
           <div class="notif-dot"></div>
         </button>
@@ -744,6 +744,9 @@ body {
           </div>
         </div>
       </div>
+
+      <!-- Role-specific banner (parish reconciliation · IT billing) -->
+      <div id="role-banner"></div>
 
       <!-- KPI row -->
       <div class="kpi-row" id="kpi-row">
@@ -792,10 +795,10 @@ body {
         <div class="card">
           <div class="card-header">
             <span class="card-title" id="title-tasks">Tasks due today</span>
-            <span class="card-action">All tasks <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5"/></svg></span>
+            <span class="card-action" onclick="go('atlas-tasks.html')">All tasks <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5"/></svg></span>
           </div>
           <div class="card-body">
-            <div class="task-list">
+            <div class="task-list" id="w-tasks">
               <div class="task-item overdue">
                 <div class="task-check"></div>
                 <div class="task-body">
@@ -854,10 +857,10 @@ body {
         <div class="card match-row">
           <div class="card-header">
             <span class="card-title" id="title-pledges">Pledges due this week</span>
-            <span class="card-action">All pledges <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5"/></svg></span>
+            <span class="card-action" id="action-pledges" onclick="goPledges()">All pledges <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5"/></svg></span>
           </div>
           <div class="card-body">
-            <div class="pledge-list">
+            <div class="pledge-list" id="w-pledges">
               <div class="pledge-item overdue">
                 <div class="pledge-avatar" style="background:#FCE7F3;color:#BE185D">RH</div>
                 <div>
@@ -964,7 +967,7 @@ body {
           <div class="card">
             <div class="card-header">
               <span class="card-title">Gifts today</span>
-              <span class="card-action">All gifts <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5"/></svg></span>
+              <span class="card-action" onclick="go('atlas-gifts-pledges.html')">All gifts <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5"/></svg></span>
             </div>
             <div class="card-body" style="padding-bottom:14px">
               <div class="gift-feed">
@@ -1031,7 +1034,7 @@ body {
           <div class="card">
             <div class="card-header">
               <span class="card-title">Campaign progress</span>
-              <span class="card-action">All campaigns <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5"/></svg></span>
+              <span class="card-action" onclick="go('atlas-campaign-dashboard.html')">All campaigns <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5"/></svg></span>
             </div>
             <div class="card-body">
               <div class="campaign-list">
@@ -1077,9 +1080,9 @@ body {
         <div class="card pipeline-col">
           <div class="card-header">
             <span class="card-title" id="title-pipeline">Major gift pipeline</span>
-            <span class="card-action">Full pipeline <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5"/></svg></span>
+            <span class="card-action" id="action-pipeline" onclick="goPipeline()"><span id="action-pipeline-label">Full pipeline</span> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5"/></svg></span>
           </div>
-          <div class="card-body">
+          <div class="card-body" id="w-pipeline-body">
             <div class="pipeline-stages">
 
               <div class="stage-col">
@@ -1151,8 +1154,8 @@ body {
           </div>
         </div>
 
-        <!-- LYBUNT alert — full width bottom -->
-        <div class="lybunt-card" style="grid-column:1/4">
+        <!-- LYBUNT alert — full width bottom (fundraising roles only) -->
+        <div class="lybunt-card" id="lybunt-alert" style="grid-column:1/4">
           <div class="lybunt-icon">
             <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round">
               <path d="M8 2v7M8 12v.5"/><circle cx="8" cy="8" r="6.5"/>
@@ -1161,7 +1164,7 @@ body {
           <div>
             <div class="lybunt-title">LYBUNT alert — 47 donors at risk</div>
             <div class="lybunt-text">47 donors gave in the same period last year but haven't given yet in FY2026. Combined last-year value: $62,400. Guru AI recommends a personalized outreach campaign before April 30.</div>
-            <button class="lybunt-btn">
+            <button class="lybunt-btn" onclick="go('atlas-donors-list.html')">
               <svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><circle cx="5" cy="5" r="4"/><path d="M3.5 5l1.5 1.5L8 3"/></svg>
               View 47 LYBUNT donors
             </button>
@@ -2144,6 +2147,10 @@ body {
   };
   var DEV_RIGHT = '<div class="wb-stat"><div class="wb-stat-num gold" id="ytd-num">$1.24M</div><div class="wb-stat-lbl">Raised year-to-date</div></div><div style="width:100%;height:1px;background:rgba(255,255,255,.08);margin:6px 0"></div><div class="wb-stat"><div class="wb-stat-num">78%</div><div class="wb-stat-lbl">of $1.6M annual goal</div></div>';
   var MGO_RIGHT = '<div class="wb-stat"><div class="wb-stat-num gold">$420k</div><div class="wb-stat-lbl">Raised this fiscal year</div></div><div style="width:100%;height:1px;background:rgba(255,255,255,.08);margin:6px 0"></div><div class="wb-stat"><div class="wb-stat-num">70%</div><div class="wb-stat-lbl">of $600k portfolio goal</div></div>';
+  var DBA_RIGHT = '<div class="wb-stat"><div class="wb-stat-num gold">99.2%</div><div class="wb-stat-lbl">Records clean &amp; verified</div></div><div style="width:100%;height:1px;background:rgba(255,255,255,.08);margin:6px 0"></div><div class="wb-stat"><div class="wb-stat-num">42</div><div class="wb-stat-lbl">receipts queued to issue</div></div>';
+  var PARISH_RIGHT = '<div class="wb-stat"><div class="wb-stat-num gold">$142k</div><div class="wb-stat-lbl">St. Michael&rsquo;s raised YTD</div></div><div style="width:100%;height:1px;background:rgba(255,255,255,.08);margin:6px 0"></div><div class="wb-stat"><div class="wb-stat-num">64%</div><div class="wb-stat-lbl">of $220k parish goal</div></div>';
+  var STEW_RIGHT = '<div class="wb-stat"><div class="wb-stat-num gold">312</div><div class="wb-stat-lbl">Acknowledgements sent (30d)</div></div><div style="width:100%;height:1px;background:rgba(255,255,255,.08);margin:6px 0"></div><div class="wb-stat"><div class="wb-stat-num">98%</div><div class="wb-stat-lbl">sent within 48 hours</div></div>';
+  var IT_RIGHT = '<div class="wb-stat"><div class="wb-stat-num gold">48</div><div class="wb-stat-lbl">Active users · 22 parishes</div></div><div style="width:100%;height:1px;background:rgba(255,255,255,.08);margin:6px 0"></div><div class="wb-stat"><div class="wb-stat-num">92%</div><div class="wb-stat-lbl">MFA / 2FA adoption</div></div>';
 
   var ROLES = {
     dev: {
@@ -2184,8 +2191,223 @@ body {
         {text:"<strong>Catherine Walsh</strong> just crossed the $50k capacity threshold in wealth screening — consider moving her to Cultivation.", action:"Open wealth screening →"}
       ],
       titles:{tasks:'My moves due today', pledges:'My pledges to follow up', pipeline:'My portfolio · moves management'},
-      hideOrg:true
+      hideOrg:true,
+      nav:['atlas-campaign-dashboard.html','atlas-reports.html','atlas-users-roles.html','atlas-tags.html','atlas-integrations.html','atlassmarttriggers.html','atlas-sync.html','atlas-location-manage.html'],
+      primaryLabel:'Record gift', primaryUrl:'atlas-gift-entry.html',
+      pipeUrl:'atlas-pipeline.html', pledgesUrl:'atlas-pledges-list.html'
+    },
+    dba: {
+      av:'MS', avColor:'var(--purple)', name:'Maria Santos', role:'Database Administrator',
+      sub:'You have <strong style="color:white">18 gifts to review</strong>, 7 likely duplicates, and 3 batches awaiting sync reconciliation. 42 receipts are queued to issue.',
+      pills:[{icon:'task',hi:true,label:'18 to review'},{icon:'plus',label:'7 duplicates'},{icon:'chart',label:'3 sync exceptions'}],
+      right:DBA_RIGHT,
+      kpis:[
+        {icon:'target',label:'Data quality score',value:'92 / 100',cls:'up',trend:'<span class="trend-up">↑ 4 pts</span><span class="trend-sub">this quarter · goal 95</span>',bar:92,barColor:'var(--green)'},
+        {icon:'clock',label:'Gifts to review',value:'18',cls:'warn',trend:'<span class="trend-sub">NSF · low-confidence OCR · closed fund</span>',bar:40,barColor:'var(--amber)'},
+        {icon:'people',label:'Duplicates to resolve',value:'7',cls:'',trend:'<span class="trend-sub">flagged on import &amp; sync</span>',bar:30,barColor:'var(--rose)'},
+        {icon:'gift',label:'Receipts to issue',value:'42',cls:'',trend:'<span class="trend-sub">queued · batch-ready</span>',bar:66,barColor:'var(--blue)'}
+      ],
+      guruSub:'3 data-quality flags',
+      guru:[
+        {text:"<strong>12 gifts</strong> have low-confidence OCR amounts from cheque scans. Verify before they post.", action:"Open correction center →"},
+        {text:"<strong>3 April batches</strong> haven't reconciled with GiveCentral. Review the sync exceptions.", action:"View sync status →"},
+        {text:"<strong>7 records</strong> look like duplicates of existing donors. Merge to protect giving history.", action:"Review duplicates →"}
+      ],
+      titles:{tasks:'Corrections to review', pledges:'Receipts to issue', pipeline:'Batch posting queue'},
+      hideOrg:true,
+      nav:['atlas-users-roles.html','atlas-integrations.html'],
+      primaryLabel:'Post gift / pledge batch', primaryUrl:'atlas-batch-landing.html',
+      pipeUrl:'atlas-batch-landing.html', pledgesUrl:'atlas-gifts-pledges.html'
+    },
+    parish: {
+      av:'TK', avColor:'var(--green)', name:'Tom Keller', role:'Parish Administrator · St. Michael’s',
+      sub:'St. Michael’s has <strong style="color:white">$4,200 in gifts today</strong>, 2 pledges due this week, and the Spring Festival is 12 days out.',
+      pills:[{icon:'task',hi:true,label:'5 tasks today'},{icon:'plus',label:'2 pledges due'},{icon:'chart',label:'$4.2k today'}],
+      right:PARISH_RIGHT,
+      kpis:[
+        {icon:'gift',label:'Parish gifts today',value:'$4,200',cls:'up',trend:'<span class="trend-up">↑ 15%</span><span class="trend-sub">vs. last Sunday</span>',bar:60,barColor:'var(--green)'},
+        {icon:'clock',label:'Parish pledges due',value:'$8,400',cls:'warn',trend:'<span class="trend-sub">2 installments this week</span>',bar:40,barColor:'var(--amber)'},
+        {icon:'people',label:'Parish donors',value:'486',cls:'',trend:'<span class="trend-up">↑ 12 new</span><span class="trend-sub">this quarter</span>',bar:55,barColor:'var(--blue)'},
+        {icon:'target',label:'Spring Festival',value:'12 days',cls:'',trend:'<span class="trend-sub">86 registered · $6.1k pledged</span>',bar:70,barColor:'var(--purple)'}
+      ],
+      guruSub:'2 parish insights',
+      guru:[
+        {text:"<strong>9 parishioners</strong> gave at last year’s festival but haven’t this year. A reminder could re-engage them.", action:"View these 9 →"},
+        {text:"<strong>The Delgado family’s</strong> pledge completes this month — a thank-you letter is ready to send.", action:"Open communications →"}
+      ],
+      titles:{tasks:'Parish tasks today', pledges:'Parish pledges due', pipeline:'Parish campaigns & events'},
+      hideOrg:true,
+      banner:'recon',
+      hidePrimary:true, hideFilter:true, hideSchedule:true,
+      pipeUrl:'atlas-campaign-dashboard.html', pledgesUrl:'atlas-pledges-list.html'
+    },
+    stew: {
+      av:'GL', avColor:'var(--amber)', name:'Grace Lin', role:'Stewardship Coordinator',
+      sub:'<strong style="color:white">14 first-time donors</strong> need a thank-you, 6 acknowledgements are pending approval, and 3 Smart Triggers fired this morning.',
+      pills:[{icon:'task',hi:true,label:'14 thank-yous'},{icon:'plus',label:'6 pending'},{icon:'chart',label:'3 triggers fired'}],
+      right:STEW_RIGHT,
+      kpis:[
+        {icon:'clock',label:'Acknowledgements pending',value:'6',cls:'warn',trend:'<span class="trend-sub">awaiting approval</span>',bar:35,barColor:'var(--amber)'},
+        {icon:'hand',label:'Thank-yous sent (7d)',value:'84',cls:'up',trend:'<span class="trend-up">98% within 48h</span>',bar:80,barColor:'var(--green)'},
+        {icon:'people',label:'Active segments',value:'12',cls:'',trend:'<span class="trend-sub">4 auto · 8 staff-built</span>',bar:50,barColor:'var(--blue)'},
+        {icon:'chart',label:'Triggers fired (today)',value:'3',cls:'',trend:'<span class="trend-sub">first gift · milestone · lapse</span>',bar:45,barColor:'var(--purple)'}
+      ],
+      guruSub:'3 stewardship nudges',
+      guru:[
+        {text:"<strong>14 first-time donors</strong> gave this week and haven’t been thanked yet. A prompt acknowledgement lifts second-gift rates.", action:"Send thank-yous →"},
+        {text:"<strong>5 donors</strong> hit a giving milestone or anniversary this month. Personal notes are queued.", action:"Review touches →"},
+        {text:"<strong>The “Lapsed 18mo” segment</strong> grew by 22 donors. Time a re-engagement appeal.", action:"Open segment →"}
+      ],
+      titles:{tasks:'Acknowledgements to send', pledges:'Recent communications', pipeline:'Segments & lists'},
+      hideOrg:true,
+      primaryLabel:'New acknowledgement', primaryUrl:'atlas-communications.html',
+      pipeUrl:'atlas-tags.html', pledgesUrl:'atlas-communications.html'
+    },
+    it: {
+      av:'ST', avColor:'var(--navy)', name:'Sam Tran', role:'Diocese IT Administrator',
+      sub:'<strong style="color:white">48 active users</strong> across 22 parishes, 2 pending invites, and all integrations synced. MFA/2FA adoption is at 92%. Last sync completed 14 minutes ago.',
+      pills:[{icon:'task',hi:true,label:'2 pending invites'},{icon:'plus',label:'1 role change'},{icon:'chart',label:'all synced'}],
+      right:IT_RIGHT,
+      kpis:[
+        {icon:'people',label:'Active users',value:'48',cls:'',trend:'<span class="trend-sub">across 22 parishes</span>',bar:70,barColor:'var(--blue)'},
+        {icon:'target',label:'MFA / 2FA adoption',value:'92%',cls:'up',trend:'<span class="trend-sub">44 of 48 · 4 not enrolled</span>',bar:92,barColor:'var(--green)'},
+        {icon:'chart',label:'Integrations',value:'4 synced',cls:'up',trend:'<span class="trend-sub">QuickBooks · GiveCentral · mail · SSO</span>',bar:100,barColor:'var(--green)'},
+        {icon:'clock',label:'Audit log',value:'7 yrs',cls:'',trend:'<span class="trend-sub">immutable retention · view only</span>',bar:100,barColor:'var(--purple)'}
+      ],
+      guruSub:'3 platform flags',
+      guru:[
+        {text:"<strong>2 users</strong> haven’t signed in for 90+ days. Consider suspending to tighten access.", action:"Review users →"},
+        {text:"<strong>The QuickBooks token</strong> expires in 6 days. Re-authorize to avoid a sync gap.", action:"Open integrations →"},
+        {text:"<strong>One custom role</strong> now overlaps a built-in. Consolidate to prevent permission drift.", action:"Review roles →"}
+      ],
+      titles:{tasks:'Recent admin activity', pledges:'Integration health', pipeline:'Roles & users in this tenant'},
+      hideOrg:true,
+      banner:'billing',
+      primaryLabel:'Invite user', primaryUrl:'atlas-users-roles.html',
+      pipeUrl:'atlas-users-roles.html', pledgesUrl:'atlas-integrations.html'
     }
+  };
+
+  // ── Role-specific widget bodies (tasks · pledges · third panel) ──
+  function ti(cls,text,who,lbl,lblCls){ return '<div class="task-item'+(cls?' '+cls:'')+'"><div class="task-check"></div><div class="task-body"><div class="task-text">'+text+'</div><div class="task-meta"><span class="task-donor">'+who+'</span><span class="task-due-label '+lblCls+'">'+lbl+'</span></div></div></div>'; }
+  function pi(av,avbg,avfg,name,camp,amt,due,dbg,dfg){ return '<div class="pledge-item"><div class="pledge-avatar" style="background:'+avbg+';color:'+avfg+'">'+av+'</div><div><div class="pledge-name">'+name+'</div><div class="pledge-campaign">'+camp+'</div></div><div class="pledge-right"><div class="pledge-amt">'+amt+'</div><div class="pledge-due" style="background:'+dbg+';color:'+dfg+'">'+due+'</div></div></div>'; }
+  var RS='display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 2px;border-bottom:1px solid var(--border-soft)';
+  function prow(name,sub,pill,pbg,pfg){ return '<div style="'+RS+'"><div style="min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text)">'+name+'</div><div style="font-size:11.5px;color:var(--text-3);margin-top:2px">'+sub+'</div></div><span style="font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:99px;background:'+pbg+';color:'+pfg+';flex-shrink:0;white-space:nowrap">'+pill+'</span></div>'; }
+  function pbar(name,sub,pct,color){ return '<div style="padding:11px 2px;border-bottom:1px solid var(--border-soft)"><div style="display:flex;justify-content:space-between;gap:10px"><div style="font-size:13px;font-weight:600;color:var(--text)">'+name+'</div><div style="font-size:12px;color:var(--text-2)">'+sub+'</div></div><div style="height:6px;background:var(--surface-2,#F1F5F9);border-radius:99px;margin-top:8px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:99px"></div></div></div>'; }
+  var GL='var(--green-light)',GN='var(--green)',AL='var(--amber-light)',AM='var(--amber)',RL='var(--rose-light)',RO='var(--rose)',BL='var(--blue-light)',BLU='#1D4ED8',PL='var(--purple-light)',PU='var(--purple)';
+  var BQG='display:grid;grid-template-columns:1.7fr .5fr .85fr .95fr .95fr;gap:8px;align-items:center;padding:10px 2px;border-bottom:1px solid var(--border-soft)';
+  function bqhead(){ return '<div style="display:grid;grid-template-columns:1.7fr .5fr .85fr .95fr .95fr;gap:8px;padding:0 2px 8px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3)"><span>Batch</span><span style="text-align:right">Gifts</span><span style="text-align:right">Amount</span><span>Submitted&nbsp;by</span><span>Status</span></div>'; }
+  function bqrow(name,sub,cnt,amt,who,status,sbg,sfg,last){ return '<div style="'+BQG+(last?';border-bottom:none':'')+'"><div style="min-width:0"><div style="font-size:12.5px;font-weight:600;color:var(--text)">'+name+'</div><div style="font-size:11px;color:var(--text-3);margin-top:1px">'+sub+'</div></div><span style="text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">'+cnt+'</span><span style="text-align:right;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums">'+amt+'</span><span style="font-size:11.5px;color:var(--text-2)">'+who+'</span><span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:'+sbg+';color:'+sfg+';white-space:nowrap;justify-self:start">'+status+'</span></div>'; }
+
+  var BODIES = {
+    mgo:{
+      tasks:
+        ti('overdue','Cultivation call — discuss the $25k Cathedral ask','James &amp; Patricia O&#39;Brien','2 days overdue','due-overdue')+
+        ti('due-today','Send proposal — $50k capital gift','Catherine Walsh','Due today','due-today')+
+        ti('due-today','Stewardship touch — no contact in 94 days','Michael &amp; Susan Grant','Due today','due-today')+
+        ti('','Log visit notes from lunch meeting','Dr. Thomas Nguyen','Due soon','due-soon')+
+        ti('','Prep ask packet for board prospect','Elena &amp; Marco Russo','Due soon','due-soon'),
+      pledges:
+        pi('JO','#FCE7F3','#BE185D','James &amp; Patricia O&#39;Brien','Cathedral Capital · Inst. 2 of 3','$8,300','Overdue',RL,RO)+
+        pi('MG','#DBEAFE','#1D4ED8','Michael &amp; Susan Grant','Cathedral Capital · Inst. 1 of 4','$6,250','Due Apr 6',BL,BLU)+
+        pi('CW','#EDE9FE','#7C3AED','Catherine Walsh','Major Gifts · new pledge','$12,500','Due Apr 9',BL,BLU)+
+        pi('TN','#DCFCE7','#15803D','Dr. Thomas Nguyen','Cathedral Capital · Inst. 3 of 3','$5,000','Due Apr 12',BL,BLU),
+      pipeline:
+        prow('James &amp; Patricia O&#39;Brien','Next move: solicitation call · $25k ask','Solicitation',AL,AM)+
+        prow('Catherine Walsh','Next move: proposal sent · $50k','Cultivation',GL,GN)+
+        prow('Michael &amp; Susan Grant','Overdue touch · 94 days since contact','Cultivation',RL,RO)+
+        prow('Dr. Thomas Nguyen','Next move: follow-up visit · $20k','Solicitation',AL,AM)+
+        '<div style="'+RS+';border-bottom:none"><div style="min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text)">Elena &amp; Marco Russo</div><div style="font-size:11.5px;color:var(--text-3);margin-top:2px">Next move: qualify · $10k ask</div></div><span style="font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:99px;background:'+BL+';color:'+BLU+';flex-shrink:0;white-space:nowrap">Identification</span></div>'
+    },
+    dba:{
+      tasks:
+        ti('overdue','NSF reversal — cheque bounced but the gift is still posted','Robert &amp; Claire Hennessy','Reverse needed','due-overdue')+
+        ti('due-today','Low-confidence OCR — amount scans as $1,500 or $7,500','Patricia Kim','Verify today','due-today')+
+        ti('','Gift posted to a closed fund — “Marian Congress 2024”','Anne Reilly','Reassign fund','due-soon')+
+        ti('','Duplicate suspected — merge before it posts','Margaret O&#39;Brien','Review merge','due-soon')+
+        ti('','Reversing entry awaiting your approval','Internal · finance','Approve','due-soon'),
+      pledges:
+        pi('JO','#DCFCE7','#15803D','James &amp; Patricia O&#39;Brien','Cathedral Capital · $25,000','Receipt','Ready',GL,GN)+
+        pi('SF','#DCFCE7','#15803D','The Sullivan Foundation','Cathedral Capital · $7,500','Receipt','Ready',GL,GN)+
+        pi('MF','#DCFCE7','#15803D','Maria &amp; Eduardo Fernandez','Cathedral Capital · $2,500','Receipt','Ready',GL,GN)+
+        pi('TK','#FEF3C7','#D97706','Thomas &amp; Lisa Kowalski','Blessed Trinity · $5,000','Receipt','Hold — address',AL,AM)+
+        pi('+38','var(--surface-2,#F1F5F9)','var(--text-3)','38 more receipts queued','Batch-ready · issue together','','Batch',BL,BLU),
+      pipeline:
+        bqhead()+
+        bqrow('BX-2026-014','April Mail Response','22','$87,400','Daniel Cho','Ready to post',GL,GN)+
+        bqrow('BX-2026-016','Stock transfer · DTC-7755','1','$18,400','M. Santos','Awaiting confirm',AL,AM)+
+        bqrow('BX-2026-017','Lockbox cheque scan','34','$12,900','OCR import','3 need review',AL,AM)+
+        bqrow('BX-2026-015','GiveCentral payouts · Apr','512','$41,250','System · nightly','Reconciled',BL,BLU)+
+        bqrow('BX-2026-013','Recurring charges','1,284','$63,110','System','Posted','var(--surface)','var(--text-3)',true)+
+        '<div style="margin-top:12px;padding:10px 12px;background:var(--green-light);border:1px solid #86EFAC;border-radius:9px;display:flex;gap:9px;align-items:flex-start"><svg viewBox="0 0 14 14" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" style="width:14px;height:14px;flex-shrink:0;margin-top:1px"><circle cx="7" cy="7" r="5.5"/><path d="M4.7 7l1.6 1.6L9.3 5.4"/></svg><div style="font-size:11.5px;color:#14532D;line-height:1.5"><strong>Sync &amp; reconciliation:</strong> 4 of 5 batches reconciled to QuickBooks Fund 4001. <strong>1 batch (BX-2026-017)</strong> has 3 unmatched gifts — resolve before posting. Last sync 14 min ago.</div></div>'
+    },
+    parish:{
+      tasks:
+        ti('due-today','Record Sunday offertory — $2,140 counted','St. Michael&#39;s · plate','Due today','due-today')+
+        ti('due-today','Confirm Spring Festival vendor deposit','Events','Due today','due-today')+
+        ti('overdue','Thank the Delgado family — pledge just completed','Delgado Family','1 day overdue','due-overdue')+
+        ti('','Update parishioner address — returned mail','J. Alvarez','Due soon','due-soon'),
+      pledges:
+        pi('DF','#DCFCE7','#15803D','Delgado Family','Building Fund · final installment','$500','Completes',GL,GN)+
+        pi('NG','#DBEAFE','#1D4ED8','Nguyen Family','CMA 2026 · Installment 2 of 4','$250','Due Apr 6',BL,BLU)+
+        pi('RO','#EDE9FE','#7C3AED','Rossi Family','Building Fund · Year 1 of 3','$1,000','Due Apr 9',BL,BLU),
+      pipeline:
+        pbar('Spring Festival','$6,100 / $10,000 · 86 registered',61,GN)+
+        pbar('Parish Building Fund','$142k / $220k',64,'var(--blue)')+
+        pbar('Lenten Food Drive','Goal met · $3,500',100,GN)
+    },
+    stew:{
+      tasks:
+        ti('due-today','Thank 14 first-time donors (batch acknowledgement)','Auto-segment · new donors','Due today','due-today')+
+        '<div class="task-item due-today" onclick="openAck1771()" style="cursor:pointer"><div class="task-check"></div><div class="task-body"><div class="task-text">Approve acknowledgement letter — $10,000 gift <span style="color:var(--amber);font-weight:600">· IRS Pub 1771 disclosure required</span></div><div class="task-meta"><span class="task-donor">Fitzgerald Family</span><span class="task-due-label due-today">Review &amp; approve</span></div></div></div>'+
+        ti('overdue','Milestone note — 10th year of giving','Margaret Sullivan','2 days overdue','due-overdue')+
+        ti('','Anniversary card — first gift one year ago','David Chen','Due soon','due-soon'),
+      pledges:
+        pi('✉','#DCFCE7','#15803D','Spring appeal','Email · 1,240 recipients','Sent','Delivered',GL,GN)+
+        pi('✉','#DCFCE7','#15803D','Q1 thank-you batch','Email · 312 recipients','Sent','98% open',GL,GN)+
+        pi('✉','#FEF3C7','#D97706','Lapsed re-engagement','Email · 88 recipients','Queued','Scheduled',AL,AM)+
+        pi('✉','#DCFCE7','#15803D','Festival invitation','Email · 540 recipients','Sent','Delivered',GL,GN),
+      pipeline:
+        prow('First-time donors — unthanked','First-ever gift this month','14 donors',AL,AM)+
+        prow('New donors this year','First-ever gift in 2026','134 donors',BL,BLU)+
+        prow('Active recurring givers','Live GiveCentral subscription','286 donors',GL,GN)+
+        prow('Giving milestones this month','Anniversary or lifetime tier','27 donors',PL,PU)+
+        '<div style="'+RS+';border-bottom:none"><div style="min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text)">Major gifts — acknowledgement due</div><div style="font-size:11.5px;color:var(--text-3);margin-top:2px">$5k+ this week · IRS Pub 1771 disclosure required</div></div><span style="font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:99px;background:'+AL+';color:'+AM+';flex-shrink:0;white-space:nowrap">4 donors</span></div>'
+    },
+    it:{
+      tasks:
+        ti('','Invited jamie.morrison@diocese.org as Gift Officer','Sarah Reynolds','Today · 9:14 AM','due-soon')+
+        ti('','Created custom role “Region Coordinator”','Sarah Reynolds','12 min ago','due-soon')+
+        ti('overdue','2 users inactive 90+ days — review their access','System','Action needed','due-overdue')+
+        ti('','SSO configuration updated','System','Yesterday','due-soon'),
+      pledges:
+        pi('QB','#FEF3C7','#D97706','QuickBooks Online','Accounting export · GL sync','','Synced · token 6d',AL,AM)+
+        pi('GC','#DCFCE7','#15803D','GiveCentral','Payment rail · reconciliation','','Synced',GL,GN)+
+        pi('MC','#DCFCE7','#15803D','Mailchimp','Email delivery','','Synced',GL,GN)+
+        pi('SSO','#DCFCE7','#15803D','Okta SSO','Single sign-on','','Synced',GL,GN),
+      pipeline:
+        prow('Development Director','Full access · all parishes','2 users',BL,BLU)+
+        prow('Gift Officer','Own portfolio · no admin','6 users',GL,GN)+
+        prow('Database Administrator','Data, GL, campaigns','3 users',PL,PU)+
+        prow('Parish Administrator','Single-parish scope','22 users',GL,GN)+
+        prow('Stewardship Coordinator','Acknowledgements &amp; segments','2 users',GL,GN)+
+        prow('Diocese IT Admin','Users, roles, integrations','1 user',BL,BLU)+
+        prow('Finance (read + GL)','Reports &amp; reconciliation only','4 users',GL,GN)+
+        '<div style="'+RS+';border-bottom:none"><div style="min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text)">Region Coordinator</div><div style="font-size:11.5px;color:var(--text-3);margin-top:2px">Custom role · multi-parish</div></div><span style="font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:99px;background:'+AL+';color:'+AM+';flex-shrink:0;white-space:nowrap">8 users</span></div>'
+    }
+  };
+
+  var BANNERS = {
+    recon: '<div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:14px;padding:16px 20px;margin-bottom:22px;display:flex;align-items:center;gap:14px">'
+      +'<div style="width:38px;height:38px;border-radius:10px;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M5 8l2 2 4-5"/><circle cx="8" cy="8" r="6.5"/></svg></div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:#14532D">Diocesan Finance Reconciliation <span style="font-size:10.5px;font-weight:700;background:var(--green);color:white;border-radius:99px;padding:2px 9px;margin-left:6px;vertical-align:middle">✓ Synced</span></div>'
+      +'<div style="font-size:12px;color:#166534;margin-top:3px;line-height:1.5">Read-only totals shared with the diocese so they can watch the QuickBooks sync — the parish cannot edit these figures. Last synced <strong>today at 6:02 AM</strong> · $142,380 parish total reconciled to GL 4001.</div></div>'
+      +'<button class="tb-btn tb-ghost" style="flex-shrink:0" onclick="go(\'atlas-sync.html\')">View sync status</button></div>',
+    billing: '<div style="background:linear-gradient(135deg,#EFF6FF,#fff);border:1px solid var(--blue-light);border-radius:14px;padding:16px 20px;margin-bottom:22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap">'
+      +'<div style="display:flex;align-items:center;gap:12px;flex:1;min-width:220px"><div style="width:38px;height:38px;border-radius:10px;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/><path d="M1.5 6.5h13"/></svg></div>'
+      +'<div><div style="font-size:13px;font-weight:700;color:var(--navy)">Atlas subscription — Diocese plan</div><div style="font-size:12px;color:var(--text-3);margin-top:2px">Enterprise · 60 seats (48 in use) · billed annually</div></div></div>'
+      +'<div style="text-align:right"><div style="font-family:\'DM Serif Display\',serif;font-size:20px;color:var(--navy)">$24,000<span style="font-size:12px;color:var(--text-3)">/yr</span></div><div style="font-size:11px;color:var(--text-3)">Renews Jan 1, 2027 · card ending 4242</div></div>'
+      +'<button class="tb-btn tb-ghost" style="flex-shrink:0" onclick="go(\'atlas-integrations.html\')">Manage billing</button></div>'
   };
 
   function pill(p){ return '<div class="wb-pill'+(p.hi?' highlight':'')+'">'+PILL_ICON[p.icon]+p.label+'</div>'; }
@@ -2204,15 +2426,165 @@ body {
     txt('guru-sub', r.guruSub);
     set('guru-insights', r.guru.map(function(g){ return '<div class="guru-insight"><div class="guru-insight-text">'+g.text+'</div><span class="guru-insight-action">'+g.action+'</span></div>'; }).join(''));
     txt('title-tasks', r.titles.tasks); txt('title-pledges', r.titles.pledges); txt('title-pipeline', r.titles.pipeline);
+    var b = BODIES[key];
+    setBody('w-tasks', b&&b.tasks, 'tasks');
+    setBody('w-pledges', b&&b.pledges, 'pledges');
+    setBody('w-pipeline-body', b&&b.pipeline, 'pipeline');
     var org=document.getElementById('gifts-campaigns-row'); if(org) org.style.display = r.hideOrg ? 'none' : '';
+
+    // ── RBAC: show all nav, then hide the ones this role can't access ──
+    document.querySelectorAll('.sidebar .nav-item').forEach(function(a){ a.style.display=''; });
+    (r.nav||[]).forEach(function(href){ document.querySelectorAll('.sidebar .nav-item[href="'+href+'"]').forEach(function(a){ a.style.display='none'; }); });
+
+    // ── Topbar buttons (label + visibility per role) ──
+    var pl=document.getElementById('tb-primary-label'); if(pl) pl.textContent=r.primaryLabel||'Record gift';
+    var pb=document.getElementById('tb-primary'); if(pb) pb.style.display=r.hidePrimary?'none':'';
+    var fb=document.getElementById('tb-filter'); if(fb) fb.style.display=r.hideFilter?'none':'';
+    var sb=document.getElementById('tb-schedule'); if(sb) sb.style.display=r.hideSchedule?'none':'';
+    window.__primaryUrl=r.primaryUrl||'atlas-gift-entry.html';
+    window.__pipeUrl=r.pipeUrl||'atlas-pipeline.html';
+    window.__pledgesUrl=r.pledgesUrl||'atlas-pledges-list.html';
+
+    // ── Pipeline card-action label per role ──
+    var pipeLabels={dev:'Full pipeline',mgo:'Full pipeline',dba:'Open batches',parish:'All campaigns',stew:'All segments',it:'Manage roles'};
+    var apl=document.getElementById('action-pipeline-label'); if(apl) apl.textContent=pipeLabels[key]||'Full pipeline';
+
+    // ── Role-specific banner under the greeting ──
+    var bn=document.getElementById('role-banner'); if(bn) bn.innerHTML=BANNERS[r.banner]||'';
+
+    // ── LYBUNT alert only for fundraising roles (not parish/stewardship/IT) ──
+    var lb=document.getElementById('lybunt-alert'); if(lb) lb.style.display = (['parish','stew','it'].indexOf(key)>-1) ? 'none' : '';
+
     document.body.dataset.role = key;
   }
+  var ORIG={};
+  function snapshot(){ var t=document.getElementById('w-tasks'),p=document.getElementById('w-pledges'),pl=document.getElementById('w-pipeline-body'); ORIG.tasks=t?t.innerHTML:''; ORIG.pledges=p?p.innerHTML:''; ORIG.pipeline=pl?pl.innerHTML:''; }
+  function setBody(id, html, origKey){ var el=document.getElementById(id); if(!el) return; el.innerHTML = (html!=null&&html!==false) ? html : (ORIG[origKey]||''); }
   window.__applyRole = applyRole;
 
-  var cur='dev';
+  // ── Navigation helpers (role-aware) ──
+  window.go = function(u){ if(u) window.location = u; };
+  window.goPledges = function(){ window.location = window.__pledgesUrl || 'atlas-pledges-list.html'; };
+  window.goPipeline = function(){ window.location = window.__pipeUrl || 'atlas-pipeline.html'; };
+  window.primaryAction = function(){ window.location = window.__primaryUrl || 'atlas-gift-entry.html'; };
+
+  var ORDER=['dev','mgo','dba','parish','stew','it'];
+  var idx=0;
+  snapshot();  // capture the default (Dev Director) widget bodies before any swap
   var sw=document.getElementById('role-switch');
-  if(sw) sw.addEventListener('click', function(){ cur = (cur==='dev'?'mgo':'dev'); applyRole(cur); });
-  applyRole('dev');  // initialise to the existing Development Director view
+  if(sw) sw.addEventListener('click', function(){ idx=(idx+1)%ORDER.length; applyRole(ORDER[idx]); });
+  applyRole('dev');  // initialise to the Development Director view
+})();
+</script>
+
+<style id="dash-modal-css">
+  .dm-ov{ position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:100040; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .dm{ background:#fff; border-radius:16px; width:100%; max-width:520px; box-shadow:0 24px 60px rgba(15,23,42,.25); display:flex; flex-direction:column; max-height:88vh; overflow:hidden; font-family:'DM Sans',sans-serif; }
+  .dm.wide{ max-width:600px; }
+  .dm-h{ padding:18px 22px 14px; border-bottom:1px solid var(--border); display:flex; gap:12px; align-items:flex-start; }
+  .dm-ic{ width:38px; height:38px; border-radius:10px; background:var(--blue-light); color:var(--blue); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .dm-ic svg{ width:19px; height:19px; }
+  .dm-tt{ font-family:'DM Serif Display',serif; font-size:19px; color:var(--navy); }
+  .dm-sb{ font-size:12px; color:var(--text-3); margin-top:3px; }
+  .dm-x{ margin-left:auto; width:28px; height:28px; border-radius:8px; border:1px solid var(--border); background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:15px; color:var(--text-2); }
+  .dm-bd{ padding:18px 22px; overflow-y:auto; }
+  .dm-ft{ padding:14px 22px; border-top:1px solid var(--border); background:var(--surface); display:flex; gap:8px; justify-content:flex-end; align-items:center; }
+  .dm-ft .l{ margin-right:auto; font-size:12px; color:var(--text-3); }
+  .dm-fld{ width:100%; font-size:13px; font-family:'DM Sans',sans-serif; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:#fff; color:var(--text); }
+  .dm-lbl{ display:block; font-size:11px; font-weight:600; color:var(--text-2); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+  .dm-row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+  .dm-btn{ font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; padding:9px 16px; border-radius:9px; cursor:pointer; border:1px solid transparent; }
+  .dm-ghost{ background:#fff; border-color:var(--border); color:var(--text-2); } .dm-primary{ background:var(--blue); color:#fff; }
+  .dm-radio{ display:flex; gap:10px; align-items:flex-start; padding:11px 13px; border:1px solid var(--border); border-radius:9px; margin-bottom:8px; cursor:pointer; font-size:13px; }
+  .dm-radio.on{ border-color:var(--blue); background:var(--blue-pale); }
+  #dash-toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:#0F172A; color:#fff; padding:12px 18px; border-radius:10px; box-shadow:0 8px 24px rgba(15,23,42,.2); font-size:13px; font-family:'DM Sans',sans-serif; z-index:100050; opacity:0; transition:opacity .2s,transform .2s; pointer-events:none; max-width:460px; }
+  #dash-toast.show{ opacity:1; transform:translateX(-50%); }
+</style>
+<div id="dash-toast"></div>
+<script id="dash-controller">
+(function(){
+  var toastEl=document.getElementById('dash-toast'); var tmr;
+  window.dashToast=function(m){ if(!toastEl)return; toastEl.textContent=m; toastEl.classList.add('show'); clearTimeout(tmr); tmr=setTimeout(function(){ toastEl.classList.remove('show'); },3000); };
+  function modal(html,wide){ var ov=document.createElement('div'); ov.className='dm-ov'; ov.innerHTML='<div class="dm'+(wide?' wide':'')+'">'+html+'</div>'; ov.addEventListener('click',function(e){ if(e.target===ov) ov.remove(); }); document.body.appendChild(ov); return ov; }
+  window.__dmClose=function(el){ var ov=el.closest('.dm-ov'); if(ov) ov.remove(); };
+
+  window.openFilterView=function(){
+    var ov=modal(
+      '<div class="dm-h"><div class="dm-ic"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h14M4.5 9h9M7 14h4"/></svg></div>'
+      +'<div><div class="dm-tt">Filter dashboard</div><div class="dm-sb">Scope every card to a slice — date range, campaign, fund, or officer.</div></div>'
+      +'<button class="dm-x" onclick="__dmClose(this)">&times;</button></div>'
+      +'<div class="dm-bd">'
+        +'<div class="dm-row2"><div><label class="dm-lbl">Date range</label><select class="dm-fld" id="fv-date"><option>This fiscal year</option><option>This month</option><option>This quarter</option><option>Last 30 days</option><option>Custom…</option></select></div>'
+        +'<div><label class="dm-lbl">Campaign</label><select class="dm-fld" id="fv-camp"><option>All campaigns</option><option>Catholic Ministry Appeal 2026</option><option>Cathedral Capital Fund</option><option>Marian Congress 2026</option></select></div></div>'
+        +'<div class="dm-row2"><div><label class="dm-lbl">Fund / GL</label><select class="dm-fld" id="fv-fund"><option>All funds</option><option>GL 4001 · Cathedral Restoration</option><option>GL 4002 · Music Ministry</option><option>GL 4100 · Annual Fund</option></select></div>'
+        +'<div><label class="dm-lbl">Solicitor</label><select class="dm-fld" id="fv-sol"><option>All officers</option><option>Sarah Reynolds</option><option>Daniel Cho</option><option>Bridget McCarthy</option></select></div></div>'
+        +'<div><label class="dm-lbl">Status</label><select class="dm-fld" id="fv-status"><option>All statuses</option><option>Active only</option><option>Overdue only</option><option>Needs review</option></select></div>'
+      +'</div>'
+      +'<div class="dm-ft"><span class="l" id="fv-note">No filters applied</span><button class="dm-btn dm-ghost" onclick="__fvReset(this)">Reset</button><button class="dm-btn dm-primary" onclick="__fvApply(this)">Apply filters</button></div>'
+    );
+  };
+  window.__fvReset=function(btn){ var ov=btn.closest('.dm-ov'); ['fv-date','fv-camp','fv-fund','fv-sol','fv-status'].forEach(function(id){ var s=ov.querySelector('#'+id); if(s) s.selectedIndex=0; }); ov.querySelector('#fv-note').textContent='No filters applied'; };
+  window.__fvApply=function(btn){
+    var ov=btn.closest('.dm-ov');
+    var parts=[]; ['fv-date','fv-camp','fv-fund','fv-sol','fv-status'].forEach(function(id){ var s=ov.querySelector('#'+id); if(s && s.selectedIndex>0) parts.push(s.value); });
+    ov.remove();
+    dashToast(parts.length ? 'Dashboard filtered: '+parts.join(' · ') : 'Filters cleared · showing everything');
+  };
+
+  window.openSchedule=function(){
+    var ov=modal(
+      '<div class="dm-h"><div class="dm-ic"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="3.5" width="13" height="12" rx="1.5"/><path d="M2.5 7h13M6 2v3M12 2v3"/></svg></div>'
+      +'<div><div class="dm-tt">Schedule this dashboard</div><div class="dm-sb">Get a recurring snapshot emailed to you or your team.</div></div>'
+      +'<button class="dm-x" onclick="__dmClose(this)">&times;</button></div>'
+      +'<div class="dm-bd"><div class="dm-row2"><div><label class="dm-lbl">Frequency</label><select class="dm-fld" id="sc-freq"><option>Every Monday</option><option>Daily · 8 AM</option><option>1st of the month</option><option>End of quarter</option></select></div>'
+      +'<div><label class="dm-lbl">Format</label><select class="dm-fld" id="sc-fmt"><option>PDF summary</option><option>CSV export</option><option>Email digest</option></select></div></div>'
+      +'<div><label class="dm-lbl">Send to</label><input class="dm-fld" id="sc-to" value="me + development team"></div></div>'
+      +'<div class="dm-ft"><button class="dm-btn dm-ghost" onclick="__dmClose(this)">Cancel</button><button class="dm-btn dm-primary" onclick="__scSave(this)">Schedule</button></div>'
+    );
+  };
+  window.__scSave=function(btn){ var ov=btn.closest('.dm-ov'); var f=ov.querySelector('#sc-freq').value; ov.remove(); dashToast('Scheduled · '+f+' · delivered to your inbox'); };
+
+  window.openAck1771=function(){
+    var ov=modal(
+      '<div class="dm-h"><div class="dm-ic" style="background:var(--amber-light);color:var(--amber)"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2.5" width="12" height="13" rx="1.5"/><path d="M6 6h6M6 9h6M6 12h4"/></svg></div>'
+      +'<div><div class="dm-tt">Approve acknowledgement — $10,000 gift</div><div class="dm-sb">Fitzgerald Family · Cathedral Capital Fund · received Apr 2</div></div>'
+      +'<button class="dm-x" onclick="__dmClose(this)">&times;</button></div>'
+      +'<div class="dm-bd">'
+        +'<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:12px 14px;font-size:12px;color:#92400E;line-height:1.55;margin-bottom:14px"><strong>IRS Publication 1771 — written disclosure required.</strong> Gifts of $250+ need a contemporaneous written acknowledgement that states whether the donor received any goods or services in exchange, and if so their fair-market value. Only the amount above that value is tax-deductible.</div>'
+        +'<label class="dm-lbl">Were goods or services provided in exchange?</label>'
+        +'<div class="dm-radio on" data-v="none" onclick="__ackPick(this)"><input type="radio" name="qpq" checked><div><div style="font-weight:600">No goods or services were provided</div><div style="font-size:11.5px;color:var(--text-3)">The full $10,000 is tax-deductible. Letter states this explicitly.</div></div></div>'
+        +'<div class="dm-radio" data-v="some" onclick="__ackPick(this)"><input type="radio" name="qpq"><div style="flex:1"><div style="font-weight:600">Goods/services were provided (e.g. gala seat, gift)</div><div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px">Enter the fair-market value — only the excess is deductible.</div><input class="dm-fld" id="ack-fmv" placeholder="$ fair-market value" disabled></div></div>'
+        +'<div id="ack-preview" style="margin-top:14px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--text-2);line-height:1.6"></div>'
+      +'</div>'
+      +'<div class="dm-ft"><button class="dm-btn dm-ghost" onclick="__dmClose(this)">Cancel</button><button class="dm-btn dm-primary" onclick="__ackApprove(this)">Approve &amp; send</button></div>'
+    );
+    __ackRender(ov);
+  };
+  window.__ackPick=function(el){
+    var ov=el.closest('.dm-ov');
+    ov.querySelectorAll('.dm-radio').forEach(function(r){ r.classList.remove('on'); r.querySelector('input').checked=false; });
+    el.classList.add('on'); el.querySelector('input').checked=true;
+    var fmv=ov.querySelector('#ack-fmv'); if(fmv) fmv.disabled = el.dataset.v!=='some';
+    if(fmv && !fmv.disabled){ fmv.oninput=function(){ __ackRender(ov); }; }
+    __ackRender(ov);
+  };
+  function __ackRender(ov){
+    var sel=ov.querySelector('.dm-radio.on'); var v=sel?sel.dataset.v:'none';
+    var pv=ov.querySelector('#ack-preview'); if(!pv) return;
+    if(v==='none'){
+      pv.innerHTML='<strong>Letter text:</strong> “Thank you for your contribution of <strong>$10,000.00</strong>. <em>No goods or services were provided in exchange for this contribution.</em> This letter serves as your receipt for tax purposes.”';
+    } else {
+      var fmv=(ov.querySelector('#ack-fmv').value||'').replace(/[^0-9.]/g,''); var f=parseFloat(fmv)||0;
+      var ded=(10000-f);
+      pv.innerHTML='<strong>Letter text:</strong> “Thank you for your contribution of <strong>$10,000.00</strong>. In exchange you received goods or services with an estimated fair-market value of <strong>$'+f.toLocaleString()+'</strong>. The tax-deductible portion of your gift is <strong>$'+(ded<0?0:ded).toLocaleString()+'</strong>.”';
+    }
+  }
+  window.__ackApprove=function(btn){
+    var ov=btn.closest('.dm-ov'); var sel=ov.querySelector('.dm-radio.on'); var v=sel?sel.dataset.v:'none';
+    if(v==='some'){ var f=parseFloat((ov.querySelector('#ack-fmv').value||'').replace(/[^0-9.]/g,'')); if(!f){ dashToast('Enter the fair-market value before approving'); return; } }
+    ov.remove();
+    dashToast('Acknowledgement approved · IRS Pub 1771 disclosure included · sending to Fitzgerald Family');
+  };
 })();
 </script>
 
@@ -2273,6 +2645,31 @@ body {
   window.alert=function(m){ atlasAlert('Atlas', String(m==null?'':m)); };
   var ov=el('ax-ov'); if(ov) ov.addEventListener('click',function(e){ if(e.target===this) close(); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
+</script>
+
+<script id="kpi-tile-nav">
+(function(){
+  // KPI tiles are clickable — route to the relevant screen by tile type.
+  // Delegated on document so it survives the per-role re-render of #kpi-row.
+  function go(u){ window.location = u; }
+  document.addEventListener('click', function(e){
+    var card = e.target.closest && e.target.closest('#kpi-row .kpi-card');
+    if(!card) return;
+    var lbl = ((card.querySelector('.kpi-label')||{}).textContent||'').toLowerCase();
+    if(/mfa|\buser|audit/.test(lbl))               return go('atlas-users-roles.html');
+    if(/integration/.test(lbl))                     return go('atlas-integrations.html');
+    if(/trigger/.test(lbl))                         return go('atlassmarttriggers.html');
+    if(/segment/.test(lbl))                         return go('atlas-tags.html');
+    if(/acknowledg|thank/.test(lbl))                return go('atlas-communications.html');
+    if(/festival|event/.test(lbl))                  return go('atlas-events-dashboard.html');
+    if(/moves due/.test(lbl))                       return go('atlas-tasks.html');
+    if(/pipeline|portfolio|ask|prospect/.test(lbl)) return go('atlas-pipeline.html');
+    if(/donor/.test(lbl))                           return go('atlas-donors-list.html');
+    if(/sync/.test(lbl))                            return go('atlas-sync.html');
+    if(/gift|pledge|receipt|review|duplicate|quality/.test(lbl)) return go('atlas-gifts-pledges.html');
+    go('atlas-reports.html');
+  });
 })();
 </script>
 
