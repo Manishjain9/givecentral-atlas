@@ -936,9 +936,9 @@ body {
         <div class="type-fields" data-tf="Individual">
           <div class="section-h">Identity</div>
           <div class="row3">
-            <div><span class="lbl">First name<span class="req">*</span></span><input class="fld" placeholder="e.g. Margaret" value="Catherine"></div>
+            <div><span class="lbl">First name<span class="req">*</span></span><input class="fld" id="ind-first" placeholder="e.g. Margaret" value="Catherine"></div>
             <div><span class="lbl">Middle / preferred</span><input class="fld" placeholder="optional"></div>
-            <div><span class="lbl">Last name<span class="req">*</span></span><input class="fld" placeholder="e.g. O'Brien" value="Romano"></div>
+            <div><span class="lbl">Last name<span class="req">*</span></span><input class="fld" id="ind-last" placeholder="e.g. O'Brien" value="Romano"></div>
           </div>
           <div class="row3 mt-12" style="margin-top:12px">
             <div>
@@ -981,12 +981,15 @@ body {
             </div>
             <div>
               <span class="lbl">Linked household</span>
-              <select class="fld">
-                <option selected>— Not in a household</option>
-                <option>Sullivan Family Household</option>
-                <option>Smith Family Household</option>
-                <option>+ Create new household</option>
-              </select>
+              <div class="hhc" id="hhc">
+                <div class="hhc-input" id="hhc-inputwrap">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+                  <input id="hhc-search" placeholder="Search name, member, address, or ID…" autocomplete="off">
+                  <span class="hhc-clear" id="hhc-clear">×</span>
+                </div>
+                <div class="hhc-selected" id="hhc-selected" style="display:none"></div>
+                <div class="hhc-panel" id="hhc-panel"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -1251,15 +1254,19 @@ body {
             <span class="dnc-toggle"><span class="cb"></span> Do not mail</span>
             <button class="x-btn" disabled style="opacity:.3">×</button>
           </div>
-          <input class="fld" placeholder="Street address" value="412 Wendover Drive" style="margin-bottom:10px">
-          <div class="row3" style="grid-template-columns:1.5fr 1fr 1fr;">
-            <input class="fld" placeholder="City" value="Albany">
-            <select class="fld"><option>State</option><option selected>NY</option><option>CT</option><option>NJ</option></select>
-            <input class="fld" placeholder="ZIP" value="12203">
+          <div class="adr-ac">
+            <input class="fld adr-street" placeholder="Start typing a street, city, or ZIP…" value="412 Wendover Drive" autocomplete="off">
+            <div class="adr-panel"></div>
           </div>
+          <div class="row3" style="grid-template-columns:1.5fr 1fr 1fr;">
+            <input class="fld adr-city" placeholder="City" value="Albany">
+            <select class="fld adr-state"><option>State</option><option selected>NY</option><option>CT</option><option>NJ</option><option>MA</option><option>VT</option></select>
+            <input class="fld adr-zip" placeholder="ZIP" value="12203">
+          </div>
+          <div class="adr-dedupe"></div>
         </div>
 
-        <div class="add-row">
+        <div class="add-row" id="adr-add">
           <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg>
           Add another address
         </div>
@@ -1620,7 +1627,7 @@ body {
           <div class="left" id="dup-foot-status"></div>
           <button class="btn btn-ghost" data-go="4">← Back</button>
           <button class="btn btn-ghost" onclick="alert('Saved as draft')">Save draft &amp; exit</button>
-          <button class="btn btn-primary" id="dup-create-btn" onclick="alert('Constituent created · ID #C-018472 · Catherine Romano added to St. Mary\'s Cathedral'); window.location='atlas-donor-360.html'">
+          <button class="btn btn-primary" id="dup-create-btn" onclick="atlasConfirm({icon:'success',title:'Constituent created',message:'ID #C-018472 · Catherine Romano added to St. Mary\'s Cathedral',confirmText:'View donor',cancelText:'Stay here',onConfirm:function(){window.location='atlas-donor-360.html';}})">
             <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M3 7l3 3 5-6"/></svg>
             Create constituent
           </button>
@@ -2870,6 +2877,372 @@ body {
   window.alert=function(m){ atlasAlert('Atlas', String(m==null?'':m)); };
   var ov=el('ax-ov'); if(ov) ov.addEventListener('click',function(e){ if(e.target===this) close(); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
+</script>
+
+<style id="hhc-css">
+  .hhc{ position:relative; }
+  .hhc-input{ display:flex; align-items:center; gap:8px; border:1px solid var(--border); border-radius:8px; padding:9px 12px; background:#fff; cursor:text; }
+  .hhc-input.focus{ border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.10); }
+  .hhc-input svg{ width:14px; height:14px; color:var(--text-3); flex-shrink:0; }
+  .hhc-input input{ border:none; outline:none; background:none; flex:1; font-family:inherit; font-size:13px; color:var(--text); min-width:0; }
+  .hhc-clear{ cursor:pointer; color:var(--text-3); font-size:16px; line-height:1; display:none; }
+  .hhc-panel{ position:absolute; z-index:60; left:0; right:0; top:calc(100% + 6px); background:#fff; border:1px solid var(--border); border-radius:11px; box-shadow:0 16px 40px rgba(15,23,42,.16); max-height:340px; overflow:auto; display:none; padding:6px; }
+  .hhc-panel.open{ display:block; }
+  .hhc-head{ font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); padding:8px 10px 4px; }
+  .hhc-create{ display:flex; gap:10px; align-items:center; padding:9px 10px; border-radius:8px; cursor:pointer; color:var(--blue); font-weight:600; font-size:13px; border-bottom:1px solid var(--border-soft); margin-bottom:4px; }
+  .hhc-create:hover, .hhc-create.active{ background:var(--blue-pale); }
+  .hhc-create .plus{ width:26px; height:26px; border-radius:7px; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+  .hhc-create .sub{ font-weight:400; font-size:11px; color:var(--text-3); margin-top:1px; }
+  .hhc-row{ display:flex; gap:10px; align-items:flex-start; padding:9px 10px; border-radius:8px; cursor:pointer; }
+  .hhc-row:hover, .hhc-row.active{ background:var(--blue-pale); }
+  .hhc-av{ width:30px; height:30px; border-radius:8px; background:var(--surface); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--text-2); flex-shrink:0; margin-top:1px; }
+  .hhc-main{ flex:1; min-width:0; }
+  .hhc-nm{ font-size:13px; font-weight:600; color:var(--navy); }
+  .hhc-nm mark{ background:#FEF3C7; color:inherit; border-radius:2px; padding:0 1px; }
+  .hhc-mem{ font-size:11.5px; color:var(--text-2); margin-top:1px; }
+  .hhc-meta{ font-size:11px; color:var(--text-3); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hhc-meta .id{ font-family:monospace; }
+  .hhc-badge{ font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:1px 6px; border-radius:20px; margin-left:6px; vertical-align:middle; }
+  .hhc-badge.recent{ background:var(--blue-light); color:var(--blue); }
+  .hhc-badge.active{ background:var(--green-light); color:var(--green); }
+  .hhc-foot{ font-size:11px; color:var(--text-3); padding:8px 10px 4px; border-top:1px solid var(--border-soft); margin-top:4px; }
+  .hhc-warn{ font-size:11px; color:var(--gold); background:#FEF3C7; border-radius:7px; padding:6px 10px; margin:2px 4px 6px; display:flex; gap:6px; align-items:flex-start; }
+  .hhc-warn svg{ width:12px; height:12px; flex-shrink:0; margin-top:1px; }
+  .hhc-selected{ display:flex; gap:10px; align-items:center; border:1px solid var(--blue-light); background:var(--blue-pale); border-radius:9px; padding:9px 12px; }
+  .hhc-selected .x{ margin-left:auto; cursor:pointer; color:var(--text-3); font-size:16px; line-height:1; flex-shrink:0; }
+  .hhc-selected.creating{ display:block; padding:11px 13px; }
+  .hhc-selected.creating .cc-top{ display:flex; align-items:center; gap:8px; margin-bottom:9px; }
+  .hhc-selected.creating .cc-ic{ width:22px; height:22px; border-radius:6px; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+  .hhc-selected.creating .cc-t{ font-size:13px; font-weight:600; color:var(--navy); }
+  .hhc-selected.creating .cc-note{ font-size:11px; color:var(--text-3); margin-top:6px; line-height:1.45; }
+  .hhc-selected.creating .fld{ padding:8px 11px; font-size:13px; }
+</style>
+<script id="hhc-js">
+(function(){
+  var HH = [
+    {id:'HH-04821', name:"O'Brien Household", members:"Robert & Susan O'Brien", addr:"142 Elm St, Albany NY 12203", parish:"St. Mary's", active:true, recent:true},
+    {id:'HH-07734', name:"O'Brien Household", members:"Kevin & Anne O'Brien", addr:"9 Maple Ave, Troy NY 12180", parish:"St. Anthony's"},
+    {id:'HH-09912', name:"O'Brien Household", members:"Margaret O'Brien", addr:"55 Cathedral Pl, Albany NY 12202", parish:"Cathedral", active:true},
+    {id:'HH-03310', name:"Romano Household", members:"Catherine & Marco Romano", addr:"18 Birch Ln, Albany NY 12208", parish:"St. Mary's", recent:true},
+    {id:'HH-06621', name:"Romano Household", members:"Elena Romano", addr:"77 Pine St, Schenectady NY 12305", parish:"St. John's"},
+    {id:'HH-01120', name:"Sullivan Family Household", members:"James & Patricia Sullivan +2", addr:"210 Washington Ave, Albany NY 12203", parish:"Cathedral", active:true},
+    {id:'HH-02245', name:"Smith Household", members:"John & Mary Smith", addr:"5 Oak St, Albany NY 12204", parish:"St. Mary's"},
+    {id:'HH-02246', name:"Smith Household", members:"David Smith", addr:"88 Lark St, Albany NY 12210", parish:"St. Anthony's"},
+    {id:'HH-05580', name:"Lin Household", members:"Robert & Susan Lin", addr:"142 Elm St, Albany NY 12203", parish:"St. Mary's", active:true, recent:true},
+    {id:'HH-08123', name:"Nguyen Household", members:"Patricia Nguyen", addr:"30 Delaware Ave, Delmar NY 12054", parish:"St. Thomas"},
+    {id:'HH-04102', name:"Delaney Household", members:"The Delaney Family +3", addr:"12 Foundation Rd, Albany NY 12205", parish:"Cathedral", active:true},
+    {id:'HH-07001', name:"Doyle Household", members:"Kevin & Anne Doyle", addr:"64 Willow Way, Albany NY 12203", parish:"St. Mary's"},
+    {id:'HH-03390', name:"Fitzgerald Household", members:"The Fitzgerald Family", addr:"9 Estate Dr, Loudonville NY 12211", parish:"Cathedral", active:true},
+    {id:'HH-06740', name:"Kowalski Household", members:"Thomas & Lisa Kowalski", addr:"41 Grove St, Albany NY 12206", parish:"Blessed Trinity"},
+    {id:'HH-09088', name:"Riccardi Household", members:"Anthony Riccardi", addr:"7 Vista Ct, Albany NY 12203", parish:"St. Mary's"},
+    {id:'HH-01777', name:"Whelan Household", members:"George Whelan", addr:"23 Chapel St, Cohoes NY 12047", parish:"St. Agnes"}
+  ];
+  var TOTAL = 150482; // households in the file (for realistic count copy)
+  var wrap=document.getElementById('hhc-inputwrap'), input=document.getElementById('hhc-search'),
+      clr=document.getElementById('hhc-clear'), panel=document.getElementById('hhc-panel'),
+      selEl=document.getElementById('hhc-selected');
+  if(!wrap||!input||!panel) return;
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function initials(n){ return (n.replace(/ Household| Family/i,'').trim().slice(0,2)||'HH').toUpperCase(); }
+  function lastName(){ var e=document.getElementById('ind-last'); return e?e.value.trim():''; }
+  function firstName(){ var e=document.getElementById('ind-first'); return e?e.value.trim():''; }
+  function hl(text,q){ if(!q) return esc(text); var i=text.toLowerCase().indexOf(q.toLowerCase()); if(i<0) return esc(text); return esc(text.slice(0,i))+'<mark>'+esc(text.slice(i,i+q.length))+'</mark>'+esc(text.slice(i+q.length)); }
+  function badges(h){ var b=''; if(h.recent) b+='<span class="hhc-badge recent">Recent</span>'; if(h.active) b+='<span class="hhc-badge active">Active donor</span>'; return b; }
+
+  function score(h,q){
+    var s=0, n=h.name.toLowerCase(), blob=(h.name+' '+h.members+' '+h.addr+' '+h.id+' '+h.parish).toLowerCase();
+    if(blob.indexOf(q)===-1) return -1;
+    if(n.indexOf(q)===0) s+=100; else if(n.indexOf(q)>-1) s+=60;
+    if(h.members.toLowerCase().indexOf(q)>-1) s+=40;
+    if(h.addr.toLowerCase().indexOf(q)>-1) s+=30;
+    if(h.id.toLowerCase().indexOf(q)>-1) s+=90;
+    var ln=lastName().toLowerCase(); if(ln && (n.indexOf(ln)>-1||h.members.toLowerCase().indexOf(ln)>-1)) s+=15;
+    if(h.recent) s+=6; if(h.active) s+=4;
+    return s;
+  }
+  function rowHTML(h,q,idx){
+    var dupName = HH.filter(function(x){return x.name===h.name;}).length>1;
+    return '<div class="hhc-row" data-idx="'+idx+'" data-id="'+h.id+'">'
+      +'<div class="hhc-av">'+initials(h.name)+'</div>'
+      +'<div class="hhc-main"><div class="hhc-nm">'+hl(h.name,q)+badges(h)+'</div>'
+      +'<div class="hhc-mem">'+hl(h.members,q)+'</div>'
+      +'<div class="hhc-meta">'+hl(h.addr,q)+' · '+esc(h.parish)+' · <span class="id">'+hl(h.id,q)+'</span></div></div></div>';
+  }
+  function createHTML(){
+    var who=(firstName()+' '+lastName()).trim();
+    return '<div class="hhc-create" data-create="1"><div class="plus">+</div><div>Create new household'
+      +'<div class="sub">'+(who?'Start a new household for '+esc(who):'Start a fresh household')+'</div></div></div>';
+  }
+  var flat=[]; // navigable items in current panel: {type, id}
+  function render(q){
+    q=(q||'').trim().toLowerCase(); flat=[];
+    var html = createHTML(); flat.push({create:true});
+    if(!q){
+      // Browse mode: suggestions (same last name) first, then the full list — so you can scroll without typing
+      var ln=lastName().toLowerCase();
+      var sug = HH.filter(function(h){ return ln && (h.name.toLowerCase().indexOf(ln)>-1 || h.members.toLowerCase().indexOf(ln)>-1); });
+      if(sug.length){
+        html += '<div class="hhc-head">Possible match for “'+esc(lastName())+'”</div>';
+        sug.forEach(function(h){ html+=rowHTML(h,'',flat.length); flat.push({id:h.id}); });
+      }
+      var rest = HH.filter(function(h){ return sug.indexOf(h)===-1; }).slice().sort(function(a,b){
+        var ra=(a.recent?0:1), rb=(b.recent?0:1); if(ra!==rb) return ra-rb;   // recents float up
+        return a.name.localeCompare(b.name);                                  // then A–Z
+      });
+      html += '<div class="hhc-head">'+(sug.length?'All households':'Browse households · A–Z')+'</div>';
+      rest.forEach(function(h){ html+=rowHTML(h,'',flat.length); flat.push({id:h.id}); });
+      html += '<div class="hhc-foot">Showing '+(sug.length+rest.length)+' of '+TOTAL.toLocaleString()+' · type to search by name, member, address, or ID</div>';
+      panel.innerHTML=html; return;
+    }
+    var results = HH.map(function(h){ return {h:h,s:score(h,q)}; }).filter(function(r){return r.s>=0;}).sort(function(a,b){return b.s-a.s;});
+    // same-name collision warning
+    var names={}; results.forEach(function(r){ names[r.h.name]=(names[r.h.name]||0)+1; });
+    var dup = Object.keys(names).filter(function(k){return names[k]>1;});
+    if(dup.length){ html+='<div class="hhc-warn"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1.5L11 10.5H1zM6 5v2.5M6 9v.3"/></svg><div>'+dup.length+' name'+(dup.length>1?'s have':' has')+' multiple households — check the <strong>address</strong> and <strong>ID</strong> to pick the right one.</div></div>'; }
+    if(!results.length){
+      html+='<div class="hhc-foot" style="border-top:none">No households match “'+esc(q)+'”. Use “Create new household” above.</div>';
+      panel.innerHTML=html; return;
+    }
+    var shown=results.slice(0,8);
+    shown.forEach(function(r){ html+=rowHTML(r.h,q,flat.length); flat.push({id:r.h.id}); });
+    html+='<div class="hhc-foot">Showing '+shown.length+' of '+results.length+' match'+(results.length!==1?'es':'')+(results.length>8?' · keep typing to narrow':'')+'</div>';
+    panel.innerHTML=html;
+  }
+  function open(){ render(input.value); panel.classList.add('open'); wrap.classList.add('focus'); }
+  function close(){ panel.classList.remove('open'); wrap.classList.remove('focus'); }
+  function selectHH(h){
+    selEl.innerHTML='<div class="hhc-av">'+initials(h.name)+'</div><div class="hhc-main"><div class="hhc-nm">'+esc(h.name)+'</div><div class="hhc-mem">'+esc(h.members)+'</div><div class="hhc-meta">'+esc(h.addr)+' · '+esc(h.parish)+' · <span class="id">'+esc(h.id)+'</span></div></div><span class="x" id="hhc-x" title="Change">×</span>';
+    selEl.className='hhc-selected'; selEl.style.display='flex'; wrap.style.display='none'; close();
+    document.getElementById('hhc-x').onclick=function(){ selEl.style.display='none'; wrap.style.display='flex'; input.value=''; clr.style.display='none'; input.focus(); open(); };
+  }
+  function selectCreate(){
+    var who=(firstName()+' '+lastName()).trim();
+    var suggest = lastName() ? lastName()+' Household' : '';
+    selEl.className='hhc-selected creating';
+    selEl.innerHTML='<div class="cc-top"><span class="cc-ic">+</span><span class="cc-t">New household</span><span class="x" id="hhc-x" title="Cancel">×</span></div>'
+      +'<label class="lbl" style="font-size:10px;margin:0 0 4px">Household name<span class="req">*</span></label>'
+      +'<input id="hhc-newname" class="fld" placeholder="e.g. '+(esc(suggest)||'O’Brien Household')+'" value="'+esc(suggest)+'">'
+      +'<div class="cc-note">'+(who?'First member: <strong>'+esc(who)+'</strong> · ':'')+'created when you save this constituent</div>';
+    selEl.style.display='block'; wrap.style.display='none'; close();
+    var nn=document.getElementById('hhc-newname'); if(nn){ setTimeout(function(){ nn.focus(); nn.select(); },20); }
+    document.getElementById('hhc-x').onclick=function(){ selEl.style.display='none'; selEl.className='hhc-selected'; wrap.style.display='flex'; input.value=''; clr.style.display='none'; input.focus(); open(); };
+  }
+  // events
+  wrap.addEventListener('click', function(){ input.focus(); });
+  input.addEventListener('focus', open);
+  input.addEventListener('input', function(){ clr.style.display=input.value?'inline':'none'; render(input.value); panel.classList.add('open'); });
+  clr.addEventListener('click', function(e){ e.stopPropagation(); input.value=''; clr.style.display='none'; input.focus(); render(''); });
+  panel.addEventListener('mousedown', function(e){ e.preventDefault(); }); // keep focus
+  panel.addEventListener('click', function(e){
+    var c=e.target.closest('.hhc-create'); if(c){ selectCreate(); return; }
+    var r=e.target.closest('.hhc-row'); if(r){ var h=HH.filter(function(x){return x.id===r.dataset.id;})[0]; if(h) selectHH(h); }
+  });
+  // keyboard nav
+  var active=-1;
+  input.addEventListener('keydown', function(e){
+    var items=panel.querySelectorAll('.hhc-create,.hhc-row');
+    if(e.key==='ArrowDown'){ e.preventDefault(); active=Math.min(active+1,items.length-1); }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); active=Math.max(active-1,0); }
+    else if(e.key==='Enter'){ e.preventDefault(); if(items[active]) items[active].click(); return; }
+    else if(e.key==='Escape'){ close(); return; }
+    else return;
+    items.forEach(function(it,i){ it.classList.toggle('active', i===active); if(i===active) it.scrollIntoView({block:'nearest'}); });
+  });
+  document.addEventListener('click', function(e){ if(!document.getElementById('hhc').contains(e.target)) close(); });
+  // re-render suggestions if the last name changes while empty
+  var ln=document.getElementById('ind-last'); if(ln) ln.addEventListener('input', function(){ if(!input.value && panel.classList.contains('open')) render(''); });
+})();
+</script>
+
+<style id="adr-css">
+  .adr-ac{ position:relative; margin-bottom:10px; }
+  .adr-panel{ position:absolute; z-index:60; left:0; right:0; top:calc(100% + 4px); background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 14px 34px rgba(15,23,42,.16); max-height:250px; overflow:auto; display:none; padding:5px; }
+  .adr-panel.open{ display:block; }
+  .adr-row{ display:flex; gap:9px; align-items:flex-start; padding:8px 10px; border-radius:7px; cursor:pointer; font-size:13px; }
+  .adr-row:hover, .adr-row.active{ background:var(--blue-pale); }
+  .adr-row .pin{ width:13px; height:13px; color:var(--text-3); flex-shrink:0; margin-top:2px; }
+  .adr-row .a1{ color:var(--navy); font-weight:500; } .adr-row .a1 mark{ background:#FEF3C7; border-radius:2px; padding:0 1px; }
+  .adr-row .a2{ color:var(--text-3); font-size:11.5px; margin-top:1px; }
+  .adr-foot{ font-size:11px; color:var(--text-3); padding:7px 10px 3px; border-top:1px solid var(--border-soft); margin-top:4px; }
+  .adr-dedupe{ font-size:11.5px; color:var(--gold); background:#FEF3C7; border:1px solid #F1D78F; border-radius:8px; padding:7px 11px; margin-bottom:2px; display:none; gap:7px; align-items:flex-start; line-height:1.45; }
+  .adr-dedupe.show{ display:flex; }
+  .adr-dedupe svg{ width:13px; height:13px; flex-shrink:0; margin-top:1px; }
+  .adr-dedupe a{ color:var(--blue); font-weight:600; cursor:pointer; }
+</style>
+<script id="adr-js">
+(function(){
+  var ADDR=[
+    {s:'412 Wendover Drive', c:'Albany', st:'NY', z:'12203', at:0},
+    {s:'142 Elm Street', c:'Albany', st:'NY', z:'12203', at:2},
+    {s:'55 Cathedral Place', c:'Albany', st:'NY', z:'12202', at:1},
+    {s:'210 Washington Avenue', c:'Albany', st:'NY', z:'12203', at:1},
+    {s:'9 Maple Avenue', c:'Troy', st:'NY', z:'12180', at:0},
+    {s:'18 Birch Lane', c:'Albany', st:'NY', z:'12208', at:1},
+    {s:'77 Pine Street', c:'Schenectady', st:'NY', z:'12305', at:0},
+    {s:'30 Delaware Avenue', c:'Delmar', st:'NY', z:'12054', at:0},
+    {s:'64 Willow Way', c:'Albany', st:'NY', z:'12203', at:0},
+    {s:'12 Foundation Road', c:'Albany', st:'NY', z:'12205', at:3},
+    {s:'9 Estate Drive', c:'Loudonville', st:'NY', z:'12211', at:1},
+    {s:'41 Grove Street', c:'Albany', st:'NY', z:'12206', at:0},
+    {s:'23 Chapel Street', c:'Cohoes', st:'NY', z:'12047', at:0},
+    {s:'88 Lark Street', c:'Albany', st:'NY', z:'12210', at:0}
+  ];
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function hl(t,q){ var i=t.toLowerCase().indexOf(q); if(i<0||!q) return esc(t); return esc(t.slice(0,i))+'<mark>'+esc(t.slice(i,i+q.length))+'</mark>'+esc(t.slice(i+q.length)); }
+  var PIN='<svg class="pin" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12.5S2.5 8.8 2.5 5.5a4.5 4.5 0 0 1 9 0C11.5 8.8 7 12.5 7 12.5z"/><circle cx="7" cy="5.3" r="1.6"/></svg>';
+  function panelOf(street){ var ac=street.closest('.adr-ac'); return ac?ac.querySelector('.adr-panel'):null; }
+  function groupOf(street){ var ac=street.closest('.adr-ac'); return (ac&&ac.parentElement)||street.parentElement; }
+  // Upgrade any raw "Street address" input into an autocomplete field (member cards, org contact, etc.)
+  function upgrade(street){
+    if(!street || street.classList.contains('adr-street')) return;
+    street.classList.add('adr-street'); street.setAttribute('autocomplete','off');
+    var ac=document.createElement('div'); ac.className='adr-ac';
+    // keep original spacing off the raw input; wrapper owns the margin
+    street.style.marginBottom='0';
+    street.parentNode.insertBefore(ac, street); ac.appendChild(street);
+    ac.insertAdjacentHTML('beforeend','<div class="adr-panel"></div>');
+    var g=groupOf(street);
+    if(g && !g.querySelector('.adr-dedupe')){
+      var d=document.createElement('div'); d.className='adr-dedupe';
+      g.appendChild(d);
+    }
+  }
+  function render(street){
+    var q=(street.value||'').trim().toLowerCase(), p=panelOf(street); if(!p) return;
+    if(q.length<2){ p.classList.remove('open'); p.innerHTML=''; return; }
+    var res=ADDR.filter(function(a){ return (a.s+' '+a.c+' '+a.z).toLowerCase().indexOf(q)>-1; }).slice(0,6);
+    if(!res.length){ p.innerHTML='<div class="adr-foot" style="border-top:none">No match — enter the address manually</div>'; p.classList.add('open'); return; }
+    p.innerHTML=res.map(function(a){ return '<div class="adr-row" data-i="'+ADDR.indexOf(a)+'">'+PIN+'<div><div class="a1">'+hl(a.s,q)+'</div><div class="a2">'+esc(a.c)+', '+a.st+' '+a.z+(a.at?' · '+a.at+' record'+(a.at>1?'s':'')+' here':'')+'</div></div></div>'; }).join('')
+      + '<div class="adr-foot">Type a street, city, or ZIP · address lookup</div>';
+    p.classList.add('open');
+  }
+  function fill(street, a){
+    var g=groupOf(street);
+    street.value=a.s;
+    // city
+    var c=g.querySelector('.adr-city')||g.querySelector('input[placeholder="City"]'); if(c) c.value=a.c;
+    // zip
+    var z=g.querySelector('.adr-zip')||g.querySelector('input[placeholder="ZIP"]'); if(z) z.value=a.z;
+    // state (explicit class, else the select sitting in the city/zip row)
+    var stSel=g.querySelector('.adr-state');
+    if(!stSel){ var row=(c&&c.closest('.row3'))||(c&&c.parentElement)||g; stSel=row.querySelector('select'); }
+    if(stSel) Array.prototype.forEach.call(stSel.options,function(o){ if(o.textContent.trim()===a.st) o.selected=true; });
+    var d=g.querySelector('.adr-dedupe');
+    if(d){ if(a.at>0){ d.innerHTML='<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2l5.5 9.5H1.5zM7 6v2.5M7 10v.3"/></svg><div>'+a.at+' existing constituent'+(a.at>1?'s':'')+' already at this address — <a>review before saving</a> to avoid a duplicate.</div>'; d.classList.add('show'); } else { d.classList.remove('show'); d.innerHTML=''; } }
+  }
+  document.addEventListener('input', function(e){ var s=e.target.closest('.adr-street'); if(s) render(s); });
+  document.addEventListener('focusin', function(e){ var s=e.target.closest('.adr-street'); if(s && (s.value||'').trim().length>=2) render(s); });
+  document.addEventListener('click', function(e){
+    var row=e.target.closest('.adr-panel .adr-row');
+    if(row){ var p=row.closest('.adr-panel'), ac=p.closest('.adr-ac'), st=ac&&ac.querySelector('.adr-street'), a=ADDR[+row.dataset.i]; if(st&&a){ fill(st,a); p.classList.remove('open'); p.innerHTML=''; } return; }
+    if(!e.target.closest('.adr-ac')) document.querySelectorAll('.adr-panel.open').forEach(function(p){ p.classList.remove('open'); });
+  });
+  // Upgrade every raw street field (household mailing address is pre-wrapped; these are the
+  // member contact cards + org contact personal address, some rendered dynamically).
+  function upgradeAll(){ document.querySelectorAll('input[placeholder="Street address"]').forEach(upgrade); }
+  upgradeAll();
+  try{ new MutationObserver(function(){ upgradeAll(); }).observe(document.body,{childList:true,subtree:true}); }catch(e){}
+})();
+</script>
+
+<style id="adp-css">
+  .adp-field{ position:relative; }
+  .adp-field .adp-input{ cursor:pointer; padding-right:34px; }
+  .adp-cal{ position:absolute; right:11px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:var(--text-3); pointer-events:none; }
+  #adp-pop{ position:fixed; z-index:100050; width:266px; background:#fff; border:1px solid var(--border); border-radius:12px; box-shadow:0 18px 48px rgba(15,23,42,.20); padding:12px; display:none; font-family:'DM Sans',sans-serif; }
+  #adp-pop.open{ display:block; }
+  #adp-pop .adp-h{ display:flex; align-items:center; gap:6px; margin-bottom:9px; }
+  #adp-pop .adp-nav{ width:28px; height:28px; border-radius:7px; border:1px solid var(--border); background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text-2); font-size:15px; line-height:1; }
+  #adp-pop .adp-nav:hover{ background:var(--surface); border-color:#94A3B8; }
+  #adp-pop .adp-sel{ flex:1; display:flex; gap:6px; }
+  #adp-pop .adp-sel select{ flex:1; min-width:0; font-family:inherit; font-size:12.5px; padding:6px 8px; border:1px solid var(--border); border-radius:7px; background:#fff; color:var(--text); cursor:pointer; }
+  #adp-pop .adp-wd{ display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:2px; }
+  #adp-pop .adp-wd span{ text-align:center; font-size:10px; font-weight:700; letter-spacing:.02em; color:var(--text-3); padding:4px 0; }
+  #adp-pop .adp-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+  #adp-pop .adp-day{ text-align:center; font-size:12.5px; padding:7px 0; border-radius:7px; cursor:pointer; color:var(--text); }
+  #adp-pop .adp-day:hover{ background:var(--blue-pale); }
+  #adp-pop .adp-day.out{ color:#CBD5E1; }
+  #adp-pop .adp-day.today{ box-shadow:inset 0 0 0 1.5px var(--blue-light); font-weight:600; }
+  #adp-pop .adp-day.sel{ background:var(--blue); color:#fff; font-weight:700; }
+  #adp-pop .adp-day.sel:hover{ background:#1D4ED8; }
+  #adp-pop .adp-foot{ display:flex; justify-content:space-between; margin-top:10px; padding-top:8px; border-top:1px solid var(--border-soft); }
+  #adp-pop .adp-foot button{ background:none; border:none; font-family:inherit; font-size:12px; font-weight:600; cursor:pointer; padding:4px 6px; border-radius:6px; }
+  #adp-pop .adp-foot .t{ color:var(--blue); } #adp-pop .adp-foot .c{ color:var(--text-3); }
+</style>
+<script id="adp-js">
+(function(){
+  var MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var WD=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  var pop, active, viewY, viewM;
+  function two(n){ return (n<10?'0':'')+n; }
+  function fmt(d){ return two(d.getDate())+'/'+two(d.getMonth()+1)+'/'+d.getFullYear(); }
+  function isoStr(d){ return d.getFullYear()+'-'+two(d.getMonth()+1)+'-'+two(d.getDate()); }
+  function ensure(){
+    if(pop) return; pop=document.createElement('div'); pop.id='adp-pop'; document.body.appendChild(pop);
+    pop.addEventListener('mousedown', function(e){ if(e.target.tagName!=='SELECT') e.preventDefault(); });
+    document.addEventListener('click', function(e){ if(pop.classList.contains('open') && !pop.contains(e.target) && !(active && active.parentElement.contains(e.target))) close(); });
+    window.addEventListener('resize', close);
+    window.addEventListener('scroll', function(){ if(pop.classList.contains('open')) close(); }, true);
+  }
+  function close(){ if(pop) pop.classList.remove('open'); active=null; }
+  function render(){
+    var now=new Date(), y1=now.getFullYear()+1, y0=1915, years='';
+    for(var y=y1;y>=y0;y--) years+='<option value="'+y+'"'+(y===viewY?' selected':'')+'>'+y+'</option>';
+    var mons=MON.map(function(m,i){ return '<option value="'+i+'"'+(i===viewM?' selected':'')+'>'+m+'</option>'; }).join('');
+    var first=new Date(viewY,viewM,1).getDay(), dim=new Date(viewY,viewM+1,0).getDate(), prevDim=new Date(viewY,viewM,0).getDate();
+    var selISO=active&&active.dataset.value, todayISO=isoStr(now), cells='';
+    for(var i=0;i<42;i++){
+      var cls='adp-day', cy=viewY, cm=viewM, dn;
+      if(i<first){ dn=prevDim-first+1+i; cls+=' out'; cm=viewM-1; }
+      else if(i>=first+dim){ dn=i-first-dim+1; cls+=' out'; cm=viewM+1; }
+      else dn=i-first+1;
+      var dISO=isoStr(new Date(cy,cm,dn));
+      if(dISO===todayISO) cls+=' today';
+      if(selISO && dISO===selISO) cls+=' sel';
+      cells+='<div class="'+cls+'" data-iso="'+dISO+'">'+dn+'</div>';
+    }
+    pop.innerHTML='<div class="adp-h"><button class="adp-nav" data-nav="-1" type="button">‹</button>'
+      +'<div class="adp-sel"><select class="adp-m">'+mons+'</select><select class="adp-y">'+years+'</select></div>'
+      +'<button class="adp-nav" data-nav="1" type="button">›</button></div>'
+      +'<div class="adp-wd">'+WD.map(function(w){return '<span>'+w+'</span>';}).join('')+'</div>'
+      +'<div class="adp-grid">'+cells+'</div>'
+      +'<div class="adp-foot"><button class="t" type="button">Today</button><button class="c" type="button">Clear</button></div>';
+    pop.querySelector('.adp-m').onchange=function(){ viewM=+this.value; render(); };
+    pop.querySelector('.adp-y').onchange=function(){ viewY=+this.value; render(); };
+    pop.querySelectorAll('.adp-nav').forEach(function(b){ b.onclick=function(){ viewM+=(+b.dataset.nav); if(viewM<0){viewM=11;viewY--;} if(viewM>11){viewM=0;viewY++;} render(); }; });
+    pop.querySelectorAll('.adp-day').forEach(function(c){ c.onclick=function(){ pick(c.dataset.iso); }; });
+    pop.querySelector('.adp-foot .t').onclick=function(){ pick(isoStr(new Date())); };
+    pop.querySelector('.adp-foot .c').onclick=function(){ if(active){ active.value=''; active.dataset.value=''; } close(); };
+  }
+  function pick(s){ if(active){ var p=s.split('-'); active.value=fmt(new Date(+p[0],+p[1]-1,+p[2])); active.dataset.value=s; } close(); }
+  function open(inp){
+    ensure(); active=inp;
+    var b=inp.dataset.value?inp.dataset.value.split('-'):null, now=new Date();
+    viewY=b?+b[0]:now.getFullYear(); viewM=b?(+b[1]-1):now.getMonth();
+    render();
+    var r=inp.getBoundingClientRect(), L=r.left, T=r.bottom+6;
+    if(L+266 > window.innerWidth-8) L=window.innerWidth-266-8;
+    if(L<8) L=8;
+    pop.style.left=L+'px'; pop.style.top=T+'px'; pop.classList.add('open');
+  }
+  function initOne(inp){
+    if(inp.dataset.adp) return; inp.dataset.adp='1';
+    if(inp.value) inp.dataset.value=inp.value;   // native ISO if any
+    try{ inp.type='text'; }catch(e){}
+    inp.readOnly=true; inp.classList.add('adp-input');
+    if(!inp.placeholder) inp.placeholder='dd/mm/yyyy';
+    if(inp.dataset.value){ var p=inp.dataset.value.split('-'); inp.value=two(+p[2])+'/'+two(+p[1])+'/'+p[0]; }
+    var w=document.createElement('div'); w.className='adp-field';
+    inp.parentNode.insertBefore(w, inp); w.appendChild(inp);
+    w.insertAdjacentHTML('beforeend','<svg class="adp-cal" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="11" height="10" rx="1.5"/><path d="M2 6h11M5 1.2v3M10 1.2v3"/></svg>');
+    inp.addEventListener('focus', function(){ open(inp); });
+    inp.addEventListener('click', function(){ open(inp); });
+  }
+  function initAll(){ document.querySelectorAll('input[type="date"], input.atlas-date').forEach(initOne); }
+  initAll();
+  // pick up date inputs added later (member cards, extra addresses, etc.)
+  try{ new MutationObserver(function(){ initAll(); }).observe(document.body,{childList:true,subtree:true}); }catch(e){}
 })();
 </script>
 

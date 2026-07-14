@@ -997,6 +997,7 @@ body {
           <div class="type-pill flagged" data-type="foundation">Foundation</div>
           <div class="type-pill flagged" data-type="corporate">Corporate</div>
           <div class="type-pill" data-type="newpledge">New pledge <small style="display:block;font-size:9px;font-weight:500;margin-top:1px;opacity:.6">create</small></div>
+          <div class="type-pill" data-type="recurring">Recurring <small style="display:block;font-size:9px;font-weight:500;margin-top:1px;opacity:.6">subscription</small></div>
           <div class="type-pill" data-type="qcd">QCD</div>
         </div>
         <p class="muted" style="font-size:11.5px;margin-top:10px;display:flex;gap:6px;align-items:center">
@@ -1032,13 +1033,22 @@ body {
 
         <!-- ── Type-conditional field panels ───────────────────── -->
 
-        <!-- Cash: nothing extra -->
-        <div data-type-fields="cash" class="type-fields"></div>
+        <!-- Cash -->
+        <div data-type-fields="cash" class="type-fields">
+          <div class="row2" style="margin-top:14px">
+            <div><span class="lbl">Counted / received by</span><input class="fld" placeholder="e.g. two-person count · initials"></div>
+            <div><span class="lbl">Deposit date</span><input class="fld" type="text" value="May 4, 2026"></div>
+          </div>
+        </div>
 
         <!-- Check -->
         <div data-type-fields="check" class="type-fields" style="display:none;margin-top:14px">
           <div class="row3">
             <div><span class="lbl">Check #<span class="req">*</span></span><input class="fld" placeholder="e.g. 2841" style="font-family:monospace"></div>
+            <div><span class="lbl">Check issue date</span><input class="fld" type="text" value="May 1, 2026"><p class="muted" style="font-size:10.5px;margin-top:4px">Date written on the check</p></div>
+            <div><span class="lbl">Check post / deposit date<span class="req">*</span></span><input class="fld" type="text" value="May 4, 2026"><p class="muted" style="font-size:10.5px;margin-top:4px">Date deposited &amp; posted to GL</p></div>
+          </div>
+          <div class="row2" style="margin-top:12px">
             <div><span class="lbl">Payor name (if different)</span><input class="fld" placeholder="optional"></div>
             <div><span class="lbl">Memo</span><input class="fld" placeholder="On the memo line"></div>
           </div>
@@ -1050,6 +1060,11 @@ body {
             <div><span class="lbl">Card last 4</span><input class="fld" placeholder="••••" style="font-family:monospace"></div>
             <div><span class="lbl">Processor</span><select class="fld"><option>Stripe (via GiveCentral)</option><option>Authorize.net</option><option>Manual offline</option></select></div>
             <div><span class="lbl">Transaction ID</span><input class="fld" placeholder="auto-filled if synced" style="font-family:monospace"></div>
+          </div>
+          <div class="row3" style="margin-top:12px">
+            <div><span class="lbl">Card brand</span><select class="fld"><option>Visa</option><option>Mastercard</option><option>American Express</option><option>Discover</option></select></div>
+            <div><span class="lbl">Authorization code</span><input class="fld" placeholder="6-digit auth" style="font-family:monospace"></div>
+            <div><span class="lbl">Charge date</span><input class="fld" type="text" value="May 4, 2026"></div>
           </div>
           <p class="muted" style="font-size:11.5px;margin-top:10px;display:flex;gap:6px;align-items:center">
             <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--blue)"><circle cx="6" cy="6" r="5"/><path d="M4 6l1.5 1.5L8 5"/></svg>
@@ -1063,6 +1078,11 @@ body {
             <div><span class="lbl">Bank account last 4</span><input class="fld" placeholder="••••" style="font-family:monospace"></div>
             <div><span class="lbl">Routing prefix</span><input class="fld" placeholder="9 digits" style="font-family:monospace"></div>
             <div><span class="lbl">Settlement status</span><select class="fld"><option>Pending settlement (T+3)</option><option>Settled</option></select></div>
+          </div>
+          <div class="row3" style="margin-top:12px">
+            <div><span class="lbl">Account type</span><select class="fld"><option>Checking</option><option>Savings</option></select></div>
+            <div><span class="lbl">Initiated date</span><input class="fld" type="text" value="May 4, 2026"></div>
+            <div><span class="lbl">Expected settlement</span><input class="fld" type="text" value="May 7, 2026" disabled></div>
           </div>
           <p class="muted" style="font-size:11.5px;margin-top:10px;display:flex;gap:6px;align-items:center">
             <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--amber)"><circle cx="6" cy="6" r="5"/><path d="M6 3.5v3M6 8v.5"/></svg>
@@ -1097,6 +1117,10 @@ body {
               <p class="muted" style="font-size:11px;margin-top:6px">⚠ FMV is <strong>never</strong> printed on the donor's receipt — Pub 1771 §B(2). Donor self-substantiates value.</p>
             </div>
           </div>
+          <div class="row2" style="margin-top:12px">
+            <div><span class="lbl">Qualified appraisal on file?</span><select class="fld"><option>Not required (under $5,000)</option><option>Qualified appraisal attached (≥ $5,000)</option><option>Appraisal pending</option></select><p class="muted" style="font-size:10.5px;margin-top:4px">IRS Form 8283 needed for non-cash gifts over $5,000</p></div>
+            <div><span class="lbl">Date received</span><input class="fld" type="text" value="May 4, 2026"></div>
+          </div>
         </div>
 
         <!-- DAF -->
@@ -1104,6 +1128,10 @@ body {
           <div class="row2">
             <div><span class="lbl">Distributing organization<span class="req">*</span></span><select class="fld"><option selected>Schwab Charitable</option><option>Fidelity Charitable</option><option>Vanguard Charitable</option><option>Diocesan Foundation DAF</option><option>Other DAF…</option></select></div>
             <div><span class="lbl">Recommended by donor<span class="req">*</span></span><input class="fld" value="Margaret O'Brien" style="font-weight:500"></div>
+          </div>
+          <div class="row2" style="margin-top:12px">
+            <div><span class="lbl">Grant check / reference #</span><input class="fld" placeholder="e.g. SCH-•••4471" style="font-family:monospace"></div>
+            <div><span class="lbl">Grant letter date</span><input class="fld" type="text" value="Apr 30, 2026"></div>
           </div>
           <div class="rule" style="background:var(--rose-light);border-color:#FCA5A5;margin-top:14px">
             <div class="ico" style="background:var(--rose)">✗</div>
@@ -1120,6 +1148,10 @@ body {
             <div><span class="lbl">Employer organization<span class="req">*</span></span><input class="fld" value="Acme Construction LLC"></div>
             <div><span class="lbl">Original employee gift<span class="req">*</span></span><select class="fld"><option selected>Margaret O'Brien · $1,000 · Apr 18 · Cathedral Restoration</option><option>Search other gift…</option></select></div>
           </div>
+          <div class="row2" style="margin-top:12px">
+            <div><span class="lbl">Match ratio</span><select class="fld"><option>1:1 (dollar-for-dollar)</option><option>2:1</option><option>3:1</option><option>0.5:1</option></select></div>
+            <div><span class="lbl">Matching-gift form received?</span><select class="fld"><option>Yes — submitted to employer portal</option><option>Pending donor form</option><option>Employer auto-match (no form)</option></select></div>
+          </div>
           <div class="rule" style="background:var(--rose-light);border-color:#FCA5A5;margin-top:14px">
             <div class="ico" style="background:var(--rose)">✗</div>
             <div class="body" style="color:#831843">
@@ -1135,6 +1167,10 @@ body {
             <div><span class="lbl">Foundation organization<span class="req">*</span></span><select class="fld"><option selected>Diocesan Foundation</option><option>Knights of Columbus</option><option>Sullivan Family Foundation</option><option>Other foundation…</option></select></div>
             <div><span class="lbl">Grant agreement #</span><input class="fld" placeholder="GA-2026-•••" style="font-family:monospace"></div>
           </div>
+          <div class="row2" style="margin-top:12px">
+            <div><span class="lbl">Grant payment date</span><input class="fld" type="text" value="May 4, 2026"></div>
+            <div><span class="lbl">Report-back due</span><input class="fld" type="text" value="Aug 2, 2026"><p class="muted" style="font-size:10.5px;margin-top:4px">Reminder auto-created 90 days out</p></div>
+          </div>
           <div class="rule" style="background:var(--rose-light);border-color:#FCA5A5;margin-top:14px">
             <div class="ico" style="background:var(--rose)">✗</div>
             <div class="body" style="color:#831843">
@@ -1149,6 +1185,10 @@ body {
           <div class="row2">
             <div><span class="lbl">Company organization<span class="req">*</span></span><input class="fld" value=""></div>
             <div><span class="lbl">Relationship owner (executive contact)</span><select class="fld"><option>—</option><option>Search constituent…</option></select></div>
+          </div>
+          <div class="row2" style="margin-top:12px">
+            <div><span class="lbl">Benefits provided to company?</span><select class="fld"><option>No — fully charitable</option><option>Yes — sponsorship benefits (split-receipt)</option></select></div>
+            <div><span class="lbl">FMV of benefits (if any)</span><input class="fld" placeholder="$ — reduces the deductible portion"></div>
           </div>
           <div class="rule" style="background:var(--rose-light);border-color:#FCA5A5;margin-top:14px">
             <div class="ico" style="background:var(--rose)">✗</div>
@@ -1179,11 +1219,39 @@ body {
             <div><span class="lbl">Check # from custodian<span class="req">*</span></span><input class="fld" placeholder="e.g. EJ-•••2841" style="font-family:monospace"></div>
             <div><span class="lbl">Counts toward RMD?</span><select class="fld"><option selected>Yes</option><option>No (already met)</option></select></div>
           </div>
+          <div class="row2" style="margin-top:12px">
+            <div><span class="lbl">Distribution date (per custodian)</span><input class="fld" type="text" value="Apr 30, 2026"></div>
+            <div><span class="lbl">Check payable to</span><input class="fld" value="Diocese of Albany" disabled><p class="muted" style="font-size:10.5px;margin-top:4px">QCD must be payable directly to the charity</p></div>
+          </div>
           <div class="rule" style="background:var(--gold-light);border-color:#F1D78F;margin-top:14px">
             <div class="ico" style="background:var(--gold)">✓</div>
             <div class="body" style="color:#78350F">
               <div class="t" style="color:var(--gold)">Donor age check passed — Margaret is 72 (≥ 70½)</div>
               <div class="d">QCD-receipt template will be used. Adds language: "no goods or services were provided in exchange · this distribution counts toward your Required Minimum Distribution." Donor reports on Form 1040 line 4b as "QCD."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recurring — subscription schedule -->
+        <div data-type-fields="recurring" class="type-fields" style="display:none;margin-top:14px">
+          <div class="info-bar blue"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 8a6 6 0 0 1 10.5-4M14 8a6 6 0 0 1-10.5 4M12.5 2v2.5H10M3.5 14v-2.5H6"/></svg><div>Setting up an <strong>ongoing recurring gift</strong> (subscription). The <strong>Amount</strong> above is charged automatically each cycle until cancelled.</div></div>
+          <span class="lbl">Frequency<span class="req">*</span></span>
+          <div class="freq-grid" id="rec-freq"><div class="freq-pill on">Monthly</div><div class="freq-pill">Quarterly</div><div class="freq-pill">Semi-annual</div><div class="freq-pill">Annually</div></div>
+          <div class="row3" style="margin-top:14px">
+            <div><span class="lbl">Start date<span class="req">*</span></span><input class="fld" type="text" value="May 4, 2026"></div>
+            <div><span class="lbl">Ends</span><select class="fld" id="rec-ends" onchange="if(window.onRecEnds)onRecEnds(this.value)"><option selected>Until cancelled (open-ended)</option><option>On a specific date</option><option>After a number of payments</option></select></div>
+            <div id="rec-end-detail"><span class="lbl">&nbsp;</span><input class="fld" placeholder="—" disabled></div>
+          </div>
+          <div class="row3" style="margin-top:12px">
+            <div><span class="lbl">Payment method on file<span class="req">*</span></span><select class="fld"><option>Credit card · Visa ••4242</option><option>Credit card · add new card…</option><option>ACH · Checking ••8891</option><option>ACH · add new account…</option></select></div>
+            <div><span class="lbl">Processor</span><select class="fld"><option>Stripe (via GiveCentral)</option><option>Authorize.net</option></select></div>
+            <div><span class="lbl">Next charge</span><input class="fld" type="text" value="Jun 4, 2026" disabled></div>
+          </div>
+          <div class="rule" style="background:var(--green-light);border-color:#86EFAC;margin-top:14px">
+            <div class="ico" style="background:var(--green)">✓</div>
+            <div class="body" style="color:#14532D">
+              <div class="t" style="color:var(--green)">Recurring subscription · $10,000/mo · open-ended</div>
+              <div class="d">Each successful charge auto-receipts on settlement. Failed payments retry per your dunning rules, then flag for review. Donor can pause or cancel from their portal.</div>
             </div>
           </div>
         </div>
@@ -1349,7 +1417,7 @@ body {
     cash:'cash gift', check:'check gift', cc:'credit card gift', ach:'ACH gift',
     stock:'stock gift', inkind:'in-kind gift',
     daf:'DAF distribution', matching:'matching gift', foundation:'foundation grant', corporate:'corporate gift',
-    pledge:'pledge payment', qcd:'QCD distribution', newpledge:'new pledge'
+    pledge:'pledge payment', qcd:'QCD distribution', newpledge:'new pledge', recurring:'recurring gift'
   };
 
   pills.forEach(function(p){
@@ -1369,6 +1437,20 @@ body {
       if (typeLabel3) typeLabel3.textContent = '— for ' + (typeNames[t] || t);
     });
   });
+
+  // ── Recurring panel: frequency toggle + "Ends" detail ──
+  var recPanel = document.querySelector('[data-type-fields="recurring"]');
+  if (recPanel){
+    recPanel.querySelectorAll('#rec-freq .freq-pill').forEach(function(p){
+      p.addEventListener('click', function(){ recPanel.querySelectorAll('#rec-freq .freq-pill').forEach(function(s){ s.classList.remove('on'); }); p.classList.add('on'); });
+    });
+    window.onRecEnds = function(v){
+      var d = document.getElementById('rec-end-detail'); if(!d) return;
+      if (v === 'On a specific date') d.innerHTML = '<span class="lbl">End date</span><input class="fld" type="text" value="May 4, 2028">';
+      else if (v === 'After a number of payments') d.innerHTML = '<span class="lbl">Number of payments</span><input class="fld" value="12">';
+      else d.innerHTML = '<span class="lbl">&nbsp;</span><input class="fld" placeholder="—" disabled>';
+    };
+  }
 })();
 </script>
 
