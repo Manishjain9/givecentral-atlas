@@ -2071,6 +2071,61 @@ body {
     });
 
     // ════════════════════════════════════════════════════════
+    // ADD ANOTHER ADDRESS — append a fresh, autocomplete-enabled
+    // address card (works for Org HQ/billing/satellites + Household).
+    // New cards reuse the .adr-street / .adr-city/.adr-state/.adr-zip
+    // / .adr-dedupe structure, so the shared address autocomplete +
+    // duplicate-at-address warning apply automatically.
+    // ════════════════════════════════════════════════════════
+    function wireAddrToggles(card){
+      var pri = card.querySelector('.pri-toggle');
+      if (pri) pri.addEventListener('click', function(){
+        card.parentElement.querySelectorAll('.contact-card .pri-toggle').forEach(function(pt){
+          pt.classList.remove('on'); var s=pt.querySelector('.star'); if(s) s.textContent='☆';
+        });
+        pri.classList.add('on'); var s2=pri.querySelector('.star'); if(s2) s2.textContent='★';
+      });
+      var dnc = card.querySelector('.dnc-toggle');
+      if (dnc) dnc.addEventListener('click', function(){
+        dnc.classList.toggle('on');
+        var cb=dnc.querySelector('.cb'); if(cb) cb.textContent = dnc.classList.contains('on') ? '✓' : '';
+      });
+      var x = card.querySelector('.x-btn');
+      if (x) x.addEventListener('click', function(){ card.parentElement.removeChild(card); });
+    }
+    var adrAdd = document.getElementById('adr-add');
+    if (adrAdd) adrAdd.addEventListener('click', function(){
+      // Mirror the type options currently shown on the primary card
+      var refSel = document.querySelector('.addr-type-select');
+      var typeOpts = refSel
+        ? refSel.innerHTML.replace(/\sselected(="[^"]*")?/g, '')
+        : '<option selected>Mailing</option><option>Other</option>';
+      var card = document.createElement('div');
+      card.className = 'contact-card';
+      card.innerHTML =
+        '<div class="contact-card-head">' +
+          '<select class="fld addr-type-select">' + typeOpts + '</select>' +
+          '<span class="pri-toggle"><span class="star">☆</span> Primary</span>' +
+          '<span class="dnc-toggle"><span class="cb"></span> Do not mail</span>' +
+          '<button class="x-btn">×</button>' +
+        '</div>' +
+        '<div class="adr-ac">' +
+          '<input class="fld adr-street" placeholder="Street address" autocomplete="off">' +
+          '<div class="adr-panel"></div>' +
+        '</div>' +
+        '<div class="row3" style="grid-template-columns:1.5fr 1fr 1fr;">' +
+          '<input class="fld adr-city" placeholder="City">' +
+          '<select class="fld adr-state"><option selected>State</option><option>NY</option><option>CT</option><option>NJ</option><option>MA</option><option>VT</option><option>Other</option></select>' +
+          '<input class="fld adr-zip" placeholder="ZIP">' +
+        '</div>' +
+        '<div class="adr-dedupe"></div>';
+      adrAdd.parentNode.insertBefore(card, adrAdd);
+      wireAddrToggles(card);
+      var st = card.querySelector('.adr-street'); if (st) st.focus();
+      if (window.atlasToast) window.atlasToast('Address added — start typing to look it up');
+    });
+
+    // ════════════════════════════════════════════════════════
     // PARISH ADDRESS PREVIEW — show full address on selection
     // ════════════════════════════════════════════════════════
     function updateParishAddr(sel){
