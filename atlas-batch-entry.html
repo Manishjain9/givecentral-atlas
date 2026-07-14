@@ -134,7 +134,8 @@
     .batch-table thead th{position:sticky;top:0;z-index:10;background:var(--navy);color:rgba(255,255,255,.7);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:7px 10px;text-align:left;border-right:1px solid rgba(255,255,255,.08);white-space:nowrap}
     .batch-table thead th:last-child{border-right:none}
     .col-n{width:38px}.col-donor{width:190px}.col-date{width:95px}.col-fund{width:165px}
-    .col-type{width:100px}.col-amt{width:100px}.col-pay{width:110px}.col-ref{width:95px}
+    .col-type{width:100px}.col-amt{width:100px}.col-pay{width:110px}.col-ref{width:95px}.col-issue{width:104px}.col-post{width:104px}
+    .ci-date-na{color:var(--text3);opacity:.55;font-size:12px;text-align:center;display:block}
     .col-gl{width:80px}.col-note{width:150px}.col-status{width:130px}.col-act{width:52px}
 
     /* Row states */
@@ -1408,6 +1409,8 @@
           <th class="col-amt" style="text-align:right">Amount</th>
           <th class="col-pay">Payment</th>
           <th class="col-ref">Check / ref #</th>
+          <th class="col-issue" title="Date written on the check">Check issue date</th>
+          <th class="col-post" title="Date deposited &amp; posted to the general ledger">Check post date</th>
           <th class="col-gl">GL code</th>
           <th class="col-note">Note</th>
           <th class="col-status">Accuracy</th>
@@ -1557,20 +1560,20 @@ function getPledgeById(pid){
 // BATCH ROWS
 // ─────────────────────────────────────────────────────────────
 let BATCH_ROWS = [
-  { id:1,  donorId:881,  donor:"O'Brien, James",      date:"04/14/2026",fund:"Cathedral Capital Fund",  type:"Pledge", amt:500,   pay:"Check",  ref:"10441",gl:"5001",note:"", pledgeId:"PL-2026-0042"},
-  { id:2,  donorId:1044, donor:"Sullivan, Margaret",  date:"04/14/2026",fund:"CMA Annual Fund",  type:"Check",  amt:2500,  pay:"Check",  ref:"2290", gl:"4100",note:""},
+  { id:1,  donorId:881,  donor:"O'Brien, James",      date:"04/14/2026",fund:"Cathedral Capital Fund",  type:"Pledge", amt:500,   pay:"Check",  ref:"10441",gl:"5001",note:"", pledgeId:"PL-2026-0042", issueDate:"04/10/2026", postDate:"04/15/2026"},
+  { id:2,  donorId:1044, donor:"Sullivan, Margaret",  date:"04/14/2026",fund:"CMA Annual Fund",  type:"Check",  amt:2500,  pay:"Check",  ref:"2290", gl:"4100",note:"", issueDate:"04/09/2026", postDate:"04/15/2026"},
   { id:3,  donorId:2201, donor:"Kim, Patricia",       date:"04/15/2026",fund:"CMA Annual Fund",  type:"Credit", amt:250,   pay:"Credit card",ref:"CC-8842",gl:"4100",note:""},
-  { id:4,  donorId:null, donor:"Hennessy, R",         date:"04/15/2026",fund:"CMA Annual Fund",  type:"Check",  amt:125,   pay:"Check",  ref:"0044", gl:"4100",note:""},
+  { id:4,  donorId:null, donor:"Hennessy, R",         date:"04/15/2026",fund:"CMA Annual Fund",  type:"Check",  amt:125,   pay:"Check",  ref:"0044", gl:"4100",note:"", issueDate:"04/11/2026", postDate:"04/16/2026"},
   { id:5,  donorId:3847, donor:"Harrington, David",   date:"04/15/2026",fund:"CMA Annual Fund",  type:"Credit", amt:500,   pay:"Credit card",ref:"CC-9911",gl:"4100",note:""},
-  { id:6,  donorId:5501, donor:"Ramirez, Elena",      date:"04/15/2026",fund:"CMA Annual Fund",  type:"Check",  amt:75,    pay:"Check",  ref:"5512", gl:"4100",note:""},
+  { id:6,  donorId:5501, donor:"Ramirez, Elena",      date:"04/15/2026",fund:"CMA Annual Fund",  type:"Check",  amt:75,    pay:"Check",  ref:"5512", gl:"4100",note:"", issueDate:"04/12/2026", postDate:"04/16/2026"},
   { id:7,  donorId:6612, donor:"Grant, Michael",      date:"04/16/2026",fund:"CMA Annual Fund",  type:"Credit", amt:250,   pay:"Credit card",ref:"CC-7741",gl:"4100",note:""},
-  { id:8,  donorId:7721, donor:"Costello, Barbara",   date:"04/16/2026",fund:"Marian Congress",  type:"Check",  amt:2500,  pay:"Check",  ref:"1108", gl:"4210",note:""},
+  { id:8,  donorId:7721, donor:"Costello, Barbara",   date:"04/16/2026",fund:"Marian Congress",  type:"Check",  amt:2500,  pay:"Check",  ref:"1108", gl:"4210",note:"", issueDate:"04/13/2026", postDate:"04/17/2026"},
   { id:9,  donorId:4450, donor:"Mendez, Carlos",      date:"04/16/2026",fund:"CMA Annual Fund",  type:"Credit", amt:5000,  pay:"Credit card",ref:"CC-3344",gl:"4100",note:""},
-  { id:10, donorId:8830, donor:"Walsh, Susan",        date:"04/17/2026",fund:"CMA Annual Fund",  type:"Check",  amt:100,   pay:"Check",  ref:"6621", gl:"4100",note:""},
+  { id:10, donorId:8830, donor:"Walsh, Susan",        date:"04/17/2026",fund:"CMA Annual Fund",  type:"Check",  amt:100,   pay:"Check",  ref:"6621", gl:"4100",note:"", issueDate:"04/13/2026", postDate:"04/18/2026"},
   { id:11, donorId:4811, donor:"Hennessy, Robert",    date:"04/17/2026",fund:"Cathedral Capital Fund",     type:"Pledge", amt:1000,  pay:"Credit card",ref:"CC-5599",gl:"5001",   note:"", pledgeId:"PL-2026-0073"},
-  { id:12, donorId:2231, donor:"Walsh, Susan M.",     date:"04/17/2026",fund:"CMA Annual Fund",  type:"Check",  amt:100,   pay:"Check",  ref:"7700", gl:"4100",note:""},
+  { id:12, donorId:2231, donor:"Walsh, Susan M.",     date:"04/17/2026",fund:"CMA Annual Fund",  type:"Check",  amt:100,   pay:"Check",  ref:"7700", gl:"4100",note:"", issueDate:"04/12/2026", postDate:"04/18/2026"},
   { id:13, donorId:9940, donor:"Morrison, Peter",     date:"04/18/2026",fund:"Marian Congress",  type:"Credit", amt:750,   pay:"Credit card",ref:"CC-1122",gl:"4210",note:""},
-  { id:14, donorId:1120, donor:"Fitzgerald, Anne",    date:"04/18/2026",fund:"CMA Annual Fund",  type:"Check",  amt:325,   pay:"Check",  ref:"9980", gl:"4100",note:""},
+  { id:14, donorId:1120, donor:"Fitzgerald, Anne",    date:"04/18/2026",fund:"CMA Annual Fund",  type:"Check",  amt:325,   pay:"Check",  ref:"9980", gl:"4100",note:"", issueDate:"04/14/2026", postDate:"04/19/2026"},
   { id:15, donorId:1102, donor:"Walsh, Thomas F.",    date:"04/18/2026",fund:"Cathedral Capital Fund", type:"Stock", amt:25500, pay:"Stock transfer", ref:"DTC-8841", gl:"4150", note:"Gift of appreciated securities", stockSym:"AAPL", stockShares:120, stockPrice:212.50},
   { id:16, donorId:3848, donor:"Walsh, Thomas G.",    date:"04/19/2026",fund:"CMA Annual Fund",        type:"Stock", amt:16720, pay:"Stock transfer", ref:"DTC-9023", gl:"4150", note:"", stockSym:"MSFT", stockShares:40, stockPrice:418.00},
   { id:17, donorId:5501, donor:"Ramirez, Elena",      date:"04/19/2026",fund:"Cathedral Capital Fund", type:"Stock", amt:9870,  pay:"Stock transfer", ref:"DTC-7755", gl:"4150", note:"DAF-adjacent brokerage transfer", stockSym:"NVDA", stockShares:78, stockPrice:126.54},
@@ -1938,6 +1941,11 @@ function renderBatch() {
         ${['Check','Credit card','ACH','Wire','Cash','Stock transfer','DAF distribution'].map(p=>`<option ${p===r.pay||p.toLowerCase().includes(r.pay.toLowerCase())?'selected':''}>${p}</option>`).join('')}
       </select></td>
       <td><input class="ci" value="${r.ref}" placeholder="—" onchange="rowEdited(${r.id},'ref',this.value)"></td>
+      ${isCheckRow(r)
+        ? `<td><input class="ci" value="${r.issueDate||''}" placeholder="mm/dd/yyyy" title="Date written on the check" onchange="rowEdited(${r.id},'issueDate',this.value)"></td>
+      <td><input class="ci" value="${r.postDate||''}" placeholder="mm/dd/yyyy" title="Date deposited & posted to GL" onchange="rowEdited(${r.id},'postDate',this.value)"></td>`
+        : `<td><span class="ci-date-na" title="Only applies to check gifts">—</span></td>
+      <td><span class="ci-date-na" title="Only applies to check gifts">—</span></td>`}
       <td><input class="ci" value="${r.gl}" placeholder="e.g. 4100" onchange="rowEdited(${r.id},'gl',this.value)" data-rid="${r.id}"></td>
       <td><input class="ci" value="${r.note}" placeholder="Optional…" onchange="rowEdited(${r.id},'note',this.value)"></td>
       <td style="padding:6px 8px">
@@ -1965,7 +1973,7 @@ function renderStockSubRow(r){
   const fmv = (r.stockShares||0)*(r.stockPrice||0);
   return `<tr class="stk-sub-row" id="stk-sub-${r.id}">
     <td></td>
-    <td colspan="11">
+    <td colspan="13">
       <div class="stk-bar">
         <svg class="stk-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="14" height="14"><path d="M1.5 10l3-3 2.5 2.5L12 4"/><path d="M9 4h3v3"/></svg>
         <div class="stk-f"><label>Symbol</label><input class="ci sym" value="${sym}" placeholder="AAPL" onchange="stockEdit(${r.id},'sym',this.value)"></div>
@@ -1999,7 +2007,7 @@ function renderPledgeSubRow(r){
   if (!r.donorId) {
     return `<tr class="ple-sub-row ple-empty" id="ple-sub-${r.id}">
       <td></td>
-      <td colspan="11">
+      <td colspan="13">
         <div class="ple-bar empty">
           <svg class="ple-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 7l1.5 1.5L9 6"/><rect x="2" y="2.5" width="10" height="9" rx="1.5"/></svg>
           <span>Pick a donor first — pledges auto-suggest once the row is matched.</span>
@@ -2012,7 +2020,7 @@ function renderPledgeSubRow(r){
   if (open.length === 0) {
     return `<tr class="ple-sub-row ple-warn" id="ple-sub-${r.id}">
       <td></td>
-      <td colspan="11">
+      <td colspan="13">
         <div class="ple-bar warn">
           <svg class="ple-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 1l6 12H1z"/><path d="M7 5v3M7 10v.5"/></svg>
           <span><strong>${escapeRowHtml(r.donor)}</strong> has no open pledges on file.</span>
@@ -2067,7 +2075,7 @@ function renderPledgeSubRow(r){
 
   return `<tr class="ple-sub-row ple-active" id="ple-sub-${r.id}">
     <td></td>
-    <td colspan="11">
+    <td colspan="13">
       <div class="ple-bar active">
         <svg class="ple-ic gold" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 2.5h8l2 2.5v6.5a1 1 0 01-1 1H3a1 1 0 01-1-1V3.5a1 1 0 011-1z"/><path d="M5 6l1.5 1.5L9 5"/></svg>
         ${pickerHtml}
@@ -2289,6 +2297,9 @@ function highlightRow(rid) {
 // ─────────────────────────────────────────────────────────────
 // ROW ACTIONS
 // ─────────────────────────────────────────────────────────────
+// A row is a "check" when the gift type or the payment method is a check.
+function isCheckRow(r){ return (r.type==='Check') || (r.pay && r.pay.toLowerCase()==='check'); }
+
 function rowEdited(rid, field, value) {
   const r = BATCH_ROWS.find(x=>x.id===rid);
   if (r) { r[field] = value; revalidateAll(); }
@@ -2316,7 +2327,7 @@ function commitDonor(inp, rid) {
 
 function addRow() {
   const newId = Math.max(...BATCH_ROWS.map(r=>r.id))+1;
-  BATCH_ROWS.push({id:newId,donorId:null,donor:'',date:'04/18/2026',fund:'CMA Annual Fund',type:'Check',amt:0,pay:'Check',ref:'',gl:'4100',note:'',pledgeId:null});
+  BATCH_ROWS.push({id:newId,donorId:null,donor:'',date:'04/18/2026',fund:'CMA Annual Fund',type:'Check',amt:0,pay:'Check',ref:'',gl:'4100',note:'',pledgeId:null,issueDate:'',postDate:''});
   revalidateAll();
   setTimeout(()=>document.querySelector(`#row-${newId} .ci`)?.focus(),50);
 }

@@ -351,6 +351,11 @@
 </aside>
 
 <div class="main">
+  <div id="share-banner">
+    <div class="lm"><svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.7)" stroke-width="3"/><line x1="58" y1="58" x2="104" y2="70" stroke="rgba(200,160,74,.7)" stroke-width="3"/><line x1="104" y1="70" x2="138" y2="34" stroke="rgba(200,160,74,.7)" stroke-width="3"/><circle cx="22" cy="92" r="7" fill="#fff"/><circle cx="58" cy="58" r="7" fill="#fff"/><circle cx="104" cy="70" r="7" fill="#fff"/><circle cx="138" cy="34" r="8" fill="#C8A04A"/></svg></div>
+    <div><div class="bt">Catholic Ministry Appeal 2026</div><div class="bs" id="share-banner-sub">Live campaign report · view-only</div></div>
+    <span class="pill">View-only</span>
+  </div>
   <div class="topbar">
     <div class="crumb">
       <a href="atlas-campaign-dashboard.html" style="color:inherit">Campaigns</a><span class="sep">›</span>
@@ -359,7 +364,7 @@
     <div class="topbar-right">
       <button class="btn btn-ghost" onclick="toast('Exporting campaign PDF…')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v6.5M3.5 5L6 7.5 8.5 5M1.5 9.5h9"/></svg>Export PDF</button>
       <button class="btn btn-ghost" id="email-btn" onclick="toast('Opening email composer…')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="9" height="7" rx="1"/><path d="M1.5 3.5L6 6.5l4.5-3" stroke-linecap="round"/></svg>Email to client</button>
-      <button class="btn btn-primary" id="share-btn" onclick="toast('Live link copied to clipboard')"><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><circle cx="3" cy="6" r="1.6"/><circle cx="9" cy="3" r="1.6"/><circle cx="9" cy="9" r="1.6"/><path d="M4.4 5.2l3.2-1.6M4.4 6.8l3.2 1.6"/></svg>Share live link</button>
+      <button class="btn btn-primary" id="share-btn" onclick="openShare()"><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><circle cx="3" cy="6" r="1.6"/><circle cx="9" cy="3" r="1.6"/><circle cx="9" cy="9" r="1.6"/><path d="M4.4 5.2l3.2-1.6M4.4 6.8l3.2 1.6"/></svg>Share live link</button>
     </div>
   </div>
 
@@ -386,6 +391,46 @@
 <aside class="drawer" id="drawer"></aside>
 <div class="rm-scrim" id="rm-scrim" onclick="closeReminder()"></div>
 <div class="rm" id="rm" role="dialog" aria-modal="true"></div>
+
+<!-- ════ Share live link modal ════ -->
+<style>
+  .sh-linkbox{display:flex;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px 6px 6px 12px;margin-bottom:6px}
+  .sh-linkbox input{flex:1;border:none;background:none;font-family:'DM Mono',monospace;font-size:12px;color:var(--text-2);outline:none;min-width:0}
+  .sh-copy{flex-shrink:0;display:flex;align-items:center;gap:6px;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer}
+  .sh-copy:hover{background:#1D4ED8}
+  .sh-copy.done{background:var(--green,#15803D)}
+  .sh-meta{font-size:11.5px;color:var(--text-3);margin-bottom:16px}
+  .sh-meta a{color:var(--blue);font-weight:600;cursor:pointer;text-decoration:none}
+  .sh-opt{margin-bottom:13px}
+  .sh-opt label{display:block;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--text-3);margin-bottom:5px}
+  .sh-opt select{width:100%;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);border:1px solid var(--border);border-radius:9px;padding:9px 11px;background:#fff;cursor:pointer}
+  .sh-toggle{display:flex;align-items:flex-start;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px;cursor:pointer;margin-bottom:6px}
+  .sh-toggle .sw{flex-shrink:0;width:34px;height:20px;border-radius:99px;background:#CBD5E1;position:relative;transition:.18s;margin-top:1px}
+  .sh-toggle .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .sh-toggle.on .sw{background:var(--blue)} .sh-toggle.on .sw::after{transform:translateX(14px)}
+  .sh-toggle .tt{font-size:12.5px;font-weight:600;color:var(--text)}
+  .sh-toggle .ts{font-size:11.5px;color:var(--text-3);margin-top:2px;line-height:1.4}
+  .sh-live{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--text-2);background:var(--blue-pale);border-radius:8px;padding:8px 11px;margin-top:2px}
+  .sh-live .dot{width:7px;height:7px;border-radius:50%;background:var(--green,#15803D);box-shadow:0 0 0 3px rgba(21,128,61,.15)}
+
+  /* ── Public shared-view mode (no sidebar / no topbar) ── */
+  #share-banner{display:none}
+  body.share-mode .sidebar,
+  body.share-mode .topbar{display:none!important}
+  body.share-mode .main{width:100%}
+  body.share-mode #share-banner{display:flex;align-items:center;gap:13px;padding:11px 24px;background:linear-gradient(90deg,var(--navy),var(--navy-2));color:#fff;position:sticky;top:0;z-index:40}
+  #share-banner .lm{width:26px;height:26px;border-radius:7px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  #share-banner .lm svg{width:16px;height:16px}
+  #share-banner .bt{font-size:13px;font-weight:600}
+  #share-banner .bs{font-size:11.5px;color:rgba(255,255,255,.7);margin-top:1px}
+  #share-banner .pill{margin-left:auto;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:99px;padding:4px 11px;color:rgba(255,255,255,.9)}
+  /* hide internal-only drill affordances in shared view */
+  body.share-mode .pdrill,
+  body.share-mode #lens button[data-lens="donor"].hide-donor{display:none}
+</style>
+<div class="rm-scrim" id="share-scrim" onclick="closeShare()"></div>
+<div class="rm" id="share" role="dialog" aria-modal="true" style="width:480px"></div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -894,13 +939,124 @@ function applyRole(key){
   setLens(role.defaultLens);
 }
 
+/* ════════════════ SHARE LIVE LINK ════════════════ */
+let shareState=null;
+function slug(s){ return (s||'campaign').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,28); }
+function newToken(){ return Math.random().toString(36).slice(2,8)+Math.random().toString(36).slice(2,6); }
+function shareUrl(){ return 'https://atlas.givecentral.org/r/'+slug(CAMPAIGN&&CAMPAIGN.name)+'/'+shareState.token; }
+/* Local URL that actually renders the public shared view in this prototype */
+function liveViewUrl(){ return 'atlas-campaign-portal.html?share=1&donors='+(shareState.donors?1:0)+'&by='+encodeURIComponent('Patricia Reyes')+'&t='+shareState.token; }
+function openLiveView(){ if(shareState.revoked){ toast('Link revoked — generate a new one first'); return; } window.open(liveViewUrl(),'_blank'); }
+function openShare(){
+  if(!shareState) shareState={ token:newToken(), scope:'anyone', expiry:'end', donors:false, revoked:false };
+  renderShare();
+  document.getElementById("share").classList.add("show");
+  document.getElementById("share-scrim").classList.add("show");
+}
+function closeShare(){ document.getElementById("share").classList.remove("show"); document.getElementById("share-scrim").classList.remove("show"); }
+function renderShare(){
+  const s=shareState, revoked=s.revoked;
+  const url = revoked ? '— link revoked —' : shareUrl();
+  document.getElementById("share").innerHTML =
+    '<div class="rm-h"><span class="ic"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="3.5" cy="7" r="1.8"/><circle cx="10.5" cy="3.5" r="1.8"/><circle cx="10.5" cy="10.5" r="1.8"/><path d="M5.2 6.1l3.6-1.8M5.2 7.9l3.6 1.8"/></svg></span>'
+      + '<div><div class="t">Share live link</div><div class="s">'+(CAMPAIGN?CAMPAIGN.name:'Campaign')+' · read-only report</div></div></div>'
+    + '<div class="rm-b">'
+      + '<div class="sh-linkbox"><input id="sh-url" readonly value="'+url+'">'
+        + '<button class="sh-copy" id="sh-copy" onclick="copyShare()"'+(revoked?' disabled style="opacity:.5;cursor:default"':'')+'><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.3"/><path d="M2 8V2.2A.7.7 0 0 1 2.7 1.5H8"/></svg>Copy</button></div>'
+      + '<div class="sh-meta">Recipients open this in a browser — no Atlas login needed. <a onclick="openLiveView()">Open live view ↗</a> · <a onclick="regenShare()">Generate new link</a></div>'
+      + '<div class="sh-opt"><label>Who can open it</label><select id="sh-scope" onchange="shareState.scope=this.value">'
+        + '<option value="anyone"'+(s.scope==='anyone'?' selected':'')+'>Anyone with the link</option>'
+        + '<option value="invited"'+(s.scope==='invited'?' selected':'')+'>Only people I invite by email</option>'
+        + '<option value="passcode"'+(s.scope==='passcode'?' selected':'')+'>Anyone with the link + passcode</option>'
+      + '</select></div>'
+      + '<div class="sh-opt"><label>Link expires</label><select id="sh-exp" onchange="shareState.expiry=this.value">'
+        + '<option value="end"'+(s.expiry==='end'?' selected':'')+'>When the campaign ends (Dec 31, 2026)</option>'
+        + '<option value="30"'+(s.expiry==='30'?' selected':'')+'>In 30 days</option>'
+        + '<option value="90"'+(s.expiry==='90'?' selected':'')+'>In 90 days</option>'
+        + '<option value="never"'+(s.expiry==='never'?' selected':'')+'>Never</option>'
+      + '</select></div>'
+      + '<div class="sh-toggle'+(s.donors?' on':'')+'" onclick="toggleDonors()"><span class="sw"></span>'
+        + '<div><div class="tt">Show donor-level detail</div><div class="ts">Off by default — recipients see parish rollups only, not individual donor names or amounts.</div></div></div>'
+      + '<div class="sh-live"><span class="dot"></span>Figures refresh automatically — this always shows current cash, pledges, and pace.</div>'
+    + '</div>'
+    + '<div class="rm-f">'
+      + (revoked
+          ? '<button class="btn btn-primary" onclick="regenShare()">Create new link</button>'
+          : '<button class="btn btn-ghost" onclick="revokeShare()" style="margin-right:auto;color:#BE185D">Revoke link</button>'
+            + '<button class="btn btn-ghost" onclick="closeShare()">Done</button>'
+            + '<button class="btn btn-primary" onclick="emailShare()"><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.5"><rect x="1.5" y="2.5" width="9" height="7" rx="1"/><path d="M1.5 3.5L6 6.5l4.5-3" stroke-linecap="round"/></svg>Email link</button>')
+    + '</div>';
+}
+function copyShare(){
+  if(shareState.revoked) return;
+  const url=shareUrl(), inp=document.getElementById("sh-url");
+  try{ navigator.clipboard.writeText(url); }catch(e){ try{ inp.select(); document.execCommand('copy'); }catch(_){} }
+  const b=document.getElementById("sh-copy");
+  b.classList.add("done"); b.innerHTML='<svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M2 6.5l2.5 2.5 5.5-6"/></svg>Copied';
+  setTimeout(function(){ if(b){ b.classList.remove("done"); b.innerHTML='<svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.3"/><path d="M2 8V2.2A.7.7 0 0 1 2.7 1.5H8"/></svg>Copy'; } },1600);
+  toast("Live link copied to clipboard");
+}
+function toggleDonors(){ shareState.donors=!shareState.donors; renderShare(); }
+function regenShare(){ shareState.token=newToken(); shareState.revoked=false; renderShare(); toast("New link generated — the old one no longer works"); }
+function revokeShare(){ shareState.revoked=true; renderShare(); toast("Link revoked — it will no longer open"); }
+function shareMailto(){
+  var name = CAMPAIGN ? CAMPAIGN.name : 'Campaign';
+  var url  = shareUrl();
+  var subject = name + ' — live campaign report';
+  var body =
+    'Hi,\n\n' +
+    'Here is the live report for ' + name + '. It opens in any browser — no login needed — and always shows the current figures (cash received, pledges, and pace).\n\n' +
+    url + '\n\n' +
+    (shareState.donors ? 'This view includes donor-level detail.\n\n' : 'This view shows parish rollups only.\n\n') +
+    'Best,\nPatricia Reyes';
+  return 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+}
+function emailShare(){
+  if(shareState.revoked){ toast('Link revoked — generate a new one first'); return; }
+  var mailto = shareMailto();
+  try{ window.location.href = mailto; }catch(e){ window.open(mailto); }
+  toast('Opening your email app with the link…');
+}
+
 /* ════════════════ TOAST ════════════════ */
 let toastT;
 function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2200); }
 
+/* ════════════════ PUBLIC SHARED-VIEW MODE ════════════════ */
+function applyShareMode(){
+  var q; try{ q=new URLSearchParams(location.search); }catch(e){ q=null; }
+  if(!q || q.get('share')!=='1') return;
+  document.body.classList.add('share-mode');
+  var showDonors = q.get('donors')==='1';
+  var by = q.get('by');
+  var sub = document.getElementById('share-banner-sub');
+  if(sub){
+    var when = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    sub.textContent = 'Live campaign report · view-only' + (by?(' · shared by '+by):'') + ' · as of '+when;
+  }
+  if(!showDonors){
+    // Hide the By-Donor lens and force the parish rollup — no individual donor names/amounts
+    var donorBtn = document.querySelector('#lens button[data-lens="donor"]');
+    if(donorBtn) donorBtn.classList.add('hide-donor');
+    if(typeof setLens==='function') setLens('parish');
+  }
+  // Neutralise internal navigation for public viewers (drill-throughs, reminders, breadcrumb links)
+  document.addEventListener('click', function(e){
+    var a=e.target.closest('a[href], [onclick]');
+    if(!a) return;
+    var href=a.getAttribute('href')||'';
+    var oc=a.getAttribute('onclick')||'';
+    if(/atlas-(donor-360|dashboard|campaign-|log-|pledge)/.test(href) || /drillParish|openReminder|openDonor|window\.location/.test(oc)){
+      e.preventDefault(); e.stopPropagation();
+      if(window.toast) toast('This is a view-only shared report');
+    }
+  }, true);
+}
+
 /* ════════════════ INIT ════════════════ */
 renderNav();
 applyRole("dev");
+applyShareMode();
 </script>
 
 <!-- ════ Atlas-themed dialog (replaces native alert/confirm) — auto-injected ════ -->
