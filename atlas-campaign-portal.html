@@ -412,6 +412,9 @@
   .sh-toggle .ts{font-size:11.5px;color:var(--text-3);margin-top:2px;line-height:1.4}
   .sh-live{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--text-2);background:var(--blue-pale);border-radius:8px;padding:8px 11px;margin-top:2px}
   .sh-live .dot{width:7px;height:7px;border-radius:50%;background:var(--green,#15803D);box-shadow:0 0 0 3px rgba(21,128,61,.15)}
+  .sh-access{display:flex;gap:9px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:13px;font-size:12.5px;color:var(--text-2);line-height:1.45}
+  .sh-access svg{width:15px;height:15px;color:var(--blue);flex-shrink:0;margin-top:1px}
+  .sh-access b{color:var(--navy);font-weight:600}
 
   /* ── Public shared-view mode (no sidebar / no topbar) ── */
   #share-banner{display:none}
@@ -964,11 +967,7 @@ function renderShare(){
       + '<div class="sh-linkbox"><input id="sh-url" readonly value="'+url+'">'
         + '<button class="sh-copy" id="sh-copy" onclick="copyShare()"'+(revoked?' disabled style="opacity:.5;cursor:default"':'')+'><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.3"/><path d="M2 8V2.2A.7.7 0 0 1 2.7 1.5H8"/></svg>Copy</button></div>'
       + '<div class="sh-meta">Recipients open this in a browser — no Atlas login needed. <a onclick="openLiveView()">Open live view ↗</a> · <a onclick="regenShare()">Generate new link</a></div>'
-      + '<div class="sh-opt"><label>Who can open it</label><select id="sh-scope" onchange="shareState.scope=this.value">'
-        + '<option value="anyone"'+(s.scope==='anyone'?' selected':'')+'>Anyone with the link</option>'
-        + '<option value="invited"'+(s.scope==='invited'?' selected':'')+'>Only people I invite by email</option>'
-        + '<option value="passcode"'+(s.scope==='passcode'?' selected':'')+'>Anyone with the link + passcode</option>'
-      + '</select></div>'
+      + '<div class="sh-access"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7s2.5-4.5 6-4.5 6 4.5 6 4.5-2.5 4.5-6 4.5S1 7 1 7z"/><circle cx="7" cy="7" r="1.7"/></svg><span><b>Anyone with the link can view</b> — read-only, no Atlas login or account needed.</span></div>'
       + '<div class="sh-opt"><label>Link expires</label><select id="sh-exp" onchange="shareState.expiry=this.value">'
         + '<option value="end"'+(s.expiry==='end'?' selected':'')+'>When the campaign ends (Dec 31, 2026)</option>'
         + '<option value="30"'+(s.expiry==='30'?' selected':'')+'>In 30 days</option>'
