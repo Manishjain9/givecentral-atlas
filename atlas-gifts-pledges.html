@@ -332,18 +332,31 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .gt-menu .sep{height:1px;background:var(--border-soft);margin:4px 2px}
 .gt-scrim{position:fixed;inset:0;background:rgba(15,23,42,.4);opacity:0;pointer-events:none;transition:opacity .2s;z-index:100025}
 .gt-scrim.show{opacity:1;pointer-events:auto}
-.void-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-46%) scale(.98);width:420px;max-width:92vw;background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.3);z-index:100026;opacity:0;pointer-events:none;transition:.2s}
+.void-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-46%) scale(.98);width:460px;max-width:92vw;background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.3);z-index:100026;opacity:0;pointer-events:none;transition:.2s;max-height:90vh;overflow:auto}
 .void-modal.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
 .void-modal .vm-h{padding:18px 20px 4px;display:flex;gap:12px;align-items:flex-start}
 .void-modal .vm-ic{width:38px;height:38px;border-radius:10px;background:var(--rose-light);color:var(--rose);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .void-modal .vm-ic svg{width:18px;height:18px}
 .void-modal .vm-t{font-size:17px;font-weight:700;color:var(--text)}
-.void-modal .vm-b{padding:6px 20px 16px 70px;font-size:13px;color:var(--text-2);line-height:1.55}
-.void-modal .vm-card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 13px;margin-top:10px;font-size:12.5px}
+.void-modal .vm-sub{font-size:12px;color:var(--text-3);margin-top:3px;line-height:1.45}
+.void-modal .vm-b{padding:10px 20px 18px 20px;font-size:13px;color:var(--text-2);line-height:1.55}
+.void-modal .vm-card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-size:12.5px;display:flex;justify-content:space-between;gap:10px}
 .void-modal .vm-card b{color:var(--text)}
-.void-modal .vm-f{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.void-modal .vm-field{margin-top:13px}
+.void-modal .vm-field label{display:block;font-size:11.5px;font-weight:600;color:var(--text-2);margin-bottom:5px}
+.void-modal .vm-field .req{color:var(--rose);margin-left:2px}
+.void-modal .vm-field .opt{color:var(--text-3);font-weight:400}
+.void-modal .vm-field select,.void-modal .vm-field textarea{width:100%;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px 11px;background:#fff;box-sizing:border-box}
+.void-modal .vm-field select:focus,.void-modal .vm-field textarea:focus{outline:none;border-color:var(--rose)}
+.void-modal .vm-field textarea{resize:vertical;min-height:52px}
+.void-modal .vm-check{display:flex;gap:9px;align-items:flex-start;margin-top:14px;font-size:12.5px;color:var(--text-2);line-height:1.45;cursor:pointer}
+.void-modal .vm-check input{margin-top:2px;accent-color:var(--rose);flex-shrink:0}
+.void-modal .vm-note-line{display:flex;gap:8px;align-items:flex-start;margin-top:14px;font-size:12px;color:var(--text-3);line-height:1.45}
+.void-modal .vm-note-line svg{width:13px;height:13px;flex-shrink:0;margin-top:1px;color:var(--text-3)}
+.void-modal .vm-f{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:#fff}
 .void-modal .vbtn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border-radius:8px;padding:8px 16px;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text-2)}
 .void-modal .vbtn.danger{background:var(--rose);border-color:var(--rose);color:#fff}
+.void-modal .vbtn.danger[disabled]{opacity:.5;cursor:not-allowed}
 .gt-row.voided{opacity:.55}
 .gt-row.voided .amt{text-decoration:line-through}
 
@@ -2071,17 +2084,46 @@ body {
     else if(a==='void') openVoid(info);
   };
   window.openVoid=function(info){
-    vm.innerHTML='<div class="vm-h"><span class="vm-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 3v5M8 11v.5"/><path d="M1.5 14L8 1.5 14.5 14H1.5z"/></svg></span><div><div class="vm-t">Void this gift?</div></div></div>'
-      +'<div class="vm-b">Voiding reverses this gift — the donor’s totals are reduced and any issued receipt is marked void. This is written to the audit trail and cannot be undone.'
-      +'<div class="vm-card"><b>'+info.donor+'</b> · '+info.amt+'</div></div>'
-      +'<div class="vm-f"><button class="vbtn" onclick="closeVoid()">Cancel</button><button class="vbtn danger" onclick="confirmVoid()">Void gift</button></div>';
+    var receiptBlock = info.issued
+      ? '<label class="vm-check"><input type="checkbox" id="vm-receipt" checked><span>Void the issued tax receipt and email <b>'+info.donor+'</b> a corrected acknowledgement.</span></label>'
+      : '<div class="vm-note-line"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 6.5v3.5M7 4v.4"/></svg><span>No tax receipt was issued for this gift — nothing to reverse.</span></div>';
+    vm.innerHTML='<div class="vm-h"><span class="vm-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 3v5M8 11v.5"/><path d="M1.5 14L8 1.5 14.5 14H1.5z"/></svg></span>'
+      +'<div><div class="vm-t">Void this gift?</div><div class="vm-sub">Reverses the gift and reduces the donor’s totals. This writes an immutable audit entry and cannot be undone.</div></div></div>'
+      +'<div class="vm-b">'
+        +'<div class="vm-card"><span><b>'+info.donor+'</b></span><span class="amt" style="font-weight:700;color:var(--text)">'+info.amt+'</span></div>'
+        +'<div class="vm-field"><label>Reason for voiding<span class="req">*</span></label>'
+          +'<select id="vm-reason"><option value="" selected disabled>Select a reason…</option>'
+          +'<option>Duplicate entry</option>'
+          +'<option>Data-entry error</option>'
+          +'<option>Donor requested refund</option>'
+          +'<option>Returned / NSF check</option>'
+          +'<option>Payment reversal / chargeback</option>'
+          +'<option>Fraud / unauthorized</option>'
+          +'<option>Other</option></select></div>'
+        +'<div class="vm-field"><label>Note <span class="opt">(required for “Other”)</span></label>'
+          +'<textarea id="vm-note" placeholder="Add context for the audit trail…"></textarea></div>'
+        +receiptBlock
+      +'</div>'
+      +'<div class="vm-f"><button class="vbtn" onclick="closeVoid()">Cancel</button><button class="vbtn danger" id="vm-confirm" onclick="confirmVoid()" disabled>Void gift</button></div>';
+    var reason=document.getElementById('vm-reason'), note=document.getElementById('vm-note'), btn=document.getElementById('vm-confirm');
+    function sync(){ var r=reason.value; btn.disabled = !r || (r==='Other' && !note.value.trim()); }
+    reason.addEventListener('change', function(){
+      note.previousElementSibling.querySelector('.opt').style.color = (reason.value==='Other') ? 'var(--rose)' : 'var(--text-3)';
+      sync();
+    });
+    note.addEventListener('input', sync);
     vm.classList.add('show'); scrim.classList.add('show');
+    setTimeout(function(){ reason.focus(); }, 40);
   };
   window.closeVoid=function(){ vm.classList.remove('show'); scrim.classList.remove('show'); };
   window.confirmVoid=function(){
+    var reason=(document.getElementById('vm-reason')||{}).value||'';
+    if(!reason) return;
+    var rcpt=document.getElementById('vm-receipt');
     if(curRow){ var info=rowInfo(curRow); curRow.classList.add('voided');
       var rc=curRow.children[4]; if(rc) rc.innerHTML='<span class="tag" style="background:var(--rose-light);color:var(--rose)">Voided</span>';
-      ggToast('Gift voided · '+info.donor); }
+      var extra=(rcpt&&rcpt.checked)?' · receipt voided, donor notified':'';
+      ggToast('Gift voided · '+info.donor+' · '+reason+extra+' · audit entry created'); }
     closeVoid();
   };
   document.querySelectorAll('[data-gp-view="recent"] .gt-row .kebab').forEach(function(k){
