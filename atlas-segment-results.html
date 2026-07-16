@@ -740,11 +740,19 @@ body {
         </tbody>
       </table>
       <div class="cdp-empty" id="sr-empty">No donors in this segment match your search.</div>
+      <div class="dpager" id="sr-pager"></div>
       <div class="sr-foot">Showing a sample of <strong>12</strong> of <span id="sr-count2">0</span> matching donors · resolved live. <a href="atlas-donors-list.html" style="color:var(--blue)">Open in Donors list →</a></div>
     </div>
   </div>
 
   <style id="sr-css">
+    .dpager{ display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 16px; border-top:1px solid var(--border); font-size:12px; color:var(--text-3); }
+    .dpager b{ color:var(--text); }
+    .dpager .nav{ display:flex; gap:4px; align-items:center; }
+    .dpager .nav button{ min-width:28px; height:28px; padding:0 6px; border-radius:7px; border:1px solid var(--border); background:#fff; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; color:var(--text-2); }
+    .dpager .nav button:hover:not(:disabled){ border-color:#94A3B8; background:var(--surface); }
+    .dpager .nav button.cur{ background:var(--blue); border-color:var(--blue); color:#fff; font-weight:600; }
+    .dpager .nav button:disabled{ opacity:.4; cursor:default; }
     .sr-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
     .sr-stat{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
     .sr-k{ font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); }
@@ -824,7 +832,28 @@ body {
     };
     window.srCount=function(){ return document.querySelectorAll('#sr-tbody .sr-cb:checked').length; };
     window.srToggleAll=function(cb){ document.querySelectorAll('#sr-tbody tr').forEach(function(r){ if(r.style.display!=='none'){ var b=r.querySelector('.sr-cb'); if(b) b.checked=cb.checked; } }); srSel(); };
-    window.srFilter=function(q){ q=(q||'').toLowerCase(); var shown=0; document.querySelectorAll('#sr-tbody tr').forEach(function(r){ var hit=r.textContent.toLowerCase().indexOf(q)!==-1; r.style.display=hit?'':'none'; if(hit)shown++; }); document.getElementById('sr-empty').style.display=shown?'none':'block'; document.getElementById('sr-shown').textContent=shown+' shown'; };
+    var srQuery='', srPage=0, SR_SIZE=10;
+    function srRender(){
+      var all=[].slice.call(document.querySelectorAll('#sr-tbody tr'));
+      var matched=all.filter(function(r){ return r.textContent.toLowerCase().indexOf(srQuery)!==-1; });
+      var total=matched.length, size=SR_SIZE, pages=Math.max(1,Math.ceil(total/size));
+      if(srPage>=pages) srPage=pages-1; if(srPage<0) srPage=0;
+      var start=srPage*size, end=Math.min(total,start+size);
+      all.forEach(function(r){ r.style.display='none'; });
+      matched.slice(start,end).forEach(function(r){ r.style.display=''; });
+      document.getElementById('sr-empty').style.display= total?'none':'block';
+      document.getElementById('sr-shown').textContent= (total? (start+1)+'–'+end : '0')+' of '+total+' shown';
+      var el=document.getElementById('sr-pager'); if(!el) return;
+      if(total===0 || pages<=1){ el.innerHTML=''; return; }
+      function btn(pg,label,cur,dis){ return '<button'+(dis?' disabled':' onclick="srGoPage('+pg+')"')+(cur?' class="cur"':'')+'>'+label+'</button>'; }
+      var cur=srPage, set={}; [0,1,cur-1,cur,cur+1,pages-2,pages-1].forEach(function(pg){ if(pg>=0&&pg<pages) set[pg]=1; });
+      var keys=Object.keys(set).map(Number).sort(function(a,b){return a-b;}), prev=-1, nums='';
+      keys.forEach(function(pg){ if(prev>=0&&pg-prev>1) nums+='<button disabled>…</button>'; nums+=btn(pg,pg+1,pg===cur,false); prev=pg; });
+      el.innerHTML='<span>Showing <b>'+(start+1)+'–'+end+'</b> of <b>'+total+'</b></span><div class="nav">'+btn(cur-1,'‹',false,cur===0)+nums+btn(cur+1,'›',false,cur===pages-1)+'</div>';
+    }
+    window.srFilter=function(q){ srQuery=(q||'').toLowerCase(); srPage=0; srRender(); };
+    window.srGoPage=function(p){ srPage=p; srRender(); };
+    srRender();
     window.srBulk=function(kind){
       var n=srCount(); if(!n){ if(window.atlasToast)atlasToast('Select at least one donor first'); return; }
       var msg={outreach:n+' donors added to an outreach list',email:'Composing an email to '+n+' donors',tag:'Tag applied to '+n+' donors',export:n+' donors exported · CSV downloading'}[kind];

@@ -1169,17 +1169,8 @@ body {
     </a>
 
     <div class="pager">
-      <span>Showing <strong style="color:var(--text)">1–14</strong> of <strong style="color:var(--text)">632</strong> matching donors</span>
-      <div class="nav">
-        <button>‹</button>
-        <button class="cur">1</button>
-        <button>2</button>
-        <button>3</button>
-        <button>4</button>
-        <button>…</button>
-        <button>45</button>
-        <button>›</button>
-      </div>
+      <span id="dt-pager-info">Showing <strong style="color:var(--text)">1–10</strong> of <strong style="color:var(--text)">632</strong> matching donors</span>
+      <div class="nav" id="dt-pager-nav"></div>
     </div>
 
   </div>
@@ -2446,21 +2437,39 @@ body {
     }
 
     var emptyEl = document.getElementById('dt-empty');
-    function applyFilters(){
-      var visible = 0;
+    var dtPage = 0, DT_SIZE = 10;
+    function applyFilters(keepPage){
+      if (!keepPage) dtPage = 0;
       var av = !!window.__archivedView;
+      var eligible = [];
       rows.forEach(function(r){
         var arch = r.classList.contains('archived');
         var ok = av ? arch : (rowMatches(r.__data) && !arch);
-        r.style.display = ok ? '' : 'none';
-        if (ok) visible++;
+        if (ok) eligible.push(r);
       });
-      if (emptyEl) emptyEl.style.display = visible === 0 ? '' : 'none';
+      var total = eligible.length, size = DT_SIZE, pages = Math.max(1, Math.ceil(total/size));
+      if (dtPage >= pages) dtPage = pages - 1; if (dtPage < 0) dtPage = 0;
+      var start = dtPage*size, end = Math.min(total, start+size);
+      rows.forEach(function(r){ r.style.display = 'none'; });
+      eligible.slice(start, end).forEach(function(r){ r.style.display = ''; });
+      if (emptyEl) emptyEl.style.display = total === 0 ? '' : 'none';
       var rightStrong = document.querySelector('.filterbar .right strong');
-      if (rightStrong) rightStrong.textContent = av ? (visible + ' archived') : (visible + ' of 632');
-      var pagerStrong = document.querySelectorAll('.pager strong')[0];
-      if (pagerStrong) pagerStrong.textContent = visible === 0 ? '0' : '1–' + visible;
+      if (rightStrong) rightStrong.textContent = av ? (total + ' archived') : (total + ' of 632');
+      renderDtPager(total, pages, start, end);
     }
+    function renderDtPager(total, pages, start, end){
+      var info = document.getElementById('dt-pager-info'), nav = document.getElementById('dt-pager-nav');
+      if (info) info.innerHTML = total === 0 ? 'No matching donors'
+        : 'Showing <strong style="color:var(--text)">'+(start+1)+'–'+end+'</strong> of <strong style="color:var(--text)">'+total+'</strong> matching donors';
+      if (!nav) return;
+      if (total === 0){ nav.innerHTML = ''; return; }
+      function btn(pg,label,cur,dis){ return '<button'+(dis?' disabled':' onclick="dtGoPage('+pg+')"')+(cur?' class="cur"':'')+'>'+label+'</button>'; }
+      var cur = dtPage, set = {}; [0,1,cur-1,cur,cur+1,pages-2,pages-1].forEach(function(pg){ if(pg>=0&&pg<pages) set[pg]=1; });
+      var keys = Object.keys(set).map(Number).sort(function(a,b){return a-b;}), prev = -1, html = '';
+      keys.forEach(function(pg){ if(prev>=0&&pg-prev>1) html += '<button disabled>…</button>'; html += btn(pg,pg+1,pg===cur,false); prev = pg; });
+      nav.innerHTML = btn(cur-1,'‹',false,cur===0) + html + btn(cur+1,'›',false,cur===pages-1);
+    }
+    window.dtGoPage = function(p){ dtPage = p; applyFilters(true); };
 
     // ── Render the chips from state ──
     var chipWrap = document.getElementById('filter-chips');

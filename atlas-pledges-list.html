@@ -1113,6 +1113,14 @@ body {
   #pl-facet .fsep{height:1px;background:#F1F5F9;margin:5px 4px}
   .filter-chip .cv{font-weight:700}
   .pl-row.pl-hidden{display:none !important}
+  .pl-row.pl-page-hidden{display:none !important}
+  #pl-pager{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 18px;border-top:1px solid var(--border);font-size:12px;color:var(--text-3)}
+  #pl-pager b{color:var(--text)}
+  #pl-pager .nav{display:flex;gap:4px;align-items:center}
+  #pl-pager .nav button{min-width:28px;height:28px;padding:0 6px;border-radius:7px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text-2)}
+  #pl-pager .nav button:hover:not(:disabled){border-color:#94A3B8;background:var(--surface)}
+  #pl-pager .nav button.cur{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+  #pl-pager .nav button:disabled{opacity:.4;cursor:default}
   #pl-empty{display:none;padding:34px 16px;text-align:center;color:var(--text-3);font-size:13px}
   #pl-empty.show{display:block}
 </style>
@@ -1182,16 +1190,24 @@ body {
     return true;
   }
 
-  function apply(){
-    var shown = 0;
+  var plPage = 0, PL_SIZE = 10;
+  function apply(keepPage){
+    if (!keepPage) plPage = 0;
+    var shown = 0, matched = [];
     rows.forEach(function(r){
       var ok = (state.status==='all' || r.status===state.status)
         && (!state.campaign || r.campaign===state.campaign)
         && (!state.solicitor || r.solicitor===state.solicitor)
         && matchDue(r) && matchAmount(r);
       r.el.classList.toggle('pl-hidden', !ok);
-      if (ok) shown++;
+      if (ok){ shown++; matched.push(r.el); }
     });
+    // paginate the matched set at 10/page
+    var total = matched.length, size = PL_SIZE, pages = Math.max(1, Math.ceil(total/size));
+    if (plPage >= pages) plPage = pages - 1; if (plPage < 0) plPage = 0;
+    var start = plPage*size, end = Math.min(total, start+size);
+    matched.forEach(function(el,i){ el.classList.toggle('pl-page-hidden', i<start || i>=end); });
+    renderPlPager(total, pages, start, end);
     // tab counts (status only, ignoring other facets so counts are stable)
     var counts = {active:0,lapsed:0,fulfilled:0,writtenoff:0,all:rows.length};
     rows.forEach(function(r){ if(counts[r.status]!=null) counts[r.status]++; });
@@ -1211,6 +1227,17 @@ body {
     document.getElementById('pl-showing').textContent = 'Showing '+shown+' of '+rows.length+' · sort by Next due ↑';
     document.getElementById('pl-empty').classList.toggle('show', shown===0);
   }
+  function renderPlPager(total, pages, start, end){
+    var el = document.getElementById('pl-pager'); if(!el) return;
+    if (total === 0){ el.innerHTML = ''; return; }
+    function btn(pg,label,cur,dis){ return '<button'+(dis?' disabled':' onclick="plGoPage('+pg+')"')+(cur?' class="cur"':'')+'>'+label+'</button>'; }
+    var cur = plPage, set = {}; [0,1,cur-1,cur,cur+1,pages-2,pages-1].forEach(function(pg){ if(pg>=0&&pg<pages) set[pg]=1; });
+    var keys = Object.keys(set).map(Number).sort(function(a,b){return a-b;}), prev = -1, nums = '';
+    keys.forEach(function(pg){ if(prev>=0&&pg-prev>1) nums += '<button disabled>…</button>'; nums += btn(pg,pg+1,pg===cur,false); prev = pg; });
+    el.innerHTML = '<span>Showing <b>'+(start+1)+'–'+end+'</b> of <b>'+total+'</b> pledges</span>'
+      + '<div class="nav">'+btn(cur-1,'‹',false,cur===0)+nums+btn(cur+1,'›',false,cur===pages-1)+'</div>';
+  }
+  window.plGoPage = function(p){ plPage = p; apply(true); };
   function setKpi(cls, n){ var v = document.querySelector('.kpi.'+cls+' .v'); if(v) v.textContent = n; }
 
   window.plTab = function(el){ state.status = el.getAttribute('data-status'); apply(); };
@@ -1260,6 +1287,9 @@ body {
     var empty = document.createElement('div'); empty.id='pl-empty';
     empty.textContent = 'No pledges match these filters. Try clearing a filter or switching tabs.';
     tableEl.appendChild(empty);
+  }
+  if (tableEl && !document.getElementById('pl-pager')){
+    var pgr = document.createElement('div'); pgr.id='pl-pager'; tableEl.appendChild(pgr);
   }
 
   window.__plReindex = function(){ index(); apply(); };

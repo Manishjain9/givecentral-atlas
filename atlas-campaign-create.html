@@ -1397,8 +1397,8 @@ body {
         ],
         logisticsTitle:'Venue',
         logisticsFields:[
-          {lbl:'Event venue',req:1,val:'Albany Capital Center — Grand Ballroom'},
-          {lbl:'City / location',val:'Albany, NY'}
+          {lbl:'Event venue',req:1,val:'Albany Capital Center — Grand Ballroom', id:'f-venue'},
+          {lbl:'City / location',val:'Albany, NY', id:'f-venue-city'}
         ],
         recognitionTitle:'Tickets & fair-market value',
         recognitionFields:[
@@ -1470,7 +1470,7 @@ body {
         var alts = (f.alt||[]).map(function(o){ return '<option>'+esc(o)+'</option>'; }).join('');
         ctl = '<select class="fld"><option selected>'+esc(f.val)+'</option>'+alts+'</select>';
       } else {
-        ctl = '<input class="fld" value="'+esc(f.val)+'"'+(f.big?' style="font-size:18px;font-weight:600"':'')+(f.ph?' placeholder="'+esc(f.ph)+'"':'')+'>';
+        ctl = '<input class="fld" value="'+esc(f.val)+'"'+(f.id?' id="'+f.id+'" autocomplete="off"':'')+(f.big?' style="font-size:18px;font-weight:600"':'')+(f.ph?' placeholder="'+esc(f.ph)+'"':'')+'>';
       }
       return '<div>'+lbl+ctl+'</div>';
     }
@@ -2055,6 +2055,64 @@ body {
     renderSolicitors('');
     updateTeamFoot();
   })();
+</script>
+
+<!-- ════ Event-venue address suggestions (auto-fills city/location) ════ -->
+<style id="venue-ac-css">
+  #venue-pop{ position:fixed; z-index:100060; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 14px 34px rgba(15,23,42,.16); max-height:262px; overflow:auto; display:none; padding:5px; font-family:'DM Sans',sans-serif; }
+  #venue-pop.open{ display:block; }
+  #venue-pop .vrow{ display:flex; gap:9px; align-items:flex-start; padding:8px 10px; border-radius:7px; cursor:pointer; font-size:13px; }
+  #venue-pop .vrow:hover{ background:var(--blue-pale); }
+  #venue-pop .vrow .pin{ width:13px; height:13px; color:var(--text-3); flex-shrink:0; margin-top:2px; }
+  #venue-pop .vrow .v1{ color:var(--navy); font-weight:500; } #venue-pop .vrow .v1 mark{ background:#FEF3C7; border-radius:2px; padding:0 1px; }
+  #venue-pop .vrow .v2{ color:var(--text-3); font-size:11.5px; margin-top:1px; }
+  #venue-pop .vfoot{ font-size:11px; color:var(--text-3); padding:7px 10px 3px; border-top:1px solid var(--border-soft); margin-top:4px; }
+</style>
+<script id="venue-ac-js">
+(function(){
+  var VENUES=[
+    {name:'Albany Capital Center — Grand Ballroom', city:'Albany, NY'},
+    {name:'The Desmond Hotel & Conference Center', city:'Albany, NY'},
+    {name:'Franklin Plaza Ballroom', city:'Troy, NY'},
+    {name:'Key Hall at Proctors', city:'Schenectady, NY'},
+    {name:'Hall of Springs', city:'Saratoga Springs, NY'},
+    {name:'The State Room', city:'Albany, NY'},
+    {name:'Glen Sanders Mansion', city:'Scotia, NY'},
+    {name:'Revolution Hall', city:'Troy, NY'},
+    {name:'Cathedral of the Immaculate Conception', city:'Albany, NY'},
+    {name:'University at Albany — SEFCU Arena', city:'Albany, NY'},
+    {name:'Albany Marriott', city:'Albany, NY'},
+    {name:'Italian American Community Center', city:'Albany, NY'}
+  ];
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function hl(t,q){ var i=t.toLowerCase().indexOf(q); if(i<0||!q) return esc(t); return esc(t.slice(0,i))+'<mark>'+esc(t.slice(i,i+q.length))+'</mark>'+esc(t.slice(i+q.length)); }
+  var PIN='<svg class="pin" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12.5S2.5 8.8 2.5 5.5a4.5 4.5 0 0 1 9 0C11.5 8.8 7 12.5 7 12.5z"/><circle cx="7" cy="5.3" r="1.6"/></svg>';
+  var pop;
+  function vIn(){ return document.getElementById('f-venue'); }
+  function cIn(){ return document.getElementById('f-venue-city'); }
+  function ensure(){
+    if(pop) return; pop=document.createElement('div'); pop.id='venue-pop'; document.body.appendChild(pop);
+    pop.addEventListener('mousedown', function(e){ e.preventDefault(); }); // keep field focus
+    document.addEventListener('click', function(e){ if(pop.classList.contains('open') && e.target.id!=='f-venue' && !pop.contains(e.target)) close(); });
+    window.addEventListener('scroll', function(){ if(pop.classList.contains('open')) position(); }, true);
+    window.addEventListener('resize', close);
+  }
+  function position(){ var i=vIn(); if(!i)return; var r=i.getBoundingClientRect(); pop.style.left=r.left+'px'; pop.style.top=(r.bottom+4)+'px'; pop.style.width=r.width+'px'; }
+  function open(q){ ensure(); var i=vIn(); if(!i)return; q=(q||'').trim().toLowerCase();
+    var res=VENUES.filter(function(v){ return !q || (v.name+' '+v.city).toLowerCase().indexOf(q)>-1; }).slice(0,7);
+    pop.innerHTML = res.length
+      ? res.map(function(v){ return '<div class="vrow" data-name="'+esc(v.name)+'" data-city="'+esc(v.city)+'">'+PIN+'<div><div class="v1">'+hl(v.name,q)+'</div><div class="v2">'+esc(v.city)+'</div></div></div>'; }).join('') + '<div class="vfoot">Pick a venue to auto-fill the city</div>'
+      : '<div class="vfoot" style="border-top:none">No match — type the venue manually</div>';
+    position(); pop.classList.add('open');
+  }
+  function close(){ if(pop) pop.classList.remove('open'); }
+  document.addEventListener('input', function(e){ if(e.target && e.target.id==='f-venue') open(e.target.value); });
+  document.addEventListener('focusin', function(e){ if(e.target && e.target.id==='f-venue') open(e.target.value); });
+  document.addEventListener('click', function(e){
+    var row=e.target.closest && e.target.closest('#venue-pop .vrow'); if(!row) return;
+    var i=vIn(), c=cIn(); if(i) i.value=row.getAttribute('data-name'); if(c) c.value=row.getAttribute('data-city'); close();
+  });
+})();
 </script>
 
 </div>

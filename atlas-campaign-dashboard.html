@@ -168,6 +168,13 @@
     .s-risk  { background: var(--amber-light); color: var(--amber); }
     .s-behind{ background: var(--rose-light);  color: var(--rose); }
     .s-done  { background: var(--blue-light);  color: #1D4ED8; }
+    .s-draft { background: var(--surface, #F1F5F9); color: var(--text-2); border: 1px solid var(--border); }
+    .draft-row { cursor: pointer; }
+    .draft-row td .td-inner { color: var(--text-3); }
+    .draft-row .camp-icon { opacity: .65; }
+    .draft-row:hover { background: var(--blue-pale, #EFF6FF); }
+    .resume-btn { font-family: inherit; font-size: 12px; font-weight: 600; color: var(--blue); background: var(--blue-pale, #EFF6FF); border: 1px solid var(--blue-light, #DBEAFE); border-radius: 7px; padding: 5px 11px; cursor: pointer; }
+    .resume-btn:hover { background: var(--blue-light, #DBEAFE); }
     .s-dot   { width: 5px; height: 5px; border-radius: 50%; }
 
     /* ── GURU AI PANEL ── */
@@ -637,6 +644,7 @@ body {
         <div class="sp" onclick="filterStatus(this,'active')">Active (6)</div>
         <div class="sp" onclick="filterStatus(this,'upcoming')">Upcoming (2)</div>
         <div class="sp" onclick="filterStatus(this,'completed')">Completed (1)</div>
+        <div class="sp" onclick="filterStatus(this,'draft')">Drafts (3)</div>
       </div>
       <div class="ctrl-sep"></div>
       <select class="ctrl-select"><option>All types</option><option>Annual appeal</option><option>Capital campaign</option><option>Special event</option></select>
@@ -802,6 +810,13 @@ const CAMPAIGNS = [
     gifts:[{name:"Campaign complete",org:"",amt:"$310,000",time:"Dec 31"}],
     pledgeOverdue:0, pledgeAmt:"$0",
   },
+  // ── Draft campaigns (saved from the create wizard, not yet launched) ──
+  { id:7, name:"Christmas Giving Appeal 2026", type:"Annual appeal", status:"draft", draft:true,
+    goal:200000, lastEdited:"2 days ago", iconBg:"#E8F0FB", iconStroke:"#2563EB" },
+  { id:8, name:"Seminarian Education Fund", type:"Capital campaign", status:"draft", draft:true,
+    goal:500000, lastEdited:"5 hours ago", iconBg:"#EDE9FE", iconStroke:"#7C3AED" },
+  { id:9, name:"Parish Roof Restoration Gala", type:"Special event", status:"draft", draft:true,
+    goal:0, lastEdited:"just now", iconBg:"#CCFBF1", iconStroke:"#0D9488" },
 ];
 
 let selectedId = null;
@@ -809,11 +824,13 @@ let currentFilter = 'all';
 let currentView = 'table';
 
 function getFiltered(){
-  return currentFilter === 'all' ? CAMPAIGNS
-    : currentFilter === 'active'    ? CAMPAIGNS.filter(c => c.status !== 'done' && c.days > 0)
-    : currentFilter === 'upcoming'  ? CAMPAIGNS.filter(c => c.days > 180)
-    : currentFilter === 'completed' ? CAMPAIGNS.filter(c => c.status === 'done')
-    : CAMPAIGNS;
+  var live = CAMPAIGNS.filter(c => c.status !== 'draft');   // drafts live only under the Drafts filter
+  return currentFilter === 'all' ? live
+    : currentFilter === 'active'    ? live.filter(c => c.status !== 'done' && c.days > 0)
+    : currentFilter === 'upcoming'  ? live.filter(c => c.days > 180)
+    : currentFilter === 'completed' ? live.filter(c => c.status === 'done')
+    : currentFilter === 'draft'     ? CAMPAIGNS.filter(c => c.status === 'draft')
+    : live;
 }
 function render(){ currentView === 'cards' ? renderCards() : renderTable(); }
 function setView(view, btn){
@@ -860,6 +877,7 @@ function renderTable() {
   document.getElementById('ct-count').textContent = filtered.length + ' campaign' + (filtered.length!==1?'s':'');
 
   body.innerHTML = filtered.map(c => {
+    if (c.status === 'draft') return draftRow(c);
     const isPace = c.pct >= c.calPct;
     const diff = c.pct - c.calPct;
     const diffLabel = diff > 0 ? `+${diff}% ahead` : diff < 0 ? `${diff}% behind` : 'on pace';
@@ -895,6 +913,28 @@ function renderTable() {
       <td><div class="td-inner" style="font-weight:500;color:${c.days===0?'var(--text-3)':'var(--text)'}">${c.days===0?'—':c.days+'d'}</div></td>
     </tr>`;
   }).join('');
+}
+
+function draftRow(c){
+  const goal = c.goal ? (c.goal >= 1e6 ? '$'+(c.goal/1e6).toFixed(1)+'M' : '$'+(c.goal/1000).toFixed(0)+'K') : '<span style="color:var(--text-3)">Goal not set</span>';
+  return `<tr class="draft-row" onclick="resumeDraft(${c.id})" title="Resume this draft">
+    <td><div class="td-inner">
+      <div class="camp-name-cell">
+        <div class="camp-icon" style="background:${c.iconBg}"><svg viewBox="0 0 14 14" fill="none" stroke="${c.iconStroke}" stroke-width="1.5" stroke-linecap="round"><path d="M7 1v12M3 5h8"/></svg></div>
+        <div><div class="camp-name">${c.name}</div><div class="camp-type">${c.type} · draft</div></div>
+      </div>
+    </div></td>
+    <td><div class="td-inner" style="color:var(--text-3)">—</div></td>
+    <td><div class="td-inner">${goal}</div></td>
+    <td><div class="td-inner" style="color:var(--text-3);font-size:12px">Not launched · last edited ${c.lastEdited}</div></td>
+    <td><div class="td-inner"><span class="status-pill s-draft"><span class="status-dot s-dot" style="background:#94A3B8"></span>Draft</span></div></td>
+    <td><div class="td-inner"><button class="resume-btn" onclick="event.stopPropagation();resumeDraft(${c.id})">Resume →</button></div></td>
+  </tr>`;
+}
+function resumeDraft(id){
+  const c = CAMPAIGNS.find(x => x.id === id);
+  if (window.atlasToast) atlasToast('Resuming draft · ' + (c ? c.name : ''));
+  setTimeout(function(){ window.location = 'atlas-campaign-create.html'; }, 450);
 }
 
 /* ── DETAIL DRAWER ── */
@@ -1025,8 +1065,7 @@ function handleGuruQuery() {
 
 // Init
 renderTable();
-// Auto-open CMA for demo
-setTimeout(() => openDrawer(1), 600);
+// Drawer stays closed on load — full-width view until a campaign is clicked.
 </script>
 
 
