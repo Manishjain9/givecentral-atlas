@@ -1020,7 +1020,7 @@ body {
             <span class="lbl">Gift date<span class="req">*</span></span>
             <input class="fld" type="text" value="May 4, 2026">
           </div>
-          <div>
+          <div id="meth-wrap">
             <span class="lbl" id="meth-lbl">Payment method</span>
             <select class="fld" id="meth-fld">
               <option>Cash deposited at parish office</option>
@@ -1242,9 +1242,8 @@ body {
             <div><span class="lbl">Ends</span><select class="fld" id="rec-ends" onchange="if(window.onRecEnds)onRecEnds(this.value)"><option selected>Until cancelled (open-ended)</option><option>On a specific date</option><option>After a number of payments</option></select></div>
             <div id="rec-end-detail"><span class="lbl">&nbsp;</span><input class="fld" placeholder="—" disabled></div>
           </div>
-          <div class="row3" style="margin-top:12px">
-            <div><span class="lbl">Payment method on file<span class="req">*</span></span><select class="fld"><option>Credit card · Visa ••4242</option><option>Credit card · add new card…</option><option>ACH · Checking ••8891</option><option>ACH · add new account…</option></select></div>
-            <div><span class="lbl">Processor</span><select class="fld"><option>Stripe (via GiveCentral)</option><option>Authorize.net</option></select></div>
+          <div class="row2" style="margin-top:12px">
+            <div><span class="lbl">Payment method on file<span class="req">*</span></span><select class="fld" id="rec-method" onchange="onRecMethodChange(this)"><option>Credit card · Visa ••4242</option><option>Credit card · add new card…</option><option>ACH · Checking ••8891</option><option>ACH · add new account…</option></select></div>
             <div><span class="lbl">Next charge</span><input class="fld" type="text" value="Jun 4, 2026" disabled></div>
           </div>
           <div class="rule" style="background:var(--green-light);border-color:#86EFAC;margin-top:14px">
@@ -1435,6 +1434,11 @@ body {
 
       // Update step-3 label
       if (typeLabel3) typeLabel3.textContent = '— for ' + (typeNames[t] || t);
+
+      // Recurring carries its own "Payment method on file" field, so hide the
+      // generic step-3 payment-method dropdown to avoid asking twice.
+      var methWrap = document.getElementById('meth-wrap');
+      if (methWrap) methWrap.style.display = (t === 'recurring') ? 'none' : '';
     });
   });
 
@@ -1451,6 +1455,118 @@ body {
       else d.innerHTML = '<span class="lbl">&nbsp;</span><input class="fld" placeholder="—" disabled>';
     };
   }
+})();
+</script>
+
+<!-- ════ Add payment method modal (recurring · "add new…") ════ -->
+<style id="pm-css">
+  #pm-ov{ position:fixed; inset:0; background:rgba(15,23,42,.45); display:none; align-items:center; justify-content:center; z-index:100050; padding:24px; font-family:'DM Sans',sans-serif; }
+  #pm-ov.open{ display:flex; }
+  #pm-modal{ background:#fff; border-radius:16px; width:480px; max-width:94vw; max-height:92vh; overflow:auto; box-shadow:0 24px 60px rgba(15,23,42,.28); }
+  #pm-modal .pm-h{ padding:18px 22px 12px; border-bottom:1px solid var(--border,#E2E8F0); }
+  #pm-modal .pm-t{ font-family:'DM Serif Display',serif; font-size:19px; color:var(--navy,#0E1E35); }
+  #pm-modal .pm-s{ font-size:12px; color:var(--text-3,#64748B); margin-top:3px; }
+  #pm-modal .pm-b{ padding:16px 22px; }
+  #pm-seg{ display:inline-flex; border:1px solid var(--border,#E2E8F0); border-radius:9px; overflow:hidden; margin-bottom:16px; }
+  #pm-seg button{ font-family:inherit; font-size:12.5px; font-weight:600; padding:8px 16px; border:none; background:#fff; color:var(--text-2,#334155); cursor:pointer; }
+  #pm-seg button+button{ border-left:1px solid var(--border,#E2E8F0); }
+  #pm-seg button.on{ background:var(--blue,#2563EB); color:#fff; }
+  #pm-modal .pm-fld{ margin-bottom:12px; }
+  #pm-modal .pm-fld label{ display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text-2,#334155); margin-bottom:5px; }
+  #pm-modal .pm-fld input, #pm-modal .pm-fld select{ width:100%; box-sizing:border-box; border:1px solid var(--border,#E2E8F0); border-radius:8px; padding:9px 11px; font-family:inherit; font-size:13px; color:var(--text,#0F172A); }
+  #pm-modal .pm-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  #pm-modal .pm-note{ display:flex; gap:9px; align-items:flex-start; background:var(--surface,#F8FAFC); border:1px solid var(--border,#E2E8F0); border-radius:9px; padding:10px 12px; font-size:11.5px; color:var(--text-3,#64748B); line-height:1.5; margin-top:4px; }
+  #pm-modal .pm-note svg{ width:14px; height:14px; flex-shrink:0; margin-top:1px; color:var(--blue,#2563EB); }
+  #pm-modal .pm-link{ margin-top:12px; font-size:12.5px; }
+  #pm-modal .pm-link a{ color:var(--blue,#2563EB); font-weight:600; cursor:pointer; }
+  #pm-modal .pm-f{ padding:14px 22px; border-top:1px solid var(--border,#E2E8F0); background:var(--surface,#F8FAFC); display:flex; gap:10px; justify-content:flex-end; }
+  #pm-modal .pm-btn{ font-family:inherit; font-size:13px; font-weight:600; border-radius:9px; padding:9px 16px; cursor:pointer; border:1px solid var(--border,#E2E8F0); background:#fff; color:var(--text-2,#334155); }
+  #pm-modal .pm-btn.primary{ background:var(--blue,#2563EB); border-color:var(--blue,#2563EB); color:#fff; }
+</style>
+<div id="pm-ov">
+  <div id="pm-modal" role="dialog" aria-modal="true">
+    <div class="pm-h">
+      <div class="pm-t">Add a payment method</div>
+      <div class="pm-s" id="pm-sub">For the donor on this gift · stored securely for recurring charges</div>
+    </div>
+    <div class="pm-b">
+      <div id="pm-seg"><button type="button" data-pm="card" class="on" onclick="pmMode('card')">Credit / debit card</button><button type="button" data-pm="ach" onclick="pmMode('ach')">Bank account (ACH)</button></div>
+      <div id="pm-card">
+        <div class="pm-fld"><label>Cardholder name</label><input placeholder="Name as it appears on card"></div>
+        <div class="pm-fld"><label>Card number</label><input id="pm-cardno" placeholder="•••• •••• •••• ••••" inputmode="numeric"></div>
+        <div class="pm-row">
+          <div class="pm-fld"><label>Expiry</label><input placeholder="MM / YY"></div>
+          <div class="pm-fld"><label>CVC</label><input placeholder="•••"></div>
+        </div>
+        <div class="pm-fld"><label>Billing ZIP</label><input placeholder="12203"></div>
+      </div>
+      <div id="pm-ach" style="display:none">
+        <div class="pm-fld"><label>Account holder</label><input placeholder="Name on the account"></div>
+        <div class="pm-row">
+          <div class="pm-fld"><label>Routing number</label><input id="pm-routing" placeholder="9 digits" inputmode="numeric"></div>
+          <div class="pm-fld"><label>Account number</label><input id="pm-acct" placeholder="Account number" inputmode="numeric"></div>
+        </div>
+        <div class="pm-fld"><label>Account type</label><select><option>Checking</option><option>Savings</option></select></div>
+      </div>
+      <div class="pm-note"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2.5" y="6" width="9" height="6" rx="1.5"/><path d="M4.5 6V4.3a2.5 2.5 0 0 1 5 0V6"/></svg><span>Card data is tokenized by the processor — Atlas never stores the full number. For PCI compliance, prefer emailing the donor a secure link rather than keying their card.</span></div>
+      <div class="pm-link">Rather not key it in? <a onclick="pmSendLink()">Email the donor a secure link to add it →</a></div>
+    </div>
+    <div class="pm-f">
+      <button class="pm-btn" type="button" onclick="pmClose(true)">Cancel</button>
+      <button class="pm-btn primary" type="button" onclick="pmSave()">Save payment method</button>
+    </div>
+  </div>
+</div>
+<script id="pm-js">
+(function(){
+  var sel=null, prevIdx=0, mode='card';
+  function ov(){ return document.getElementById('pm-ov'); }
+  window.onRecMethodChange=function(s){
+    var txt=s.options[s.selectedIndex].textContent;
+    if(/add new/i.test(txt)){
+      sel=s; prevIdx=(s.__prev!=null?s.__prev:0);
+      pmMode(/account|ach/i.test(txt)?'ach':'card');
+      document.getElementById('pm-sub').textContent='For the donor on this gift · stored securely for recurring charges';
+      ov().classList.add('open');
+    } else { s.__prev=s.selectedIndex; }
+  };
+  window.pmMode=function(m){
+    mode=m;
+    document.querySelectorAll('#pm-seg button').forEach(function(b){ b.classList.toggle('on', b.dataset.pm===m); });
+    document.getElementById('pm-card').style.display = m==='card'?'':'none';
+    document.getElementById('pm-ach').style.display  = m==='ach'?'':'none';
+  };
+  window.pmClose=function(revert){
+    if(revert && sel){ sel.selectedIndex=prevIdx; }
+    ov().classList.remove('open'); sel=null;
+  };
+  window.pmSave=function(){
+    if(!sel){ pmClose(); return; }
+    var label, last4;
+    if(mode==='card'){
+      var no=(document.getElementById('pm-cardno').value||'').replace(/\D/g,'');
+      last4 = no.slice(-4) || String(1000+Math.floor(Math.random()*8999));
+      label='Credit card · Visa ••'+last4;
+    } else {
+      var acc=(document.getElementById('pm-acct').value||'').replace(/\D/g,'');
+      last4 = acc.slice(-4) || String(1000+Math.floor(Math.random()*8999));
+      label='ACH · Checking ••'+last4;
+    }
+    // insert the new saved method before the matching "add new…" option and select it
+    var opt=document.createElement('option'); opt.textContent=label;
+    sel.insertBefore(opt, sel.options[sel.selectedIndex]);
+    sel.value=label; sel.__prev=sel.selectedIndex;
+    ov().classList.remove('open'); sel=null;
+    if(window.atlasToast) atlasToast('Payment method saved · '+label);
+  };
+  window.pmSendLink=function(){
+    if(window.atlasToast) atlasToast('Secure "add a payment method" link emailed to the donor');
+    pmClose(true);
+  };
+  // remember prior selection so cancel can revert
+  var rm=document.getElementById('rec-method'); if(rm){ rm.__prev=rm.selectedIndex; rm.addEventListener('focus',function(){ this.__prev=this.selectedIndex; }); }
+  // click backdrop closes (revert)
+  document.getElementById('pm-ov').addEventListener('click', function(e){ if(e.target===this) pmClose(true); });
 })();
 </script>
 

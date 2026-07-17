@@ -821,6 +821,27 @@ body {
           <textarea class="fld" id="f-desc" placeholder="Shown on donation forms and the location portal">Restoring the 1888 cathedral — bell-tower masonry, lead flashing, and stained-glass conservation. 1:1 matched gifts available up to $250,000.</textarea>
         </div>
 
+        <div class="section-h">Legal entity</div>
+        <p class="muted" style="font-size:12px;margin-top:-6px;margin-bottom:10px">Set the legal entity first — it scopes the funds and GL accounts you'll build in the hierarchy step.</p>
+        <div class="row2">
+          <div>
+            <span class="lbl">Primary legal entity<span class="req">*</span></span>
+            <select class="fld" id="f-entity">
+              <option selected>Diocese of Albany (EIN 14-•••2401)</option>
+              <option>Catholic Charities of Albany (EIN 14-•••5512)</option>
+              <option>Diocesan Foundation (EIN 14-•••8847)</option>
+              <option>Scholarship Foundation (EIN 14-•••9201)</option>
+            </select>
+          </div>
+          <div>
+            <span class="lbl">Cross-entity?</span>
+            <select class="fld" id="f-crossentity">
+              <option selected>Single entity</option>
+              <option>Allow funds across multiple entities</option>
+            </select>
+          </div>
+        </div>
+
         <div id="gtr-render"></div>
 
         <div class="wiz-foot">
@@ -983,27 +1004,7 @@ body {
       <!-- ── STEP 4: TEAM & ACCESS ────────────────────────────── -->
       <section class="wiz-panel" data-panel="4" data-key="team">
         <h2 class="wiz-h" id="team-h">Team &amp; access</h2>
-        <p class="wiz-sub" id="team-sub">Assign solicitors, set the legal entity scope, and decide which roles can edit the campaign.</p>
-
-        <div class="section-h">Legal entity scope</div>
-        <div class="row2">
-          <div>
-            <span class="lbl">Primary legal entity<span class="req">*</span></span>
-            <select class="fld" id="f-entity">
-              <option selected>Diocese of Albany (EIN 14-•••2401)</option>
-              <option>Catholic Charities of Albany (EIN 14-•••5512)</option>
-              <option>Diocesan Foundation (EIN 14-•••8847)</option>
-              <option>Scholarship Foundation (EIN 14-•••9201)</option>
-            </select>
-          </div>
-          <div>
-            <span class="lbl">Cross-entity?</span>
-            <select class="fld" id="f-crossentity">
-              <option selected>Single entity</option>
-              <option>Allow funds across multiple entities</option>
-            </select>
-          </div>
-        </div>
+        <p class="wiz-sub" id="team-sub">Assign solicitors and decide which roles can edit the campaign. The legal entity was set on the first step.</p>
 
         <div class="section-h">Solicitors assigned to this campaign</div>
         <p class="muted" style="font-size:12px;margin-top:-6px;margin-bottom:10px">Search the team and click to assign. Only assigned solicitors will see this campaign in their pipeline filter.</p>
@@ -1492,7 +1493,7 @@ body {
        rail labels, and panel headings.
        ════════════════════════════════════════════════════ */
     var FLOWS = {
-      capital:  ['type','goal','named','hierarchy','team','review'],
+      capital:  ['type','goal','hierarchy','team','review'],
       annual:   ['type','goal','segments','hierarchy','ack','team','review'],
       event:    ['type','goal','tickets','hierarchy','team','review'],
       memorial: ['type','goal','vehicles','stewardship','team','review']
@@ -1502,7 +1503,7 @@ body {
         type:{nav:'Type',sub:'Capital campaign'},
         goal:{nav:'Goal & phases',sub:'Target · quiet phase',title:'Goal & phases',desc:'Set the campaign target, optional stretch goal, and the quiet → public phase timeline.'},
         named:{nav:'Named gifts',sub:'Naming opportunities'},
-        hierarchy:{nav:'Hierarchy',sub:'Appeals & funds',title:'Build your hierarchy',desc:'Atlas pre-loaded the recommended hierarchy for a capital campaign. Edit inline — goals roll up automatically.'},
+        hierarchy:{nav:'Hierarchy',sub:'Appeals & funds',title:'Build your hierarchy',desc:'Add the appeals and funds for this campaign — name each, set its GL account and entity, and enter a goal. Appeal goals roll up to the campaign total automatically.'},
         team:{nav:'Team & prospects',sub:'Officers · entity',title:'Team, prospects & access',desc:'Assign gift officers, set the legal entity scope, and choose who can edit this campaign.'},
         review:{nav:'Review & create',sub:'Final check'}
       },
@@ -1510,7 +1511,7 @@ body {
         type:{nav:'Type',sub:'Annual appeal'},
         goal:{nav:'Goal & timeline',sub:'Target · calendar',title:'Goal & timeline',desc:'Set the appeal target and the calendar-year window. Annual appeals run fully public.'},
         segments:{nav:'Segments & channels',sub:'Who & how'},
-        hierarchy:{nav:'Hierarchy',sub:'Appeals & funds',title:'Build your hierarchy',desc:'Map each mailing and channel to the funds it supports. Goals roll up automatically.'},
+        hierarchy:{nav:'Hierarchy',sub:'Appeals & funds',title:'Build your hierarchy',desc:'Add the appeals (mailings, channels) and the funds they support. Appeal goals roll up to the campaign total automatically.'},
         ack:{nav:'Acknowledgement',sub:'Thank-you · receipt'},
         team:{nav:'Team & access',sub:'Officers · entity',title:'Team & access',desc:'Assign solicitors, set the legal entity scope, and choose who can edit this campaign.'},
         review:{nav:'Review & create',sub:'Final check'}
@@ -1519,7 +1520,7 @@ body {
         type:{nav:'Type',sub:'Special / event'},
         goal:{nav:'Event details',sub:'Date · goal',title:'Event details',desc:'Set the event date, fundraising goal, and the ticket-sales window.'},
         tickets:{nav:'Tickets & FMV',sub:'Tables · sponsorships'},
-        hierarchy:{nav:'Proceeds & funds',sub:'Where money routes',title:'Proceeds & funds',desc:'Map ticket, sponsorship, and donation revenue to the funds it supports. Goals roll up automatically.'},
+        hierarchy:{nav:'Proceeds & funds',sub:'Where money routes',title:'Proceeds & funds',desc:'Add the revenue streams (tickets, sponsorships, donations) and the funds they route to. Goals roll up to the campaign total automatically.'},
         team:{nav:'Committee',sub:'Roles · access',title:'Event committee & access',desc:'Assign the event committee, set the legal entity, and choose who can edit.'},
         review:{nav:'Review & create',sub:'Final check'}
       },
@@ -1637,11 +1638,7 @@ body {
     function extraReview(t){
       var k=current, out='';
       function blk(editkey,title,rows){ return '<div class="review-block"><h4>'+title+' <a data-editkey="'+editkey+'">Edit →</a></h4>'+rows.map(function(r){return rrow(r[0],r[1],r[2]);}).join('')+'</div>'; }
-      if(k==='capital'){
-        var tb=document.querySelectorAll('#ext-named-tbl tbody tr'); var n=tb.length;
-        var first=n?(tb[0].querySelector('input')||{}).value:'—';
-        out+=blk('named','Named-gift opportunities',[['Opportunities', n+' named gifts'],['Lead opportunity', esc(first||'—')]]);
-      } else if(k==='annual'){
+      if(k==='annual'){
         out+=blk('segments','Segments &amp; channels',[['Segments', esc(chosenChips('ext-segments',0).join(' · ')||'—')],['Channels', esc(chosenChips('ext-segments',1).join(' · ')||'—')]]);
         var a=selVals('ext-ack');
         out+=blk('ack','Acknowledgement',[['Thank-you', esc(a[0]||'—')],['Receipt', esc(a[1]||'—')]]);
@@ -1662,45 +1659,71 @@ body {
     function node(kind, name, meta, goal, opts){
       opts = opts||{};
       var nmCls = kind==='a'?' appeal':(kind==='f'?' fund':'');
+      var phName = kind==='a'?'Name this appeal (e.g. Spring mailing, Online giving)':kind==='f'?'Name this fund':'';
+      var phMeta = kind==='a'?'Describe this appeal (optional)':kind==='f'?'GL account · legal entity (e.g. GL 4001 · Diocese)':'';
       var lead = '<div class="lead"><div class="ico-sm '+kind+'">'+kind.toUpperCase()+'</div>'
-               + '<div class="txt"><input class="nm-input'+nmCls+'" value="'+esc(name)+'"><input class="meta-input" value="'+esc(meta)+'"></div></div>';
+               + '<div class="txt"><input class="nm-input'+nmCls+'" value="'+esc(name)+'" placeholder="'+esc(phName)+'"><input class="meta-input" value="'+esc(meta)+'" placeholder="'+esc(phMeta)+'"></div></div>';
       if (kind==='c'){
         return '<div class="h-node lvl-c">'+lead
           +'<div><input class="goal-input" value="'+esc(goal)+'" readonly title="Auto = sum of appeal goals" style="background:var(--blue-pale);color:var(--blue);font-weight:600"></div>'
           +'<div></div></div>';
       }
       return '<div class="h-node lvl-'+kind+'"'+(opts.mt?' style="margin-top:8px"':'')+'>'+lead
-        +'<div><input class="goal-input" value="'+esc(goal)+'"></div>'
+        +'<div><input class="goal-input" value="'+esc(goal)+'" placeholder="$0"></div>'
         +'<div><button class="x-btn">×</button></div></div>';
     }
     function addNode(cls, label, mt){ return '<div class="add-node '+cls+'"'+(mt?' style="margin-top:14px"':'')+'>'+PLUS+esc(label)+'</div>'; }
+    // Start blank & practical — no template data. Just the campaign root + one empty
+    // appeal + one empty fund to fill in. Goals roll up live from what you enter.
     function buildHierarchy(t){
-      var h = node('c', t.root.name, t.root.meta, t.root.goal);
-      t.appeals.forEach(function(a,i){
-        h += node('a', a.name, a.meta, a.goal, {mt:i>0});
-        a.funds.forEach(function(f){ h += node('f', f.name, f.meta, f.goal); });
-        h += addNode('fund', a.add);
-      });
-      h += addNode('appeal', 'Add another appeal', true);
-      return h;
+      var rootName = liveVal('campaign-name-input', t.name);
+      return node('c', rootName, '', '$0')
+        + node('a', '', '', '')
+        + node('f', '', '', '')
+        + addNode('fund', 'Add fund under this appeal')
+        + addNode('appeal', 'Add another appeal', true);
     }
-    function countFunds(t){ var n=0; t.appeals.forEach(function(a){ n+=a.funds.length; }); return n; }
-    function buildSummary(t){
-      return '<span class="l">Roll-up</span>'
-        +'<span class="v">'+t.appeals.length+' appeals · '+countFunds(t)+' funds</span>'
-        +'<span class="v">'+t.rollupText+'</span>'
-        +'<span class="'+(t.rollupOk?'ok':'warn')+'">'+(t.rollupOk?'✓ ':'⚠ ')+t.rollupNote+'</span>';
+    function hParse(s){ var n=parseFloat(String(s||'').replace(/[^0-9.]/g,'')); return isNaN(n)?0:n; }
+    function hMoney(n){ return '$'+Math.round(n).toLocaleString('en-US'); }
+    function readHierarchy(){
+      var box=document.getElementById('hierarchy-box'); var out={appeals:[],apCount:0,fundCount:0,total:0};
+      if(!box) return out;
+      var cur=null;
+      [].slice.call(box.querySelectorAll('.h-node')).forEach(function(nd){
+        if(nd.classList.contains('lvl-a')){
+          var nm=((nd.querySelector('.nm-input')||{}).value||'').trim();
+          var g=hParse((nd.querySelector('.goal-input')||{}).value);
+          cur={name:nm, goal:g, funds:[]}; out.appeals.push(cur); out.total+=g;
+        } else if(nd.classList.contains('lvl-f')){
+          out.fundCount++;
+          if(cur) cur.funds.push(((nd.querySelector('.nm-input')||{}).value||'').trim());
+        }
+      });
+      out.apCount=out.appeals.length;
+      return out;
+    }
+    function recomputeHierarchy(){
+      var h=readHierarchy();
+      var root=document.querySelector('#hierarchy-box .lvl-c .goal-input'); if(root) root.value=hMoney(h.total);
+      var gs=document.getElementById('goal-summary-box');
+      if(gs) gs.innerHTML='<span class="l">Roll-up</span>'
+        +'<span class="v">'+h.apCount+' appeal'+(h.apCount!==1?'s':'')+' · '+h.fundCount+' fund'+(h.fundCount!==1?'s':'')+'</span>'
+        +'<span class="v">Total '+hMoney(h.total)+'</span>'
+        +'<span class="ok">✓ Rolls up automatically as you edit</span>';
     }
 
     /* ── review builder ── */
     function rrow(l,v,small){ return '<div class="review-row"><span class="l">'+l+'</span><span class="v">'+v+(small?' <small>'+small+'</small>':'')+'</span></div>'; }
     function liveVal(id, fb){ var e=document.getElementById(id); return (e && e.value) ? e.value : fb; }
     function buildReview(t){
-      var struct = t.appeals.length+' appeals · '+countFunds(t)+' funds · 1 legal entity';
-      var appealRows = t.appeals.map(function(a){
-        var fundNames = a.funds.map(function(f){ return f.name; }).join(' · ');
-        return rrow(a.name, a.goal+' · '+a.funds.length+' fund'+(a.funds.length>1?'s':'')+' ('+fundNames+')');
-      }).join('');
+      var H = readHierarchy();
+      var struct = H.apCount+' appeal'+(H.apCount!==1?'s':'')+' · '+H.fundCount+' fund'+(H.fundCount!==1?'s':'')+' · 1 legal entity';
+      var appealRows = H.appeals.map(function(a){
+        var named=a.funds.filter(function(f){return f;});
+        var label = a.name || '<span style="color:var(--text-3)">(unnamed appeal)</span>';
+        var fundTxt = named.length ? ' ('+named.join(' · ')+')' : '';
+        return rrow(label, hMoney(a.goal)+' · '+a.funds.length+' fund'+(a.funds.length!==1?'s':'')+fundTxt);
+      }).join('') || rrow('Structure','No appeals added yet');
       // live values (fall back to type defaults before those fields exist)
       var nm  = liveVal('campaign-name-input', t.name);
       var cd  = liveVal('f-code', t.code);
@@ -1728,7 +1751,7 @@ body {
       + '<div class="review-block"><h4>'+((STEP_LABELS[current]&&STEP_LABELS[current].hierarchy&&STEP_LABELS[current].hierarchy.nav)||'Hierarchy')+' <a data-editkey="hierarchy">Edit →</a></h4>'
         + rrow('Structure', struct)
         + appealRows
-        + '<div class="review-row"><span class="l">Roll-up</span><span class="v" style="color:var(--green);font-weight:600">✓ '+t.rollupText.replace(/<\/?strong>/g,'')+' · '+t.rollupNote.toLowerCase()+'</span></div>'
+        + '<div class="review-row"><span class="l">Roll-up</span><span class="v" style="color:var(--green);font-weight:600">✓ Total '+hMoney(H.total)+' · rolls up from appeal goals</span></div>'
       + '</div>'
       + '<div class="review-block"><h4>'+((STEP_LABELS[current]&&STEP_LABELS[current].team&&STEP_LABELS[current].team.nav)||'Team')+' <a data-editkey="team">Edit →</a></h4>'
         + rrow('Legal entity', esc(entName), 'EIN '+ein)
@@ -1739,7 +1762,7 @@ body {
       + '</div>'
       + '<div style="background:var(--green-light);border:1px solid #86EFAC;border-radius:11px;padding:16px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start">'
         + '<div style="width:30px;height:30px;border-radius:8px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700">✓</div>'
-        + '<div style="flex:1;font-size:12.5px;color:#14532D;line-height:1.5"><strong>All checks passed.</strong> GL codes are valid · solicitors have entity access · '+(t.publicNo?'internal-only program':'public URL is available')+' · roll-up balanced. The campaign is ready to create.</div>'
+        + '<div style="flex:1;font-size:12.5px;color:#14532D;line-height:1.5"><strong>Ready to create.</strong> Assigned solicitors have entity access · '+(t.publicNo?'internal-only program':'public URL is available')+' · appeal goals roll up to the campaign total. You can refine the hierarchy any time after creating.</div>'
       + '</div>';
     }
 
@@ -1772,7 +1795,7 @@ body {
       }
       var gtr = document.getElementById('gtr-render'); if (gtr) gtr.innerHTML = buildGTR(t);
       var hb = document.getElementById('hierarchy-box'); if (hb) hb.innerHTML = buildHierarchy(t);
-      var gs = document.getElementById('goal-summary-box'); if (gs) gs.innerHTML = buildSummary(t);
+      recomputeHierarchy();
       rebindX();
       setSelect('f-entity', t.entity);
       var pub = document.getElementById('f-public');
@@ -1854,20 +1877,25 @@ body {
 
     /* ══ Hierarchy add / remove (delegated) ══ */
     var hbox = document.getElementById('hierarchy-box');
-    if (hbox) hbox.addEventListener('click', function(e){
-      var x = e.target.closest('.x-btn');
-      if (x){ var nd = x.closest('.h-node'); if(nd) nd.remove(); return; }
-      var addF = e.target.closest('.add-node.fund');
-      if (addF){ addF.insertAdjacentHTML('beforebegin', node('f','New fund','GL —— · set GL account + entity','$0')); return; }
-      var addA = e.target.closest('.add-node.appeal');
-      if (addA){
-        var block = node('a','New appeal','Describe this appeal','$0',{mt:true})
-                  + node('f','New fund','GL —— · set GL account + entity','$0')
-                  + addNode('fund','Add fund under New appeal');
-        addA.insertAdjacentHTML('beforebegin', block);
-        return;
-      }
-    });
+    if (hbox){
+      hbox.addEventListener('click', function(e){
+        var x = e.target.closest('.x-btn');
+        if (x){ var nd = x.closest('.h-node'); if(nd) nd.remove(); recomputeHierarchy(); return; }
+        var addF = e.target.closest('.add-node.fund');
+        if (addF){ addF.insertAdjacentHTML('beforebegin', node('f','','','')); recomputeHierarchy(); return; }
+        var addA = e.target.closest('.add-node.appeal');
+        if (addA){
+          var block = node('a','','','',{mt:true})
+                    + node('f','','','')
+                    + addNode('fund','Add fund under this appeal');
+          addA.insertAdjacentHTML('beforebegin', block);
+          recomputeHierarchy();
+          return;
+        }
+      });
+      // live roll-up as goals are typed
+      hbox.addEventListener('input', function(e){ if(e.target.classList && e.target.classList.contains('goal-input')) recomputeHierarchy(); });
+    }
 
     /* ══ Custom-option ("…") modal ══
        Any <select> option whose text ends in "…" opens a builder.
@@ -2001,7 +2029,8 @@ body {
       var goal = ((document.querySelector('#gtr-render input')||{}).value) || t.reviewGoal;
       var entity = ((document.getElementById('f-entity')||{}).value || t.entity).replace(/ \(EIN.*$/,'');
       var perm = (document.getElementById('f-editperm')||{}).value || t.permissions;
-      var nApp = t.appeals.length, nFund = countFunds(t);
+      var _H = readHierarchy(); var nApp = _H.apCount, nFund = _H.fundCount;
+      if (_H.total > 0) goal = hMoney(_H.total);
       var names = assignedNames(); var n = names.length;
       var url = currentPublicUrl();
       var emailSel = document.querySelector('#gtr-render') && document.querySelectorAll('.wiz-panel[data-panel="4"] select');
