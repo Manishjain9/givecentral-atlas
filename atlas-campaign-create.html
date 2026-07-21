@@ -822,24 +822,15 @@ body {
         </div>
 
         <div class="section-h">Legal entity</div>
-        <p class="muted" style="font-size:12px;margin-top:-6px;margin-bottom:10px">Set the legal entity first — it scopes the funds and GL accounts you'll build in the hierarchy step.</p>
-        <div class="row2">
-          <div>
-            <span class="lbl">Primary legal entity<span class="req">*</span></span>
-            <select class="fld" id="f-entity">
-              <option selected>Diocese of Albany (EIN 14-•••2401)</option>
-              <option>Catholic Charities of Albany (EIN 14-•••5512)</option>
-              <option>Diocesan Foundation (EIN 14-•••8847)</option>
-              <option>Scholarship Foundation (EIN 14-•••9201)</option>
-            </select>
-          </div>
-          <div>
-            <span class="lbl">Cross-entity?</span>
-            <select class="fld" id="f-crossentity">
-              <option selected>Single entity</option>
-              <option>Allow funds across multiple entities</option>
-            </select>
-          </div>
+        <p class="muted" style="font-size:12px;margin-top:-6px;margin-bottom:10px">Set the primary legal entity first — it scopes the funds and GL accounts you'll build in the hierarchy step. Individual funds can be assigned to other entities in that step.</p>
+        <div>
+          <span class="lbl">Primary legal entity<span class="req">*</span></span>
+          <select class="fld" id="f-entity">
+            <option selected>Diocese of Albany (EIN 14-•••2401)</option>
+            <option>Catholic Charities of Albany (EIN 14-•••5512)</option>
+            <option>Diocesan Foundation (EIN 14-•••8847)</option>
+            <option>Scholarship Foundation (EIN 14-•••9201)</option>
+          </select>
         </div>
 
         <div id="gtr-render"></div>
@@ -1114,7 +1105,7 @@ body {
       <!-- ── EXTRA: MEMORIAL · Stewardship plan ───────────────── -->
       <section class="wiz-panel" data-key="stewardship">
         <h2 class="wiz-h">Stewardship plan</h2>
-        <p class="wiz-sub">How you'll welcome, cultivate, and recognize legacy donors over a multi-decade relationship.</p>
+        <p class="wiz-sub">Enroll legacy donors and assign the planned-giving officer. Ongoing cultivation and recognition live in the Stewardship module.</p>
         <div id="ext-stewardship"></div>
         <div class="wiz-foot"><div class="left"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--green)"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg> Auto-saved as draft</div><div class="wiz-nav"></div></div>
       </section>
@@ -1317,7 +1308,7 @@ body {
         timelineFields:[
           {lbl:'Public start',req:1,val:'January 1, 2026'},
           {lbl:'Public end',req:1,val:'June 30, 2026'},
-          {lbl:'Quiet phase',select:1,val:'Started Sep 2025 · 4-month silent phase',alt:['No quiet phase']}
+          {lbl:'Quiet phase',select:1,val:'4-month quiet phase before public launch',alt:['3-month quiet phase','6-month quiet phase','No quiet phase','Custom…']}
         ],
         recognitionTitle:'Recognition',
         recognitionFields:[
@@ -1325,7 +1316,7 @@ body {
           {lbl:'Naming opportunities?',select:1,val:'Yes · 12 named opportunities',alt:['No']}
         ],
         reviewGoal:'$2,000,000.00 USD',  reviewGoalSmall:'stretch goal $2,500,000.00',
-        reviewTimeline:'Jan 1 → Jun 30, 2026', reviewTimelineSmall:'quiet phase from Sep 2025',
+        reviewTimeline:'Jan 1 → Jun 30, 2026', reviewTimelineSmall:'includes a 4-month quiet phase',
         reviewRecognition:'Bronze · Silver · Gold · Platinum tiers', reviewRecognitionSmall:'12 named opportunities',
         root:{name:'Cathedral Capital Campaign 2026', meta:'Goal $2.0M · 6-month public phase · Diocese of Albany', goal:'$2,000,000'},
         appeals:[
@@ -1356,16 +1347,15 @@ body {
         timelineFields:[
           {lbl:'Appeal start',req:1,val:'January 1, 2026'},
           {lbl:'Appeal end',req:1,val:'December 31, 2026'},
-          {lbl:'Quiet phase',select:1,val:'No quiet phase — annual appeals run fully public',alt:['Add a quiet phase…']}
+          {lbl:'Quiet phase',select:1,val:'No quiet phase — runs fully public',alt:['3-month quiet phase','4-month quiet phase','6-month quiet phase','Custom…']}
         ],
         recognitionTitle:'Recognition',
         recognitionFields:[
-          {lbl:'Donor acknowledgement',select:1,val:'Thank-you letter + annual tax receipt',alt:['Add honor-roll listing','None']},
           {lbl:'Gift tiers / naming?',select:1,val:'No tiers — flat annual appeal',alt:['Add giving levels…']}
         ],
         reviewGoal:'$750,000.00 USD', reviewGoalSmall:'no stretch goal',
         reviewTimeline:'Jan 1 → Dec 31, 2026', reviewTimelineSmall:'full calendar year · no quiet phase',
-        reviewRecognition:'Thank-you letter + annual receipt', reviewRecognitionSmall:'no gift tiers',
+        reviewRecognition:'No gift tiers', reviewRecognitionSmall:'flat annual appeal',
         root:{name:'Annual Appeal 2026', meta:'Goal $750k · full-year appeal · Diocese of Albany', goal:'$750,000'},
         appeals:[
           {name:'Spring mailing', meta:'Direct mail · renewal + reactivation segments', goal:'$250,000', add:'Add fund under Spring mailing',
@@ -1528,7 +1518,7 @@ body {
         type:{nav:'Type',sub:'Planned giving'},
         goal:{nav:'Program setup',sub:'Intentions · horizon',title:'Program setup',desc:'Set the deferred intention target, program start, and stewardship-review cadence. No public dollar goal.'},
         vehicles:{nav:'Gift vehicles',sub:'What you track'},
-        stewardship:{nav:'Stewardship plan',sub:'Cultivate · recognize'},
+        stewardship:{nav:'Stewardship plan',sub:'Enroll · assign officer'},
         team:{nav:'Team & access',sub:'Officers · entity',title:'Team & access',desc:'Assign the planned-giving team, set the legal entity, and choose who can edit.'},
         review:{nav:'Review & create',sub:'Final check'}
       }
@@ -1615,10 +1605,7 @@ body {
     function buildStewardship(){
       return section('Enrollment & officer',[{lbl:'Heritage Society enrollment',select:1,val:'Auto-enroll on recorded intention',alt:['Manual enrollment','No enrollment']},
                                              {lbl:'Planned-giving officer',select:1,val:'Aoife O’Brien',alt:['Grace Lin','Assign later']}])
-        +section('Cultivation cadence',[{lbl:'Welcome series',select:1,val:'5-touch legacy welcome',alt:['3-touch','None']},
-                                        {lbl:'Ongoing touch cadence',select:1,val:'Quarterly',alt:['Semi-annual','Annual']}])
-        +section('Recognition & legacy',[{lbl:'Annual-report listing',select:1,val:'Yes — name or anonymous',alt:['No listing']},
-                                         {lbl:'Legacy naming',select:1,val:'Endowment & memorial naming',alt:['No naming']}]);
+        + '<div class="ext-readout" style="align-items:flex-start">'+IBLUE+'<span>Cultivation cadence and donor recognition are managed in the Stewardship module once the program is live — not set up here.</span></div>';
     }
     function fillExtras(){
       var m={'ext-named':buildNamed,'ext-segments':buildSegments,'ext-ack':buildAck,'ext-tickets':buildTickets,'ext-vehicles':buildVehicles,'ext-stewardship':buildStewardship};
@@ -1649,7 +1636,7 @@ body {
       } else if(k==='memorial'){
         out+=blk('vehicles','Planned-gift vehicles',[['Tracking', esc(chosenChips('ext-vehicles',0).join(' · ')||'—')]]);
         var s=selVals('ext-stewardship');
-        out+=blk('stewardship','Stewardship plan',[['Enrollment', esc(s[0]||'—')],['Officer', esc(s[1]||'—')],['Cadence', esc(s[3]||'—')]]);
+        out+=blk('stewardship','Stewardship plan',[['Enrollment', esc(s[0]||'—')],['Officer', esc(s[1]||'—')]]);
       }
       return out;
     }
@@ -1858,9 +1845,7 @@ body {
     function updateTeamFoot(){
       var n = assignedCount();
       var cnt = document.getElementById('sol-count'); if(cnt) cnt.textContent = n+' assigned';
-      var cross = document.getElementById('f-crossentity');
-      var scope = (cross && cross.selectedIndex===1) ? 'cross-entity scope' : 'single-entity scope';
-      var foot = document.getElementById('team-foot'); if(foot) foot.textContent = n+' solicitor'+(n!==1?'s':'')+' assigned · '+scope;
+      var foot = document.getElementById('team-foot'); if(foot) foot.textContent = n+' solicitor'+(n!==1?'s':'')+' assigned';
     }
     window.filterSolicitors = function(v){ renderSolicitors(v); };
     var solList = document.getElementById('sol-list');
@@ -1921,7 +1906,7 @@ body {
           '<div id="tier-list">'+tierRow('Bronze','$1,000')+tierRow('Silver','$5,000')+'</div>'
           +'<div class="add-tier" onclick="addTierRow()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg>Add another level</div>';
       } else {
-        var ph = /quiet phase/i.test(txt) ? 'e.g. Started Sep 2025 · 4-month silent phase'
+        var ph = /quiet phase/i.test(txt) ? 'e.g. 5-month quiet phase, or Sep 2025 – Jan 2026'
                : /end date/i.test(txt)    ? 'e.g. December 31, 2030'
                : /public goal/i.test(txt) ? 'e.g. $5,000,000.00'
                : /giving levels/i.test(txt)? 'e.g. $100 · $500 · $1,000'
