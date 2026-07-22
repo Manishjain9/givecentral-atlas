@@ -4185,10 +4185,34 @@ body {
   let ntmCat = 'Solicitation';
   let ntmPri = 'High';
 
+  // ─── Edit mode ───
+  let ntmEditRow = null;
+  function ntmSetMode(edit){
+    var t = document.getElementById('ntm-title'); if(t) t.textContent = edit ? 'Edit task' : 'Create new task';
+    var sub = document.querySelector('.ntm-head-sub'); if(sub) sub.textContent = edit ? 'Update this task and save your changes' : 'Assigned to Sarah Reynolds · saves to your Today queue';
+    var addAnother = document.querySelector('.ntm-foot-btn.ghost[onclick*="saveNewTask(true)"]'); if(addAnother) addAnother.style.display = edit ? 'none' : '';
+    var primary = document.querySelector('.ntm-foot-btn.primary');
+    if(primary) primary.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round"><path d="M2 6l3 3 5-7"/></svg> ' + (edit ? 'Save changes' : 'Save task');
+  }
+
   // ─── Open / Close ───
   window.openNewTaskModal = function() {
     const ov = document.getElementById('ntm-overlay');
     if (!ov) return;
+    ntmEditRow = null; ntmSetMode(false);
+    document.getElementById('ntm-title-input').value = '';
+    document.body.classList.add('ntm-modal-open');
+    ov.classList.add('show');
+    document.getElementById('ntm-error').textContent = '';
+    setTimeout(() => document.getElementById('ntm-title-input').focus(), 220);
+  };
+  window.openEditTaskModal = function(row) {
+    const ov = document.getElementById('ntm-overlay');
+    if (!ov) return;
+    ntmEditRow = row || null;
+    var ttl = row && row.querySelector('.ttl');
+    document.getElementById('ntm-title-input').value = ttl ? ttl.textContent.trim() : '';
+    ntmSetMode(true);
     document.body.classList.add('ntm-modal-open');
     ov.classList.add('show');
     document.getElementById('ntm-error').textContent = '';
@@ -4198,6 +4222,7 @@ body {
     const ov = document.getElementById('ntm-overlay');
     if (ov) ov.classList.remove('show');
     document.body.classList.remove('ntm-modal-open');
+    ntmEditRow = null;
   };
 
   // ─── Quick-fill chips ───
@@ -4250,6 +4275,19 @@ body {
 
   // ─── Save logic ───
   window.saveNewTask = function(addAnother) {
+    // ── Edit mode: update the existing row in place ──
+    if (ntmEditRow) {
+      var _et = document.getElementById('ntm-title-input').value.trim();
+      var _err = document.getElementById('ntm-error');
+      if (!_et) { _err.textContent = 'Give the task a title before saving.'; document.getElementById('ntm-title-input').focus(); return; }
+      _err.textContent = '';
+      var _ttl = ntmEditRow.querySelector('.ttl'); if (_ttl) _ttl.textContent = _et;
+      ntmToast('Task updated · “' + _et.slice(0, 40) + (_et.length > 40 ? '…' : '') + '”');
+      ntmEditRow = null;
+      closeNewTaskModal();
+      return;
+    }
+
     const title = document.getElementById('ntm-title-input').value.trim();
     const dueDate = document.getElementById('ntm-due-date').value.trim();
     const err = document.getElementById('ntm-error');
@@ -4606,9 +4644,16 @@ body {
     if(a==='done'){ var cb=row.querySelector('.cb'); if(cb){ cb.click(); } else { row.style.opacity=.4; toast('Task completed'); } }
     else if(a==='snooze'){ row.style.transition='opacity .25s'; row.style.opacity='.4'; setTimeout(function(){ row.style.display='none'; refreshGroups(); },260); toast('Snoozed 1 day · '+title.slice(0,34)); }
     else if(a==='reassign'){ window.location='atlas-task-modal.html'; }
-    else if(a==='edit'){ if(window.openNewTaskModal){ window.openNewTaskModal(); } else { window.location='atlas-task-modal.html'; } }
+    else if(a==='edit'){ if(window.openEditTaskModal){ window.openEditTaskModal(row); } else { window.location='atlas-task-modal.html'; } }
     else if(a==='donor'){ window.location='atlas-donor-360.html'; }
-    else if(a==='delete'){ row.style.transition='opacity .2s'; row.style.opacity='0'; setTimeout(function(){ row.style.display='none'; refreshGroups(); },200); toast('Task deleted · “'+title.slice(0,30)+'”'); }
+    else if(a==='delete'){
+      var doDelete=function(){ row.style.transition='opacity .2s'; row.style.opacity='0'; setTimeout(function(){ row.style.display='none'; refreshGroups(); },200); toast('Task deleted · “'+title.slice(0,30)+'”'); };
+      if(window.atlasConfirm){
+        atlasConfirm({ icon:'danger', danger:true, title:'Delete this task?',
+          message:'<strong>“'+title.replace(/</g,'&lt;')+'”</strong> will be permanently removed. This can’t be undone.',
+          confirmText:'Delete task', cancelText:'Cancel', onConfirm:doDelete });
+      } else { doDelete(); }
+    }
   }
 
   // ══ 4 · STAT CARDS — clickable bodies (handled by the delegated listener above) ══

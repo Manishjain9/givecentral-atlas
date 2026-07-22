@@ -420,6 +420,9 @@
   .sh-toggle.on .sw{background:var(--blue)} .sh-toggle.on .sw::after{transform:translateX(14px)}
   .sh-toggle .tt{font-size:12.5px;font-weight:600;color:var(--text)}
   .sh-toggle .ts{font-size:11.5px;color:var(--text-3);margin-top:2px;line-height:1.4}
+  .sh-warn{display:flex;gap:9px;align-items:flex-start;background:#FDECF3;border:1px solid #F4B6D2;border-radius:10px;padding:10px 12px;margin:6px 0;font-size:11.5px;color:#9D174D;line-height:1.45}
+  .sh-warn svg{width:14px;height:14px;flex-shrink:0;margin-top:1px;color:#BE185D}
+  .sh-warn b{color:#9D174D;font-weight:700}
   .sh-live{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--text-2);background:var(--blue-pale);border-radius:8px;padding:8px 11px;margin-top:2px}
   .sh-live .dot{width:7px;height:7px;border-radius:50%;background:var(--green,#15803D);box-shadow:0 0 0 3px rgba(21,128,61,.15)}
   .sh-access{display:flex;gap:9px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:13px;font-size:12.5px;color:var(--text-2);line-height:1.45}
@@ -1015,6 +1018,7 @@ function renderShare(){
       + '</select></div>'
       + '<div class="sh-toggle'+(s.donors?' on':'')+'" onclick="toggleDonors()"><span class="sw"></span>'
         + '<div><div class="tt">Show donor-level detail</div><div class="ts">Off by default — recipients see parish rollups only, not individual donor names or amounts.</div></div></div>'
+      + (s.donors ? '<div class="sh-warn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2l5.5 9.5H1.5z"/><path d="M7 6v2.5M7 10v.3"/></svg><span><b>Anyone with this link will see individual donor names, amounts, and gift officers.</b> Only share it with trusted staff — never post it publicly.</span></div>' : '')
       + '<div class="sh-live"><span class="dot"></span>Figures refresh automatically — this always shows current cash, pledges, and pace.</div>'
     + '</div>'
     + '<div class="rm-f">'
@@ -1034,7 +1038,13 @@ function copyShare(){
   setTimeout(function(){ if(b){ b.classList.remove("done"); b.innerHTML='<svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.3"/><path d="M2 8V2.2A.7.7 0 0 1 2.7 1.5H8"/></svg>Copy'; } },1600);
   toast("Live link copied to clipboard");
 }
-function toggleDonors(){ shareState.donors=!shareState.donors; renderShare(); }
+function toggleDonors(){
+  shareState.donors=!shareState.donors;
+  renderShare();
+  toast(shareState.donors
+    ? 'Donor-level detail ON — recipients will see individual donor names & amounts'
+    : 'Donor-level detail off — parish rollups only');
+}
 function regenShare(){ shareState.token=newToken(); shareState.revoked=false; renderShare(); toast("New link generated — the old one no longer works"); }
 function revokeShare(){ shareState.revoked=true; renderShare(); toast("Link revoked — it will no longer open"); }
 function shareMailto(){
