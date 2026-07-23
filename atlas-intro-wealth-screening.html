@@ -341,5 +341,198 @@
 })();
 </script>
 
+<!-- ATLAS-DATEPICKER v1 : reusable click-to-open calendar for text date fields -->
+<style id="atlas-datepicker-css">
+.adp-pop{position:absolute;z-index:2147483000;width:266px;background:#fff;border:1px solid var(--border,#E2E8F0);border-radius:12px;
+  box-shadow:0 12px 34px rgba(15,23,42,.18);padding:12px;font-family:'DM Sans',system-ui,sans-serif;color:var(--text-1,#0F172A);
+  opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .12s ease,transform .12s ease;}
+.adp-pop.open{opacity:1;transform:translateY(0);pointer-events:auto;}
+.adp-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.adp-nav{width:28px;height:28px;border:none;background:transparent;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;
+  color:var(--text-2,#334155);display:flex;align-items:center;justify-content:center;}
+.adp-nav:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
+.adp-title{font-size:13.5px;font-weight:600;letter-spacing:.01em;cursor:pointer;padding:4px 8px;border-radius:8px;}
+.adp-title:hover{background:var(--surface,#F8FAFC);}
+.adp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.adp-dow{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3,#64748B);
+  text-align:center;padding:4px 0;}
+.adp-day{border:none;background:transparent;border-radius:8px;height:32px;font-size:12.5px;cursor:pointer;color:var(--text-1,#0F172A);
+  font-family:inherit;}
+.adp-day:hover{background:var(--blue-pale,#EFF6FF);}
+.adp-day.mut{color:#CBD5E1;}
+.adp-day.today{box-shadow:inset 0 0 0 1px var(--blue,#2563EB);color:var(--blue,#2563EB);font-weight:600;}
+.adp-day.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
+.adp-cell{border:none;background:transparent;border-radius:8px;height:34px;font-size:12.5px;cursor:pointer;color:var(--text-2,#334155);
+  font-family:inherit;}
+.adp-cell:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
+.adp-cell.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
+.adp-ft{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border,#E2E8F0);}
+.adp-ft button{border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:4px 6px;border-radius:6px;}
+.adp-today-b{color:var(--blue,#2563EB);} .adp-today-b:hover{background:var(--blue-pale,#EFF6FF);}
+.adp-clear-b{color:var(--text-3,#64748B);} .adp-clear-b:hover{background:var(--surface,#F8FAFC);}
+.adp-mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+</style>
+<script id="atlas-datepicker-js">
+(function(){
+  if (window.__atlasDP) return; window.__atlasDP = true;
+  var MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  var DATE_PH=/\b(m{1,2}\s*[\/\-.]\s*d{1,2}\s*[\/\-.]\s*y{2,4}|y{4}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*d{1,2}|d{1,2}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*y{2,4})\b/i;
+  var WORD_DATE=/\bdate\b/i;
+
+  function looksDate(inp){
+    if(!inp||inp.tagName!=='INPUT') return false;
+    var t=(inp.getAttribute('type')||'text').toLowerCase();
+    if(t!=='text'&&t!=='') return false;              // leave native date/other inputs alone
+    if(inp.getAttribute('data-adp')==='off') return false;
+    if(inp.getAttribute('list')) return false;         // autocomplete fields
+    var ph=inp.getAttribute('placeholder')||'';
+    if(DATE_PH.test(ph)) return true;
+    if(WORD_DATE.test(ph)) return true;
+    // label / aria signal (whole word "date")
+    var lab=inp.getAttribute('aria-label')||'';
+    if(WORD_DATE.test(lab)) return true;
+    // native label association (for=/wrapping label)
+    try{ if(inp.labels){ for(var i=0;i<inp.labels.length;i++){ if(WORD_DATE.test(inp.labels[i].textContent||'')) return true; } } }catch(e){}
+    var isLbl=function(el){ return el && el.matches && el.matches('label,.lbl,.field-label,.form-label'); };
+    // immediate preceding sibling labels (no climbing to broad ancestors)
+    var sib=inp.previousElementSibling, guard=0;
+    while(sib && guard<3){ if(isLbl(sib) && WORD_DATE.test(sib.textContent||'')) return true; sib=sib.previousElementSibling; guard++; }
+    // direct label children of the input's own wrapper only
+    var par=inp.parentElement;
+    if(par){ var kids=par.children; for(var j=0;j<kids.length;j++){ var k=kids[j]; if(k!==inp && isLbl(k) && WORD_DATE.test(k.textContent||'')) return true; } }
+    return false;
+  }
+
+  // ---- format detection & output ----
+  function fmtOf(inp){
+    var ph=(inp.getAttribute('placeholder')||'').toLowerCase();
+    var v=(inp.value||'').trim();
+    if(/y{4}\s*[\/\-.]\s*m/.test(ph)||/^\d{4}-\d{1,2}-\d{1,2}$/.test(v)) return 'iso';
+    if(/d{1,2}\s*[\/\-.]\s*m/.test(ph)) return 'dmy';
+    if(/[a-z]{3,}\s+\d{1,2},?\s+\d{4}/i.test(v)) return 'long';
+    return 'mdy';
+  }
+  function pad(n){return (n<10?'0':'')+n;}
+  function toStr(d,fmt){
+    var y=d.getFullYear(),m=d.getMonth()+1,day=d.getDate();
+    if(fmt==='iso') return y+'-'+pad(m)+'-'+pad(day);
+    if(fmt==='dmy') return pad(day)+'/'+pad(m)+'/'+y;
+    if(fmt==='long') return MON[m-1]+' '+day+', '+y;
+    return pad(m)+'/'+pad(day)+'/'+y;
+  }
+  function parse(v){
+    v=(v||'').trim(); if(!v) return null;
+    var m;
+    if(m=v.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/)) return new Date(+m[1],+m[2]-1,+m[3]);
+    if(m=v.match(/^([a-z]{3,})\s+(\d{1,2}),?\s+(\d{4})$/i)){var mi=MON.findIndex(function(x){return x.toLowerCase().indexOf(m[1].toLowerCase())===0;});if(mi>=0)return new Date(+m[3],mi,+m[2]);}
+    if(m=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/)){var y=+m[3];if(y<100)y+=2000;return new Date(y,+m[1]-1,+m[2]);}
+    var d=new Date(v); return isNaN(d)?null:d;
+  }
+
+  // ---- single shared popover ----
+  var pop,active,view,mode='days';
+  function build(){
+    pop=document.createElement('div');pop.className='adp-pop';pop.setAttribute('role','dialog');
+    document.body.appendChild(pop);
+    pop.addEventListener('mousedown',function(e){e.preventDefault();}); // keep field focus
+  }
+  function close(){ if(pop) pop.classList.remove('open'); active=null; mode='days'; }
+  function open(inp){
+    if(!pop) build();
+    active=inp; mode='days';
+    view=parse(inp.value)||new Date();
+    render(); position(); pop.classList.add('open');
+  }
+  function position(){
+    var r=active.getBoundingClientRect(), sx=window.pageXOffset, sy=window.pageYOffset;
+    pop.style.visibility='hidden'; pop.classList.add('open');
+    var ph=pop.offsetHeight, pw=pop.offsetWidth;
+    pop.classList.remove('open'); pop.style.visibility='';
+    var top=r.bottom+sy+6, left=r.left+sx;
+    if(r.bottom+ph+6>window.innerHeight && r.top-ph-6>0) top=r.top+sy-ph-6;
+    left=Math.min(left, sx+window.innerWidth-pw-8); left=Math.max(left,sx+8);
+    pop.style.top=top+'px'; pop.style.left=left+'px';
+  }
+  function commit(d){
+    var fmt=fmtOf(active);
+    active.value=toStr(d,fmt);
+    active.dispatchEvent(new Event('input',{bubbles:true}));
+    active.dispatchEvent(new Event('change',{bubbles:true}));
+    close();
+  }
+  function render(){
+    if(mode==='months'){renderMonths();return;}
+    if(mode==='years'){renderYears();return;}
+    var y=view.getFullYear(), mo=view.getMonth();
+    var sel=parse(active.value), today=new Date();
+    var first=new Date(y,mo,1), start=first.getDay(), dim=new Date(y,mo+1,0).getDate(), pdim=new Date(y,mo,0).getDate();
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="pm">&#8249;</button>'+
+      '<div class="adp-title" data-a="mode">'+MON[mo]+' '+y+'</div>'+
+      '<button class="adp-nav" data-a="nm">&#8250;</button></div><div class="adp-grid">';
+    for(var i=0;i<7;i++) h+='<div class="adp-dow">'+DOW[i]+'</div>';
+    for(var c=0;c<42;c++){
+      var dn,cls='adp-day',dt;
+      if(c<start){dn=pdim-start+1+c;cls+=' mut';dt=new Date(y,mo-1,dn);}
+      else if(c-start+1<=dim){dn=c-start+1;dt=new Date(y,mo,dn);}
+      else{dn=c-start+1-dim;cls+=' mut';dt=new Date(y,mo+1,dn);}
+      if(dt.getFullYear()===today.getFullYear()&&dt.getMonth()===today.getMonth()&&dt.getDate()===today.getDate())cls+=' today';
+      if(sel&&dt.getFullYear()===sel.getFullYear()&&dt.getMonth()===sel.getMonth()&&dt.getDate()===sel.getDate())cls+=' sel';
+      h+='<button class="'+cls+'" data-d="'+dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate()+'">'+dn+'</button>';
+      if(c>=start+dim-1 && (c+1)%7===0) break;
+    }
+    h+='</div><div class="adp-ft"><button class="adp-today-b" data-a="today">Today</button><button class="adp-clear-b" data-a="clear">Clear</button></div>';
+    pop.innerHTML=h;
+  }
+  function renderMonths(){
+    var y=view.getFullYear();
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="py">&#8249;</button>'+
+      '<div class="adp-title" data-a="years">'+y+'</div><button class="adp-nav" data-a="ny">&#8250;</button></div><div class="adp-mgrid">';
+    for(var i=0;i<12;i++) h+='<button class="adp-cell'+(i===view.getMonth()?' sel':'')+'" data-m="'+i+'">'+MONS[i]+'</button>';
+    h+='</div>'; pop.innerHTML=h;
+  }
+  function renderYears(){
+    var base=view.getFullYear()-6;
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="pyr">&#8249;</button>'+
+      '<div class="adp-title">'+base+' – '+(base+11)+'</div><button class="adp-nav" data-a="nyr">&#8250;</button></div><div class="adp-mgrid">';
+    for(var i=0;i<12;i++){var yr=base+i;h+='<button class="adp-cell'+(yr===view.getFullYear()?' sel':'')+'" data-y="'+yr+'">'+yr+'</button>';}
+    h+='</div>'; pop.innerHTML=h;
+  }
+
+  document.addEventListener('click',function(e){
+    if(!pop) return;
+    var t=e.target;
+    if(pop.contains(t)){
+      var a=t.getAttribute('data-a'), d=t.getAttribute('data-d'), mm=t.getAttribute('data-m'), yy=t.getAttribute('data-y');
+      if(d){var p=d.split('-');commit(new Date(+p[0],+p[1]-1,+p[2]));return;}
+      if(mm!=null){view=new Date(view.getFullYear(),+mm,1);mode='days';render();return;}
+      if(yy!=null){view=new Date(+yy,view.getMonth(),1);mode='months';render();return;}
+      if(a==='pm'){view=new Date(view.getFullYear(),view.getMonth()-1,1);render();}
+      else if(a==='nm'){view=new Date(view.getFullYear(),view.getMonth()+1,1);render();}
+      else if(a==='mode'){mode='months';render();}
+      else if(a==='years'){mode='years';render();}
+      else if(a==='py'){view=new Date(view.getFullYear()-1,view.getMonth(),1);render();}
+      else if(a==='ny'){view=new Date(view.getFullYear()+1,view.getMonth(),1);render();}
+      else if(a==='pyr'){view=new Date(view.getFullYear()-12,view.getMonth(),1);render();}
+      else if(a==='nyr'){view=new Date(view.getFullYear()+12,view.getMonth(),1);render();}
+      else if(a==='today'){commit(new Date());}
+      else if(a==='clear'){active.value='';active.dispatchEvent(new Event('input',{bubbles:true}));active.dispatchEvent(new Event('change',{bubbles:true}));close();}
+      return;
+    }
+    if(active && t===active) return;
+    close();
+  },true);
+
+  document.addEventListener('focusin',function(e){ if(looksDate(e.target)) open(e.target); });
+  document.addEventListener('click',function(e){ if(looksDate(e.target) && active!==e.target) open(e.target); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+  window.addEventListener('resize',function(){ if(active&&pop&&pop.classList.contains('open')) position(); });
+  window.addEventListener('scroll',function(){ if(active&&pop&&pop.classList.contains('open')) position(); },true);
+
+  window.__atlasLooksDate=looksDate; // exposed for tests
+})();
+</script>
+<!-- /ATLAS-DATEPICKER -->
 </body>
 </html>

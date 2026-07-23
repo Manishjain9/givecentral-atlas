@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Atlas — Appeals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:#0E1E35; --navy-2:#152844; --blue:#2563EB; --blue-mid:#3B82F6; --blue-light:#DBEAFE; --blue-pale:#EFF6FF;
+  --teal:#0D9488; --green:#15803D; --green-light:#DCFCE7; --amber:#D97706; --amber-light:#FEF3C7;
+  --rose:#BE185D; --rose-light:#FCE7F3; --purple:#7C3AED; --purple-light:#EDE9FE; --gold:#B45309;
+  --text:#0F172A; --text-2:#334155; --text-3:#64748B; --border:#E2E8F0; --border-soft:#EDF2F7;
+  --surface:#F8FAFC; --white:#FFFFFF; --sidebar-w:220px;
+  --shadow-md:0 4px 16px rgba(15,23,42,.06), 0 2px 4px rgba(15,23,42,.04);
+}
+html { font-size:14px; -webkit-font-smoothing:antialiased; }
+body { font-family:'DM Sans',sans-serif; background:var(--surface); color:var(--text); min-height:100vh; display:flex; overflow-x:hidden; }
+a { color:inherit; text-decoration:none; }
+
+/* Sidebar */
+.sidebar { width:var(--sidebar-w); background:var(--navy); min-height:100vh; display:flex; flex-direction:column; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; }
+.sidebar-logo { padding:18px 18px 14px; display:flex; align-items:center; gap:11px; border-bottom:1px solid rgba(255,255,255,.08); }
+.logo-mark { width:52px; height:40px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.logo-mark svg { width:52px; height:40px; }
+.logo-text-wrap { display:flex; flex-direction:column; }
+.logo-name { font-family:'DM Serif Display',serif; font-size:20px; color:white; line-height:1; }
+.logo-sub { font-size:9px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.3); margin-top:3px; }
+.sidebar-search { margin:12px 12px 6px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:8px; display:flex; align-items:center; gap:8px; padding:8px 12px; cursor:pointer; }
+.sidebar-search svg { width:13px; height:13px; color:rgba(255,255,255,.3); flex-shrink:0; }
+.sidebar-search input { background:none; border:none; outline:none; width:100%; font-size:12px; color:rgba(255,255,255,.6); font-family:'DM Sans',sans-serif; cursor:pointer; }
+.sidebar-search input::placeholder { color:rgba(255,255,255,.3); }
+.sidebar-scroll { flex:1; }
+.nav-group { padding:8px 8px 0; }
+.nav-label { font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.28); padding:0 10px; margin-bottom:4px; }
+.nav-item { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:7px; font-size:12px; font-weight:500; color:rgba(255,255,255,.55); cursor:pointer; transition:all .15s; margin-bottom:1px; text-decoration:none; }
+.nav-item:hover { background:rgba(255,255,255,.07); color:rgba(255,255,255,.85); }
+.nav-item.active { background:var(--blue); color:white; }
+.nav-item svg { width:14px; height:14px; flex-shrink:0; }
+.nav-badge { margin-left:auto; background:rgba(255,255,255,.12); color:rgba(255,255,255,.6); border-radius:10px; padding:1px 7px; font-size:10px; font-weight:600; }
+.nav-item.active .nav-badge { background:rgba(255,255,255,.2); color:white; }
+.nav-badge.alert { background:#EF4444; color:white; }
+.sidebar-user { margin-top:auto; padding:12px; border-top:1px solid rgba(255,255,255,.08); display:flex; align-items:center; gap:9px; cursor:pointer; }
+.sidebar-user:hover { background:rgba(255,255,255,.04); }
+.user-avatar { width:30px; height:30px; border-radius:50%; background:var(--blue); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:white; flex-shrink:0; }
+.user-name { font-size:12px; font-weight:500; color:rgba(255,255,255,.75); }
+.user-role { font-size:10px; color:rgba(255,255,255,.35); margin-top:1px; }
+
+/* Main + topbar */
+.main { flex:1; min-width:0; display:flex; flex-direction:column; }
+.topbar { background:white; border-bottom:1px solid var(--border); padding:0 24px; height:52px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+.topbar-title { font-size:14px; font-weight:600; color:var(--text); }
+.topbar-date { font-size:12px; color:var(--text-3); }
+.topbar-search { flex:1; max-width:460px; margin:0 18px; background:var(--surface); border:1px solid var(--border); border-radius:8px; display:flex; align-items:center; gap:8px; padding:7px 12px; cursor:text; }
+.topbar-search svg { width:13px; height:13px; color:var(--text-3); }
+.topbar-search input { background:none; border:none; outline:none; width:100%; font-size:12.5px; color:var(--text); font-family:'DM Sans',sans-serif; }
+.topbar-search kbd { margin-left:auto; font-size:10.5px; background:white; border:1px solid var(--border); border-radius:4px; padding:1px 6px; color:var(--text-3); }
+.topbar-right { display:flex; align-items:center; gap:8px; margin-left:auto; }
+.tb-btn { font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; padding:7px 13px; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:6px; }
+.tb-btn svg { width:12px; height:12px; }
+.tb-ghost { background:none; border:1px solid var(--border); color:var(--text-2); }
+.tb-ghost:hover { background:var(--surface); border-color:#94A3B8; }
+.tb-notif { width:34px; height:34px; border-radius:8px; border:1px solid var(--border); background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; }
+.tb-notif:hover { background:var(--surface); }
+.tb-notif svg { width:15px; height:15px; color:var(--text-2); }
+.notif-dot { position:absolute; top:7px; right:7px; width:7px; height:7px; background:#EF4444; border-radius:50%; border:2px solid white; }
+
+.dash { padding:24px; overflow-y:auto; }
+.page-head { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-bottom:18px; }
+.crumb { font-size:12px; color:var(--text-3); margin-bottom:4px; display:flex; align-items:center; gap:6px; }
+.crumb a { color:var(--blue); } .crumb a:hover { text-decoration:underline; } .crumb svg { width:10px; height:10px; }
+.page-title { font-family:'DM Serif Display',serif; font-size:28px; letter-spacing:-.02em; color:var(--text); line-height:1.1; }
+.page-sub { color:var(--text-3); font-size:13px; margin-top:4px; }
+
+.btn { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; padding:9px 16px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; border:1px solid transparent; transition:background .15s,border-color .15s,color .15s; }
+.btn svg { width:13px; height:13px; }
+.btn-primary { background:var(--blue); color:white; box-shadow:0 1px 4px rgba(37,99,235,.25); }
+.btn-primary:hover { background:#1D4ED8; }
+.btn-ghost { background:white; border-color:var(--border); color:var(--text-2); }
+.btn-ghost:hover { background:var(--surface); border-color:#94A3B8; }
+.btn-rose { background:var(--rose); color:white; } .btn-rose:hover { background:#9D174D; }
+
+.lbl { display:block; font-size:11px; font-weight:600; color:var(--text-2); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+.lbl .req { color:var(--rose); margin-left:2px; }
+.fld { width:100%; font-size:13px; font-family:'DM Sans',sans-serif; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:white; color:var(--text); transition:border-color .15s, box-shadow .15s; }
+.fld:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.10); }
+.fld::placeholder { color:#94A3B8; }
+select.fld { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M3 5l3 3 3-3z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; padding-right:28px; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+/* Toolbar */
+.toolbar { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+.tool-search { flex:1; min-width:220px; max-width:360px; background:white; border:1px solid var(--border); border-radius:9px; display:flex; align-items:center; gap:8px; padding:8px 12px; }
+.tool-search svg { width:14px; height:14px; color:var(--text-3); flex-shrink:0; }
+.tool-search input { border:none; outline:none; width:100%; font-size:13px; font-family:'DM Sans',sans-serif; background:none; color:var(--text); }
+.tool-sel { width:200px; min-width:200px; flex:0 0 auto; }
+.chk { display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-2); cursor:pointer; user-select:none; white-space:nowrap; }
+.chk input { accent-color:var(--blue); width:15px; height:15px; }
+.count-note { margin-left:auto; font-size:12px; color:var(--text-3); white-space:nowrap; }
+.count-note strong { color:var(--text); }
+
+/* Table */
+.tbl-card { background:white; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.tbl { width:100%; border-collapse:collapse; }
+.tbl th { text-align:left; font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); padding:11px 14px; border-bottom:1px solid var(--border); background:var(--surface); white-space:nowrap; }
+.tbl th.sortable { cursor:pointer; user-select:none; }
+.tbl th.sortable:hover { color:var(--text); }
+.tbl th .car { opacity:.4; margin-left:3px; }
+.tbl th.sorted .car { opacity:1; color:var(--blue); }
+.tbl th.num, .tbl td.num { text-align:right; font-variant-numeric:tabular-nums; }
+.tbl td { padding:11px 14px; border-bottom:1px solid var(--border-soft); font-size:12.5px; color:var(--text-2); vertical-align:middle; }
+.tbl tr:last-child td { border-bottom:none; }
+.tbl tbody tr:hover { background:var(--blue-pale); }
+.id-link { color:var(--blue); font-weight:600; font-family:'DM Mono',monospace; font-size:12px; cursor:pointer; }
+.id-link:hover { text-decoration:underline; }
+.desc-cell { color:var(--text); font-weight:500; max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cat-tag { display:inline-block; font-size:10.5px; font-weight:600; padding:2px 8px; border-radius:6px; background:var(--surface); color:var(--text-2); border:1px solid var(--border); white-space:nowrap; }
+.pill { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:2px 9px; border-radius:20px; }
+.pill.yes { background:var(--green-light); color:var(--green); }
+.pill.no { background:var(--surface); color:var(--text-3); border:1px solid var(--border); }
+.pill .dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+.mini { min-width:96px; }
+.mini .amt { font-size:12px; color:var(--text); font-weight:600; font-variant-numeric:tabular-nums; }
+.mini .track { height:4px; background:var(--border-soft); border-radius:3px; margin-top:4px; overflow:hidden; }
+.mini .fill { height:100%; background:var(--blue); border-radius:3px; }
+.mini .fill.done { background:var(--green); }
+tr.inactive td:not(.kb-cell) { opacity:.55; }
+
+/* Kebab */
+.kb-cell { width:34px; }
+.kbtn { width:26px; height:26px; border-radius:7px; border:none; background:none; cursor:pointer; color:var(--text-3); display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; }
+.kbtn:hover { background:var(--border-soft); color:var(--text); }
+.kmenu { position:absolute; z-index:60; background:white; border:1px solid var(--border); border-radius:10px; box-shadow:var(--shadow-md); padding:5px; min-width:172px; }
+.kmenu button { display:flex; align-items:center; gap:9px; width:100%; text-align:left; background:none; border:none; font-family:'DM Sans',sans-serif; font-size:12.5px; color:var(--text-2); padding:8px 10px; border-radius:7px; cursor:pointer; }
+.kmenu button:hover { background:var(--surface); }
+.kmenu button.danger { color:var(--rose); }
+.kmenu button.danger:hover { background:var(--rose-light); }
+.kmenu button svg { width:13px; height:13px; }
+.kmenu .sep { height:1px; background:var(--border); margin:4px 2px; }
+
+/* Pager */
+.pager { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-top:1px solid var(--border); background:var(--surface); }
+.pager .info { font-size:12px; color:var(--text-3); }
+.pager .info strong { color:var(--text); }
+.pg { display:flex; align-items:center; gap:4px; }
+.pg button { min-width:30px; height:30px; padding:0 8px; border-radius:7px; border:1px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-size:12.5px; color:var(--text-2); cursor:pointer; }
+.pg button:hover:not(:disabled) { border-color:#94A3B8; }
+.pg button.on { background:var(--blue); color:white; border-color:var(--blue); }
+.pg button:disabled { opacity:.4; cursor:default; }
+.pg .gap { color:var(--text-3); padding:0 2px; }
+.empty-row td { text-align:center; color:var(--text-3); padding:34px; font-size:13px; }
+
+/* Modal */
+.m-ov { position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:100; display:none; align-items:center; justify-content:center; padding:24px; }
+.m-ov.open { display:flex; }
+.m-card { background:white; border-radius:16px; width:100%; max-width:560px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 24px 60px rgba(15,23,42,.28); }
+.m-head { padding:20px 22px 14px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; gap:12px; }
+.m-title { font-family:'DM Serif Display',serif; font-size:20px; color:var(--text); }
+.m-sub { font-size:12.5px; color:var(--text-3); margin-top:3px; }
+.m-body { padding:18px 22px; overflow-y:auto; }
+.m-foot { padding:14px 22px; border-top:1px solid var(--border); display:flex; align-items:center; gap:10px; justify-content:flex-end; }
+.m-ico { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.m-ico.green { background:var(--green-light); color:var(--green); }
+.m-ico.rose { background:var(--rose-light); color:var(--rose); }
+.m-ico svg { width:20px; height:20px; }
+.sum { border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.sum .r { display:flex; justify-content:space-between; gap:14px; padding:9px 13px; border-bottom:1px solid var(--border-soft); font-size:12.5px; }
+.sum .r:last-child { border-bottom:none; }
+.sum .r .k { color:var(--text-3); } .sum .r .v { color:var(--navy); font-weight:600; text-align:right; }
+.field-mt { margin-top:14px; }
+.chk-row { display:flex; align-items:center; gap:8px; margin-top:16px; font-size:13px; color:var(--text-2); cursor:pointer; }
+.chk-row input { accent-color:var(--blue); width:16px; height:16px; }
+
+/* Toast */
+.toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--navy); color:white; padding:11px 18px; border-radius:10px; font-size:13px; box-shadow:var(--shadow-md); opacity:0; pointer-events:none; transition:all .25s; z-index:120; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
+        <circle cx="22" cy="92" r="4" fill="white"/><circle cx="58" cy="58" r="5" fill="white"/>
+        <circle cx="98" cy="38" r="5.5" fill="white"/><circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
+        <circle cx="138" cy="24" r="7" fill="#C8A04A"/><circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
+      </svg>
+    </div>
+    <div class="logo-text-wrap"><span class="logo-name">Atlas</span><span class="logo-sub">By GiveCentral</span></div>
+  </div>
+  <a href="atlas-search.html"><div class="sidebar-search">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+    <input type="text" placeholder="Search…" readonly>
+  </div></a>
+  <div class="sidebar-scroll">
+    <div class="nav-group">
+      <div class="nav-label">Main</div>
+      <a class="nav-item" href="atlas-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>Dashboard</a>
+      <a class="nav-item" href="atlas-donors-list.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>Donors</a>
+      <a class="nav-item" href="atlas-gifts-pledges.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>Gifts &amp; pledges</a>
+      <a class="nav-item" href="atlas-campaign-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>Campaigns</a>
+      <div class="nav-subwrap" style="margin:2px 0 4px 20px;border-left:1.5px solid rgba(255,255,255,.12)">
+        <a class="nav-item active" href="atlas-appeals.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v5H6l-2.5 2v-2H2z"/></svg>Appeals</a>
+        <a class="nav-item" href="atlas-funds.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><ellipse cx="7" cy="3.5" rx="5" ry="2"/><path d="M2 3.5v7c0 1.1 2.2 2 5 2s5-.9 5-2v-7M2 7c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg>Funds</a>
+      </div>
+      <a class="nav-item" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>Reports</a>
+    </div>
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Fundraising</div>
+      <a class="nav-item" href="atlas-pipeline.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>Prospect pipeline</a>
+      <a class="nav-item" href="atlas-tasks.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>Tasks &amp; reminders</a>
+      <a class="nav-item" href="atlas-communications.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>Communications</a>
+      <a class="nav-item" href="atlas-events-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>Events</a>
+    </div>
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Admin</div>
+      <a class="nav-item" href="atlas-users-roles.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Users &amp; roles</a>
+      <a class="nav-item" href="atlas-integrations.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>Integrations</a>
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar">SR</div>
+    <div><div class="user-name">Sarah Reynolds</div><div class="user-role">Development Director</div></div>
+  </div>
+</aside>
+
+<div class="main">
+<div class="topbar">
+  <span class="topbar-title">Appeals</span>
+  <span class="topbar-date">Monday, May 4, 2026</span>
+  <a href="atlas-search.html" class="topbar-search">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+    <input type="text" placeholder="Search donors, gifts, campaigns…" readonly style="cursor:pointer"><kbd>⌘K</kbd>
+  </a>
+  <div class="topbar-right">
+    <a class="tb-btn tb-ghost" href="atlas-guru-ai.html"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M3 9c.5-1 5.5-1 6 0"/></svg>Ask Guru</a>
+    <a href="atlas-notifications.html" class="tb-notif" title="Notifications"><svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.5 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5zM6 13a1.5 1.5 0 003 0"/></svg><div class="notif-dot"></div></a>
+  </div>
+</div>
+
+<div class="dash">
+  <div class="page-head">
+    <div>
+      <div class="crumb"><a href="atlas-dashboard.html">Atlas</a><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg><a href="atlas-campaign-dashboard.html">Campaigns</a><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg><span>Appeals</span></div>
+      <div class="page-title">Appeals</div>
+      <div class="page-sub">The solicitations donors respond to — mailings, calls, and events. Track goal, raised, and response by appeal.</div>
+    </div>
+    <div class="flex gap-8" style="align-items:center">
+      <button class="btn btn-ghost" onclick="atlasToast('Export started — CSV will download shortly.')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 9.5V1.5M3.5 6L7 9.5 10.5 6M2 12.5h10"/></svg>Export</button>
+      <button class="btn btn-primary" onclick="openNew()"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg>New appeal</button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <label class="tool-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="q" placeholder="Find in this list — ID, description, category…" oninput="onSearch(this.value)"></label>
+    <select class="fld tool-sel" id="catf" onchange="onFilter()"></select>
+    <label class="chk"><input type="checkbox" id="activeOnly" checked onchange="onFilter()"> Display active entries only</label>
+    <span class="count-note" id="countNote"></span>
+  </div>
+
+  <div class="tbl-card">
+    <table class="tbl">
+      <thead><tr id="head-row"></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="pager"><div class="info" id="pinfo"></div><div class="pg" id="pg"></div></div>
+  </div>
+</div>
+</div>
+
+<!-- New / Edit modal -->
+<div class="m-ov" id="form-ov"><div class="m-card">
+  <div class="m-head"><div><div class="m-title" id="form-title">New appeal</div><div class="m-sub" id="form-sub">Create a solicitation donors can respond to.</div></div></div>
+  <div class="m-body">
+    <div class="row2">
+      <div><span class="lbl">Appeal ID<span class="req">*</span></span><input class="fld" id="f-id" placeholder="e.g. B26SM"></div>
+      <div><span class="lbl">Category</span><select class="fld" id="f-cat"><option>Direct Mail</option><option>HOS</option><option>CTF - BISHOP</option><option>CTF - Direct Mail</option><option>CTF - Matching</option><option>CTF - In-Pew</option><option>Online</option><option>Personal Solicitation</option><option>Event</option><option>Planned Giving</option></select></div>
+    </div>
+    <div class="field-mt"><span class="lbl">Description<span class="req">*</span></span><input class="fld" id="f-desc" placeholder="e.g. 2026 Spring Mailing — Bishop's ask"></div>
+    <div class="row2 field-mt">
+      <div><span class="lbl">Start date</span><input class="fld" id="f-start" placeholder="MM/DD/YYYY"></div>
+      <div><span class="lbl">End date</span><input class="fld" id="f-end" placeholder="MM/DD/YYYY"></div>
+    </div>
+    <div class="row2 field-mt">
+      <div><span class="lbl">Goal</span><input class="fld" id="f-goal" placeholder="$0"></div>
+      <div><span class="lbl">Number solicited</span><input class="fld" id="f-solic" placeholder="0"></div>
+    </div>
+    <label class="chk-row"><input type="checkbox" id="f-active" checked> Active</label>
+  </div>
+  <div class="m-foot"><button class="btn btn-ghost" onclick="closeForm()">Cancel</button><button class="btn btn-primary" id="form-save" onclick="saveForm()">Save appeal</button></div>
+</div></div>
+
+<!-- Confirmation modal -->
+<div class="m-ov" id="cf-ov"><div class="m-card" style="max-width:430px">
+  <div class="m-head"><div class="m-ico green"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg></div><div><div class="m-title" id="cf-title">Appeal created</div><div class="m-sub" id="cf-sub">Saved to this organization.</div></div></div>
+  <div class="m-body"><div class="sum" id="cf-sum"></div></div>
+  <div class="m-foot"><button class="btn btn-primary" onclick="closeCf()">Done</button></div>
+</div></div>
+
+<!-- Delete confirm -->
+<div class="m-ov" id="del-ov"><div class="m-card" style="max-width:420px">
+  <div class="m-head"><div class="m-ico rose"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5h14M8 5V3h4v2M6 5l1 12h6l1-12"/></svg></div><div><div class="m-title">Delete appeal?</div><div class="m-sub" id="del-sub">This can't be undone.</div></div></div>
+  <div class="m-body"><p style="font-size:13px;color:var(--text-2);line-height:1.5">Deleting removes this appeal from Atlas. Gifts already coded to it keep their history, but the appeal will no longer be selectable. To keep it for reporting, choose <strong>Deactivate</strong> instead.</p></div>
+  <div class="m-foot"><button class="btn btn-ghost" onclick="closeDel()">Cancel</button><button class="btn btn-rose" id="del-go">Delete appeal</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var money=function(n){ return '$'+Math.round(n).toLocaleString('en-US'); };
+var parseMoney=function(s){ var n=parseFloat(String(s||'').replace(/[^0-9.]/g,'')); return isNaN(n)?0:n; };
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ── Sample data (Catholic Community Foundation, RE NXT-style) ── */
+var APPEALS = [
+  {id:'27ED01QR', desc:'2027 ED letter QR PURL', cat:'HOS', start:'01/02/2027', end:'', goal:150000, raised:0, gifts:0, active:true},
+  {id:'B19SM', desc:'2019 - SM - Bishop ask - Omit prior donors', cat:'HOS', start:'02/15/2019', end:'06/30/2019', goal:420000, raised:438200, gifts:1842, active:true},
+  {id:'B20SM', desc:'2020 - SM - Bishop ask - Omit prior donors', cat:'HOS', start:'02/15/2020', end:'06/30/2020', goal:440000, raised:401950, gifts:1720, active:true},
+  {id:'B21SM', desc:'2021 - SM - Bishop ask - Omit prior donors', cat:'HOS', start:'02/15/2021', end:'06/30/2021', goal:460000, raised:472300, gifts:1908, active:true},
+  {id:'B22SM', desc:'2022 - SM - Bishop Visit Solicitation', cat:'HOS', start:'02/15/2022', end:'06/30/2022', goal:480000, raised:455100, gifts:1863, active:true},
+  {id:'B23SM', desc:'2023 - SM - Bishop Visit Solicitation', cat:'HOS', start:'02/15/2023', end:'06/30/2023', goal:500000, raised:518640, gifts:2011, active:true},
+  {id:'CCNOTDES', desc:'Undesignated / general response', cat:'General', start:'01/01/2024', end:'', goal:0, raised:96420, gifts:512, active:true},
+  {id:'CTFBISHP', desc:'Called to Flourish Bishop Solicitation', cat:'CTF - BISHOP', start:'09/01/2025', end:'12/31/2026', goal:1200000, raised:734500, gifts:318, active:true},
+  {id:'CTFBISParish', desc:'Called to Flourish Bishop Solicitation - Parish', cat:'CTF - BISHOP', start:'09/01/2025', end:'12/31/2026', goal:650000, raised:288900, gifts:264, active:true},
+  {id:'CTFBISPG', desc:'Called to Flourish Bishop Solicitation - Planned Gift', cat:'CTF - BISHOP PG', start:'09/01/2025', end:'12/31/2026', goal:900000, raised:410000, gifts:41, active:true},
+  {id:'CTFDM1', desc:'Called to Flourish Direct Mail 1', cat:'CTF - Direct Mail', start:'10/01/2025', end:'11/15/2025', goal:220000, raised:198750, gifts:1204, active:true},
+  {id:'CTFDM2', desc:'Called to Flourish Direct Mail 2 - Last Chance', cat:'CTF - Last Chance Mail', start:'11/20/2025', end:'12/31/2025', goal:120000, raised:132400, gifts:842, active:true},
+  {id:'CTFMG', desc:'Called to Flourish Matching Gift', cat:'CTF - Matching', start:'10/01/2025', end:'12/31/2025', goal:250000, raised:250000, gifts:96, active:true},
+  {id:'CTFPEW', desc:'Called to Flourish In-Pew', cat:'CTF - In-Pew', start:'10/05/2025', end:'10/26/2025', goal:180000, raised:141200, gifts:2210, active:true},
+  {id:'CTFEML1', desc:'Called to Flourish Email 1 - Kickoff', cat:'CTF - Email', start:'09/15/2025', end:'09/30/2025', goal:60000, raised:48900, gifts:640, active:true},
+  {id:'CTFEML2', desc:'Called to Flourish Email 2 - Reminder', cat:'CTF - Email', start:'11/01/2025', end:'11/10/2025', goal:50000, raised:41250, gifts:588, active:true},
+  {id:'CTFEYE', desc:'Called to Flourish Year-End Email', cat:'CTF - Email', start:'12/26/2025', end:'12/31/2025', goal:90000, raised:118600, gifts:910, active:true},
+  {id:'GALA25', desc:'2025 Bishop’s Annual Gala', cat:'Event', start:'04/01/2025', end:'05/10/2025', goal:300000, raised:342700, gifts:214, active:true},
+  {id:'GALA26', desc:'2026 Bishop’s Annual Gala', cat:'Event', start:'04/01/2026', end:'05/10/2026', goal:325000, raised:88200, gifts:64, active:true},
+  {id:'MDC26', desc:'Major-Donor Cultivation FY26', cat:'Personal Solicitation', start:'07/01/2025', end:'06/30/2026', goal:850000, raised:512000, gifts:37, active:true},
+  {id:'PG26', desc:'Planned Giving Outreach FY26', cat:'Planned Giving', start:'07/01/2025', end:'06/30/2026', goal:500000, raised:150000, gifts:12, active:true},
+  {id:'XMAS25', desc:'Christmas Appeal 2025', cat:'Direct Mail', start:'12/01/2025', end:'12/31/2025', goal:130000, raised:141900, gifts:1120, active:true},
+  {id:'LENT26', desc:'Lenten Appeal 2026', cat:'Direct Mail', start:'02/18/2026', end:'04/05/2026', goal:95000, raised:37400, gifts:410, active:true},
+  {id:'CORP26', desc:'Corporate Sponsorship Drive 2026', cat:'Personal Solicitation', start:'01/15/2026', end:'06/30/2026', goal:160000, raised:72500, gifts:22, active:true},
+  {id:'MATCH26', desc:'Spring Matching Gift Drive', cat:'Matching', start:'03/01/2026', end:'03/31/2026', goal:100000, raised:0, gifts:0, active:true},
+  {id:'ONLINE26', desc:'Online Giving — Evergreen', cat:'Online', start:'01/01/2026', end:'', goal:200000, raised:64300, gifts:1480, active:true},
+  {id:'B18SM', desc:'2018 - SM - Bishop ask (archived)', cat:'HOS', start:'02/15/2018', end:'06/30/2018', goal:400000, raised:392100, gifts:1788, active:false},
+  {id:'GALA24', desc:'2024 Bishop’s Annual Gala', cat:'Event', start:'04/01/2024', end:'05/10/2024', goal:280000, raised:301400, gifts:198, active:false},
+  {id:'XMAS24', desc:'Christmas Appeal 2024', cat:'Direct Mail', start:'12/01/2024', end:'12/31/2024', goal:120000, raised:128700, gifts:1044, active:false},
+  {id:'PHONE23', desc:'2023 Phonathon', cat:'Personal Solicitation', start:'09/01/2023', end:'10/15/2023', goal:75000, raised:61200, gifts:520, active:false},
+  {id:'GRANT25', desc:'Foundation Grant Match 2025', cat:'Matching', start:'06/01/2025', end:'08/31/2025', goal:250000, raised:250000, gifts:8, active:false},
+  {id:'PARISH26', desc:'Parish Partnership Appeal 2026', cat:'CTF - BISHOP', start:'02/01/2026', end:'05/31/2026', goal:140000, raised:29800, gifts:176, active:true},
+  {id:'YEEML26', desc:'Year-End Email 2026', cat:'CTF - Email', start:'12/26/2026', end:'', goal:100000, raised:0, gifts:0, active:true},
+  {id:'PEW26', desc:'Parish In-Pew Appeal 2026', cat:'CTF - In-Pew', start:'10/04/2026', end:'10/25/2026', goal:70000, raised:0, gifts:0, active:true}
+];
+
+var COLS = [
+  {k:'id',    label:'Appeal ID', sortable:true},
+  {k:'desc',  label:'Description', sortable:true},
+  {k:'cat',   label:'Category', sortable:true},
+  {k:'goal',  label:'Goal', sortable:true, num:true},
+  {k:'raised',label:'Raised', sortable:true, num:true},
+  {k:'gifts', label:'Gifts', sortable:true, num:true},
+  {k:'start', label:'Start date', sortable:true},
+  {k:'end',   label:'End date', sortable:true},
+  {k:'active',label:'Active', sortable:true}
+];
+
+var PER=10, state={q:'', cat:'all', activeOnly:true, sortKey:'id', sortDir:1, page:0};
+var editingId=null;
+
+function toDateNum(s){ var m=String(s||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/); return m?(+m[3]*10000+ +m[1]*100+ +m[2]):0; }
+function filtered(){
+  var q=state.q.trim().toLowerCase();
+  var list=APPEALS.filter(function(a){
+    if(state.activeOnly && !a.active) return false;
+    if(state.cat!=='all' && a.cat!==state.cat) return false;
+    if(q && (a.id+' '+a.desc+' '+a.cat).toLowerCase().indexOf(q)===-1) return false;
+    return true;
+  });
+  var k=state.sortKey, d=state.sortDir;
+  list.sort(function(a,b){
+    var av,bv;
+    if(k==='goal'||k==='raised'||k==='gifts'){ av=a[k]; bv=b[k]; }
+    else if(k==='start'||k==='end'){ av=toDateNum(a[k]); bv=toDateNum(b[k]); }
+    else if(k==='active'){ av=a.active?1:0; bv=b.active?1:0; }
+    else { av=String(a[k]).toLowerCase(); bv=String(b[k]).toLowerCase(); }
+    if(av<bv) return -1*d; if(av>bv) return 1*d; return 0;
+  });
+  return list;
+}
+function renderHead(){
+  document.getElementById('head-row').innerHTML =
+    '<th class="kb-cell"></th>' + COLS.map(function(c){
+      var on=state.sortKey===c.k;
+      var car = on ? (state.sortDir>0?'▲':'▼') : '↕';
+      return '<th class="'+(c.num?'num ':'')+(c.sortable?'sortable ':'')+(on?'sorted':'')+'" '+(c.sortable?'onclick="sortBy(\''+c.k+'\')"':'')+'>'+esc(c.label)+(c.sortable?'<span class="car">'+car+'</span>':'')+'</th>';
+    }).join('');
+}
+function catCell(v){ return '<span class="cat-tag">'+esc(v)+'</span>'; }
+function miniCell(raised, goal){
+  if(!goal) return '<div class="mini"><div class="amt">'+money(raised)+'</div><div class="track"><div class="fill" style="width:0%"></div></div></div>';
+  var pct=Math.min(100, Math.round(raised/goal*100));
+  return '<div class="mini"><div class="amt">'+money(raised)+'</div><div class="track"><div class="fill'+(pct>=100?' done':'')+'" style="width:'+pct+'%"></div></div></div>';
+}
+function render(){
+  renderHead();
+  var list=filtered(), total=list.length, pages=Math.max(1,Math.ceil(total/PER));
+  if(state.page>=pages) state.page=pages-1; if(state.page<0) state.page=0;
+  var slice=list.slice(state.page*PER, state.page*PER+PER);
+  var body=document.getElementById('rows');
+  if(!slice.length){ body.innerHTML='<tr class="empty-row"><td colspan="'+(COLS.length+1)+'">No appeals match your filters. <a href="#" onclick="clearFilters();return false" style="color:var(--blue)">Clear filters</a> or create a <a href="#" onclick="openNew();return false" style="color:var(--blue)">new appeal</a>.</td></tr>'; }
+  else body.innerHTML = slice.map(function(a){
+    return '<tr class="'+(a.active?'':'inactive')+'" data-id="'+esc(a.id)+'">'
+      + '<td class="kb-cell"><button class="kbtn" onclick="openKebab(event,\''+esc(a.id)+'\')">⋯</button></td>'
+      + '<td><span class="id-link" onclick="openEdit(\''+esc(a.id)+'\')">'+esc(a.id)+'</span></td>'
+      + '<td class="desc-cell" title="'+esc(a.desc)+'">'+esc(a.desc)+'</td>'
+      + '<td>'+catCell(a.cat)+'</td>'
+      + '<td class="num">'+(a.goal?money(a.goal):'<span class="muted">—</span>')+'</td>'
+      + '<td class="num">'+miniCell(a.raised,a.goal)+'</td>'
+      + '<td class="num">'+a.gifts.toLocaleString('en-US')+'</td>'
+      + '<td>'+(a.start||'<span class="muted">—</span>')+'</td>'
+      + '<td>'+(a.end||'<span class="muted">—</span>')+'</td>'
+      + '<td><span class="pill '+(a.active?'yes':'no')+'"><span class="dot"></span>'+(a.active?'Yes':'No')+'</span></td>'
+      + '</tr>';
+  }).join('');
+  // pager
+  var from=total? state.page*PER+1:0, to=Math.min(total, state.page*PER+PER);
+  document.getElementById('pinfo').innerHTML='Showing <strong>'+from+'–'+to+'</strong> of <strong>'+total+'</strong> appeals';
+  document.getElementById('countNote').innerHTML='<strong>'+total+'</strong> appeal'+(total!==1?'s':'')+(state.activeOnly?' (active)':'');
+  renderPager(pages);
+}
+function renderPager(pages){
+  var pg=document.getElementById('pg'), cur=state.page, html='';
+  html+='<button '+(cur===0?'disabled':'')+' onclick="go('+(cur-1)+')">‹</button>';
+  var show=[]; for(var i=0;i<pages;i++){ if(i<2||i>pages-3||Math.abs(i-cur)<=1) show.push(i); }
+  var last=-1;
+  show.forEach(function(i){ if(i-last>1) html+='<span class="gap">…</span>'; html+='<button class="'+(i===cur?'on':'')+'" onclick="go('+i+')">'+(i+1)+'</button>'; last=i; });
+  html+='<button '+(cur>=pages-1?'disabled':'')+' onclick="go('+(cur+1)+')">›</button>';
+  pg.innerHTML=html;
+}
+function go(p){ state.page=p; render(); }
+function sortBy(k){ if(state.sortKey===k) state.sortDir*=-1; else { state.sortKey=k; state.sortDir=1; } render(); }
+function onSearch(v){ state.q=v; state.page=0; render(); }
+function onFilter(){ state.cat=document.getElementById('catf').value; state.activeOnly=document.getElementById('activeOnly').checked; state.page=0; render(); }
+function clearFilters(){ state.q=''; state.cat='all'; state.activeOnly=false; document.getElementById('q').value=''; document.getElementById('catf').value='all'; document.getElementById('activeOnly').checked=false; state.page=0; render(); }
+function buildCatFilter(){
+  var cats={}; APPEALS.forEach(function(a){ cats[a.cat]=1; });
+  var opts='<option value="all">All categories</option>'+Object.keys(cats).sort().map(function(c){ return '<option value="'+esc(c)+'">'+esc(c)+'</option>'; }).join('');
+  document.getElementById('catf').innerHTML=opts;
+}
+
+/* ── Kebab ── */
+var kmenu=null;
+function closeKebab(){ if(kmenu){ kmenu.remove(); kmenu=null; } }
+function openKebab(e, id){
+  e.stopPropagation(); closeKebab();
+  var a=APPEALS.find(function(x){return x.id===id;}); if(!a) return;
+  kmenu=document.createElement('div'); kmenu.className='kmenu';
+  kmenu.innerHTML =
+    '<button onclick="openEdit(\''+esc(id)+'\')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9.5 2.5l2 2L5 11l-2.5.5L3 9z"/></svg>Edit appeal</button>'
+    + '<button onclick="toggleActive(\''+esc(id)+'\')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">'+(a.active?'<circle cx="7" cy="7" r="5.5"/><path d="M5 7h4"/>':'<circle cx="7" cy="7" r="5.5"/><path d="M7 4.5v5M4.5 7h5"/>')+'</svg>'+(a.active?'Deactivate':'Activate')+'</button>'
+    + '<button onclick="dupAppeal(\''+esc(id)+'\')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="8" rx="1.2"/><path d="M5.5 3V1.8h6.7V10"/></svg>Duplicate</button>'
+    + '<div class="sep"></div>'
+    + '<button class="danger" onclick="askDelete(\''+esc(id)+'\')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 4h9M5.5 4V2.5h3V4M4 4l.5 8h5l.5-8"/></svg>Delete appeal</button>';
+  document.body.appendChild(kmenu);
+  var r=e.target.getBoundingClientRect();
+  kmenu.style.top=(r.bottom+window.pageYOffset+4)+'px';
+  var left=r.right+window.pageXOffset-kmenu.offsetWidth;
+  kmenu.style.left=Math.max(8,left)+'px';
+}
+document.addEventListener('click', function(e){ if(kmenu && !kmenu.contains(e.target)) closeKebab(); });
+
+/* ── Create / Edit ── */
+function openNew(){
+  closeKebab(); editingId=null;
+  document.getElementById('form-title').textContent='New appeal';
+  document.getElementById('form-sub').textContent='Create a solicitation donors can respond to.';
+  document.getElementById('form-save').textContent='Save appeal';
+  ['f-id','f-desc','f-start','f-end','f-goal','f-solic'].forEach(function(i){ document.getElementById(i).value=''; });
+  document.getElementById('f-cat').selectedIndex=0; document.getElementById('f-active').checked=true;
+  document.getElementById('f-id').disabled=false;
+  document.getElementById('form-ov').classList.add('open');
+  setTimeout(function(){ document.getElementById('f-id').focus(); },40);
+}
+function openEdit(id){
+  closeKebab(); var a=APPEALS.find(function(x){return x.id===id;}); if(!a) return;
+  editingId=id;
+  document.getElementById('form-title').textContent='Edit appeal';
+  document.getElementById('form-sub').textContent=esc(a.id)+' · '+esc(a.cat);
+  document.getElementById('form-save').textContent='Save changes';
+  document.getElementById('f-id').value=a.id; document.getElementById('f-id').disabled=true;
+  document.getElementById('f-desc').value=a.desc;
+  document.getElementById('f-cat').value=a.cat;
+  document.getElementById('f-start').value=a.start; document.getElementById('f-end').value=a.end;
+  document.getElementById('f-goal').value=a.goal?money(a.goal):'';
+  document.getElementById('f-solic').value='';
+  document.getElementById('f-active').checked=a.active;
+  document.getElementById('form-ov').classList.add('open');
+}
+function closeForm(){ document.getElementById('form-ov').classList.remove('open'); }
+function saveForm(){
+  var id=document.getElementById('f-id').value.trim(), desc=document.getElementById('f-desc').value.trim();
+  if(!id){ alert('Appeal ID is required.'); return; }
+  if(!desc){ alert('Description is required.'); return; }
+  var cat=document.getElementById('f-cat').value;
+  var start=document.getElementById('f-start').value.trim(), end=document.getElementById('f-end').value.trim();
+  var goal=parseMoney(document.getElementById('f-goal').value);
+  var solic=document.getElementById('f-solic').value.trim();
+  var active=document.getElementById('f-active').checked;
+  var isNew=!editingId;
+  if(isNew){
+    if(APPEALS.some(function(x){return x.id.toLowerCase()===id.toLowerCase();})){ alert('An appeal with that ID already exists.'); return; }
+    APPEALS.unshift({id:id, desc:desc, cat:cat, start:start, end:end, goal:goal, raised:0, gifts:0, active:active});
+  } else {
+    var a=APPEALS.find(function(x){return x.id===editingId;});
+    a.desc=desc; a.cat=cat; a.start=start; a.end=end; a.goal=goal; a.active=active;
+  }
+  closeForm(); refresh();
+  if(isNew){
+    showCf('Appeal created','Saved to the Appeals list.', [['Appeal ID',id],['Description',desc],['Category',cat],['Goal',goal?money(goal):''],['Start date',start],['End date',end],['Number solicited',solic],['Status',active?'Active':'Inactive']]);
+  } else atlasToast('Appeal updated · '+id);
+}
+function dupAppeal(id){
+  closeKebab(); var a=APPEALS.find(function(x){return x.id===id;}); if(!a) return;
+  var base=a.id.replace(/\d+$/,''), n=2, nid=a.id+'-COPY';
+  while(APPEALS.some(function(x){return x.id===nid;})){ nid=a.id+'-COPY'+n; n++; }
+  APPEALS.unshift({id:nid, desc:a.desc+' (copy)', cat:a.cat, start:'', end:'', goal:a.goal, raised:0, gifts:0, active:true});
+  refresh(); atlasToast('Duplicated as '+nid);
+}
+function toggleActive(id){ closeKebab(); var a=APPEALS.find(function(x){return x.id===id;}); if(!a) return; a.active=!a.active; refresh(); atlasToast(a.id+(a.active?' activated':' deactivated')); }
+
+/* ── Delete ── */
+var pendingDel=null;
+function askDelete(id){ closeKebab(); var a=APPEALS.find(function(x){return x.id===id;}); if(!a) return; pendingDel=id; document.getElementById('del-sub').textContent=a.id+' · '+a.desc; document.getElementById('del-ov').classList.add('open'); }
+function closeDel(){ document.getElementById('del-ov').classList.remove('open'); pendingDel=null; }
+document.getElementById('del-go').addEventListener('click', function(){ if(!pendingDel) return; var id=pendingDel; APPEALS=APPEALS.filter(function(x){return x.id!==id;}); closeDel(); refresh(); atlasToast('Appeal deleted · '+id); });
+
+/* ── Confirmation ── */
+function showCf(title, sub, rows){
+  document.getElementById('cf-title').textContent=title;
+  document.getElementById('cf-sub').textContent=sub;
+  document.getElementById('cf-sum').innerHTML=rows.filter(function(r){return r[1];}).map(function(r){ return '<div class="r"><span class="k">'+esc(r[0])+'</span><span class="v">'+esc(r[1])+'</span></div>'; }).join('');
+  document.getElementById('cf-ov').classList.add('open');
+}
+function closeCf(){ document.getElementById('cf-ov').classList.remove('open'); }
+
+/* ── Toast ── */
+var toastT=null;
+function atlasToast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){ t.classList.remove('show'); },2600); }
+
+function refresh(){ var b=document.getElementById('nav-appeal-ct'); if(b) b.textContent=APPEALS.filter(function(a){return a.active;}).length; render(); }
+[].forEach.call(document.querySelectorAll('.m-ov'), function(ov){ ov.addEventListener('click', function(e){ if(e.target===ov) ov.classList.remove('open'); }); });
+document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ document.querySelectorAll('.m-ov.open').forEach(function(o){o.classList.remove('open');}); closeKebab(); } });
+
+buildCatFilter(); refresh();
+</script>
+<!-- ATLAS-DATEPICKER v1 : reusable click-to-open calendar for text date fields -->
+<style id="atlas-datepicker-css">
+.adp-pop{position:absolute;z-index:2147483000;width:266px;background:#fff;border:1px solid var(--border,#E2E8F0);border-radius:12px;
+  box-shadow:0 12px 34px rgba(15,23,42,.18);padding:12px;font-family:'DM Sans',system-ui,sans-serif;color:var(--text-1,#0F172A);
+  opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .12s ease,transform .12s ease;}
+.adp-pop.open{opacity:1;transform:translateY(0);pointer-events:auto;}
+.adp-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.adp-nav{width:28px;height:28px;border:none;background:transparent;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;
+  color:var(--text-2,#334155);display:flex;align-items:center;justify-content:center;}
+.adp-nav:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
+.adp-title{font-size:13.5px;font-weight:600;letter-spacing:.01em;cursor:pointer;padding:4px 8px;border-radius:8px;}
+.adp-title:hover{background:var(--surface,#F8FAFC);}
+.adp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.adp-dow{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3,#64748B);
+  text-align:center;padding:4px 0;}
+.adp-day{border:none;background:transparent;border-radius:8px;height:32px;font-size:12.5px;cursor:pointer;color:var(--text-1,#0F172A);
+  font-family:inherit;}
+.adp-day:hover{background:var(--blue-pale,#EFF6FF);}
+.adp-day.mut{color:#CBD5E1;}
+.adp-day.today{box-shadow:inset 0 0 0 1px var(--blue,#2563EB);color:var(--blue,#2563EB);font-weight:600;}
+.adp-day.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
+.adp-cell{border:none;background:transparent;border-radius:8px;height:34px;font-size:12.5px;cursor:pointer;color:var(--text-2,#334155);
+  font-family:inherit;}
+.adp-cell:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
+.adp-cell.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
+.adp-ft{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border,#E2E8F0);}
+.adp-ft button{border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:4px 6px;border-radius:6px;}
+.adp-today-b{color:var(--blue,#2563EB);} .adp-today-b:hover{background:var(--blue-pale,#EFF6FF);}
+.adp-clear-b{color:var(--text-3,#64748B);} .adp-clear-b:hover{background:var(--surface,#F8FAFC);}
+.adp-mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+</style>
+<script id="atlas-datepicker-js">
+(function(){
+  if (window.__atlasDP) return; window.__atlasDP = true;
+  var MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  var DATE_PH=/\b(m{1,2}\s*[\/\-.]\s*d{1,2}\s*[\/\-.]\s*y{2,4}|y{4}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*d{1,2}|d{1,2}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*y{2,4})\b/i;
+  var WORD_DATE=/\bdate\b/i;
+
+  function looksDate(inp){
+    if(!inp||inp.tagName!=='INPUT') return false;
+    var t=(inp.getAttribute('type')||'text').toLowerCase();
+    if(t!=='text'&&t!=='') return false;              // leave native date/other inputs alone
+    if(inp.getAttribute('data-adp')==='off') return false;
+    if(inp.getAttribute('list')) return false;         // autocomplete fields
+    var ph=inp.getAttribute('placeholder')||'';
+    if(DATE_PH.test(ph)) return true;
+    if(WORD_DATE.test(ph)) return true;
+    // label / aria signal (whole word "date")
+    var lab=inp.getAttribute('aria-label')||'';
+    if(WORD_DATE.test(lab)) return true;
+    // native label association (for=/wrapping label)
+    try{ if(inp.labels){ for(var i=0;i<inp.labels.length;i++){ if(WORD_DATE.test(inp.labels[i].textContent||'')) return true; } } }catch(e){}
+    var isLbl=function(el){ return el && el.matches && el.matches('label,.lbl,.field-label,.form-label'); };
+    // immediate preceding sibling labels (no climbing to broad ancestors)
+    var sib=inp.previousElementSibling, guard=0;
+    while(sib && guard<3){ if(isLbl(sib) && WORD_DATE.test(sib.textContent||'')) return true; sib=sib.previousElementSibling; guard++; }
+    // direct label children of the input's own wrapper only
+    var par=inp.parentElement;
+    if(par){ var kids=par.children; for(var j=0;j<kids.length;j++){ var k=kids[j]; if(k!==inp && isLbl(k) && WORD_DATE.test(k.textContent||'')) return true; } }
+    return false;
+  }
+
+  // ---- format detection & output ----
+  function fmtOf(inp){
+    var ph=(inp.getAttribute('placeholder')||'').toLowerCase();
+    var v=(inp.value||'').trim();
+    if(/y{4}\s*[\/\-.]\s*m/.test(ph)||/^\d{4}-\d{1,2}-\d{1,2}$/.test(v)) return 'iso';
+    if(/d{1,2}\s*[\/\-.]\s*m/.test(ph)) return 'dmy';
+    if(/[a-z]{3,}\s+\d{1,2},?\s+\d{4}/i.test(v)) return 'long';
+    return 'mdy';
+  }
+  function pad(n){return (n<10?'0':'')+n;}
+  function toStr(d,fmt){
+    var y=d.getFullYear(),m=d.getMonth()+1,day=d.getDate();
+    if(fmt==='iso') return y+'-'+pad(m)+'-'+pad(day);
+    if(fmt==='dmy') return pad(day)+'/'+pad(m)+'/'+y;
+    if(fmt==='long') return MON[m-1]+' '+day+', '+y;
+    return pad(m)+'/'+pad(day)+'/'+y;
+  }
+  function parse(v){
+    v=(v||'').trim(); if(!v) return null;
+    var m;
+    if(m=v.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/)) return new Date(+m[1],+m[2]-1,+m[3]);
+    if(m=v.match(/^([a-z]{3,})\s+(\d{1,2}),?\s+(\d{4})$/i)){var mi=MON.findIndex(function(x){return x.toLowerCase().indexOf(m[1].toLowerCase())===0;});if(mi>=0)return new Date(+m[3],mi,+m[2]);}
+    if(m=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/)){var y=+m[3];if(y<100)y+=2000;return new Date(y,+m[1]-1,+m[2]);}
+    var d=new Date(v); return isNaN(d)?null:d;
+  }
+
+  // ---- single shared popover ----
+  var pop,active,view,mode='days';
+  function build(){
+    pop=document.createElement('div');pop.className='adp-pop';pop.setAttribute('role','dialog');
+    document.body.appendChild(pop);
+    pop.addEventListener('mousedown',function(e){e.preventDefault();}); // keep field focus
+  }
+  function close(){ if(pop) pop.classList.remove('open'); active=null; mode='days'; }
+  function open(inp){
+    if(!pop) build();
+    active=inp; mode='days';
+    view=parse(inp.value)||new Date();
+    render(); position(); pop.classList.add('open');
+  }
+  function position(){
+    var r=active.getBoundingClientRect(), sx=window.pageXOffset, sy=window.pageYOffset;
+    pop.style.visibility='hidden'; pop.classList.add('open');
+    var ph=pop.offsetHeight, pw=pop.offsetWidth;
+    pop.classList.remove('open'); pop.style.visibility='';
+    var top=r.bottom+sy+6, left=r.left+sx;
+    if(r.bottom+ph+6>window.innerHeight && r.top-ph-6>0) top=r.top+sy-ph-6;
+    left=Math.min(left, sx+window.innerWidth-pw-8); left=Math.max(left,sx+8);
+    pop.style.top=top+'px'; pop.style.left=left+'px';
+  }
+  function commit(d){
+    var fmt=fmtOf(active);
+    active.value=toStr(d,fmt);
+    active.dispatchEvent(new Event('input',{bubbles:true}));
+    active.dispatchEvent(new Event('change',{bubbles:true}));
+    close();
+  }
+  function render(){
+    if(mode==='months'){renderMonths();return;}
+    if(mode==='years'){renderYears();return;}
+    var y=view.getFullYear(), mo=view.getMonth();
+    var sel=parse(active.value), today=new Date();
+    var first=new Date(y,mo,1), start=first.getDay(), dim=new Date(y,mo+1,0).getDate(), pdim=new Date(y,mo,0).getDate();
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="pm">&#8249;</button>'+
+      '<div class="adp-title" data-a="mode">'+MON[mo]+' '+y+'</div>'+
+      '<button class="adp-nav" data-a="nm">&#8250;</button></div><div class="adp-grid">';
+    for(var i=0;i<7;i++) h+='<div class="adp-dow">'+DOW[i]+'</div>';
+    for(var c=0;c<42;c++){
+      var dn,cls='adp-day',dt;
+      if(c<start){dn=pdim-start+1+c;cls+=' mut';dt=new Date(y,mo-1,dn);}
+      else if(c-start+1<=dim){dn=c-start+1;dt=new Date(y,mo,dn);}
+      else{dn=c-start+1-dim;cls+=' mut';dt=new Date(y,mo+1,dn);}
+      if(dt.getFullYear()===today.getFullYear()&&dt.getMonth()===today.getMonth()&&dt.getDate()===today.getDate())cls+=' today';
+      if(sel&&dt.getFullYear()===sel.getFullYear()&&dt.getMonth()===sel.getMonth()&&dt.getDate()===sel.getDate())cls+=' sel';
+      h+='<button class="'+cls+'" data-d="'+dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate()+'">'+dn+'</button>';
+      if(c>=start+dim-1 && (c+1)%7===0) break;
+    }
+    h+='</div><div class="adp-ft"><button class="adp-today-b" data-a="today">Today</button><button class="adp-clear-b" data-a="clear">Clear</button></div>';
+    pop.innerHTML=h;
+  }
+  function renderMonths(){
+    var y=view.getFullYear();
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="py">&#8249;</button>'+
+      '<div class="adp-title" data-a="years">'+y+'</div><button class="adp-nav" data-a="ny">&#8250;</button></div><div class="adp-mgrid">';
+    for(var i=0;i<12;i++) h+='<button class="adp-cell'+(i===view.getMonth()?' sel':'')+'" data-m="'+i+'">'+MONS[i]+'</button>';
+    h+='</div>'; pop.innerHTML=h;
+  }
+  function renderYears(){
+    var base=view.getFullYear()-6;
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="pyr">&#8249;</button>'+
+      '<div class="adp-title">'+base+' – '+(base+11)+'</div><button class="adp-nav" data-a="nyr">&#8250;</button></div><div class="adp-mgrid">';
+    for(var i=0;i<12;i++){var yr=base+i;h+='<button class="adp-cell'+(yr===view.getFullYear()?' sel':'')+'" data-y="'+yr+'">'+yr+'</button>';}
+    h+='</div>'; pop.innerHTML=h;
+  }
+
+  document.addEventListener('click',function(e){
+    if(!pop) return;
+    var t=e.target;
+    if(pop.contains(t)){
+      var a=t.getAttribute('data-a'), d=t.getAttribute('data-d'), mm=t.getAttribute('data-m'), yy=t.getAttribute('data-y');
+      if(d){var p=d.split('-');commit(new Date(+p[0],+p[1]-1,+p[2]));return;}
+      if(mm!=null){view=new Date(view.getFullYear(),+mm,1);mode='days';render();return;}
+      if(yy!=null){view=new Date(+yy,view.getMonth(),1);mode='months';render();return;}
+      if(a==='pm'){view=new Date(view.getFullYear(),view.getMonth()-1,1);render();}
+      else if(a==='nm'){view=new Date(view.getFullYear(),view.getMonth()+1,1);render();}
+      else if(a==='mode'){mode='months';render();}
+      else if(a==='years'){mode='years';render();}
+      else if(a==='py'){view=new Date(view.getFullYear()-1,view.getMonth(),1);render();}
+      else if(a==='ny'){view=new Date(view.getFullYear()+1,view.getMonth(),1);render();}
+      else if(a==='pyr'){view=new Date(view.getFullYear()-12,view.getMonth(),1);render();}
+      else if(a==='nyr'){view=new Date(view.getFullYear()+12,view.getMonth(),1);render();}
+      else if(a==='today'){commit(new Date());}
+      else if(a==='clear'){active.value='';active.dispatchEvent(new Event('input',{bubbles:true}));active.dispatchEvent(new Event('change',{bubbles:true}));close();}
+      return;
+    }
+    if(active && t===active) return;
+    close();
+  },true);
+
+  document.addEventListener('focusin',function(e){ if(looksDate(e.target)) open(e.target); });
+  document.addEventListener('click',function(e){ if(looksDate(e.target) && active!==e.target) open(e.target); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+  window.addEventListener('resize',function(){ if(active&&pop&&pop.classList.contains('open')) position(); });
+  window.addEventListener('scroll',function(){ if(active&&pop&&pop.classList.contains('open')) position(); },true);
+
+  window.__atlasLooksDate=looksDate; // exposed for tests
+})();
+</script>
+<!-- /ATLAS-DATEPICKER -->
+<!-- ATLAS-NAVCOLLAPSE v1 : expandable/collapsible Campaigns submenu (Appeals / Funds) -->
+<style id="atlas-navcollapse-css">
+.nav-caret{ margin-left:auto; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px;
+  border-radius:5px; opacity:.55; transition:transform .18s ease, opacity .15s, background .15s; flex-shrink:0; }
+.nav-caret:hover{ opacity:1; background:rgba(255,255,255,.12); }
+.nav-caret svg{ width:9px; height:9px; }
+.nav-item.nav-open .nav-caret{ transform:rotate(90deg); }
+.nav-item .nav-badge + .nav-caret{ margin-left:8px; }
+.nav-subwrap{ overflow:hidden; }
+</style>
+<script id="atlas-navcollapse-js">
+(function(){
+  if (window.__atlasNavCollapse) return; window.__atlasNavCollapse = true;
+  var CARET = '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 2l3 3-3 3"/></svg>';
+
+  function setup(link){
+    // collect submenu: a following .nav-subwrap, or loose Appeals/Funds nav-items (portal)
+    var wrap=null, subs=[], next=link.nextElementSibling;
+    if(next && next.classList && next.classList.contains('nav-subwrap')) wrap=next;
+    else {
+      var n=next;
+      while(n && n.classList && n.classList.contains('nav-item') && /atlas-(appeals|funds)\.html$/.test(n.getAttribute('href')||'')){ subs.push(n); n=n.nextElementSibling; }
+    }
+    if(!wrap && !subs.length) return;
+
+    var childActive = wrap ? !!wrap.querySelector('.nav-item.active') : subs.some(function(s){return s.classList.contains('active');});
+    var expanded = link.classList.contains('active') || childActive;
+
+    if(!link.querySelector('.nav-caret')){
+      var car=document.createElement('span'); car.className='nav-caret'; car.setAttribute('aria-label','Toggle submenu'); car.innerHTML=CARET;
+      link.appendChild(car);
+    }
+    var caret=link.querySelector('.nav-caret');
+    function apply(){
+      if(wrap) wrap.style.display = expanded?'':'none';
+      else subs.forEach(function(s){ s.style.display = expanded?'':'none'; });
+      link.classList.toggle('nav-open', expanded);
+      link.setAttribute('aria-expanded', expanded?'true':'false');
+    }
+    apply();
+    caret.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); expanded=!expanded; apply(); });
+  }
+
+  function scan(){
+    var links=document.querySelectorAll('.nav-item[href="atlas-campaign-dashboard.html"]:not([data-navcol])');
+    for(var i=0;i<links.length;i++){ links[i].setAttribute('data-navcol','1'); setup(links[i]); }
+  }
+  function boot(){
+    scan();
+    // portal renders its sidebar via JS — watch for it to appear
+    var host=document.querySelector('.sidebar, #nav') || document.body;
+    try{
+      var mo=new MutationObserver(function(){ scan(); });
+      mo.observe(host, {childList:true, subtree:true});
+      setTimeout(function(){ mo.disconnect(); }, 4000);
+    }catch(e){}
+    var tries=0, t=setInterval(function(){ scan(); if(++tries>12) clearInterval(t); }, 120);
+  }
+  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+<!-- /ATLAS-NAVCOLLAPSE -->
+</body>
+</html>

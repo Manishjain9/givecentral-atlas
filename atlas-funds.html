@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Atlas — Funds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:#0E1E35; --navy-2:#152844; --blue:#2563EB; --blue-mid:#3B82F6; --blue-light:#DBEAFE; --blue-pale:#EFF6FF;
+  --teal:#0D9488; --green:#15803D; --green-light:#DCFCE7; --amber:#D97706; --amber-light:#FEF3C7;
+  --rose:#BE185D; --rose-light:#FCE7F3; --purple:#7C3AED; --purple-light:#EDE9FE; --gold:#B45309;
+  --text:#0F172A; --text-2:#334155; --text-3:#64748B; --border:#E2E8F0; --border-soft:#EDF2F7;
+  --surface:#F8FAFC; --white:#FFFFFF; --sidebar-w:220px;
+  --shadow-md:0 4px 16px rgba(15,23,42,.06), 0 2px 4px rgba(15,23,42,.04);
+}
+html { font-size:14px; -webkit-font-smoothing:antialiased; }
+body { font-family:'DM Sans',sans-serif; background:var(--surface); color:var(--text); min-height:100vh; display:flex; overflow-x:hidden; }
+a { color:inherit; text-decoration:none; }
+.sidebar { width:var(--sidebar-w); background:var(--navy); min-height:100vh; display:flex; flex-direction:column; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; }
+.sidebar-logo { padding:18px 18px 14px; display:flex; align-items:center; gap:11px; border-bottom:1px solid rgba(255,255,255,.08); }
+.logo-mark { width:52px; height:40px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.logo-mark svg { width:52px; height:40px; }
+.logo-text-wrap { display:flex; flex-direction:column; }
+.logo-name { font-family:'DM Serif Display',serif; font-size:20px; color:white; line-height:1; }
+.logo-sub { font-size:9px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.3); margin-top:3px; }
+.sidebar-search { margin:12px 12px 6px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:8px; display:flex; align-items:center; gap:8px; padding:8px 12px; cursor:pointer; }
+.sidebar-search svg { width:13px; height:13px; color:rgba(255,255,255,.3); flex-shrink:0; }
+.sidebar-search input { background:none; border:none; outline:none; width:100%; font-size:12px; color:rgba(255,255,255,.6); font-family:'DM Sans',sans-serif; cursor:pointer; }
+.sidebar-search input::placeholder { color:rgba(255,255,255,.3); }
+.sidebar-scroll { flex:1; }
+.nav-group { padding:8px 8px 0; }
+.nav-label { font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.28); padding:0 10px; margin-bottom:4px; }
+.nav-item { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:7px; font-size:12px; font-weight:500; color:rgba(255,255,255,.55); cursor:pointer; transition:all .15s; margin-bottom:1px; text-decoration:none; }
+.nav-item:hover { background:rgba(255,255,255,.07); color:rgba(255,255,255,.85); }
+.nav-item.active { background:var(--blue); color:white; }
+.nav-item svg { width:14px; height:14px; flex-shrink:0; }
+.nav-badge { margin-left:auto; background:rgba(255,255,255,.12); color:rgba(255,255,255,.6); border-radius:10px; padding:1px 7px; font-size:10px; font-weight:600; }
+.nav-item.active .nav-badge { background:rgba(255,255,255,.2); color:white; }
+.sidebar-user { margin-top:auto; padding:12px; border-top:1px solid rgba(255,255,255,.08); display:flex; align-items:center; gap:9px; cursor:pointer; }
+.sidebar-user:hover { background:rgba(255,255,255,.04); }
+.user-avatar { width:30px; height:30px; border-radius:50%; background:var(--blue); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:white; flex-shrink:0; }
+.user-name { font-size:12px; font-weight:500; color:rgba(255,255,255,.75); }
+.user-role { font-size:10px; color:rgba(255,255,255,.35); margin-top:1px; }
+.main { flex:1; min-width:0; display:flex; flex-direction:column; }
+.topbar { background:white; border-bottom:1px solid var(--border); padding:0 24px; height:52px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+.topbar-title { font-size:14px; font-weight:600; color:var(--text); }
+.topbar-date { font-size:12px; color:var(--text-3); }
+.topbar-search { flex:1; max-width:460px; margin:0 18px; background:var(--surface); border:1px solid var(--border); border-radius:8px; display:flex; align-items:center; gap:8px; padding:7px 12px; cursor:text; }
+.topbar-search svg { width:13px; height:13px; color:var(--text-3); }
+.topbar-search input { background:none; border:none; outline:none; width:100%; font-size:12.5px; color:var(--text); font-family:'DM Sans',sans-serif; }
+.topbar-search kbd { margin-left:auto; font-size:10.5px; background:white; border:1px solid var(--border); border-radius:4px; padding:1px 6px; color:var(--text-3); }
+.topbar-right { display:flex; align-items:center; gap:8px; margin-left:auto; }
+.tb-btn { font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; padding:7px 13px; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:6px; }
+.tb-btn svg { width:12px; height:12px; }
+.tb-ghost { background:none; border:1px solid var(--border); color:var(--text-2); }
+.tb-ghost:hover { background:var(--surface); border-color:#94A3B8; }
+.tb-notif { width:34px; height:34px; border-radius:8px; border:1px solid var(--border); background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; }
+.tb-notif:hover { background:var(--surface); }
+.tb-notif svg { width:15px; height:15px; color:var(--text-2); }
+.notif-dot { position:absolute; top:7px; right:7px; width:7px; height:7px; background:#EF4444; border-radius:50%; border:2px solid white; }
+.dash { padding:24px; overflow-y:auto; }
+.page-head { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-bottom:18px; }
+.crumb { font-size:12px; color:var(--text-3); margin-bottom:4px; display:flex; align-items:center; gap:6px; }
+.crumb a { color:var(--blue); } .crumb a:hover { text-decoration:underline; } .crumb svg { width:10px; height:10px; }
+.page-title { font-family:'DM Serif Display',serif; font-size:28px; letter-spacing:-.02em; color:var(--text); line-height:1.1; }
+.page-sub { color:var(--text-3); font-size:13px; margin-top:4px; }
+.btn { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; padding:9px 16px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; border:1px solid transparent; transition:background .15s,border-color .15s,color .15s; }
+.btn svg { width:13px; height:13px; }
+.btn-primary { background:var(--blue); color:white; box-shadow:0 1px 4px rgba(37,99,235,.25); }
+.btn-primary:hover { background:#1D4ED8; }
+.btn-ghost { background:white; border-color:var(--border); color:var(--text-2); }
+.btn-ghost:hover { background:var(--surface); border-color:#94A3B8; }
+.btn-rose { background:var(--rose); color:white; } .btn-rose:hover { background:#9D174D; }
+.lbl { display:block; font-size:11px; font-weight:600; color:var(--text-2); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+.lbl .req { color:var(--rose); margin-left:2px; }
+.fld { width:100%; font-size:13px; font-family:'DM Sans',sans-serif; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:white; color:var(--text); transition:border-color .15s, box-shadow .15s; }
+.fld:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.10); }
+.fld::placeholder { color:#94A3B8; }
+select.fld { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M3 5l3 3 3-3z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; padding-right:28px; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.toolbar { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+.tool-search { flex:1; min-width:220px; max-width:360px; background:white; border:1px solid var(--border); border-radius:9px; display:flex; align-items:center; gap:8px; padding:8px 12px; }
+.tool-search svg { width:14px; height:14px; color:var(--text-3); flex-shrink:0; }
+.tool-search input { border:none; outline:none; width:100%; font-size:13px; font-family:'DM Sans',sans-serif; background:none; color:var(--text); }
+.tool-sel { width:200px; min-width:190px; flex:0 0 auto; }
+.chk { display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-2); cursor:pointer; user-select:none; white-space:nowrap; }
+.chk input { accent-color:var(--blue); width:15px; height:15px; }
+.count-note { margin-left:auto; font-size:12px; color:var(--text-3); white-space:nowrap; }
+.count-note strong { color:var(--text); }
+.tbl-card { background:white; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.tbl { width:100%; border-collapse:collapse; }
+.tbl th { text-align:left; font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); padding:11px 14px; border-bottom:1px solid var(--border); background:var(--surface); white-space:nowrap; }
+.tbl th.sortable { cursor:pointer; user-select:none; }
+.tbl th.sortable:hover { color:var(--text); }
+.tbl th .car { opacity:.4; margin-left:3px; }
+.tbl th.sorted .car { opacity:1; color:var(--blue); }
+.tbl th.num, .tbl td.num { text-align:right; font-variant-numeric:tabular-nums; }
+.tbl td { padding:11px 14px; border-bottom:1px solid var(--border-soft); font-size:12.5px; color:var(--text-2); vertical-align:middle; }
+.tbl tr:last-child td { border-bottom:none; }
+.tbl tbody tr:hover { background:var(--blue-pale); }
+.id-link { color:var(--blue); font-weight:600; font-family:'DM Mono',monospace; font-size:12px; cursor:pointer; }
+.id-link:hover { text-decoration:underline; }
+.gl { font-family:'DM Mono',monospace; font-size:12px; color:var(--text-2); }
+.desc-cell { color:var(--text); font-weight:500; max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cat-tag { display:inline-block; font-size:10.5px; font-weight:600; padding:2px 8px; border-radius:6px; background:var(--surface); color:var(--text-2); border:1px solid var(--border); white-space:nowrap; }
+.pill { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:2px 9px; border-radius:20px; }
+.pill.yes { background:var(--green-light); color:var(--green); }
+.pill.no { background:var(--surface); color:var(--text-3); border:1px solid var(--border); }
+.pill .dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+.mini { min-width:96px; }
+.mini .amt { font-size:12px; color:var(--text); font-weight:600; font-variant-numeric:tabular-nums; }
+.mini .track { height:4px; background:var(--border-soft); border-radius:3px; margin-top:4px; overflow:hidden; }
+.mini .fill { height:100%; background:var(--blue); border-radius:3px; }
+.mini .fill.done { background:var(--green); }
+tr.inactive td:not(.kb-cell) { opacity:.55; }
+.kb-cell { width:34px; }
+.kbtn { width:26px; height:26px; border-radius:7px; border:none; background:none; cursor:pointer; color:var(--text-3); display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; }
+.kbtn:hover { background:var(--border-soft); color:var(--text); }
+.kmenu { position:absolute; z-index:60; background:white; border:1px solid var(--border); border-radius:10px; box-shadow:var(--shadow-md); padding:5px; min-width:168px; }
+.kmenu button { display:flex; align-items:center; gap:9px; width:100%; text-align:left; background:none; border:none; font-family:'DM Sans',sans-serif; font-size:12.5px; color:var(--text-2); padding:8px 10px; border-radius:7px; cursor:pointer; }
+.kmenu button:hover { background:var(--surface); }
+.kmenu button.danger { color:var(--rose); }
+.kmenu button.danger:hover { background:var(--rose-light); }
+.kmenu button svg { width:13px; height:13px; }
+.kmenu .sep { height:1px; background:var(--border); margin:4px 2px; }
+.pager { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-top:1px solid var(--border); background:var(--surface); }
+.pager .info { font-size:12px; color:var(--text-3); }
+.pager .info strong { color:var(--text); }
+.pg { display:flex; align-items:center; gap:4px; }
+.pg button { min-width:30px; height:30px; padding:0 8px; border-radius:7px; border:1px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-size:12.5px; color:var(--text-2); cursor:pointer; }
+.pg button:hover:not(:disabled) { border-color:#94A3B8; }
+.pg button.on { background:var(--blue); color:white; border-color:var(--blue); }
+.pg button:disabled { opacity:.4; cursor:default; }
+.pg .gap { color:var(--text-3); padding:0 2px; }
+.empty-row td { text-align:center; color:var(--text-3); padding:34px; font-size:13px; }
+.m-ov { position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:100; display:none; align-items:center; justify-content:center; padding:24px; }
+.m-ov.open { display:flex; }
+.m-card { background:white; border-radius:16px; width:100%; max-width:560px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 24px 60px rgba(15,23,42,.28); }
+.m-head { padding:20px 22px 14px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; gap:12px; }
+.m-title { font-family:'DM Serif Display',serif; font-size:20px; color:var(--text); }
+.m-sub { font-size:12.5px; color:var(--text-3); margin-top:3px; }
+.m-body { padding:18px 22px; overflow-y:auto; }
+.m-foot { padding:14px 22px; border-top:1px solid var(--border); display:flex; align-items:center; gap:10px; justify-content:flex-end; }
+.m-ico { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.m-ico.green { background:var(--green-light); color:var(--green); }
+.m-ico.rose { background:var(--rose-light); color:var(--rose); }
+.m-ico svg { width:20px; height:20px; }
+.sum { border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.sum .r { display:flex; justify-content:space-between; gap:14px; padding:9px 13px; border-bottom:1px solid var(--border-soft); font-size:12.5px; }
+.sum .r:last-child { border-bottom:none; }
+.sum .r .k { color:var(--text-3); } .sum .r .v { color:var(--navy); font-weight:600; text-align:right; }
+.field-mt { margin-top:14px; }
+.chk-row { display:flex; align-items:center; gap:8px; margin-top:16px; font-size:13px; color:var(--text-2); cursor:pointer; }
+.chk-row input { accent-color:var(--blue); width:16px; height:16px; }
+.toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--navy); color:white; padding:11px 18px; border-radius:10px; font-size:13px; box-shadow:var(--shadow-md); opacity:0; pointer-events:none; transition:all .25s; z-index:120; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
+        <circle cx="22" cy="92" r="4" fill="white"/><circle cx="58" cy="58" r="5" fill="white"/>
+        <circle cx="98" cy="38" r="5.5" fill="white"/><circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
+        <circle cx="138" cy="24" r="7" fill="#C8A04A"/><circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
+      </svg>
+    </div>
+    <div class="logo-text-wrap"><span class="logo-name">Atlas</span><span class="logo-sub">By GiveCentral</span></div>
+  </div>
+  <a href="atlas-search.html"><div class="sidebar-search">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+    <input type="text" placeholder="Search…" readonly>
+  </div></a>
+  <div class="sidebar-scroll">
+    <div class="nav-group">
+      <div class="nav-label">Main</div>
+      <a class="nav-item" href="atlas-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>Dashboard</a>
+      <a class="nav-item" href="atlas-donors-list.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>Donors</a>
+      <a class="nav-item" href="atlas-gifts-pledges.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>Gifts &amp; pledges</a>
+      <a class="nav-item" href="atlas-campaign-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>Campaigns</a>
+      <div class="nav-subwrap" style="margin:2px 0 4px 20px;border-left:1.5px solid rgba(255,255,255,.12)">
+        <a class="nav-item" href="atlas-appeals.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v5H6l-2.5 2v-2H2z"/></svg>Appeals</a>
+        <a class="nav-item active" href="atlas-funds.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><ellipse cx="7" cy="3.5" rx="5" ry="2"/><path d="M2 3.5v7c0 1.1 2.2 2 5 2s5-.9 5-2v-7M2 7c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg>Funds</a>
+      </div>
+      <a class="nav-item" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>Reports</a>
+    </div>
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Fundraising</div>
+      <a class="nav-item" href="atlas-pipeline.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>Prospect pipeline</a>
+      <a class="nav-item" href="atlas-tasks.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>Tasks &amp; reminders</a>
+      <a class="nav-item" href="atlas-communications.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>Communications</a>
+      <a class="nav-item" href="atlas-events-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>Events</a>
+    </div>
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Admin</div>
+      <a class="nav-item" href="atlas-users-roles.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Users &amp; roles</a>
+      <a class="nav-item" href="atlas-integrations.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>Integrations</a>
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar">SR</div>
+    <div><div class="user-name">Sarah Reynolds</div><div class="user-role">Development Director</div></div>
+  </div>
+</aside>
+
+<div class="main">
+<div class="topbar">
+  <span class="topbar-title">Funds</span>
+  <span class="topbar-date">Monday, May 4, 2026</span>
+  <a href="atlas-search.html" class="topbar-search">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+    <input type="text" placeholder="Search donors, gifts, campaigns…" readonly style="cursor:pointer"><kbd>⌘K</kbd>
+  </a>
+  <div class="topbar-right">
+    <a class="tb-btn tb-ghost" href="atlas-guru-ai.html"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M3 9c.5-1 5.5-1 6 0"/></svg>Ask Guru</a>
+    <a href="atlas-notifications.html" class="tb-notif" title="Notifications"><svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.5 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5zM6 13a1.5 1.5 0 003 0"/></svg><div class="notif-dot"></div></a>
+  </div>
+</div>
+
+<div class="dash">
+  <div class="page-head">
+    <div>
+      <div class="crumb"><a href="atlas-dashboard.html">Atlas</a><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg><a href="atlas-campaign-dashboard.html">Campaigns</a><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg><span>Funds</span></div>
+      <div class="page-title">Funds</div>
+      <div class="page-sub">Where gifts are designated — each fund maps to a GL account and legal entity for clean revenue reporting.</div>
+    </div>
+    <div class="flex gap-8" style="align-items:center">
+      <button class="btn btn-ghost" onclick="atlasToast('Export started — CSV will download shortly.')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 9.5V1.5M3.5 6L7 9.5 10.5 6M2 12.5h10"/></svg>Export</button>
+      <button class="btn btn-primary" onclick="openNew()"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg>New fund</button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <label class="tool-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="q" placeholder="Find in this list — ID, description, GL, entity…" oninput="onSearch(this.value)"></label>
+    <select class="fld tool-sel" id="catf" onchange="onFilter()"></select>
+    <select class="fld tool-sel" id="entf" onchange="onFilter()"></select>
+    <label class="chk"><input type="checkbox" id="activeOnly" checked onchange="onFilter()"> Display active entries only</label>
+    <span class="count-note" id="countNote"></span>
+  </div>
+
+  <div class="tbl-card">
+    <table class="tbl">
+      <thead><tr id="head-row"></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="pager"><div class="info" id="pinfo"></div><div class="pg" id="pg"></div></div>
+  </div>
+</div>
+</div>
+
+<!-- New / Edit modal -->
+<div class="m-ov" id="form-ov"><div class="m-card">
+  <div class="m-head"><div><div class="m-title" id="form-title">New fund</div><div class="m-sub" id="form-sub">Create a designation gifts can be applied to.</div></div></div>
+  <div class="m-body">
+    <div class="row2">
+      <div><span class="lbl">Fund ID<span class="req">*</span></span><input class="fld" id="f-id" placeholder="e.g. 4001"></div>
+      <div><span class="lbl">Category</span><select class="fld" id="f-cat"><option>General</option><option>Angel Scholarship</option><option>Restricted</option><option>Endowment</option><option>Capital</option><option>Ministry</option><option>Scholarship</option></select></div>
+    </div>
+    <div class="field-mt"><span class="lbl">Description<span class="req">*</span></span><input class="fld" id="f-desc" placeholder="e.g. Cathedral Restoration"></div>
+    <div class="row2 field-mt">
+      <div><span class="lbl">GL account</span><input class="fld" id="f-gl" placeholder="e.g. 4001-00"></div>
+      <div><span class="lbl">Legal entity</span><select class="fld" id="f-ent"><option>Diocese of Albany</option><option>Catholic Charities of Albany</option><option>Diocesan Foundation</option><option>Scholarship Foundation</option></select></div>
+    </div>
+    <div class="row2 field-mt">
+      <div><span class="lbl">Goal (optional)</span><input class="fld" id="f-goal" placeholder="$0"></div>
+      <div><span class="lbl">Start date</span><input class="fld" id="f-start" placeholder="MM/DD/YYYY"></div>
+    </div>
+    <label class="chk-row"><input type="checkbox" id="f-active" checked> Active</label>
+  </div>
+  <div class="m-foot"><button class="btn btn-ghost" onclick="closeForm()">Cancel</button><button class="btn btn-primary" id="form-save" onclick="saveForm()">Save fund</button></div>
+</div></div>
+
+<!-- Confirmation modal -->
+<div class="m-ov" id="cf-ov"><div class="m-card" style="max-width:430px">
+  <div class="m-head"><div class="m-ico green"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg></div><div><div class="m-title" id="cf-title">Fund created</div><div class="m-sub" id="cf-sub">Saved to this organization.</div></div></div>
+  <div class="m-body"><div class="sum" id="cf-sum"></div></div>
+  <div class="m-foot"><button class="btn btn-primary" onclick="closeCf()">Done</button></div>
+</div></div>
+
+<!-- Delete confirm -->
+<div class="m-ov" id="del-ov"><div class="m-card" style="max-width:420px">
+  <div class="m-head"><div class="m-ico rose"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5h14M8 5V3h4v2M6 5l1 12h6l1-12"/></svg></div><div><div class="m-title">Delete fund?</div><div class="m-sub" id="del-sub">This can't be undone.</div></div></div>
+  <div class="m-body"><p style="font-size:13px;color:var(--text-2);line-height:1.5">Deleting removes this fund from Atlas. Gifts already designated to it keep their history, but the fund will no longer be selectable and its GL mapping is retired. To keep it for reporting, choose <strong>Deactivate</strong> instead.</p></div>
+  <div class="m-foot"><button class="btn btn-ghost" onclick="closeDel()">Cancel</button><button class="btn btn-rose" id="del-go">Delete fund</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var money=function(n){ return '$'+Math.round(n).toLocaleString('en-US'); };
+var parseMoney=function(s){ var n=parseFloat(String(s||'').replace(/[^0-9.]/g,'')); return isNaN(n)?0:n; };
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+var SCHOOLS=['Our Lady of Angels School','Our Lady of the Elms School','Our Lady of the Lake School','Our Lady of Mt. Carmel School','Padua Franciscan High School','Sacred Heart-Jesu School','Seton Catholic School','Ss. Robert & William School','St. Adalbert School','St. Agatha - St. Aloysius School','St. Albert the Great School','St. Ambrose School','St. Angela Merici School','St. Anthony of Padua School','St. Augustine School','St. Casimir School','St. Clare School','St. Colman School','St. Francis of Assisi School','St. Gregory School'];
+var FUNDS=[
+  {id:'4000', desc:'General Fund', cat:'General', gl:'4000-00', ent:'Diocese of Albany', goal:0, raised:1842300, gifts:9821, active:true, start:''},
+  {id:'4100', desc:'Annual Fund', cat:'General', gl:'4100-00', ent:'Diocese of Albany', goal:2000000, raised:1465800, gifts:6120, active:true, start:'07/01/2025'},
+  {id:'4001', desc:'Cathedral Restoration', cat:'Capital', gl:'4001-00', ent:'Diocese of Albany', goal:5000000, raised:2310000, gifts:412, active:true, start:'01/01/2025'},
+  {id:'4002', desc:'Music Ministry', cat:'Ministry', gl:'4002-00', ent:'Diocese of Albany', goal:120000, raised:88400, gifts:640, active:true, start:''},
+  {id:'4050', desc:'Building & Maintenance', cat:'Capital', gl:'4050-00', ent:'Diocese of Albany', goal:800000, raised:512900, gifts:1204, active:true, start:''},
+  {id:'4210', desc:'Parish Outreach Fund', cat:'Ministry', gl:'4210-00', ent:'Catholic Charities of Albany', goal:300000, raised:214600, gifts:1880, active:true, start:''},
+  {id:'4300', desc:'Seminarian Education Fund', cat:'Scholarship', gl:'4300-00', ent:'Catholic Charities of Albany', goal:450000, raised:298000, gifts:520, active:true, start:''},
+  {id:'4500', desc:'Endowment — Unrestricted', cat:'Endowment', gl:'4500-00', ent:'Diocesan Foundation', goal:0, raised:8640000, gifts:214, active:true, start:''},
+  {id:'4501', desc:'Legacy Endowment', cat:'Endowment', gl:'4501-00', ent:'Diocesan Foundation', goal:0, raised:4120000, gifts:96, active:true, start:''},
+  {id:'4600', desc:'Scholarship Fund', cat:'Scholarship', gl:'4600-00', ent:'Scholarship Foundation', goal:600000, raised:441200, gifts:842, active:true, start:''},
+  {id:'4110', desc:'CC — St. Jude', cat:'Restricted', gl:'4110-00', ent:'Diocese of Albany', goal:0, raised:64200, gifts:310, active:true, start:''},
+  {id:'4111', desc:'CC — St. James', cat:'Restricted', gl:'4111-00', ent:'Diocese of Albany', goal:0, raised:52800, gifts:288, active:true, start:''},
+  {id:'4700', desc:'Called to Flourish — Diocesan', cat:'Capital', gl:'4700-00', ent:'Diocesan Foundation', goal:12000000, raised:6820000, gifts:1240, active:true, start:'09/01/2025'},
+  {id:'4701', desc:'Called to Flourish — Parish Share', cat:'Capital', gl:'4701-00', ent:'Diocese of Albany', goal:4000000, raised:1980000, gifts:2110, active:true, start:'09/01/2025'}
+];
+// Angel Scholarship — one fund per school
+SCHOOLS.forEach(function(name,i){
+  var raised=[9820,14200,7600,11250,6400,4950,8100,10400,5300,6700,9100,4200,3800,7350,6100,5600,4800,6900,8300,5200][i]||6000;
+  FUNDS.push({id:'AS'+String(60+i).padStart(3,'0'), desc:name, cat:'Angel Scholarship', gl:'46'+String(20+i).padStart(2,'0')+'-00', ent:'Scholarship Foundation', goal:0, raised:raised*10, gifts:Math.round(raised/12), active:(i%13!==0), start:''});
+});
+
+var COLS = [
+  {k:'id',    label:'Fund ID', sortable:true},
+  {k:'desc',  label:'Description', sortable:true},
+  {k:'cat',   label:'Category', sortable:true},
+  {k:'gl',    label:'GL account', sortable:true},
+  {k:'ent',   label:'Legal entity', sortable:true},
+  {k:'goal',  label:'Goal', sortable:true, num:true},
+  {k:'raised',label:'Raised', sortable:true, num:true},
+  {k:'gifts', label:'Gifts', sortable:true, num:true},
+  {k:'active',label:'Active', sortable:true}
+];
+
+var PER=10, state={q:'', cat:'all', ent:'all', activeOnly:true, sortKey:'id', sortDir:1, page:0};
+var editingId=null;
+
+function filtered(){
+  var q=state.q.trim().toLowerCase();
+  var list=FUNDS.filter(function(a){
+    if(state.activeOnly && !a.active) return false;
+    if(state.cat!=='all' && a.cat!==state.cat) return false;
+    if(state.ent!=='all' && a.ent!==state.ent) return false;
+    if(q && (a.id+' '+a.desc+' '+a.cat+' '+a.gl+' '+a.ent).toLowerCase().indexOf(q)===-1) return false;
+    return true;
+  });
+  var k=state.sortKey, d=state.sortDir;
+  list.sort(function(a,b){
+    var av,bv;
+    if(k==='goal'||k==='raised'||k==='gifts'){ av=a[k]; bv=b[k]; }
+    else if(k==='active'){ av=a.active?1:0; bv=b.active?1:0; }
+    else { av=String(a[k]).toLowerCase(); bv=String(b[k]).toLowerCase(); }
+    if(av<bv) return -1*d; if(av>bv) return 1*d; return 0;
+  });
+  return list;
+}
+function renderHead(){
+  document.getElementById('head-row').innerHTML =
+    '<th class="kb-cell"></th>' + COLS.map(function(c){
+      var on=state.sortKey===c.k, car=on?(state.sortDir>0?'▲':'▼'):'↕';
+      return '<th class="'+(c.num?'num ':'')+(c.sortable?'sortable ':'')+(on?'sorted':'')+'" '+(c.sortable?'onclick="sortBy(\''+c.k+'\')"':'')+'>'+esc(c.label)+(c.sortable?'<span class="car">'+car+'</span>':'')+'</th>';
+    }).join('');
+}
+function catCell(v){ return '<span class="cat-tag">'+esc(v)+'</span>'; }
+function miniCell(raised, goal){
+  if(!goal) return '<div class="mini"><div class="amt">'+money(raised)+'</div><div class="track"><div class="fill" style="width:0%"></div></div></div>';
+  var pct=Math.min(100, Math.round(raised/goal*100));
+  return '<div class="mini"><div class="amt">'+money(raised)+'</div><div class="track"><div class="fill'+(pct>=100?' done':'')+'" style="width:'+pct+'%"></div></div></div>';
+}
+function render(){
+  renderHead();
+  var list=filtered(), total=list.length, pages=Math.max(1,Math.ceil(total/PER));
+  if(state.page>=pages) state.page=pages-1; if(state.page<0) state.page=0;
+  var slice=list.slice(state.page*PER, state.page*PER+PER);
+  var body=document.getElementById('rows');
+  if(!slice.length){ body.innerHTML='<tr class="empty-row"><td colspan="'+(COLS.length+1)+'">No funds match your filters. <a href="#" onclick="clearFilters();return false" style="color:var(--blue)">Clear filters</a> or create a <a href="#" onclick="openNew();return false" style="color:var(--blue)">new fund</a>.</td></tr>'; }
+  else body.innerHTML = slice.map(function(a){
+    return '<tr class="'+(a.active?'':'inactive')+'" data-id="'+esc(a.id)+'">'
+      + '<td class="kb-cell"><button class="kbtn" onclick="openKebab(event,\''+esc(a.id)+'\')">⋯</button></td>'
+      + '<td><span class="id-link" onclick="openEdit(\''+esc(a.id)+'\')">'+esc(a.id)+'</span></td>'
+      + '<td class="desc-cell" title="'+esc(a.desc)+'">'+esc(a.desc)+'</td>'
+      + '<td>'+catCell(a.cat)+'</td>'
+      + '<td><span class="gl">'+esc(a.gl||'—')+'</span></td>'
+      + '<td>'+esc(a.ent)+'</td>'
+      + '<td class="num">'+(a.goal?money(a.goal):'<span class="muted">—</span>')+'</td>'
+      + '<td class="num">'+miniCell(a.raised,a.goal)+'</td>'
+      + '<td class="num">'+a.gifts.toLocaleString('en-US')+'</td>'
+      + '<td><span class="pill '+(a.active?'yes':'no')+'"><span class="dot"></span>'+(a.active?'Yes':'No')+'</span></td>'
+      + '</tr>';
+  }).join('');
+  var from=total? state.page*PER+1:0, to=Math.min(total, state.page*PER+PER);
+  document.getElementById('pinfo').innerHTML='Showing <strong>'+from+'–'+to+'</strong> of <strong>'+total+'</strong> funds';
+  document.getElementById('countNote').innerHTML='<strong>'+total+'</strong> fund'+(total!==1?'s':'')+(state.activeOnly?' (active)':'');
+  renderPager(pages);
+}
+function renderPager(pages){
+  var pg=document.getElementById('pg'), cur=state.page, html='';
+  html+='<button '+(cur===0?'disabled':'')+' onclick="go('+(cur-1)+')">‹</button>';
+  var show=[]; for(var i=0;i<pages;i++){ if(i<2||i>pages-3||Math.abs(i-cur)<=1) show.push(i); }
+  var last=-1;
+  show.forEach(function(i){ if(i-last>1) html+='<span class="gap">…</span>'; html+='<button class="'+(i===cur?'on':'')+'" onclick="go('+i+')">'+(i+1)+'</button>'; last=i; });
+  html+='<button '+(cur>=pages-1?'disabled':'')+' onclick="go('+(cur+1)+')">›</button>';
+  pg.innerHTML=html;
+}
+function go(p){ state.page=p; render(); }
+function sortBy(k){ if(state.sortKey===k) state.sortDir*=-1; else { state.sortKey=k; state.sortDir=1; } render(); }
+function onSearch(v){ state.q=v; state.page=0; render(); }
+function onFilter(){ state.cat=document.getElementById('catf').value; state.ent=document.getElementById('entf').value; state.activeOnly=document.getElementById('activeOnly').checked; state.page=0; render(); }
+function clearFilters(){ state.q=''; state.cat='all'; state.ent='all'; state.activeOnly=false; document.getElementById('q').value=''; document.getElementById('catf').value='all'; document.getElementById('entf').value='all'; document.getElementById('activeOnly').checked=false; state.page=0; render(); }
+function buildFilters(){
+  var cats={},ents={}; FUNDS.forEach(function(a){ cats[a.cat]=1; ents[a.ent]=1; });
+  document.getElementById('catf').innerHTML='<option value="all">All categories</option>'+Object.keys(cats).sort().map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
+  document.getElementById('entf').innerHTML='<option value="all">All legal entities</option>'+Object.keys(ents).sort().map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
+}
+
+var kmenu=null;
+function closeKebab(){ if(kmenu){ kmenu.remove(); kmenu=null; } }
+function openKebab(e, id){
+  e.stopPropagation(); closeKebab();
+  var a=FUNDS.find(function(x){return x.id===id;}); if(!a) return;
+  kmenu=document.createElement('div'); kmenu.className='kmenu';
+  kmenu.innerHTML =
+    '<button onclick="openEdit(\''+esc(id)+'\')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9.5 2.5l2 2L5 11l-2.5.5L3 9z"/></svg>Edit fund</button>'
+    + '<button onclick="toggleActive(\''+esc(id)+'\')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/>'+(a.active?'<path d="M5 7h4"/>':'<path d="M7 4.5v5M4.5 7h5"/>')+'</svg>'+(a.active?'Deactivate':'Activate')+'</button>'
+    + '<button onclick="dupFund(\''+esc(id)+'\')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="8" rx="1.2"/><path d="M5.5 3V1.8h6.7V10"/></svg>Duplicate</button>'
+    + '<div class="sep"></div>'
+    + '<button class="danger" onclick="askDelete(\''+esc(id)+'\')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 4h9M5.5 4V2.5h3V4M4 4l.5 8h5l.5-8"/></svg>Delete fund</button>';
+  document.body.appendChild(kmenu);
+  var r=e.target.getBoundingClientRect();
+  kmenu.style.top=(r.bottom+window.pageYOffset+4)+'px';
+  kmenu.style.left=Math.max(8, r.right+window.pageXOffset-kmenu.offsetWidth)+'px';
+}
+document.addEventListener('click', function(e){ if(kmenu && !kmenu.contains(e.target)) closeKebab(); });
+
+function openNew(){
+  closeKebab(); editingId=null;
+  document.getElementById('form-title').textContent='New fund';
+  document.getElementById('form-sub').textContent='Create a designation gifts can be applied to.';
+  document.getElementById('form-save').textContent='Save fund';
+  ['f-id','f-desc','f-gl','f-goal','f-start'].forEach(function(i){ document.getElementById(i).value=''; });
+  document.getElementById('f-cat').selectedIndex=0; document.getElementById('f-ent').selectedIndex=0; document.getElementById('f-active').checked=true;
+  document.getElementById('f-id').disabled=false;
+  document.getElementById('form-ov').classList.add('open');
+  setTimeout(function(){ document.getElementById('f-id').focus(); },40);
+}
+function openEdit(id){
+  closeKebab(); var a=FUNDS.find(function(x){return x.id===id;}); if(!a) return;
+  editingId=id;
+  document.getElementById('form-title').textContent='Edit fund';
+  document.getElementById('form-sub').textContent=esc(a.id)+' · '+esc(a.cat);
+  document.getElementById('form-save').textContent='Save changes';
+  document.getElementById('f-id').value=a.id; document.getElementById('f-id').disabled=true;
+  document.getElementById('f-desc').value=a.desc; document.getElementById('f-cat').value=a.cat;
+  document.getElementById('f-gl').value=a.gl; document.getElementById('f-ent').value=a.ent;
+  document.getElementById('f-goal').value=a.goal?money(a.goal):''; document.getElementById('f-start').value=a.start||'';
+  document.getElementById('f-active').checked=a.active;
+  document.getElementById('form-ov').classList.add('open');
+}
+function closeForm(){ document.getElementById('form-ov').classList.remove('open'); }
+function saveForm(){
+  var id=document.getElementById('f-id').value.trim(), desc=document.getElementById('f-desc').value.trim();
+  if(!id){ alert('Fund ID is required.'); return; }
+  if(!desc){ alert('Description is required.'); return; }
+  var cat=document.getElementById('f-cat').value, gl=document.getElementById('f-gl').value.trim(), ent=document.getElementById('f-ent').value;
+  var goal=parseMoney(document.getElementById('f-goal').value), start=document.getElementById('f-start').value.trim();
+  var active=document.getElementById('f-active').checked;
+  var isNew=!editingId;
+  if(isNew){
+    if(FUNDS.some(function(x){return x.id.toLowerCase()===id.toLowerCase();})){ alert('A fund with that ID already exists.'); return; }
+    FUNDS.unshift({id:id, desc:desc, cat:cat, gl:gl, ent:ent, goal:goal, raised:0, gifts:0, active:active, start:start});
+  } else {
+    var a=FUNDS.find(function(x){return x.id===editingId;});
+    a.desc=desc; a.cat=cat; a.gl=gl; a.ent=ent; a.goal=goal; a.start=start; a.active=active;
+  }
+  closeForm(); refresh();
+  if(isNew) showCf('Fund created','Saved to the Funds list.', [['Fund ID',id],['Description',desc],['Category',cat],['GL account',gl],['Legal entity',ent],['Goal',goal?money(goal):''],['Start date',start],['Status',active?'Active':'Inactive']]);
+  else atlasToast('Fund updated · '+id);
+}
+function dupFund(id){
+  closeKebab(); var a=FUNDS.find(function(x){return x.id===id;}); if(!a) return;
+  var nid=a.id+'-COPY', n=2; while(FUNDS.some(function(x){return x.id===nid;})){ nid=a.id+'-COPY'+n; n++; }
+  FUNDS.unshift({id:nid, desc:a.desc+' (copy)', cat:a.cat, gl:'', ent:a.ent, goal:a.goal, raised:0, gifts:0, active:true, start:''});
+  refresh(); atlasToast('Duplicated as '+nid);
+}
+function toggleActive(id){ closeKebab(); var a=FUNDS.find(function(x){return x.id===id;}); if(!a) return; a.active=!a.active; refresh(); atlasToast(a.id+(a.active?' activated':' deactivated')); }
+
+var pendingDel=null;
+function askDelete(id){ closeKebab(); var a=FUNDS.find(function(x){return x.id===id;}); if(!a) return; pendingDel=id; document.getElementById('del-sub').textContent=a.id+' · '+a.desc; document.getElementById('del-ov').classList.add('open'); }
+function closeDel(){ document.getElementById('del-ov').classList.remove('open'); pendingDel=null; }
+document.getElementById('del-go').addEventListener('click', function(){ if(!pendingDel) return; var id=pendingDel; FUNDS=FUNDS.filter(function(x){return x.id!==id;}); closeDel(); refresh(); atlasToast('Fund deleted · '+id); });
+
+function showCf(title, sub, rows){
+  document.getElementById('cf-title').textContent=title; document.getElementById('cf-sub').textContent=sub;
+  document.getElementById('cf-sum').innerHTML=rows.filter(function(r){return r[1];}).map(function(r){ return '<div class="r"><span class="k">'+esc(r[0])+'</span><span class="v">'+esc(r[1])+'</span></div>'; }).join('');
+  document.getElementById('cf-ov').classList.add('open');
+}
+function closeCf(){ document.getElementById('cf-ov').classList.remove('open'); }
+
+var toastT=null;
+function atlasToast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){ t.classList.remove('show'); },2600); }
+
+function refresh(){ var b=document.getElementById('nav-fund-ct'); if(b) b.textContent=FUNDS.filter(function(a){return a.active;}).length; render(); }
+[].forEach.call(document.querySelectorAll('.m-ov'), function(ov){ ov.addEventListener('click', function(e){ if(e.target===ov) ov.classList.remove('open'); }); });
+document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ document.querySelectorAll('.m-ov.open').forEach(function(o){o.classList.remove('open');}); closeKebab(); } });
+
+buildFilters(); refresh();
+</script>
+<!-- ATLAS-DATEPICKER v1 : reusable click-to-open calendar for text date fields -->
+<style id="atlas-datepicker-css">
+.adp-pop{position:absolute;z-index:2147483000;width:266px;background:#fff;border:1px solid var(--border,#E2E8F0);border-radius:12px;
+  box-shadow:0 12px 34px rgba(15,23,42,.18);padding:12px;font-family:'DM Sans',system-ui,sans-serif;color:var(--text-1,#0F172A);
+  opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .12s ease,transform .12s ease;}
+.adp-pop.open{opacity:1;transform:translateY(0);pointer-events:auto;}
+.adp-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.adp-nav{width:28px;height:28px;border:none;background:transparent;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;
+  color:var(--text-2,#334155);display:flex;align-items:center;justify-content:center;}
+.adp-nav:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
+.adp-title{font-size:13.5px;font-weight:600;letter-spacing:.01em;cursor:pointer;padding:4px 8px;border-radius:8px;}
+.adp-title:hover{background:var(--surface,#F8FAFC);}
+.adp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.adp-dow{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3,#64748B);
+  text-align:center;padding:4px 0;}
+.adp-day{border:none;background:transparent;border-radius:8px;height:32px;font-size:12.5px;cursor:pointer;color:var(--text-1,#0F172A);
+  font-family:inherit;}
+.adp-day:hover{background:var(--blue-pale,#EFF6FF);}
+.adp-day.mut{color:#CBD5E1;}
+.adp-day.today{box-shadow:inset 0 0 0 1px var(--blue,#2563EB);color:var(--blue,#2563EB);font-weight:600;}
+.adp-day.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
+.adp-cell{border:none;background:transparent;border-radius:8px;height:34px;font-size:12.5px;cursor:pointer;color:var(--text-2,#334155);
+  font-family:inherit;}
+.adp-cell:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
+.adp-cell.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
+.adp-ft{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border,#E2E8F0);}
+.adp-ft button{border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:4px 6px;border-radius:6px;}
+.adp-today-b{color:var(--blue,#2563EB);} .adp-today-b:hover{background:var(--blue-pale,#EFF6FF);}
+.adp-clear-b{color:var(--text-3,#64748B);} .adp-clear-b:hover{background:var(--surface,#F8FAFC);}
+.adp-mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+</style>
+<script id="atlas-datepicker-js">
+(function(){
+  if (window.__atlasDP) return; window.__atlasDP = true;
+  var MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  var DATE_PH=/\b(m{1,2}\s*[\/\-.]\s*d{1,2}\s*[\/\-.]\s*y{2,4}|y{4}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*d{1,2}|d{1,2}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*y{2,4})\b/i;
+  var WORD_DATE=/\bdate\b/i;
+
+  function looksDate(inp){
+    if(!inp||inp.tagName!=='INPUT') return false;
+    var t=(inp.getAttribute('type')||'text').toLowerCase();
+    if(t!=='text'&&t!=='') return false;              // leave native date/other inputs alone
+    if(inp.getAttribute('data-adp')==='off') return false;
+    if(inp.getAttribute('list')) return false;         // autocomplete fields
+    var ph=inp.getAttribute('placeholder')||'';
+    if(DATE_PH.test(ph)) return true;
+    if(WORD_DATE.test(ph)) return true;
+    // label / aria signal (whole word "date")
+    var lab=inp.getAttribute('aria-label')||'';
+    if(WORD_DATE.test(lab)) return true;
+    // native label association (for=/wrapping label)
+    try{ if(inp.labels){ for(var i=0;i<inp.labels.length;i++){ if(WORD_DATE.test(inp.labels[i].textContent||'')) return true; } } }catch(e){}
+    var isLbl=function(el){ return el && el.matches && el.matches('label,.lbl,.field-label,.form-label'); };
+    // immediate preceding sibling labels (no climbing to broad ancestors)
+    var sib=inp.previousElementSibling, guard=0;
+    while(sib && guard<3){ if(isLbl(sib) && WORD_DATE.test(sib.textContent||'')) return true; sib=sib.previousElementSibling; guard++; }
+    // direct label children of the input's own wrapper only
+    var par=inp.parentElement;
+    if(par){ var kids=par.children; for(var j=0;j<kids.length;j++){ var k=kids[j]; if(k!==inp && isLbl(k) && WORD_DATE.test(k.textContent||'')) return true; } }
+    return false;
+  }
+
+  // ---- format detection & output ----
+  function fmtOf(inp){
+    var ph=(inp.getAttribute('placeholder')||'').toLowerCase();
+    var v=(inp.value||'').trim();
+    if(/y{4}\s*[\/\-.]\s*m/.test(ph)||/^\d{4}-\d{1,2}-\d{1,2}$/.test(v)) return 'iso';
+    if(/d{1,2}\s*[\/\-.]\s*m/.test(ph)) return 'dmy';
+    if(/[a-z]{3,}\s+\d{1,2},?\s+\d{4}/i.test(v)) return 'long';
+    return 'mdy';
+  }
+  function pad(n){return (n<10?'0':'')+n;}
+  function toStr(d,fmt){
+    var y=d.getFullYear(),m=d.getMonth()+1,day=d.getDate();
+    if(fmt==='iso') return y+'-'+pad(m)+'-'+pad(day);
+    if(fmt==='dmy') return pad(day)+'/'+pad(m)+'/'+y;
+    if(fmt==='long') return MON[m-1]+' '+day+', '+y;
+    return pad(m)+'/'+pad(day)+'/'+y;
+  }
+  function parse(v){
+    v=(v||'').trim(); if(!v) return null;
+    var m;
+    if(m=v.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/)) return new Date(+m[1],+m[2]-1,+m[3]);
+    if(m=v.match(/^([a-z]{3,})\s+(\d{1,2}),?\s+(\d{4})$/i)){var mi=MON.findIndex(function(x){return x.toLowerCase().indexOf(m[1].toLowerCase())===0;});if(mi>=0)return new Date(+m[3],mi,+m[2]);}
+    if(m=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/)){var y=+m[3];if(y<100)y+=2000;return new Date(y,+m[1]-1,+m[2]);}
+    var d=new Date(v); return isNaN(d)?null:d;
+  }
+
+  // ---- single shared popover ----
+  var pop,active,view,mode='days';
+  function build(){
+    pop=document.createElement('div');pop.className='adp-pop';pop.setAttribute('role','dialog');
+    document.body.appendChild(pop);
+    pop.addEventListener('mousedown',function(e){e.preventDefault();}); // keep field focus
+  }
+  function close(){ if(pop) pop.classList.remove('open'); active=null; mode='days'; }
+  function open(inp){
+    if(!pop) build();
+    active=inp; mode='days';
+    view=parse(inp.value)||new Date();
+    render(); position(); pop.classList.add('open');
+  }
+  function position(){
+    var r=active.getBoundingClientRect(), sx=window.pageXOffset, sy=window.pageYOffset;
+    pop.style.visibility='hidden'; pop.classList.add('open');
+    var ph=pop.offsetHeight, pw=pop.offsetWidth;
+    pop.classList.remove('open'); pop.style.visibility='';
+    var top=r.bottom+sy+6, left=r.left+sx;
+    if(r.bottom+ph+6>window.innerHeight && r.top-ph-6>0) top=r.top+sy-ph-6;
+    left=Math.min(left, sx+window.innerWidth-pw-8); left=Math.max(left,sx+8);
+    pop.style.top=top+'px'; pop.style.left=left+'px';
+  }
+  function commit(d){
+    var fmt=fmtOf(active);
+    active.value=toStr(d,fmt);
+    active.dispatchEvent(new Event('input',{bubbles:true}));
+    active.dispatchEvent(new Event('change',{bubbles:true}));
+    close();
+  }
+  function render(){
+    if(mode==='months'){renderMonths();return;}
+    if(mode==='years'){renderYears();return;}
+    var y=view.getFullYear(), mo=view.getMonth();
+    var sel=parse(active.value), today=new Date();
+    var first=new Date(y,mo,1), start=first.getDay(), dim=new Date(y,mo+1,0).getDate(), pdim=new Date(y,mo,0).getDate();
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="pm">&#8249;</button>'+
+      '<div class="adp-title" data-a="mode">'+MON[mo]+' '+y+'</div>'+
+      '<button class="adp-nav" data-a="nm">&#8250;</button></div><div class="adp-grid">';
+    for(var i=0;i<7;i++) h+='<div class="adp-dow">'+DOW[i]+'</div>';
+    for(var c=0;c<42;c++){
+      var dn,cls='adp-day',dt;
+      if(c<start){dn=pdim-start+1+c;cls+=' mut';dt=new Date(y,mo-1,dn);}
+      else if(c-start+1<=dim){dn=c-start+1;dt=new Date(y,mo,dn);}
+      else{dn=c-start+1-dim;cls+=' mut';dt=new Date(y,mo+1,dn);}
+      if(dt.getFullYear()===today.getFullYear()&&dt.getMonth()===today.getMonth()&&dt.getDate()===today.getDate())cls+=' today';
+      if(sel&&dt.getFullYear()===sel.getFullYear()&&dt.getMonth()===sel.getMonth()&&dt.getDate()===sel.getDate())cls+=' sel';
+      h+='<button class="'+cls+'" data-d="'+dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate()+'">'+dn+'</button>';
+      if(c>=start+dim-1 && (c+1)%7===0) break;
+    }
+    h+='</div><div class="adp-ft"><button class="adp-today-b" data-a="today">Today</button><button class="adp-clear-b" data-a="clear">Clear</button></div>';
+    pop.innerHTML=h;
+  }
+  function renderMonths(){
+    var y=view.getFullYear();
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="py">&#8249;</button>'+
+      '<div class="adp-title" data-a="years">'+y+'</div><button class="adp-nav" data-a="ny">&#8250;</button></div><div class="adp-mgrid">';
+    for(var i=0;i<12;i++) h+='<button class="adp-cell'+(i===view.getMonth()?' sel':'')+'" data-m="'+i+'">'+MONS[i]+'</button>';
+    h+='</div>'; pop.innerHTML=h;
+  }
+  function renderYears(){
+    var base=view.getFullYear()-6;
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="pyr">&#8249;</button>'+
+      '<div class="adp-title">'+base+' – '+(base+11)+'</div><button class="adp-nav" data-a="nyr">&#8250;</button></div><div class="adp-mgrid">';
+    for(var i=0;i<12;i++){var yr=base+i;h+='<button class="adp-cell'+(yr===view.getFullYear()?' sel':'')+'" data-y="'+yr+'">'+yr+'</button>';}
+    h+='</div>'; pop.innerHTML=h;
+  }
+
+  document.addEventListener('click',function(e){
+    if(!pop) return;
+    var t=e.target;
+    if(pop.contains(t)){
+      var a=t.getAttribute('data-a'), d=t.getAttribute('data-d'), mm=t.getAttribute('data-m'), yy=t.getAttribute('data-y');
+      if(d){var p=d.split('-');commit(new Date(+p[0],+p[1]-1,+p[2]));return;}
+      if(mm!=null){view=new Date(view.getFullYear(),+mm,1);mode='days';render();return;}
+      if(yy!=null){view=new Date(+yy,view.getMonth(),1);mode='months';render();return;}
+      if(a==='pm'){view=new Date(view.getFullYear(),view.getMonth()-1,1);render();}
+      else if(a==='nm'){view=new Date(view.getFullYear(),view.getMonth()+1,1);render();}
+      else if(a==='mode'){mode='months';render();}
+      else if(a==='years'){mode='years';render();}
+      else if(a==='py'){view=new Date(view.getFullYear()-1,view.getMonth(),1);render();}
+      else if(a==='ny'){view=new Date(view.getFullYear()+1,view.getMonth(),1);render();}
+      else if(a==='pyr'){view=new Date(view.getFullYear()-12,view.getMonth(),1);render();}
+      else if(a==='nyr'){view=new Date(view.getFullYear()+12,view.getMonth(),1);render();}
+      else if(a==='today'){commit(new Date());}
+      else if(a==='clear'){active.value='';active.dispatchEvent(new Event('input',{bubbles:true}));active.dispatchEvent(new Event('change',{bubbles:true}));close();}
+      return;
+    }
+    if(active && t===active) return;
+    close();
+  },true);
+
+  document.addEventListener('focusin',function(e){ if(looksDate(e.target)) open(e.target); });
+  document.addEventListener('click',function(e){ if(looksDate(e.target) && active!==e.target) open(e.target); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+  window.addEventListener('resize',function(){ if(active&&pop&&pop.classList.contains('open')) position(); });
+  window.addEventListener('scroll',function(){ if(active&&pop&&pop.classList.contains('open')) position(); },true);
+
+  window.__atlasLooksDate=looksDate; // exposed for tests
+})();
+</script>
+<!-- /ATLAS-DATEPICKER -->
+<!-- ATLAS-NAVCOLLAPSE v1 : expandable/collapsible Campaigns submenu (Appeals / Funds) -->
+<style id="atlas-navcollapse-css">
+.nav-caret{ margin-left:auto; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px;
+  border-radius:5px; opacity:.55; transition:transform .18s ease, opacity .15s, background .15s; flex-shrink:0; }
+.nav-caret:hover{ opacity:1; background:rgba(255,255,255,.12); }
+.nav-caret svg{ width:9px; height:9px; }
+.nav-item.nav-open .nav-caret{ transform:rotate(90deg); }
+.nav-item .nav-badge + .nav-caret{ margin-left:8px; }
+.nav-subwrap{ overflow:hidden; }
+</style>
+<script id="atlas-navcollapse-js">
+(function(){
+  if (window.__atlasNavCollapse) return; window.__atlasNavCollapse = true;
+  var CARET = '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 2l3 3-3 3"/></svg>';
+
+  function setup(link){
+    // collect submenu: a following .nav-subwrap, or loose Appeals/Funds nav-items (portal)
+    var wrap=null, subs=[], next=link.nextElementSibling;
+    if(next && next.classList && next.classList.contains('nav-subwrap')) wrap=next;
+    else {
+      var n=next;
+      while(n && n.classList && n.classList.contains('nav-item') && /atlas-(appeals|funds)\.html$/.test(n.getAttribute('href')||'')){ subs.push(n); n=n.nextElementSibling; }
+    }
+    if(!wrap && !subs.length) return;
+
+    var childActive = wrap ? !!wrap.querySelector('.nav-item.active') : subs.some(function(s){return s.classList.contains('active');});
+    var expanded = link.classList.contains('active') || childActive;
+
+    if(!link.querySelector('.nav-caret')){
+      var car=document.createElement('span'); car.className='nav-caret'; car.setAttribute('aria-label','Toggle submenu'); car.innerHTML=CARET;
+      link.appendChild(car);
+    }
+    var caret=link.querySelector('.nav-caret');
+    function apply(){
+      if(wrap) wrap.style.display = expanded?'':'none';
+      else subs.forEach(function(s){ s.style.display = expanded?'':'none'; });
+      link.classList.toggle('nav-open', expanded);
+      link.setAttribute('aria-expanded', expanded?'true':'false');
+    }
+    apply();
+    caret.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); expanded=!expanded; apply(); });
+  }
+
+  function scan(){
+    var links=document.querySelectorAll('.nav-item[href="atlas-campaign-dashboard.html"]:not([data-navcol])');
+    for(var i=0;i<links.length;i++){ links[i].setAttribute('data-navcol','1'); setup(links[i]); }
+  }
+  function boot(){
+    scan();
+    // portal renders its sidebar via JS — watch for it to appear
+    var host=document.querySelector('.sidebar, #nav') || document.body;
+    try{
+      var mo=new MutationObserver(function(){ scan(); });
+      mo.observe(host, {childList:true, subtree:true});
+      setTimeout(function(){ mo.disconnect(); }, 4000);
+    }catch(e){}
+    var tries=0, t=setInterval(function(){ scan(); if(++tries>12) clearInterval(t); }, 120);
+  }
+  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+<!-- /ATLAS-NAVCOLLAPSE -->
+</body>
+</html>

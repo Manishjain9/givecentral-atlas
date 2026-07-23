@@ -1127,6 +1127,10 @@
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>
         Campaigns
       </a>
+      <div class="nav-subwrap" style="margin:2px 0 4px 20px;border-left:1.5px solid rgba(255,255,255,.12)">
+        <a class="nav-item" href="atlas-appeals.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v5H6l-2.5 2v-2H2z"/></svg>Appeals</a>
+        <a class="nav-item" href="atlas-funds.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><ellipse cx="7" cy="3.5" rx="5" ry="2"/><path d="M2 3.5v7c0 1.1 2.2 2 5 2s5-.9 5-2v-7M2 7c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg>Funds</a>
+      </div>
       <a class="nav-item" href="atlas-reports.html">
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>
         Reports
@@ -1238,7 +1242,7 @@
     <div class="sb-action" onclick="openModal('accuracy-settings')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M4 6l1.5 1.5 3-3"/></svg>Accuracy settings</div>
     <div style="padding:7px 14px;display:flex;align-items:center;gap:8px;border-top:1px solid rgba(255,255,255,.06)">
       <div class="u-av-sm">JW</div>
-      <div><div style="font-size:11px;color:rgba(255,255,255,.65)">Janet Williams</div><div style="font-size:9px;color:rgba(255,255,255,.3)">Gift entry clerk</div></div>
+      <div><div style="font-size:11px;color:rgba(255,255,255,.65)">Janet Williams</div><div style="font-size:9px;color:rgba(255,255,255,.3)">Pledge entry clerk</div></div>
     </div>
   </div>
 </aside>
@@ -1298,7 +1302,7 @@
 
   <div class="topbar">
     <div class="tb-crumb">
-      <a href="atlas-gifts-pledges.html" style="color:inherit;text-decoration:none">2026 — CMA</a> / <b id="tb-batch-name">April Mail Response 2026</b>
+      <a href="atlas-gifts-pledges.html" style="color:inherit;text-decoration:none">2026 — CMA</a> / <b id="tb-batch-name">April Pledge Drive 2026</b>
     </div>
     <div class="tb-pill tp-draft"><div style="width:5px;height:5px;border-radius:50%;background:var(--amber)"></div>Draft</div>
     <div class="tb-save" id="tb-save">
@@ -1374,7 +1378,7 @@
   <!-- Stats -->
   <div class="stats-row">
     <div class="stat-cell"><div class="sc-val green" id="sc-total">$14,975</div><div class="sc-lbl">Batch total</div></div>
-    <div class="stat-cell"><div class="sc-val" id="sc-count">14</div><div class="sc-lbl">Gifts</div></div>
+    <div class="stat-cell"><div class="sc-val" id="sc-count">14</div><div class="sc-lbl">Pledges</div></div>
     <div class="stat-cell"><div class="sc-val green" id="sc-valid">8</div><div class="sc-lbl">Clean</div></div>
     <div class="stat-cell"><div class="sc-val rose" id="sc-errors">3</div><div class="sc-lbl">Errors</div></div>
     <div class="stat-cell"><div class="sc-val amber" id="sc-warns">2</div><div class="sc-lbl">Warnings</div></div>
@@ -1572,23 +1576,25 @@ let BATCH_ROWS = [
 ];
 
 // Settings
-let THRESHOLD = 3;    // outlier multiplier
-let DUP_DAYS  = 30;   // duplicate window in days
+let THRESHOLD = 3;       // outlier multiplier vs donor history
+let DUP_DAYS  = 30;      // (legacy) duplicate window in days
+let MAJOR_PLEDGE = 100000; // pledge ≥ this routes to finance review
+let MAX_TERM_YEARS = 5;  // schedules longer than this raise a confirm-term signal
 
 // Folder tree
 const FOLDERS = [
   { id:"f1", name:"2026 — CMA", open:true, batches:[
-    { id:"b1",name:"April Mail Response",date:"Apr 18",gifts:14,total:"$14,975",status:"draft"},
-    { id:"b2",name:"March Mail Response",date:"Mar 15",gifts:22,total:"$28,450",status:"posted"},
-    { id:"b3",name:"Lenten Appeal",date:"Feb 28",gifts:18,total:"$19,200",status:"posted"},
+    { id:"b1",name:"April Pledge Drive",date:"Apr 18",gifts:14,total:"$118,400",status:"draft"},
+    { id:"b2",name:"March Pledge Drive",date:"Mar 15",gifts:22,total:"$214,200",status:"posted"},
+    { id:"b3",name:"Lenten Pledge Appeal",date:"Feb 28",gifts:18,total:"$96,500",status:"posted"},
   ]},
   { id:"f2", name:"2026 — Cathedral Capital", open:false, batches:[
-    { id:"b4",name:"Q1 Major Gifts",date:"Mar 31",gifts:8,total:"$185,000",status:"posted"},
+    { id:"b4",name:"Q1 Capital Pledges",date:"Mar 31",gifts:8,total:"$985,000",status:"posted"},
   ]},
   { id:"f3", name:"Templates", open:true, isTemplates:true, batches:[
-    { id:"t1",name:"CMA Mail Response",date:"14 uses",gifts:9,total:"9 cols",status:"template"},
-    { id:"t2",name:"Major Gift Pledge",date:"6 uses",gifts:11,total:"11 cols",status:"template"},
-    { id:"t3",name:"Online Giving Export",date:"22 uses",gifts:8,total:"8 cols",status:"template"},
+    { id:"t1",name:"CMA Annual Pledges",date:"14 uses",gifts:9,total:"9 cols",status:"template"},
+    { id:"t2",name:"Capital Campaign Pledges",date:"6 uses",gifts:11,total:"11 cols",status:"template"},
+    { id:"t3",name:"Monthly Sustainers",date:"22 uses",gifts:8,total:"8 cols",status:"template"},
   ]},
 ];
 
@@ -1597,11 +1603,13 @@ const FOLDERS = [
 // ─────────────────────────────────────────────────────────────
 function runAccuracyEngine(rows) {
   const signals = [];
-  const batchDate = new Date('2026-04-18');
+  const PER_YEAR = { 'Monthly':12, 'Quarterly':4, 'Semi-annual':2, 'Annual':1, 'One-time':1 };
 
   rows.forEach((r, idx) => {
     const rowNum = idx + 1;
     const donor = DONOR_DB.find(d => d.id === r.donorId);
+    const inst  = parseInt(r.ref, 10) || 0;
+    const freq  = r.pay || '';
 
     // ── IDENTITY ──────────────────────────────────────────────
     // 1. Donor not found
@@ -1628,194 +1636,140 @@ function runAccuracyEngine(rows) {
     if (donor && donor.dns) {
       signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Identity',
         msg:`Do not solicit flag — ${donor.name}`,
-        sub:'DNS flag was set Apr 2024. Unsolicited gifts are fine to post — please acknowledge.',
+        sub:'DNS flag was set Apr 2024. A donor-initiated pledge is fine to record — please acknowledge.',
         fix:'Acknowledge', fixAction:`acknowledgeRow(${r.id})` });
     }
 
-    // 4. Lapsed donor
+    // 4. Lapsed donor re-engaging
     if (donor && donor.status === 'lapsed') {
       signals.push({ row:rowNum, rid:r.id, sev:'info', cat:'Identity',
-        msg:`Lapsed donor re-engaging — ${donor.name}`,
-        sub:'Last gift was Jun 2024 (22 months ago). Gift officer will be notified.',
+        msg:`Lapsed donor making a new pledge — ${donor.name}`,
+        sub:'Last gift was Jun 2024 (22 months ago). Gift officer will be notified of the re-engagement.',
         fix:'Flag officer', fixAction:`flagOfficer(${r.id})` });
     }
 
-    // ── AMOUNT INTELLIGENCE ───────────────────────────────────
+    // ── SCHEDULE ──────────────────────────────────────────────
+    // 5. Missing frequency
+    if (!freq) {
+      signals.push({ row:rowNum, rid:r.id, sev:'error', cat:'Schedule',
+        msg:`Frequency required`,
+        sub:'A pledge needs a payment frequency to build its installment schedule.',
+        fix:null });
+    }
+
+    // 6. Installment count missing / invalid
+    if (freq !== 'One-time' && inst < 1) {
+      signals.push({ row:rowNum, rid:r.id, sev:'error', cat:'Schedule',
+        msg:`Installment count required`,
+        sub:`A ${freq.toLowerCase()} pledge needs the number of installments to generate its schedule.`,
+        fix:null });
+    }
+
+    // 7. One-time pledge with multiple installments
+    if (freq === 'One-time' && inst > 1) {
+      signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Schedule',
+        msg:`One-time pledge has ${inst} installments`,
+        sub:'A one-time pledge is a single payment. Set installments to 1 or change the frequency.',
+        fix:'Set to 1 installment', fixAction:`setRef(${r.id},'1')` });
+    }
+
+    // 8. Total not evenly divisible across installments
+    if (inst > 1 && r.amt > 0 && (Math.round(r.amt * 100) % inst !== 0)) {
+      const per = (r.amt / inst);
+      signals.push({ row:rowNum, rid:r.id, sev:'info', cat:'Schedule',
+        msg:`Installments won't divide evenly`,
+        sub:`$${r.amt.toLocaleString()} ÷ ${inst} = $${per.toFixed(4)}. Schedule will round to $${per.toFixed(2)}/installment with a cents adjustment on the final one.`,
+        fix:null });
+    }
+
+    // 9. Long-running schedule (> MAX_TERM_YEARS)
+    if (inst > 0 && freq !== 'One-time' && PER_YEAR[freq]) {
+      const years = inst / PER_YEAR[freq];
+      if (years > MAX_TERM_YEARS) {
+        signals.push({ row:rowNum, rid:r.id, sev:'info', cat:'Schedule',
+          msg:`Long-running pledge — ${years.toFixed(1)} years`,
+          sub:`${inst} ${freq.toLowerCase()} installments runs ~${years.toFixed(1)} years. Confirm the term with the donor.`,
+          fix:'Acknowledge term', fixAction:`acknowledgeRow(${r.id})` });
+      }
+    }
+
+    // ── AMOUNT ────────────────────────────────────────────────
+    // 10. Major pledge — finance review
+    if (r.amt >= MAJOR_PLEDGE) {
+      signals.push({ row:rowNum, rid:r.id, sev:'info', cat:'Amount',
+        msg:`Major pledge — $${r.amt.toLocaleString()}`,
+        sub:'Pledges ≥ $100k route to finance for a gift-agreement review before recognition.',
+        fix:'Flag for finance', fixAction:`flagOfficer(${r.id})` });
+    }
+
     if (donor && r.amt > 0) {
       const fundHistory = donor.history.filter(h => h.fund === r.fund);
-      
-      // 5. Statistical outlier
+
+      // 11. Statistical outlier vs donor history
       if (fundHistory.length >= 2) {
         const avg = fundHistory.reduce((s,h) => s+h.amt, 0) / fundHistory.length;
         const stddev = Math.sqrt(fundHistory.reduce((s,h) => s+(h.amt-avg)**2, 0) / fundHistory.length);
         const threshold = Math.max(avg * THRESHOLD, avg + 2 * stddev);
         if (r.amt > threshold && r.amt > avg * 1.5) {
           signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Amount',
-            msg:`Amount ${r.amt/avg >= THRESHOLD ? Math.round(r.amt/avg)+'× typical' : 'unusually high'} — ${donor.name}`,
-            sub:`History: ${fundHistory.map(h=>'$'+h.amt.toLocaleString()).join(' / ')} · Entered: $${r.amt.toLocaleString()}. Possible transposition?`,
+            msg:`Pledge ${r.amt/avg >= THRESHOLD ? Math.round(r.amt/avg)+'× typical' : 'unusually high'} — ${donor.name}`,
+            sub:`Prior to this fund: ${fundHistory.map(h=>'$'+h.amt.toLocaleString()).join(' / ')} · Entered: $${r.amt.toLocaleString()}. Possible transposition?`,
             fix:'Review history', fixAction:`showHistory(${r.id})`, histogram:fundHistory, entered:r.amt });
         }
       }
 
-      // 6. Transposition error
+      // 12. Transposition error
       if (fundHistory.length >= 1) {
         const lastAmt = fundHistory[0].amt;
         if (isTransposition(r.amt, lastAmt)) {
           signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Amount',
             msg:`Possible transposition — entered $${r.amt.toLocaleString()}, history shows $${lastAmt.toLocaleString()}`,
-            sub:'Digit pattern looks like a data entry error. Verify against the cheque or receipt.',
+            sub:'Digit pattern looks like a data-entry error. Verify against the pledge card or agreement.',
             fix:`Use $${lastAmt.toLocaleString()}`, fixAction:`setAmt(${r.id},${lastAmt})` });
         }
       }
-
-      // 7. YoY downgrade ≥50%
-      if (fundHistory.length >= 1) {
-        const prevYearGift = fundHistory.find(h => h.year === 2025);
-        if (prevYearGift) {
-          const change = (r.amt - prevYearGift.amt) / prevYearGift.amt;
-          if (change <= -0.5) {
-            signals.push({ row:rowNum, rid:r.id, sev:'info', cat:'Amount',
-              msg:`Year-over-year downgrade — ${donor.name}`,
-              sub:`2025: $${prevYearGift.amt.toLocaleString()} → 2026: $${r.amt.toLocaleString()} (${Math.round(change*100)}%). Lapse-risk task will be created.`,
-              fix:'Note for officer', fixAction:`flagOfficer(${r.id})` });
-          }
-          if (change >= 0.5) {
-            signals.push({ row:rowNum, rid:r.id, sev:'info', cat:'Amount',
-              msg:`Year-over-year upgrade — ${donor.name}`,
-              sub:`2025: $${prevYearGift.amt.toLocaleString()} → 2026: $${r.amt.toLocaleString()} (+${Math.round(change*100)}%). Please confirm.`,
-              fix:'Confirm upgrade', fixAction:`acknowledgeRow(${r.id})` });
-          }
-        }
-      }
-
-      // 8. First-time large gift
-      if (donor.history.length === 0 && r.amt >= 1000) {
-        signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Amount',
-          msg:`First-ever gift, unusually large — $${r.amt.toLocaleString()}`,
-          sub:`${donor.name} has no prior giving history. Confirm this is a new major donor or check the donor record.`,
-          fix:'Confirm new major donor', fixAction:`acknowledgeRow(${r.id})` });
-      }
     }
 
-    // ── DUPLICATE DETECTION ────────────────────────────────────
-    // 9. Same check number
-    if (r.ref && r.ref.trim()) {
-      const refDup = POSTED_GIFTS.find(g => g.donorId === r.donorId && g.ref === r.ref);
-      if (refDup) {
-        signals.push({ row:rowNum, rid:r.id, sev:'error', cat:'Duplicate',
-          msg:`Check #${r.ref} already posted`,
-          sub:`Posted ${refDup.date} — $${refDup.amt.toLocaleString()} to ${refDup.fund}. This is a duplicate.`,
-          fix:'View original', fixAction:`viewOriginal('${r.ref}')` });
-      }
+    // ── PLEDGE TYPE ───────────────────────────────────────────
+    // 13. Estate / Bequest with a scheduled term
+    if (r.type === 'Estate / Bequest' && (freq !== 'One-time' || inst > 1)) {
+      signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Pledge type',
+        msg:`Bequest with a payment schedule`,
+        sub:'Bequests are realized at estate settlement, not paid in installments. Set frequency to One-time, or change the pledge type.',
+        fix:'Set to One-time', fixAction:`setFreq(${r.id},'One-time')` });
     }
 
-    // 10. Same donor, same amount, recent posted gift
-    if (r.donorId && r.amt > 0) {
-      const recentDup = POSTED_GIFTS.find(g => {
-        if (g.donorId !== r.donorId || g.amt !== r.amt) return false;
-        const gDate = new Date(g.date);
-        const diff = Math.abs(batchDate - gDate) / 86400000;
-        return diff <= DUP_DAYS;
-      });
-      if (recentDup) {
-        signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Duplicate',
-          msg:`Possible duplicate — ${r.donor} gave $${r.amt.toLocaleString()} on ${recentDup.date}`,
-          sub:`Same donor, same amount, within ${DUP_DAYS} days. Confirm this is a separate gift.`,
-          fix:'Confirm not duplicate', fixAction:`acknowledgeRow(${r.id})` });
-      }
+    // 14. Matching pledge missing terms
+    if (r.type === 'Matching' && (!r.note || !r.note.trim())) {
+      signals.push({ row:rowNum, rid:r.id, sev:'info', cat:'Pledge type',
+        msg:`Matching pledge — capture match terms`,
+        sub:'Add the employer / match ratio / cap to the note so the match can be claimed later.',
+        fix:'Add note', fixAction:`focusNote(${r.id})` });
     }
 
-    // 11. Same donor appears twice in batch
+    // ── FUND / GL ─────────────────────────────────────────────
+    // 15. Missing GL code
+    if (!r.gl || !r.gl.trim()) {
+      signals.push({ row:rowNum, rid:r.id, sev:'error', cat:'Fund/GL',
+        msg:`GL code required`,
+        sub:'Pledges post to a receivable account. Suggested: 5002 (Pledges receivable).',
+        fix:'Use 5002', fixAction:`setGL(${r.id},'5002')` });
+    } else if (!/^5\d{3}$/.test(r.gl.trim())) {
+      // 16. GL not a pledge-receivable account
+      signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Fund/GL',
+        msg:`GL ${r.gl} is not a receivable account`,
+        sub:'Pledges should book to a 5xxx receivable account, not a cash/revenue code. Suggested: 5002.',
+        fix:'Use 5002', fixAction:`setGL(${r.id},'5002')` });
+    }
+
+    // ── DUPLICATE ─────────────────────────────────────────────
+    // 17. Same donor + fund appears twice in batch
     const batchDups = BATCH_ROWS.filter(other => other.id !== r.id && other.donorId === r.donorId && other.fund === r.fund && r.donorId !== null);
     if (batchDups.length > 0 && r.id < batchDups[0].id) {
       signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Duplicate',
-        msg:`${r.donor} appears twice in this batch`,
-        sub:`Rows ${rowNum} and ${BATCH_ROWS.indexOf(batchDups[0])+1} — same donor, same fund. Intentional?`,
+        msg:`${r.donor} pledged to ${r.fund} twice in this batch`,
+        sub:`Rows ${rowNum} and ${BATCH_ROWS.indexOf(batchDups[0])+1} — same donor, same fund. Intentional, or a duplicate?`,
         fix:'Remove duplicate row', fixAction:`deleteRow(${batchDups[0].id},null)` });
-    }
-
-    // ── FUND / GL VALIDATION ───────────────────────────────────
-    // 12. Missing GL for restricted fund
-    if (r.fund === 'General Fund' && (!r.gl || !r.gl.trim())) {
-      signals.push({ row:rowNum, rid:r.id, sev:'error', cat:'Fund/GL',
-        msg:`GL code required for General Fund`,
-        sub:'General Fund gifts must have a GL code for accounting. Suggested: 4200.',
-        fix:'Add GL code', fixAction:`setGL(${r.id},'4200')` });
-    }
-
-    // 13. GL / fund mismatch
-    if (r.gl && r.fund) {
-      const glNum = parseInt(r.gl);
-      const fundRange = { 'CMA Annual Fund':[4100,4199], 'Cathedral Capital Fund':[5000,5999], 'General Fund':[4200,4299], 'Marian Congress':[4200,4299] };
-      const range = fundRange[r.fund];
-      if (range && r.gl.trim() && (glNum < range[0] || glNum > range[1])) {
-        signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Fund/GL',
-          msg:`GL code ${r.gl} may not match ${r.fund}`,
-          sub:`Expected range ${range[0]}–${range[1]} for this fund.`,
-          fix:'Auto-correct GL', fixAction:`setGL(${r.id},'${range[0]}')` });
-      }
-    }
-
-    // ── DATE / PAYMENT ─────────────────────────────────────────
-    // 14. Date outside batch range
-    if (r.date && r.date.includes('2025')) {
-      signals.push({ row:rowNum, rid:r.id, sev:'error', cat:'Date',
-        msg:`Gift date appears to be last year — ${r.date}`,
-        sub:'All other rows are in 2026. Possible mis-typed year.',
-        fix:'Update to 2026', fixAction:`fixYear(${r.id})` });
-    }
-
-    // 15. DAF + event fund
-    if (r.type === 'DAF' && (r.fund.toLowerCase().includes('gala') || r.fund.toLowerCase().includes('dinner'))) {
-      signals.push({ row:rowNum, rid:r.id, sev:'error', cat:'Date',
-        msg:`DAF gift cannot cover event ticket benefits`,
-        sub:'DAF distributions cannot fund personal benefits (ticket value). Split required.',
-        fix:'Split gift', fixAction:`openModal('daf-split')` });
-    }
-
-    // ── PLEDGE PAYMENT RULES ─────────────────────────────────────
-    // 16. Orphan pledge type — donor matched but no pledge selected
-    if (r.type === 'Pledge' && r.donorId && !r.pledgeId) {
-      const open = getOpenPledgesFor(r.donorId);
-      if (open.length === 0) {
-        signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Pledge',
-          msg:`No open pledges on file for ${r.donor}`,
-          sub:'Gift type is Pledge but this donor has no outstanding pledge. Confirm or change to Check / Credit.',
-          fix:'Change to Check', fixAction:`fixPledgeType(${r.id})` });
-      } else {
-        signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Pledge',
-          msg:`Pledge type selected but no pledge linked`,
-          sub:`${open.length} open pledge${open.length>1?'s':''} available for ${r.donor}. Pick one below the row.`,
-          fix:'Pick pledge', fixAction:`focusPledgePicker(${r.id})` });
-      }
-    }
-
-    // 17. Pledge picked + fund mismatch
-    if (r.pledgeId) {
-      const p = getPledgeById(r.pledgeId);
-      if (p && r.fund && p.fund !== r.fund) {
-        signals.push({ row:rowNum, rid:r.id, sev:'warning', cat:'Pledge',
-          msg:`Fund mismatch with pledge ${p.id}`,
-          sub:`Pledge is to ${p.fund}; this row reads ${r.fund}. Donor likely intended their pledge.`,
-          fix:`Use ${p.fund.split(' ')[0]}`, fixAction:`fixPledgeFund(${r.id})` });
-      }
-
-      // 18. Over-payment
-      if (p && r.amt > p.remaining + 0.005) {
-        const over = (r.amt - p.remaining).toFixed(2);
-        signals.push({ row:rowNum, rid:r.id, sev:'error', cat:'Pledge',
-          msg:`Payment exceeds remaining balance by $${over}`,
-          sub:`Pledge ${p.id} has $${p.remaining.toLocaleString()} remaining. Split into two rows: $${p.remaining.toLocaleString()} pledge payment + $${over} new gift.`,
-          fix:'Split row', fixAction:`splitOverPledge(${r.id})` });
-      }
-
-      // 19. Pledge will be fulfilled (info — celebratory)
-      if (p && r.amt >= p.remaining - 0.005 && r.amt <= p.remaining + 0.005) {
-        signals.push({ row:rowNum, rid:r.id, sev:'info', cat:'Pledge',
-          msg:`This payment fulfills pledge ${p.id}`,
-          sub:`Pledge will flip to "Fulfilled" status on post · audit entry will be written to the donor record.`,
-          fix:null });
-      }
     }
   });
 
@@ -1925,15 +1879,15 @@ function renderBatch() {
       <td><select class="cs" onchange="rowEdited(${r.id},'type',this.value)">
         ${['Capital','Annual','Estate / Bequest','Matching','Monthly sustainer'].map(t=>`<option ${t===r.type?'selected':''}>${t}</option>`).join('')}
       </select></td>
-      <td>${r.type==='Stock' ? renderStockAmt(r) : `<input class="ci ci-amt" value="$${r.amt.toFixed(2)}" style="text-align:right"
+      <td><input class="ci ci-amt" value="$${r.amt.toFixed(2)}" style="text-align:right"
         onchange="handleAmtChange(${r.id},this.value)"
         onblur="handleAmtChange(${r.id},this.value)"
-        data-rid="${r.id}">`}</td>
+        data-rid="${r.id}"></td>
       <td><select class="cs" onchange="rowEdited(${r.id},'pay',this.value)">
         ${['Monthly','Quarterly','Semi-annual','Annual','One-time'].map(p=>`<option ${p===r.pay?'selected':''}>${p}</option>`).join('')}
       </select></td>
       <td><input class="ci" value="${r.ref}" placeholder="—" onchange="rowEdited(${r.id},'ref',this.value)"></td>
-      <td><input class="ci" value="${r.gl}" placeholder="e.g. 4100" onchange="rowEdited(${r.id},'gl',this.value)" data-rid="${r.id}"></td>
+      <td><input class="ci" value="${r.gl}" placeholder="e.g. 5002" onchange="rowEdited(${r.id},'gl',this.value)" data-rid="${r.id}"></td>
       <td><input class="ci" value="${r.note}" placeholder="Optional…" onchange="rowEdited(${r.id},'note',this.value)"></td>
       <td style="padding:6px 8px">
         <div class="sp ${spClass}" style="cursor:pointer" onclick="openModal('row-signals',${r.id})">${spLabel}</div>
@@ -1943,50 +1897,16 @@ function renderBatch() {
         <button class="ra" onclick="duplicateRow(${r.id})" title="Duplicate"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><rect x="1" y="2.5" width="6.5" height="6.5" rx="1"/><path d="M3 2.5V1.5h6.5V8H8.5"/></svg></button>
         <button class="ra" onclick="deleteRow(${r.id},null)" title="Delete"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M1.5 3h7M4 3v-.5h2V3M4.5 4.5v3M5.5 4.5v3"/><rect x="2" y="3" width="6" height="6.5" rx="1"/></svg></button>
       </div></td>
-    </tr>${renderPledgeSubRow(r)}${renderStockSubRow(r)}`;
+    </tr>`;
   }).join('');
 }
 
 // ─────────────────────────────────────────────────────────────
-// STOCK · shares × FMV, never a plain cash amount
+// (Removed gift-only Stock + pledge-payment sub-row renderers —
+//  not applicable to a pledge-creation batch.)
 // ─────────────────────────────────────────────────────────────
-function renderStockAmt(r){
-  const sh = r.stockShares||0, sym = r.stockSym||'—', fmv = r.amt||0;
-  return `<div class="amt-stock"><b>$${fmv.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</b><small>${sh||'—'} sh · ${sym} · FMV</small></div>`;
-}
-function renderStockSubRow(r){
-  if (r.type !== 'Stock') return '';
-  const sh = r.stockShares||'', sym = r.stockSym||'', price = r.stockPrice||'';
-  const fmv = (r.stockShares||0)*(r.stockPrice||0);
-  return `<tr class="stk-sub-row" id="stk-sub-${r.id}">
-    <td></td>
-    <td colspan="11">
-      <div class="stk-bar">
-        <svg class="stk-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="14" height="14"><path d="M1.5 10l3-3 2.5 2.5L12 4"/><path d="M9 4h3v3"/></svg>
-        <div class="stk-f"><label>Symbol</label><input class="ci sym" value="${sym}" placeholder="AAPL" onchange="stockEdit(${r.id},'sym',this.value)"></div>
-        <div class="stk-f"><label>Shares</label><input class="ci" value="${sh}" placeholder="0" onchange="stockEdit(${r.id},'shares',this.value)"></div>
-        <div class="stk-f"><label>Price / share · gift-date avg</label><input class="ci" value="${price}" placeholder="0.00" onchange="stockEdit(${r.id},'price',this.value)"></div>
-        <div class="stk-fmv">FMV $${fmv.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
-        <span class="stk-note">No cash received — receipt states shares &amp; symbol, not a dollar amount.</span>
-      </div>
-    </td>
-  </tr>`;
-}
-function stockEdit(rid, field, val){
-  const r = BATCH_ROWS.find(x=>x.id===rid);
-  if (!r) return;
-  if (field==='sym') r.stockSym = val.toUpperCase().trim();
-  else if (field==='shares') r.stockShares = parseFloat(val)||0;
-  else if (field==='price') r.stockPrice = parseFloat(val)||0;
-  r.amt = +((r.stockShares||0)*(r.stockPrice||0)).toFixed(2);
-  revalidateAll();
-}
-
-// ─────────────────────────────────────────────────────────────
-// PLEDGE SUB-ROW · inline-reveal when Gift type = Pledge
-// ─────────────────────────────────────────────────────────────
-function renderPledgeSubRow(r){
-  if (r.type !== 'Pledge') return '';
+function __removedPledgeSubRow(r){
+  if (true) return '';
   const open = getOpenPledgesFor(r.donorId);
   const selected = r.pledgeId ? getPledgeById(r.pledgeId) : null;
 
@@ -2323,6 +2243,9 @@ function deleteRow(rid,e){ if(e)e.stopPropagation(); const i=BATCH_ROWS.findInde
 function acknowledgeRow(rid){ /* mark acknowledged — suppress this signal */ revalidateAll(); }
 function setAmt(rid,amt){ const r=BATCH_ROWS.find(x=>x.id===rid); if(r){r.amt=amt; revalidateAll();} }
 function setGL(rid,gl){ const r=BATCH_ROWS.find(x=>x.id===rid); if(r){r.gl=gl; revalidateAll();} }
+function setRef(rid,ref){ const r=BATCH_ROWS.find(x=>x.id===rid); if(r){r.ref=ref; revalidateAll();} }
+function setFreq(rid,freq){ const r=BATCH_ROWS.find(x=>x.id===rid); if(r){r.pay=freq; revalidateAll();} }
+function focusNote(rid){ revalidateAll(); setTimeout(function(){ var row=document.getElementById('row-'+rid); if(row){ var inps=row.querySelectorAll('input.ci'); var el=inps[inps.length-1]; if(el){ el.focus(); } } },60); }
 function fixYear(rid){ const r=BATCH_ROWS.find(x=>x.id===rid); if(r){r.date=r.date.replace('2025','2026'); revalidateAll();} }
 function fixDonor(rid){ openModal('donor-lookup',rid); }
 function openDonorSelect(rid){ openModal('donor-lookup',rid); }
@@ -2648,10 +2571,10 @@ function saveDraft(){
 }
 
 function exportCSV(){
-  const headers = ['Donor','Gift date','Fund','Amount','Type','Ref','GL','Note'];
+  const headers = ['Donor','Start date','Fund','Pledge amount','Pledge type','Frequency','Installments','GL','Note'];
   const rows = BATCH_ROWS.map(r => [
     r.donor || '', r.date || '', r.fund || '',
-    r.amt || 0, r.type || '', r.ref || '', r.gl || '', (r.note || '').replace(/[\r\n,]/g, ' ')
+    r.amt || 0, r.type || '', r.pay || '', r.ref || '', r.gl || '', (r.note || '').replace(/[\r\n,]/g, ' ')
   ]);
   const csv = [headers, ...rows].map(row =>
     row.map(c => {
@@ -2764,16 +2687,16 @@ window.__pickedImportFile = null;
 
 // Sample template — download + inline view
 function downloadSampleCsv(){
-  var headers=['Donor name','Gift date','Fund','Gift type','Amount','Payment method','Check / Ref #','GL code','Note'];
+  var headers=['Donor name','Start date','Fund','Pledge type','Pledge amount','Frequency','Installments','GL code','Note'];
   var rows=[
-    ["O'Brien, James",'04/18/2026','CMA Annual Fund','Check','500.00','Check','10441','4100','Spring appeal'],
-    ['Sullivan, Margaret','04/18/2026','CMA Annual Fund','Credit card','250.00','Credit card','CC-2290','4100',''],
-    ['Kim, Patricia','04/19/2026','Cathedral Capital Fund','Stock','9870.00','Stock transfer','DTC-7755','4150','78 sh NVDA']
+    ["O'Brien, James",'04/18/2026','Cathedral Capital Fund','Capital','12000.00','Monthly','24','5002','3-year capital pledge'],
+    ['Sullivan, Margaret','04/18/2026','CMA Annual Fund','Annual','1200.00','Monthly','12','5002',''],
+    ['Kim, Patricia','04/19/2026','Cathedral Capital Fund','Capital','50000.00','Quarterly','20','5002','Pledge agreement on file']
   ];
   var csv=[headers].concat(rows).map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
   try{
     var blob=new Blob([csv],{type:'text/csv'}); var url=URL.createObjectURL(blob);
-    var a=document.createElement('a'); a.href=url; a.download='atlas-gift-import-template.csv'; document.body.appendChild(a); a.click(); a.remove();
+    var a=document.createElement('a'); a.href=url; a.download='atlas-pledge-import-template.csv'; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function(){URL.revokeObjectURL(url);},800);
   }catch(_){}
   batchToast('Sample CSV downloaded · fill it in, then upload');
@@ -2804,9 +2727,9 @@ function validatePicked(file){
     var firstLine=(text.split(/\r?\n/)[0]||'');
     var hdrs=firstLine.split(',').map(normHdr);
     var have={donor:false,date:false,amount:false};
-    hdrs.forEach(function(h){ if(/donor|name|constituent/.test(h))have.donor=true; if(/date/.test(h))have.date=true; if(/amount|amt|gift/.test(h))have.amount=true; });
-    var missing=[]; if(!have.donor)missing.push('Donor name'); if(!have.date)missing.push('Gift date'); if(!have.amount)missing.push('Amount');
-    if(!firstLine.trim()){ fail('<strong>The file looks empty.</strong> Add a header row and at least one gift. <a href="#" onclick="downloadSampleCsv();return false" style="color:#9D174D;font-weight:600">Download the template →</a>'); return; }
+    hdrs.forEach(function(h){ if(/donor|name|constituent/.test(h))have.donor=true; if(/date|start/.test(h))have.date=true; if(/amount|amt|total|pledge/.test(h))have.amount=true; });
+    var missing=[]; if(!have.donor)missing.push('Donor name'); if(!have.date)missing.push('Start date'); if(!have.amount)missing.push('Pledge amount');
+    if(!firstLine.trim()){ fail('<strong>The file looks empty.</strong> Add a header row and at least one pledge. <a href="#" onclick="downloadSampleCsv();return false" style="color:#9D174D;font-weight:600">Download the template →</a>'); return; }
     if(missing.length){ fail('<strong>This file isn’t in the right format.</strong><br>Missing required column'+(missing.length>1?'s':'')+': <strong>'+missing.join(', ')+'</strong>.<br>Match the header names in the template, then re-upload. <a href="#" onclick="downloadSampleCsv();return false" style="color:#9D174D;font-weight:600">Download template →</a>'); return; }
     var n=text.split(/\r?\n/).filter(function(l){return l.trim();}).length-1;
     pass('format looks good · '+(n>0?n:'?')+' row'+(n===1?'':'s')+' detected');
@@ -2849,7 +2772,7 @@ function triggerImportPreview(){
 /* ════════════════════════════════════════════════════════════
    IMPORT WIZARD · Map columns → Review (validate + dedupe) → Import
    ════════════════════════════════════════════════════════════ */
-var ATLAS_FIELDS=[['donor','Donor name',true],['date','Gift date',true],['fund','Fund',false],['type','Gift type',false],['amount','Amount',true],['pay','Payment method',false],['ref','Check / Ref #',false],['gl','GL code',false],['note','Note',false]];
+var ATLAS_FIELDS=[['donor','Donor name',true],['date','Start date',true],['fund','Fund · campaign',false],['type','Pledge type',false],['amount','Pledge amount',true],['pay','Frequency',false],['ref','Installments',false],['gl','GL code',false],['note','Note',false]];
 var IMP={};
 
 function parseCsvLine(line){
@@ -2865,22 +2788,22 @@ function parseCSV(text){
   if(!lines.length) return {headers:[],rows:[]};
   return {headers:parseCsvLine(lines[0]), rows:lines.slice(1).map(parseCsvLine)};
 }
-var DEMO_IMPORT={headers:['Donor','Gift Date','Fund','Type','Amount','Method','Ref','GL','Memo'],rows:[
-  ['O\'Brien, James','04/18/2026','CMA Annual Fund','Check','500.00','Check','10441','4100','Spring appeal'],
-  ['Anne Reilly','04/18/2026','CMA Annual Fund','Check','250.00','Check','CSV-2','4100',''],
-  ['Patricia Mathias','04/18/2026','Cathedral Capital Fund','Check','5000.00','Check','CSV-3','5001',''],
-  ['Sullivan, Margaret','04/18/2026','CMA Annual Fund','Credit card','250.00','Credit card','CC-2290','4100',''],
-  ['','04/18/2026','General Fund','Check','75.00','Check','CSV-5','','missing donor'],
-  ['Brian Walsh','','CMA Annual Fund','Check','100.00','Check','CSV-6','4100','missing date'],
-  ['Kim, Patricia','04/19/2026','Cathedral Capital Fund','Stock','not a number','Stock transfer','DTC-1','4150','bad amount'],
-  ['Thomas Sullivan','04/19/2026','CMA Annual Fund','Check','1500.00','Check','CSV-8','4100','']
+var DEMO_IMPORT={headers:['Donor','Start Date','Fund','Pledge Type','Pledge Amount','Frequency','Installments','GL','Note'],rows:[
+  ['O\'Brien, James','04/18/2026','Cathedral Capital Fund','Capital','12000.00','Monthly','24','5002','3-year capital pledge'],
+  ['Anne Reilly','04/18/2026','CMA Annual Fund','Annual','1200.00','Monthly','12','5002',''],
+  ['Patricia Mathias','04/18/2026','Cathedral Capital Fund','Capital','50000.00','Quarterly','20','5002','Pledge agreement on file'],
+  ['Sullivan, Margaret','04/18/2026','CMA Annual Fund','Matching','2500.00','Annual','1','5002',''],
+  ['','04/18/2026','General Fund','Annual','600.00','Monthly','12','5002','missing donor'],
+  ['Brian Walsh','','CMA Annual Fund','Annual','1000.00','Monthly','10','5002','missing start date'],
+  ['Kim, Patricia','04/19/2026','Cathedral Capital Fund','Capital','not a number','Quarterly','12','5002','bad amount'],
+  ['Thomas Sullivan','04/19/2026','CMA Annual Fund','Monthly sustainer','600.00','Monthly','12','5002','']
 ]};
 function headerSig(h){return h.map(function(x){return x.toLowerCase().replace(/[^a-z]/g,'');}).join('|');}
 function autoMapCols(headers){
-  var rx={donor:/donor|name|constituent/,date:/date/,fund:/fund|campaign|designation/,type:/gifttype|type/,amount:/amount|amt/,pay:/payment|method|pay/,ref:/check|ref|reference|transaction/,gl:/gl|account/,note:/note|memo|comment/};
+  var rx={donor:/donor|name|constituent/,date:/start|date|begin/,fund:/fund|campaign|designation/,type:/pledgetype|type/,amount:/amount|total|amt|pledge/,pay:/frequency|freq|schedule|interval/,ref:/installment|instal|payments|count|number/,gl:/gl|account/,note:/note|memo|comment|term/};
   return headers.map(function(h){var n=h.toLowerCase().replace(/[^a-z]/g,'');for(var f in rx){if(rx[f].test(n))return f;}return '';});
 }
-function detectTemplate(name){name=(name||'').toLowerCase();if(/online|export|givecentral/.test(name))return 'Online Giving Export';if(/mail|cma/.test(name))return 'CMA Mail Response';if(/pledge|major|capital/.test(name))return 'Major Gift Pledge';return '';}
+function detectTemplate(name){name=(name||'').toLowerCase();if(/capital|campaign/.test(name))return 'Capital Campaign Pledges';if(/sustainer|monthly|recurring/.test(name))return 'Monthly Sustainers';if(/cma|annual/.test(name))return 'CMA Annual Pledges';return '';}
 
 function openImportWizard(file){
   function setup(headers,rows){
@@ -2905,7 +2828,7 @@ function ensureWizardEl(){
   el=document.createElement('div'); el.id='imp-wiz';
   el.style.cssText='position:fixed;inset:0;background:rgba(14,30,53,.5);backdrop-filter:blur(2px);z-index:100000;display:none;align-items:center;justify-content:center;padding:24px;font-family:\'DM Sans\',sans-serif';
   el.innerHTML='<div style="background:#fff;border-radius:16px;width:100%;max-width:760px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(15,23,42,.3);overflow:hidden">'
-    +'<div style="padding:18px 22px 0;display:flex;align-items:flex-start;justify-content:space-between"><div><div style="font-family:\'DM Serif Display\',serif;font-size:20px;color:var(--text)">Import gifts</div><div id="iw-steps" style="display:flex;gap:8px;margin-top:10px"></div></div><div onclick="closeWizard()" style="cursor:pointer;color:var(--text3);font-size:20px;line-height:1;padding:2px 6px">×</div></div>'
+    +'<div style="padding:18px 22px 0;display:flex;align-items:flex-start;justify-content:space-between"><div><div style="font-family:\'DM Serif Display\',serif;font-size:20px;color:var(--text)">Import pledges</div><div id="iw-steps" style="display:flex;gap:8px;margin-top:10px"></div></div><div onclick="closeWizard()" style="cursor:pointer;color:var(--text3);font-size:20px;line-height:1;padding:2px 6px">×</div></div>'
     +'<div id="iw-body" style="padding:16px 22px;overflow-y:auto;flex:1"></div>'
     +'<div id="iw-foot" style="padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:10px"></div></div>';
   document.body.appendChild(el);
@@ -2919,7 +2842,7 @@ function stepDots(active){
   var steps=[['map','1 · Map columns'],['review','2 · Review & import']];
   return steps.map(function(s){var on=s[0]===active;return '<span style="font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:99px;background:'+(on?'var(--bluep)':'var(--surf)')+';color:'+(on?'var(--blue)':'var(--text3)')+';border:1px solid '+(on?'var(--bluel)':'var(--border)')+'">'+s[1]+'</span>';}).join('');
 }
-function reqCoverage(){var have={};IMP.colField.forEach(function(f){if(f)have[f]=1;});return [['donor','Donor name'],['date','Gift date'],['amount','Amount']].map(function(r){return {key:r[0],label:r[1],ok:!!have[r[0]]};});}
+function reqCoverage(){var have={};IMP.colField.forEach(function(f){if(f)have[f]=1;});return [['donor','Donor name'],['date','Start date'],['amount','Pledge amount']].map(function(r){return {key:r[0],label:r[1],ok:!!have[r[0]]};});}
 
 function renderWizard(){
   var el=ensureWizardEl();
@@ -2951,11 +2874,11 @@ function renderWizard(){
       +(data.length>14?'<div style="padding:8px 10px;font-size:11.5px;color:var(--text3);border-top:1px solid var(--border)">+ '+(data.length-14)+' more rows</div>':'')+'</div>'
       +(errs>0?'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--rosel);border:1px solid #FBCFE8;border-radius:9px;padding:10px 13px;margin-top:12px"><span style="font-size:12.5px;color:#9D174D"><strong>'+errs+' row'+(errs>1?'s':'')+' can’t be imported</strong> and won’t post. Fix them and re-upload.</span><button class="btn btn-ghost" style="font-size:12px;padding:6px 11px" onclick="wizDownloadFailed()">Download failed rows</button></div>':'')
       +'<div id="iw-progress" style="display:none;margin-top:14px"><div style="font-size:12px;color:var(--text2);margin-bottom:6px" id="iw-prog-label">Importing…</div><div style="height:8px;background:var(--surf);border-radius:6px;overflow:hidden"><div id="iw-prog-bar" style="height:100%;width:0;background:var(--blue);border-radius:6px;transition:width .12s"></div></div></div>';
-    foot.innerHTML='<button class="btn btn-ghost" onclick="IMP.step=\'map\';renderWizard()">← Back to mapping</button><button class="btn btn-green" id="iw-import" onclick="wizDoImport()">Import '+ready+' gift'+(ready===1?'':'s')+(dups?' ('+dups+' flagged)':'')+'</button>';
+    foot.innerHTML='<button class="btn btn-ghost" onclick="IMP.step=\'map\';renderWizard()">← Back to mapping</button><button class="btn btn-green" id="iw-import" onclick="wizDoImport()">Import '+ready+' pledge'+(ready===1?'':'s')+(dups?' ('+dups+' flagged)':'')+'</button>';
   }
 }
 function wizSetCol(sel){IMP.colField[parseInt(sel.getAttribute('data-col'))]=sel.value;renderWizard();}
-function wizGoReview(){var cov=reqCoverage();if(!cov.every(function(c){return c.ok;})){batchToast('Map Donor, Date and Amount to continue');return;}IMP.step='review';renderWizard();}
+function wizGoReview(){var cov=reqCoverage();if(!cov.every(function(c){return c.ok;})){batchToast('Map Donor, Start date and Pledge amount to continue');return;}IMP.step='review';renderWizard();}
 function wizComputeParsed(){
   var existing={};(typeof DONOR_DB!=='undefined'?DONOR_DB.map(function(d){return d.name;}):[]).concat(BATCH_ROWS.map(function(r){return r.donor;})).forEach(function(n){var k=normName(n);if(k)existing[k]=n;});
   return IMP.rows.map(function(row){
@@ -2963,7 +2886,7 @@ function wizComputeParsed(){
     var errs=[];
     if(!o.donor)errs.push('missing donor');
     var amt=parseFloat((o.amount||'').replace(/[^0-9.]/g,''));if(!(amt>0))errs.push('invalid amount');
-    if(!o.date||!/\d/.test(o.date))errs.push('missing date');
+    if(!o.date||!/\d/.test(o.date))errs.push('missing start date');
     if(errs.length)return {obj:o,kind:'error',msg:errs.join(', '),amt:amt};
     var dupOf=existing[normName(o.donor)];
     if(dupOf)return {obj:o,kind:'dup',msg:dupOf,amt:amt};
@@ -2989,11 +2912,11 @@ function wizDoImport(){
   var p=0;var iv=setInterval(function(){p+=14;if(bar)bar.style.width=Math.min(100,p)+'%';if(lab)lab.textContent='Importing… '+Math.min(100,p)+'%';
     if(p>=100){clearInterval(iv);
       var nextId=BATCH_ROWS.length?Math.max.apply(null,BATCH_ROWS.map(function(r){return r.id;}))+1:1;
-      keep.forEach(function(r){var o=r.obj;BATCH_ROWS.push({id:nextId++,donorId:null,donor:o.donor||'',date:o.date||'04/18/2026',fund:o.fund||'CMA Annual Fund',type:o.type||'Check',amt:parseFloat((o.amount||'0').replace(/[^0-9.]/g,''))||0,pay:o.pay||'Check',ref:o.ref||'',gl:o.gl||'',note:'imported'+(r.kind==='dup'?' · review duplicate':'')});});
+      keep.forEach(function(r){var o=r.obj;BATCH_ROWS.push({id:nextId++,donorId:null,donor:o.donor||'',date:o.date||'04/18/2026',fund:o.fund||'CMA Annual Fund',type:o.type||'Annual',amt:parseFloat((o.amount||'0').replace(/[^0-9.]/g,''))||0,pay:o.pay||'Monthly',ref:o.ref||'',gl:o.gl||'5002',note:'imported'+(r.kind==='dup'?' · review duplicate':'')});});
       try{localStorage.setItem('atlas-import-map-'+headerSig(IMP.headers),JSON.stringify(IMP.colField));}catch(_){ }
       if(typeof revalidateAll==='function')revalidateAll();
       closeWizard();
-      batchToast('Imported '+keep.length+' gift'+(keep.length===1?'':'s')+(errs?' · '+errs+' skipped (errors)':'')+(dups?' · '+dups+' flagged as possible duplicates':''));
+      batchToast('Imported '+keep.length+' pledge'+(keep.length===1?'':'s')+(errs?' · '+errs+' skipped (errors)':'')+(dups?' · '+dups+' flagged as possible duplicates':''));
     }
   },90);
 }
@@ -3002,14 +2925,14 @@ function wizDoImport(){
 function handleImportFile(file){
   if (!file) return;
   batchToast('Imported · ' + file.name + ' · 6 rows added to current batch');
-  // Smoke-test: append 6 sample rows so the user sees the Accuracy Engine react
+  // Smoke-test: append 6 sample pledge rows so the user sees the Accuracy Engine react
   const samples = [
-    { donor:'Anne Reilly',       date:'Apr 18 2026', fund:'CMA Annual Fund',    type:'Check', amt:250, ref:'CSV-1', gl:'4100', note:'imported' },
-    { donor:'Brian Walsh',       date:'Apr 18 2026', fund:'CMA Annual Fund',    type:'Check', amt:100, ref:'CSV-2', gl:'4100', note:'imported' },
-    { donor:'Patricia Mathias',  date:'Apr 18 2026', fund:'Cathedral Capital Fund', type:'Check', amt:5000, ref:'CSV-3', gl:'5001', note:'imported' },
-    { donor:'Sullivan, Thomas',  date:'Apr 18 2026', fund:'CMA Annual Fund',    type:'Check', amt:1500, ref:'CSV-4', gl:'4100', note:'imported' },
-    { donor:'Smith',             date:'Apr 18 2026', fund:'General Fund',       type:'Check', amt:75,  ref:'CSV-5', gl:'',     note:'imported · ambiguous' },
-    { donor:'Margaret O\'Brien', date:'Apr 18 2026', fund:'CMA Annual Fund',    type:'Check', amt:200, ref:'CSV-6', gl:'4100', note:'imported' }
+    { donor:'Anne Reilly',       date:'Apr 18 2026', fund:'CMA Annual Fund',        type:'Annual',  amt:1200, pay:'Monthly',   ref:'12', gl:'5002', note:'imported' },
+    { donor:'Brian Walsh',       date:'Apr 18 2026', fund:'CMA Annual Fund',        type:'Annual',  amt:1000, pay:'Monthly',   ref:'10', gl:'5002', note:'imported' },
+    { donor:'Patricia Mathias',  date:'Apr 18 2026', fund:'Cathedral Capital Fund', type:'Capital', amt:50000, pay:'Quarterly', ref:'20', gl:'5002', note:'imported' },
+    { donor:'Sullivan, Thomas',  date:'Apr 18 2026', fund:'CMA Annual Fund',        type:'Annual',  amt:2500, pay:'Annual',    ref:'5',  gl:'5002', note:'imported' },
+    { donor:'Smith',             date:'Apr 18 2026', fund:'General Fund',           type:'Annual',  amt:600,  pay:'Monthly',   ref:'12', gl:'',     note:'imported · ambiguous' },
+    { donor:'Margaret O\'Brien', date:'Apr 18 2026', fund:'CMA Annual Fund',        type:'Annual',  amt:1200, pay:'Monthly',   ref:'12', gl:'5002', note:'imported' }
   ];
   let nextId = BATCH_ROWS.length ? Math.max.apply(null, BATCH_ROWS.map(function(r){return r.id;})) + 1 : 1;
   samples.forEach(function(s){
@@ -3196,14 +3119,14 @@ const MODALS = {
   },
   'save-template':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--purp)" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="2" width="9" height="9" rx="1.5"/><path d="M5 6.5h3M6.5 5v3"/></svg>`, iconBg:'var(--purpl)', title:'Save as template',
     body:`<div style="background:var(--purpl);border:1px solid #DDD6FE;border-radius:8px;padding:10px;font-size:12px;color:var(--purp);margin-bottom:4px">Templates save column config and defaults — not row data. Anyone on your team can use this.</div>
-      <div class="form-row"><label class="form-label">Template name <span>*</span></label><input class="form-input" value="CMA Mail Response 2026"></div>
-      <div class="form-row"><label class="form-label">Description</label><input class="form-input" value="CMA direct mail — cheque and credit card gifts"></div>
+      <div class="form-row"><label class="form-label">Template name <span>*</span></label><input class="form-input" value="CMA Annual Pledges 2026"></div>
+      <div class="form-row"><label class="form-label">Description</label><input class="form-input" value="CMA annual fund — monthly recurring pledges"></div>
       <div class="form-row"><label class="form-label">Default values captured from this batch</label>
         <div style="display:flex;flex-direction:column;gap:5px">
           <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--surf);border-radius:6px;font-size:12px"><span style="color:var(--text3)">Default fund</span><span style="font-weight:600">CMA Annual Fund</span></div>
-          <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--surf);border-radius:6px;font-size:12px"><span style="color:var(--text3)">Default GL</span><span style="font-weight:600">4100</span></div>
-          <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--surf);border-radius:6px;font-size:12px"><span style="color:var(--text3)">Default type</span><span style="font-weight:600">Check</span></div>
-          <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--surf);border-radius:6px;font-size:12px"><span style="color:var(--text3)">Outlier threshold</span><span style="font-weight:600">${THRESHOLD}× average</span></div>
+          <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--surf);border-radius:6px;font-size:12px"><span style="color:var(--text3)">Default GL</span><span style="font-weight:600">5002 · Pledges receivable</span></div>
+          <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--surf);border-radius:6px;font-size:12px"><span style="color:var(--text3)">Default pledge type</span><span style="font-weight:600">Annual</span></div>
+          <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--surf);border-radius:6px;font-size:12px"><span style="color:var(--text3)">Default frequency</span><span style="font-weight:600">Monthly</span></div>
         </div>
       </div>`,
     foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-purp" onclick="saveTemplateFromModal()">Save template</button>`
@@ -3215,13 +3138,13 @@ const MODALS = {
     foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-blue" onclick="closeModal()">Save to folder</button>`
   },
   'new-template':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--purp)" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="2" width="9" height="9" rx="1.5"/><path d="M5 6.5h3M6.5 5v3"/></svg>`, iconBg:'var(--purpl)', title:'New template',
-    body:`<div class="form-row"><label class="form-label">Template name <span>*</span></label><input class="form-input" placeholder="e.g. Stock Gift Entry"></div>
-      <div class="form-row"><label class="form-label">Start from</label><select class="form-select"><option>Blank</option><option>Copy: CMA Mail Response</option><option>Copy: Major Gift Pledge</option><option>Copy: current batch</option></select></div>
+    body:`<div class="form-row"><label class="form-label">Template name <span>*</span></label><input class="form-input" placeholder="e.g. Capital Campaign Pledges"></div>
+      <div class="form-row"><label class="form-label">Start from</label><select class="form-select"><option>Blank</option><option>Copy: CMA Annual Pledges</option><option>Copy: Capital Campaign Pledges</option><option>Copy: current batch</option></select></div>
       <div class="form-row">
         <label class="form-label">Columns in this template</label>
         <span class="form-hint" style="display:block;margin-bottom:7px">Choose which columns the template starts with. Required columns are always included.</span>
         <div id="tpl-cols" style="display:flex;flex-direction:column;gap:5px;max-height:228px;overflow-y:auto;padding-right:2px">
-          ${[['Donor',1,1],['Gift date',1,1],['Fund / campaign',0,1],['Gift type',0,1],['Amount',1,1],['Payment method',0,1],['Check / ref #',0,1],['GL code',0,1],['Note',0,1],['Entity',0,0],['Solicitor',0,0],['Pledge reference',0,0]].map(co=>`
+          ${[['Donor',1,1],['Start date',1,1],['Fund / campaign',0,1],['Pledge type',0,1],['Pledge amount',1,1],['Frequency',0,1],['Installments',0,1],['GL code',0,1],['Note',0,1],['Entity',0,0],['Solicitor',0,0],['End date',0,0]].map(co=>`
             <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:var(--surf);border:1px solid var(--border);border-radius:7px">
               <svg viewBox="0 0 8 10" fill="none" stroke="var(--text3)" stroke-width="1.1" stroke-linecap="round" width="8" height="10"><path d="M1 2h6M1 5h6M1 8h6"/></svg>
               <span style="flex:1;font-size:12px;color:var(--text)">${co[0]}</span>
@@ -3236,14 +3159,14 @@ const MODALS = {
   },
   'new-batch':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="2" width="9" height="9" rx="1.5"/><path d="M5 6.5h3M6.5 5v3"/></svg>`, iconBg:'var(--bluep)', title:'New batch',
     body:`<div class="form-row"><label class="form-label">Batch name <span>*</span></label><input class="form-input" placeholder="e.g. CMA May Mail Response 2026"></div>
-      <div class="form-row"><label class="form-label">Template</label><select class="form-select"><option>— Blank batch —</option><option>CMA Mail Response (14 uses)</option><option>Major Gift Pledge (6 uses)</option><option>Online Giving Export (22 uses)</option></select></div>
+      <div class="form-row"><label class="form-label">Template</label><select class="form-select"><option>— Blank batch —</option><option>CMA Annual Pledges (14 uses)</option><option>Capital Campaign Pledges (6 uses)</option><option>Monthly Sustainers (22 uses)</option></select></div>
       <div class="form-row-2"><div class="form-row"><label class="form-label">Default fund</label><select class="form-select"><option>CMA Annual Fund</option><option>Cathedral Capital</option><option>General Fund</option></select></div>
       <div class="form-row"><label class="form-label">Default date</label><input class="form-input" type="date" value="2026-04-18"></div></div>
       <div class="form-row"><label class="form-label">Save to folder</label><select class="form-select"><option>2026 — CMA</option><option>2026 — Cathedral Capital</option><option>+ New folder</option></select></div>`,
     foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-blue" onclick="createBatchFromModal()">Create batch</button>`
   },
   'accuracy-settings':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--purp)" stroke-width="1.4" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="5"/><path d="M4.5 6.5l1.5 1.5 3-3"/></svg>`, iconBg:'var(--purpl)', title:'Accuracy engine settings',
-    body:`<div style="font-size:12px;color:var(--text3);margin-bottom:12px">These thresholds apply to all batches in this diocese. Changes take effect immediately.</div>
+    body:`<div style="font-size:12px;color:var(--text3);margin-bottom:12px">These thresholds apply to all pledge batches in this diocese. Changes take effect immediately.</div>
       <div style="display:flex;flex-direction:column;gap:8px">
         <div style="padding:10px 12px;background:var(--surf);border:1px solid var(--border);border-radius:8px">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
@@ -3251,35 +3174,34 @@ const MODALS = {
             <input type="range" min="2" max="10" value="${THRESHOLD}" style="width:100px;accent-color:var(--purp)" oninput="THRESHOLD=parseInt(this.value);document.getElementById('as-thresh').textContent=this.value+'×';revalidateAll()">
             <span id="as-thresh" style="font-size:12px;font-weight:700;color:var(--purp);min-width:28px">${THRESHOLD}×</span>
           </div>
-          <div style="font-size:11px;color:var(--text3)">Flag amounts more than N× the donor's giving history average for the same fund</div>
-        </div>
-        <div style="padding:10px 12px;background:var(--surf);border:1px solid var(--border);border-radius:8px">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-            <span style="font-size:12px;font-weight:600;color:var(--text);flex:1">Duplicate window</span>
-            <input type="range" min="7" max="90" value="${DUP_DAYS}" style="width:100px;accent-color:var(--purp)" oninput="DUP_DAYS=parseInt(this.value);document.getElementById('as-dup').textContent=this.value+' days';revalidateAll()">
-            <span id="as-dup" style="font-size:12px;font-weight:700;color:var(--purp);min-width:50px">${DUP_DAYS} days</span>
-          </div>
-          <div style="font-size:11px;color:var(--text3)">Flag same donor + same amount if a matching gift exists within N days</div>
+          <div style="font-size:11px;color:var(--text3)">Flag a pledge more than N× the donor's giving history average for the same fund</div>
         </div>
         <div style="padding:10px 12px;background:var(--surf);border:1px solid var(--border);border-radius:8px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-            <span style="font-size:12px;font-weight:600;color:var(--text)">First-time large gift threshold</span>
-            <div style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--text3)">$</span><input type="number" value="1000" style="width:80px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit"></div>
+            <span style="font-size:12px;font-weight:600;color:var(--text)">Major-pledge review threshold</span>
+            <div style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--text3)">$</span><input type="number" value="${MAJOR_PLEDGE}" style="width:96px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit" oninput="MAJOR_PLEDGE=parseInt(this.value)||0;revalidateAll()"></div>
           </div>
-          <div style="font-size:11px;color:var(--text3)">Warn when a donor with no prior history makes a first gift above this amount</div>
+          <div style="font-size:11px;color:var(--text3)">Pledges at or above this amount route to finance for a gift-agreement review</div>
         </div>
         <div style="padding:10px 12px;background:var(--surf);border:1px solid var(--border);border-radius:8px">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-            <span style="font-size:12px;font-weight:600;color:var(--text);flex:1">YoY change alert</span>
-            <input type="range" min="25" max="200" value="50" style="width:100px;accent-color:var(--purp)" oninput="document.getElementById('as-yoy').textContent=this.value+'%'">
-            <span id="as-yoy" style="font-size:12px;font-weight:700;color:var(--purp);min-width:36px">50%</span>
+            <span style="font-size:12px;font-weight:600;color:var(--text);flex:1">Long-running term alert</span>
+            <input type="range" min="2" max="15" value="${MAX_TERM_YEARS}" style="width:100px;accent-color:var(--purp)" oninput="MAX_TERM_YEARS=parseInt(this.value);document.getElementById('as-term').textContent=this.value+' yrs';revalidateAll()">
+            <span id="as-term" style="font-size:12px;font-weight:700;color:var(--purp);min-width:42px">${MAX_TERM_YEARS} yrs</span>
           </div>
-          <div style="font-size:11px;color:var(--text3)">Flag when same-campaign gift changes by more than N% vs. prior year</div>
+          <div style="font-size:11px;color:var(--text3)">Confirm the term when a pledge schedule runs longer than N years</div>
+        </div>
+        <div style="padding:10px 12px;background:var(--surf);border:1px solid var(--border);border-radius:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:12px;font-weight:600;color:var(--text)">Require receivable GL (5xxx)</span>
+            <span style="font-size:11px;font-weight:700;color:var(--green);background:var(--greenl);border-radius:20px;padding:3px 9px">On</span>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:6px">Warn when a pledge books to a non-receivable account — pledges should post to 5xxx</div>
         </div>
       </div>`,
     foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-purp" onclick="closeModal()">Save settings</button>`
   },
-  'import':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 1.5H3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V4z"/><path d="M8.5 1.5V4H11"/><path d="M6.5 9.5v-3.2M5 7.8l1.5-1.5L8 7.8"/></svg>`, iconBg:'var(--bluep)', title:'Import gifts',
+  'import':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 1.5H3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V4z"/><path d="M8.5 1.5V4H11"/><path d="M6.5 9.5v-3.2M5 7.8l1.5-1.5L8 7.8"/></svg>`, iconBg:'var(--bluep)', title:'Import pledges',
     body:`
       <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--bluep);border:1px solid var(--bluel);border-radius:10px;padding:11px 13px;margin-bottom:12px">
         <div style="font-size:12.5px;color:#1D4ED8;line-height:1.45"><strong>First import?</strong> Start from our template so your columns line up.</div>
@@ -3291,12 +3213,12 @@ const MODALS = {
       <div id="import-sample" style="display:none;border:1px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:12px">
         <div style="background:var(--surf);padding:7px 11px;font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--text3)">REQUIRED FORMAT · EXAMPLE ROWS</div>
         <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap">
-          <thead><tr>${['Donor name *','Gift date *','Fund','Gift type','Amount *','Payment method','Check / Ref #','GL code','Note'].map(h=>`<th style="text-align:left;padding:6px 9px;background:var(--surf);color:var(--text3);font-weight:700;border-bottom:1px solid var(--border)">${h}</th>`).join('')}</tr></thead>
+          <thead><tr>${['Donor name *','Start date *','Fund','Pledge type','Pledge amount *','Frequency','Installments','GL code','Note'].map(h=>`<th style="text-align:left;padding:6px 9px;background:var(--surf);color:var(--text3);font-weight:700;border-bottom:1px solid var(--border)">${h}</th>`).join('')}</tr></thead>
           <tbody>
-            <tr>${["O'Brien, James","04/18/2026","CMA Annual Fund","Check","500.00","Check","10441","4100","Spring appeal"].map(c=>`<td style="padding:6px 9px;border-bottom:1px solid var(--border);color:var(--text2)">${c}</td>`).join('')}</tr>
-            <tr>${["Sullivan, Margaret","04/18/2026","CMA Annual Fund","Credit card","250.00","Credit card","CC-2290","4100",""].map(c=>`<td style="padding:6px 9px;color:var(--text2)">${c}</td>`).join('')}</tr>
+            <tr>${["O'Brien, James","04/18/2026","Cathedral Capital Fund","Capital","12000.00","Monthly","24","5002","3-year capital pledge"].map(c=>`<td style="padding:6px 9px;border-bottom:1px solid var(--border);color:var(--text2)">${c}</td>`).join('')}</tr>
+            <tr>${["Sullivan, Margaret","04/18/2026","CMA Annual Fund","Annual","1200.00","Monthly","12","5002",""].map(c=>`<td style="padding:6px 9px;color:var(--text2)">${c}</td>`).join('')}</tr>
           </tbody></table></div>
-        <div style="padding:7px 11px;font-size:11px;color:var(--text3);border-top:1px solid var(--border)"><strong>*</strong> Donor name, Gift date and Amount are required. Header names must match (extra columns are ignored).</div>
+        <div style="padding:7px 11px;font-size:11px;color:var(--text3);border-top:1px solid var(--border)"><strong>*</strong> Donor name, Start date and Pledge amount are required. Header names must match (extra columns are ignored).</div>
       </div>
       <input type="file" id="import-file-input" accept=".csv,.xlsx,.xls" style="display:none">
       <div id="import-dropzone" onclick="document.getElementById('import-file-input').click()" style="border:2px dashed var(--border);border-radius:10px;padding:22px;text-align:center;cursor:pointer;background:var(--surf);margin-bottom:10px;transition:all .14s">
@@ -3305,7 +3227,7 @@ const MODALS = {
         <div style="font-size:11px;color:var(--text3);margin-top:4px">.csv, .xlsx, .xls · max 10MB</div>
       </div>
       <div id="import-error" style="display:none;background:var(--rosel);border:1px solid #FBCFE8;border-radius:9px;padding:11px 13px;margin-bottom:10px;font-size:12.5px;color:#9D174D;line-height:1.5"></div>
-      <div class="form-row"><label class="form-label">Apply template for column mapping</label><select class="form-select"><option>Auto-detect</option><option>CMA Mail Response</option><option>Major Gift Pledge</option><option>Online Giving Export</option></select></div>`,
+      <div class="form-row"><label class="form-label">Apply template for column mapping</label><select class="form-select"><option>Auto-detect</option><option>CMA Annual Pledges</option><option>Capital Campaign Pledges</option><option>Monthly Sustainers</option></select></div>`,
     foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-blue" id="import-preview-btn" onclick="triggerImportPreview()" disabled style="opacity:.5;cursor:not-allowed">Import &amp; preview</button>`
   },
   'new-folder':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--amber)" stroke-width="1.4" stroke-linecap="round"><path d="M1 2.5h3l1.5 1.5H12a.7.7 0 01.7.7v6.3a.7.7 0 01-.7.7H1a.7.7 0 01-.7-.7V3.2A.7.7 0 011 2.5z"/><path d="M7 5.5v3M5.5 7h3"/></svg>`, iconBg:'var(--amberl)', title:'New folder',
@@ -3315,7 +3237,7 @@ const MODALS = {
   'columns':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3.5h10M1.5 6.5h10M1.5 9.5h10"/></svg>`, iconBg:'var(--bluep)', title:'Column configuration',
     body:`<div style="font-size:12px;color:var(--text3);margin-bottom:10px">Drag to reorder. Changes apply to this batch only — save as template to reuse.</div>
       <div style="display:flex;flex-direction:column;gap:5px">
-        ${['Donor (required)','Gift date (required)','Fund / campaign','Gift type','Amount (required)','Payment method','Check / ref #','GL code','Note','Entity','Solicitor','Pledge reference'].map((c,i)=>`
+        ${['Donor (required)','Start date (required)','Fund / campaign','Pledge type','Pledge amount (required)','Frequency','Installments','GL code','Note','Entity','Solicitor','End date'].map((c,i)=>`
           <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:var(--surf);border:1px solid var(--border);border-radius:7px;cursor:grab">
             <svg viewBox="0 0 8 10" fill="none" stroke="var(--text3)" stroke-width="1.1" stroke-linecap="round" width="8" height="10"><path d="M1 2h6M1 5h6M1 8h6"/></svg>
             <span style="flex:1;font-size:12px;color:var(--text)">${c}</span>
@@ -4084,5 +4006,260 @@ revalidateAll();
 })();
 </script>
 
+<!-- ATLAS-DATEPICKER v1 : reusable click-to-open calendar for text date fields -->
+<style id="atlas-datepicker-css">
+.adp-pop{position:absolute;z-index:2147483000;width:266px;background:#fff;border:1px solid var(--border,#E2E8F0);border-radius:12px;
+  box-shadow:0 12px 34px rgba(15,23,42,.18);padding:12px;font-family:'DM Sans',system-ui,sans-serif;color:var(--text-1,#0F172A);
+  opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .12s ease,transform .12s ease;}
+.adp-pop.open{opacity:1;transform:translateY(0);pointer-events:auto;}
+.adp-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.adp-nav{width:28px;height:28px;border:none;background:transparent;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;
+  color:var(--text-2,#334155);display:flex;align-items:center;justify-content:center;}
+.adp-nav:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
+.adp-title{font-size:13.5px;font-weight:600;letter-spacing:.01em;cursor:pointer;padding:4px 8px;border-radius:8px;}
+.adp-title:hover{background:var(--surface,#F8FAFC);}
+.adp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.adp-dow{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3,#64748B);
+  text-align:center;padding:4px 0;}
+.adp-day{border:none;background:transparent;border-radius:8px;height:32px;font-size:12.5px;cursor:pointer;color:var(--text-1,#0F172A);
+  font-family:inherit;}
+.adp-day:hover{background:var(--blue-pale,#EFF6FF);}
+.adp-day.mut{color:#CBD5E1;}
+.adp-day.today{box-shadow:inset 0 0 0 1px var(--blue,#2563EB);color:var(--blue,#2563EB);font-weight:600;}
+.adp-day.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
+.adp-cell{border:none;background:transparent;border-radius:8px;height:34px;font-size:12.5px;cursor:pointer;color:var(--text-2,#334155);
+  font-family:inherit;}
+.adp-cell:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
+.adp-cell.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
+.adp-ft{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border,#E2E8F0);}
+.adp-ft button{border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:4px 6px;border-radius:6px;}
+.adp-today-b{color:var(--blue,#2563EB);} .adp-today-b:hover{background:var(--blue-pale,#EFF6FF);}
+.adp-clear-b{color:var(--text-3,#64748B);} .adp-clear-b:hover{background:var(--surface,#F8FAFC);}
+.adp-mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+</style>
+<script id="atlas-datepicker-js">
+(function(){
+  if (window.__atlasDP) return; window.__atlasDP = true;
+  var MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  var DATE_PH=/\b(m{1,2}\s*[\/\-.]\s*d{1,2}\s*[\/\-.]\s*y{2,4}|y{4}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*d{1,2}|d{1,2}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*y{2,4})\b/i;
+  var WORD_DATE=/\bdate\b/i;
+
+  function looksDate(inp){
+    if(!inp||inp.tagName!=='INPUT') return false;
+    var t=(inp.getAttribute('type')||'text').toLowerCase();
+    if(t!=='text'&&t!=='') return false;              // leave native date/other inputs alone
+    if(inp.getAttribute('data-adp')==='off') return false;
+    if(inp.getAttribute('list')) return false;         // autocomplete fields
+    var ph=inp.getAttribute('placeholder')||'';
+    if(DATE_PH.test(ph)) return true;
+    if(WORD_DATE.test(ph)) return true;
+    // label / aria signal (whole word "date")
+    var lab=inp.getAttribute('aria-label')||'';
+    if(WORD_DATE.test(lab)) return true;
+    // native label association (for=/wrapping label)
+    try{ if(inp.labels){ for(var i=0;i<inp.labels.length;i++){ if(WORD_DATE.test(inp.labels[i].textContent||'')) return true; } } }catch(e){}
+    var isLbl=function(el){ return el && el.matches && el.matches('label,.lbl,.field-label,.form-label'); };
+    // immediate preceding sibling labels (no climbing to broad ancestors)
+    var sib=inp.previousElementSibling, guard=0;
+    while(sib && guard<3){ if(isLbl(sib) && WORD_DATE.test(sib.textContent||'')) return true; sib=sib.previousElementSibling; guard++; }
+    // direct label children of the input's own wrapper only
+    var par=inp.parentElement;
+    if(par){ var kids=par.children; for(var j=0;j<kids.length;j++){ var k=kids[j]; if(k!==inp && isLbl(k) && WORD_DATE.test(k.textContent||'')) return true; } }
+    return false;
+  }
+
+  // ---- format detection & output ----
+  function fmtOf(inp){
+    var ph=(inp.getAttribute('placeholder')||'').toLowerCase();
+    var v=(inp.value||'').trim();
+    if(/y{4}\s*[\/\-.]\s*m/.test(ph)||/^\d{4}-\d{1,2}-\d{1,2}$/.test(v)) return 'iso';
+    if(/d{1,2}\s*[\/\-.]\s*m/.test(ph)) return 'dmy';
+    if(/[a-z]{3,}\s+\d{1,2},?\s+\d{4}/i.test(v)) return 'long';
+    return 'mdy';
+  }
+  function pad(n){return (n<10?'0':'')+n;}
+  function toStr(d,fmt){
+    var y=d.getFullYear(),m=d.getMonth()+1,day=d.getDate();
+    if(fmt==='iso') return y+'-'+pad(m)+'-'+pad(day);
+    if(fmt==='dmy') return pad(day)+'/'+pad(m)+'/'+y;
+    if(fmt==='long') return MON[m-1]+' '+day+', '+y;
+    return pad(m)+'/'+pad(day)+'/'+y;
+  }
+  function parse(v){
+    v=(v||'').trim(); if(!v) return null;
+    var m;
+    if(m=v.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/)) return new Date(+m[1],+m[2]-1,+m[3]);
+    if(m=v.match(/^([a-z]{3,})\s+(\d{1,2}),?\s+(\d{4})$/i)){var mi=MON.findIndex(function(x){return x.toLowerCase().indexOf(m[1].toLowerCase())===0;});if(mi>=0)return new Date(+m[3],mi,+m[2]);}
+    if(m=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/)){var y=+m[3];if(y<100)y+=2000;return new Date(y,+m[1]-1,+m[2]);}
+    var d=new Date(v); return isNaN(d)?null:d;
+  }
+
+  // ---- single shared popover ----
+  var pop,active,view,mode='days';
+  function build(){
+    pop=document.createElement('div');pop.className='adp-pop';pop.setAttribute('role','dialog');
+    document.body.appendChild(pop);
+    pop.addEventListener('mousedown',function(e){e.preventDefault();}); // keep field focus
+  }
+  function close(){ if(pop) pop.classList.remove('open'); active=null; mode='days'; }
+  function open(inp){
+    if(!pop) build();
+    active=inp; mode='days';
+    view=parse(inp.value)||new Date();
+    render(); position(); pop.classList.add('open');
+  }
+  function position(){
+    var r=active.getBoundingClientRect(), sx=window.pageXOffset, sy=window.pageYOffset;
+    pop.style.visibility='hidden'; pop.classList.add('open');
+    var ph=pop.offsetHeight, pw=pop.offsetWidth;
+    pop.classList.remove('open'); pop.style.visibility='';
+    var top=r.bottom+sy+6, left=r.left+sx;
+    if(r.bottom+ph+6>window.innerHeight && r.top-ph-6>0) top=r.top+sy-ph-6;
+    left=Math.min(left, sx+window.innerWidth-pw-8); left=Math.max(left,sx+8);
+    pop.style.top=top+'px'; pop.style.left=left+'px';
+  }
+  function commit(d){
+    var fmt=fmtOf(active);
+    active.value=toStr(d,fmt);
+    active.dispatchEvent(new Event('input',{bubbles:true}));
+    active.dispatchEvent(new Event('change',{bubbles:true}));
+    close();
+  }
+  function render(){
+    if(mode==='months'){renderMonths();return;}
+    if(mode==='years'){renderYears();return;}
+    var y=view.getFullYear(), mo=view.getMonth();
+    var sel=parse(active.value), today=new Date();
+    var first=new Date(y,mo,1), start=first.getDay(), dim=new Date(y,mo+1,0).getDate(), pdim=new Date(y,mo,0).getDate();
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="pm">&#8249;</button>'+
+      '<div class="adp-title" data-a="mode">'+MON[mo]+' '+y+'</div>'+
+      '<button class="adp-nav" data-a="nm">&#8250;</button></div><div class="adp-grid">';
+    for(var i=0;i<7;i++) h+='<div class="adp-dow">'+DOW[i]+'</div>';
+    for(var c=0;c<42;c++){
+      var dn,cls='adp-day',dt;
+      if(c<start){dn=pdim-start+1+c;cls+=' mut';dt=new Date(y,mo-1,dn);}
+      else if(c-start+1<=dim){dn=c-start+1;dt=new Date(y,mo,dn);}
+      else{dn=c-start+1-dim;cls+=' mut';dt=new Date(y,mo+1,dn);}
+      if(dt.getFullYear()===today.getFullYear()&&dt.getMonth()===today.getMonth()&&dt.getDate()===today.getDate())cls+=' today';
+      if(sel&&dt.getFullYear()===sel.getFullYear()&&dt.getMonth()===sel.getMonth()&&dt.getDate()===sel.getDate())cls+=' sel';
+      h+='<button class="'+cls+'" data-d="'+dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate()+'">'+dn+'</button>';
+      if(c>=start+dim-1 && (c+1)%7===0) break;
+    }
+    h+='</div><div class="adp-ft"><button class="adp-today-b" data-a="today">Today</button><button class="adp-clear-b" data-a="clear">Clear</button></div>';
+    pop.innerHTML=h;
+  }
+  function renderMonths(){
+    var y=view.getFullYear();
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="py">&#8249;</button>'+
+      '<div class="adp-title" data-a="years">'+y+'</div><button class="adp-nav" data-a="ny">&#8250;</button></div><div class="adp-mgrid">';
+    for(var i=0;i<12;i++) h+='<button class="adp-cell'+(i===view.getMonth()?' sel':'')+'" data-m="'+i+'">'+MONS[i]+'</button>';
+    h+='</div>'; pop.innerHTML=h;
+  }
+  function renderYears(){
+    var base=view.getFullYear()-6;
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="pyr">&#8249;</button>'+
+      '<div class="adp-title">'+base+' – '+(base+11)+'</div><button class="adp-nav" data-a="nyr">&#8250;</button></div><div class="adp-mgrid">';
+    for(var i=0;i<12;i++){var yr=base+i;h+='<button class="adp-cell'+(yr===view.getFullYear()?' sel':'')+'" data-y="'+yr+'">'+yr+'</button>';}
+    h+='</div>'; pop.innerHTML=h;
+  }
+
+  document.addEventListener('click',function(e){
+    if(!pop) return;
+    var t=e.target;
+    if(pop.contains(t)){
+      var a=t.getAttribute('data-a'), d=t.getAttribute('data-d'), mm=t.getAttribute('data-m'), yy=t.getAttribute('data-y');
+      if(d){var p=d.split('-');commit(new Date(+p[0],+p[1]-1,+p[2]));return;}
+      if(mm!=null){view=new Date(view.getFullYear(),+mm,1);mode='days';render();return;}
+      if(yy!=null){view=new Date(+yy,view.getMonth(),1);mode='months';render();return;}
+      if(a==='pm'){view=new Date(view.getFullYear(),view.getMonth()-1,1);render();}
+      else if(a==='nm'){view=new Date(view.getFullYear(),view.getMonth()+1,1);render();}
+      else if(a==='mode'){mode='months';render();}
+      else if(a==='years'){mode='years';render();}
+      else if(a==='py'){view=new Date(view.getFullYear()-1,view.getMonth(),1);render();}
+      else if(a==='ny'){view=new Date(view.getFullYear()+1,view.getMonth(),1);render();}
+      else if(a==='pyr'){view=new Date(view.getFullYear()-12,view.getMonth(),1);render();}
+      else if(a==='nyr'){view=new Date(view.getFullYear()+12,view.getMonth(),1);render();}
+      else if(a==='today'){commit(new Date());}
+      else if(a==='clear'){active.value='';active.dispatchEvent(new Event('input',{bubbles:true}));active.dispatchEvent(new Event('change',{bubbles:true}));close();}
+      return;
+    }
+    if(active && t===active) return;
+    close();
+  },true);
+
+  document.addEventListener('focusin',function(e){ if(looksDate(e.target)) open(e.target); });
+  document.addEventListener('click',function(e){ if(looksDate(e.target) && active!==e.target) open(e.target); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+  window.addEventListener('resize',function(){ if(active&&pop&&pop.classList.contains('open')) position(); });
+  window.addEventListener('scroll',function(){ if(active&&pop&&pop.classList.contains('open')) position(); },true);
+
+  window.__atlasLooksDate=looksDate; // exposed for tests
+})();
+</script>
+<!-- /ATLAS-DATEPICKER -->
+<!-- ATLAS-NAVCOLLAPSE v1 : expandable/collapsible Campaigns submenu (Appeals / Funds) -->
+<style id="atlas-navcollapse-css">
+.nav-caret{ margin-left:auto; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px;
+  border-radius:5px; opacity:.55; transition:transform .18s ease, opacity .15s, background .15s; flex-shrink:0; }
+.nav-caret:hover{ opacity:1; background:rgba(255,255,255,.12); }
+.nav-caret svg{ width:9px; height:9px; }
+.nav-item.nav-open .nav-caret{ transform:rotate(90deg); }
+.nav-item .nav-badge + .nav-caret{ margin-left:8px; }
+.nav-subwrap{ overflow:hidden; }
+</style>
+<script id="atlas-navcollapse-js">
+(function(){
+  if (window.__atlasNavCollapse) return; window.__atlasNavCollapse = true;
+  var CARET = '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 2l3 3-3 3"/></svg>';
+
+  function setup(link){
+    // collect submenu: a following .nav-subwrap, or loose Appeals/Funds nav-items (portal)
+    var wrap=null, subs=[], next=link.nextElementSibling;
+    if(next && next.classList && next.classList.contains('nav-subwrap')) wrap=next;
+    else {
+      var n=next;
+      while(n && n.classList && n.classList.contains('nav-item') && /atlas-(appeals|funds)\.html$/.test(n.getAttribute('href')||'')){ subs.push(n); n=n.nextElementSibling; }
+    }
+    if(!wrap && !subs.length) return;
+
+    var childActive = wrap ? !!wrap.querySelector('.nav-item.active') : subs.some(function(s){return s.classList.contains('active');});
+    var expanded = link.classList.contains('active') || childActive;
+
+    if(!link.querySelector('.nav-caret')){
+      var car=document.createElement('span'); car.className='nav-caret'; car.setAttribute('aria-label','Toggle submenu'); car.innerHTML=CARET;
+      link.appendChild(car);
+    }
+    var caret=link.querySelector('.nav-caret');
+    function apply(){
+      if(wrap) wrap.style.display = expanded?'':'none';
+      else subs.forEach(function(s){ s.style.display = expanded?'':'none'; });
+      link.classList.toggle('nav-open', expanded);
+      link.setAttribute('aria-expanded', expanded?'true':'false');
+    }
+    apply();
+    caret.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); expanded=!expanded; apply(); });
+  }
+
+  function scan(){
+    var links=document.querySelectorAll('.nav-item[href="atlas-campaign-dashboard.html"]:not([data-navcol])');
+    for(var i=0;i<links.length;i++){ links[i].setAttribute('data-navcol','1'); setup(links[i]); }
+  }
+  function boot(){
+    scan();
+    // portal renders its sidebar via JS — watch for it to appear
+    var host=document.querySelector('.sidebar, #nav') || document.body;
+    try{
+      var mo=new MutationObserver(function(){ scan(); });
+      mo.observe(host, {childList:true, subtree:true});
+      setTimeout(function(){ mo.disconnect(); }, 4000);
+    }catch(e){}
+    var tries=0, t=setInterval(function(){ scan(); if(++tries>12) clearInterval(t); }, 120);
+  }
+  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+<!-- /ATLAS-NAVCOLLAPSE -->
 </body>
 </html>
