@@ -2208,6 +2208,16 @@ body {
   .hp-row .hp-nm{ font-size:13px; font-weight:500; color:var(--navy); } .hp-row .hp-nm mark{ background:#FEF3C7; border-radius:2px; }
   .hp-row .hp-sub{ font-size:11.5px; color:var(--text-3); margin-top:1px; }
   .hp-row .hp-goal{ font-size:12.5px; color:var(--text-2); font-weight:600; white-space:nowrap; }
+  .hp-toolbar{ display:flex; gap:8px; margin-top:10px; align-items:stretch; }
+  .hp-toolbar .hp-search{ flex:1; margin-top:0; }
+  .hp-catf{ width:200px; flex:0 0 auto; }
+  .hp-listmeta{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; }
+  .hp-selall{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-2); cursor:pointer; user-select:none; }
+  .hp-selall input{ accent-color:var(--blue); width:15px; height:15px; }
+  .hp-selcount{ font-size:12px; color:var(--text-3); }
+  .hp-row .hp-check{ accent-color:var(--blue); width:16px; height:16px; flex-shrink:0; }
+  .hp-row .hp-main{ flex:1; min-width:0; }
+  .hp-row.sel{ background:var(--blue-pale); }
   .hp-empty{ padding:22px; text-align:center; color:var(--text-3); font-size:12.5px; }
   .hp-new-link{ background:var(--blue); color:#fff; font-weight:700; cursor:pointer; font-size:12.5px; display:inline-flex; align-items:center; gap:6px; padding:9px 15px; border-radius:9px; white-space:nowrap; box-shadow:0 2px 6px rgba(37,99,235,.28); transition:background .12s, transform .08s, box-shadow .12s; }
   .hp-new-link:hover{ background:#1D4ED8; box-shadow:0 3px 10px rgba(37,99,235,.36); }
@@ -2228,7 +2238,14 @@ body {
   </div>
   <div class="cc-mbody">
     <div id="hap-listview">
-      <div class="hp-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="hap-q" placeholder="Find an appeal by name, ID, or category…" oninput="hapRender(this.value)"></div>
+      <div class="hp-toolbar">
+        <div class="hp-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="hap-q" placeholder="Find an appeal by name or ID…" oninput="hapRender()"></div>
+        <select class="fld hp-catf" id="hap-catf" onchange="hapRender()"></select>
+      </div>
+      <div class="hp-listmeta">
+        <label class="hp-selall"><input type="checkbox" id="hap-selall" onclick="hapToggleAll(this)"> Select all</label>
+        <span class="hp-selcount" id="hap-selcount">None selected</span>
+      </div>
       <div class="hp-list" id="hap-list"></div>
     </div>
     <div id="hap-newview" style="display:none">
@@ -2242,6 +2259,7 @@ body {
   <div class="cc-mfoot">
     <span class="hp-back" id="hap-backbtn" style="display:none;margin-right:auto" onclick="hapShowList()">← Back to list</span>
     <button class="btn btn-ghost" onclick="hapClose()">Cancel</button>
+    <button class="btn btn-primary" id="hap-addbtn" onclick="hapAddSelected()" disabled>Add appeals</button>
     <button class="btn btn-primary" id="hap-savebtn" style="display:none" onclick="hapSaveNew()">Save appeal</button>
   </div>
 </div></div>
@@ -2254,7 +2272,14 @@ body {
   </div>
   <div class="cc-mbody">
     <div id="hfd-listview">
-      <div class="hp-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="hfd-q" placeholder="Find a fund by name, GL, or entity…" oninput="hfdRender(this.value)"></div>
+      <div class="hp-toolbar">
+        <div class="hp-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="hfd-q" placeholder="Find a fund by name or GL…" oninput="hfdRender()"></div>
+        <select class="fld hp-catf" id="hfd-entf" onchange="hfdRender()"></select>
+      </div>
+      <div class="hp-listmeta">
+        <label class="hp-selall"><input type="checkbox" id="hfd-selall" onclick="hfdToggleAll(this)"> Select all</label>
+        <span class="hp-selcount" id="hfd-selcount">None selected</span>
+      </div>
       <div class="hp-list" id="hfd-list"></div>
     </div>
     <div id="hfd-newview" style="display:none">
@@ -2265,6 +2290,7 @@ body {
   <div class="cc-mfoot">
     <span class="hp-back" id="hfd-backbtn" style="display:none;margin-right:auto" onclick="hfdShowList()">← Back to list</span>
     <button class="btn btn-ghost" onclick="hfdClose()">Cancel</button>
+    <button class="btn btn-primary" id="hfd-addbtn" onclick="hfdAddSelected()" disabled>Add funds</button>
     <button class="btn btn-primary" id="hfd-savebtn" style="display:none" onclick="hfdSaveNew()">Save fund</button>
   </div>
 </div></div>
@@ -2315,16 +2341,28 @@ body {
   var hapAnchor=null, hfdAnchor=null;
 
   // ── Appeal picker ──
-  window.openAppealPicker=function(anchor){ hapAnchor=anchor; hapShowList(); document.getElementById('hap-q').value=''; hapRender(''); document.getElementById('hap-ov').classList.add('open'); setTimeout(function(){ var q=document.getElementById('hap-q'); if(q) q.focus(); },40); };
+  var hapSel={}, hapFilteredIdx=[];
+  function hapBuildCatf(){ var el=document.getElementById('hap-catf'); if(!el) return; var m={}; APPEALS.forEach(function(a){ m[a.cat]=1; }); el.innerHTML='<option value="all">All categories</option>'+Object.keys(m).sort().map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join(''); }
+  window.openAppealPicker=function(anchor){ hapAnchor=anchor; hapSel={}; hapBuildCatf(); hapShowList(); document.getElementById('hap-q').value=''; document.getElementById('hap-catf').value='all'; hapRender(); document.getElementById('hap-ov').classList.add('open'); setTimeout(function(){ var q=document.getElementById('hap-q'); if(q) q.focus(); },40); };
   window.hapClose=function(){ document.getElementById('hap-ov').classList.remove('open'); hapAnchor=null; };
-  window.hapShowList=function(){ document.getElementById('hap-listview').style.display=''; document.getElementById('hap-newview').style.display='none'; document.getElementById('hap-savebtn').style.display='none'; document.getElementById('hap-backbtn').style.display='none'; document.getElementById('hap-newbtn').style.display=''; document.getElementById('hap-title').textContent='Select appeal'; };
-  window.hapShowNew=function(){ document.getElementById('hap-listview').style.display='none'; document.getElementById('hap-newview').style.display=''; document.getElementById('hap-savebtn').style.display=''; document.getElementById('hap-backbtn').style.display=''; document.getElementById('hap-newbtn').style.display='none'; document.getElementById('hap-title').textContent='New appeal'; };
-  window.hapRender=function(q){ q=(q||'').trim().toLowerCase(); var have=presentNames('.h-node.lvl-a');
-    var res=APPEALS.filter(function(a){ return have.indexOf(a.name.toLowerCase())===-1 && (!q || (a.name+' '+a.id+' '+a.cat).toLowerCase().indexOf(q)>-1); });
+  window.hapShowList=function(){ document.getElementById('hap-listview').style.display=''; document.getElementById('hap-newview').style.display='none'; document.getElementById('hap-savebtn').style.display='none'; document.getElementById('hap-addbtn').style.display=''; document.getElementById('hap-backbtn').style.display='none'; document.getElementById('hap-newbtn').style.display=''; document.getElementById('hap-title').textContent='Select appeals'; };
+  window.hapShowNew=function(){ document.getElementById('hap-listview').style.display='none'; document.getElementById('hap-newview').style.display=''; document.getElementById('hap-savebtn').style.display=''; document.getElementById('hap-addbtn').style.display='none'; document.getElementById('hap-backbtn').style.display=''; document.getElementById('hap-newbtn').style.display='none'; document.getElementById('hap-title').textContent='New appeal'; };
+  window.hapRender=function(){ var q=(document.getElementById('hap-q').value||'').trim().toLowerCase(); var cat=(document.getElementById('hap-catf')||{}).value||'all'; var have=presentNames('.h-node.lvl-a');
+    var res=APPEALS.map(function(a,i){return {a:a,i:i};}).filter(function(o){ var a=o.a; return have.indexOf(a.name.toLowerCase())===-1 && (cat==='all'||a.cat===cat) && (!q || (a.name+' '+a.id+' '+a.cat).toLowerCase().indexOf(q)>-1); });
+    hapFilteredIdx=res.map(function(o){return o.i;});
     var el=document.getElementById('hap-list');
-    el.innerHTML = res.length ? res.map(function(a,i){ return '<div class="hp-row" data-i="'+APPEALS.indexOf(a)+'"><div><div class="hp-nm">'+hl(a.name,q)+'</div><div class="hp-sub">'+esc(a.id)+' · '+esc(a.cat)+'</div></div><div class="hp-goal">'+esc(a.goal)+'</div></div>'; }).join('') : '<div class="hp-empty">No appeals match.<br><span class="hp-new-link" style="margin-top:12px" onclick="hapShowNew()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2v8M2 6h8"/></svg>New appeal</span></div>';
+    el.innerHTML = res.length ? res.map(function(o){ var a=o.a, i=o.i; return '<label class="hp-row'+(hapSel[i]?' sel':'')+'" data-i="'+i+'"><input type="checkbox" class="hp-check" '+(hapSel[i]?'checked':'')+'><div class="hp-main"><div class="hp-nm">'+hl(a.name,q)+'</div><div class="hp-sub">'+esc(a.id)+' · '+esc(a.cat)+'</div></div><div class="hp-goal">'+esc(a.goal)+'</div></label>'; }).join('') : '<div class="hp-empty">No appeals match.<br><span class="hp-new-link" style="margin-top:12px" onclick="hapShowNew()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2v8M2 6h8"/></svg>New appeal</span></div>';
+    hapUpdateBar();
   };
-  document.getElementById('hap-list').addEventListener('click', function(e){ var row=e.target.closest('.hp-row'); if(!row||!hapAnchor) return; var a=APPEALS[+row.dataset.i]; if(!a) return; window.__hierInsertAppeal(hapAnchor, {name:a.name, meta:a.id+' · '+a.cat, goal:a.goal}); hapClose(); });
+  function hapUpdateBar(){
+    var n=Object.keys(hapSel).filter(function(k){return hapSel[k];}).length;
+    var cnt=document.getElementById('hap-selcount'); if(cnt) cnt.textContent = n? (n+' selected') : 'None selected';
+    var btn=document.getElementById('hap-addbtn'); if(btn){ btn.disabled=n===0; btn.textContent = n? ('Add '+n+' appeal'+(n!==1?'s':'')) : 'Add appeals'; }
+    var sa=document.getElementById('hap-selall'); if(sa){ var selFil=hapFilteredIdx.filter(function(i){return hapSel[i];}).length; sa.checked = hapFilteredIdx.length>0 && selFil===hapFilteredIdx.length; sa.indeterminate = selFil>0 && selFil<hapFilteredIdx.length; }
+  }
+  window.hapToggleAll=function(cb){ hapFilteredIdx.forEach(function(i){ if(cb.checked) hapSel[i]=true; else delete hapSel[i]; }); hapRender(); };
+  document.getElementById('hap-list').addEventListener('change', function(e){ var row=e.target.closest('.hp-row'); if(!row) return; var i=+row.dataset.i; if(e.target.checked) hapSel[i]=true; else delete hapSel[i]; row.classList.toggle('sel', !!hapSel[i]); hapUpdateBar(); });
+  window.hapAddSelected=function(){ if(!hapAnchor) return; var idx=Object.keys(hapSel).filter(function(k){return hapSel[k];}).map(Number); if(!idx.length) return; idx.forEach(function(i){ var a=APPEALS[i]; if(a) window.__hierInsertAppeal(hapAnchor, {name:a.name, meta:a.id+' · '+a.cat, goal:a.goal}); }); hapClose(); };
   window.hapSaveNew=function(){ var id=(document.getElementById('hap-id').value||'').trim(), desc=(document.getElementById('hap-desc').value||'').trim();
     if(!id){ alert('Appeal ID is required.'); return; } if(!desc){ alert('Description is required.'); return; }
     var cat=document.getElementById('hap-cat').value, goal=(document.getElementById('hap-goal').value||'').trim()||'$0';
@@ -2335,17 +2373,29 @@ body {
     showHierAdded('appeal', [['Appeal ID',id],['Description',desc],['Category',cat],['Goal',goal],['Start date',start],['End date',end],['Number solicited',solic],['Status',active?'Active':'Inactive']]);
   };
 
-  // ── Fund picker ──
-  window.openFundPicker=function(anchor){ hfdAnchor=anchor; hfdShowList(); document.getElementById('hfd-q').value=''; hfdRender(''); document.getElementById('hfd-ov').classList.add('open'); setTimeout(function(){ var q=document.getElementById('hfd-q'); if(q) q.focus(); },40); };
+  // ── Fund picker (multi-select + legal-entity filter) ──
+  var hfdSel={}, hfdFilteredIdx=[];
+  function hfdBuildEntf(){ var el=document.getElementById('hfd-entf'); if(!el) return; var m={}; FUNDS.forEach(function(f){ m[f.entity]=1; }); el.innerHTML='<option value="all">All legal entities</option>'+Object.keys(m).sort().map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join(''); }
+  window.openFundPicker=function(anchor){ hfdAnchor=anchor; hfdSel={}; hfdBuildEntf(); hfdShowList(); document.getElementById('hfd-q').value=''; document.getElementById('hfd-entf').value='all'; hfdRender(); document.getElementById('hfd-ov').classList.add('open'); setTimeout(function(){ var q=document.getElementById('hfd-q'); if(q) q.focus(); },40); };
   window.hfdClose=function(){ document.getElementById('hfd-ov').classList.remove('open'); hfdAnchor=null; };
-  window.hfdShowList=function(){ document.getElementById('hfd-listview').style.display=''; document.getElementById('hfd-newview').style.display='none'; document.getElementById('hfd-savebtn').style.display='none'; document.getElementById('hfd-backbtn').style.display='none'; document.getElementById('hfd-newbtn').style.display=''; document.getElementById('hfd-title').textContent='Select fund'; };
-  window.hfdShowNew=function(){ document.getElementById('hfd-listview').style.display='none'; document.getElementById('hfd-newview').style.display=''; document.getElementById('hfd-savebtn').style.display=''; document.getElementById('hfd-backbtn').style.display=''; document.getElementById('hfd-newbtn').style.display='none'; document.getElementById('hfd-title').textContent='New fund'; };
-  window.hfdRender=function(q){ q=(q||'').trim().toLowerCase(); var have=presentNames('.h-node.lvl-f');
-    var res=FUNDS.filter(function(f){ return have.indexOf(f.name.toLowerCase())===-1 && (!q || (f.name+' '+f.gl+' '+f.entity).toLowerCase().indexOf(q)>-1); });
+  window.hfdShowList=function(){ document.getElementById('hfd-listview').style.display=''; document.getElementById('hfd-newview').style.display='none'; document.getElementById('hfd-savebtn').style.display='none'; document.getElementById('hfd-addbtn').style.display=''; document.getElementById('hfd-backbtn').style.display='none'; document.getElementById('hfd-newbtn').style.display=''; document.getElementById('hfd-title').textContent='Select funds'; };
+  window.hfdShowNew=function(){ document.getElementById('hfd-listview').style.display='none'; document.getElementById('hfd-newview').style.display=''; document.getElementById('hfd-savebtn').style.display=''; document.getElementById('hfd-addbtn').style.display='none'; document.getElementById('hfd-backbtn').style.display=''; document.getElementById('hfd-newbtn').style.display='none'; document.getElementById('hfd-title').textContent='New fund'; };
+  window.hfdRender=function(){ var q=(document.getElementById('hfd-q').value||'').trim().toLowerCase(); var ent=(document.getElementById('hfd-entf')||{}).value||'all'; var have=presentNames('.h-node.lvl-f');
+    var res=FUNDS.map(function(f,i){return {f:f,i:i};}).filter(function(o){ var f=o.f; return have.indexOf(f.name.toLowerCase())===-1 && (ent==='all'||f.entity===ent) && (!q || (f.name+' '+f.gl+' '+f.entity).toLowerCase().indexOf(q)>-1); });
+    hfdFilteredIdx=res.map(function(o){return o.i;});
     var el=document.getElementById('hfd-list');
-    el.innerHTML = res.length ? res.map(function(f){ return '<div class="hp-row" data-i="'+FUNDS.indexOf(f)+'"><div><div class="hp-nm">'+hl(f.name,q)+'</div><div class="hp-sub">GL '+esc(f.gl)+' · '+esc(f.entity)+'</div></div></div>'; }).join('') : '<div class="hp-empty">No funds match.<br><span class="hp-new-link" style="margin-top:12px" onclick="hfdShowNew()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2v8M2 6h8"/></svg>New fund</span></div>';
+    el.innerHTML = res.length ? res.map(function(o){ var f=o.f, i=o.i; return '<label class="hp-row'+(hfdSel[i]?' sel':'')+'" data-i="'+i+'"><input type="checkbox" class="hp-check" '+(hfdSel[i]?'checked':'')+'><div class="hp-main"><div class="hp-nm">'+hl(f.name,q)+'</div><div class="hp-sub">GL '+esc(f.gl)+' · '+esc(f.entity)+'</div></div></label>'; }).join('') : '<div class="hp-empty">No funds match.<br><span class="hp-new-link" style="margin-top:12px" onclick="hfdShowNew()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2v8M2 6h8"/></svg>New fund</span></div>';
+    hfdUpdateBar();
   };
-  document.getElementById('hfd-list').addEventListener('click', function(e){ var row=e.target.closest('.hp-row'); if(!row||!hfdAnchor) return; var f=FUNDS[+row.dataset.i]; if(!f) return; window.__hierInsertFund(hfdAnchor, {name:f.name, meta:'GL '+f.gl+' · '+f.entity}); hfdClose(); });
+  function hfdUpdateBar(){
+    var n=Object.keys(hfdSel).filter(function(k){return hfdSel[k];}).length;
+    var cnt=document.getElementById('hfd-selcount'); if(cnt) cnt.textContent = n? (n+' selected') : 'None selected';
+    var btn=document.getElementById('hfd-addbtn'); if(btn){ btn.disabled=n===0; btn.textContent = n? ('Add '+n+' fund'+(n!==1?'s':'')) : 'Add funds'; }
+    var sa=document.getElementById('hfd-selall'); if(sa){ var selFil=hfdFilteredIdx.filter(function(i){return hfdSel[i];}).length; sa.checked = hfdFilteredIdx.length>0 && selFil===hfdFilteredIdx.length; sa.indeterminate = selFil>0 && selFil<hfdFilteredIdx.length; }
+  }
+  window.hfdToggleAll=function(cb){ hfdFilteredIdx.forEach(function(i){ if(cb.checked) hfdSel[i]=true; else delete hfdSel[i]; }); hfdRender(); };
+  document.getElementById('hfd-list').addEventListener('change', function(e){ var row=e.target.closest('.hp-row'); if(!row) return; var i=+row.dataset.i; if(e.target.checked) hfdSel[i]=true; else delete hfdSel[i]; row.classList.toggle('sel', !!hfdSel[i]); hfdUpdateBar(); });
+  window.hfdAddSelected=function(){ if(!hfdAnchor) return; var idx=Object.keys(hfdSel).filter(function(k){return hfdSel[k];}).map(Number); if(!idx.length) return; idx.forEach(function(i){ var f=FUNDS[i]; if(f) window.__hierInsertFund(hfdAnchor, {name:f.name, meta:'GL '+f.gl+' · '+f.entity}); }); hfdClose(); };
   window.hfdSaveNew=function(){ var name=(document.getElementById('hfd-name').value||'').trim();
     if(!name){ alert('Fund name is required.'); return; }
     var gl=(document.getElementById('hfd-gl').value||'').trim(), ent=document.getElementById('hfd-entity').value;
