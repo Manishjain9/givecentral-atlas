@@ -337,8 +337,8 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .h-node { display:grid; grid-template-columns: 1fr 120px 32px; gap:12px; align-items:center; padding:10px 8px; border-radius:8px; transition:background .12s; }
 .h-node:hover { background:white; }
 .h-node .lead { display:flex; align-items:flex-start; gap:10px; min-width:0; }
-.h-node.lvl-a .lead { margin-left:4px; }
 .h-node.lvl-f .lead { margin-left:4px; }
+.h-node.lvl-a .lead { margin-left:30px; }
 .h-node .txt { flex:1; min-width:0; }
 .h-node .indent {}
 .h-node .ico-sm { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:11px; font-weight:700; margin-top:2px; }
@@ -365,8 +365,8 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 
 .add-node { padding:10px; border:1.5px dashed var(--border); border-radius:9px; font-size:12.5px; color:var(--text-3); cursor:pointer; display:flex; align-items:center; gap:8px; margin-top:6px; transition:border-color .12s, color .12s; }
 .add-node:hover { border-color:var(--blue); color:var(--blue); }
-.add-node.appeal { margin-left:0; }
 .add-node.fund { margin-left:0; }
+.add-node.appeal { margin-left:38px; }
 .add-node svg { width:13px; height:13px; }
 .hier-sec { margin-top:16px; }
 .hier-sec-hd { display:flex; align-items:baseline; gap:10px; margin:0 0 8px; }
@@ -414,6 +414,12 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .wiz-foot .left { margin-right:auto; font-size:12px; color:var(--text-3); display:flex; gap:6px; align-items:center; }
 .wiz-foot .left svg { width:14px; height:14px; }
 .wiz-nav { display:flex; align-items:center; gap:12px; }
+.dur-opts { margin-top:12px; padding:12px 14px; background:var(--surface); border:1px solid var(--border); border-radius:10px; }
+.dur-chk { display:flex; align-items:center; gap:9px; font-size:13px; color:var(--text-2); cursor:pointer; padding:4px 0; }
+.dur-chk + .dur-chk { margin-top:2px; }
+.dur-chk input { accent-color:var(--blue); width:15px; height:15px; flex-shrink:0; }
+.dur-hint { color:var(--text-3); font-size:12px; }
+.dur-note { margin-top:8px; font-size:12px; color:var(--blue); background:var(--blue-pale); border:1px solid var(--blue-light); border-radius:8px; padding:8px 11px; line-height:1.5; }
 
 </style>
 
@@ -1079,10 +1085,10 @@ body {
         <div class="wiz-foot"><div class="left"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--green)"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg> Auto-saved as draft</div><div class="wiz-nav"></div></div>
       </section>
 
-      <!-- ── EXTRA: ANNUAL · Segments & channels ──────────────── -->
+      <!-- ── EXTRA: ANNUAL · Segments & schedule ──────────────── -->
       <section class="wiz-panel" data-key="segments">
-        <h2 class="wiz-h">Segments &amp; channels</h2>
-        <p class="wiz-sub">Choose who you'll ask and how you'll reach them. Atlas builds the mailing and email lists from these segments and schedules the sends.</p>
+        <h2 class="wiz-h">Segments &amp; schedule</h2>
+        <p class="wiz-sub">Choose who you'll ask. Atlas builds the mailing and email lists from these segments and schedules the sends.</p>
         <div id="ext-segments"></div>
         <div class="wiz-foot"><div class="left"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--green)"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg> Auto-saved as draft</div><div class="wiz-nav"></div></div>
       </section>
@@ -1316,8 +1322,8 @@ body {
           {lbl:'Currency',select:1,val:'USD',alt:['CAD','EUR']}
         ],
         timelineFields:[
-          {lbl:'Public start',req:1,val:'January 1, 2026'},
-          {lbl:'Public end',req:1,val:'June 30, 2026'},
+          {lbl:'Public start date',req:1,val:'January 1, 2026'},
+          {lbl:'Public end date',val:'June 30, 2026',id:'f-end-date'},
           {lbl:'Quiet phase',select:1,val:'4-month quiet phase before public launch',alt:['3-month quiet phase','6-month quiet phase','No quiet phase','Custom…']}
         ],
         recognitionTitle:'Recognition',
@@ -1355,8 +1361,8 @@ body {
           {lbl:'Currency',select:1,val:'USD',alt:['CAD','EUR']}
         ],
         timelineFields:[
-          {lbl:'Appeal start',req:1,val:'January 1, 2026'},
-          {lbl:'Appeal end',req:1,val:'December 31, 2026'},
+          {lbl:'Appeal start date',req:1,val:'January 1, 2026'},
+          {lbl:'Appeal end date',val:'December 31, 2026',id:'f-end-date'},
           {lbl:'Quiet phase',select:1,val:'No quiet phase — runs fully public',alt:['3-month quiet phase','4-month quiet phase','6-month quiet phase','Custom…']}
         ],
         recognitionTitle:'Recognition',
@@ -1393,8 +1399,8 @@ body {
         ],
         timelineFields:[
           {lbl:'Event date',req:1,val:'April 24, 2026'},
-          {lbl:'Campaign start',req:1,val:'February 1, 2026'},
-          {lbl:'Campaign end',req:1,val:'May 1, 2026'}
+          {lbl:'Campaign start date',req:1,val:'February 1, 2026'},
+          {lbl:'Campaign end date',val:'May 1, 2026',id:'f-end-date'}
         ],
         logisticsTitle:'Venue',
         logisticsFields:[
@@ -1483,10 +1489,29 @@ body {
     function buildGTR(t){
       var html = section('Goal', t.goalFields)
                + section(t.timelineTitle||'Timeline', t.timelineFields);
+      // Duration options — open-ended (no end date) + back-dating for historical imports.
+      // Memorial already handles open-ended in its own timeline fields.
+      if (current !== 'memorial'){
+        html += '<div class="dur-opts">'
+          + '<label class="dur-chk"><input type="checkbox" id="f-openended" onchange="onOpenEnded()"> Open-ended — no end date <span class="dur-hint">(campaign runs until you close it)</span></label>'
+          + '<label class="dur-chk"><input type="checkbox" id="f-backdated" onchange="onBackdated()"> Back-dated — importing historical data <span class="dur-hint">(start &amp; end can be in the past)</span></label>'
+          + '<div id="backdate-note" class="dur-note" style="display:none">Historical mode — pick any past start/end date to match your imported records. This campaign won\'t trigger launch emails or tasks.</div>'
+          + '</div>';
+      }
       if (t.logisticsTitle) html += section(t.logisticsTitle, t.logisticsFields);
       html += section(t.recognitionTitle||'Recognition', t.recognitionFields);
       return html;
     }
+    window.onOpenEnded = function(){
+      var oe=document.getElementById('f-openended'), end=document.getElementById('f-end-date');
+      if(!end) return;
+      if(oe.checked){ if(end.dataset.prev===undefined) end.dataset.prev=end.value; end.value='No end date — open-ended'; end.disabled=true; end.style.opacity='.55'; }
+      else { end.disabled=false; end.style.opacity=''; end.value=end.dataset.prev||''; delete end.dataset.prev; }
+    };
+    window.onBackdated = function(){
+      var bd=document.getElementById('f-backdated'), n=document.getElementById('backdate-note');
+      if(n) n.style.display = bd.checked ? '' : 'none';
+    };
 
     /* ════════════════════════════════════════════════════
        PER-TYPE FLOW · each type gets its own ordered steps,
@@ -1510,8 +1535,8 @@ body {
       annual: {
         type:{nav:'Type',sub:'Annual appeal'},
         goal:{nav:'Goal & timeline',sub:'Target · calendar',title:'Goal & timeline',desc:'Set the appeal target and the calendar-year window. Annual appeals run fully public.'},
-        segments:{nav:'Segments & channels',sub:'Who & how'},
-        hierarchy:{nav:'Hierarchy',sub:'Appeals & funds',title:'Build your hierarchy',desc:'Add the appeals (mailings, channels) and the funds they support — select existing ones or create new. The campaign goal is set on the Goal step.'},
+        segments:{nav:'Segments & schedule',sub:'Who & when'},
+        hierarchy:{nav:'Hierarchy',sub:'Funds & appeals',title:'Build your hierarchy',desc:'Add the funds gifts are designated to, then the appeals that raise for each — select existing ones or create new. The campaign goal is set on the Goal step.'},
         ack:{nav:'Acknowledgement',sub:'Thank-you · receipt'},
         team:{nav:'Team & access',sub:'Officers · entity',title:'Team & access',desc:'Assign solicitors, set the legal entity scope, and choose who can edit this campaign.'},
         review:{nav:'Review & create',sub:'Final check'}
@@ -1576,13 +1601,10 @@ body {
                 {label:'Lapsed 2+ years',note:'reactivation',on:false},
                 {label:'New / acquisition',note:'never given',on:false},
                 {label:'Registered parishioners',note:'not yet donors',on:false}];
-      var chans=[{label:'Direct mail',on:true},{label:'Email',on:true},{label:'Online giving form',on:true},
-                 {label:'Text-to-give',on:false},{label:'Bulletin insert',on:false}];
       return '<div class="section-h">Target segments</div>'+chipGroup(segs)
-        +'<div class="section-h">Channels</div>'+chipGroup(chans)
         +section('Mailing schedule',[{lbl:'Spring wave',select:1,val:'Mail drop — March 2, 2026',alt:['April 1, 2026','Skip spring']},
                                      {lbl:'Year-end wave',select:1,val:'Email + mail — Nov 28',alt:['Dec 1','Skip year-end']}])
-        +'<div class="ext-readout">'+IBLUE+'<span>Estimated reach ~6,200 households across 3 channels · lists build automatically when you create.</span></div>';
+        +'<div class="ext-readout">'+IBLUE+'<span>Estimated reach ~6,200 households · lists build automatically when you create.</span></div>';
     }
     function buildAck(){
       return section('Thank-you & receipt',[{lbl:'Thank-you letter',select:1,val:'Standard diocesan letter',alt:['Pastor-signed','Major-donor personalized']},
@@ -1636,7 +1658,7 @@ body {
       var k=current, out='';
       function blk(editkey,title,rows){ return '<div class="review-block"><h4>'+title+' <a data-editkey="'+editkey+'">Edit →</a></h4>'+rows.map(function(r){return rrow(r[0],r[1],r[2]);}).join('')+'</div>'; }
       if(k==='annual'){
-        out+=blk('segments','Segments &amp; channels',[['Segments', esc(chosenChips('ext-segments',0).join(' · ')||'—')],['Channels', esc(chosenChips('ext-segments',1).join(' · ')||'—')]]);
+        out+=blk('segments','Segments &amp; schedule',[['Segments', esc(chosenChips('ext-segments',0).join(' · ')||'—')]]);
         var a=selVals('ext-ack');
         out+=blk('ack','Acknowledgement',[['Thank-you', esc(a[0]||'—')],['Receipt', esc(a[1]||'—')]]);
       } else if(k==='event'){
@@ -1695,30 +1717,31 @@ body {
         + '<div class="goal-none">—</div>'
         + '<div><button class="x-btn" title="Remove fund">×</button></div></div>';
     }
+    function addAppealNode(){ return '<div class="add-node appeal">'+PLUS+'Add appeal under this fund</div>'; }
     function sectionHd(title, sub){ return '<div class="hier-sec-hd"><span class="hs-title">'+title+'</span><span class="hs-sub">'+sub+'</span></div>'; }
-    // Appeals and Funds are two separate, parallel parts of the campaign.
-    // Both "Add appeal" and "Add fund" are always available at the top level.
+    // Funds are the primary designation. Appeals nest under the fund they raise for:
+    // Campaign → Fund → Appeal.
     function buildHierarchy(t){
       return rootRow()
-        + '<div class="hier-sec" id="hier-sec-appeals">'
-          + sectionHd('Appeals', 'How you ask — the solicitations donors respond to')
-          + addNode('appeal', 'Add appeal')
-        + '</div>'
         + '<div class="hier-sec" id="hier-sec-funds">'
-          + sectionHd('Funds', 'Where the gifts are designated — GL accounts')
+          + sectionHd('Funds', 'Where gifts are designated — add the appeals that raise for each fund')
           + addNode('fund', 'Add fund')
         + '</div>';
     }
     function readHierarchy(){
-      var box=document.getElementById('hierarchy-box'); var out={appeals:[],funds:[],apCount:0,fundCount:0,campaignGoal:campaignGoal()};
+      var box=document.getElementById('hierarchy-box'); var out={funds:[],apCount:0,fundCount:0,campaignGoal:campaignGoal()};
       if(!box) return out;
-      [].slice.call(box.querySelectorAll('.h-node.lvl-a')).forEach(function(nd){
-        out.appeals.push({name:nd.getAttribute('data-name')||'', goal:(nd.querySelector('.goal-input')||{}).value||'', meta:(nd.querySelector('.meta-static')||{}).textContent||''});
+      var cur=null;
+      [].slice.call(box.querySelectorAll('.h-node')).forEach(function(nd){
+        if(nd.classList.contains('lvl-f')){
+          cur={name:nd.getAttribute('data-name')||'', meta:(nd.querySelector('.meta-static')||{}).textContent||'', appeals:[]};
+          out.funds.push(cur);
+        } else if(nd.classList.contains('lvl-a')){
+          out.apCount++;
+          if(cur) cur.appeals.push({name:nd.getAttribute('data-name')||'', goal:(nd.querySelector('.goal-input')||{}).value||'', meta:(nd.querySelector('.meta-static')||{}).textContent||''});
+        }
       });
-      [].slice.call(box.querySelectorAll('.h-node.lvl-f')).forEach(function(nd){
-        out.funds.push({name:nd.getAttribute('data-name')||'', meta:(nd.querySelector('.meta-static')||{}).textContent||''});
-      });
-      out.apCount=out.appeals.length; out.fundCount=out.funds.length;
+      out.fundCount=out.funds.length;
       return out;
     }
     function recomputeHierarchy(){
@@ -1727,7 +1750,7 @@ body {
       var root=document.querySelector('#hierarchy-box .lvl-c .goal-input'); if(root) root.value=campaignGoal();
       var gs=document.getElementById('goal-summary-box');
       if(gs) gs.innerHTML='<span class="l">Structure</span>'
-        +'<span class="v">'+h.apCount+' appeal'+(h.apCount!==1?'s':'')+' · '+h.fundCount+' fund'+(h.fundCount!==1?'s':'')+'</span>'
+        +'<span class="v">'+h.fundCount+' fund'+(h.fundCount!==1?'s':'')+' · '+h.apCount+' appeal'+(h.apCount!==1?'s':'')+'</span>'
         +'<span class="v">Campaign goal '+campaignGoal()+'</span>'
         +'<span class="ok">✓ Goal set on the Goal step</span>';
     }
@@ -1737,15 +1760,16 @@ body {
     function liveVal(id, fb){ var e=document.getElementById(id); return (e && e.value) ? e.value : fb; }
     function buildReview(t){
       var H = readHierarchy();
-      var struct = H.apCount+' appeal'+(H.apCount!==1?'s':'')+' · '+H.fundCount+' fund'+(H.fundCount!==1?'s':'')+' · 1 legal entity';
-      var grpHd=function(txt){ return '<div class="review-row" style="border:none;padding-bottom:2px"><span class="l" style="color:var(--blue);font-weight:700">'+txt+'</span><span class="v"></span></div>'; };
-      var appealRows = grpHd('Appeals') + (H.appeals.map(function(a){
-        var label = esc(a.name) || '<span style="color:var(--text-3)">(unnamed appeal)</span>';
-        return rrow(label, esc(a.goal||'$0'));
-      }).join('') || rrow('','<span style="color:var(--text-3)">No appeals added yet</span>'));
-      var fundRows = grpHd('Funds') + (H.funds.map(function(f){
-        return rrow(esc(f.name), '<span style="color:var(--text-3)">'+esc(f.meta||'')+'</span>');
-      }).join('') || rrow('','<span style="color:var(--text-3)">No funds added yet</span>'));
+      var struct = H.fundCount+' fund'+(H.fundCount!==1?'s':'')+' · '+H.apCount+' appeal'+(H.apCount!==1?'s':'')+' · 1 legal entity';
+      var grpHd=function(txt,sub){ return '<div class="review-row" style="border:none;padding-bottom:2px"><span class="l" style="color:var(--blue);font-weight:700">'+txt+'</span><span class="v" style="color:var(--text-3);font-weight:400">'+(sub||'')+'</span></div>'; };
+      // Funds primary; appeals nested beneath each fund.
+      var fundRows = H.funds.length ? H.funds.map(function(f){
+        var head = grpHd(esc(f.name) || '(unnamed fund)', esc(f.meta||''));
+        var appeals = f.appeals.length
+          ? f.appeals.map(function(a){ return rrow('&nbsp;&nbsp;↳ '+(esc(a.name)||'(unnamed appeal)'), esc(a.goal||'$0')); }).join('')
+          : rrow('&nbsp;&nbsp;','<span style="color:var(--text-3)">No appeals yet</span>');
+        return head + appeals;
+      }).join('') : grpHd('Funds')+rrow('','<span style="color:var(--text-3)">No funds added yet</span>');
       // live values (fall back to type defaults before those fields exist)
       var nm  = liveVal('campaign-name-input', t.name);
       var cd  = liveVal('f-code', t.code);
@@ -1758,6 +1782,10 @@ body {
               : (t.publicNo ? 'No — internal only' : 'Yes — <strong>givecentral.org/'+t.slug+'</strong>');
       var solNames = (typeof assignedNames==='function') ? assignedNames() : ['Sarah Reynolds','Bridget McCarthy','Julia Kelleher'];
       var solTags = solNames.map(function(x){ return '<span class="tag blue">'+esc(x)+'</span>'; }).join('');
+      var _oe=document.getElementById('f-openended'), _bd=document.getElementById('f-backdated');
+      var tlMain = (_oe&&_oe.checked) ? 'Open-ended · no fixed end date' : t.reviewTimeline;
+      var tlSmall = t.reviewTimelineSmall||'';
+      if(_bd&&_bd.checked) tlSmall = (tlSmall?tlSmall+' · ':'')+'back-dated (historical import)';
       return ''
       + '<div class="review-block"><h4>Type &amp; basics <a data-editkey="type">Edit →</a></h4>'
         + rrow('Type','<span class="tag blue">'+t.label+'</span>')
@@ -1766,13 +1794,12 @@ body {
       + '</div>'
       + '<div class="review-block"><h4>'+((STEP_LABELS[current]&&STEP_LABELS[current].goal&&STEP_LABELS[current].goal.title)||'Goal &amp; dates')+' <a data-editkey="goal">Edit →</a></h4>'
         + rrow('Goal', t.reviewGoal, t.reviewGoalSmall)
-        + rrow('Timeline', t.reviewTimeline, t.reviewTimelineSmall)
+        + rrow('Timeline', tlMain, tlSmall)
         + rrow('Recognition', t.reviewRecognition, t.reviewRecognitionSmall)
       + '</div>'
       + extraReview(t)
       + '<div class="review-block"><h4>'+((STEP_LABELS[current]&&STEP_LABELS[current].hierarchy&&STEP_LABELS[current].hierarchy.nav)||'Hierarchy')+' <a data-editkey="hierarchy">Edit →</a></h4>'
         + rrow('Structure', struct)
-        + appealRows
         + fundRows
         + '<div class="review-row"><span class="l">Campaign goal</span><span class="v" style="color:var(--green);font-weight:600">'+esc(H.campaignGoal)+' · set on the Goal step</span></div>'
       + '</div>'
@@ -1908,14 +1935,14 @@ body {
         if (addA){ openAppealPicker(addA); return; }
       });
     }
-    // Insert a chosen appeal before the "Add appeal" prompt (Appeals section)
+    // Insert a chosen appeal before its fund's "Add appeal under this fund" prompt
     window.__hierInsertAppeal = function(addAnchor, a){
       addAnchor.insertAdjacentHTML('beforebegin', apRow(a));
       recomputeHierarchy();
     };
-    // Insert a chosen fund before the "Add fund" prompt (Funds section)
+    // Insert a chosen fund (+ its own "Add appeal" prompt) before the "Add fund" prompt
     window.__hierInsertFund = function(addAnchor, f){
-      addAnchor.insertAdjacentHTML('beforebegin', fdRow(f));
+      addAnchor.insertAdjacentHTML('beforebegin', fdRow(f) + addAppealNode());
       recomputeHierarchy();
     };
 

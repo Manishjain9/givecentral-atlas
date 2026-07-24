@@ -156,6 +156,44 @@ tr.inactive td:not(.kb-cell) { opacity:.55; }
 .field-mt { margin-top:14px; }
 .chk-row { display:flex; align-items:center; gap:8px; margin-top:16px; font-size:13px; color:var(--text-2); cursor:pointer; }
 .chk-row input { accent-color:var(--blue); width:16px; height:16px; }
+.assign-wrap { margin-top:16px; }
+.assign-chips { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
+.achip { display:inline-flex; align-items:center; gap:6px; background:var(--blue-pale); color:var(--blue); border:1px solid var(--blue-light); border-radius:7px; padding:4px 9px; font-size:12px; font-weight:600; }
+.achip.ca { background:var(--purple-light); color:var(--purple); border-color:#DDD6FE; }
+.achip.so { background:#CCFBF1; color:#0F766E; border-color:#99F6E4; }
+.achip .x { cursor:pointer; opacity:.6; font-size:14px; line-height:1; }
+.achip .x:hover { opacity:1; }
+.assign-none { font-size:12px; color:var(--text-3); }
+.acount { display:inline-block; font-size:10px; font-weight:700; padding:2px 6px; border-radius:5px; margin-right:4px; white-space:nowrap; }
+.acount.ap { background:var(--blue-light); color:var(--blue); }
+.acount.ca { background:var(--purple-light); color:var(--purple); }
+.acount.so { background:#CCFBF1; color:#0F766E; }
+.asg-cell { display:inline-flex; gap:4px; white-space:nowrap; cursor:default; outline:none; }
+.asg-pop { position:absolute; z-index:200; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 8px 28px rgba(15,23,42,.14); padding:11px 13px; min-width:190px; max-width:280px; display:none; }
+.asg-pop.show { display:block; }
+.asg-pop .ap-grp + .ap-grp { margin-top:9px; padding-top:9px; border-top:1px solid var(--border-soft); }
+.asg-pop .ap-h { font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; margin-bottom:4px; }
+.asg-pop .ap-h.ap { color:var(--blue); } .asg-pop .ap-h.ca { color:var(--purple); } .asg-pop .ap-h.so { color:#0F766E; }
+.asg-pop .ap-i { font-size:12.5px; color:var(--text); padding:2px 0; line-height:1.35; }
+.cb-cell { width:30px; text-align:center; }
+.cb-cell input { accent-color:var(--blue); width:15px; height:15px; cursor:pointer; vertical-align:middle; }
+tr.sel-row td { background:var(--blue-pale); }
+.asrch { position:relative; }
+.asrch-list { margin-top:6px; background:#fff; border:1px solid var(--border); border-radius:9px; max-height:150px; overflow-y:auto; }
+.asrch-opt { padding:8px 12px; font-size:13px; cursor:pointer; color:var(--text); border-bottom:1px solid var(--border-soft); }
+.asrch-opt:last-child { border-bottom:none; }
+.asrch-opt:hover { background:var(--blue-pale); color:var(--blue); }
+.asrch-empty { padding:10px 12px; font-size:12.5px; color:var(--text-3); }
+.bulkbar { display:none; align-items:center; gap:10px; background:var(--navy); color:#fff; border-radius:11px; padding:10px 14px; margin-bottom:12px; }
+.bulkbar.show { display:flex; }
+.bulkbar .bb-count { font-size:13px; font-weight:600; }
+.bulkbar .bb-sp { flex:1; }
+.bulkbar button { font-family:inherit; font-size:12.5px; font-weight:600; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.10); color:#fff; border-radius:8px; padding:7px 12px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+.bulkbar button:hover { background:rgba(255,255,255,.2); }
+.bulkbar button svg { width:13px; height:13px; }
+.bulkbar button.danger { border-color:#F4B6D2; color:#FBCFE8; }
+.bulkbar button.danger:hover { background:rgba(190,24,93,.4); }
+.bulkbar .bb-clear { background:none; border:none; text-decoration:underline; opacity:.85; padding:6px; }
 .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--navy); color:white; padding:11px 18px; border-radius:10px; font-size:13px; box-shadow:var(--shadow-md); opacity:0; pointer-events:none; transition:all .25s; z-index:120; }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
@@ -247,6 +285,16 @@ tr.inactive td:not(.kb-cell) { opacity:.55; }
     <span class="count-note" id="countNote"></span>
   </div>
 
+  <div class="bulkbar" id="bulkbar">
+    <span class="bb-count" id="bb-count">0 selected</span>
+    <span style="opacity:.6;font-size:12px" id="bb-scope"></span>
+    <span class="bb-sp"></span>
+    <button onclick="bulkDuplicate()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="8" rx="1.2"/><path d="M5.5 3V1.8h6.7V10"/></svg>Duplicate</button>
+    <button onclick="bulkDeactivate()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M5 7h4"/></svg>Deactivate</button>
+    <button class="danger" onclick="bulkDelete()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 4h9M5.5 4V2.5h3V4M4 4l.5 8h5l.5-8"/></svg>Delete</button>
+    <button class="bb-clear" onclick="clearSel()">Clear</button>
+  </div>
+
   <div class="tbl-card">
     <table class="tbl">
       <thead><tr id="head-row"></tr></thead>
@@ -274,6 +322,27 @@ tr.inactive td:not(.kb-cell) { opacity:.55; }
       <div><span class="lbl">Goal (optional)</span><input class="fld" id="f-goal" placeholder="$0"></div>
       <div><span class="lbl">Start date</span><input class="fld" id="f-start" placeholder="MM/DD/YYYY"></div>
     </div>
+
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)">Assignments</div>
+      <div style="font-size:12px;color:var(--text-3);margin-top:3px">Appeals and campaigns associate to a fund here. Assign the solicitors responsible for it.</div>
+    </div>
+    <div class="assign-wrap">
+      <span class="lbl">Campaigns this fund raises for</span>
+      <div class="assign-chips" id="f-campaigns-chips"></div>
+      <div class="asrch"><input class="fld" id="f-campaigns-add" autocomplete="off" placeholder="Search campaigns to add…" oninput="asrchInput('edit','campaigns')" onfocus="asrchInput('edit','campaigns')"><div class="asrch-list" id="asrch-edit-campaigns"></div></div>
+    </div>
+    <div class="assign-wrap">
+      <span class="lbl">Appeals raising for this fund</span>
+      <div class="assign-chips" id="f-appeals-chips"></div>
+      <div class="asrch"><input class="fld" id="f-appeals-add" autocomplete="off" placeholder="Search appeals to add…" oninput="asrchInput('edit','appeals')" onfocus="asrchInput('edit','appeals')"><div class="asrch-list" id="asrch-edit-appeals"></div></div>
+    </div>
+    <div class="assign-wrap">
+      <span class="lbl">Solicitors assigned</span>
+      <div class="assign-chips" id="f-solicitors-chips"></div>
+      <div class="asrch"><input class="fld" id="f-solicitors-add" autocomplete="off" placeholder="Search solicitors to add…" oninput="asrchInput('edit','solicitors')" onfocus="asrchInput('edit','solicitors')"><div class="asrch-list" id="asrch-edit-solicitors"></div></div>
+    </div>
+
     <label class="chk-row"><input type="checkbox" id="f-active" checked> Active</label>
   </div>
   <div class="m-foot"><button class="btn btn-ghost" onclick="closeForm()">Cancel</button><button class="btn btn-primary" id="form-save" onclick="saveForm()">Save fund</button></div>
@@ -293,7 +362,18 @@ tr.inactive td:not(.kb-cell) { opacity:.55; }
   <div class="m-foot"><button class="btn btn-ghost" onclick="closeDel()">Cancel</button><button class="btn btn-rose" id="del-go">Delete fund</button></div>
 </div></div>
 
+<!-- Single-purpose assign modal (from kebab) -->
+<div class="m-ov" id="asgm-ov"><div class="m-card" style="max-width:460px">
+  <div class="m-head"><div><div class="m-title" id="asgm-title">Assign</div><div class="m-sub" id="asgm-sub"></div></div></div>
+  <div class="m-body">
+    <div class="assign-chips" id="asgm-chips"></div>
+    <div class="asrch"><input class="fld" id="asgm-add" autocomplete="off" placeholder="Search to add…" oninput="asrchInput('asgm')" onfocus="asrchInput('asgm')"><div class="asrch-list" id="asrch-asgm"></div></div>
+  </div>
+  <div class="m-foot"><button class="btn btn-ghost" onclick="asgmClose()">Cancel</button><button class="btn btn-primary" onclick="asgmSave()">Save</button></div>
+</div></div>
+
 <div class="toast" id="toast"></div>
+<div class="asg-pop" id="asg-pop"></div>
 
 <script>
 var money=function(n){ return '$'+Math.round(n).toLocaleString('en-US'); };
@@ -323,19 +403,42 @@ SCHOOLS.forEach(function(name,i){
   FUNDS.push({id:'AS'+String(60+i).padStart(3,'0'), desc:name, cat:'Angel Scholarship', gl:'46'+String(20+i).padStart(2,'0')+'-00', ent:'Scholarship Foundation', goal:0, raised:raised*10, gifts:Math.round(raised/12), active:(i%13!==0), start:''});
 });
 
+// ── Assignment options + seed a few funds ──
+var ASSIGN_OPTS = {
+  campaigns:['Catholic Ministry Appeal 2026','Cathedral Capital Campaign 2026','Called to Flourish','Annual Fund 2026',"Bishop's Annual Gala 2026",'Christmas Appeal 2026'],
+  appeals:['Spring Mailing 2026','Year-End Appeal 2026','Online Giving — Evergreen','Bishop Solicitation','Parish In-Pew Appeal','Matching Gift Drive','Planned Giving Outreach'],
+  solicitors:['Sarah Reynolds','Bridget McCarthy','Julia Kelleher','Mike Donovan','Janet Walsh','Daniel Cho']
+};
+(function seedAssign(){
+  var byId={}; FUNDS.forEach(function(f){ byId[f.id]=f; });
+  if(byId['4001']){ byId['4001'].campaigns=['Cathedral Capital Campaign 2026']; byId['4001'].appeals=['Spring Mailing 2026','Bishop Solicitation']; byId['4001'].solicitors=['Sarah Reynolds','Mike Donovan']; }
+  if(byId['4100']){ byId['4100'].campaigns=['Annual Fund 2026','Catholic Ministry Appeal 2026']; byId['4100'].appeals=['Year-End Appeal 2026','Online Giving — Evergreen']; byId['4100'].solicitors=['Bridget McCarthy']; }
+  if(byId['4700']){ byId['4700'].campaigns=['Called to Flourish']; byId['4700'].appeals=['Bishop Solicitation','Planned Giving Outreach']; byId['4700'].solicitors=['Sarah Reynolds','Julia Kelleher']; }
+})();
+
 var COLS = [
   {k:'id',    label:'Fund ID', sortable:true},
   {k:'desc',  label:'Description', sortable:true},
   {k:'cat',   label:'Category', sortable:true},
   {k:'gl',    label:'GL account', sortable:true},
   {k:'ent',   label:'Legal entity', sortable:true},
+  {k:'assigned', label:'Assigned', sortable:false},
   {k:'goal',  label:'Goal', sortable:true, num:true},
   {k:'raised',label:'Raised', sortable:true, num:true},
   {k:'gifts', label:'Gifts', sortable:true, num:true},
   {k:'active',label:'Active', sortable:true}
 ];
+function assignCell(a){
+  var n=(a.appeals||[]).length+(a.campaigns||[]).length+(a.solicitors||[]).length;
+  if(!n) return '<span class="muted">—</span>';
+  var out='<span class="asg-cell" data-fund="'+esc(a.id)+'" tabindex="0">';
+  if((a.appeals||[]).length) out+='<span class="acount ap">'+a.appeals.length+' A</span>';
+  if((a.campaigns||[]).length) out+='<span class="acount ca">'+a.campaigns.length+' C</span>';
+  if((a.solicitors||[]).length) out+='<span class="acount so">'+a.solicitors.length+' S</span>';
+  return out+'</span>';
+}
 
-var PER=10, state={q:'', cat:'all', ent:'all', activeOnly:true, sortKey:'id', sortDir:1, page:0};
+var PER=10, state={q:'', cat:'all', ent:'all', activeOnly:true, sortKey:'id', sortDir:1, page:0, sel:{}};
 var editingId=null;
 
 function filtered(){
@@ -359,7 +462,8 @@ function filtered(){
 }
 function renderHead(){
   document.getElementById('head-row').innerHTML =
-    '<th class="kb-cell"></th>' + COLS.map(function(c){
+    '<th class="cb-cell"><input type="checkbox" id="selall" onclick="toggleAll(this)"></th>'
+    + '<th class="kb-cell"></th>' + COLS.map(function(c){
       var on=state.sortKey===c.k, car=on?(state.sortDir>0?'▲':'▼'):'↕';
       return '<th class="'+(c.num?'num ':'')+(c.sortable?'sortable ':'')+(on?'sorted':'')+'" '+(c.sortable?'onclick="sortBy(\''+c.k+'\')"':'')+'>'+esc(c.label)+(c.sortable?'<span class="car">'+car+'</span>':'')+'</th>';
     }).join('');
@@ -376,15 +480,17 @@ function render(){
   if(state.page>=pages) state.page=pages-1; if(state.page<0) state.page=0;
   var slice=list.slice(state.page*PER, state.page*PER+PER);
   var body=document.getElementById('rows');
-  if(!slice.length){ body.innerHTML='<tr class="empty-row"><td colspan="'+(COLS.length+1)+'">No funds match your filters. <a href="#" onclick="clearFilters();return false" style="color:var(--blue)">Clear filters</a> or create a <a href="#" onclick="openNew();return false" style="color:var(--blue)">new fund</a>.</td></tr>'; }
+  if(!slice.length){ body.innerHTML='<tr class="empty-row"><td colspan="'+(COLS.length+2)+'">No funds match your filters. <a href="#" onclick="clearFilters();return false" style="color:var(--blue)">Clear filters</a> or create a <a href="#" onclick="openNew();return false" style="color:var(--blue)">new fund</a>.</td></tr>'; }
   else body.innerHTML = slice.map(function(a){
-    return '<tr class="'+(a.active?'':'inactive')+'" data-id="'+esc(a.id)+'">'
+    return '<tr class="'+(a.active?'':'inactive')+(state.sel[a.id]?' sel-row':'')+'" data-id="'+esc(a.id)+'">'
+      + '<td class="cb-cell"><input type="checkbox" '+(state.sel[a.id]?'checked':'')+' onclick="toggleSel(event,\''+esc(a.id)+'\')"></td>'
       + '<td class="kb-cell"><button class="kbtn" onclick="openKebab(event,\''+esc(a.id)+'\')">⋯</button></td>'
       + '<td><span class="id-link" onclick="openEdit(\''+esc(a.id)+'\')">'+esc(a.id)+'</span></td>'
       + '<td class="desc-cell" title="'+esc(a.desc)+'">'+esc(a.desc)+'</td>'
       + '<td>'+catCell(a.cat)+'</td>'
       + '<td><span class="gl">'+esc(a.gl||'—')+'</span></td>'
       + '<td>'+esc(a.ent)+'</td>'
+      + '<td>'+assignCell(a)+'</td>'
       + '<td class="num">'+(a.goal?money(a.goal):'<span class="muted">—</span>')+'</td>'
       + '<td class="num">'+miniCell(a.raised,a.goal)+'</td>'
       + '<td class="num">'+a.gifts.toLocaleString('en-US')+'</td>'
@@ -395,7 +501,29 @@ function render(){
   document.getElementById('pinfo').innerHTML='Showing <strong>'+from+'–'+to+'</strong> of <strong>'+total+'</strong> funds';
   document.getElementById('countNote').innerHTML='<strong>'+total+'</strong> fund'+(total!==1?'s':'')+(state.activeOnly?' (active)':'');
   renderPager(pages);
+  updateBulk(); syncSelAll();
 }
+
+/* ── Bulk select / duplicate by category ── */
+function filteredIds(){ return filtered().map(function(a){return a.id;}); }
+function selCount(){ return Object.keys(state.sel).length; }
+function toggleSel(e,id){ e.stopPropagation(); if(state.sel[id]) delete state.sel[id]; else state.sel[id]=true; render(); }
+function toggleAll(cb){ var ids=filteredIds(); if(cb.checked) ids.forEach(function(id){state.sel[id]=true;}); else ids.forEach(function(id){delete state.sel[id];}); render(); }
+function clearSel(){ state.sel={}; render(); }
+function syncSelAll(){ var cb=document.getElementById('selall'); if(!cb) return; var ids=filteredIds(); var n=ids.filter(function(id){return state.sel[id];}).length; cb.checked=n>0&&n===ids.length; cb.indeterminate=n>0&&n<ids.length; }
+function updateBulk(){ var n=selCount(); var bar=document.getElementById('bulkbar'); if(!bar) return; bar.classList.toggle('show', n>0);
+  document.getElementById('bb-count').textContent=n+' selected';
+  var scope=document.getElementById('bb-scope'); scope.textContent = state.cat!=='all' ? '· in “'+state.cat+'”' : (state.ent!=='all'?'· in '+state.ent:''); }
+function bulkDuplicate(){
+  var ids=Object.keys(state.sel); if(!ids.length) return; var made=0;
+  ids.forEach(function(id){ var a=FUNDS.find(function(x){return x.id===id;}); if(!a) return;
+    var nid=a.id+'-COPY', n=2; while(FUNDS.some(function(x){return x.id===nid;})){ nid=a.id+'-COPY'+n; n++; }
+    FUNDS.unshift({id:nid,desc:a.desc+' (copy)',cat:a.cat,gl:'',ent:a.ent,goal:a.goal,raised:0,gifts:0,active:true,start:'',campaigns:(a.campaigns||[]).slice(),appeals:(a.appeals||[]).slice(),solicitors:(a.solicitors||[]).slice()}); made++; });
+  state.sel={}; refresh(); atlasToast(made+' fund'+(made!==1?'s':'')+' duplicated'+(state.cat!=='all'?' in “'+state.cat+'”':''));
+}
+function bulkDeactivate(){ var ids=Object.keys(state.sel); if(!ids.length) return; ids.forEach(function(id){ var a=FUNDS.find(function(x){return x.id===id;}); if(a) a.active=false; }); var n=ids.length; state.sel={}; refresh(); atlasToast(n+' fund'+(n!==1?'s':'')+' deactivated'); }
+var pendingBulkDel=null;
+function bulkDelete(){ var ids=Object.keys(state.sel); if(!ids.length) return; pendingBulkDel=ids.slice(); document.getElementById('del-sub').textContent=ids.length+' fund'+(ids.length!==1?'s':'')+' selected · this can’t be undone'; document.getElementById('del-ov').classList.add('open'); }
 function renderPager(pages){
   var pg=document.getElementById('pg'), cur=state.page, html='';
   html+='<button '+(cur===0?'disabled':'')+' onclick="go('+(cur-1)+')">‹</button>';
@@ -427,6 +555,10 @@ function openKebab(e, id){
     + '<button onclick="toggleActive(\''+esc(id)+'\')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/>'+(a.active?'<path d="M5 7h4"/>':'<path d="M7 4.5v5M4.5 7h5"/>')+'</svg>'+(a.active?'Deactivate':'Activate')+'</button>'
     + '<button onclick="dupFund(\''+esc(id)+'\')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="8" rx="1.2"/><path d="M5.5 3V1.8h6.7V10"/></svg>Duplicate</button>'
     + '<div class="sep"></div>'
+    + '<button onclick="openAssignModal(\''+esc(id)+'\',\'campaigns\')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6.5h11"/></svg>Assign campaigns</button>'
+    + '<button onclick="openAssignModal(\''+esc(id)+'\',\'appeals\')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10v5H6l-2.5 2v-2H2z"/></svg>Assign appeals</button>'
+    + '<button onclick="openAssignModal(\''+esc(id)+'\',\'solicitors\')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Assign solicitors</button>'
+    + '<div class="sep"></div>'
     + '<button class="danger" onclick="askDelete(\''+esc(id)+'\')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 4h9M5.5 4V2.5h3V4M4 4l.5 8h5l.5-8"/></svg>Delete fund</button>';
   document.body.appendChild(kmenu);
   var r=e.target.getBoundingClientRect();
@@ -434,6 +566,44 @@ function openKebab(e, id){
   kmenu.style.left=Math.max(8, r.right+window.pageXOffset-kmenu.offsetWidth)+'px';
 }
 document.addEventListener('click', function(e){ if(kmenu && !kmenu.contains(e.target)) closeKebab(); });
+
+// ── Assignment multi-select ──
+var fAssign = {campaigns:[],appeals:[],solicitors:[]};
+function assignLabel(k){ return k==='campaigns'?'campaign':k==='appeals'?'appeal':'solicitor'; }
+function assignChipCls(k){ return k==='campaigns'?' ca':k==='solicitors'?' so':''; }
+function renderAssign(k){
+  var chips=document.getElementById('f-'+k+'-chips');
+  chips.innerHTML = fAssign[k].length ? fAssign[k].map(function(name,i){ return '<span class="achip'+assignChipCls(k)+'">'+esc(name)+'<span class="x" onclick="assignRemove(\''+k+'\','+i+')">×</span></span>'; }).join('') : '<span class="assign-none">None assigned yet</span>';
+}
+function assignRemove(k, i){ fAssign[k].splice(i,1); renderAssign(k); asrchInput('edit',k); }
+function renderAllAssign(){ ['campaigns','appeals','solicitors'].forEach(function(k){ renderAssign(k); var inp=document.getElementById('f-'+k+'-add'); if(inp) inp.value=''; asrchInput('edit',k); }); }
+
+/* ── Searchable add typeahead (shared by Edit + kebab assign modals) ── */
+function asrchState(scope, kind){ // returns {k, cur}
+  var k = scope==='edit' ? kind : asgmKind;
+  var cur = scope==='edit' ? fAssign[k] : asgmList;
+  return {k:k, cur:cur};
+}
+function asrchInputEl(scope, kind){ return document.getElementById(scope==='edit' ? ('f-'+kind+'-add') : 'asgm-add'); }
+function asrchListEl(scope, kind){ return document.getElementById(scope==='edit' ? ('asrch-edit-'+kind) : 'asrch-asgm'); }
+window.asrchInput=function(scope, kind){
+  var s=asrchState(scope,kind); var inp=asrchInputEl(scope,kind), el=asrchListEl(scope,kind);
+  var q=(inp.value||'').toLowerCase().trim();
+  var avail=ASSIGN_OPTS[s.k].filter(function(o){ return s.cur.indexOf(o)===-1 && o.toLowerCase().indexOf(q)>-1; });
+  el.innerHTML = avail.length
+    ? avail.map(function(o){ return '<div class="asrch-opt" data-scope="'+scope+'" data-kind="'+esc(kind||'')+'" data-name="'+esc(o)+'">'+esc(o)+'</div>'; }).join('')
+    : '<div class="asrch-empty">'+(s.cur.length===ASSIGN_OPTS[s.k].length?'All added':'No matches')+'</div>';
+  el.classList.add('show');
+};
+document.addEventListener('mousedown', function(e){
+  var opt=e.target.closest && e.target.closest('.asrch-opt'); if(!opt) return;
+  e.preventDefault();
+  var scope=opt.getAttribute('data-scope'), kind=opt.getAttribute('data-kind'), name=opt.getAttribute('data-name');
+  var s=asrchState(scope,kind); if(s.cur.indexOf(name)===-1) s.cur.push(name);
+  var inp=asrchInputEl(scope,kind); if(inp) inp.value='';
+  if(scope==='edit') renderAssign(kind); else asgmRender();
+  asrchInput(scope, kind); // refresh the always-visible list
+});
 
 function openNew(){
   closeKebab(); editingId=null;
@@ -443,6 +613,7 @@ function openNew(){
   ['f-id','f-desc','f-gl','f-goal','f-start'].forEach(function(i){ document.getElementById(i).value=''; });
   document.getElementById('f-cat').selectedIndex=0; document.getElementById('f-ent').selectedIndex=0; document.getElementById('f-active').checked=true;
   document.getElementById('f-id').disabled=false;
+  fAssign={campaigns:[],appeals:[],solicitors:[]}; renderAllAssign();
   document.getElementById('form-ov').classList.add('open');
   setTimeout(function(){ document.getElementById('f-id').focus(); },40);
 }
@@ -457,6 +628,7 @@ function openEdit(id){
   document.getElementById('f-gl').value=a.gl; document.getElementById('f-ent').value=a.ent;
   document.getElementById('f-goal').value=a.goal?money(a.goal):''; document.getElementById('f-start').value=a.start||'';
   document.getElementById('f-active').checked=a.active;
+  fAssign={campaigns:(a.campaigns||[]).slice(),appeals:(a.appeals||[]).slice(),solicitors:(a.solicitors||[]).slice()}; renderAllAssign();
   document.getElementById('form-ov').classList.add('open');
 }
 function closeForm(){ document.getElementById('form-ov').classList.remove('open'); }
@@ -468,29 +640,33 @@ function saveForm(){
   var goal=parseMoney(document.getElementById('f-goal').value), start=document.getElementById('f-start').value.trim();
   var active=document.getElementById('f-active').checked;
   var isNew=!editingId;
+  var asg={campaigns:fAssign.campaigns.slice(),appeals:fAssign.appeals.slice(),solicitors:fAssign.solicitors.slice()};
   if(isNew){
     if(FUNDS.some(function(x){return x.id.toLowerCase()===id.toLowerCase();})){ alert('A fund with that ID already exists.'); return; }
-    FUNDS.unshift({id:id, desc:desc, cat:cat, gl:gl, ent:ent, goal:goal, raised:0, gifts:0, active:active, start:start});
+    FUNDS.unshift({id:id, desc:desc, cat:cat, gl:gl, ent:ent, goal:goal, raised:0, gifts:0, active:active, start:start, campaigns:asg.campaigns, appeals:asg.appeals, solicitors:asg.solicitors});
   } else {
     var a=FUNDS.find(function(x){return x.id===editingId;});
     a.desc=desc; a.cat=cat; a.gl=gl; a.ent=ent; a.goal=goal; a.start=start; a.active=active;
+    a.campaigns=asg.campaigns; a.appeals=asg.appeals; a.solicitors=asg.solicitors;
   }
   closeForm(); refresh();
-  if(isNew) showCf('Fund created','Saved to the Funds list.', [['Fund ID',id],['Description',desc],['Category',cat],['GL account',gl],['Legal entity',ent],['Goal',goal?money(goal):''],['Start date',start],['Status',active?'Active':'Inactive']]);
+  if(isNew) showCf('Fund created','Saved to the Funds list.', [['Fund ID',id],['Description',desc],['Category',cat],['GL account',gl],['Legal entity',ent],['Goal',goal?money(goal):''],['Campaigns',asg.campaigns.join(', ')],['Appeals',asg.appeals.join(', ')],['Solicitors',asg.solicitors.join(', ')],['Status',active?'Active':'Inactive']]);
   else atlasToast('Fund updated · '+id);
 }
 function dupFund(id){
   closeKebab(); var a=FUNDS.find(function(x){return x.id===id;}); if(!a) return;
   var nid=a.id+'-COPY', n=2; while(FUNDS.some(function(x){return x.id===nid;})){ nid=a.id+'-COPY'+n; n++; }
-  FUNDS.unshift({id:nid, desc:a.desc+' (copy)', cat:a.cat, gl:'', ent:a.ent, goal:a.goal, raised:0, gifts:0, active:true, start:''});
+  FUNDS.unshift({id:nid, desc:a.desc+' (copy)', cat:a.cat, gl:'', ent:a.ent, goal:a.goal, raised:0, gifts:0, active:true, start:'', campaigns:(a.campaigns||[]).slice(), appeals:(a.appeals||[]).slice(), solicitors:(a.solicitors||[]).slice()});
   refresh(); atlasToast('Duplicated as '+nid);
 }
 function toggleActive(id){ closeKebab(); var a=FUNDS.find(function(x){return x.id===id;}); if(!a) return; a.active=!a.active; refresh(); atlasToast(a.id+(a.active?' activated':' deactivated')); }
 
 var pendingDel=null;
 function askDelete(id){ closeKebab(); var a=FUNDS.find(function(x){return x.id===id;}); if(!a) return; pendingDel=id; document.getElementById('del-sub').textContent=a.id+' · '+a.desc; document.getElementById('del-ov').classList.add('open'); }
-function closeDel(){ document.getElementById('del-ov').classList.remove('open'); pendingDel=null; }
-document.getElementById('del-go').addEventListener('click', function(){ if(!pendingDel) return; var id=pendingDel; FUNDS=FUNDS.filter(function(x){return x.id!==id;}); closeDel(); refresh(); atlasToast('Fund deleted · '+id); });
+function closeDel(){ document.getElementById('del-ov').classList.remove('open'); pendingDel=null; pendingBulkDel=null; }
+document.getElementById('del-go').addEventListener('click', function(){
+  if(pendingBulkDel && pendingBulkDel.length){ var set={}; pendingBulkDel.forEach(function(id){set[id]=1;}); FUNDS=FUNDS.filter(function(x){return !set[x.id];}); var n=pendingBulkDel.length; pendingBulkDel=null; state.sel={}; closeDel(); refresh(); atlasToast(n+' fund'+(n!==1?'s':'')+' deleted'); return; }
+  if(!pendingDel) return; var id=pendingDel; FUNDS=FUNDS.filter(function(x){return x.id!==id;}); closeDel(); refresh(); atlasToast('Fund deleted · '+id); });
 
 function showCf(title, sub, rows){
   document.getElementById('cf-title').textContent=title; document.getElementById('cf-sub').textContent=sub;
@@ -505,6 +681,46 @@ function atlasToast(msg){ var t=document.getElementById('toast'); t.textContent=
 function refresh(){ var b=document.getElementById('nav-fund-ct'); if(b) b.textContent=FUNDS.filter(function(a){return a.active;}).length; render(); }
 [].forEach.call(document.querySelectorAll('.m-ov'), function(ov){ ov.addEventListener('click', function(e){ if(e.target===ov) ov.classList.remove('open'); }); });
 document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ document.querySelectorAll('.m-ov.open').forEach(function(o){o.classList.remove('open');}); closeKebab(); } });
+
+/* ── Single-purpose assign modal (kebab: Assign campaigns/appeals/solicitors) ── */
+var asgmFund=null, asgmKind=null, asgmList=[];
+function assignTitle(k){ return k==='campaigns'?'campaigns':k==='appeals'?'appeals':'solicitors'; }
+window.openAssignModal=function(id, kind){
+  closeKebab(); var a=FUNDS.find(function(x){return x.id===id;}); if(!a) return;
+  asgmFund=a; asgmKind=kind; asgmList=(a[kind]||[]).slice();
+  document.getElementById('asgm-title').textContent='Assign '+assignTitle(kind);
+  document.getElementById('asgm-sub').textContent=a.id+' · '+a.desc;
+  var inp=document.getElementById('asgm-add'); if(inp) inp.value='';
+  document.getElementById('asgm-add').placeholder='Search '+assignLabel(kind)+'s to add…';
+  asgmRender(); asrchInput('asgm');
+  document.getElementById('asgm-ov').classList.add('open');
+};
+function asgmRender(){
+  var chips=document.getElementById('asgm-chips');
+  chips.innerHTML = asgmList.length ? asgmList.map(function(n,i){ return '<span class="achip'+assignChipCls(asgmKind)+'">'+esc(n)+'<span class="x" onclick="asgmRemove('+i+')">×</span></span>'; }).join('') : '<span class="assign-none">None assigned yet</span>';
+}
+window.asgmRemove=function(i){ asgmList.splice(i,1); asgmRender(); asrchInput('asgm'); };
+window.asgmClose=function(){ document.getElementById('asgm-ov').classList.remove('open'); asgmFund=null; };
+window.asgmSave=function(){ var k=asgmKind; if(asgmFund) asgmFund[k]=asgmList.slice(); asgmClose(); refresh(); atlasToast(assignTitle(k).charAt(0).toUpperCase()+assignTitle(k).slice(1)+' updated'); };
+
+/* ── Assigned hover popover (full names, no row-height impact) ── */
+(function(){
+  var pop=document.getElementById('asg-pop');
+  function grp(title,arr,cls){ if(!arr||!arr.length) return ''; return '<div class="ap-grp"><div class="ap-h '+cls+'">'+title+'</div>'+arr.map(function(n){return '<div class="ap-i">'+esc(n)+'</div>';}).join('')+'</div>'; }
+  function show(cell){
+    var a=FUNDS.find(function(x){return x.id===cell.getAttribute('data-fund');}); if(!a) return;
+    pop.innerHTML=grp('Appeals',a.appeals,'ap')+grp('Campaigns',a.campaigns,'ca')+grp('Solicitors',a.solicitors,'so');
+    pop.classList.add('show');
+    var r=cell.getBoundingClientRect(), pw=pop.offsetWidth;
+    var left=r.left+window.pageXOffset; left=Math.min(left, window.pageXOffset+document.documentElement.clientWidth-pw-10);
+    pop.style.top=(r.bottom+window.pageYOffset+6)+'px'; pop.style.left=Math.max(8,left)+'px';
+  }
+  function hide(){ pop.classList.remove('show'); }
+  document.addEventListener('mouseover', function(e){ var c=e.target.closest&&e.target.closest('.asg-cell'); if(c) show(c); });
+  document.addEventListener('mouseout', function(e){ var c=e.target.closest&&e.target.closest('.asg-cell'); if(!c) return; var to=e.relatedTarget; if(to&&c.contains(to)) return; hide(); });
+  document.addEventListener('focusin', function(e){ var c=e.target.closest&&e.target.closest('.asg-cell'); if(c) show(c); else if(!e.target.closest('#asg-pop')) hide(); });
+  window.addEventListener('scroll', hide, true);
+})();
 
 buildFilters(); refresh();
 </script>

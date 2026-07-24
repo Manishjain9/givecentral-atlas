@@ -173,6 +173,19 @@ tr.inactive td:not(.kb-cell) { opacity:.55; }
 .field-mt { margin-top:14px; }
 .chk-row { display:flex; align-items:center; gap:8px; margin-top:16px; font-size:13px; color:var(--text-2); cursor:pointer; }
 .chk-row input { accent-color:var(--blue); width:16px; height:16px; }
+.cb-cell { width:30px; text-align:center; }
+.cb-cell input { accent-color:var(--blue); width:15px; height:15px; cursor:pointer; vertical-align:middle; }
+tr.sel-row td { background:var(--blue-pale); }
+.bulkbar { display:none; align-items:center; gap:10px; background:var(--navy); color:#fff; border-radius:11px; padding:10px 14px; margin-bottom:12px; }
+.bulkbar.show { display:flex; }
+.bulkbar .bb-count { font-size:13px; font-weight:600; }
+.bulkbar .bb-sp { flex:1; }
+.bulkbar button { font-family:inherit; font-size:12.5px; font-weight:600; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.10); color:#fff; border-radius:8px; padding:7px 12px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+.bulkbar button:hover { background:rgba(255,255,255,.2); }
+.bulkbar button svg { width:13px; height:13px; }
+.bulkbar button.danger { border-color:#F4B6D2; color:#FBCFE8; }
+.bulkbar button.danger:hover { background:rgba(190,24,93,.4); }
+.bulkbar .bb-clear { background:none; border:none; text-decoration:underline; opacity:.85; padding:6px; }
 
 /* Toast */
 .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--navy); color:white; padding:11px 18px; border-radius:10px; font-size:13px; box-shadow:var(--shadow-md); opacity:0; pointer-events:none; transition:all .25s; z-index:120; }
@@ -263,6 +276,16 @@ tr.inactive td:not(.kb-cell) { opacity:.55; }
     <select class="fld tool-sel" id="catf" onchange="onFilter()"></select>
     <label class="chk"><input type="checkbox" id="activeOnly" checked onchange="onFilter()"> Display active entries only</label>
     <span class="count-note" id="countNote"></span>
+  </div>
+
+  <div class="bulkbar" id="bulkbar">
+    <span class="bb-count" id="bb-count">0 selected</span>
+    <span style="opacity:.6;font-size:12px" id="bb-scope"></span>
+    <span class="bb-sp"></span>
+    <button onclick="bulkDuplicate()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="8" rx="1.2"/><path d="M5.5 3V1.8h6.7V10"/></svg>Duplicate</button>
+    <button onclick="bulkDeactivate()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M5 7h4"/></svg>Deactivate</button>
+    <button class="danger" onclick="bulkDelete()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 4h9M5.5 4V2.5h3V4M4 4l.5 8h5l.5-8"/></svg>Delete</button>
+    <button class="bb-clear" onclick="clearSel()">Clear</button>
   </div>
 
   <div class="tbl-card">
@@ -368,7 +391,7 @@ var COLS = [
   {k:'active',label:'Active', sortable:true}
 ];
 
-var PER=10, state={q:'', cat:'all', activeOnly:true, sortKey:'id', sortDir:1, page:0};
+var PER=10, state={q:'', cat:'all', activeOnly:true, sortKey:'id', sortDir:1, page:0, sel:{}};
 var editingId=null;
 
 function toDateNum(s){ var m=String(s||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/); return m?(+m[3]*10000+ +m[1]*100+ +m[2]):0; }
@@ -393,7 +416,8 @@ function filtered(){
 }
 function renderHead(){
   document.getElementById('head-row').innerHTML =
-    '<th class="kb-cell"></th>' + COLS.map(function(c){
+    '<th class="cb-cell"><input type="checkbox" id="selall" onclick="toggleAll(this)"></th>'
+    + '<th class="kb-cell"></th>' + COLS.map(function(c){
       var on=state.sortKey===c.k;
       var car = on ? (state.sortDir>0?'▲':'▼') : '↕';
       return '<th class="'+(c.num?'num ':'')+(c.sortable?'sortable ':'')+(on?'sorted':'')+'" '+(c.sortable?'onclick="sortBy(\''+c.k+'\')"':'')+'>'+esc(c.label)+(c.sortable?'<span class="car">'+car+'</span>':'')+'</th>';
@@ -411,9 +435,10 @@ function render(){
   if(state.page>=pages) state.page=pages-1; if(state.page<0) state.page=0;
   var slice=list.slice(state.page*PER, state.page*PER+PER);
   var body=document.getElementById('rows');
-  if(!slice.length){ body.innerHTML='<tr class="empty-row"><td colspan="'+(COLS.length+1)+'">No appeals match your filters. <a href="#" onclick="clearFilters();return false" style="color:var(--blue)">Clear filters</a> or create a <a href="#" onclick="openNew();return false" style="color:var(--blue)">new appeal</a>.</td></tr>'; }
+  if(!slice.length){ body.innerHTML='<tr class="empty-row"><td colspan="'+(COLS.length+2)+'">No appeals match your filters. <a href="#" onclick="clearFilters();return false" style="color:var(--blue)">Clear filters</a> or create a <a href="#" onclick="openNew();return false" style="color:var(--blue)">new appeal</a>.</td></tr>'; }
   else body.innerHTML = slice.map(function(a){
-    return '<tr class="'+(a.active?'':'inactive')+'" data-id="'+esc(a.id)+'">'
+    return '<tr class="'+(a.active?'':'inactive')+(state.sel[a.id]?' sel-row':'')+'" data-id="'+esc(a.id)+'">'
+      + '<td class="cb-cell"><input type="checkbox" '+(state.sel[a.id]?'checked':'')+' onclick="toggleSel(event,\''+esc(a.id)+'\')"></td>'
       + '<td class="kb-cell"><button class="kbtn" onclick="openKebab(event,\''+esc(a.id)+'\')">⋯</button></td>'
       + '<td><span class="id-link" onclick="openEdit(\''+esc(a.id)+'\')">'+esc(a.id)+'</span></td>'
       + '<td class="desc-cell" title="'+esc(a.desc)+'">'+esc(a.desc)+'</td>'
@@ -431,7 +456,29 @@ function render(){
   document.getElementById('pinfo').innerHTML='Showing <strong>'+from+'–'+to+'</strong> of <strong>'+total+'</strong> appeals';
   document.getElementById('countNote').innerHTML='<strong>'+total+'</strong> appeal'+(total!==1?'s':'')+(state.activeOnly?' (active)':'');
   renderPager(pages);
+  updateBulk(); syncSelAll();
 }
+
+/* ── Bulk select / duplicate by category ── */
+function filteredIds(){ return filtered().map(function(a){return a.id;}); }
+function selCount(){ return Object.keys(state.sel).length; }
+function toggleSel(e,id){ e.stopPropagation(); if(state.sel[id]) delete state.sel[id]; else state.sel[id]=true; render(); }
+function toggleAll(cb){ var ids=filteredIds(); if(cb.checked) ids.forEach(function(id){state.sel[id]=true;}); else ids.forEach(function(id){delete state.sel[id];}); render(); }
+function clearSel(){ state.sel={}; render(); }
+function syncSelAll(){ var cb=document.getElementById('selall'); if(!cb) return; var ids=filteredIds(); var n=ids.filter(function(id){return state.sel[id];}).length; cb.checked=n>0&&n===ids.length; cb.indeterminate=n>0&&n<ids.length; }
+function updateBulk(){ var n=selCount(); var bar=document.getElementById('bulkbar'); if(!bar) return; bar.classList.toggle('show', n>0);
+  document.getElementById('bb-count').textContent=n+' selected';
+  document.getElementById('bb-scope').textContent = state.cat!=='all' ? '· in “'+state.cat+'”' : ''; }
+function bulkDuplicate(){
+  var ids=Object.keys(state.sel); if(!ids.length) return; var made=0;
+  ids.forEach(function(id){ var a=APPEALS.find(function(x){return x.id===id;}); if(!a) return;
+    var nid=a.id+'-COPY', n=2; while(APPEALS.some(function(x){return x.id===nid;})){ nid=a.id+'-COPY'+n; n++; }
+    APPEALS.unshift({id:nid,desc:a.desc+' (copy)',cat:a.cat,start:'',end:'',goal:a.goal,raised:0,gifts:0,active:true}); made++; });
+  state.sel={}; refresh(); atlasToast(made+' appeal'+(made!==1?'s':'')+' duplicated'+(state.cat!=='all'?' in “'+state.cat+'”':''));
+}
+function bulkDeactivate(){ var ids=Object.keys(state.sel); if(!ids.length) return; ids.forEach(function(id){ var a=APPEALS.find(function(x){return x.id===id;}); if(a) a.active=false; }); var n=ids.length; state.sel={}; refresh(); atlasToast(n+' appeal'+(n!==1?'s':'')+' deactivated'); }
+var pendingBulkDel=null;
+function bulkDelete(){ var ids=Object.keys(state.sel); if(!ids.length) return; pendingBulkDel=ids.slice(); document.getElementById('del-sub').textContent=ids.length+' appeal'+(ids.length!==1?'s':'')+' selected · this can’t be undone'; document.getElementById('del-ov').classList.add('open'); }
 function renderPager(pages){
   var pg=document.getElementById('pg'), cur=state.page, html='';
   html+='<button '+(cur===0?'disabled':'')+' onclick="go('+(cur-1)+')">‹</button>';
@@ -535,8 +582,10 @@ function toggleActive(id){ closeKebab(); var a=APPEALS.find(function(x){return x
 /* ── Delete ── */
 var pendingDel=null;
 function askDelete(id){ closeKebab(); var a=APPEALS.find(function(x){return x.id===id;}); if(!a) return; pendingDel=id; document.getElementById('del-sub').textContent=a.id+' · '+a.desc; document.getElementById('del-ov').classList.add('open'); }
-function closeDel(){ document.getElementById('del-ov').classList.remove('open'); pendingDel=null; }
-document.getElementById('del-go').addEventListener('click', function(){ if(!pendingDel) return; var id=pendingDel; APPEALS=APPEALS.filter(function(x){return x.id!==id;}); closeDel(); refresh(); atlasToast('Appeal deleted · '+id); });
+function closeDel(){ document.getElementById('del-ov').classList.remove('open'); pendingDel=null; pendingBulkDel=null; }
+document.getElementById('del-go').addEventListener('click', function(){
+  if(pendingBulkDel && pendingBulkDel.length){ var set={}; pendingBulkDel.forEach(function(id){set[id]=1;}); APPEALS=APPEALS.filter(function(x){return !set[x.id];}); var n=pendingBulkDel.length; pendingBulkDel=null; state.sel={}; closeDel(); refresh(); atlasToast(n+' appeal'+(n!==1?'s':'')+' deleted'); return; }
+  if(!pendingDel) return; var id=pendingDel; APPEALS=APPEALS.filter(function(x){return x.id!==id;}); closeDel(); refresh(); atlasToast('Appeal deleted · '+id); });
 
 /* ── Confirmation ── */
 function showCf(title, sub, rows){

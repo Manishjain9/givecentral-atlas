@@ -343,6 +343,13 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .tk-row.overdue .body .ttl { color:var(--rose); }
 .tk-row .body .meta { font-size:11.5px; color:var(--text-3); margin-top:2px; display:flex; gap:8px; flex-wrap:wrap; }
 .tk-row .body .meta .donor { color:var(--blue); font-weight:500; }
+.tk-row.done { grid-template-columns:22px 1fr 150px 90px 44px 86px; cursor:default; background:#fff; }
+.tk-row.done .body .ttl { text-decoration:line-through; color:var(--text-3); font-weight:500; }
+.tk-row.done .cb { border-color:var(--green); background:var(--green); }
+.tk-row.done .cb::after { content:''; width:9px; height:5px; border:1.6px solid #fff; border-top:none; border-right:none; transform:rotate(-45deg) translateY(-1px); }
+.done-when { font-size:11.5px; color:var(--text-3); }
+.reopen-btn { font-family:'DM Sans',sans-serif; font-size:11.5px; font-weight:600; color:var(--blue); background:none; border:1px solid var(--border); border-radius:7px; padding:5px 9px; cursor:pointer; }
+.reopen-btn:hover { background:var(--blue-pale); border-color:var(--blue-light); }
 .tk-row .due {
   display:flex; flex-direction:column; align-items:flex-start;
 }
@@ -589,6 +596,10 @@ body {
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>
         Campaigns
       </a>
+      <div class="nav-subwrap" style="margin:2px 0 4px 20px;border-left:1.5px solid rgba(255,255,255,.12)">
+        <a class="nav-item" href="atlas-appeals.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v5H6l-2.5 2v-2H2z"/></svg>Appeals</a>
+        <a class="nav-item" href="atlas-funds.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><ellipse cx="7" cy="3.5" rx="5" ry="2"/><path d="M2 3.5v7c0 1.1 2.2 2 5 2s5-.9 5-2v-7M2 7c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg>Funds</a>
+      </div>
       <a class="nav-item" href="atlas-reports.html">
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>
         Reports
@@ -1057,6 +1068,13 @@ body {
   <div class="empty">7 tasks scheduled Wed–Sun · expand to view</div>
 
   </div><!-- /#tk-list-view -->
+
+  <!-- ════ COMPLETED VIEW ════ -->
+  <div id="tk-completed-view" style="display:none">
+    <div class="group-h" style="color:var(--green)"><span>Completed today</span><span class="ct" id="tk-completed-ct">0</span><span class="line"></span></div>
+    <div class="tk-list" id="tk-completed-list"></div>
+    <div class="empty" id="tk-completed-empty" style="display:none">No tasks completed yet. Check one off and it'll land here.</div>
+  </div>
 
   <!-- ════ CALENDAR VIEW (week strip) ════ -->
   <div id="tk-cal-view" style="display:none">
@@ -2129,12 +2147,8 @@ body {
     if (cb) cb.classList.add('checked');
     row.classList.add('completing');
 
-    // Update stats: bump completed, decrement today/overdue counters
-    var completedNumEl = document.getElementById('completed-num');
-    if (completedNumEl) {
-      var n = parseInt(completedNumEl.textContent, 10) || 0;
-      completedNumEl.textContent = n + 1;
-    }
+    // Record into the Completed view (also keeps the "Completed today" count in sync)
+    if (window.__addCompleted) window.__addCompleted(row);
     var todayDoneEl = document.getElementById('today-done');
     var todayTotalEl = document.getElementById('today-total');
     if (todayDoneEl && todayTotalEl) {
@@ -4179,6 +4193,103 @@ body {
   </div>
 </div>
 
+<!-- ── Custom recurrence modal ── -->
+<style id="rc-css">
+  .rc-ov { position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:100050; display:none; align-items:center; justify-content:center; padding:24px; font-family:'DM Sans',sans-serif; }
+  .rc-ov.show { display:flex; }
+  .rc-modal { background:#fff; border-radius:16px; width:100%; max-width:420px; box-shadow:0 24px 60px rgba(15,23,42,.3); overflow:hidden; }
+  .rc-head { display:flex; align-items:center; justify-content:space-between; padding:18px 20px 12px; border-bottom:1px solid var(--border); }
+  .rc-title { font-family:'DM Serif Display',serif; font-size:18px; color:var(--text); }
+  .rc-x { border:none; background:none; cursor:pointer; color:var(--text-3); font-size:15px; width:28px; height:28px; border-radius:7px; }
+  .rc-x:hover { background:var(--surface); color:var(--text); }
+  .rc-body { padding:18px 20px; }
+  .rc-line { display:flex; align-items:center; gap:8px; font-size:13.5px; color:var(--text-2); }
+  .rc-num { width:64px; padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-family:inherit; font-size:13px; }
+  .rc-sel { padding:8px 26px 8px 10px; border:1px solid var(--border); border-radius:8px; font-family:inherit; font-size:13px; background:#fff; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M3 5l3 3 3-3z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 9px center; }
+  .rc-num:focus, .rc-sel:focus, .rc-date:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.12); }
+  .rc-sub-lbl { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--text-3); margin:18px 0 8px; }
+  .rc-days { display:flex; gap:6px; }
+  .rc-days button { width:34px; height:34px; border-radius:50%; border:1px solid var(--border); background:#fff; font-family:inherit; font-size:12px; font-weight:600; color:var(--text-2); cursor:pointer; }
+  .rc-days button.on { background:var(--blue); color:#fff; border-color:var(--blue); }
+  .rc-ends { display:flex; flex-direction:column; gap:10px; }
+  .rc-radio { display:flex; align-items:center; gap:9px; font-size:13.5px; color:var(--text-2); cursor:pointer; }
+  .rc-radio input[type=radio] { accent-color:var(--blue); width:15px; height:15px; }
+  .rc-date { width:130px; padding:7px 10px; border:1px solid var(--border); border-radius:8px; font-family:inherit; font-size:12.5px; }
+  .rc-summary { margin-top:18px; padding:11px 13px; background:var(--blue-pale); border:1px solid var(--blue-light); border-radius:10px; font-size:12.5px; color:var(--blue); font-weight:600; }
+  .rc-foot { display:flex; justify-content:flex-end; gap:10px; padding:14px 20px; border-top:1px solid var(--border); }
+  .rc-btn { font-family:inherit; font-size:13px; font-weight:600; padding:9px 16px; border-radius:9px; cursor:pointer; border:1px solid transparent; }
+  .rc-btn.ghost { background:#fff; border-color:var(--border); color:var(--text-2); }
+  .rc-btn.ghost:hover { background:var(--surface); }
+  .rc-btn.primary { background:var(--blue); color:#fff; }
+  .rc-btn.primary:hover { background:#1D4ED8; }
+</style>
+<div class="rc-ov" id="rc-ov">
+  <div class="rc-modal" role="dialog" aria-modal="true">
+    <div class="rc-head"><div class="rc-title">Custom recurrence</div><button class="rc-x" onclick="rcCancel()" aria-label="Close">✕</button></div>
+    <div class="rc-body">
+      <div class="rc-line">Repeat every
+        <input class="rc-num" id="rc-n" type="number" min="1" value="1" oninput="rcRender()">
+        <select class="rc-sel" id="rc-unit" onchange="rcRender()"><option value="day">day</option><option value="week" selected>week</option><option value="month">month</option><option value="year">year</option></select>
+      </div>
+      <div id="rc-week-wrap">
+        <div class="rc-sub-lbl">Repeat on</div>
+        <div class="rc-days" id="rc-days"></div>
+      </div>
+      <div class="rc-sub-lbl">Ends</div>
+      <div class="rc-ends">
+        <label class="rc-radio"><input type="radio" name="rc-end" value="never" checked onchange="rcRender()"> Never</label>
+        <label class="rc-radio"><input type="radio" name="rc-end" value="on" onchange="rcRender()"> On <input class="rc-date" id="rc-end-date" placeholder="MM/DD/YYYY" onclick="document.querySelector('input[name=rc-end][value=on]').checked=true;rcRender()"></label>
+        <label class="rc-radio"><input type="radio" name="rc-end" value="after" onchange="rcRender()"> After <input class="rc-num" id="rc-end-n" type="number" min="1" value="13" style="width:56px" oninput="document.querySelector('input[name=rc-end][value=after]').checked=true;rcRender()"> occurrences</label>
+      </div>
+      <div class="rc-summary" id="rc-summary">Weekly on Monday</div>
+    </div>
+    <div class="rc-foot"><button class="rc-btn ghost" onclick="rcCancel()">Cancel</button><button class="rc-btn primary" onclick="rcSave()">Done</button></div>
+  </div>
+</div>
+<script id="rc-js">
+(function(){
+  var DOW=['S','M','T','W','T','F','S'], DOWFULL=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var sel=document.getElementById('ntm-recurrence');
+  var ov=document.getElementById('rc-ov'), daysBox=document.getElementById('rc-days');
+  if(!sel||!ov) return;
+  sel.setAttribute('data-prev', sel.value);
+  // build weekday chips (Mon default on)
+  for(var i=0;i<7;i++){ var b=document.createElement('button'); b.type='button'; b.setAttribute('data-d',i); b.textContent=DOW[i]; if(i===1)b.classList.add('on'); b.onclick=function(){ this.classList.toggle('on'); rcRender(); }; daysBox.appendChild(b); }
+
+  function selectedDays(){ return [].slice.call(daysBox.querySelectorAll('button.on')).map(function(b){return +b.getAttribute('data-d');}).sort(); }
+  function endMode(){ var r=ov.querySelector('input[name=rc-end]:checked'); return r?r.value:'never'; }
+  function summary(){
+    var n=parseInt(document.getElementById('rc-n').value,10)||1, unit=document.getElementById('rc-unit').value;
+    var UN={day:'day',week:'week',month:'month',year:'year'};
+    var s = n===1 ? ({day:'Daily',week:'Weekly',month:'Monthly',year:'Yearly'})[unit] : ('Every '+n+' '+UN[unit]+'s');
+    if(unit==='week'){ var d=selectedDays(); if(d.length&&d.length<7) s+=' on '+d.map(function(i){return DOWFULL[i].slice(0,3);}).join(', '); else if(d.length===7) s+=' on every day'; }
+    var em=endMode();
+    if(em==='on'){ var dt=(document.getElementById('rc-end-date').value||'').trim(); s+=dt?(' until '+dt):' until a set date'; }
+    else if(em==='after'){ var oc=parseInt(document.getElementById('rc-end-n').value,10)||1; s+=' for '+oc+' occurrence'+(oc!==1?'s':''); }
+    return s;
+  }
+  window.rcRender=function(){
+    document.getElementById('rc-week-wrap').style.display = document.getElementById('rc-unit').value==='week' ? '' : 'none';
+    document.getElementById('rc-summary').textContent = summary();
+  };
+  window.rcOpen=function(){ rcRender(); ov.classList.add('show'); };
+  window.rcCancel=function(){ ov.classList.remove('show'); sel.value = sel.getAttribute('data-prev') || "Doesn't repeat"; };
+  window.rcSave=function(){
+    var text='Custom · '+summary();
+    var opt=sel.querySelector('option[data-custom]');
+    if(!opt){ opt=document.createElement('option'); opt.setAttribute('data-custom','1'); var trigger=[].slice.call(sel.options).find(function(o){return o.text==='Custom…';}); sel.insertBefore(opt, trigger||null); }
+    opt.text=text; opt.value=text;
+    sel.value=opt.value; sel.setAttribute('data-prev', opt.value);
+    ov.classList.remove('show');
+  };
+  sel.addEventListener('change', function(){
+    if(this.value==='Custom…'){ rcOpen(); }
+    else { this.setAttribute('data-prev', this.value); }
+  });
+  ov.addEventListener('click', function(e){ if(e.target===ov) rcCancel(); });
+})();
+</script>
+
 <script>
 (function(){
   // ─── State ───
@@ -4668,5 +4779,321 @@ body {
 })();
 </script>
 
+<!-- ATLAS-DATEPICKER v1 : reusable click-to-open calendar for text date fields -->
+<style id="atlas-datepicker-css">
+.adp-pop{position:absolute;z-index:2147483000;width:266px;background:#fff;border:1px solid var(--border,#E2E8F0);border-radius:12px;
+  box-shadow:0 12px 34px rgba(15,23,42,.18);padding:12px;font-family:'DM Sans',system-ui,sans-serif;color:var(--text-1,#0F172A);
+  opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .12s ease,transform .12s ease;}
+.adp-pop.open{opacity:1;transform:translateY(0);pointer-events:auto;}
+.adp-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.adp-nav{width:28px;height:28px;border:none;background:transparent;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;
+  color:var(--text-2,#334155);display:flex;align-items:center;justify-content:center;}
+.adp-nav:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
+.adp-title{font-size:13.5px;font-weight:600;letter-spacing:.01em;cursor:pointer;padding:4px 8px;border-radius:8px;}
+.adp-title:hover{background:var(--surface,#F8FAFC);}
+.adp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.adp-dow{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3,#64748B);
+  text-align:center;padding:4px 0;}
+.adp-day{border:none;background:transparent;border-radius:8px;height:32px;font-size:12.5px;cursor:pointer;color:var(--text-1,#0F172A);
+  font-family:inherit;}
+.adp-day:hover{background:var(--blue-pale,#EFF6FF);}
+.adp-day.mut{color:#CBD5E1;}
+.adp-day.today{box-shadow:inset 0 0 0 1px var(--blue,#2563EB);color:var(--blue,#2563EB);font-weight:600;}
+.adp-day.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
+.adp-cell{border:none;background:transparent;border-radius:8px;height:34px;font-size:12.5px;cursor:pointer;color:var(--text-2,#334155);
+  font-family:inherit;}
+.adp-cell:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
+.adp-cell.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
+.adp-ft{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border,#E2E8F0);}
+.adp-ft button{border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:4px 6px;border-radius:6px;}
+.adp-today-b{color:var(--blue,#2563EB);} .adp-today-b:hover{background:var(--blue-pale,#EFF6FF);}
+.adp-clear-b{color:var(--text-3,#64748B);} .adp-clear-b:hover{background:var(--surface,#F8FAFC);}
+.adp-mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+</style>
+<script id="atlas-datepicker-js">
+(function(){
+  if (window.__atlasDP) return; window.__atlasDP = true;
+  var MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  var DATE_PH=/\b(m{1,2}\s*[\/\-.]\s*d{1,2}\s*[\/\-.]\s*y{2,4}|y{4}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*d{1,2}|d{1,2}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*y{2,4})\b/i;
+  var WORD_DATE=/\bdate\b/i;
+
+  function looksDate(inp){
+    if(!inp||inp.tagName!=='INPUT') return false;
+    var t=(inp.getAttribute('type')||'text').toLowerCase();
+    if(t!=='text'&&t!=='') return false;              // leave native date/other inputs alone
+    if(inp.getAttribute('data-adp')==='off') return false;
+    if(inp.getAttribute('list')) return false;         // autocomplete fields
+    var ph=inp.getAttribute('placeholder')||'';
+    if(DATE_PH.test(ph)) return true;
+    if(WORD_DATE.test(ph)) return true;
+    // label / aria signal (whole word "date")
+    var lab=inp.getAttribute('aria-label')||'';
+    if(WORD_DATE.test(lab)) return true;
+    // native label association (for=/wrapping label)
+    try{ if(inp.labels){ for(var i=0;i<inp.labels.length;i++){ if(WORD_DATE.test(inp.labels[i].textContent||'')) return true; } } }catch(e){}
+    var isLbl=function(el){ return el && el.matches && el.matches('label,.lbl,.field-label,.form-label'); };
+    // immediate preceding sibling labels (no climbing to broad ancestors)
+    var sib=inp.previousElementSibling, guard=0;
+    while(sib && guard<3){ if(isLbl(sib) && WORD_DATE.test(sib.textContent||'')) return true; sib=sib.previousElementSibling; guard++; }
+    // direct label children of the input's own wrapper only
+    var par=inp.parentElement;
+    if(par){ var kids=par.children; for(var j=0;j<kids.length;j++){ var k=kids[j]; if(k!==inp && isLbl(k) && WORD_DATE.test(k.textContent||'')) return true; } }
+    return false;
+  }
+
+  // ---- format detection & output ----
+  function fmtOf(inp){
+    var ph=(inp.getAttribute('placeholder')||'').toLowerCase();
+    var v=(inp.value||'').trim();
+    if(/y{4}\s*[\/\-.]\s*m/.test(ph)||/^\d{4}-\d{1,2}-\d{1,2}$/.test(v)) return 'iso';
+    if(/d{1,2}\s*[\/\-.]\s*m/.test(ph)) return 'dmy';
+    if(/[a-z]{3,}\s+\d{1,2},?\s+\d{4}/i.test(v)) return 'long';
+    return 'mdy';
+  }
+  function pad(n){return (n<10?'0':'')+n;}
+  function toStr(d,fmt){
+    var y=d.getFullYear(),m=d.getMonth()+1,day=d.getDate();
+    if(fmt==='iso') return y+'-'+pad(m)+'-'+pad(day);
+    if(fmt==='dmy') return pad(day)+'/'+pad(m)+'/'+y;
+    if(fmt==='long') return MON[m-1]+' '+day+', '+y;
+    return pad(m)+'/'+pad(day)+'/'+y;
+  }
+  function parse(v){
+    v=(v||'').trim(); if(!v) return null;
+    var m;
+    if(m=v.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/)) return new Date(+m[1],+m[2]-1,+m[3]);
+    if(m=v.match(/^([a-z]{3,})\s+(\d{1,2}),?\s+(\d{4})$/i)){var mi=MON.findIndex(function(x){return x.toLowerCase().indexOf(m[1].toLowerCase())===0;});if(mi>=0)return new Date(+m[3],mi,+m[2]);}
+    if(m=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/)){var y=+m[3];if(y<100)y+=2000;return new Date(y,+m[1]-1,+m[2]);}
+    var d=new Date(v); return isNaN(d)?null:d;
+  }
+
+  // ---- single shared popover ----
+  var pop,active,view,mode='days';
+  function build(){
+    pop=document.createElement('div');pop.className='adp-pop';pop.setAttribute('role','dialog');
+    document.body.appendChild(pop);
+    pop.addEventListener('mousedown',function(e){e.preventDefault();}); // keep field focus
+  }
+  function close(){ if(pop) pop.classList.remove('open'); active=null; mode='days'; }
+  function open(inp){
+    if(!pop) build();
+    active=inp; mode='days';
+    view=parse(inp.value)||new Date();
+    render(); position(); pop.classList.add('open');
+  }
+  function position(){
+    var r=active.getBoundingClientRect(), sx=window.pageXOffset, sy=window.pageYOffset;
+    pop.style.visibility='hidden'; pop.classList.add('open');
+    var ph=pop.offsetHeight, pw=pop.offsetWidth;
+    pop.classList.remove('open'); pop.style.visibility='';
+    var top=r.bottom+sy+6, left=r.left+sx;
+    if(r.bottom+ph+6>window.innerHeight && r.top-ph-6>0) top=r.top+sy-ph-6;
+    left=Math.min(left, sx+window.innerWidth-pw-8); left=Math.max(left,sx+8);
+    pop.style.top=top+'px'; pop.style.left=left+'px';
+  }
+  function commit(d){
+    var fmt=fmtOf(active);
+    active.value=toStr(d,fmt);
+    active.dispatchEvent(new Event('input',{bubbles:true}));
+    active.dispatchEvent(new Event('change',{bubbles:true}));
+    close();
+  }
+  function render(){
+    if(mode==='months'){renderMonths();return;}
+    if(mode==='years'){renderYears();return;}
+    var y=view.getFullYear(), mo=view.getMonth();
+    var sel=parse(active.value), today=new Date();
+    var first=new Date(y,mo,1), start=first.getDay(), dim=new Date(y,mo+1,0).getDate(), pdim=new Date(y,mo,0).getDate();
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="pm">&#8249;</button>'+
+      '<div class="adp-title" data-a="mode">'+MON[mo]+' '+y+'</div>'+
+      '<button class="adp-nav" data-a="nm">&#8250;</button></div><div class="adp-grid">';
+    for(var i=0;i<7;i++) h+='<div class="adp-dow">'+DOW[i]+'</div>';
+    for(var c=0;c<42;c++){
+      var dn,cls='adp-day',dt;
+      if(c<start){dn=pdim-start+1+c;cls+=' mut';dt=new Date(y,mo-1,dn);}
+      else if(c-start+1<=dim){dn=c-start+1;dt=new Date(y,mo,dn);}
+      else{dn=c-start+1-dim;cls+=' mut';dt=new Date(y,mo+1,dn);}
+      if(dt.getFullYear()===today.getFullYear()&&dt.getMonth()===today.getMonth()&&dt.getDate()===today.getDate())cls+=' today';
+      if(sel&&dt.getFullYear()===sel.getFullYear()&&dt.getMonth()===sel.getMonth()&&dt.getDate()===sel.getDate())cls+=' sel';
+      h+='<button class="'+cls+'" data-d="'+dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate()+'">'+dn+'</button>';
+      if(c>=start+dim-1 && (c+1)%7===0) break;
+    }
+    h+='</div><div class="adp-ft"><button class="adp-today-b" data-a="today">Today</button><button class="adp-clear-b" data-a="clear">Clear</button></div>';
+    pop.innerHTML=h;
+  }
+  function renderMonths(){
+    var y=view.getFullYear();
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="py">&#8249;</button>'+
+      '<div class="adp-title" data-a="years">'+y+'</div><button class="adp-nav" data-a="ny">&#8250;</button></div><div class="adp-mgrid">';
+    for(var i=0;i<12;i++) h+='<button class="adp-cell'+(i===view.getMonth()?' sel':'')+'" data-m="'+i+'">'+MONS[i]+'</button>';
+    h+='</div>'; pop.innerHTML=h;
+  }
+  function renderYears(){
+    var base=view.getFullYear()-6;
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="pyr">&#8249;</button>'+
+      '<div class="adp-title">'+base+' – '+(base+11)+'</div><button class="adp-nav" data-a="nyr">&#8250;</button></div><div class="adp-mgrid">';
+    for(var i=0;i<12;i++){var yr=base+i;h+='<button class="adp-cell'+(yr===view.getFullYear()?' sel':'')+'" data-y="'+yr+'">'+yr+'</button>';}
+    h+='</div>'; pop.innerHTML=h;
+  }
+
+  document.addEventListener('click',function(e){
+    if(!pop) return;
+    var t=e.target;
+    if(pop.contains(t)){
+      var a=t.getAttribute('data-a'), d=t.getAttribute('data-d'), mm=t.getAttribute('data-m'), yy=t.getAttribute('data-y');
+      if(d){var p=d.split('-');commit(new Date(+p[0],+p[1]-1,+p[2]));return;}
+      if(mm!=null){view=new Date(view.getFullYear(),+mm,1);mode='days';render();return;}
+      if(yy!=null){view=new Date(+yy,view.getMonth(),1);mode='months';render();return;}
+      if(a==='pm'){view=new Date(view.getFullYear(),view.getMonth()-1,1);render();}
+      else if(a==='nm'){view=new Date(view.getFullYear(),view.getMonth()+1,1);render();}
+      else if(a==='mode'){mode='months';render();}
+      else if(a==='years'){mode='years';render();}
+      else if(a==='py'){view=new Date(view.getFullYear()-1,view.getMonth(),1);render();}
+      else if(a==='ny'){view=new Date(view.getFullYear()+1,view.getMonth(),1);render();}
+      else if(a==='pyr'){view=new Date(view.getFullYear()-12,view.getMonth(),1);render();}
+      else if(a==='nyr'){view=new Date(view.getFullYear()+12,view.getMonth(),1);render();}
+      else if(a==='today'){commit(new Date());}
+      else if(a==='clear'){active.value='';active.dispatchEvent(new Event('input',{bubbles:true}));active.dispatchEvent(new Event('change',{bubbles:true}));close();}
+      return;
+    }
+    if(active && t===active) return;
+    close();
+  },true);
+
+  document.addEventListener('focusin',function(e){ if(looksDate(e.target)) open(e.target); });
+  document.addEventListener('click',function(e){ if(looksDate(e.target) && active!==e.target) open(e.target); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+  window.addEventListener('resize',function(){ if(active&&pop&&pop.classList.contains('open')) position(); });
+  window.addEventListener('scroll',function(){ if(active&&pop&&pop.classList.contains('open')) position(); },true);
+
+  window.__atlasLooksDate=looksDate; // exposed for tests
+})();
+</script>
+<!-- /ATLAS-DATEPICKER -->
+<!-- ATLAS-NAVCOLLAPSE v1 : expandable/collapsible Campaigns submenu (Appeals / Funds) -->
+<style id="atlas-navcollapse-css">
+.nav-caret{ margin-left:auto; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px;
+  border-radius:5px; opacity:.55; transition:transform .18s ease, opacity .15s, background .15s; flex-shrink:0; }
+.nav-caret:hover{ opacity:1; background:rgba(255,255,255,.12); }
+.nav-caret svg{ width:9px; height:9px; }
+.nav-item.nav-open .nav-caret{ transform:rotate(90deg); }
+.nav-item .nav-badge + .nav-caret{ margin-left:8px; }
+.nav-subwrap{ overflow:hidden; }
+</style>
+<script id="atlas-navcollapse-js">
+(function(){
+  if (window.__atlasNavCollapse) return; window.__atlasNavCollapse = true;
+  var CARET = '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 2l3 3-3 3"/></svg>';
+
+  function setup(link){
+    // collect submenu: a following .nav-subwrap, or loose Appeals/Funds nav-items (portal)
+    var wrap=null, subs=[], next=link.nextElementSibling;
+    if(next && next.classList && next.classList.contains('nav-subwrap')) wrap=next;
+    else {
+      var n=next;
+      while(n && n.classList && n.classList.contains('nav-item') && /atlas-(appeals|funds)\.html$/.test(n.getAttribute('href')||'')){ subs.push(n); n=n.nextElementSibling; }
+    }
+    if(!wrap && !subs.length) return;
+
+    var childActive = wrap ? !!wrap.querySelector('.nav-item.active') : subs.some(function(s){return s.classList.contains('active');});
+    var expanded = link.classList.contains('active') || childActive;
+
+    if(!link.querySelector('.nav-caret')){
+      var car=document.createElement('span'); car.className='nav-caret'; car.setAttribute('aria-label','Toggle submenu'); car.innerHTML=CARET;
+      link.appendChild(car);
+    }
+    var caret=link.querySelector('.nav-caret');
+    function apply(){
+      if(wrap) wrap.style.display = expanded?'':'none';
+      else subs.forEach(function(s){ s.style.display = expanded?'':'none'; });
+      link.classList.toggle('nav-open', expanded);
+      link.setAttribute('aria-expanded', expanded?'true':'false');
+    }
+    apply();
+    caret.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); expanded=!expanded; apply(); });
+  }
+
+  function scan(){
+    var links=document.querySelectorAll('.nav-item[href="atlas-campaign-dashboard.html"]:not([data-navcol])');
+    for(var i=0;i<links.length;i++){ links[i].setAttribute('data-navcol','1'); setup(links[i]); }
+  }
+  function boot(){
+    scan();
+    // portal renders its sidebar via JS — watch for it to appear
+    var host=document.querySelector('.sidebar, #nav') || document.body;
+    try{
+      var mo=new MutationObserver(function(){ scan(); });
+      mo.observe(host, {childList:true, subtree:true});
+      setTimeout(function(){ mo.disconnect(); }, 4000);
+    }catch(e){}
+    var tries=0, t=setInterval(function(){ scan(); if(++tries>12) clearInterval(t); }, 120);
+  }
+  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+<!-- /ATLAS-NAVCOLLAPSE -->
+<script id="tk-completed-js">
+(function(){
+  var list=document.getElementById('tk-completed-list'); if(!list) return;
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  var SEED=[
+    {ttl:"Call Margaret O'Brien — thank you for May 4 cultivation visit", donor:"Margaret O'Brien", ctx:"Cathedral Capital Campaign", cat:"Stewardship", av:"SR", avc:"#2563EB", when:"9:12 AM"},
+    {ttl:"Log gift entry — Lin Family Foundation $125k pledge payment", donor:"Robert & Susan Lin", ctx:"Cathedral Capital Campaign", cat:"Admin", av:"DC", avc:"#7C3AED", when:"9:40 AM"},
+    {ttl:"Send DocuSign pledge agreement — Kevin & Anne Doyle", donor:"Kevin & Anne Doyle", ctx:"Annual Fund 2026", cat:"Solicitation", av:"SR", avc:"#2563EB", when:"10:05 AM"},
+    {ttl:"Email year-end receipt — Schwab Charitable DAF", donor:"Schwab Charitable (DAF)", ctx:"Soft-credit · Margaret O'Brien", cat:"Stewardship", av:"BM", avc:"#BE185D", when:"10:24 AM"},
+    {ttl:"Confirm table sponsorship — Bishop's Gala 2026", donor:"First Catholic Bank", ctx:"Bishop's Annual Gala 2026", cat:"Events", av:"JK", avc:"#15803D", when:"10:51 AM"},
+    {ttl:"Update contact info — St. Mary's Parish", donor:"St. Mary's Parish", ctx:"Parish record", cat:"Admin", av:"DC", avc:"#7C3AED", when:"11:03 AM"},
+    {ttl:"Follow-up call — Patricia Nguyen mid-level upgrade", donor:"Patricia Nguyen", ctx:"Annual Fund 2026", cat:"Cultivation", av:"BM", avc:"#BE185D", when:"11:28 AM"},
+    {ttl:"Prepare board report — Q2 campaign pacing", donor:"", ctx:"Cathedral Capital Campaign", cat:"Admin", av:"SR", avc:"#2563EB", when:"11:45 AM"},
+    {ttl:"Acknowledge stock gift — Anthony Riccardi $68k", donor:"Anthony Riccardi", ctx:"Cathedral Capital Campaign", cat:"Stewardship", av:"SR", avc:"#2563EB", when:"12:10 PM"},
+    {ttl:"Schedule cultivation visit — James Sullivan", donor:"James Sullivan", ctx:"Pipeline · Q3", cat:"Solicitation", av:"JK", avc:"#15803D", when:"12:33 PM"},
+    {ttl:"Review LYBUNT outreach list — 47 lapsed donors", donor:"", ctx:"Annual Fund 2026", cat:"Cultivation", av:"BM", avc:"#BE185D", when:"12:52 PM"},
+    {ttl:"Post batch #2026-118 to GL", donor:"", ctx:"Daily gift batch", cat:"Admin", av:"DC", avc:"#7C3AED", when:"1:15 PM"}
+  ];
+  function rowHTML(t, whenLabel){
+    var meta=[]; if(t.donor) meta.push('<span class="donor">'+esc(t.donor)+'</span>'); if(t.ctx) meta.push('<span>'+esc(t.ctx)+'</span>');
+    meta.push('<span>Completed '+esc(whenLabel||t.when)+'</span>');
+    return '<div class="tk-row done">'
+      + '<span class="cb checked"></span>'
+      + '<div class="body"><div class="ttl">'+esc(t.ttl)+'</div><div class="meta">'+meta.join('<span>·</span>')+'</div></div>'
+      + '<div class="done-when">'+esc(t.when||whenLabel||'')+'</div>'
+      + '<span class="cat">'+esc(t.cat||'')+'</span>'
+      + '<div class="own-av" style="background:'+(t.avc||'#2563EB')+'">'+esc(t.av||'')+'</div>'
+      + '<button class="reopen-btn" onclick="reopenCompleted(this)">Reopen</button>'
+      + '</div>';
+  }
+  function sync(){
+    var n=list.querySelectorAll('.tk-row').length;
+    var cn=document.getElementById('completed-num'); if(cn) cn.textContent=n;
+    var cc=document.getElementById('tk-completed-ct'); if(cc) cc.textContent=n;
+    var tabs=document.querySelectorAll('.tabs .tab');
+    for(var i=0;i<tabs.length;i++){ if((tabs[i].dataset.tabName||'')==='Completed'){ var c=tabs[i].querySelector('.ct'); if(c) c.textContent=n; } }
+    var e=document.getElementById('tk-completed-empty'); if(e) e.style.display=n?'none':'';
+  }
+  list.innerHTML = SEED.map(function(t){ return rowHTML(t); }).join('');
+  sync();
+  window.__tkCompletedSync = sync;
+  window.__addCompleted = function(srcRow){
+    var t={ ttl:(srcRow.querySelector('.ttl')||{}).textContent||'Task',
+      donor:(srcRow.querySelector('.meta .donor')||{}).textContent||'', ctx:'',
+      cat:(srcRow.querySelector('.cat')||{}).textContent||'',
+      av:(srcRow.querySelector('.own-av')||{}).textContent||'',
+      avc:((srcRow.querySelector('.own-av')||{}).style||{}).background||'#2563EB', when:'Just now' };
+    var spans=srcRow.querySelectorAll('.meta > span');
+    for(var i=0;i<spans.length;i++){ var sp=spans[i]; if(!sp.classList.contains('donor') && sp.textContent.trim()!=='·'){ t.ctx=sp.textContent; break; } }
+    var wrap=document.createElement('div'); wrap.innerHTML=rowHTML(t,'just now');
+    var el=wrap.firstChild; el.__srcRow=srcRow;
+    list.insertBefore(el, list.firstChild); sync();
+  };
+  window.reopenCompleted=function(btn){
+    var el=btn.closest('.tk-row'); if(!el) return;
+    var src=el.__srcRow;
+    if(src){ src.style.display=''; src.classList.remove('completing','fading'); var cb=src.querySelector('.cb'); if(cb) cb.classList.remove('checked'); }
+    el.parentNode.removeChild(el); sync();
+  };
+})();
+</script>
 </body>
 </html>

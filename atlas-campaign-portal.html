@@ -14,12 +14,12 @@
     --purple:#7C3AED;--purple-light:#EDE9FE;--gold:#C8A04A;
     --text:#0F172A;--text-2:#334155;--text-3:#64748B;--border:#E2E8F0;--border-soft:#EDF2F7;--surface:#F8FAFC;
   }
-  html{font-size:14px;-webkit-font-smoothing:antialiased}
-  body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden}
+  html{font-size:14px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);height:100vh;display:flex;overflow:hidden;max-width:100vw}
   a{color:inherit;text-decoration:none}
 
   /* Sidebar */
-  .sidebar{width:220px;background:var(--navy);min-height:100vh;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow:hidden}
+  .sidebar{width:220px;background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;height:100vh;overflow-y:auto;overflow-x:hidden}
   .sidebar-logo{padding:18px 18px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
   .logo-mark{width:46px;height:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
   .logo-name{font-family:'DM Serif Display',serif;font-size:19px;color:#fff;line-height:1}
@@ -72,7 +72,8 @@
   .btn-dark{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18);color:#fff}
   .btn-dark:hover{background:rgba(255,255,255,.18)}
 
-  .scroll{overflow-y:auto;flex:1}
+  .scroll{overflow-y:auto;overflow-x:hidden;flex:1;min-width:0}
+  .body{min-width:0}
 
   /* ════ HERO (navy) ════ */
   .hero{background:linear-gradient(135deg,#16294C 0%,#1E3D6E 55%,#264C8C 100%);color:#fff;padding:22px 30px 26px;position:relative;overflow:hidden;box-shadow:inset 1px 0 0 rgba(255,255,255,.06)}
@@ -137,7 +138,8 @@
   .lens-note{font-size:11.5px;color:var(--text-3)}
 
   /* layout */
-  .grid{display:grid;grid-template-columns:1fr 312px;gap:16px;align-items:start}
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) 312px;gap:16px;align-items:start;min-width:0}
+  .grid>*{min-width:0}
   @media(max-width:1180px){.grid{grid-template-columns:1fr}.kstrip.c5,.kstrip.c6{grid-template-columns:repeat(3,1fr)}.hero-stats{width:100%}.pcards{grid-template-columns:1fr}}
   @media(max-width:680px){.kstrip.c5,.kstrip.c6{grid-template-columns:repeat(2,1fr)}.hstat{flex:1 0 33%}
     .toolbar{flex-wrap:wrap}.search{flex:1 1 100%}.tool-right{width:100%}}
@@ -168,9 +170,9 @@
 
   /* table */
   table{width:100%;border-collapse:collapse}
-  th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);white-space:nowrap}
+  th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);padding:10px 11px;background:var(--surface);border-bottom:1px solid var(--border);white-space:nowrap}
   th.r{text-align:right}
-  td{padding:11px 16px;border-bottom:1px solid var(--border-soft);font-size:13px;color:var(--text-2);vertical-align:middle;white-space:nowrap}
+  td{padding:10px 11px;border-bottom:1px solid var(--border-soft);font-size:12.5px;color:var(--text-2);vertical-align:middle;white-space:nowrap}
   #donor-table,#parish-body{overflow-x:auto}
   .dpager{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text-3)}
   .dpager b{color:var(--text)}
@@ -185,20 +187,21 @@
   tr:last-child td{border-bottom:none}
   td.r{text-align:right;font-variant-numeric:tabular-nums}
   .av{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
-  .donor-cell{display:flex;align-items:center;gap:11px}
-  .donor-cell{min-width:0}
-  .donor-cell .nm{font-weight:600;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
-  .donor-cell .su{font-size:11px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+  .donor-cell{display:flex;align-items:center;gap:9px;min-width:0}
+  .donor-cell .nm{font-weight:600;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+  .donor-cell .su{font-size:11px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+  .av{margin-left:0}
   .paid{color:var(--green);font-weight:600}
   .bal{font-weight:700;color:var(--text)}
   .mut{color:var(--text-3)}
   /* progress mini */
-  .pmini{display:flex;align-items:center;gap:9px;min-width:130px}
+  .pmini{display:flex;align-items:center;gap:8px;min-width:92px}
   .pmini .track{flex:1;height:6px;border-radius:99px;background:#E2E8F0;overflow:hidden}
   .pmini .fill{height:100%;border-radius:99px}
   .pmini .pct{font-size:12px;font-weight:600;width:34px;text-align:right;font-variant-numeric:tabular-nums}
   /* status badge */
   .sb{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;border-radius:99px;padding:3px 10px}
+  .tier{display:inline-flex;align-items:center;font-size:11px;font-weight:700;border-radius:6px;padding:3px 9px;white-space:nowrap;letter-spacing:.01em}
   .sb .d{width:6px;height:6px;border-radius:50%}
   .sb.current{background:var(--green-light);color:var(--green)} .sb.current .d{background:var(--green)}
   .sb.overdue{background:var(--rose-light);color:var(--rose)} .sb.overdue .d{background:var(--rose)}
@@ -701,6 +704,12 @@ function filteredDonors(){
   if(donorSearch) rows=rows.filter(d=>(d.n+" "+d.parish+" "+d.officer).toLowerCase().includes(donorSearch.toLowerCase()));
   return rows;
 }
+function tierOf(d){
+  return d.pledged>=10000 ? {l:'Major',      c:'#B45309', bg:'#FEF3C7'}
+       : d.pledged>=1000  ? {l:'Mid-level',  c:'#1D4ED8', bg:'#DBEAFE'}
+       :                    {l:'Grassroots', c:'#15803D', bg:'#DCFCE7'};
+}
+function tierBadge(d){ var t=tierOf(d); return '<span class="tier" style="color:'+t.c+';background:'+t.bg+'">'+t.l+'</span>'; }
 function renderDonorTable(){
   const all=filteredDonors();
   const el=document.getElementById("donor-table"); if(!el)return;
@@ -710,10 +719,11 @@ function renderDonorTable(){
   if(donorPage>=pages) donorPage=pages-1; if(donorPage<0) donorPage=0;
   const start=donorPage*size, end=Math.min(total,start+size);
   const rows=all.slice(start,end);
-  el.innerHTML='<table><thead><tr><th>Donor</th><th class="r">Pledged</th><th class="r">Paid</th><th class="r">Balance</th><th>Progress</th><th>Status</th><th>Next installment</th><th>Gift officer</th></tr></thead><tbody>'
+  el.innerHTML='<table><thead><tr><th>Donor</th><th>Giving tier</th><th class="r">Pledged</th><th class="r">Paid</th><th class="r">Balance</th><th>Progress</th><th>Status</th><th>Next installment</th><th>Gift officer</th></tr></thead><tbody>'
     + rows.map((d,i)=>{ const p=pct(d); const bal=d.pledged-d.paid;
       return '<tr data-donor="'+DONORS.indexOf(d)+'">'
        + '<td><div class="donor-cell"><span class="av" style="background:'+oc(d.officer)+'">'+initials(d.n)+'</span><div><div class="nm">'+d.n+'</div><div class="su">'+d.parish+'</div></div></div></td>'
+       + '<td>'+tierBadge(d)+'</td>'
        + '<td class="r">'+full(d.pledged)+'</td>'
        + '<td class="r paid">'+full(d.paid)+'</td>'
        + '<td class="r bal">'+(bal>0?full(bal):'<span class="mut">—</span>')+'</td>'
