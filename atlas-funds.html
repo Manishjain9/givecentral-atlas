@@ -180,10 +180,19 @@ tr.inactive td:not(.kb-cell) { opacity:.55; }
 tr.sel-row td { background:var(--blue-pale); }
 .asrch { position:relative; }
 .asrch-list { margin-top:6px; background:#fff; border:1px solid var(--border); border-radius:9px; max-height:150px; overflow-y:auto; }
-.asrch-opt { padding:8px 12px; font-size:13px; cursor:pointer; color:var(--text); border-bottom:1px solid var(--border-soft); }
+.asrch-opt { display:flex; align-items:center; gap:9px; padding:8px 12px; font-size:13px; cursor:pointer; color:var(--text); border-bottom:1px solid var(--border-soft); }
 .asrch-opt:last-child { border-bottom:none; }
-.asrch-opt:hover { background:var(--blue-pale); color:var(--blue); }
+.asrch-opt:hover { background:var(--blue-pale); }
+.asrch-opt.on { background:var(--blue-pale); color:var(--blue); font-weight:600; }
+.asrch-opt input, .asrch-all input { accent-color:var(--blue); width:15px; height:15px; pointer-events:none; flex-shrink:0; }
+.asrch-all { display:flex; align-items:center; gap:9px; padding:8px 12px; font-size:12px; font-weight:700; color:var(--text-2); border-bottom:1px solid var(--border); cursor:pointer; background:var(--surface); position:sticky; top:0; }
 .asrch-empty { padding:10px 12px; font-size:12.5px; color:var(--text-3); }
+.asgm-tools { display:flex; gap:8px; align-items:center; }
+.asgm-tools input { flex:1; }
+.asgm-catf { width:180px; flex:0 0 auto; }
+#asgm-ov .m-card { min-height:560px; }
+#asgm-ov .m-body { flex:1; display:flex; flex-direction:column; }
+#asrch-asgm { max-height:none; flex:1; margin-top:10px; }
 .bulkbar { display:none; align-items:center; gap:10px; background:var(--navy); color:#fff; border-radius:11px; padding:10px 14px; margin-bottom:12px; }
 .bulkbar.show { display:flex; }
 .bulkbar .bb-count { font-size:13px; font-weight:600; }
@@ -367,7 +376,11 @@ tr.sel-row td { background:var(--blue-pale); }
   <div class="m-head"><div><div class="m-title" id="asgm-title">Assign</div><div class="m-sub" id="asgm-sub"></div></div></div>
   <div class="m-body">
     <div class="assign-chips" id="asgm-chips"></div>
-    <div class="asrch"><input class="fld" id="asgm-add" autocomplete="off" placeholder="Search to add…" oninput="asrchInput('asgm')" onfocus="asrchInput('asgm')"><div class="asrch-list" id="asrch-asgm"></div></div>
+    <div class="asgm-tools">
+      <input class="fld" id="asgm-add" autocomplete="off" placeholder="Search to add…" oninput="asrchInput('asgm')">
+      <select class="fld asgm-catf" id="asgm-catf" onchange="asrchInput('asgm')"></select>
+    </div>
+    <div class="asrch-list" id="asrch-asgm"></div>
   </div>
   <div class="m-foot"><button class="btn btn-ghost" onclick="asgmClose()">Cancel</button><button class="btn btn-primary" onclick="asgmSave()">Save</button></div>
 </div></div>
@@ -408,6 +421,11 @@ var ASSIGN_OPTS = {
   campaigns:['Catholic Ministry Appeal 2026','Cathedral Capital Campaign 2026','Called to Flourish','Annual Fund 2026',"Bishop's Annual Gala 2026",'Christmas Appeal 2026'],
   appeals:['Spring Mailing 2026','Year-End Appeal 2026','Online Giving — Evergreen','Bishop Solicitation','Parish In-Pew Appeal','Matching Gift Drive','Planned Giving Outreach'],
   solicitors:['Sarah Reynolds','Bridget McCarthy','Julia Kelleher','Mike Donovan','Janet Walsh','Daniel Cho']
+};
+// Category metadata for filtering (solicitors have no category)
+var ASSIGN_CATS = {
+  appeals:{ 'Spring Mailing 2026':'Direct Mail','Year-End Appeal 2026':'Direct Mail','Online Giving — Evergreen':'Online','Bishop Solicitation':'Personal Solicitation','Parish In-Pew Appeal':'In-Pew','Matching Gift Drive':'Matching','Planned Giving Outreach':'Planned Giving' },
+  campaigns:{ 'Catholic Ministry Appeal 2026':'Annual','Cathedral Capital Campaign 2026':'Capital','Called to Flourish':'Capital','Annual Fund 2026':'Annual',"Bishop's Annual Gala 2026":'Event','Christmas Appeal 2026':'Annual' }
 };
 (function seedAssign(){
   var byId={}; FUNDS.forEach(function(f){ byId[f.id]=f; });
@@ -589,20 +607,41 @@ function asrchListEl(scope, kind){ return document.getElementById(scope==='edit'
 window.asrchInput=function(scope, kind){
   var s=asrchState(scope,kind); var inp=asrchInputEl(scope,kind), el=asrchListEl(scope,kind);
   var q=(inp.value||'').toLowerCase().trim();
-  var avail=ASSIGN_OPTS[s.k].filter(function(o){ return s.cur.indexOf(o)===-1 && o.toLowerCase().indexOf(q)>-1; });
-  el.innerHTML = avail.length
-    ? avail.map(function(o){ return '<div class="asrch-opt" data-scope="'+scope+'" data-kind="'+esc(kind||'')+'" data-name="'+esc(o)+'">'+esc(o)+'</div>'; }).join('')
-    : '<div class="asrch-empty">'+(s.cur.length===ASSIGN_OPTS[s.k].length?'All added':'No matches')+'</div>';
+  var catEl = scope==='asgm' ? document.getElementById('asgm-catf') : null;
+  var cat = (catEl && catEl.style.display!=='none') ? (catEl.value||'all') : 'all';
+  var cats = ASSIGN_CATS[s.k];
+  var opts=ASSIGN_OPTS[s.k].filter(function(o){
+    if(o.toLowerCase().indexOf(q)===-1) return false;
+    if(cat!=='all' && cats && cats[o]!==cat) return false;
+    return true;
+  });
+  if(!opts.length){ el.innerHTML='<div class="asrch-empty">No matches</div>'; el.classList.add('show'); return; }
+  var allSel=opts.every(function(o){ return s.cur.indexOf(o)>-1; });
+  var head='<div class="asrch-all" data-scope="'+scope+'" data-kind="'+esc(kind||'')+'"><input type="checkbox" '+(allSel?'checked':'')+'>Select all'+(q?' matching':'')+'</div>';
+  el.innerHTML = head + opts.map(function(o){ var on=s.cur.indexOf(o)>-1; return '<div class="asrch-opt'+(on?' on':'')+'" data-scope="'+scope+'" data-kind="'+esc(kind||'')+'" data-name="'+esc(o)+'"><input type="checkbox" '+(on?'checked':'')+'>'+esc(o)+'</div>'; }).join('');
   el.classList.add('show');
 };
 document.addEventListener('mousedown', function(e){
+  var all=e.target.closest && e.target.closest('.asrch-all');
+  if(all){ e.preventDefault();
+    var scope=all.getAttribute('data-scope'), kind=all.getAttribute('data-kind'); var s=asrchState(scope,kind);
+    var q=((asrchInputEl(scope,kind)||{}).value||'').toLowerCase().trim();
+    var catEl = scope==='asgm' ? document.getElementById('asgm-catf') : null;
+    var cat = (catEl && catEl.style.display!=='none') ? (catEl.value||'all') : 'all';
+    var cats = ASSIGN_CATS[s.k];
+    var opts=ASSIGN_OPTS[s.k].filter(function(o){ if(o.toLowerCase().indexOf(q)===-1) return false; if(cat!=='all' && cats && cats[o]!==cat) return false; return true; });
+    var allSel=opts.every(function(o){ return s.cur.indexOf(o)>-1; });
+    if(allSel){ opts.forEach(function(o){ var i=s.cur.indexOf(o); if(i>-1) s.cur.splice(i,1); }); }
+    else { opts.forEach(function(o){ if(s.cur.indexOf(o)===-1) s.cur.push(o); }); }
+    if(scope==='edit') renderAssign(kind); else asgmRender(); asrchInput(scope, kind); return;
+  }
   var opt=e.target.closest && e.target.closest('.asrch-opt'); if(!opt) return;
   e.preventDefault();
   var scope=opt.getAttribute('data-scope'), kind=opt.getAttribute('data-kind'), name=opt.getAttribute('data-name');
-  var s=asrchState(scope,kind); if(s.cur.indexOf(name)===-1) s.cur.push(name);
-  var inp=asrchInputEl(scope,kind); if(inp) inp.value='';
+  var s=asrchState(scope,kind); var idx=s.cur.indexOf(name);
+  if(idx>-1) s.cur.splice(idx,1); else s.cur.push(name);
   if(scope==='edit') renderAssign(kind); else asgmRender();
-  asrchInput(scope, kind); // refresh the always-visible list
+  asrchInput(scope, kind);
 });
 
 function openNew(){
@@ -685,6 +724,14 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ document
 /* ── Single-purpose assign modal (kebab: Assign campaigns/appeals/solicitors) ── */
 var asgmFund=null, asgmKind=null, asgmList=[];
 function assignTitle(k){ return k==='campaigns'?'campaigns':k==='appeals'?'appeals':'solicitors'; }
+function asgmBuildCatf(kind){
+  var el=document.getElementById('asgm-catf'); if(!el) return;
+  var cats=ASSIGN_CATS[kind];
+  if(!cats){ el.style.display='none'; el.innerHTML=''; return; }
+  el.style.display='';
+  var uniq={}; Object.keys(cats).forEach(function(nm){ uniq[cats[nm]]=1; });
+  el.innerHTML='<option value="all">All categories</option>'+Object.keys(uniq).sort().map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
+}
 window.openAssignModal=function(id, kind){
   closeKebab(); var a=FUNDS.find(function(x){return x.id===id;}); if(!a) return;
   asgmFund=a; asgmKind=kind; asgmList=(a[kind]||[]).slice();
@@ -692,6 +739,7 @@ window.openAssignModal=function(id, kind){
   document.getElementById('asgm-sub').textContent=a.id+' · '+a.desc;
   var inp=document.getElementById('asgm-add'); if(inp) inp.value='';
   document.getElementById('asgm-add').placeholder='Search '+assignLabel(kind)+'s to add…';
+  asgmBuildCatf(kind);
   asgmRender(); asrchInput('asgm');
   document.getElementById('asgm-ov').classList.add('open');
 };
