@@ -347,6 +347,45 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .tk-row.done .body .ttl { text-decoration:line-through; color:var(--text-3); font-weight:500; }
 .tk-row.done .cb { border-color:var(--green); background:var(--green); }
 .tk-row.done .cb::after { content:''; width:9px; height:5px; border:1.6px solid #fff; border-top:none; border-right:none; transform:rotate(-45deg) translateY(-1px); }
+/* selection */
+.tk-row.tk-selected { box-shadow:inset 0 0 0 1.5px var(--blue); }
+.tk-row.tk-selected .cb { background:var(--blue); border-color:var(--blue); }
+.tk-row.tk-selected .cb::after { content:''; width:9px; height:5px; border:1.6px solid #fff; border-top:none; border-right:none; transform:rotate(-45deg) translateY(-1px); }
+.tk-selall { display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:var(--text-2); cursor:pointer; margin-right:4px; }
+.tk-selall input { accent-color:var(--blue); width:15px; height:15px; }
+.tk-selbar { display:none; align-items:center; gap:9px; background:var(--navy); color:#fff; border-radius:11px; padding:10px 14px; margin-bottom:14px; }
+.tk-selbar.show { display:flex; }
+.tk-selbar .sb-count { font-size:13px; font-weight:600; }
+.tk-selbar .sb-sp { flex:1; }
+.tk-selbar button { font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:600; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.1); color:#fff; border-radius:8px; padding:7px 12px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+.tk-selbar button:hover { background:rgba(255,255,255,.2); }
+.tk-selbar button svg { width:13px; height:13px; }
+.tk-selbar button.danger { border-color:#F4B6D2; color:#FBCFE8; }
+.tk-selbar button.danger:hover { background:rgba(190,24,93,.4); }
+.tk-selbar .sb-clear { background:none; border:none; text-decoration:underline; opacity:.85; }
+/* generic task modal (snooze / saved-view) */
+.tkm-ov { position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:100060; display:none; align-items:center; justify-content:center; padding:24px; }
+.tkm-ov.show { display:flex; }
+.tkm { background:#fff; border-radius:16px; width:100%; max-width:440px; box-shadow:0 24px 60px rgba(15,23,42,.3); overflow:hidden; }
+.tkm-h { padding:18px 22px 12px; border-bottom:1px solid var(--border); }
+.tkm-h .t { font-family:'DM Serif Display',serif; font-size:19px; color:var(--text); }
+.tkm-h .s { font-size:12.5px; color:var(--text-3); margin-top:3px; }
+.tkm-b { padding:16px 22px; }
+.tkm-f { padding:14px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
+.tkm-opt { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border); border-radius:10px; font-size:13.5px; color:var(--text-2); cursor:pointer; margin-bottom:8px; }
+.tkm-opt:hover { border-color:#94A3B8; }
+.tkm-opt input { accent-color:var(--blue); width:16px; height:16px; }
+.tkm-opt.sel { border-color:var(--blue); background:var(--blue-pale); color:var(--blue); font-weight:600; }
+.tkm-custom { display:none; gap:10px; margin-top:4px; }
+.tkm-custom.show { display:flex; }
+.tkm-lbl { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--text-2); margin:12px 0 6px; }
+.tkm-fld { width:100%; font-family:'DM Sans',sans-serif; font-size:13px; padding:9px 11px; border:1px solid var(--border); border-radius:9px; background:#fff; color:var(--text); }
+.tkm-fld:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.12); }
+.tkm-btn { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; padding:9px 16px; border-radius:9px; cursor:pointer; border:1px solid transparent; }
+.tkm-btn.ghost { background:#fff; border-color:var(--border); color:var(--text-2); }
+.tkm-btn.primary { background:var(--blue); color:#fff; }
+.tkm-btn.primary:hover { background:#1D4ED8; }
+.tkm-row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .done-when { font-size:11.5px; color:var(--text-3); }
 .reopen-btn { font-family:'DM Sans',sans-serif; font-size:11.5px; font-weight:600; color:var(--blue); background:none; border:1px solid var(--border); border-radius:7px; padding:5px 9px; cursor:pointer; }
 .reopen-btn:hover { background:var(--blue-pale); border-color:var(--blue-light); }
@@ -854,6 +893,7 @@ body {
 
   <!-- Toolbar -->
   <div class="tk-toolbar">
+    <label class="tk-selall"><input type="checkbox" id="tk-selall" onclick="tkSelectAll(this)"> Select all</label>
     <div class="filter-chip applied">Owner: Me <span class="x">×</span></div>
     <div class="filter-chip applied">Priority: High+ <span class="x">×</span></div>
     <div class="filter-chip">
@@ -881,6 +921,16 @@ body {
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- Bulk action bar (appears when tasks are selected) -->
+  <div class="tk-selbar" id="tk-selbar">
+    <span class="sb-count" id="tk-selbar-count">0 selected</span>
+    <span class="sb-sp"></span>
+    <button onclick="tkBulkComplete()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7l3 3L11 5"/></svg>Complete</button>
+    <button onclick="tkBulkSnooze()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="5"/><path d="M7 4v3.5l2 1.5"/></svg>Snooze</button>
+    <button class="danger" onclick="tkBulkDelete()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 4h9M5.5 4V2.5h3V4M4 4l.5 8h5l.5-8"/></svg>Delete</button>
+    <button class="sb-clear" onclick="tkClearSel()">Clear</button>
   </div>
 
   <!-- ════ LIST VIEW (default) ════ -->
@@ -1993,7 +2043,7 @@ body {
   document.querySelectorAll('.sp-pill').forEach(function(p){
     p.addEventListener('click', function(){
       if (p.classList.contains('sp-customize')) {
-        alert('Saved-view builder · combine filter chips + save as a named view (Phase 2 feature)');
+        if(window.openNewSavedView) window.openNewSavedView();
         return;
       }
       var wasOn = p.classList.contains('on');
@@ -2136,10 +2186,11 @@ body {
       actions.querySelector('.act-reassign').addEventListener('click', function(e){ e.stopPropagation(); window.location = 'atlas-task-modal.html'; });
     }
 
-    // Checkbox click → complete
+    // Checkbox click → SELECT the task (bulk actions), not complete
     var cb = row.querySelector('.cb');
-    if (cb) cb.addEventListener('click', function(e){ e.stopPropagation(); completeTask(row); });
+    if (cb) cb.addEventListener('click', function(e){ e.stopPropagation(); if(window.tkSelToggle) window.tkSelToggle(row); });
   });
+  window.completeTask = completeTask;
 
   function completeTask(row){
     if (row.classList.contains('completing')) return;
@@ -2183,16 +2234,15 @@ body {
     }, 600);
   }
 
-  function snoozeTask(row){
-    var donor = (row.querySelector('.donor') || row.querySelector('.ttl') || {}).textContent || 'task';
-    row.style.transition = 'opacity .25s, transform .25s';
-    row.style.opacity = '.4';
-    row.style.transform = 'translateX(20px)';
-    setTimeout(function(){
-      row.style.display = 'none';
-      showCelebration('Snoozed 1 day', donor.trim() + ' · will surface tomorrow morning');
-    }, 250);
-  }
+  function snoozeTask(row){ if(window.openSnooze) window.openSnooze([row]); }
+  window.snoozeRowsNow = function(rows, label){
+    rows.forEach(function(row){
+      row.style.transition='opacity .25s, transform .25s'; row.style.opacity='.4'; row.style.transform='translateX(20px)';
+      setTimeout(function(){ row.style.display='none'; }, 250);
+    });
+    var who = rows.length===1 ? ((rows[0].querySelector('.donor')||rows[0].querySelector('.ttl')||{}).textContent||'task').trim() : (rows.length+' tasks');
+    showCelebration('Snoozed · '+label, who+' · will resurface then');
+  };
 
   // ── Celebration toast (top-right) ──
   var cel = document.getElementById('celebration-msg');
@@ -4776,6 +4826,133 @@ body {
     css.textContent='.tk-stats,.tabs,.smart-pills,.tk-toolbar{position:relative;z-index:3}';
     document.head.appendChild(css);
   })();
+})();
+</script>
+
+<!-- Snooze modal -->
+<div class="tkm-ov" id="snz-ov">
+  <div class="tkm">
+    <div class="tkm-h"><div class="t">Snooze</div><div class="s" id="snz-sub"></div></div>
+    <div class="tkm-b" id="snz-body"></div>
+    <div class="tkm-f"><button class="tkm-btn ghost" onclick="snzClose()">Cancel</button><button class="tkm-btn primary" onclick="snzConfirm()">Snooze</button></div>
+  </div>
+</div>
+
+<!-- New saved view modal -->
+<div class="tkm-ov" id="nsv-ov">
+  <div class="tkm">
+    <div class="tkm-h"><div class="t">New saved view</div><div class="s">Name it and set the filters. It'll appear as a pill you can toggle.</div></div>
+    <div class="tkm-b">
+      <span class="tkm-lbl">View name</span>
+      <input class="tkm-fld" id="nsv-name" placeholder="e.g. Major-donor follow-ups">
+      <div class="tkm-row2">
+        <div><span class="tkm-lbl">Priority</span><select class="tkm-fld" id="nsv-pri"><option value="any">Any</option><option value="crit">Critical only</option><option value="high">High &amp; up</option></select></div>
+        <div><span class="tkm-lbl">Category</span><select class="tkm-fld" id="nsv-cat"></select></div>
+      </div>
+      <div class="tkm-row2">
+        <div><span class="tkm-lbl">Min amount ($)</span><input class="tkm-fld" id="nsv-amt" placeholder="e.g. 25000"></div>
+        <div><span class="tkm-lbl">Keyword</span><input class="tkm-fld" id="nsv-kw" placeholder="e.g. pledge"></div>
+      </div>
+      <div id="nsv-preview" style="font-size:12px;color:var(--text-3);margin-top:12px"></div>
+    </div>
+    <div class="tkm-f"><button class="tkm-btn ghost" onclick="nsvClose()">Cancel</button><button class="tkm-btn primary" onclick="nsvSave()">Save view</button></div>
+  </div>
+</div>
+
+<script id="tk-bulk-js">
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function listRows(){ return [].slice.call(document.querySelectorAll('#tk-list-view .tk-row')); }
+  function visibleRows(){ return listRows().filter(function(r){ return r.style.display!=='none' && !r.classList.contains('completing'); }); }
+  function selectedRows(){ return listRows().filter(function(r){ return r.classList.contains('tk-selected'); }); }
+
+  window.tkSelToggle=function(row){ row.classList.toggle('tk-selected'); tkSelUpdate(); };
+  window.tkSelectAll=function(cb){ visibleRows().forEach(function(r){ r.classList.toggle('tk-selected', cb.checked); }); tkSelUpdate(); };
+  window.tkClearSel=function(){ selectedRows().forEach(function(r){ r.classList.remove('tk-selected'); }); tkSelUpdate(); };
+  function tkSelUpdate(){
+    var n=selectedRows().length, bar=$('tk-selbar');
+    if(bar){ bar.classList.toggle('show', n>0); var c=$('tk-selbar-count'); if(c) c.textContent=n+' selected'; }
+    var sa=$('tk-selall'); if(sa){ var vis=visibleRows().length, sel=selectedRows().length; sa.checked=vis>0&&sel===vis; sa.indeterminate=sel>0&&sel<vis; }
+  }
+  window.tkBulkComplete=function(){ var rows=selectedRows(); if(!rows.length) return; rows.forEach(function(r){ r.classList.remove('tk-selected'); if(window.completeTask) window.completeTask(r); }); tkSelUpdate(); };
+  window.tkBulkSnooze=function(){ var rows=selectedRows(); if(!rows.length) return; if(window.openSnooze) window.openSnooze(rows); };
+  window.tkBulkDelete=function(){ var rows=selectedRows(); if(!rows.length) return; var n=rows.length; rows.forEach(function(r){ r.style.display='none'; r.classList.remove('tk-selected'); }); tkSelUpdate(); if(window.atlasToast) window.atlasToast(n+' task'+(n!==1?'s':'')+' deleted'); };
+
+  /* ── Snooze modal ── */
+  var snzRows=[];
+  var SNZ=[['1hr','In 1 hour'],['3hr','In 3 hours'],['tom','Tomorrow morning'],['week','Next week'],['custom','Custom…']];
+  window.openSnooze=function(rows){
+    snzRows=rows.slice();
+    $('snz-sub').textContent = rows.length===1 ? ((rows[0].querySelector('.ttl')||{}).textContent||'').slice(0,60) : (rows.length+' tasks selected');
+    $('snz-body').innerHTML = SNZ.map(function(o,i){ return '<label class="tkm-opt'+(i===0?' sel':'')+'"><input type="radio" name="snz" value="'+o[0]+'" '+(i===0?'checked':'')+'>'+esc(o[1])+'</label>'; }).join('')
+      + '<div class="tkm-custom" id="snz-custom"><div style="flex:1"><span class="tkm-lbl">Date</span><input class="tkm-fld" id="snz-date" placeholder="MM/DD/YYYY"></div><div style="flex:1"><span class="tkm-lbl">Time</span><input class="tkm-fld" id="snz-time" placeholder="9:00 AM"></div></div>';
+    $('snz-ov').classList.add('show');
+  };
+  window.snzClose=function(){ $('snz-ov').classList.remove('show'); snzRows=[]; };
+  document.addEventListener('change', function(e){
+    if(e.target && e.target.name==='snz'){
+      [].forEach.call(document.querySelectorAll('#snz-body .tkm-opt'), function(l){ l.classList.toggle('sel', l.querySelector('input').checked); });
+      var cu=$('snz-custom'); if(cu) cu.classList.toggle('show', e.target.value==='custom');
+    }
+  });
+  window.snzConfirm=function(){
+    var r=document.querySelector('#snz-body input[name="snz"]:checked'); var val=r?r.value:'1hr';
+    var map={'1hr':'in 1 hour','3hr':'in 3 hours','tom':'tomorrow morning','week':'next week'};
+    var label=map[val];
+    if(val==='custom'){ var d=($('snz-date').value||'').trim(), t=($('snz-time').value||'').trim(); label=(d?d:'a set date')+(t?' · '+t:''); }
+    snzClose_keep = snzRows.slice();
+    $('snz-ov').classList.remove('show');
+    if(window.snoozeRowsNow) window.snoozeRowsNow(snzClose_keep, label);
+    snzRows=[]; if(typeof tkSelUpdate==='function') tkSelUpdate();
+  };
+  var snzClose_keep=[];
+
+  /* ── New saved view builder ── */
+  function amtOf(txt){ var max=0,re=/\$\s*([\d,.]+)\s*([kKmM])?/g,m; while((m=re.exec(txt))){ var v=parseFloat(m[1].replace(/,/g,''))||0; var u=(m[2]||'').toLowerCase(); if(u==='k')v*=1e3; else if(u==='m')v*=1e6; if(v>max)max=v; } return max; }
+  function catsInList(){ var s={}; listRows().forEach(function(r){ var c=((r.querySelector('.cat')||{}).textContent||'').trim(); if(c) s[c]=1; }); return Object.keys(s).sort(); }
+  window.openNewSavedView=function(){
+    $('nsv-name').value=''; $('nsv-pri').value='any'; $('nsv-amt').value=''; $('nsv-kw').value='';
+    $('nsv-cat').innerHTML='<option value="any">Any</option>'+catsInList().map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
+    nsvPreview();
+    $('nsv-ov').classList.add('show');
+    setTimeout(function(){ $('nsv-name').focus(); },40);
+  };
+  window.nsvClose=function(){ $('nsv-ov').classList.remove('show'); };
+  function nsvCriteria(){ return { pri:$('nsv-pri').value, cat:$('nsv-cat').value, amt:parseFloat(($('nsv-amt').value||'').replace(/[^0-9.]/g,''))||0, kw:($('nsv-kw').value||'').trim().toLowerCase() }; }
+  function nsvMatch(row, c){
+    var txt=row.textContent, cat=((row.querySelector('.cat')||{}).textContent||'');
+    if(c.pri==='crit' && !row.querySelector('.pri-dot.crit')) return false;
+    if(c.pri==='high' && !(row.querySelector('.pri-dot.crit')||row.querySelector('.pri-dot.high'))) return false;
+    if(c.cat!=='any' && cat.trim()!==c.cat) return false;
+    if(c.amt>0 && amtOf(txt)<c.amt) return false;
+    if(c.kw && txt.toLowerCase().indexOf(c.kw)===-1) return false;
+    return true;
+  }
+  function nsvPreview(){ var c=nsvCriteria(); var n=listRows().filter(function(r){return nsvMatch(r,c);}).length; var el=$('nsv-preview'); if(el) el.textContent='Matches '+n+' task'+(n!==1?'s':'')+' right now.'; }
+  ['nsv-pri','nsv-cat','nsv-amt','nsv-kw'].forEach(function(id){ var e=$(id); if(e){ e.addEventListener('input',nsvPreview); e.addEventListener('change',nsvPreview); } });
+  function refreshGroups(){
+    document.querySelectorAll('#tk-list-view .group-h').forEach(function(gh){ var list=gh.nextElementSibling; if(!list||!list.classList.contains('tk-list')) return; var any=[].some.call(list.querySelectorAll('.tk-row'),function(r){return r.style.display!=='none';}); gh.style.display=any?'':'none'; list.style.display=any?'':'none'; });
+  }
+  window.nsvSave=function(){
+    var name=($('nsv-name').value||'').trim(); if(!name){ alert('Give the view a name.'); return; }
+    var c=nsvCriteria();
+    var pill=document.createElement('button'); pill.className='sp-pill sp-custom';
+    pill.innerHTML='<span class="sp-glyph" style="background:#EFF6FF;color:#2563EB">★</span>'+esc(name)+'<span class="sp-count"></span>';
+    var n=listRows().filter(function(r){return nsvMatch(r,c);}).length; pill.querySelector('.sp-count').textContent=n;
+    pill.addEventListener('click', function(){
+      var wasOn=pill.classList.contains('on');
+      document.querySelectorAll('.sp-pill').forEach(function(x){ x.classList.remove('on'); });
+      if(wasOn){ listRows().forEach(function(r){ r.style.display=''; }); refreshGroups(); if(window.atlasToast) atlasToast('Saved view cleared · showing all tasks'); return; }
+      pill.classList.add('on');
+      listRows().forEach(function(r){ r.style.display = nsvMatch(r,c)?'':'none'; }); refreshGroups();
+      if(window.atlasToast) atlasToast(name+' · '+n+' task'+(n!==1?'s':''));
+    });
+    var custBtn=$('sp-customize'); custBtn.parentNode.insertBefore(pill, custBtn);
+    nsvClose();
+    pill.click();
+  };
+  [].forEach.call(document.querySelectorAll('.tkm-ov'), function(ov){ ov.addEventListener('click', function(e){ if(e.target===ov) ov.classList.remove('show'); }); });
 })();
 </script>
 
