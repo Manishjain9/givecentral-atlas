@@ -120,6 +120,14 @@
   .echip{display:inline-flex;align-items:center;gap:7px;background:var(--blue-pale);border:1px solid #DBEAFE;color:var(--blue-d);border-radius:99px;padding:5px 8px 5px 12px;font:600 12.5px 'DM Sans'}
   .echip .x{cursor:pointer;color:var(--text-3);font-size:14px}
   .echip .x:hover{color:var(--rose)}
+  /* bulk upload dropzone */
+  .nl-drop{border:1.5px dashed var(--border);border-radius:12px;padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:12px}
+  .nl-drop.over{border-color:var(--blue);background:var(--blue-pale)}
+  .nl-dtxt{font-size:12.5px;color:var(--text-2);line-height:1.5}
+  .nl-dtxt span{color:var(--text-3);font-size:11px}
+  .nl-detect{margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--text-2);line-height:1.5}
+  .nl-detect b{color:var(--navy)}
+  .nl-warn{margin-top:6px;color:#B45309;font-size:11.5px}
 
   /* design */
   .ebframe{width:100%;height:560px;border:1px solid var(--border);border-radius:14px;background:#fff}
@@ -481,21 +489,41 @@
   }
   function analyticsURL(){ var r=reach(); return 'atlas-message-detail.html?subj='+encodeURIComponent(S.subject||S.name)+'&type=appeal&sender='+encodeURIComponent(S.from.split(' · ')[0])+'&camp='+encodeURIComponent(S.name)+'&recips='+r+'&del=0.986&open=0.25&clicked='+Math.round(r*0.25*0.12)+'&bounced='+Math.round(r*0.014); }
   window.cwAddList=function(){
-    var ov=$('ov');
-    ov.innerHTML='<div class="m"><div class="mh"><h3>Add a new list / segment</h3><p>Create a list to send to. Refine it later in Tags &amp; Segments.</p></div>'+
-      '<div class="mb"><label class="lbl">List name</label><input class="fld" id="nl-name" placeholder="e.g. FY26 Cathedral leadership">'+
-      '<label class="lbl" style="margin-top:12px">Source</label><select class="fld" id="nl-src"><option value="empty">Start empty · add contacts later</option><option value="dynamic">Dynamic · donors matching criteria</option><option value="import">Import from CSV</option></select>'+
-      '<label class="lbl" style="margin-top:12px">Estimated size</label><input class="fld" id="nl-size" type="number" min="0" value="0"></div>'+
+    var ov=$('ov'); var detected=0;
+    ov.innerHTML='<div class="m" style="max-width:500px"><div class="mh"><h3>Add a new list / segment</h3><p>Create a list to send to. Bulk upload handles files up to ~5,000,000 rows.</p></div>'+
+      '<div class="mb">'+
+        '<label class="lbl">List name</label><input class="fld" id="nl-name" placeholder="e.g. FY26 Cathedral leadership">'+
+        '<label class="lbl" style="margin-top:12px">How to build it</label><select class="fld" id="nl-src"><option value="empty">Start empty · add contacts later</option><option value="dynamic">Dynamic · donors matching criteria</option><option value="bulk">Bulk upload · CSV or paste emails</option></select>'+
+        '<div id="nl-empty"><label class="lbl" style="margin-top:12px">Estimated size</label><input class="fld" id="nl-size" type="number" min="0" value="0"></div>'+
+        '<div id="nl-bulk" style="display:none">'+
+          '<div class="nl-drop" id="nl-drop"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#94A3B8" stroke-width="1.6" stroke-linecap="round"><path d="M12 16V6M8 10l4-4 4 4"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>'+
+            '<div class="nl-dtxt">Drop a CSV / TXT of email addresses<br><span>up to 5,000,000 rows · large files import in the background</span></div>'+
+            '<button type="button" class="btn" id="nl-browse" style="padding:6px 14px">Browse file</button><input type="file" id="nl-file" accept=".csv,.txt" style="display:none"></div>'+
+          '<div style="text-align:center;font-size:11px;color:#94A3B8;margin:9px 0">— or paste addresses —</div>'+
+          '<textarea class="fld" id="nl-paste" rows="4" placeholder="name@email.org, one per line or comma-separated"></textarea>'+
+          '<div class="nl-detect" id="nl-detect" style="display:none"></div>'+
+        '</div>'+
+      '</div>'+
       '<div class="mf"><button class="btn" id="nl-cancel">Cancel</button><button class="btn primary" id="nl-go">Create &amp; select</button></div></div>';
     ov.classList.add('show');
-    ov.querySelector('#nl-cancel').addEventListener('click',function(){ov.classList.remove('show');});
-    ov.querySelector('#nl-go').addEventListener('click',function(){
+    function showDetect(n, srcTxt){ detected=n; var el=$('nl-detect'); if(n>0){ var dupes=Math.round(n*0.02); var add=n-dupes; el.style.display='block'; el.innerHTML='<b>'+fmt(n)+'</b> addresses '+srcTxt+' · ~'+fmt(dupes)+' duplicates removed · <b>'+fmt(add)+'</b> will be added'+(n>100000?'<div class="nl-warn">⏳ Large import — processed in the background. You\'ll be emailed when it\'s ready.</div>':''); } else { el.style.display='none'; } }
+    $('nl-src').addEventListener('change', function(){ var v=this.value; $('nl-empty').style.display=v==='empty'?'block':'none'; $('nl-bulk').style.display=v==='bulk'?'block':'none'; });
+    $('nl-browse').addEventListener('click', function(){ $('nl-file').click(); });
+    $('nl-file').addEventListener('change', function(){ var f=this.files&&this.files[0]; if(!f) return; showDetect(Math.max(1,Math.round(f.size/24)), 'in “'+f.name+'”'); });
+    var drop=$('nl-drop');
+    drop.addEventListener('dragover', function(e){ e.preventDefault(); drop.classList.add('over'); });
+    drop.addEventListener('dragleave', function(){ drop.classList.remove('over'); });
+    drop.addEventListener('drop', function(e){ e.preventDefault(); drop.classList.remove('over'); var f=e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) showDetect(Math.max(1,Math.round(f.size/24)), 'in “'+f.name+'”'); });
+    $('nl-paste').addEventListener('input', function(){ var em=(this.value||'').split(/[\s,;]+/).filter(function(x){return /@/.test(x);}); showDetect(em.length, 'pasted'); });
+    $('nl-cancel').addEventListener('click', function(){ ov.classList.remove('show'); });
+    $('nl-go').addEventListener('click', function(){
       var nm=($('nl-name').value||'').trim(); if(!nm){ $('nl-name').focus(); return; }
-      var src=$('nl-src').value;
-      if(src==='import'){ ov.classList.remove('show'); window.open('atlas-outreach-lists.html?import=csv','_blank'); toast('Opening CSV importer for “'+nm+'”'); return; }
-      var size=Math.max(0,parseInt($('nl-size').value||'0',10)||0);
-      var id='new'+Date.now(); LISTS.push({id:id,nm:nm,sub:(src==='dynamic'?'Dynamic segment':'New list'),n:size}); S.lists.push(id);
-      ov.classList.remove('show'); render(); toast('“'+nm+'” created and selected');
+      var v=$('nl-src').value, count;
+      if(v==='bulk'){ if(!detected){ toast('Add a file or paste addresses first'); return; } count=detected; }
+      else if(v==='dynamic'){ count=0; }
+      else { count=Math.max(0,parseInt($('nl-size').value||'0',10)||0); }
+      var id='new'+Date.now(); LISTS.push({id:id,nm:nm,sub:(v==='bulk'?'Bulk upload · '+fmt(count)+' contacts':(v==='dynamic'?'Dynamic segment':'New list')),n:count}); S.lists.push(id);
+      ov.classList.remove('show'); render(); toast('“'+nm+'” created'+(count?' · '+fmt(count)+' contacts':'')+' and selected');
     });
   };
 

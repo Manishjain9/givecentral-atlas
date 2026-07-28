@@ -669,7 +669,6 @@ body {
       <div class="page-sub">Every email and acknowledgement Atlas has sent on your team's behalf.</div>
     </div>
     <div class="flex gap-8">
-      <a class="btn btn-ghost" href="atlas-email-compose.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg> Quick compose</a>
       <a class="btn btn-primary" href="atlas-email-campaign.html"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg> Create Email</a>
     </div>
   </div>
@@ -810,7 +809,7 @@ body {
 
   <!-- ─── TEMPLATES pane ─── -->
   <div class="tab-pane" data-pane="templates" style="display:none">
-    <div class="section-h"><span>Email templates · 12 reusable</span><span class="line"></span><a href="atlas-email-compose.html" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none">+ New template</a></div>
+    <div class="section-h"><span>Email templates · 12 reusable</span><span class="line"></span><a href="atlas-email-builder.html?mode=template" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none">+ New template</a></div>
     <div class="cm-list" id="templates-list">
       <!-- 6 template entries — these are visual demos, not interactive -->
       <a class="cm-row" href="atlas-email-compose.html">
@@ -902,7 +901,7 @@ body {
 
   <!-- ─── LISTS & SEGMENTS pane ─── -->
   <div class="tab-pane" data-pane="lists" style="display:none">
-    <div class="section-h"><span>Outreach lists &amp; segments · 8 lists</span><span class="line"></span><a href="atlas-outreach-lists.html?import=csv" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none;margin-right:14px">↑ Import contacts (CSV)</a><a href="atlas-outreach-lists.html" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none">Manage all lists →</a></div>
+    <div class="section-h"><span>Outreach lists &amp; segments · 8 lists</span><span class="line"></span><a href="#" onclick="commsImport();return false" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none;margin-right:14px">↑ Import contacts (CSV)</a><a href="atlas-outreach-lists.html" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none">Manage all lists →</a></div>
     <p class="muted" style="padding:18px;background:var(--blue-pale);border:1px solid var(--blue-light);border-radius:10px;color:#1D4ED8;font-size:13px;display:flex;align-items:center;gap:10px">
       <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="width:16px;height:16px;flex-shrink:0"><path d="M7 2v5l3 2"/><circle cx="7" cy="7" r="5.5"/></svg>
       <span>Full list management lives on a dedicated page. <a href="atlas-outreach-lists.html" style="font-weight:600;color:inherit;text-decoration:underline">Open Outreach lists →</a></span>
@@ -1667,6 +1666,135 @@ body {
 })();
 </script>
 
+<style id="comms-import-css">
+  #ci-ov{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100070;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',sans-serif}
+  #ci-ov.show{display:flex}
+  #ci-ov .card{background:#fff;border-radius:16px;width:100%;max-width:560px;box-shadow:0 24px 64px rgba(15,23,42,.3);overflow:hidden;display:flex;flex-direction:column;max-height:88vh}
+  #ci-ov .hd{padding:18px 22px 6px;flex-shrink:0}
+  #ci-ov .hd h3{font-family:'DM Serif Display',serif;font-size:21px;color:#0E1E35}
+  #ci-ov .steps{display:flex;gap:6px;margin-top:12px}
+  #ci-ov .st{flex:1;height:5px;border-radius:99px;background:#E2E8F0}
+  #ci-ov .st.on{background:#2563EB}
+  #ci-ov .bd{padding:16px 22px;overflow-y:auto}
+  #ci-ov .ft{padding:14px 22px;border-top:1px solid #E2E8F0;display:flex;gap:10px;justify-content:flex-end;flex-shrink:0}
+  #ci-ov .lbl{display:block;font:600 11px 'DM Sans';color:#334155;margin:12px 0 6px}
+  #ci-ov .fld{width:100%;border:1px solid #E2E8F0;border-radius:9px;padding:9px 11px;font:400 13px 'DM Sans'}
+  #ci-ov .drop{border:1.5px dashed #E2E8F0;border-radius:12px;padding:24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:9px}
+  #ci-ov .drop.over{border-color:#2563EB;background:#EFF6FF}
+  #ci-ov .drop .dt{font-size:12.5px;color:#334155}.drop .dt span{color:#94A3B8;font-size:11px}
+  #ci-ov .btn{font:600 12.5px 'DM Sans';padding:8px 14px;border-radius:9px;border:1px solid #E2E8F0;background:#fff;color:#334155;cursor:pointer}
+  #ci-ov .btn.primary{background:#2563EB;border-color:#2563EB;color:#fff}
+  #ci-ov .btn.primary:disabled{opacity:.5;cursor:not-allowed}
+  #ci-ov .det{margin-top:10px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#334155}#ci-ov .det b{color:#0E1E35}
+  #ci-ov table.prev{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+  #ci-ov table.prev th{text-align:left;color:#64748B;font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:6px 8px;border-bottom:1px solid #E2E8F0}
+  #ci-ov table.prev td{padding:6px 8px;border-bottom:1px solid #F1F5F9;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+  #ci-ov .statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 12px}
+  #ci-ov .statrow .c{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:11px 12px;text-align:center}
+  #ci-ov .statrow .v{font-family:'DM Serif Display',serif;font-size:22px}.statrow .k{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#64748B;margin-top:2px}
+  #ci-ov .warn{color:#B45309;font-size:11.5px;margin-top:8px}
+</style>
+<div id="ci-ov"><div class="card"><div class="hd"><h3 id="ci-title">Import contacts</h3><div class="steps"><div class="st" id="ci-s1"></div><div class="st" id="ci-s2"></div><div class="st" id="ci-s3"></div></div></div><div class="bd" id="ci-bd"></div><div class="ft" id="ci-ft"></div></div></div>
+<script id="comms-import-js">
+(function(){
+  var CI={step:1,rows:[],hasHeader:false,map:{email:-1,first:-1,last:-1},name:'Imported contacts'};
+  var ov,bd,ft;
+  function fmt(n){ return (n||0).toLocaleString(); }
+  function toastMsg(m){ if(window.atlasToast){window.atlasToast(m);return;} var t=document.getElementById('atlas-rescue-toast'); if(t){t.querySelector('.msg').textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);} }
+  function parseCSV(text){
+    var lines=text.replace(/\r/g,'').split('\n').filter(function(l){return l.trim()!=='';});
+    return lines.map(function(l){ var out=[],cur='',q=false; for(var i=0;i<l.length;i++){var c=l[i]; if(c==='"'){q=!q;} else if(c===','&&!q){out.push(cur);cur='';} else cur+=c;} out.push(cur); return out.map(function(s){return s.trim().replace(/^"|"$/g,'');}); });
+  }
+  var EMAILRE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  function colWithEmails(rows){ if(!rows.length) return -1; var cols=rows[0].length,best=-1,bc=0; for(var c=0;c<cols;c++){ var n=0; for(var r=0;r<Math.min(rows.length,20);r++){ if(rows[r][c]&&rows[r][c].indexOf('@')!==-1) n++; } if(n>bc){bc=n;best=c;} } return best; }
+  function load(text){
+    var rows=parseCSV(text); if(!rows.length){ CI.rows=[]; return; }
+    // header detection: if first row has no '@' anywhere and looks like labels
+    var firstHasEmail=rows[0].some(function(c){return c.indexOf('@')!==-1;});
+    CI.hasHeader=!firstHasEmail;
+    CI.rows=rows;
+    var dataRows=CI.hasHeader?rows.slice(1):rows;
+    CI.map.email=colWithEmails(dataRows);
+    if(CI.hasHeader){ rows[0].forEach(function(h,i){ var hl=h.toLowerCase(); if(/mail/.test(hl))CI.map.email=i; else if(/first/.test(hl))CI.map.first=i; else if(/last|surname/.test(hl))CI.map.last=i; }); }
+  }
+  function dataRows(){ return CI.hasHeader?CI.rows.slice(1):CI.rows; }
+  function headerName(i){ return CI.hasHeader?(CI.rows[0][i]||('Column '+(i+1))):('Column '+(i+1)); }
+  function colCount(){ return CI.rows.length?CI.rows[0].length:0; }
+  function stats(){
+    var dr=dataRows(), seen={}, valid=0,dup=0,invalid=0;
+    dr.forEach(function(r){ var e=(r[CI.map.email]||'').toLowerCase(); if(!EMAILRE.test(e)){invalid++;return;} if(seen[e]){dup++;return;} seen[e]=1; valid++; });
+    return {total:dr.length,valid:valid,dup:dup,invalid:invalid};
+  }
+
+  function setSteps(){ ['ci-s1','ci-s2','ci-s3'].forEach(function(id,i){ document.getElementById(id).classList.toggle('on', i<CI.step); }); }
+  function render(){
+    setSteps();
+    if(CI.step===1) step1(); else if(CI.step===2) step2(); else step3();
+  }
+  function step1(){
+    document.getElementById('ci-title').textContent='Import contacts · Upload';
+    bd.innerHTML='<div class="drop" id="ci-drop"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#94A3B8" stroke-width="1.6" stroke-linecap="round"><path d="M12 16V6M8 10l4-4 4 4"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>'+
+      '<div class="dt">Drop a CSV file here<br><span>Email column required · First/Last optional · up to ~5M rows</span></div>'+
+      '<button class="btn" id="ci-browse">Browse file</button><input type="file" id="ci-file" accept=".csv,.txt" style="display:none"></div>'+
+      '<div style="text-align:center;font-size:11px;color:#94A3B8;margin:9px 0">— or paste rows —</div>'+
+      '<textarea class="fld" id="ci-paste" rows="4" placeholder="email,first,last&#10;margaret@email.org,Margaret,O\'Brien"></textarea>'+
+      '<a href="#" id="ci-sample" style="font-size:11.5px;color:#2563EB;font-weight:600;text-decoration:none;display:inline-block;margin-top:8px">Load a sample</a>'+
+      '<div class="det" id="ci-det" style="display:none"></div>';
+    ft.innerHTML='<button class="btn" id="ci-cancel">Cancel</button><button class="btn primary" id="ci-next" '+(CI.rows.length?'':'disabled')+'>Next: map columns</button>';
+    var drop=document.getElementById('ci-drop');
+    document.getElementById('ci-browse').addEventListener('click',function(){document.getElementById('ci-file').click();});
+    document.getElementById('ci-file').addEventListener('change',function(){ var f=this.files&&this.files[0]; if(!f)return; var rd=new FileReader(); rd.onload=function(){ load(rd.result||''); showDet('in “'+f.name+'”'); }; rd.readAsText(f); });
+    drop.addEventListener('dragover',function(e){e.preventDefault();drop.classList.add('over');});
+    drop.addEventListener('dragleave',function(){drop.classList.remove('over');});
+    drop.addEventListener('drop',function(e){e.preventDefault();drop.classList.remove('over'); var f=e.dataTransfer.files&&e.dataTransfer.files[0]; if(f){var rd=new FileReader();rd.onload=function(){load(rd.result||'');showDet('in “'+f.name+'”');};rd.readAsText(f);}});
+    var pa=document.getElementById('ci-paste'); pa.addEventListener('input',function(){ load(this.value); showDet('pasted'); });
+    document.getElementById('ci-sample').addEventListener('click',function(e){ e.preventDefault(); var s='email,first,last\nmargaret@email.org,Margaret,O\'Brien\nthomas@email.org,Thomas,Sullivan\njames@email.org,James,Grant\nmargaret@email.org,Margaret,O\'Brien\nnotanemail,Bad,Row'; pa.value=s; load(s); showDet('pasted'); });
+    document.getElementById('ci-cancel').addEventListener('click',close);
+    document.getElementById('ci-next').addEventListener('click',function(){ if(CI.rows.length){ CI.step=2; render(); } });
+    if(CI.rows.length) showDet('loaded');
+  }
+  function showDet(srcTxt){
+    var el=document.getElementById('ci-det'); var n=dataRows().length;
+    document.getElementById('ci-next').disabled = n===0;
+    if(n>0){ el.style.display='block'; el.innerHTML='<b>'+fmt(n)+'</b> rows '+srcTxt+' · '+colCount()+' columns'+(CI.hasHeader?' · header row detected':'')+(n>100000?'<div class="warn">⏳ Large file — imported in the background; you\'ll be emailed when ready.</div>':''); }
+    else { el.style.display='none'; }
+  }
+  function step2(){
+    document.getElementById('ci-title').textContent='Import contacts · Map columns';
+    function sel(field,label,req){ var opts='<option value="-1">'+(req?'— required —':'— not mapped —')+'</option>'; for(var i=0;i<colCount();i++){ opts+='<option value="'+i+'"'+(CI.map[field]===i?' selected':'')+'>'+headerName(i)+'</option>'; } return '<label class="lbl">'+label+(req?' *':'')+'</label><select class="fld" data-map="'+field+'">'+opts+'</select>'; }
+    var dr=dataRows().slice(0,3);
+    var prev='<table class="prev"><thead><tr>'; for(var i=0;i<colCount();i++) prev+='<th>'+headerName(i)+'</th>'; prev+='</tr></thead><tbody>'+dr.map(function(r){ return '<tr>'+r.map(function(c){return '<td>'+(c||'')+'</td>';}).join('')+'</tr>'; }).join('')+'</tbody></table>';
+    bd.innerHTML=sel('email','Email column',true)+sel('first','First name',false)+sel('last','Last name',false)+'<div class="lbl">Preview</div>'+prev;
+    ft.innerHTML='<button class="btn" id="ci-back">← Back</button><button class="btn primary" id="ci-next2" '+(CI.map.email>=0?'':'disabled')+'>Next: review</button>';
+    bd.querySelectorAll('[data-map]').forEach(function(s){ s.addEventListener('change',function(){ CI.map[this.getAttribute('data-map')]=parseInt(this.value,10); document.getElementById('ci-next2').disabled = CI.map.email<0; }); });
+    document.getElementById('ci-back').addEventListener('click',function(){CI.step=1;render();});
+    document.getElementById('ci-next2').addEventListener('click',function(){ if(CI.map.email>=0){CI.step=3;render();} });
+  }
+  function step3(){
+    document.getElementById('ci-title').textContent='Import contacts · Review';
+    var s=stats();
+    bd.innerHTML='<div class="statrow"><div class="c"><div class="v" style="color:#15803D">'+fmt(s.valid)+'</div><div class="k">Will import</div></div><div class="c"><div class="v" style="color:#64748B">'+fmt(s.dup)+'</div><div class="k">Duplicates</div></div><div class="c"><div class="v" style="color:#B91C1C">'+fmt(s.invalid)+'</div><div class="k">Invalid</div></div></div>'+
+      '<p style="font-size:12.5px;color:#64748B">'+fmt(s.total)+' rows scanned. Duplicates and invalid addresses are skipped automatically. Suppressed / unsubscribed contacts are also excluded on send.</p>'+
+      '<label class="lbl">New list name</label><input class="fld" id="ci-name" value="'+CI.name+'">';
+    ft.innerHTML='<button class="btn" id="ci-back2">← Back</button><button class="btn primary" id="ci-create" '+(s.valid?'':'disabled')+'>Import '+fmt(s.valid)+' contacts</button>';
+    document.getElementById('ci-back2').addEventListener('click',function(){CI.step=2;render();});
+    document.getElementById('ci-create').addEventListener('click',function(){ var nm=(document.getElementById('ci-name').value||'Imported contacts').trim(); addListRow(nm, s.valid); close(); toastMsg('“'+nm+'” created · '+fmt(s.valid)+' contacts imported'); });
+  }
+  function addListRow(nm, count){
+    var host=document.querySelector('[data-pane="lists"] .cm-list'); if(!host) return;
+    var row=document.createElement('a'); row.className='cm-row'; row.href='atlas-outreach-lists.html';
+    row.style.animation='fadeUp .25s ease';
+    row.innerHTML='<div class="ico" style="background:var(--green-light);color:var(--green);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 16V6M8 10l4-4 4 4" transform="scale(0.55) translate(1 -3)"/><path d="M2 3.5h10M2 7h10M2 10.5h6"/></svg></div>'+
+      '<div class="body"><div class="ttl">'+nm+'</div><div class="meta"><span>'+count.toLocaleString()+' contacts</span><span>·</span><span>Imported CSV</span><span>·</span><span>Just now</span></div></div>'+
+      '<div class="recipients"><span class="muted" style="font-size:11.5px">Imported '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})+' · ready to send</span></div>'+
+      '<div class="metric"><span class="v">New</span></div>'+
+      '<span class="tag green">Active</span>';
+    host.insertBefore(row, host.firstChild);
+  }
+  function close(){ ov.classList.remove('show'); }
+  window.commsImport=function(){ ov=document.getElementById('ci-ov'); bd=document.getElementById('ci-bd'); ft=document.getElementById('ci-ft'); CI.step=1; CI.rows=[]; CI.map={email:-1,first:-1,last:-1}; render(); ov.classList.add('show'); ov.onclick=function(e){ if(e.target===ov) close(); }; };
+})();
+</script>
 <style id="atlas-rescue-css">
   #atlas-rescue-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background:#0F172A; color:white; padding:12px 18px; border-radius:10px; box-shadow:0 8px 24px rgba(15,23,42,.20); font-size:13px; font-family:'DM Sans',sans-serif; z-index:100010; display:flex; align-items:center; gap:10px; opacity:0; transition:opacity .2s,transform .2s; pointer-events:none; max-width: 480px; }
   #atlas-rescue-toast.show { opacity:1; transform:translateX(-50%); pointer-events:auto; }
