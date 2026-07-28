@@ -76,6 +76,12 @@
   .aud .nm{flex:1;font:600 13.5px 'DM Sans';color:var(--text)}
   .aud .sub{font-size:11.5px;color:var(--text-3)}
   .aud .cnt{font:700 14px 'DM Sans';color:var(--navy)}
+  .aud-search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 11px;margin-bottom:10px}
+  .aud-search svg{width:14px;height:14px;flex-shrink:0}
+  .aud-search input{border:none;outline:none;background:transparent;flex:1;font:400 13px 'DM Sans'}
+  .aud-search .aud-seln{font:600 11.5px 'DM Sans';color:var(--blue);background:var(--blue-pale);border-radius:99px;padding:3px 9px;white-space:nowrap}
+  .aud-scroll{max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:2px}
+  .aud-empty{padding:24px;text-align:center;color:var(--text-3);font-size:13px}
   .reach{background:var(--navy);color:#fff;border-radius:14px;padding:18px 20px;margin-top:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
   .reach .big{font-family:'DM Serif Display',serif;font-size:32px;line-height:1}
   .reach .k{font-size:11px;text-transform:uppercase;letter-spacing:.05em;opacity:.6}
@@ -94,6 +100,17 @@
   .tpl .thumb .mini .l.b{background:#2563EB;width:40%;height:8px}
   .tpl .nm{padding:10px 12px;font:600 13px 'DM Sans';color:var(--text)}
   .tpl .nm small{display:block;font-weight:400;color:var(--text-3);font-size:11px;margin-top:2px}
+  /* template card grid */
+  .tplc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:820px){.tplc-grid{grid-template-columns:repeat(2,1fr)}}
+  .tplc{position:relative;border:1px solid var(--border);border-radius:14px;padding:18px 16px;background:#fff;cursor:pointer;text-align:center;transition:all .12s}
+  .tplc:hover{border-color:var(--blue);box-shadow:0 8px 22px rgba(37,99,235,.12);transform:translateY(-2px)}
+  .tplc.on{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue)}
+  .tplc.blank{border-style:dashed}
+  .tplc-th{width:60px;height:60px;border-radius:14px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:28px}
+  .tplc-nm{font:600 14px 'DM Sans';color:var(--text);line-height:1.3}
+  .tplc-sub{font-size:11.5px;color:var(--text-3);margin-top:5px;line-height:1.4}
+  .tplc-chk{position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px}
   /* template list (screenshot style) */
   .tpl-bar{display:flex;gap:10px;margin-bottom:14px}
   .tpl-search{flex:1;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:9px;padding:9px 12px}
@@ -267,6 +284,16 @@
     {id:'lapsed',nm:'Lapsed + LYBUNT',sub:'Gave last year, not this year',n:312},
     {id:'firsttime',nm:'First-time donors (90d)',sub:'Recently acquired',n:842}
   ];
+  // Seed 100+ more lists for the heavy-data view
+  (function(){
+    var BASE=['Spring Appeal','Major Gift Cultivation','Welcome Series','Cathedral Capital','Annual Appeal','Lapsed donors','Monthly Sustainers','Board & Trustees','Volunteers','Gala invite','Parish leaders','Legacy Society','Recurring givers','Event attendees','DAF & matching','Young professionals','Choir & music','School families','Memorial gifts','Bishop\'s Circle'];
+    var SUF=['2026','· St. Mary\'s','· diocese-wide','· west deanery','· east deanery','· Q1','· Q2',''];
+    var CNT=[18,42,120,312,480,847,1240,3847,12800,54200,128540,312480];
+    function rnd(s){ var x=Math.sin(s*61.7+9.3)*43758.5453; return x-Math.floor(x); }
+    for(var i=0;i<104;i++){
+      LISTS.push({id:'L'+i, nm:(BASE[i%BASE.length]+' '+SUF[Math.floor(rnd(i*1.7)*SUF.length)]).trim(), sub:['Dynamic segment','Manual list','Imported CSV'][Math.floor(rnd(i*2.9)*3)], n:CNT[Math.floor(rnd(i*3.3)*CNT.length)]});
+    }
+  })();
   var TEMPLATES=[
     {id:'thankyou',nm:'Major-donor thank-you',sub:'Used 142 times · Last edited Apr 28 by Sarah R.',emoji:'💚',bg:'#DBEAFE',used:142,edited:20},
     {id:'receipt',nm:'Tax receipt · Pub 1771',sub:'Used 2,840 times · Auto-attached to gifts',emoji:'🧾',bg:'#FEF3C7',used:2840,edited:2},
@@ -286,9 +313,9 @@
     step:1, maxStep:1,
     name:'Cathedral year-end appeal', subject:'', preview:'',
     from:'Sarah Reynolds · sarah.reynolds@diocese.org', replyTo:'Same as From',
-    lists:[], manualEmails:[], abTest:false,
+    lists:[], manualEmails:[], abTest:false, audQuery:'',
     template:null, tplQuery:'', tplSort:'used', html:'', device:'desktop',
-    schedule:{mode:'now', date:'', time:'09:00', tz:'ET'}
+    schedule:{mode:'now', date:'', time:'09:00', tz:'America/New_York', optimize:false}
   };
 
   // builder html sync (from hidden/design iframe)
@@ -328,15 +355,19 @@
   }
   function stepAudience(){
     var g=grossCount(),su=suppressed(),r=reach();
-    return '<div class="wrap"><h2 class="step-h">Select audience</h2><p class="step-sub">Pick lists, tags, or segments — or type a few addresses. Suppressed contacts are removed automatically.</p>'+
-      '<div class="card"><h3 style="display:flex;align-items:center;justify-content:space-between">Lists &amp; segments <button class="btn" style="padding:6px 11px;font-size:12px" onclick="cwAddList()">+ Add new list</button></h3><div class="aud-list">'+
-      LISTS.map(function(l){ var on=S.lists.indexOf(l.id)!==-1; return '<div class="aud'+(on?' on':'')+'" data-l="'+l.id+'"><div class="ck">'+(on?'✓':'')+'</div><div style="flex:1"><div class="nm">'+l.nm+'</div><div class="sub">'+l.sub+'</div></div><div class="cnt">'+fmt(l.n)+'</div></div>'; }).join('')+
-      '</div>'+
-      '<div class="abrow"><label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="f-ab" '+(S.abTest?'checked':'')+'> Run an A/B test (split subject line across a sample first)</label></div>'+
-      '</div>'+
-      '<div class="card"><h3>Or send to specific people</h3><p class="hint" style="margin:-6px 0 10px">Type 2–4 email addresses to reach individuals without a list.</p>'+
+    var q=(S.audQuery||'').toLowerCase();
+    var shown=LISTS.filter(function(l){ return !q || (l.nm+' '+l.sub).toLowerCase().indexOf(q)!==-1; });
+    return '<div class="wrap"><h2 class="step-h">Select audience</h2><p class="step-sub">Add specific people, or pick from your lists &amp; segments. Suppressed contacts are removed automatically.</p>'+
+      // manual — on top so it\'s visible
+      '<div class="card"><h3>Send to specific people</h3><p class="hint" style="margin:-6px 0 10px">Type email addresses to reach individuals directly — great for a quick send.</p>'+
       '<div class="echips" id="echips">'+ (S.manualEmails.length? S.manualEmails.map(function(e,i){ return '<span class="echip">'+esc(e)+'<span class="x" data-i="'+i+'">×</span></span>'; }).join('') : '<span class="hint" style="align-self:center">No addresses added yet.</span>') +'</div>'+
       '<div style="display:flex;gap:8px;margin-top:10px"><input class="fld" id="manual-email" placeholder="name@email.org" style="flex:1"><button class="btn" id="add-email-btn">Add</button></div>'+
+      '</div>'+
+      // lists — searchable + scrollable (handles 100+)
+      '<div class="card"><h3 style="display:flex;align-items:center;justify-content:space-between">Lists &amp; segments · '+LISTS.length+' <button class="btn" style="padding:6px 11px;font-size:12px" onclick="cwAddList()">+ Add new list</button></h3>'+
+      '<div class="aud-search"><svg viewBox="0 0 14 14" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="aud-q" placeholder="Search '+LISTS.length+' lists & segments…" value="'+esc(S.audQuery)+'">'+(S.lists.length?'<span class="aud-seln">'+S.lists.length+' selected</span>':'')+'</div>'+
+      '<div class="aud-scroll">'+ (shown.length? shown.map(function(l){ var on=S.lists.indexOf(l.id)!==-1; return '<div class="aud'+(on?' on':'')+'" data-l="'+l.id+'"><div class="ck">'+(on?'✓':'')+'</div><div style="flex:1;min-width:0"><div class="nm">'+l.nm+'</div><div class="sub">'+l.sub+'</div></div><div class="cnt">'+fmt(l.n)+'</div></div>'; }).join('') : '<div class="aud-empty">No lists match “'+esc(S.audQuery)+'”.</div>') +'</div>'+
+      '<div class="abrow"><label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="f-ab" '+(S.abTest?'checked':'')+'> Run an A/B test (split subject line across a sample first)</label></div>'+
       '</div>'+
       '<div class="reach"><div><div class="k">Estimated reach</div><div class="big">'+fmt(r)+'</div></div>'+
       '<div class="sup">Lists gross: <b>'+fmt(g)+'</b><br>− Suppressed (unsub · bounced · DNC): <b>'+fmt(su)+'</b>'+(S.manualEmails.length?'<br>+ Manual addresses: <b>'+S.manualEmails.length+'</b>':'')+'<br>= Will receive: <b>'+fmt(r)+'</b></div></div>'+
@@ -349,14 +380,15 @@
     else if(S.tplSort==='name') list=list.slice().sort(function(a,b){return a.nm.localeCompare(b.nm);});
     else if(S.tplSort==='edited') list=list.slice().sort(function(a,b){return a.edited-b.edited;});
     var blankOn=S.template==='blank';
-    return '<div class="wrap"><h2 class="step-h">Choose a template</h2><p class="step-sub">Start blank or from a reusable template — it loads straight into the builder.</p>'+
+    return '<div class="wrap wide"><h2 class="step-h">Choose a template</h2><p class="step-sub">Start blank or from a reusable template — it loads straight into the builder.</p>'+
       '<div class="tpl-bar">'+
         '<div class="tpl-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="tpl-q" placeholder="Search templates…" value="'+esc(S.tplQuery)+'"></div>'+
         '<select class="fld" id="tpl-sort" style="max-width:190px"><option value="used"'+(S.tplSort==='used'?' selected':'')+'>Sort: Most used</option><option value="name"'+(S.tplSort==='name'?' selected':'')+'>Sort: Name A–Z</option><option value="edited"'+(S.tplSort==='edited'?' selected':'')+'>Sort: Recently edited</option></select>'+
       '</div>'+
-      '<div class="tpl-blank'+(blankOn?' on':'')+'" data-t="blank"><div class="tpl-th" style="background:#EFF6FF;color:#2563EB">＋</div><div style="flex:1"><div class="tnm">Start from blank</div><div class="tsub">Build your own layout in the drag-and-drop editor</div></div>'+(blankOn?'<span class="tpl-chk">✓</span>':'')+'</div>'+
-      '<div class="tpl-sech">Email templates · '+list.length+' shown</div>'+
-      '<div class="tpl-list">'+ (list.length? list.map(function(t){ var on=S.template===t.id; return '<div class="tpl-row'+(on?' on':'')+'" data-t="'+t.id+'"><div class="tpl-th" style="background:'+t.bg+'">'+t.emoji+'</div><div style="flex:1;min-width:0"><div class="tnm">'+t.nm+'</div><div class="tsub">'+t.sub+'</div></div>'+(on?'<span class="tpl-chk">✓</span>':'<span class="tpl-use">Use</span>')+'</div>'; }).join('') : '<div class="tpl-empty">No templates match “'+esc(S.tplQuery)+'”.</div>') +'</div></div>';
+      '<div class="tplc-grid">'+
+        '<div class="tplc blank'+(blankOn?' on':'')+'" data-t="blank">'+(blankOn?'<span class="tplc-chk">✓</span>':'')+'<div class="tplc-th" style="background:#EFF6FF;color:#2563EB;font-size:28px">＋</div><div class="tplc-nm">Start from blank</div><div class="tplc-sub">Build your own layout</div></div>'+
+        (list.length? list.map(function(t){ var on=S.template===t.id; return '<div class="tplc'+(on?' on':'')+'" data-t="'+t.id+'">'+(on?'<span class="tplc-chk">✓</span>':'')+'<div class="tplc-th" style="background:'+t.bg+'">'+t.emoji+'</div><div class="tplc-nm">'+t.nm+'</div><div class="tplc-sub">'+t.sub+'</div></div>'; }).join('') : '<div class="tpl-empty" style="grid-column:1/-1">No templates match “'+esc(S.tplQuery)+'”.</div>') +
+      '</div></div>';
   }
   function stepDesign(){
     return '<div class="wrap wide"><h2 class="step-h">Design your email</h2><p class="step-sub">Drag blocks to build the layout. Add personalization with merge fields.</p>'+
@@ -365,29 +397,83 @@
   }
   function stepPreview(){
     var checks=runValidation();
+    var fails=checks.filter(function(c){return c.s==='fail';}).length;
+    var warns=checks.filter(function(c){return c.s==='warn';}).length;
     var body=S.html || '<div style="padding:30px;text-align:center;color:#94A3B8">No content yet — go back to Design to build your email.</div>';
-    return '<div class="wrap"><h2 class="step-h">Preview &amp; test</h2><p class="step-sub">See it as recipients will, run the pre-send check, and send yourself a test.</p>'+
-      '<div class="pv-toolbar"><div class="devtog" id="devtog"><button class="'+(S.device==='desktop'?'on':'')+'" data-d="desktop">Desktop</button><button class="'+(S.device==='mobile'?'on':'')+'" data-d="mobile">Mobile</button></div>'+
-      '<button class="btn" onclick="cwTest()" style="margin-left:auto">Send test email</button></div>'+
-      '<div class="pv-frame'+(S.device==='mobile'?' mobile':'')+'"><div class="pv-head"><b>'+esc(S.from.split(' · ')[0])+'</b> &nbsp; '+esc(S.subject||'(no subject)')+'</div><div class="pv-body">'+body+'</div></div>'+
-      '<div class="card" style="margin-top:18px"><h3>Pre-send validation</h3><div>'+checks.map(function(c){ return '<div class="val '+c.s+'"><span class="ic">'+(c.s==='pass'?'✓':c.s==='warn'?'!':'✕')+'</span><div><div class="t">'+c.t+'</div><div class="s">'+c.d+'</div></div></div>'; }).join('')+'</div></div>'+
-      '</div>';
+    var status = fails? {c:'#B91C1C',bg:'#FEF2F2',bd:'#FCA5A5',t:fails+' issue'+(fails>1?'s':'')+' to fix before sending'} : warns? {c:'#B45309',bg:'#FFFBEB',bd:'#FCD34D',t:warns+' recommendation'+(warns>1?'s':'')+' — safe to send'} : {c:'#15803D',bg:'#F0FDF4',bd:'#86EFAC',t:'All checks passed — ready to send'};
+    var rows=checks.map(function(c){
+      var ic=c.s==='pass'?'✓':c.s==='warn'?'!':'✕';
+      var clickable=(c.s!=='pass' && c.g);
+      return '<div class="vrow val '+c.s+'"'+(clickable?' data-goto="'+c.g+'" role="button" tabindex="0" style="cursor:pointer"':'')+'>'+
+        '<span class="ic">'+ic+'</span>'+
+        '<div style="flex:1"><div class="t">'+c.t+'</div><div class="s">'+c.d+'</div>'+
+        (clickable?'<div class="fixlink" style="margin-top:5px;font-size:12px;font-weight:600;color:#2563EB">Fix in '+c.gl+' →</div>':'')+'</div></div>';
+    }).join('');
+    return '<div class="wrap wide"><h2 class="step-h">Preview &amp; test</h2><p class="step-sub">See it as recipients will, run the pre-send check, and send yourself a test.</p>'+
+      '<div class="pv-split" style="display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start">'+
+        '<div>'+
+          '<div class="pv-toolbar"><div class="devtog" id="devtog"><button class="'+(S.device==='desktop'?'on':'')+'" data-d="desktop">Desktop</button><button class="'+(S.device==='mobile'?'on':'')+'" data-d="mobile">Mobile</button></div>'+
+          '<button class="btn" onclick="cwTest()" style="margin-left:auto">Send test email</button></div>'+
+          '<div class="pv-frame'+(S.device==='mobile'?' mobile':'')+'"><div class="pv-head"><b>'+esc(S.from.split(' · ')[0])+'</b> &nbsp; '+esc(S.subject||'(no subject)')+'</div><div class="pv-body">'+body+'</div></div>'+
+        '</div>'+
+        '<aside class="pv-check" style="position:sticky;top:12px;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">'+
+          '<div style="padding:13px 16px;background:'+status.bg+';border-bottom:1px solid '+status.bd+'"><div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748B">Pre-send check</div><div style="font-weight:700;color:'+status.c+';font-size:14px;margin-top:2px">'+status.t+'</div></div>'+
+          '<div style="max-height:60vh;overflow:auto">'+rows+'</div>'+
+        '</aside>'+
+      '</div></div>';
+  }
+  window.gotoStep=function(n){ S.step=n; render(); };
+  // ── Scheduler helpers ──
+  var TZONES=[
+    {v:'America/New_York',ab:'ET',lb:'Eastern Time (ET) · New York'},
+    {v:'America/Chicago',ab:'CT',lb:'Central Time (CT) · Chicago'},
+    {v:'America/Denver',ab:'MT',lb:'Mountain Time (MT) · Denver'},
+    {v:'America/Los_Angeles',ab:'PT',lb:'Pacific Time (PT) · Los Angeles'},
+    {v:'America/Phoenix',ab:'MST',lb:'Arizona (MST) · Phoenix'},
+    {v:'America/Anchorage',ab:'AKT',lb:'Alaska Time (AKT) · Anchorage'},
+    {v:'Pacific/Honolulu',ab:'HT',lb:'Hawaii Time (HT) · Honolulu'},
+    {v:'UTC',ab:'UTC',lb:'Coordinated Universal Time (UTC)'},
+    {v:'Europe/London',ab:'GMT',lb:'London (GMT/BST)'}
+  ];
+  function tzOf(v){ for(var i=0;i<TZONES.length;i++){ if(TZONES[i].v===v) return TZONES[i]; } return TZONES[0]; }
+  function isoLocal(off){ var d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+(off||0)); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function nextMonday(){ var d=new Date(); d.setHours(0,0,0,0); var add=(8-d.getDay())%7; if(add===0) add=7; d.setDate(d.getDate()+add); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function prettyDate(iso){ if(!iso) return ''; var p=iso.split('-'); var d=new Date(+p[0],+p[1]-1,+p[2]); return d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}); }
+  function prettyTime(t){ if(!t) return ''; var p=t.split(':'),h=+p[0],m=p[1]; var ap=h<12?'AM':'PM'; var hh=h%12; if(hh===0)hh=12; return hh+':'+m+' '+ap; }
+  function whenText(){ if(S.schedule.mode==='now') return 'Immediately (throttled)'; if(!S.schedule.date) return 'Pick a date & time'; return prettyDate(S.schedule.date)+' · '+prettyTime(S.schedule.time)+' '+tzOf(S.schedule.tz).ab; }
+  function schedSummary(){
+    if(!S.schedule.date) return '<span style="color:#B45309">⚠ Choose a send date to continue.</span>';
+    var extra = S.schedule.optimize ? ' <span style="color:#2563EB">· Send-time optimization on — delivered near each recipient’s best open hour</span>' : '';
+    return '<b>Will send:</b> '+prettyDate(S.schedule.date)+' at <b>'+prettyTime(S.schedule.time)+' '+tzOf(S.schedule.tz).ab+'</b>'+extra;
   }
   function stepSend(){
     var r=reach();
-    var when = S.schedule.mode==='now' ? 'Immediately' : ((S.schedule.date||'a chosen date')+' · '+S.schedule.time+' '+S.schedule.tz);
     return '<div class="wrap"><h2 class="step-h">Send or schedule</h2><p class="step-sub">Final check before it goes out. Large sends are throttled to protect deliverability.</p>'+
       '<div class="confirm">'+
         '<div class="cr"><span class="k">Email</span><span class="v">'+esc(S.name)+'</span></div>'+
         '<div class="cr"><span class="k">Subject</span><span class="v">'+esc(S.subject||'—')+'</span></div>'+
         '<div class="cr"><span class="k">From</span><span class="v">'+esc(S.from.split(' · ')[0])+'</span></div>'+
         '<div class="cr"><span class="k">Audience</span><span class="v">'+fmt(r)+' recipients</span></div>'+
-        '<div class="cr"><span class="k">When</span><span class="v">'+when+'</span></div>'+
+        '<div class="cr"><span class="k">When</span><span class="v" id="when-v">'+whenText()+'</span></div>'+
       '</div>'+
       '<div class="card"><h3>Delivery</h3>'+
       '<div class="radio '+(S.schedule.mode==='now'?'on':'')+'" data-m="now"><input type="radio" name="sch" '+(S.schedule.mode==='now'?'checked':'')+'><div><div class="rt">Send now</div><div class="rs">Begins immediately · large sends throttled over ~30–60 min</div></div></div>'+
-      '<div class="radio '+(S.schedule.mode==='sched'?'on':'')+'" data-m="sched"><input type="radio" name="sch" '+(S.schedule.mode==='sched'?'checked':'')+'><div style="flex:1"><div class="rt">Schedule</div><div class="rs">Pick a date and time. Send-time optimization available.</div>'+
-        '<div id="sched-fields" style="display:'+(S.schedule.mode==='sched'?'flex':'none')+';gap:10px;margin-top:10px"><input class="fld" type="date" id="sch-date" value="'+S.schedule.date+'" style="max-width:170px"><input class="fld" type="time" id="sch-time" value="'+S.schedule.time+'" style="max-width:120px"><select class="fld" id="sch-tz" style="max-width:90px"><option>ET</option><option>CT</option><option>MT</option><option>PT</option></select></div>'+
+      '<div class="radio '+(S.schedule.mode==='sched'?'on':'')+'" data-m="sched"><input type="radio" name="sch" '+(S.schedule.mode==='sched'?'checked':'')+'><div style="flex:1"><div class="rt">Schedule for later</div><div class="rs">Pick a date, time and timezone. Send-time optimization available.</div>'+
+        '<div id="sched-fields" style="display:'+(S.schedule.mode==='sched'?'block':'none')+';margin-top:12px">'+
+          '<div style="font-size:12px;font-weight:600;color:#334155;margin-bottom:6px">Quick pick</div>'+
+          '<div class="sch-presets" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">'+
+            [['tom','Tomorrow'],['d3','In 3 days'],['mon','Next Monday'],['custom','Custom date']].map(function(p){
+              var on=(S.schedule.preset===p[0]); return '<button type="button" class="sch-chip'+(on?' on':'')+'" data-preset="'+p[0]+'" style="border:1px solid '+(on?'#2563EB':'#E2E8F0')+';background:'+(on?'#EFF6FF':'#fff')+';color:'+(on?'#1D4ED8':'#334155')+';border-radius:20px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer">'+p[1]+'</button>';
+            }).join('')+
+          '</div>'+
+          '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">'+
+            '<div><label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:4px">Date</label><input class="fld" type="date" id="sch-date" value="'+S.schedule.date+'" min="'+isoLocal(0)+'" style="max-width:180px"></div>'+
+            '<div><label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:4px">Time</label><input class="fld" type="time" id="sch-time" value="'+S.schedule.time+'" style="max-width:130px"></div>'+
+            '<div style="flex:1;min-width:220px"><label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:4px">Timezone</label><select class="fld" id="sch-tz" style="width:100%">'+TZONES.map(function(z){return '<option value="'+z.v+'"'+(S.schedule.tz===z.v?' selected':'')+'>'+z.lb+'</option>';}).join('')+'</select></div>'+
+          '</div>'+
+          '<label style="display:flex;gap:9px;align-items:flex-start;margin-top:14px;font-size:13px;color:#334155;cursor:pointer"><input type="checkbox" id="sch-opt" '+(S.schedule.optimize?'checked':'')+' style="margin-top:2px"><span><b>Send-time optimization</b><br><span style="color:#64748B;font-size:12px">Deliver near each recipient’s most-likely open time, within a few hours of your scheduled slot.</span></span></label>'+
+          '<div id="sch-summary" style="margin-top:14px;padding:11px 13px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:9px;font-size:13px;color:#334155">'+schedSummary()+'</div>'+
+        '</div>'+
       '</div></div>'+
       '</div></div>';
   }
@@ -396,18 +482,18 @@
     var scheduled=S.schedule.mode==='sched';
     return '<div class="wrap"><div class="sent"><div class="big-ic">'+(scheduled?'⏱':'✓')+'</div>'+
       '<h2>'+(scheduled?'Email scheduled':'Email sent')+'</h2>'+
-      '<p>'+(scheduled?('“'+esc(S.name)+'” will send to '+fmt(r)+' recipients on '+(S.schedule.date||'the chosen date')+' at '+S.schedule.time+' '+S.schedule.tz+'.'):('“'+esc(S.name)+'” is going out to '+fmt(r)+' recipients now. Delivery is throttled to protect your sender reputation.'))+'</p>'+
+      '<p>'+(scheduled?('“'+esc(S.name)+'” will send to '+fmt(r)+' recipients on '+prettyDate(S.schedule.date)+' at '+prettyTime(S.schedule.time)+' '+tzOf(S.schedule.tz).ab+'.'):('“'+esc(S.name)+'” is going out to '+fmt(r)+' recipients now. Delivery is throttled to protect your sender reputation.'))+'</p>'+
       '<div style="display:flex;gap:12px;justify-content:center;margin-top:22px"><a class="btn" href="atlas-communications.html">Back to Communications</a><a class="btn primary" href="atlas-message-detail.html?subj='+encodeURIComponent(S.subject||S.name)+'&type=appeal&recips='+r+'&del=0.986&open=0.25">View analytics</a></div>'+
       '</div></div>';
   }
 
   function runValidation(){
     var h=(S.html||'').toLowerCase(), out=[];
-    out.push(S.subject.trim() ? {s:'pass',t:'Subject line set',d:'“'+esc(S.subject)+'”'} : {s:'fail',t:'Subject line missing',d:'Add a subject in Email details.'});
-    out.push(reach()>0 ? {s:'pass',t:'Audience selected',d:fmt(reach())+' recipients after suppression'} : {s:'fail',t:'No audience',d:'Select at least one list or segment.'});
-    out.push(S.html ? {s:'pass',t:'Email content added',d:'Built in the drag-and-drop editor'} : {s:'warn',t:'No content yet',d:'Design your email before sending.'});
-    out.push(h.indexOf('unsubscribe')!==-1 ? {s:'pass',t:'Unsubscribe link present',d:'Required by CAN-SPAM'} : {s:'warn',t:'No unsubscribe link found',d:'Add a Footer block — it includes the unsubscribe link.'});
-    out.push((h.indexOf('albany')!==-1||h.indexOf('address')!==-1||h.indexOf('st ')!==-1) ? {s:'pass',t:'Physical mailing address present',d:'Required by CAN-SPAM'} : {s:'warn',t:'Mailing address not detected',d:'Include your address in the footer.'});
+    out.push(S.subject.trim() ? {s:'pass',t:'Subject line set',d:'“'+esc(S.subject)+'”'} : {s:'fail',t:'Subject line missing',d:'Add a subject in Email details.',g:1,gl:'Email details'});
+    out.push(reach()>0 ? {s:'pass',t:'Audience selected',d:fmt(reach())+' recipients after suppression'} : {s:'fail',t:'No audience',d:'Select at least one list or segment.',g:2,gl:'Select audience'});
+    out.push(S.html ? {s:'pass',t:'Email content added',d:'Built in the drag-and-drop editor'} : {s:'warn',t:'No content yet',d:'Design your email before sending.',g:4,gl:'Design email'});
+    out.push(h.indexOf('unsubscribe')!==-1 ? {s:'pass',t:'Unsubscribe link present',d:'Required by CAN-SPAM'} : {s:'warn',t:'No unsubscribe link found',d:'Add a Footer block — it includes the unsubscribe link.',g:4,gl:'Design email'});
+    out.push((h.indexOf('albany')!==-1||h.indexOf('address')!==-1||h.indexOf('st ')!==-1) ? {s:'pass',t:'Physical mailing address present',d:'Required by CAN-SPAM'} : {s:'warn',t:'Mailing address not detected',d:'Include your address in the footer.',g:4,gl:'Design email'});
     var merges=((S.html||'').match(/{{/g)||[]).length;
     out.push({s:'pass',t:'Merge fields',d:merges+' found · will resolve per recipient at send'});
     out.push({s:'pass',t:'Sender authentication',d:'SPF + DKIM verified for diocese.org'});
@@ -459,20 +545,39 @@
       var ae=$('add-email-btn'); if(ae) ae.addEventListener('click', addEmail);
       var me=$('manual-email'); if(me) me.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); addEmail(); } });
       var ec=$('echips'); if(ec) ec.addEventListener('click', function(e){ var x=e.target.closest('.x'); if(!x) return; S.manualEmails.splice(+x.dataset.i,1); render(); });
+      var aq=$('aud-q'); if(aq) aq.addEventListener('input', function(){ S.audQuery=this.value; var pos=this.selectionStart; render(); var n=$('aud-q'); if(n){ n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){}} });
     } else if(k==='template'){
-      body_.querySelectorAll('.tpl-row,.tpl-blank').forEach(function(el){ el.addEventListener('click',function(){ S.template=el.dataset.t; render(); var t=TEMPLATES.filter(function(x){return x.id===S.template;})[0]; toast((t?t.nm:'Blank')+' selected'); }); });
+      body_.querySelectorAll('.tplc').forEach(function(el){ el.addEventListener('click',function(){ S.template=el.dataset.t; render(); var t=TEMPLATES.filter(function(x){return x.id===S.template;})[0]; toast((t?t.nm:'Blank')+' selected'); }); });
       var tq=$('tpl-q'); if(tq){ tq.addEventListener('input',function(){ S.tplQuery=this.value; var pos=this.selectionStart; render(); var n=$('tpl-q'); if(n){ n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){}}}); }
       var ts=$('tpl-sort'); if(ts) ts.addEventListener('change',function(){ S.tplSort=this.value; render(); });
     } else if(k==='design'){
       var fr=$('eb-design'); if(fr){ fr.addEventListener('load',function(){ /* if a template chosen, load into builder */ if(S.template && S.template!=='blank'){ try{ fr.contentWindow.postMessage({type:'eb-request'},'*'); }catch(_){} } }); }
     } else if(k==='preview'){
       var dt=$('devtog'); if(dt) dt.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; S.device=b.dataset.d; render(); });
+      body_.querySelectorAll('[data-goto]').forEach(function(el){
+        el.addEventListener('click',function(){ gotoStep(+el.dataset.goto); });
+        el.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); gotoStep(+el.dataset.goto); } });
+        el.addEventListener('mouseenter',function(){ el.style.background='#F8FAFC'; });
+        el.addEventListener('mouseleave',function(){ el.style.background=''; });
+      });
     } else if(k==='send'){
       body_.querySelectorAll('.radio').forEach(function(el){ el.addEventListener('click',function(){ S.schedule.mode=el.dataset.m; render(); }); });
-      var sd=$('sch-date'), stime=$('sch-time'), stz=$('sch-tz');
-      if(sd) sd.addEventListener('change',function(){S.schedule.date=this.value;});
-      if(stime) stime.addEventListener('change',function(){S.schedule.time=this.value;});
-      if(stz) stz.addEventListener('change',function(){S.schedule.tz=this.value;});
+      function refreshSched(){ var s=$('sch-summary'); if(s) s.innerHTML=schedSummary(); var w=$('when-v'); if(w) w.textContent=whenText(); var fp=$('f-primary'); if(fp && S.step===6) fp.textContent=(S.schedule.mode==='sched'?'Schedule email':'Send to '+fmt(reach())+' recipients'); }
+      var sd=$('sch-date'), stime=$('sch-time'), stz=$('sch-tz'), sopt=$('sch-opt');
+      if(sd) sd.addEventListener('change',function(){S.schedule.date=this.value; S.schedule.preset='custom'; body_.querySelectorAll('.sch-chip').forEach(function(c){ var on=c.dataset.preset==='custom'; c.classList.toggle('on',on); c.style.borderColor=on?'#2563EB':'#E2E8F0'; c.style.background=on?'#EFF6FF':'#fff'; c.style.color=on?'#1D4ED8':'#334155'; }); refreshSched();});
+      if(stime) stime.addEventListener('input',function(){S.schedule.time=this.value; refreshSched();});
+      if(stz) stz.addEventListener('change',function(){S.schedule.tz=this.value; refreshSched();});
+      if(sopt) sopt.addEventListener('change',function(){S.schedule.optimize=this.checked; refreshSched();});
+      body_.querySelectorAll('.sch-chip').forEach(function(c){ c.addEventListener('click',function(){
+        var p=c.dataset.preset; S.schedule.preset=p;
+        if(p==='tom') S.schedule.date=isoLocal(1);
+        else if(p==='d3') S.schedule.date=isoLocal(3);
+        else if(p==='mon') S.schedule.date=nextMonday();
+        body_.querySelectorAll('.sch-chip').forEach(function(x){ var on=x===c; x.classList.toggle('on',on); x.style.borderColor=on?'#2563EB':'#E2E8F0'; x.style.background=on?'#EFF6FF':'#fff'; x.style.color=on?'#1D4ED8':'#334155'; });
+        var di=$('sch-date'); if(di && p!=='custom') di.value=S.schedule.date;
+        if(p==='custom'){ var d2=$('sch-date'); if(d2) d2.focus(); }
+        refreshSched();
+      }); });
     }
   }
   var body_={ querySelectorAll:function(s){ return $('stepbody').querySelectorAll(s); } };
@@ -480,7 +585,7 @@
   function doSend(){
     var ov=$('ov');
     var r=reach(), sch=S.schedule.mode==='sched';
-    ov.innerHTML='<div class="m"><div class="mh"><h3>'+(sch?'Schedule this email?':'Send to '+fmt(r)+' recipients?')+'</h3><p>'+(sch?('It will send on '+(S.schedule.date||'the chosen date')+' at '+S.schedule.time+' '+S.schedule.tz+'.'):('“'+esc(S.name)+'” will begin sending immediately.'))+'</p></div>'+
+    ov.innerHTML='<div class="m"><div class="mh"><h3>'+(sch?'Schedule this email?':'Send to '+fmt(r)+' recipients?')+'</h3><p>'+(sch?('It will send on '+prettyDate(S.schedule.date)+' at '+prettyTime(S.schedule.time)+' '+tzOf(S.schedule.tz).ab+'.'):('“'+esc(S.name)+'” will begin sending immediately.'))+'</p></div>'+
       '<div class="mb" style="font-size:13px;color:#334155">This action can\'t be undone once delivery starts. Suppressed contacts are excluded automatically.</div>'+
       '<div class="mf"><button class="btn" id="c-cancel">Cancel</button><button class="btn primary" id="c-go">'+(sch?'Schedule':'Send now')+'</button></div></div>';
     ov.classList.add('show');

@@ -99,7 +99,7 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .divhr{border:none;border-top:2px solid #D8DEE7;margin:6px 0}
   .btn-block{text-align:center}
-  .btn-block a{display:inline-block;background:var(--btn-color);color:#fff;padding:12px 30px;border-radius:8px;font-weight:600;text-decoration:none}
+  .btn-block a{display:inline-block;background:var(--btn-color);color:#fff;padding:12px 30px;border-radius:var(--btn-radius,8px);font-weight:600;text-decoration:none}
   .social{text-align:center}
   .social a{display:inline-block;width:36px;height:36px;line-height:36px;border-radius:50%;background:var(--navy);color:#fff;text-decoration:none;margin:0 5px;font-weight:700;text-align:center}
   .foot{text-align:center;font-size:11.5px;color:#94A3B8;line-height:1.7}
@@ -145,7 +145,27 @@
   .align-tog button{border:none;background:#fff;padding:7px 12px;cursor:pointer;color:var(--text-3);font-size:13px}
   .align-tog button.on{background:var(--blue);color:#fff}
   .set-actions{display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+  .mergechips{display:flex;flex-wrap:wrap;gap:6px}
+  .mchip{border:1px solid #DBEAFE;background:var(--blue-pale);color:var(--blue);border-radius:99px;padding:5px 10px;font:600 11.5px 'DM Sans';cursor:pointer}
+  .mchip:hover{background:#DBEAFE}
 
+  #eb-pv{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:150;display:none;align-items:center;justify-content:center;padding:24px}
+  #eb-pv.show{display:flex}
+  #eb-pv .pcard{background:#fff;border-radius:16px;width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(15,23,42,.35)}
+  #eb-pv .phd{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+  #eb-pv .phd h3{font-family:'DM Serif Display',serif;font-size:18px;color:var(--navy)}
+  #eb-pv .pdevs{display:inline-flex;background:var(--surface);border-radius:9px;padding:3px}
+  #eb-pv .pdevs button{border:none;background:transparent;border-radius:7px;padding:6px 11px;font:600 11.5px 'DM Sans';color:var(--text-3);cursor:pointer}
+  #eb-pv .pdevs button.on{background:#fff;color:var(--navy);box-shadow:0 1px 2px rgba(15,23,42,.08)}
+  #eb-pv .px{margin-left:auto;width:28px;height:28px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;color:var(--text-3)}
+  #eb-pv .pstage{flex:1;overflow-y:auto;background:var(--surface);padding:22px;display:flex;justify-content:center}
+  #eb-pv .pframe{background:#fff;width:600px;transition:width .2s;border-radius:10px;border:1px solid var(--border);overflow:hidden}
+  #eb-pv .pframe.tablet{width:480px}#eb-pv .pframe.mobile{width:340px}
+  #eb-pv .pframe.dark{background:#0F172A;color:#CBD5E1}
+  #eb-pv .pfhd{padding:10px 16px;border-bottom:1px solid var(--border);font-size:11.5px;color:var(--text-3)}
+  #eb-pv .pframe.dark .pfhd{color:#94A3B8;border-color:#1E293B}
+  #eb-pv .pfbody{padding:8px}
+  #eb-pv .pnote{padding:10px 20px;border-top:1px solid var(--border);font-size:12px;color:var(--text-3)}
   #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:#0F172A;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;z-index:200;opacity:0;transition:.2s;display:flex;gap:10px;align-items:center}
   #toast.show{opacity:1;transform:translateX(-50%)}
   #toast .i{width:20px;height:20px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px}
@@ -201,11 +221,15 @@
       <span class="tb-title" id="eb-title">Email builder</span>
       <input id="eb-tplname" placeholder="Template name…" style="display:none;border:1px solid var(--border);border-radius:8px;padding:7px 11px;font:500 13px 'DM Sans';min-width:220px">
       <div class="tb-actions">
+        <span id="eb-saved" style="font-size:11.5px;color:var(--green);display:flex;align-items:center;gap:5px;margin-right:4px">✓ Auto-saved</span>
         <div class="device-tog" id="device"><button class="on" data-d="desktop">Desktop</button><button data-d="mobile">Mobile</button></div>
+        <button class="btn" id="eb-preview" onclick="ebPreview()"><svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-right:4px;vertical-align:-1px"><circle cx="7" cy="7" r="2"/><path d="M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z"/></svg>Preview</button>
         <button class="btn" id="eb-save" onclick="ebSave()">Save</button>
+        <button class="btn" id="eb-savedraft" onclick="ebSave()" style="display:none">Save draft</button>
         <button class="btn" id="eb-test" onclick="ebTest()">Send test</button>
+        <button class="btn" id="eb-history" onclick="ebHistory()" style="display:none">History</button>
         <button class="btn primary" id="eb-continue" onclick="ebContinue()">Continue →</button>
-        <button class="btn primary" id="eb-savetpl" onclick="ebSaveTemplate()" style="display:none">Save template</button>
+        <button class="btn primary" id="eb-savetpl" onclick="ebSaveTemplate()" style="display:none">Publish template</button>
       </div>
     </div>
 
@@ -246,6 +270,7 @@
     {t:'text',n:'Text',ico:lines()},
     {t:'boxed',n:'Boxed Text',ico:boxed()},
     {t:'divider',n:'Divider',ico:divider()},
+    {t:'spacer',n:'Spacer',ico:spacerIco()},
     {t:'image',n:'Image',ico:img()},
     {t:'imagegroup',n:'Image Group',ico:imgGroup()},
     {t:'imagecard',n:'Image Card',ico:imgCard()},
@@ -269,20 +294,25 @@
   function footIco(){return '<svg viewBox="0 0 38 30"><g stroke="currentColor" stroke-width="1.3"><path d="M6 8h26M6 12h20"/></g><rect x="6" y="17" width="26" height="6" rx="1.5" fill="currentColor" opacity=".3"/></svg>';}
   function videoIco(){return '<svg viewBox="0 0 38 30"><rect x="5" y="5" width="28" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M16 11l7 4-7 4z" fill="currentColor"/></svg>';}
   function codeIco(){return '<svg viewBox="0 0 38 30"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 10l-5 5 5 5M24 10l5 5-5 5"/></g></svg>';}
+  function spacerIco(){return '<svg viewBox="0 0 38 30"><g stroke="currentColor" stroke-width="1.3"><path d="M8 8h22M8 22h22"/><path d="M19 11v8M16 12l3-3 3 3M16 18l3 3 3-3" fill="none"/></g></svg>';}
 
+  // ── Social networks: labels + default profile URLs ──
+  var SOCIAL_META={f:{lb:'Facebook',url:'https://facebook.com/StMarysCathedralAlbany'},X:{lb:'X / Twitter',url:'https://x.com/StMarysCathAlb'},in:{lb:'LinkedIn',url:'https://linkedin.com/company/diocese-of-albany'},ig:{lb:'Instagram',url:'https://instagram.com/stmaryscathedral'},yt:{lb:'YouTube',url:'https://youtube.com/@stmaryscathedral'}};
+  function defaultUrls(nets){ var o={}; nets.forEach(function(n){ o[n]=(SOCIAL_META[n]||{}).url||'#'; }); return o; }
   // ── Block factory (default data) ──
   function makeBlock(type){
     var id='b'+(Math.random().toString(36).slice(2,8));
     var defaults={
-      text:{align:'left',html:"<h1>It's time to design your email.</h1><p>Now that you've selected a template, define the layout of your message by adding, rearranging, and deleting content blocks. Click <strong>Design</strong> to set fonts, colors, and styles.</p><p>Need inspiration? <a href='#'>See what others are doing</a> or learn about email design.</p>"},
+      text:{align:'left',html:"<h1>It's time to design your email.</h1><p>Now that you've selected a template, define the layout of your message by adding, rearranging, and deleting content blocks. Click <strong>Design</strong> to set fonts, colors, and styles.</p><p>Need inspiration? <a href='#' data-insp='1'>See what others are doing</a> or learn about email design.</p>"},
       boxed:{align:'left',html:"<p><strong>A note from Father Michael</strong></p><p>Thank you for being part of the Cathedral family. Your generosity keeps the restoration moving.</p>"},
       divider:{color:'#D8DEE7',thick:2},
-      image:{alt:'Image',align:'center',url:''},
-      imagegroup:{},
-      imagecard:{caption:'Your caption goes here.'},
-      imagecaption:{caption:'Your text caption goes here. Change position and width in block settings.'},
-      socialshare:{nets:['f','X','in']},
-      socialfollow:{nets:['f','in','ig','X']},
+      spacer:{h:24},
+      image:{alt:'Image',align:'center',url:'',src:''},
+      imagegroup:{srcs:['','','','']},
+      imagecard:{caption:'Your caption goes here.',src:''},
+      imagecaption:{caption:'Your text caption goes here. Change position and width in block settings.',src:''},
+      socialshare:{nets:['f','X','in'],urls:defaultUrls(['f','X','in'])},
+      socialfollow:{nets:['f','in','ig','X'],urls:defaultUrls(['f','in','ig','X'])},
       button:{label:'Donate now',url:'https://give.diocese.org',align:'center',color:'#2563EB'},
       footer:{html:"St. Mary's Cathedral · 125 Eagle St, Albany, NY 12202<br>Copyright © 2026 · All rights reserved.<br><a href='#'>Update preferences</a> · <a href='#'>Unsubscribe</a>"},
       video:{title:'Watch: the bell tower restoration'},
@@ -302,6 +332,11 @@
 
   function findBlock(id){ for(var s in MODEL){ for(var i=0;i<MODEL[s].length;i++){ if(MODEL[s][i].id===id) return {sec:s,idx:i,b:MODEL[s][i]}; } } return null; }
 
+  // image slot: shows uploaded image or an upload placeholder (click / drop to replace)
+  function imgSlot(id,slot,src,compact){
+    if(src) return '<img src="'+src+'" class="img-real" data-blk="'+id+'" data-slot="'+slot+'" style="max-width:100%;border-radius:8px;display:block;margin:0 auto;cursor:pointer" title="Click to replace">';
+    return '<div class="img-ph" data-blk="'+id+'" data-slot="'+slot+'"'+(compact?' style="padding:20px"':'')+'><span class="ico">🖼</span>'+(compact?'':'Drop an image here')+(compact?'':'<span style="opacity:.6">or</span>')+'<span class="br">Browse</span></div>';
+  }
   // ── Render a block's inner HTML ──
   function blockInner(b){
     var d=b.data;
@@ -309,12 +344,13 @@
       case 'text': return '<div class="bk-inner" contenteditable="true" data-edit="html" style="text-align:'+d.align+'">'+d.html+'</div>';
       case 'boxed': return '<div class="bk-inner"><div class="bx" contenteditable="true" data-edit="html" style="text-align:'+d.align+'">'+d.html+'</div></div>';
       case 'divider': return '<div class="bk-inner"><hr class="divhr" style="border-top:'+d.thick+'px solid '+d.color+'"></div>';
-      case 'image': return '<div class="bk-inner"><div class="img-ph"><span class="ico">🖼</span>Drop an image here<span style="opacity:.6">or</span><span class="br">Browse</span></div></div>';
-      case 'imagegroup': return '<div class="bk-inner"><div class="grid2">'+[0,0,0,0].map(function(){return '<div class="img-ph" style="padding:20px"><span class="ico">🖼</span></div>';}).join('')+'</div></div>';
-      case 'imagecard': return '<div class="bk-inner"><div class="img-ph"><span class="ico">🖼</span>Drop an image here<span class="br">Browse</span></div><p contenteditable="true" data-edit="caption" style="font-size:13px;color:#64748B;margin-top:10px">'+esc(d.caption)+'</p></div>';
-      case 'imagecaption': return '<div class="bk-inner" style="display:flex;gap:14px;align-items:flex-start"><div class="img-ph" style="flex:0 0 42%;padding:22px"><span class="ico">🖼</span></div><p contenteditable="true" data-edit="caption" style="flex:1;font-size:13px;color:#334155">'+esc(d.caption)+'</p></div>';
+      case 'spacer': return '<div class="bk-inner" style="padding:0"><div style="height:'+d.h+'px;background:repeating-linear-gradient(45deg,#F1F5F9,#F1F5F9 6px,#fff 6px,#fff 12px);border-radius:4px"></div></div>';
+      case 'image': return '<div class="bk-inner">'+imgSlot(b.id,0,d.src)+'</div>';
+      case 'imagegroup': return '<div class="bk-inner"><div class="grid2">'+[0,1,2,3].map(function(k){return imgSlot(b.id,k,(d.srcs||[])[k],true);}).join('')+'</div></div>';
+      case 'imagecard': return '<div class="bk-inner">'+imgSlot(b.id,0,d.src)+'<p contenteditable="true" data-edit="caption" style="font-size:13px;color:#64748B;margin-top:10px">'+esc(d.caption)+'</p></div>';
+      case 'imagecaption': return '<div class="bk-inner" style="display:flex;gap:14px;align-items:flex-start"><div style="flex:0 0 42%">'+imgSlot(b.id,0,d.src,true)+'</div><p contenteditable="true" data-edit="caption" style="flex:1;font-size:13px;color:#334155">'+esc(d.caption)+'</p></div>';
       case 'socialshare':
-      case 'socialfollow': return '<div class="bk-inner"><div class="social">'+d.nets.map(function(n){return '<a href="#">'+n+'</a>';}).join('')+'</div></div>';
+      case 'socialfollow': return '<div class="bk-inner"><div class="social">'+d.nets.map(function(n){return '<a href="'+esc((d.urls&&d.urls[n])||'#')+'" target="_blank" rel="noopener">'+n+'</a>';}).join('')+'</div></div>';
       case 'button': return '<div class="bk-inner"><div class="btn-block" style="text-align:'+d.align+'"><a href="'+esc(d.url)+'" style="background:'+d.color+'">'+esc(d.label)+'</a></div></div>';
       case 'footer': return '<div class="bk-inner"><div class="foot">'+d.html+'</div></div>';
       case 'video': return '<div class="bk-inner"><div class="videobk"><div class="thumb"><span class="play">▶</span></div><p style="text-align:center;font-size:13px;color:#334155;margin-top:8px">'+esc(d.title)+'</p></div></div>';
@@ -352,9 +388,12 @@
       case 'text': return '<div style="text-align:'+d.align+'">'+d.html+'</div>';
       case 'boxed': return '<div style="background:#F1F5F9;border-radius:8px;padding:16px 18px;text-align:'+d.align+'">'+d.html+'</div>';
       case 'divider': return '<hr style="border:none;border-top:'+d.thick+'px solid '+d.color+';margin:16px 0">';
-      case 'image': case 'imagegroup': return '<div style="text-align:center;color:#94A3B8;padding:22px;border:1px dashed #E2E8F0;border-radius:8px">[ '+(b.type==='imagegroup'?'Image group':'Image')+' ]</div>';
-      case 'imagecard': case 'imagecaption': return '<div style="text-align:center;color:#94A3B8;padding:22px;border:1px dashed #E2E8F0;border-radius:8px">[ Image ]<div style="font-size:13px;color:#334155;margin-top:8px">'+esc(d.caption)+'</div></div>';
-      case 'socialshare': case 'socialfollow': return '<div style="text-align:center">'+d.nets.map(function(n){return '<a href="#" style="display:inline-block;width:34px;height:34px;line-height:34px;border-radius:50%;background:#0E1E35;color:#fff;text-decoration:none;margin:0 4px;font-weight:700;text-align:center">'+n+'</a>';}).join('')+'</div>';
+      case 'spacer': return '<div style="height:'+d.h+'px"></div>';
+      case 'image': return d.src ? '<img src="'+d.src+'" alt="'+esc(d.alt||'')+'" style="max-width:100%;display:block;margin:0 auto;border-radius:8px">' : '<div style="text-align:center;color:#94A3B8;padding:22px;border:1px dashed #E2E8F0;border-radius:8px">[ Image ]</div>';
+      case 'imagegroup': return '<table width="100%" cellpadding="0" cellspacing="6"><tr>'+[0,1].map(function(k){return '<td width="50%">'+((d.srcs||[])[k]?'<img src="'+d.srcs[k]+'" style="width:100%;border-radius:6px">':'<div style="color:#94A3B8;padding:18px;border:1px dashed #E2E8F0;border-radius:6px;text-align:center">[ Image ]</div>')+'</td>';}).join('')+'</tr><tr>'+[2,3].map(function(k){return '<td width="50%">'+((d.srcs||[])[k]?'<img src="'+d.srcs[k]+'" style="width:100%;border-radius:6px">':'<div style="color:#94A3B8;padding:18px;border:1px dashed #E2E8F0;border-radius:6px;text-align:center">[ Image ]</div>')+'</td>';}).join('')+'</tr></table>';
+      case 'imagecard': return (d.src?'<img src="'+d.src+'" style="max-width:100%;display:block;margin:0 auto;border-radius:8px">':'<div style="text-align:center;color:#94A3B8;padding:22px;border:1px dashed #E2E8F0;border-radius:8px">[ Image ]</div>')+'<div style="font-size:13px;color:#334155;margin-top:8px;text-align:center">'+esc(d.caption)+'</div>';
+      case 'imagecaption': return '<table width="100%"><tr><td width="42%" valign="top">'+(d.src?'<img src="'+d.src+'" style="width:100%;border-radius:8px">':'<div style="color:#94A3B8;padding:20px;border:1px dashed #E2E8F0;border-radius:8px;text-align:center">[ Image ]</div>')+'</td><td valign="top" style="padding-left:12px;font-size:13px;color:#334155">'+esc(d.caption)+'</td></tr></table>';
+      case 'socialshare': case 'socialfollow': return '<div style="text-align:center">'+d.nets.map(function(n){return '<a href="'+esc((d.urls&&d.urls[n])||'#')+'" style="display:inline-block;width:34px;height:34px;line-height:34px;border-radius:50%;background:#0E1E35;color:#fff;text-decoration:none;margin:0 4px;font-weight:700;text-align:center">'+n+'</a>';}).join('')+'</div>';
       case 'button': return '<div style="text-align:'+d.align+';margin:16px 0"><a href="'+esc(d.url)+'" style="display:inline-block;background:'+d.color+';color:#fff;padding:12px 28px;border-radius:8px;font-weight:600;text-decoration:none">'+esc(d.label)+'</a></div>';
       case 'footer': return '<div style="text-align:center;font-size:11.5px;color:#94A3B8;line-height:1.7">'+d.html+'</div>';
       case 'video': return '<div style="text-align:center"><div style="background:#111;border-radius:8px;height:160px;line-height:160px;color:#fff">▶</div><div style="font-size:13px;color:#334155;margin-top:8px">'+esc(d.title)+'</div></div>';
@@ -363,7 +402,23 @@
     }
   }
   function serializeEmail(){ var out=''; ['header','body','footer'].forEach(function(s){ MODEL[s].forEach(function(b){ out+='<div style="margin:14px 22px">'+cleanInner(b)+'</div>'; }); }); return out; }
-  function sync(){ if(EMBED && window.parent!==window){ try{ window.parent.postMessage({type:'eb-html', html:serializeEmail()}, '*'); }catch(_){} } }
+  function flashSaved(){ var s=document.getElementById('eb-saved'); if(!s) return; s.textContent='Saving…'; s.style.color='var(--text-3)'; clearTimeout(s._t); s._t=setTimeout(function(){ s.textContent='✓ Auto-saved'; s.style.color='var(--green)'; },500); }
+  function sync(){ flashSaved(); if(EMBED && window.parent!==window){ try{ window.parent.postMessage({type:'eb-html', html:serializeEmail()}, '*'); }catch(_){} } }
+  // ── Preview (Desktop / Tablet / Mobile / Dark · sample data) ──
+  var SAMPLE={first_name:'Margaret',last_name:"O'Brien",org_name:'Diocese of Albany',parish_name:"St. Mary's Cathedral",donation_amount:'$10,000',event_name:"Bishop's Annual Gala"};
+  function resolveMerge(html){ return String(html||'').replace(/\{\{?\s*([a-z_]+)\s*\}?\}/gi,function(m,k){ return SAMPLE[k]!=null?('<span style="background:#EFF6FF;color:#2563EB;border-radius:3px;padding:0 2px">'+SAMPLE[k]+'</span>'):m; }); }
+  var pvMode='desktop';
+  window.ebPreview=function(){
+    var ov=document.getElementById('eb-pv');
+    if(!ov){ ov=document.createElement('div'); ov.id='eb-pv'; ov.innerHTML='<div class="pcard"><div class="phd"><h3>Preview</h3><div class="pdevs" id="pv-devs"><button class="on" data-d="desktop">Desktop</button><button data-d="tablet">Tablet</button><button data-d="mobile">Mobile</button><button data-d="dark">Dark</button></div><button class="px" id="pv-x">✕</button></div><div class="pstage"><div class="pframe" id="pv-frame"></div></div><div class="pnote">Rendered with sample recipient · <b>Margaret O\'Brien</b> · merge tags resolved.</div></div>'; document.body.appendChild(ov);
+      ov.querySelector('#pv-x').addEventListener('click',function(){ov.classList.remove('show');}); ov.addEventListener('click',function(e){ if(e.target===ov) ov.classList.remove('show'); });
+      ov.querySelector('#pv-devs').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; pvMode=b.dataset.d; ov.querySelectorAll('#pv-devs button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); drawPv(); });
+    }
+    pvMode='desktop'; ov.querySelectorAll('#pv-devs button').forEach(function(x){x.classList.toggle('on',x.dataset.d==='desktop');});
+    drawPv(); ov.classList.add('show');
+    function drawPv(){ var f=document.getElementById('pv-frame'); f.className='pframe'+(pvMode!=='desktop'?' '+pvMode:''); var c=$('canvas'); var w=DESIGN.width; f.innerHTML='<div class="pfhd"><b>'+SAMPLE.parish_name+'</b> · to '+SAMPLE.first_name+' '+SAMPLE.last_name+'</div><div class="pfbody" style="max-width:'+w+'px;margin:0 auto;font-family:'+((c.style.fontFamily)||'DM Sans')+'">'+resolveMerge(serializeEmail())+'</div>'; }
+  };
+  window.ebHistory=function(){ toast('Version history · 4 autosaved versions (every 30s) · latest 2 min ago'); };
   window.addEventListener('message', function(e){ var m=e.data||{}; if(m.type==='eb-load' && typeof m.html==='string'){ MODEL.body=[{id:'b'+Math.random().toString(36).slice(2,8),type:'text',data:{align:'left',html:m.html}}]; renderAll(); } else if(m.type==='eb-request'){ sync(); } });
 
   // ── Palette render ──
@@ -374,23 +429,27 @@
   }
 
   // ── Design tab ──
-  var DESIGN={width:640,btn:'#2563EB',link:'#2563EB',bg:'#FFFFFF',page:'#F8FAFC'};
+  var DESIGN={width:640,btn:'#2563EB',link:'#2563EB',bg:'#FFFFFF',page:'#F8FAFC',btnStyle:'8px'};
   var COLORS=['#2563EB','#0E1E35','#15803D','#BE185D','#7C3AED','#D97706'];
+  var BGCOLORS=['#FFFFFF','#F8FAFC','#F1F5F9','#FEF3C7','#EFF6FF','#0E1E35'];
   function renderDesign(){
-    function swset(key){ return '<div class="swatches">'+COLORS.map(function(c){return '<div class="sw'+(DESIGN[key]===c?' on':'')+'" data-key="'+key+'" data-c="'+c+'" style="background:'+c+'"></div>';}).join('')+'</div>'; }
+    function swset(key,arr){ arr=arr||COLORS; return '<div class="swatches">'+arr.map(function(c){return '<div class="sw'+(DESIGN[key]===c?' on':'')+'" data-key="'+key+'" data-c="'+c+'" style="background:'+c+';'+(c==='#FFFFFF'?'border-color:#CBD5E1':'')+'"></div>';}).join('')+'</div>'; }
     $('pane-design').innerHTML=
-      '<div class="dsg-group"><div class="dsg-h">Layout</div>'+
-      '<div class="dsg-row"><span>Content width</span><select class="fld" id="dsg-width"><option value="600">600 px (standard)</option><option value="640" selected>640 px</option><option value="700">700 px (wide)</option></select></div></div>'+
-      '<div class="dsg-group"><div class="dsg-h">Colors</div>'+
+      '<div class="dsg-group"><div class="dsg-h">Layout &amp; background</div>'+
+      '<div class="dsg-row"><span>Content width</span><select class="fld" id="dsg-width"><option value="600"'+(DESIGN.width===600?' selected':'')+'>600 px (standard)</option><option value="640"'+(DESIGN.width===640?' selected':'')+'>640 px</option><option value="700"'+(DESIGN.width===700?' selected':'')+'>700 px (wide)</option></select></div>'+
+      '<div class="dsg-row"><span>Email background</span>'+swset('bg',BGCOLORS)+'</div></div>'+
+      '<div class="dsg-group"><div class="dsg-h">Buttons</div>'+
       '<div class="dsg-row"><span>Button color</span>'+swset('btn')+'</div>'+
-      '<div class="dsg-row"><span>Link color</span>'+swset('link')+'</div></div>'+
-      '<div class="dsg-group"><div class="dsg-h">Typography</div>'+
+      '<div class="dsg-row"><span>Button style</span><select class="fld" id="dsg-btnstyle"><option value="4px"'+(DESIGN.btnStyle==='4px'?' selected':'')+'>Rounded</option><option value="8px"'+(DESIGN.btnStyle==='8px'?' selected':'')+'>Soft</option><option value="99px"'+(DESIGN.btnStyle==='99px'?' selected':'')+'>Pill</option><option value="0"'+(DESIGN.btnStyle==='0'?' selected':'')+'>Square</option></select></div></div>'+
+      '<div class="dsg-group"><div class="dsg-h">Links &amp; type</div>'+
+      '<div class="dsg-row"><span>Link color</span>'+swset('link')+'</div>'+
       '<div class="dsg-row"><span>Body font</span><select class="fld" id="dsg-font"><option>DM Sans</option><option>Georgia</option><option>Helvetica</option><option>Arial</option></select></div></div>';
     $('dsg-width').addEventListener('change', function(){ DESIGN.width=+this.value; applyDesign(); });
+    $('dsg-btnstyle').addEventListener('change', function(){ DESIGN.btnStyle=this.value; applyDesign(); });
     $('dsg-font').addEventListener('change', function(){ $('canvas').style.fontFamily=this.value+', sans-serif'; toast('Font set · '+this.value); });
     $('pane-design').querySelectorAll('.sw').forEach(function(s){ s.addEventListener('click', function(){ var k=s.dataset.key; DESIGN[k]=s.dataset.c; applyDesign(); renderDesign(); }); });
   }
-  function applyDesign(){ var c=$('canvas'); c.style.maxWidth=DESIGN.width+'px'; c.style.setProperty('--btn-color',DESIGN.btn); c.style.setProperty('--link-color',DESIGN.link); }
+  function applyDesign(){ var c=$('canvas'); c.style.maxWidth=DESIGN.width+'px'; c.style.background=DESIGN.bg; c.style.setProperty('--btn-color',DESIGN.btn); c.style.setProperty('--link-color',DESIGN.link); c.style.setProperty('--btn-radius',DESIGN.btnStyle); }
 
   // ── Settings (per selected block) ──
   function showSettings(id){
@@ -398,23 +457,32 @@
     var b=f.b, d=b.data;
     $('pane-content').style.display='none'; $('pane-design').style.display='none';
     var ps=$('pane-settings'); ps.style.display='block';
-    var name={text:'Text',boxed:'Boxed text',divider:'Divider',image:'Image',imagegroup:'Image group',imagecard:'Image card',imagecaption:'Image + caption',socialshare:'Social share',socialfollow:'Social follow',button:'Button',footer:'Footer',video:'Video',code:'Code'}[b.type]||b.type;
+    var name={text:'Text',boxed:'Boxed text',divider:'Divider',spacer:'Spacer',image:'Image',imagegroup:'Image group',imagecard:'Image card',imagecaption:'Image + caption',socialshare:'Social share',socialfollow:'Social follow',button:'Button',footer:'Footer',video:'Video',code:'Code'}[b.type]||b.type;
     var body='';
     function alignRow(){ return '<label class="set-fl">Alignment</label><div class="align-tog" data-set="align">'+['left','center','right'].map(function(a){return '<button data-v="'+a+'" class="'+(d.align===a?'on':'')+'">'+({left:'⟸',center:'≡',right:'⟹'})[a]+'</button>';}).join('')+'</div>'; }
-    if(b.type==='button'){
+    var MERGE=[['First name','first_name'],['Last name','last_name'],['Organisation','org_name'],['Donation amount','donation_amount'],['Event name','event_name'],['Parish','parish_name']];
+    function mergeRow(){ return '<label class="set-fl">Personalization — insert merge tag</label><div class="mergechips">'+MERGE.map(function(m){return '<button type="button" class="mchip" data-tag="'+m[1]+'">'+m[0]+'</button>';}).join('')+'</div><p style="font-size:11px;color:#94A3B8;margin-top:6px">Tags resolve per recipient at send. Preview with sample data.</p>'; }
+    if(b.type==='spacer'){
+      body='<label class="set-fl">Height: <span id="sp-h">'+d.h+'</span> px</label><input class="set-fld" type="range" min="8" max="120" step="4" value="'+d.h+'" data-set="h" style="padding:0">';
+    } else if(b.type==='button'){
       body='<label class="set-fl">Button text</label><input class="set-fld" data-set="label" value="'+esc(d.label)+'">'+
         '<label class="set-fl">Link URL</label><input class="set-fld" data-set="url" value="'+esc(d.url)+'">'+
         '<label class="set-fl">Color</label><div class="swatches" data-set="color">'+COLORS.map(function(c){return '<div class="sw'+(d.color===c?' on':'')+'" data-c="'+c+'" style="background:'+c+'"></div>';}).join('')+'</div>'+ alignRow();
     } else if(b.type==='text'||b.type==='boxed'){
-      body='<p style="font-size:12.5px;color:#64748B">Click the block on the canvas to edit its text directly.</p>'+alignRow();
+      body='<p style="font-size:12.5px;color:#64748B">Click the block on the canvas to edit its text directly.</p>'+alignRow()+mergeRow();
     } else if(b.type==='divider'){
       body='<label class="set-fl">Thickness</label><select class="set-fld" data-set="thick"><option '+(d.thick==1?'selected':'')+'>1</option><option '+(d.thick==2?'selected':'')+'>2</option><option '+(d.thick==4?'selected':'')+'>4</option></select>'+
         '<label class="set-fl">Color</label><div class="swatches" data-set="color">'+['#D8DEE7','#0E1E35','#2563EB','#BE185D'].map(function(c){return '<div class="sw'+(d.color===c?' on':'')+'" data-c="'+c+'" style="background:'+c+'"></div>';}).join('')+'</div>';
     } else if(b.type==='image'||b.type==='imagecard'||b.type==='imagegroup'||b.type==='imagecaption'){
-      body='<label class="set-fl">Alt text</label><input class="set-fld" data-set="alt" value="'+esc(d.alt||'')+'">'+(b.type!=='imagegroup'?alignRow():'')+'<p style="font-size:12px;color:#94A3B8;margin-top:12px">Drop or Browse an image on the canvas to replace the placeholder.</p>';
+      body='<label class="set-fl">Alt text</label><input class="set-fld" data-set="alt" value="'+esc(d.alt||'')+'">'+(b.type!=='imagegroup'?alignRow():'')+'<button class="btn" style="width:100%;margin-top:12px;justify-content:center" onclick="ebUploadSel()"><svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="margin-right:5px;vertical-align:-1px"><path d="M7 10V3M4 6l3-3 3 3M3 11h8"/></svg>Upload image</button><p style="font-size:12px;color:#94A3B8;margin-top:10px">Or click / drop an image onto the canvas placeholder.</p>';
     } else if(b.type==='socialshare'||b.type==='socialfollow'){
       var all=[['f','Facebook'],['X','X / Twitter'],['in','LinkedIn'],['ig','Instagram'],['yt','YouTube']];
-      body='<label class="set-fl">Networks</label>'+all.map(function(n){return '<label style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:13px"><input type="checkbox" data-net="'+n[0]+'" '+(d.nets.indexOf(n[0])!==-1?'checked':'')+'> '+n[1]+'</label>';}).join('');
+      if(!d.urls) d.urls=defaultUrls(d.nets);
+      body='<label class="set-fl">Networks &amp; links</label><p style="font-size:12px;color:#94A3B8;margin:-4px 0 8px">Tick a network, then set the URL it links to.</p>'+
+        all.map(function(n){ var on=d.nets.indexOf(n[0])!==-1; return '<div style="padding:5px 0;border-bottom:1px solid #F1F5F9">'+
+          '<label style="display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600"><input type="checkbox" data-net="'+n[0]+'" '+(on?'checked':'')+'> '+n[1]+'</label>'+
+          '<input class="set-fld soc-url" data-soc="'+n[0]+'" value="'+esc((d.urls&&d.urls[n[0]])||'')+'" placeholder="https://…" style="margin-top:6px;font-size:12px;display:'+(on?'block':'none')+'">'+
+        '</div>'; }).join('');
     } else if(b.type==='footer'){
       body='<p style="font-size:12.5px;color:#64748B">Click the footer on the canvas to edit address and links.</p>';
     } else if(b.type==='video'){
@@ -432,7 +500,10 @@
       else if(el.tagName==='SELECT'){ el.addEventListener('change', function(){ d[key]=el.value; renderAll(); reselect(); }); }
       else { el.addEventListener('input', function(){ d[key]=el.value; renderAll(); reselect(); }); }
     });
-    ps.querySelectorAll('[data-net]').forEach(function(cb){ cb.addEventListener('change', function(){ var n=cb.getAttribute('data-net'); if(cb.checked){ if(d.nets.indexOf(n)===-1) d.nets.push(n); } else { d.nets=d.nets.filter(function(x){return x!==n;}); } renderAll(); reselect(); }); });
+    ps.querySelectorAll('[data-net]').forEach(function(cb){ cb.addEventListener('change', function(){ var n=cb.getAttribute('data-net'); if(!d.urls)d.urls={}; if(cb.checked){ if(d.nets.indexOf(n)===-1) d.nets.push(n); if(!d.urls[n]) d.urls[n]=(SOCIAL_META[n]||{}).url||'#'; } else { d.nets=d.nets.filter(function(x){return x!==n;}); } var inp=ps.querySelector('.soc-url[data-soc="'+n+'"]'); if(inp) inp.style.display=cb.checked?'block':'none'; renderAll(); reselect(); }); });
+    ps.querySelectorAll('.soc-url').forEach(function(inp){ inp.addEventListener('input', function(){ if(!d.urls)d.urls={}; d.urls[inp.getAttribute('data-soc')]=inp.value; renderAll(); reselect(); }); });
+    ps.querySelectorAll('.mchip').forEach(function(ch){ ch.addEventListener('click', function(){ var tag='{{'+ch.dataset.tag+'}}'; var ed=document.querySelector('.bk[data-id="'+id+'"] [data-edit="html"]'); if(ed){ ed.innerHTML += ' <span style="background:#EFF6FF;color:#2563EB;border-radius:4px;padding:0 3px">'+tag+'</span>'; d.html=ed.innerHTML; renderAll(); reselect(); toast('Inserted '+tag); } }); });
+    var sp=ps.querySelector('[data-set="h"]'); if(sp) sp.addEventListener('input', function(){ var l=document.getElementById('sp-h'); if(l) l.textContent=this.value; });
   }
   function reselect(){ var el=document.querySelector('.bk[data-id="'+selId+'"]'); if(el) el.classList.add('sel'); }
   function backToContent(){ selId=null; $('pane-settings').style.display='none'; $('pane-content').style.display=''; $('pane-design').style.display='none'; setTab('content'); document.querySelectorAll('.bk.sel').forEach(function(x){x.classList.remove('sel');}); }
@@ -452,14 +523,28 @@
   function moveBlock(id,dir){ var f=findBlock(id); if(!f) return; var arr=MODEL[f.sec]; var ni=f.idx+dir; if(ni<0||ni>=arr.length) return; var tmp=arr[ni]; arr[ni]=arr[f.idx]; arr[f.idx]=tmp; renderAll(); selectBlock(id); }
   function selectBlock(id){ selId=id; document.querySelectorAll('.bk.sel').forEach(function(x){x.classList.remove('sel');}); var el=document.querySelector('.bk[data-id="'+id+'"]'); if(el) el.classList.add('sel'); showSettings(id); }
 
+  // ── Image upload ──
+  var imgFile=document.createElement('input'); imgFile.type='file'; imgFile.accept='image/*'; imgFile.style.display='none'; document.body.appendChild(imgFile);
+  var pendingUp=null;
+  function openUpload(id,slot){ pendingUp={id:id,slot:slot}; imgFile.value=''; imgFile.click(); }
+  window.ebUploadSel=function(){ if(selId) openUpload(selId,0); };
+  function readImg(file,id,slot){ if(!file||!/^image\//.test(file.type)){ toast('Please choose an image file'); return; } var rd=new FileReader(); rd.onload=function(){ setImg(id,slot,rd.result); }; rd.readAsDataURL(file); }
+  function setImg(id,slot,src){ var f=findBlock(id); if(!f) return; var b=f.b; if(b.type==='imagegroup'){ b.data.srcs=b.data.srcs||['','','','']; b.data.srcs[slot]=src; } else { b.data.src=src; } renderAll(); selectBlock(id); toast('Image added'); }
+  imgFile.addEventListener('change', function(){ var f=this.files&&this.files[0]; if(f&&pendingUp) readImg(f, pendingUp.id, pendingUp.slot); pendingUp=null; });
+
   // ── Canvas interactions ──
   var canvas=$('canvas');
   canvas.addEventListener('click', function(e){
     var toolBtn=e.target.closest('.bk-tools button');
     if(toolBtn){ e.stopPropagation(); var id=toolBtn.closest('.bk').dataset.id; var a=toolBtn.dataset.a; if(a==='up')moveBlock(id,-1); else if(a==='down')moveBlock(id,1); else if(a==='dup')dupBlock(id); else if(a==='del')delBlock(id); return; }
+    var img=e.target.closest('.img-ph,.img-real');
+    if(img){ e.stopPropagation(); var bk0=img.closest('.bk'); if(bk0) selectBlock(bk0.dataset.id); openUpload(img.dataset.blk, +img.dataset.slot); return; }
     if(e.target.closest('[contenteditable]')) { var bk=e.target.closest('.bk'); if(bk) selectBlock(bk.dataset.id); return; }
     var bk=e.target.closest('.bk'); if(bk){ selectBlock(bk.dataset.id); }
   });
+  // drop an image file directly onto an image slot (capture phase, before palette DnD)
+  canvas.addEventListener('dragover', function(e){ if(e.dataTransfer && [].indexOf.call(e.dataTransfer.types||[],'Files')!==-1 && e.target.closest('.img-ph,.img-real')){ e.preventDefault(); e.stopPropagation(); } }, true);
+  canvas.addEventListener('drop', function(e){ if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){ var slot=e.target.closest('.img-ph,.img-real'); if(slot){ e.preventDefault(); e.stopPropagation(); readImg(e.dataTransfer.files[0], slot.dataset.blk, +slot.dataset.slot); } } }, true);
   // save contenteditable edits back to model
   canvas.addEventListener('input', function(e){
     var ed=e.target.closest('[data-edit]'); if(!ed) return; var bk=ed.closest('.bk'); if(!bk) return; var f=findBlock(bk.dataset.id); if(!f) return;
@@ -502,6 +587,76 @@
   // ── Boot ──
   // ── Template mode: design-only surface for "New template" ──
   window.ebSaveTemplate=function(){ var nm=(document.getElementById('eb-tplname').value||'Untitled template').trim(); toast('Template “'+nm+'” saved · reusable from Communications → Templates'); setTimeout(function(){ window.location='atlas-communications.html'; }, 1000); };
+  // ── Real content library for each template ──
+  var LOGO='<div style="font-family:\'DM Serif Display\',serif;font-size:22px;color:#0E1E35">St. Mary\'s Cathedral</div><div style="font-size:10px;color:#64748B;letter-spacing:.12em;text-transform:uppercase;margin-top:2px">Diocese of Albany</div>';
+  var FOOT='St. Mary\'s Cathedral · 125 Eagle St, Albany, NY 12202<br>Diocese of Albany · EIN 14-0000000<br><a href="#">Update preferences</a> · <a href="#">Unsubscribe</a>';
+  var TPL_CONTENT={
+    thankyou:{banner:'<h1>Thank you, {{first_name}}</h1>',body:'<p>Dear {{first_name}},</p><p>Your generous gift of <b>{{donation_amount}}</b> to the Cathedral Capital Campaign arrived at a pivotal moment. Because of you, the bell-tower restoration is moving forward.</p><p>With deep gratitude,<br>Father Michael Reilly · Rector</p>',cta:{l:'See your impact',c:'#2563EB'}},
+    receipt:{banner:'<h1>Your official gift receipt</h1>',body:'<p>Dear {{first_name}},</p><p>This confirms your tax-deductible gift of <b>{{donation_amount}}</b> to {{org_name}}. No goods or services were provided in exchange for this contribution.</p><p style="color:#64748B;font-size:12px">Receipt #R-2026-0148 · Retain for your records (IRS Pub 1771).</p>',cta:{l:'Download PDF receipt',c:'#15803D'}},
+    welcome:{banner:'<h1>Welcome to the family, {{first_name}}</h1>',body:'<p>We\'re so glad you\'ve joined the {{parish_name}} community. Your first gift helps sustain everything from our music ministry to outreach for families in need.</p><p>Over the coming weeks we\'ll share a few stories of the difference your generosity makes.</p>',cta:{l:'Explore our ministries',c:'#7C3AED'}},
+    pledge:{banner:'<h1>Your pledge payment is coming up</h1>',body:'<p>Hi {{first_name}},</p><p>A friendly reminder that your next pledge installment of <b>{{donation_amount}}</b> is due soon. Thank you for keeping your commitment to the Cathedral.</p>',cta:{l:'Make your payment',c:'#2563EB'}},
+    lapsed:{banner:'<h1>We miss you at {{parish_name}}</h1>',body:'<p>Dear {{first_name}},</p><p>It\'s been a while since we\'ve seen your support, and the community is thinking of you. Your past generosity made a lasting difference — and there\'s still so much to do.</p>',cta:{l:'Come back with a gift',c:'#BE185D'}},
+    event:{banner:'<h1>You\'re invited — {{event_name}}</h1>',body:'<p>Dear {{first_name}},</p><p>Join us for an unforgettable evening celebrating the Cathedral\'s restoration — dinner, music, and fellowship with the Bishop and fellow supporters.</p><p><b>Saturday, June 14 · 6:00 PM · Cathedral Hall</b></p>',cta:{l:'RSVP now',c:'#7C3AED'}},
+    soft:{banner:'<h1>Your gift was recorded, {{first_name}}</h1>',body:'<p>Thank you for your recent gift through your donor-advised fund. Because your DAF sponsor has already issued your tax receipt, this is an acknowledgement only — no additional tax document is enclosed.</p>',cta:{l:'View your giving history',c:'#D97706'}},
+    midpoint:{banner:'<h1>We\'re halfway there, {{first_name}}</h1>',body:'<p>Thanks to friends like you, the Cathedral Capital Campaign has reached <b>52% of our $4M goal</b>. The bell-tower scaffolding is up and restoration is underway.</p><p>Will you help us finish strong?</p>',cta:{l:'Give to the campaign',c:'#2563EB'}},
+    cultivation:{banner:'<h1>A personal note, {{first_name}}</h1>',body:'<p>Dear {{first_name}},</p><p>I\'ve been reflecting on the impact your leadership has had on {{parish_name}}. I\'d love to find time to share our vision for the next phase of the restoration over coffee.</p><p>Warmly,<br>Sarah Reynolds · Development Director</p>',cta:{l:'Schedule a conversation',c:'#0E1E35'}},
+    matching:{banner:'<h1>Great news — your gift was matched!</h1>',body:'<p>{{first_name}}, your employer confirmed a match of your recent gift, <b>doubling your impact</b> to the Cathedral. Thank you for multiplying your generosity.</p>',cta:{l:'See your total impact',c:'#15803D'}},
+    memorial:{banner:'<h1>In loving memory</h1>',body:'<p>Dear {{first_name}},</p><p>Your tribute gift has been received with gratitude. Your loved one\'s memory will be honored through the ongoing ministry of {{parish_name}}. The family has been notified of your thoughtful gift.</p>',cta:{l:'Leave a remembrance',c:'#BE185D'}},
+    yearend:{banner:'<h1>Your 2026 giving summary</h1>',body:'<p>Dear {{first_name}},</p><p>As the year closes, thank you for your faithful support of {{org_name}}. Your cumulative giving totaled <b>{{donation_amount}}</b> across all funds — a tax-deductible summary is attached.</p>',cta:{l:'Download giving statement',c:'#2563EB'}}
+  };
+  function matchSlug(name){ var n=(name||'').toLowerCase();
+    if(/receipt/.test(n))return'receipt'; if(/welcome/.test(n))return'welcome'; if(/pledge/.test(n))return'pledge';
+    if(/laps/.test(n))return'lapsed'; if(/gala|event/.test(n))return'event'; if(/soft/.test(n))return'soft';
+    if(/mid.?point/.test(n))return'midpoint'; if(/cultivat/.test(n))return'cultivation'; if(/match/.test(n))return'matching';
+    if(/memori/.test(n))return'memorial'; if(/year.?end|giving summary/.test(n))return'yearend'; if(/thank/.test(n))return'thankyou';
+    return null; }
+  function mk(type,data){ var b=makeBlock(type); if(data) for(var k in data) b.data[k]=data[k]; return b; }
+  function loadTemplate(name){
+    var slug=matchSlug(name), c=TPL_CONTENT[slug]; if(!c) return false;
+    MODEL.header=[ mk('text',{align:'center',html:LOGO}) ];
+    MODEL.body=[ mk('text',{align:'center',html:c.banner}), mk('text',{align:'left',html:c.body}) ];
+    if(c.cta) MODEL.body.push(mk('button',{label:c.cta.l,url:'https://give.diocese.org',align:'center',color:c.cta.c}));
+    MODEL.body.push(mk('divider',{color:'#E2E8F0',thick:1}));
+    MODEL.footer=[ mk('socialshare',{nets:['f','X','in','ig']}), mk('footer',{html:FOOT}) ];
+    renderAll(); return true;
+  }
+  window.__ebLoadTemplate=loadTemplate;
+
+  // ── Inspiration gallery (starter layouts) ──
+  var INSP=[
+    {slug:'thankyou',nm:'Major-donor thank-you',desc:'Warm, personal gratitude with impact CTA',c:'#2563EB'},
+    {slug:'event',nm:'Event invitation',desc:'Gala / dinner invite with RSVP',c:'#7C3AED'},
+    {slug:'midpoint',nm:'Campaign update',desc:'Progress-to-goal appeal',c:'#2563EB'},
+    {slug:'welcome',nm:'Welcome series',desc:'First-time donor onboarding',c:'#7C3AED'},
+    {slug:'yearend',nm:'Year-end summary',desc:'Annual giving statement',c:'#15803D'},
+    {slug:'receipt',nm:'Gift receipt',desc:'Clean, compliant acknowledgement',c:'#15803D'}
+  ];
+  function ebInspiration(){
+    var ov=document.getElementById('insp-ov');
+    if(!ov){ ov=document.createElement('div'); ov.id='insp-ov'; ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px'; document.body.appendChild(ov); }
+    ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:760px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.3)">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #E2E8F0"><div><h3 style="margin:0;font-family:\'DM Serif Display\',serif;font-size:20px;color:#0E1E35">Design inspiration</h3><p style="margin:3px 0 0;font-size:13px;color:#64748B">Popular layouts from diocesan teams. Pick one to start — you can change anything.</p></div><button onclick="document.getElementById(\'insp-ov\').remove()" style="background:none;border:none;font-size:22px;color:#94A3B8;cursor:pointer;line-height:1">×</button></div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:20px">'+
+        INSP.map(function(x){ var c=TPL_CONTENT[x.slug]; var prev=(c?c.banner.replace(/<[^>]+>/g,''):x.nm); return '<div class="insp-card" data-slug="'+x.slug+'" style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;cursor:pointer;transition:.15s">'+
+          '<div style="height:96px;background:linear-gradient(135deg,'+x.c+'12,'+x.c+'05);border-bottom:1px solid #EEF2F7;padding:14px;display:flex;flex-direction:column;gap:6px">'+
+            '<div style="height:8px;width:42%;background:'+x.c+';border-radius:3px"></div>'+
+            '<div style="height:5px;width:80%;background:#CBD5E1;border-radius:3px"></div>'+
+            '<div style="height:5px;width:66%;background:#CBD5E1;border-radius:3px"></div>'+
+            '<div style="margin-top:auto;height:16px;width:88px;background:'+x.c+';border-radius:5px"></div>'+
+          '</div>'+
+          '<div style="padding:12px 14px"><div style="font-weight:700;color:#0F172A;font-size:14px">'+x.nm+'</div><div style="font-size:12px;color:#64748B;margin-top:2px">'+x.desc+'</div></div>'+
+        '</div>'; }).join('')+
+      '</div></div>';
+    ov.querySelectorAll('.insp-card').forEach(function(card){
+      card.addEventListener('mouseenter',function(){card.style.borderColor='#2563EB';card.style.boxShadow='0 6px 18px rgba(37,99,235,.15)';});
+      card.addEventListener('mouseleave',function(){card.style.borderColor='#E2E8F0';card.style.boxShadow='none';});
+      card.addEventListener('click',function(){ loadTemplate(card.dataset.slug); ov.remove(); if(window.toast) toast('Starter layout applied'); });
+    });
+    ov.addEventListener('click',function(e){ if(e.target===ov) ov.remove(); });
+  }
+  window.ebInspiration=ebInspiration;
+  document.addEventListener('click',function(e){ var a=e.target.closest('[data-insp]'); if(a){ e.preventDefault(); ebInspiration(); } }, true);
+
   var TPLMODE = new URLSearchParams(location.search).get('mode')==='template';
   if(TPLMODE && !EMBED){
     var t=$('eb-title'); if(t) t.textContent='New template';
@@ -509,7 +664,9 @@
     var bl=$('eb-back-lb'); if(bl) bl.textContent='Templates';
     var nm=$('eb-tplname'); if(nm) nm.style.display='';
     ['eb-test','eb-continue','eb-save'].forEach(function(id){ var e=$(id); if(e) e.style.display='none'; });
-    var stpl=$('eb-savetpl'); if(stpl) stpl.style.display='';
+    ['eb-savedraft','eb-history','eb-savetpl'].forEach(function(id){ var e=$(id); if(e) e.style.display=''; });
+    var tplParam=new URLSearchParams(location.search).get('tpl'); if(tplParam && nm) nm.value=tplParam;
+    if(tplParam) loadTemplate(tplParam);
   }
 
   renderPalette(); renderAll(); applyDesign();

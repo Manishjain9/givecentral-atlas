@@ -339,6 +339,11 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .section-h { display:flex; align-items:center; gap:10px; margin:24px 0 12px; padding:0 4px; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); }
 .section-h .ct { background:var(--surface); border:1px solid var(--border); border-radius:99px; padding:1px 8px; font-size:10.5px; }
 .section-h .line { flex:1; height:1px; background:var(--border-soft); }
+.cta-btn { display:inline-flex; align-items:center; gap:6px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:#fff; background:var(--blue); border:none; border-radius:8px; padding:7px 14px; text-decoration:none; text-transform:none; letter-spacing:0; cursor:pointer; box-shadow:0 1px 2px rgba(37,99,235,.28); white-space:nowrap; }
+.cta-btn:hover { background:var(--blue-d,#1D4ED8); color:#fff; }
+.cta-btn.ghost { background:var(--blue-pale,#EFF6FF); color:var(--blue); box-shadow:none; }
+.cta-btn.ghost:hover { background:#DBEAFE; color:var(--blue); }
+.cta-btn svg { width:12px; height:12px; }
 
 </style>
 
@@ -669,7 +674,7 @@ body {
       <div class="page-sub">Every email and acknowledgement Atlas has sent on your team's behalf.</div>
     </div>
     <div class="flex gap-8">
-      <a class="btn btn-primary" href="atlas-email-campaign.html"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg> Create Email</a>
+      <a class="btn btn-primary" href="atlas-email-campaign.html"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg> Create New Email</a>
     </div>
   </div>
 
@@ -678,16 +683,16 @@ body {
     <div class="cm-stat delivered" onclick="commsStatClick('delivered')"><div class="l"><span class="pip"></span>Delivered today</div><div class="v">142</div><div class="d">99.3% delivery rate · 30-day avg</div></div>
     <div class="cm-stat opens" onclick="commsStatClick('opens')"><div class="l"><span class="pip"></span>Opens (24h)</div><div class="v">68%</div><div class="d">↑ 4pts vs. weekly avg · 38% click rate</div></div>
     <div class="cm-stat bounce" onclick="commsStatClick('bounce')"><div class="l"><span class="pip"></span>Bounces (7d)</div><div class="v">3</div><div class="d">2 hard · 1 soft · auto-flagged DNC</div></div>
-    <div class="cm-stat scheduled" onclick="commsStatClick('scheduled')"><div class="l"><span class="pip"></span>Scheduled</div><div class="v">14</div><div class="d">Next: tomorrow 8 AM · weekly recap</div></div>
+    <div class="cm-stat scheduled" onclick="commsStatClick('scheduled')"><div class="l"><span class="pip"></span>Scheduled</div><div class="v">126</div><div class="d">Next: tomorrow 8 AM · weekly recap</div></div>
   </div>
 
   <!-- Tabs -->
   <div class="tabs" id="comms-tabs">
     <div class="tab on"      data-tab="sent"      onclick="switchCommsTab('sent', this)">Sent <span class="ct">2,840</span></div>
-    <div class="tab"         data-tab="scheduled" onclick="switchCommsTab('scheduled', this)">Scheduled <span class="ct">14</span></div>
+    <div class="tab"         data-tab="scheduled" onclick="switchCommsTab('scheduled', this)">Scheduled <span class="ct" id="tab-ct-scheduled">126</span></div>
     <div class="tab"         data-tab="drafts"    onclick="switchCommsTab('drafts', this)">Drafts <span class="ct">3</span></div>
     <div class="tab"         data-tab="templates" onclick="switchCommsTab('templates', this)">Templates <span class="ct">12</span></div>
-    <div class="tab"         data-tab="lists"     onclick="switchCommsTab('lists', this)">Lists &amp; segments <span class="ct">8</span></div>
+    <div class="tab"         data-tab="lists"     onclick="switchCommsTab('lists', this)">Lists &amp; segments <span class="ct">112</span></div>
   </div>
 
   <!-- ═══ TAB PANES ═══ -->
@@ -794,13 +799,13 @@ body {
 
   <!-- ─── SCHEDULED pane ─── -->
   <div class="tab-pane" data-pane="scheduled" style="display:none">
-    <div class="section-h"><span>Upcoming · <span id="sched-count-inline">14</span> scheduled</span><span class="line"></span><a href="#" onclick="commsSchedule();return false" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none">+ Schedule a send</a></div>
+    <div class="section-h"><span>Upcoming · <span id="sched-count-inline">14</span> scheduled</span><span class="line"></span><a href="#" onclick="commsSchedule();return false" class="cta-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg> Schedule a send</a></div>
     <div class="cm-list" id="scheduled-list"></div>
   </div>
 
   <!-- ─── DRAFTS pane ─── -->
   <div class="tab-pane" data-pane="drafts" style="display:none">
-    <div class="section-h"><span>Drafts · <span id="drafts-count-inline">3</span> saved</span><span class="line"></span><a href="atlas-email-compose.html" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none">+ New draft</a></div>
+    <div class="section-h"><span>Drafts · <span id="drafts-count-inline">3</span> saved</span><span class="line"></span></div>
     <div class="drafts-list cm-list" id="drafts-list">
       <!-- Filled in by JS so saved-draft state can be merged in from localStorage -->
     </div>
@@ -809,7 +814,7 @@ body {
 
   <!-- ─── TEMPLATES pane ─── -->
   <div class="tab-pane" data-pane="templates" style="display:none">
-    <div class="section-h"><span>Email templates · 12 reusable</span><span class="line"></span><a href="atlas-email-builder.html?mode=template" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none">+ New template</a></div>
+    <div class="section-h"><span>Email templates · 12 reusable</span><span class="line"></span><a href="atlas-email-builder.html?mode=template" class="cta-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg> New template</a></div>
     <div class="cm-list" id="templates-list">
       <!-- 6 template entries — these are visual demos, not interactive -->
       <a class="cm-row" href="atlas-email-compose.html">
@@ -901,34 +906,8 @@ body {
 
   <!-- ─── LISTS & SEGMENTS pane ─── -->
   <div class="tab-pane" data-pane="lists" style="display:none">
-    <div class="section-h"><span>Outreach lists &amp; segments · 8 lists</span><span class="line"></span><a href="#" onclick="commsImport();return false" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none;margin-right:14px">↑ Import contacts (CSV)</a><a href="atlas-outreach-lists.html" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none">Manage all lists →</a></div>
-    <p class="muted" style="padding:18px;background:var(--blue-pale);border:1px solid var(--blue-light);border-radius:10px;color:#1D4ED8;font-size:13px;display:flex;align-items:center;gap:10px">
-      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="width:16px;height:16px;flex-shrink:0"><path d="M7 2v5l3 2"/><circle cx="7" cy="7" r="5.5"/></svg>
-      <span>Full list management lives on a dedicated page. <a href="atlas-outreach-lists.html" style="font-weight:600;color:inherit;text-decoration:underline">Open Outreach lists →</a></span>
-    </p>
-    <div class="cm-list" style="margin-top:12px">
-      <a class="cm-row" href="atlas-outreach-lists.html">
-        <div class="ico" style="background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10M2 7h10M2 10.5h6"/></svg></div>
-        <div class="body"><div class="ttl">Spring 2026 Appeal</div><div class="meta"><span>847 donors</span><span>·</span><span>Dynamic</span><span>·</span><span>Active</span></div></div>
-        <div class="recipients"><span class="muted" style="font-size:11.5px">Last send 3 days ago · 42% open</span></div>
-        <div class="metric"><span class="v green">48% engagement</span><div class="bar"><div class="bar-f" style="width:48%;background:var(--green)"></div></div></div>
-        <span class="tag green">Active</span>
-      </a>
-      <a class="cm-row" href="atlas-outreach-lists.html">
-        <div class="ico" style="background:var(--purple-light);color:var(--purple);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="5" r="3"/><path d="M2 12c0-2.5 2-4.5 5-4.5s5 2 5 4.5"/></svg></div>
-        <div class="body"><div class="ttl">Major Gift Cultivation</div><div class="meta"><span>28 donors</span><span>·</span><span>Manual</span><span>·</span><span>Active</span></div></div>
-        <div class="recipients"><span class="muted" style="font-size:11.5px">Last updated yesterday · personal outreach only</span></div>
-        <div class="metric"><span class="v green">67% engagement</span><div class="bar"><div class="bar-f" style="width:67%;background:var(--green)"></div></div></div>
-        <span class="tag green">Active</span>
-      </a>
-      <a class="cm-row" href="atlas-outreach-lists.html">
-        <div class="ico" style="background:var(--green-light);color:var(--green);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2l1.5 3 3.5.5-2.5 2.5.5 3.5L7 10l-3 1.5.5-3.5L2 5.5l3.5-.5L7 2z"/></svg></div>
-        <div class="body"><div class="ttl">New Donor Welcome Series</div><div class="meta"><span>163 donors</span><span>·</span><span>Dynamic</span><span>·</span><span>5-touch automated</span></div></div>
-        <div class="recipients"><span class="muted" style="font-size:11.5px">2 new members today · 142 completed cycle</span></div>
-        <div class="metric"><span class="v green">58% engagement</span><div class="bar"><div class="bar-f" style="width:58%;background:var(--green)"></div></div></div>
-        <span class="tag green">Active</span>
-      </a>
-    </div>
+    <div class="section-h"><span>Outreach lists &amp; segments · <span id="lists-count-inline">112</span> lists</span><span class="line"></span><a href="#" onclick="commsImport();return false" class="cta-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg> Add new list</a></div>
+    <div class="cm-list" style="margin-top:12px" id="lists-list"></div>
   </div>
 
   </div><!-- /#comms-tab-panes -->
@@ -1095,6 +1074,20 @@ body {
     {ico:'appeal', subj:'Lenten appeal — final week push', meta:['Appeal','Auto-segmented'], to:'Lapsed + LYBUNT', toSub:'312 recipients', when:'May 20', time:'6:30 AM', tag:'Scheduled', tagc:'purple'},
     {ico:'steward', subj:'New donor welcome — touch 2 of 5', meta:['Welcome series','5-touch automated'], to:'New Donor Welcome Series', toSub:'163 recipients', when:'May 22', time:'8:00 AM', tag:'Auto', tagc:'purple'}
   ];
+  // ── Seed 120 more scheduled sends (heavy-data view) ──
+  (function(){
+    var subs=['Cathedral capital update','Pledge installment reminder','Spring stewardship note','Parish festival invitation','Lenten appeal follow-up','Year-end giving summary','Matching gift alert','Monthly newsletter','Welcome series touch','Gala reminder','Volunteer appreciation','Bishop\'s letter','Recurring gift receipt','Lapsed re-engagement','Impact report'];
+    var types=[['appeal','Appeal'],['steward','Stewardship'],['thank','Acknowledgement'],['event','Event'],['appeal','Campaign update'],['receipt','Receipt']];
+    var senders=['Sarah Reynolds','Bridget McCarthy','Julia Kelleher','Auto-segmented','Mark Collins'];
+    var lists=[['Spring 2026 Appeal',847],['Major Gift Cultivation',28],['Cathedral committee',12],['Gala invite list',480],['Lapsed + LYBUNT',312],['Annual Appeal 2026 list',312480],['All active donors',3847],['New Donor Welcome',163],['Cathedral Capital segment',128540]];
+    var months=['May','Jun','Jul'];
+    function rnd(s){ var x=Math.sin(s*97.3+13.7)*43758.5453; return x-Math.floor(x); }
+    for(var i=0;i<120;i++){
+      var t=types[Math.floor(rnd(i*1.3)*types.length)], l=lists[Math.floor(rnd(i*2.7)*lists.length)];
+      var day=Math.floor(rnd(i*3.9)*84), mo=months[Math.min(2,Math.floor(day/31))], dd=(day%31)+1;
+      SCHEDULED.push({ico:t[0], subj:subs[Math.floor(rnd(i*5.5)*subs.length)]+' — '+t[1], meta:[t[1], senders[Math.floor(rnd(i*6.1)*senders.length)]], to:l[0], toSub:l[1].toLocaleString()+' recipients', when:mo+' '+dd, time:['6:30 AM','7:00 AM','8:00 AM','9:00 AM','10:00 AM'][Math.floor(rnd(i*7.7)*5)]+' ET', tag:(rnd(i*4.1)>0.6?'Auto':'Scheduled'), tagc:'purple'});
+    }
+  })();
   function schedRow(s){
     return '<div class="cm-row" data-sched="1">'
       + '<div class="ico '+esc(s.ico)+'"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10"/></svg></div>'
@@ -1109,8 +1102,9 @@ body {
   function renderScheduled(){
     var el=document.getElementById('scheduled-list'); if(!el) return;
     el.innerHTML = SCHEDULED.map(schedRow).join('');
-    var n=SCHEDULED.length + 8; // seeded 6 shown + more implied
+    var n=SCHEDULED.length;
     var inl=document.getElementById('sched-count-inline'); if(inl) inl.textContent=n;
+    var tc=document.getElementById('tab-ct-scheduled'); if(tc) tc.textContent=n;
   }
   window.__commsAddScheduled=function(o){ SCHEDULED.unshift({ico:'appeal', subj:o.subj, meta:['Scheduled by you'], to:o.to, when:o.when, time:o.time, tag:'Scheduled', tagc:'purple'}); renderScheduled(); };
 
@@ -1150,24 +1144,83 @@ body {
     });
   }
 
-  /* ── Schedule send modal ── */
-  window.commsSchedule=function(){
-    if(!window.atlasOpenModal){ toast('Schedule send'); return; }
-    window.atlasOpenModal({
-      title:'Schedule a send', sub:'Pick what to send and when — it lands in the Scheduled tab.',
-      fields:[
-        {id:'sch-what', label:'What to send', type:'select', options:['Cathedral campaign weekly recap','Major-donor thank-you','Pledge installment reminder','Event invitation · annual gala','New draft…']},
-        {id:'sch-to', label:'Recipients / list', type:'text', placeholder:'e.g. Spring 2026 Appeal (847)'},
-        {id:'sch-date', label:'Send date', type:'text', placeholder:'MM/DD/YYYY'},
-        {id:'sch-time', label:'Send time', type:'text', placeholder:'8:00 AM'}
-      ],
-      cta:'Schedule send',
-      onSave:function(v){
-        if(!v['sch-to']){ toast('Add a recipient or list first.'); return false; }
-        window.__commsAddScheduled({ subj:v['sch-what']||'Scheduled send', to:v['sch-to'], when:v['sch-date']||'Tomorrow', time:v['sch-time']||'8:00 AM' });
-        toast('Scheduled for '+(v['sch-date']||'tomorrow')+(v['sch-time']?' · '+v['sch-time']:'')+' · see the Scheduled tab');
-      }
+  /* ── Schedule send modal (rich) ── */
+  // Build the "What to send" list from the real Drafts + Templates tabs
+  function buildWhat(){
+    var out=[];
+    document.querySelectorAll('#comms-tab-panes [data-pane="drafts"] .cm-row').forEach(function(row,i){
+      var nm=((row.querySelector('.ttl')||{}).textContent||'').trim(); if(!nm) return;
+      out.push({id:'draft'+i, group:'Drafts', nm:nm, type:'Draft', subj:''});
     });
+    document.querySelectorAll('#templates-list .cm-row').forEach(function(row,i){
+      var nm=((row.querySelector('.ttl')||{}).textContent||'').trim(); if(!nm) return;
+      var subM=((row.querySelector('.recipients')||{}).textContent||''); var subj=(subM.match(/[“"]([^”"]*)[”"]/)||[])[1]||'';
+      var tag=((row.querySelector('.tag')||{}).textContent||'Template').trim();
+      out.push({id:'tpl'+i, group:'Templates', nm:nm, type:tag+' template', subj:subj});
+    });
+    out.push({id:'new', group:'Other', nm:'New draft…', type:'Draft', subj:''});
+    return out;
+  }
+  var CS_LISTS=[
+    {id:'appeal',nm:'Spring 2026 Appeal',n:847},{id:'major',nm:'Major Gift Cultivation',n:28},
+    {id:'all',nm:'All active donors',n:3847},{id:'cathedral',nm:'Cathedral Capital segment',n:128540},
+    {id:'annual',nm:'Annual Appeal 2026 list',n:312480},{id:'lapsed',nm:'Lapsed + LYBUNT',n:312},
+    {id:'committee',nm:'Cathedral committee',n:12},{id:'gala',nm:'Gala invite list',n:480}
+  ];
+  function csInjectCSS(){
+    if(document.getElementById('comms-schedule-css')) return;
+    var s=document.createElement('style'); s.id='comms-schedule-css';
+    s.textContent='#cs-ov{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100075;display:none;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif}#cs-ov.show{display:flex}#cs-ov .cs-card{background:#fff;border-radius:16px;width:100%;max-width:500px;box-shadow:0 24px 64px rgba(15,23,42,.3);overflow:hidden;display:flex;flex-direction:column;max-height:90vh}#cs-ov .cs-hd{background:linear-gradient(135deg,#0E1E35,#2563EB);color:#fff;padding:18px 22px;display:flex;align-items:flex-start;gap:12px}#cs-ov .cs-hd h3{font-family:DM Serif Display,serif;font-size:21px}#cs-ov .cs-hd p{font-size:12px;opacity:.85;margin-top:4px;line-height:1.4}#cs-ov .cs-x{margin-left:auto;width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;flex-shrink:0}#cs-ov .cs-bd{padding:16px 22px;overflow-y:auto}#cs-ov .cs-l{display:block;font:700 10.5px DM Sans;letter-spacing:.05em;text-transform:uppercase;color:#64748B;margin:14px 0 6px}#cs-ov .cs-bd>.cs-l:first-child{margin-top:0}#cs-ov .cs-f{width:100%;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px;font:400 13.5px DM Sans;background:#fff}#cs-ov .cs-prev{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:9px;padding:9px 12px;font-size:12px;color:#334155;margin-top:8px}#cs-ov .cs-prev b{color:#0E1E35}#cs-ov .cs-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}#cs-ov .cs-chips{display:flex;gap:7px;margin-bottom:8px}#cs-ov .cs-chips button{border:1px solid #E2E8F0;background:#fff;border-radius:99px;padding:5px 12px;font:600 12px DM Sans;color:#2563EB;cursor:pointer}#cs-ov .cs-chips button:hover{background:#EFF6FF}#cs-ov .cs-chk{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:#334155;margin-top:14px;cursor:pointer}#cs-ov .cs-sum{margin-top:14px;border-radius:10px;padding:11px 14px;font-size:12.5px;line-height:1.5}#cs-ov .cs-sum.ok{background:#EFF6FF;border:1px solid #DBEAFE;color:#334155}#cs-ov .cs-sum.ok b{color:#1D4ED8}#cs-ov .cs-sum.warn{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E}#cs-ov .cs-ft{padding:14px 22px;border-top:1px solid #E2E8F0;display:flex;gap:10px;justify-content:flex-end}#cs-ov .cs-btn{font:600 12.5px DM Sans;padding:9px 16px;border-radius:9px;border:1px solid #E2E8F0;background:#fff;color:#334155;cursor:pointer}#cs-ov .cs-btn.primary{background:#2563EB;border-color:#2563EB;color:#fff}#cs-ov .cs-btn.primary:disabled{opacity:.5;cursor:not-allowed}';
+    document.head.appendChild(s);
+  }
+  window.commsSchedule=function(){
+    csInjectCSS();
+    var ov=document.getElementById('cs-ov');
+    if(!ov){ ov=document.createElement('div'); ov.id='cs-ov'; document.body.appendChild(ov); ov.addEventListener('click',function(e){ if(e.target===ov) ov.classList.remove('show'); }); }
+    var NOW=new Date(2026,4,4);
+    function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+    var CS_WHAT=buildWhat();
+    var st={what:CS_WHAT[0], list:null, date:iso(new Date(2026,4,5)), time:'8:00 AM', tz:'ET', optimize:false};
+    // preselect the content's default list
+    (function(){ var dl=CS_LISTS.filter(function(l){return l.id===st.what.list;})[0]; if(dl) st.list=dl; })();
+    function fmtDate(s){ if(!s) return '—'; var d=new Date(s+'T00:00'); return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); }
+    function reach(){ return st.list? st.list.n : 0; }
+    function valid(){ return !!(st.list && st.date && new Date(st.date+'T00:00')>=NOW); }
+    function close(){ ov.classList.remove('show'); }
+    function render(){
+      var TIMES=['6:00 AM','7:00 AM','8:00 AM','9:00 AM','10:00 AM','12:00 PM','3:00 PM','5:00 PM'];
+      ov.innerHTML='<div class="cs-card">'+
+        '<div class="cs-hd"><div><h3>Schedule a send</h3><p>Pick what to send, to whom, and when. It lands in the Scheduled tab.</p></div><button class="cs-x" id="cs-x">✕</button></div>'+
+        '<div class="cs-bd">'+
+          '<label class="cs-l">What to send</label><select class="cs-f" id="cs-what">'+(function(){var g={};CS_WHAT.forEach(function(w){(g[w.group]=g[w.group]||[]).push(w);});return ['Drafts','Templates','Other'].filter(function(k){return g[k];}).map(function(k){return '<optgroup label="'+k+'">'+g[k].map(function(w){return '<option value="'+w.id+'"'+(st.what.id===w.id?' selected':'')+'>'+w.nm+'</option>';}).join('')+'</optgroup>';}).join('');})()+'</select>'+
+          '<div class="cs-prev" id="cs-prev"></div>'+
+          '<label class="cs-l">Recipients / list</label><select class="cs-f" id="cs-list"><option value="">Choose a list or segment…</option>'+CS_LISTS.map(function(l){return '<option value="'+l.id+'"'+(st.list&&st.list.id===l.id?' selected':'')+'>'+l.nm+' · '+l.n.toLocaleString()+'</option>';}).join('')+'</select>'+
+          '<label class="cs-l">Send date</label><div class="cs-chips" id="cs-chips"><button type="button" data-q="tom">Tomorrow</button><button type="button" data-q="3d">In 3 days</button><button type="button" data-q="mon">Next Monday</button></div>'+
+          '<input class="cs-f" type="date" id="cs-date" min="'+iso(NOW)+'" value="'+st.date+'">'+
+          '<div class="cs-2" style="margin-top:14px"><div><label class="cs-l" style="margin-top:0">Send time</label><select class="cs-f" id="cs-time">'+TIMES.map(function(t){return '<option'+(st.time===t?' selected':'')+'>'+t+'</option>';}).join('')+'</select></div><div><label class="cs-l" style="margin-top:0">Time zone</label><select class="cs-f" id="cs-tz">'+['ET','CT','MT','PT'].map(function(z){return '<option'+(st.tz===z?' selected':'')+'>'+z+'</option>';}).join('')+'</select></div></div>'+
+          '<label class="cs-chk"><input type="checkbox" id="cs-opt"'+(st.optimize?' checked':'')+'> Use send-time optimization — deliver at each recipient\'s most-likely-to-open hour</label>'+
+          '<div class="cs-sum" id="cs-sum"></div>'+
+        '</div>'+
+        '<div class="cs-ft"><button class="cs-btn" id="cs-cancel">Cancel</button><button class="cs-btn primary" id="cs-go">Schedule send</button></div>'+
+      '</div>';
+      var w=st.what;
+      document.getElementById('cs-prev').innerHTML = w.id==='draft' ? '<span style="color:#64748B">Start from a new draft — you\'ll design it before it sends.</span>' : '<b>'+w.type+'</b> · Subject: “'+(w.subj||'—')+'”';
+      var sum=document.getElementById('cs-sum');
+      if(valid()){ sum.className='cs-sum ok'; sum.innerHTML='Scheduling <b>'+w.nm+'</b> to <b>'+reach().toLocaleString()+'</b> recipients on <b>'+fmtDate(st.date)+'</b> at <b>'+(st.optimize?'each recipient’s best hour':st.time+' '+st.tz)+'</b>'+(reach()>10000?' · large send throttled over ~30–60 min':''); }
+      else { sum.className='cs-sum warn'; sum.innerHTML = !st.list ? 'Choose a list to see estimated reach.' : (new Date(st.date+'T00:00')<NOW ? 'Pick a date that isn’t in the past.' : 'Complete the fields to schedule.'); }
+      document.getElementById('cs-go').disabled=!valid();
+      document.getElementById('cs-x').onclick=close;
+      document.getElementById('cs-cancel').onclick=close;
+      document.getElementById('cs-what').addEventListener('change',function(){ var id=this.value; st.what=CS_WHAT.filter(function(x){return x.id===id;})[0]; var dl=CS_LISTS.filter(function(l){return l.id===st.what.list;})[0]; if(dl) st.list=dl; render(); });
+      document.getElementById('cs-list').addEventListener('change',function(){ var id=this.value; st.list=CS_LISTS.filter(function(x){return x.id===id;})[0]||null; render(); });
+      document.getElementById('cs-date').addEventListener('change',function(){ st.date=this.value; render(); });
+      document.getElementById('cs-time').addEventListener('change',function(){ st.time=this.value; render(); });
+      document.getElementById('cs-tz').addEventListener('change',function(){ st.tz=this.value; render(); });
+      document.getElementById('cs-opt').addEventListener('change',function(){ st.optimize=this.checked; render(); });
+      document.getElementById('cs-chips').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; var q=b.dataset.q, d; if(q==='tom')d=new Date(2026,4,5); else if(q==='3d')d=new Date(2026,4,7); else { d=new Date(2026,4,4); d.setDate(d.getDate()+((8-d.getDay())%7||7)); } st.date=iso(d); render(); });
+      document.getElementById('cs-go').addEventListener('click',function(){ if(!valid())return; window.__commsAddScheduled({subj:st.what.nm, to:st.list.nm, when:fmtDate(st.date), time:(st.optimize?'Optimized':st.time+' '+st.tz)}); close(); toast('Scheduled · '+st.what.nm+' to '+reach().toLocaleString()+' on '+fmtDate(st.date)); var t=document.querySelector('#comms-tabs .tab[data-tab="scheduled"]'); if(window.switchCommsTab&&t) window.switchCommsTab('scheduled',t); });
+    }
+    render(); ov.classList.add('show');
   };
 
   /* ── KPI cards ── */
@@ -1179,7 +1232,38 @@ body {
     else if(k==='bounce'){ toast('3 bounces · 2 hard flagged Do-Not-Contact'); }
   };
 
-  function boot(){ renderScheduled(); ensureKebabs(); }
+  /* ── Lists & segments (heavy data) ── */
+  function commsRenderLists(){
+    var host=document.getElementById('lists-list'); if(!host) return;
+    var BASE=['Spring 2026 Appeal','Major Gift Cultivation','New Donor Welcome Series','Cathedral Capital segment','Annual Appeal','Lapsed + LYBUNT','Monthly Sustainers','Board & Trustees','Active Volunteers','Gala invite list','Parish leaders','Legacy Society','First-time donors 90d','Recurring givers','Event attendees','DAF & matching gifts','Young professionals','Cathedral committee','Choir & music ministry','School families','Capital pledge donors','Memorial gift givers','Bishop\'s Circle','Stewardship follow-up'];
+    var SUFFIX=['','2026','· St. Mary\'s','· Diocese-wide','· Q1','· Q2','· west deanery','· east deanery',''];
+    var TYPES=['Dynamic','Manual','Imported CSV'];
+    var STATUS=[['Active','green'],['Active','green'],['Active','green'],['Paused','amber'],['Draft','']];
+    var COLORS=[['var(--blue-pale)','var(--blue)'],['var(--purple-light)','var(--purple)'],['var(--green-light)','var(--green)'],['var(--amber-light)','var(--amber)'],['var(--rose-light)','var(--rose)']];
+    function rnd(s){ var x=Math.sin(s*53.1+7.7)*43758.5453; return x-Math.floor(x); }
+    var rows=[];
+    for(var i=0;i<112;i++){
+      var nm=BASE[i%BASE.length]+' '+SUFFIX[Math.floor(rnd(i*1.7)*SUFFIX.length)];
+      var counts=[12,28,163,312,480,847,1240,3847,12800,128540,312480];
+      var n=counts[Math.floor(rnd(i*2.3)*counts.length)];
+      var ty=TYPES[Math.floor(rnd(i*3.1)*TYPES.length)];
+      var st=STATUS[Math.floor(rnd(i*4.9)*STATUS.length)];
+      var eng=st[0]==='Draft'?0:20+Math.floor(rnd(i*5.5)*55);
+      var col=COLORS[i%COLORS.length];
+      var slug='list-'+(i+1);
+      rows.push('<a class="cm-row" href="atlas-outreach-lists.html?list='+slug+'">'+
+        '<div class="ico" style="background:'+col[0]+';color:'+col[1]+';display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10M2 7h10M2 10.5h6"/></svg></div>'+
+        '<div class="body"><div class="ttl">'+nm.trim()+'</div><div class="meta"><span>'+n.toLocaleString()+' donors</span><span>·</span><span>'+ty+'</span><span>·</span><span>'+st[0]+'</span></div></div>'+
+        '<div class="recipients"><span class="muted" style="font-size:11.5px">'+(st[0]==='Draft'?'Not sent yet':'Last send '+(1+Math.floor(rnd(i*6.1)*20))+' days ago')+'</span></div>'+
+        '<div class="metric">'+(eng?'<span class="v '+(eng>40?'green':'amber')+'">'+eng+'% engagement</span><div class="bar"><div class="bar-f" style="width:'+eng+'%;background:var(--'+(eng>40?'green':'amber')+')"></div></div>':'<span class="v" style="color:var(--text-3)">—</span>')+'</div>'+
+        '<span class="tag '+(st[1]||'')+'"'+(st[1]?'':' style="background:var(--surface);color:var(--text-3)"')+'>'+st[0]+'</span>'+
+        '</a>');
+    }
+    host.innerHTML=rows.join('');
+    var lc=document.getElementById('lists-count-inline'); if(lc) lc.textContent='112';
+  }
+  window.__commsRenderLists=commsRenderLists;
+  function boot(){ renderScheduled(); commsRenderLists(); ensureKebabs(); }
   if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
 })();
 </script>
@@ -1793,6 +1877,122 @@ body {
   }
   function close(){ ov.classList.remove('show'); }
   window.commsImport=function(){ ov=document.getElementById('ci-ov'); bd=document.getElementById('ci-bd'); ft=document.getElementById('ci-ft'); CI.step=1; CI.rows=[]; CI.map={email:-1,first:-1,last:-1}; render(); ov.classList.add('show'); ov.onclick=function(e){ if(e.target===ov) close(); }; };
+})();
+</script>
+<style id="tpl-actions-css">
+  .tplmenu{position:fixed;background:#fff;border:1px solid var(--border);border-radius:11px;box-shadow:0 14px 36px rgba(15,23,42,.2);padding:6px;min-width:210px;z-index:100080;font-family:'DM Sans',sans-serif}
+  .tplmenu .it{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;font-size:13px;color:var(--text-2);cursor:pointer}
+  .tplmenu .it:hover{background:var(--blue-pale)}
+  .tplmenu .it.danger{color:#B91C1C}.tplmenu .it.danger:hover{background:#FEF2F2}
+  .tplmenu .sep{height:1px;background:var(--border);margin:5px 2px}
+  .tplmenu .it svg{width:14px;height:14px;flex-shrink:0;color:var(--text-3)}
+  .tplmenu .it.danger svg{color:#B91C1C}
+  #tp-ov{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100081;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',sans-serif}
+  #tp-ov.show{display:flex}
+  #tp-ov .card{background:#fff;border-radius:16px;width:100%;max-width:720px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(15,23,42,.3);overflow:hidden}
+  #tp-ov .hd{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+  #tp-ov .hd h3{font-family:'DM Serif Display',serif;font-size:19px;color:var(--navy)}
+  #tp-ov .hd .x{margin-left:auto;width:28px;height:28px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;color:var(--text-3)}
+  #tp-ov .devs{display:inline-flex;background:var(--surface);border-radius:9px;padding:3px}
+  #tp-ov .devs button{border:none;background:transparent;border-radius:7px;padding:6px 11px;font:600 11.5px 'DM Sans';color:var(--text-3);cursor:pointer}
+  #tp-ov .devs button.on{background:#fff;color:var(--navy);box-shadow:0 1px 2px rgba(15,23,42,.08)}
+  #tp-ov .stage{flex:1;overflow-y:auto;background:var(--surface);padding:22px;display:flex;justify-content:center}
+  #tp-ov .frame{background:#fff;border:1px solid var(--border);border-radius:10px;width:600px;transition:width .2s;overflow:hidden}
+  #tp-ov .frame.tablet{width:480px}#tp-ov .frame.mobile{width:340px}
+  #tp-ov .frame.dark{background:#0F172A;border-color:#1E293B}
+  #tp-ov .fhead{padding:12px 18px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-3)}
+  #tp-ov .frame.dark .fhead{color:#94A3B8;border-color:#1E293B}
+  #tp-ov .fbody{padding:24px 22px;font-size:14px;line-height:1.7;color:#334155}
+  #tp-ov .frame.dark .fbody{color:#CBD5E1}
+  #tp-ov .fbody h2{font-family:'DM Serif Display',serif;color:var(--navy);font-size:20px;margin-bottom:12px}
+  #tp-ov .frame.dark .fbody h2{color:#fff}
+  #tp-ov .fbody .cta{display:inline-block;margin:12px 0;background:var(--blue);color:#fff;padding:11px 22px;border-radius:8px;font-weight:600;text-decoration:none}
+  #tp-ov .ft{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center}
+  #tp-ov .ft .note{font-size:12px;color:var(--text-3)}
+</style>
+<div id="tp-ov"><div class="card"><div class="hd"><h3 id="tp-title">Preview</h3><div class="devs" id="tp-devs"><button class="on" data-d="desktop">Desktop</button><button data-d="tablet">Tablet</button><button data-d="mobile">Mobile</button><button data-d="dark">Dark</button></div><button class="x" id="tp-x">✕</button></div><div class="stage"><div class="frame" id="tp-frame"></div></div><div class="ft"><span class="note">Preview shown with sample recipient · <b>Margaret O'Brien</b></span><a class="btn btn-primary" id="tp-edit" style="margin-left:auto;text-decoration:none">Edit in builder →</a></div></div></div>
+<script id="tpl-actions-js">
+(function(){
+  var SAMPLE={first_name:'Margaret',last_name:"O'Brien",org_name:'Diocese of Albany',parish_name:"St. Mary's Cathedral",donation_amount:'$10,000',amount:'$500',event_name:"Bishop's Annual Gala",year:'2026',seq:'0148'};
+  function resolve(s){ return String(s||'').replace(/\{\{?\s*([a-z_]+)\s*\}?\}/gi,function(m,k){ return SAMPLE[k]!=null?('<span style="background:#EFF6FF;color:#2563EB;border-radius:4px;padding:0 3px">'+SAMPLE[k]+'</span>'):m; }); }
+  function tplInfo(row){ return { nm:((row.querySelector('.ttl')||{}).textContent||'Template').trim(), subj:(((row.querySelector('.recipients')||{}).textContent||'').match(/[“"]([^”"]*)[”"]/)||[])[1]||'' }; }
+  var curTpl=null;
+  function openPreview(t){
+    curTpl=t; var ov=document.getElementById('tp-ov'); document.getElementById('tp-title').textContent='Preview · '+t.nm;
+    document.getElementById('tp-edit').setAttribute('href','atlas-email-builder.html?mode=template&tpl='+encodeURIComponent(t.nm));
+    drawPreview('desktop');
+    document.querySelectorAll('#tp-devs button').forEach(function(b){ b.classList.toggle('on', b.dataset.d==='desktop'); });
+    ov.classList.add('show');
+  }
+  var TPL_LIB={
+    thankyou:{banner:'<h1>Thank you, {{first_name}}</h1>',body:'<p>Dear {{first_name}},</p><p>Your generous gift of <b>{{donation_amount}}</b> to the Cathedral Capital Campaign arrived at a pivotal moment. Because of you, the bell-tower restoration is moving forward.</p><p>With deep gratitude,<br>Father Michael Reilly · Rector</p>',cta:{l:'See your impact',c:'#2563EB'}},
+    receipt:{banner:'<h1>Your official gift receipt</h1>',body:'<p>Dear {{first_name}},</p><p>This confirms your tax-deductible gift of <b>{{donation_amount}}</b> to {{org_name}}. No goods or services were provided in exchange for this contribution.</p><p style="color:#94A3B8;font-size:12px">Receipt #R-2026-{{seq}} · Retain for your records (IRS Pub 1771).</p>',cta:{l:'Download PDF receipt',c:'#15803D'}},
+    welcome:{banner:'<h1>Welcome to the family, {{first_name}}</h1>',body:'<p>We\'re so glad you\'ve joined the {{parish_name}} community. Your first gift helps sustain everything from our music ministry to outreach for families in need.</p>',cta:{l:'Explore our ministries',c:'#7C3AED'}},
+    pledge:{banner:'<h1>Your pledge payment is coming up</h1>',body:'<p>Hi {{first_name}},</p><p>A friendly reminder that your next pledge installment of <b>{{amount}}</b> is due soon. Thank you for keeping your commitment to the Cathedral.</p>',cta:{l:'Make your payment',c:'#2563EB'}},
+    lapsed:{banner:'<h1>We miss you at {{parish_name}}</h1>',body:'<p>Dear {{first_name}},</p><p>It\'s been a while since we\'ve seen your support, and the community is thinking of you. Your past generosity made a lasting difference.</p>',cta:{l:'Come back with a gift',c:'#BE185D'}},
+    event:{banner:'<h1>You\'re invited — {{event_name}}</h1>',body:'<p>Dear {{first_name}},</p><p>Join us for an unforgettable evening — dinner, music, and fellowship with the Bishop.</p><p><b>Saturday, June 14 · 6:00 PM · Cathedral Hall</b></p>',cta:{l:'RSVP now',c:'#7C3AED'}},
+    soft:{banner:'<h1>Your gift was recorded, {{first_name}}</h1>',body:'<p>Thank you for your recent gift through your donor-advised fund. Because your DAF sponsor already issued your tax receipt, this is an acknowledgement only.</p>',cta:{l:'View your giving history',c:'#D97706'}},
+    midpoint:{banner:'<h1>We\'re halfway there, {{first_name}}</h1>',body:'<p>Thanks to friends like you, the Cathedral Capital Campaign has reached <b>52% of our $4M goal</b>. Will you help us finish strong?</p>',cta:{l:'Give to the campaign',c:'#2563EB'}},
+    cultivation:{banner:'<h1>A personal note, {{first_name}}</h1>',body:'<p>Dear {{first_name}},</p><p>I\'ve been reflecting on the impact your leadership has had on {{parish_name}}. I\'d love to share our vision over coffee.</p><p>Warmly,<br>Sarah Reynolds · Development Director</p>',cta:{l:'Schedule a conversation',c:'#0E1E35'}},
+    matching:{banner:'<h1>Great news — your gift was matched!</h1>',body:'<p>{{first_name}}, your employer confirmed a match, <b>doubling your impact</b> to the Cathedral. Thank you for multiplying your generosity.</p>',cta:{l:'See your total impact',c:'#15803D'}},
+    memorial:{banner:'<h1>In loving memory</h1>',body:'<p>Dear {{first_name}},</p><p>Your tribute gift has been received with gratitude. Your loved one\'s memory will be honored through the ongoing ministry of {{parish_name}}.</p>',cta:{l:'Leave a remembrance',c:'#BE185D'}},
+    yearend:{banner:'<h1>Your 2026 giving summary</h1>',body:'<p>Dear {{first_name}},</p><p>As the year closes, thank you for your faithful support of {{org_name}}. Your cumulative giving totaled <b>{{donation_amount}}</b> — a tax-deductible summary is attached.</p>',cta:{l:'Download giving statement',c:'#2563EB'}}
+  };
+  function matchSlug(name){ var n=(name||'').toLowerCase();
+    if(/receipt/.test(n))return'receipt'; if(/welcome/.test(n))return'welcome'; if(/pledge/.test(n))return'pledge';
+    if(/laps/.test(n))return'lapsed'; if(/gala|event/.test(n))return'event'; if(/soft/.test(n))return'soft';
+    if(/mid.?point/.test(n))return'midpoint'; if(/cultivat/.test(n))return'cultivation'; if(/match/.test(n))return'matching';
+    if(/memori/.test(n))return'memorial'; if(/year.?end|giving summary/.test(n))return'yearend'; if(/thank/.test(n))return'thankyou';
+    return 'thankyou'; }
+  function socialRow(){ return '<div style="text-align:center;margin:16px 0">'+['f','X','in','ig'].map(function(s){return '<a href="#" style="display:inline-block;width:30px;height:30px;line-height:30px;border-radius:50%;background:#0E1E35;color:#fff;text-decoration:none;margin:0 3px;font-weight:700;text-align:center">'+s+'</a>';}).join('')+'</div>'; }
+  function drawPreview(mode){
+    var f=document.getElementById('tp-frame'); f.className='frame'+(mode!=='desktop'?' '+mode:'');
+    var t=curTpl, c=TPL_LIB[matchSlug(t.nm)], dark=mode==='dark';
+    f.innerHTML='<div class="fhead"><b>St. Mary\'s Cathedral</b> · to '+SAMPLE.first_name+' '+SAMPLE.last_name+'</div>'+
+      '<div class="fbody">'+
+      '<div style="text-align:center;padding-bottom:14px;border-bottom:2px solid #2563EB;margin-bottom:16px"><div style="font-family:\'DM Serif Display\',serif;font-size:20px;color:'+(dark?'#fff':'#0E1E35')+'">St. Mary\'s Cathedral</div><div style="font-size:10px;color:#94A3B8;letter-spacing:.1em;text-transform:uppercase">Diocese of Albany</div></div>'+
+      resolve(c.banner)+resolve(c.body)+
+      '<div style="text-align:center;margin:16px 0"><a class="cta" style="background:'+c.cta.c+'" href="#">'+c.cta.l+'</a></div>'+
+      socialRow()+
+      '<div style="border-top:1px solid '+(dark?'#1E293B':'#E2E8F0')+';padding-top:12px;font-size:11px;color:#94A3B8;text-align:center;line-height:1.6">St. Mary\'s Cathedral · 125 Eagle St, Albany, NY 12202<br>EIN 14-0000000 · <a href="#" style="color:#2563EB">Unsubscribe</a></div>'+
+      '</div>';
+  }
+  document.getElementById('tp-devs').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; document.querySelectorAll('#tp-devs button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); drawPreview(b.dataset.d); });
+  document.getElementById('tp-x').addEventListener('click',function(){ document.getElementById('tp-ov').classList.remove('show'); });
+  document.getElementById('tp-ov').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
+
+  function toast(m){ if(window.atlasToast){window.atlasToast(m);return;} var t=document.getElementById('atlas-rescue-toast'); if(t){t.querySelector('.msg').textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);} }
+  function closeMenus(){ document.querySelectorAll('.tplmenu').forEach(function(m){m.remove();}); }
+  function openMenu(x,y,t,row){
+    closeMenus();
+    var m=document.createElement('div'); m.className='tplmenu';
+    var items=[
+      ['Preview','preview','<circle cx="7" cy="7" r="2"/><path d="M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z"/>'],
+      ['Open / edit in builder','edit','<path d="M2 10.5L9.5 3l1.5 1.5L3.5 12H2z"/>'],
+      ['sep'],
+      ['Duplicate','dup','<rect x="3" y="3" width="7" height="7" rx="1"/><path d="M5.5 3V2a1 1 0 011-1h5a1 1 0 011 1v5a1 1 0 01-1 1h-1"/>'],
+      ['Rename','rename','<path d="M2 10.5L9.5 3l1.5 1.5L3.5 12H2z"/>'],
+      ['Set as default','default','<path d="M7 1.5l1.6 3.3 3.6.5-2.6 2.5.6 3.6L7 9.7 3.8 11.4l.6-3.6L1.8 5.3l3.6-.5z"/>'],
+      ['Share with team','share','<circle cx="4" cy="7" r="1.5"/><circle cx="10" cy="3.5" r="1.5"/><circle cx="10" cy="10.5" r="1.5"/><path d="M5.3 6.3l3.4-2M5.3 7.7l3.4 2"/>'],
+      ['Move to folder','folder','<path d="M1.5 3.5h4l1 1.5h6v6h-11z"/>'],
+      ['sep'],
+      ['Archive','archive','<rect x="1.5" y="2.5" width="11" height="3" rx="1"/><path d="M2.5 5.5v6h9v-6M5.5 8h3"/>','danger'],
+      ['Delete','delete','<path d="M2 3.5h10M5 3.5V2h4v1.5M3.5 3.5l.5 9h6l.5-9"/>','danger']
+    ];
+    m.innerHTML=items.map(function(it){ return it[0]==='sep'?'<div class="sep"></div>':'<div class="it'+(it[3]?' '+it[3]:'')+'" data-a="'+it[1]+'"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">'+it[2]+'</svg>'+it[0]+'</div>'; }).join('');
+    document.body.appendChild(m);
+    m.style.left=Math.min(x, window.innerWidth-224)+'px'; m.style.top=Math.min(y, window.innerHeight-380)+'px';
+    m.addEventListener('click',function(e){ var it=e.target.closest('.it'); if(!it)return; var a=it.dataset.a; closeMenus();
+      if(a==='preview') openPreview(t);
+      else if(a==='edit') window.location='atlas-email-builder.html?mode=template&tpl='+encodeURIComponent(t.nm);
+      else if(a==='dup'){ var c=row.cloneNode(true); c.querySelector('.ttl').textContent=t.nm+' (copy)'; row.parentNode.insertBefore(c,row.nextSibling); toast('“'+t.nm+'” duplicated'); }
+      else if(a==='rename'){ var nn=prompt('Rename template',t.nm); if(nn){ row.querySelector('.ttl').textContent=nn; toast('Renamed to “'+nn+'”'); } }
+      else if(a==='delete'){ if(confirm('Delete “'+t.nm+'”? This can\'t be undone.')){ row.remove(); toast('Template deleted'); } }
+      else toast(({default:'“'+t.nm+'” set as default',share:'Shared with your team',folder:'Moved to a folder',archive:'“'+t.nm+'” archived'})[a]||'Done'); });
+    setTimeout(function(){ document.addEventListener('click',function cl(ev){ if(!m.contains(ev.target)){ closeMenus(); document.removeEventListener('click',cl); } }); },10);
+  }
+  var list=document.getElementById('templates-list');
+  if(list) list.addEventListener('click',function(e){ var row=e.target.closest('.cm-row'); if(!row) return; if(e.target.closest('.kebab')) return; e.preventDefault(); var r=row.getBoundingClientRect(); openMenu(e.clientX, e.clientY||r.bottom, tplInfo(row), row); });
 })();
 </script>
 <style id="atlas-rescue-css">
