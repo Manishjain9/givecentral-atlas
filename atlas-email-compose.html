@@ -700,12 +700,12 @@ body {
   <div class="page-head">
     <div>
       <div class="crumb"><a href="atlas-dashboard.html">Atlas</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <span>Compose</span></div>
-      <div class="page-title">Compose acknowledgement</div>
+      <div class="page-title">Compose email</div>
       <div class="page-sub">Sending from <strong>Diocese of Albany — Sarah Reynolds &lt;sarah.reynolds@diocese.org&gt;</strong> via SendGrid.</div>
     </div>
     <div class="flex gap-8">
       <button class="btn btn-ghost" onclick="atlasSaveDraft()">Save draft</button>
-      <button class="btn btn-ghost" onclick="window.atlasToast ? atlasToast('Test sent to sarah.reynolds@diocese.org · check your inbox') : alert('Test sent to sarah.reynolds@diocese.org')">Send test to me</button>
+      <button class="btn btn-ghost" onclick="cmpSendTest()">Send test</button>
     </div>
   </div>
 
@@ -713,48 +713,53 @@ body {
 
     <main>
 
-      <!-- Template -->
-      <div class="compose-card">
-        <h3 style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:14px">Template</h3>
-        <div class="template-strip">
-          <span class="lbl-strip">Family</span>
-          <span class="chip on">Cathedral major-donor thank-you</span>
-          <span class="chip">Standard cash receipt</span>
-          <span class="chip">Soft-credit acknowledgement (no tax)</span>
-          <span class="chip">Pledge-payment receipt</span>
-          <span class="chip">First-time donor welcome</span>
-          <span class="chip">+ Build a new template</span>
-        </div>
-        <p class="muted" style="font-size:11.5px;margin-top:6px;display:flex;align-items:center;gap:6px">
-          <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--green);flex-shrink:0"><circle cx="6" cy="6" r="5"/><path d="M4 6l1.5 1.5L8 5"/></svg>
-          IRS Pub 1771 compliant · Diocese of Albany sender identity loaded.
-        </p>
+      <!-- Template (compact) -->
+      <div class="compose-card cmp-compact">
+        <span class="cmp-inline-lbl">Template</span>
+        <select class="fld" id="cmp-tpl-select" style="flex:1;min-width:0;max-width:360px" onchange="cmpPickTemplateSel(this)">
+          <option value="cathedral">Cathedral major-donor thank-you</option>
+          <option value="cash">Standard cash receipt</option>
+          <option value="soft">Soft-credit acknowledgement (no tax)</option>
+          <option value="pledge">Pledge-payment receipt</option>
+          <option value="welcome">First-time donor welcome</option>
+          <option value="new">+ Build a new template…</option>
+        </select>
+        <a class="btn btn-ghost" style="padding:7px 12px;text-decoration:none" href="atlas-email-builder.html"><svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-right:4px;vertical-align:-1px"><rect x="1.5" y="1.5" width="11" height="4" rx="1"/><rect x="1.5" y="7.5" width="5" height="5" rx="1"/><rect x="8" y="7.5" width="4.5" height="5" rx="1"/></svg>Drag &amp; drop builder</a>
+        <span class="cmp-compliance"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--green);flex-shrink:0"><circle cx="6" cy="6" r="5"/><path d="M4 6l1.5 1.5L8 5"/></svg> IRS Pub 1771 compliant</span>
       </div>
 
-      <!-- Recipients -->
-      <div class="compose-card">
-        <h3 style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:14px">Recipient</h3>
-        <div class="recipient-row">
+      <!-- Recipients (collapsible) -->
+      <div class="compose-card" id="cmp-recip-card">
+        <div class="cmp-collapse-hd" onclick="cmpToggleRecip()">
+          <h3 style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:0">Recipient</h3>
+          <span class="cmp-recip-summary" id="cmp-recip-summary"></span>
+          <span class="cmp-chev" id="cmp-recip-chev">▾</span>
+        </div>
+        <div id="cmp-recip-body" style="margin-top:14px">
+        <div class="recipient-row" id="cmp-to-row">
           <span class="lbl-tag">To</span>
-          <span class="recipient-chip">
+          <span class="recipient-chip" data-name="Margaret O'Brien">
             <span class="av">M</span>
             Margaret O'Brien <span class="muted" style="font-weight:400">&lt;margaret.obrien@email.com&gt;</span>
-            <span class="x">×</span>
+            <span class="x" onclick="cmpRemoveRecipient(this)">×</span>
           </span>
-          <span class="muted" style="font-size:12px;margin-left:6px">+ add another</span>
+          <span class="cmp-addrecip" style="font-size:12px;margin-left:6px;color:var(--blue);font-weight:600;cursor:pointer" onclick="cmpAddRecipient('to')">+ add another</span>
+          <span class="cmp-addrecip" style="font-size:12px;margin-left:10px;color:var(--blue);font-weight:600;cursor:pointer" onclick="cmpAddList()">+ add a list / segment</span>
         </div>
-        <div class="recipient-row">
+        <div id="cmp-recip-note" style="display:none;margin-top:10px;padding:9px 12px;border-radius:9px;font-size:12px;line-height:1.5"></div>
+        <div class="recipient-row" id="cmp-cc-row">
           <span class="lbl-tag">Cc</span>
-          <span class="recipient-chip" style="background:var(--purple-light);border-color:var(--purple-light);color:var(--purple)">
+          <span class="recipient-chip" data-name="Bridget McCarthy" style="background:var(--purple-light);border-color:var(--purple-light);color:var(--purple)">
             <span class="av" style="background:var(--purple)">B</span>
             Bridget McCarthy
-            <span class="x" style="color:var(--purple)">×</span>
+            <span class="x" style="color:var(--purple)" onclick="cmpRemoveRecipient(this)">×</span>
           </span>
+          <span class="cmp-addrecip" style="font-size:12px;margin-left:6px;color:var(--blue);font-weight:600;cursor:pointer" onclick="cmpAddRecipient('cc')">+ add cc</span>
         </div>
         <div class="row2 mt-12" style="margin-top:12px">
           <div>
             <span class="lbl">From</span>
-            <select class="fld">
+            <select class="fld" id="cmp-from">
               <option selected>Sarah Reynolds (you) · sarah.reynolds@diocese.org</option>
               <option>Bridget McCarthy · bridget@diocese.org</option>
               <option>St. Mary's Cathedral · cathedral@diocese.org</option>
@@ -768,6 +773,7 @@ body {
             </select>
           </div>
         </div>
+        </div><!-- /#cmp-recip-body -->
       </div>
 
       <!-- Subject + body -->
@@ -775,25 +781,42 @@ body {
         <h3 style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:14px">Message</h3>
 
         <span class="lbl">Subject</span>
-        <input class="fld mb-12" style="margin-bottom:12px" value="Thank you for your $10,000 gift to Cathedral Restoration, Margaret">
+        <input id="cmp-subject" class="fld mb-12" style="margin-bottom:12px" value="Thank you for your $10,000 gift to Cathedral Restoration, Margaret">
 
+        <div class="cmp-mode">
+          <button type="button" class="cmp-mode-btn on" id="cmp-mode-rt" onclick="cmpMode('rt')"><svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="vertical-align:-1px"><path d="M2 10.5L9.5 3l1.5 1.5L3.5 12H2z"/></svg> Rich text</button>
+          <button type="button" class="cmp-mode-btn" id="cmp-mode-builder" onclick="cmpMode('builder')"><svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:-1px"><rect x="1.5" y="1.5" width="11" height="4" rx="1"/><rect x="1.5" y="7.5" width="5" height="5" rx="1"/><rect x="8" y="7.5" width="4.5" height="5" rx="1"/></svg> Drag &amp; drop builder</button>
+        </div>
+
+        <div id="cmp-rt">
         <div class="editor-frame">
           <div class="editor-toolbar">
-            <select><option>Paragraph</option><option>Heading 1</option><option>Heading 2</option></select>
+            <select id="cmp-format"><option value="p">Paragraph</option><option value="h1">Heading 1</option><option value="h2">Heading 2</option></select>
             <span class="sep"></span>
-            <button title="Bold"><strong>B</strong></button>
-            <button title="Italic"><em>I</em></button>
-            <button title="Underline"><u>U</u></button>
+            <button title="Bold" data-cmd="bold"><strong>B</strong></button>
+            <button title="Italic" data-cmd="italic"><em>I</em></button>
+            <button title="Underline" data-cmd="underline"><u>U</u></button>
             <span class="sep"></span>
-            <button>•</button>
-            <button>1.</button>
+            <button title="Bulleted list" data-cmd="insertUnorderedList">•</button>
+            <button title="Numbered list" data-cmd="insertOrderedList">1.</button>
             <span class="sep"></span>
-            <button title="Link">🔗</button>
-            <button title="Image">🖼</button>
+            <button title="Link" data-cmd="createLink">🔗</button>
+            <button title="Image" data-cmd="insertImage">🖼</button>
             <span class="sep"></span>
-            <select><option>+ Insert merge field</option><option>{{first_name}}</option><option>{{last_gift_amount}}</option><option>{{last_gift_date}}</option><option>{{lifetime_giving}}</option><option>{{receipt_link}}</option></select>
+            <select id="cmp-merge"><option value="">+ Insert merge field</option><option>{{first_name}}</option><option>{{last_gift_amount}}</option><option>{{last_gift_date}}</option><option>{{lifetime_giving}}</option><option>{{receipt_link}}</option></select>
           </div>
-          <div class="editor-body">
+          <div class="editor-insertbar">
+            <span class="ins-lbl">Insert block</span>
+            <button type="button" class="ins-btn" onclick="cmpInsertButtonModal()"><span class="ins-ico">▭</span>Button</button>
+            <button type="button" class="ins-btn" onclick="cmpInsert('columns')"><span class="ins-ico">▥</span>2 columns</button>
+            <button type="button" class="ins-btn" onclick="cmpInsert('banner')"><span class="ins-ico">▬</span>Banner</button>
+            <button type="button" class="ins-btn" onclick="cmpInsert('image')"><span class="ins-ico">🖼</span>Image</button>
+            <button type="button" class="ins-btn" onclick="cmpInsert('divider')"><span class="ins-ico">—</span>Divider</button>
+            <button type="button" class="ins-btn" onclick="cmpInsert('header')"><span class="ins-ico">⬒</span>Header</button>
+            <button type="button" class="ins-btn" onclick="cmpInsert('footer')"><span class="ins-ico">⬓</span>Footer</button>
+            <button type="button" class="ins-btn" onclick="cmpInsert('social')"><span class="ins-ico">◎</span>Social</button>
+          </div>
+          <div class="editor-body" id="cmp-body" contenteditable="true" spellcheck="true">
             <p>Dear <span class="merge">{{first_name}}</span>,</p>
             <p>I'm writing to thank you, personally, for your gift of <span class="merge">{{last_gift_amount}}</span> to the Cathedral Capital Campaign on <span class="merge">{{last_gift_date}}</span>. It arrived during a stretch of restoration work that has felt slow and expensive — your generosity has changed the rhythm of the project.</p>
             <p>The bell-tower scaffolding goes up in two weeks. I'd love to send you a short video the day it's complete.</p>
@@ -815,10 +838,12 @@ body {
           </div>
           <span class="tag green">Auto</span>
         </div>
-        <div class="add-row" style="padding:10px 14px;border:1.5px dashed var(--border);border-radius:10px;display:flex;gap:8px;align-items:center;font-size:13px;color:var(--text-3);cursor:pointer">
+        <div id="cmp-attach-list"></div>
+        <div class="add-row" onclick="document.getElementById('cmp-file-input').click()" style="padding:10px 14px;border:1.5px dashed var(--border);border-radius:10px;display:flex;gap:8px;align-items:center;font-size:13px;color:var(--text-3);cursor:pointer">
           <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0"><path d="M7 3v8M3 7h8"/></svg>
           Attach a file
         </div>
+        <input type="file" id="cmp-file-input" multiple style="display:none">
       </div>
     </main>
 
@@ -828,23 +853,19 @@ body {
       <div class="preview-card">
         <div class="preview-head">
           <span class="l">Live preview</span>
-          <div class="device">
-            <button class="on" title="Desktop">🖥</button>
-            <button title="Mobile">📱</button>
+          <div class="device" id="cmp-device">
+            <button class="on" data-device="desktop" title="Desktop" onclick="cmpDevice(this)">🖥</button>
+            <button data-device="mobile" title="Mobile" onclick="cmpDevice(this)">📱</button>
           </div>
         </div>
-        <div class="preview-body">
+        <div class="preview-body" id="cmp-preview-body">
           <div class="preview-meta">
-            <div class="row"><span class="l">From</span><span class="v">Sarah Reynolds &lt;sarah.reynolds@diocese.org&gt;</span></div>
-            <div class="row"><span class="l">To</span><span class="v">Margaret O'Brien</span></div>
-            <div class="row"><span class="l">Subject</span><span class="v" style="font-weight:600">Thank you for your $10,000 gift to Cathedral Restoration, Margaret</span></div>
+            <div class="row"><span class="l">From</span><span class="v" id="pv-from">Sarah Reynolds &lt;sarah.reynolds@diocese.org&gt;</span></div>
+            <div class="row"><span class="l">To</span><span class="v" id="pv-to">Margaret O'Brien</span></div>
+            <div class="row"><span class="l">Subject</span><span class="v" id="pv-subject" style="font-weight:600">Thank you for your $10,000 gift to Cathedral Restoration, Margaret</span></div>
           </div>
 
-          <div class="preview-msg">
-            <p>Dear <span class="resolved">Margaret</span>,</p>
-            <p>I'm writing to thank you, personally, for your gift of <span class="resolved">$10,000</span> to the Cathedral Capital Campaign on <span class="resolved">May 4, 2026</span>. It arrived during a stretch of restoration work that has felt slow and expensive — your generosity has changed the rhythm of the project.</p>
-            <p style="color:var(--text-3)">… (continued in send)</p>
-          </div>
+          <div class="preview-msg" id="pv-msg"></div>
         </div>
       </div>
 
@@ -938,6 +959,310 @@ body {
 
 </div>
 
+<style id="compose-interactions-css">
+  .editor-body { outline:none; }
+  .editor-toolbar button.active { background:var(--blue-pale); color:var(--blue); }
+  .preview-body.mobile { max-width:380px; margin:0 auto; box-shadow:0 0 0 1px var(--border); border-radius:12px; }
+  .cmp-addrecip:hover { text-decoration:underline; }
+  .cmp-attach { display:flex; align-items:center; gap:12px; padding:10px 14px; background:var(--surface); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  .recipient-chip.list-chip { background:var(--blue-pale); border-color:#BFDBFE; color:#1D4ED8; }
+  .recipient-chip.list-chip .lico { width:20px;height:20px;border-radius:5px;background:var(--blue);color:#fff;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0; }
+  .recipient-chip.list-chip .lico svg { width:11px;height:11px; }
+  .recipient-chip.list-chip .cnt { font-size:10.5px;font-weight:700;background:#fff;color:var(--blue);border:1px solid #BFDBFE;border-radius:20px;padding:1px 7px;margin-left:2px; }
+  #lp-ov { position:fixed; inset:0; background:rgba(15,23,42,.5); backdrop-filter:blur(3px); z-index:100040; display:none; align-items:center; justify-content:center; padding:24px; }
+  #lp-ov.show { display:flex; }
+  .lp { background:#fff; border-radius:16px; width:100%; max-width:520px; max-height:86vh; display:flex; flex-direction:column; box-shadow:0 24px 60px rgba(15,23,42,.3); overflow:hidden; }
+  .lp-h { padding:18px 22px 12px; border-bottom:1px solid var(--border); }
+  .lp-h .t { font-family:'DM Serif Display',serif; font-size:20px; color:var(--text); }
+  .lp-h .s { font-size:12.5px; color:var(--text-3); margin-top:3px; }
+  .lp-search { margin:14px 22px 0; display:flex; align-items:center; gap:8px; border:1px solid var(--border); border-radius:9px; padding:8px 11px; }
+  .lp-search input { border:none; outline:none; width:100%; font-size:13px; font-family:'DM Sans',sans-serif; background:none; }
+  .lp-list { padding:10px 22px 8px; overflow-y:auto; }
+  .lp-row { display:flex; align-items:center; gap:12px; padding:11px 12px; border:1px solid var(--border); border-radius:10px; margin-bottom:8px; cursor:pointer; }
+  .lp-row:hover { border-color:var(--blue); background:var(--blue-pale); }
+  .lp-row .lp-ic { width:34px;height:34px;border-radius:9px;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+  .lp-row .lp-nm { font-size:13.5px;font-weight:600;color:var(--text); }
+  .lp-row .lp-sub { font-size:11.5px;color:var(--text-3);margin-top:1px; }
+  .lp-row .lp-n { margin-left:auto;font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums; }
+  .lp-row.big .lp-ic { background:var(--amber-light);color:var(--amber); }
+  .lp-f { padding:12px 22px; border-top:1px solid var(--border); display:flex; gap:10px; align-items:center; }
+  .lp-btn { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; padding:9px 16px; border-radius:9px; cursor:pointer; border:1px solid var(--border); background:#fff; color:var(--text-2); }
+  .lp-btn.primary { background:var(--blue); color:#fff; border-color:var(--blue); }
+  .lp-btn.primary:hover { background:#1D4ED8; }
+  .lp-newf { width:100%; font-family:'DM Sans',sans-serif; font-size:13px; padding:9px 11px; border:1px solid var(--border); border-radius:9px; }
+  .lp-newf:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.12); }
+  .lp-opt { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1px solid var(--border); border-radius:10px; margin-bottom:8px; cursor:pointer; font-size:13px; color:var(--text-2); }
+  .lp-opt:hover { border-color:#94A3B8; }
+  .lp-opt input { accent-color:var(--blue); width:15px; height:15px; margin-top:2px; flex-shrink:0; }
+  .lp-opt .s { font-size:11.5px; color:var(--text-3); }
+</style>
+<div id="lp-ov">
+  <div class="lp">
+    <div class="lp-h"><div class="t">Add a list or segment</div><div class="s">Send to an entire saved list. Great for appeals and large sends.</div></div>
+    <div class="lp-search" id="lp-search-wrap"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="width:14px;height:14px;color:var(--text-3)"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="lp-q" placeholder="Search lists & segments…" oninput="lpRender()"></div>
+    <div class="lp-list" id="lp-list"></div>
+    <div class="lp-f" id="lp-foot"></div>
+  </div>
+</div>
+<script id="compose-interactions">
+(function(){
+  function toast(m){ if(window.atlasToast){ window.atlasToast(m); return; } var t=document.getElementById('atlas-rescue-toast'); if(t){ t.querySelector('.msg').textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){ t.classList.remove('show'); },2600); } }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function $(id){ return document.getElementById(id); }
+  var MERGE={ '{{first_name}}':'Margaret', '{{last_gift_amount}}':'$10,000', '{{last_gift_date}}':'May 4, 2026', '{{lifetime_giving}}':'$142,500', '{{receipt_link}}':'givecentral.org/r/2026-0148', '{{parish_name}}':"St. Mary's Cathedral" };
+
+  /* ── Live preview ── */
+  window.cmpSyncPreview=function(){
+    var body=$('cmp-body'); if(!body) return;
+    var html=body.innerHTML;
+    Object.keys(MERGE).forEach(function(tok){ html=html.split(tok).join('<span class="resolved">'+MERGE[tok]+'</span>'); });
+    html=html.replace(/class="merge"/g,'');
+    var msg=$('pv-msg'); if(msg) msg.innerHTML=html;
+    var subj=$('cmp-subject'); if(subj && $('pv-subject')) $('pv-subject').textContent=subj.value;
+    var fs=$('cmp-from'); if(fs && $('pv-from')){ var fo=fs.options[fs.selectedIndex].text, p=fo.split('·'); var nm=p[0].replace(/\(you\)/,'').trim(), em=(p[1]||'').trim(); $('pv-from').textContent=nm+(em?' <'+em+'>':''); }
+    var chips=[].slice.call(document.querySelectorAll('#cmp-to-row .recipient-chip'));
+    var names=[], total=0, hasList=false, big=0;
+    chips.forEach(function(c){ var nm=c.getAttribute('data-name')||''; if(c.classList.contains('list-chip')){ var n=+(c.getAttribute('data-count')||0); names.push(nm+' ('+n.toLocaleString()+')'); total+=n; hasList=true; if(n>big) big=n; } else { names.push(nm); total+=1; } });
+    if($('pv-to')) $('pv-to').textContent = names.join(', ')||'—';
+    cmpRecipNote(total, hasList, big);
+  };
+  function cmpRecipNote(total, hasList, big){
+    var el=$('cmp-recip-note'); if(!el) return;
+    if(!hasList && total<=1){ el.style.display='none'; return; }
+    el.style.display='';
+    if(big>=10000){
+      el.style.background='var(--amber-light)'; el.style.color='#92400E'; el.style.border='1px solid #FDE68A';
+      el.innerHTML='<strong>'+total.toLocaleString()+' recipients.</strong> Large send — Atlas will throttle delivery, dedupe against Do-Not-Contact + bounces, and let you preview a 10-recipient sample before it goes out.';
+    } else {
+      el.style.background='var(--blue-pale)'; el.style.color='#1E3A8A'; el.style.border='1px solid #BFDBFE';
+      el.innerHTML='<strong>'+total.toLocaleString()+' recipients.</strong> Merge fields personalize each message individually.';
+    }
+  }
+
+  /* ── Add a list / segment ── */
+  var LISTS=[
+    {name:'Spring 2026 Appeal', n:847, sub:'Dynamic · 42% avg open'},
+    {name:'Major Gift Cultivation', n:28, sub:'Manual · personal outreach'},
+    {name:'New Donor Welcome Series', n:163, sub:'Automated · 5-touch'},
+    {name:'LYBUNT donors', n:47, sub:'Dynamic · lapsed last year'},
+    {name:'Christmas 2025 recipients', n:9820, sub:'Static snapshot'},
+    {name:'All active donors', n:128540, sub:'Dynamic · gave in last 24 months'},
+    {name:'Diocese-wide parishioners', n:312480, sub:'Dynamic · full mailing universe'}
+  ];
+  var lpMode='list';
+  window.cmpAddList=function(){ lpMode='list'; var q=$('lp-q'); if(q) q.value=''; lpRender(); $('lp-ov').classList.add('show'); setTimeout(function(){ var qq=$('lp-q'); if(qq&&lpMode==='list') qq.focus(); },40); };
+  window.lpClose=function(){ $('lp-ov').classList.remove('show'); };
+  window.lpNew=function(){ lpMode='new'; lpRender(); setTimeout(function(){ var n=$('lp-new-name'); if(n) n.focus(); },40); };
+  window.lpBack=function(){ lpMode='list'; lpRender(); };
+  window.lpRender=function(){
+    var sw=$('lp-search-wrap'), el=$('lp-list'), foot=$('lp-foot');
+    if(lpMode==='new'){
+      if(sw) sw.style.display='none';
+      el.innerHTML = '<div style="padding:4px 0 2px">'
+        + '<span style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);margin-bottom:6px">List name</span>'
+        + '<input id="lp-new-name" class="lp-newf" placeholder="e.g. Summer 2026 mid-level prospects">'
+        + '<span style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);margin:14px 0 6px">How to build it</span>'
+        + '<label class="lp-opt"><input type="radio" name="lpsrc" value="empty" checked><span><b>Start empty</b><br><span class="s">Add contacts one by one or from the Donors page later.</span></span></label>'
+        + '<label class="lp-opt"><input type="radio" name="lpsrc" value="dynamic"><span><b>Dynamic segment</b><br><span class="s">Members update automatically from a filter (e.g. "$1k+ Capital givers").</span></span></label>'
+        + '<label class="lp-opt"><input type="radio" name="lpsrc" value="csv"><span><b>Import from CSV</b><br><span class="s">Upload a contact file — opens the import wizard in a new tab.</span></span></label>'
+        + '</div>';
+      foot.innerHTML = '<button class="lp-btn" onclick="lpBack()">← Back</button><button class="lp-btn primary" style="margin-left:auto" onclick="lpCreate()">Create list</button>';
+      return;
+    }
+    if(sw) sw.style.display='';
+    var q=(($('lp-q')||{}).value||'').toLowerCase().trim();
+    var have=[].slice.call(document.querySelectorAll('#cmp-to-row .list-chip')).map(function(c){ return c.getAttribute('data-name'); });
+    var res=LISTS.filter(function(l){ return have.indexOf(l.name)===-1 && (!q || l.name.toLowerCase().indexOf(q)>-1); });
+    el.innerHTML = res.length ? res.map(function(l){ return '<div class="lp-row'+(l.n>=10000?' big':'')+'" data-i="'+LISTS.indexOf(l)+'"><div class="lp-ic"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10M2 7h10M2 10.5h6"/></svg></div><div><div class="lp-nm">'+esc(l.name)+'</div><div class="lp-sub">'+esc(l.sub)+'</div></div><div class="lp-n">'+l.n.toLocaleString()+'</div></div>'; }).join('') : '<div style="padding:18px;text-align:center;color:var(--text-3);font-size:12.5px">No lists match — create one below.</div>';
+    foot.innerHTML = '<button class="lp-btn" onclick="lpNew()">+ New list / segment</button><button class="lp-btn" style="margin-left:auto" onclick="lpClose()">Cancel</button>';
+  };
+  window.lpCreate=function(){
+    var name=(($('lp-new-name')||{}).value||'').trim(); if(!name){ var n=$('lp-new-name'); if(n) n.focus(); return; }
+    var src=((document.querySelector('input[name="lpsrc"]:checked'))||{}).value||'empty';
+    if(src==='csv'){ try{ window.open('atlas-outreach-lists.html?import=csv','_blank'); }catch(e){} toast('Opening CSV importer in a new tab…'); lpClose(); return; }
+    var l={ name:name, n:0, sub:(src==='dynamic'?'Dynamic · new segment':'Manual · new list') };
+    LISTS.unshift(l); cmpInsertList(l); lpClose();
+    toast('List "'+name+'" created'+(src==='dynamic'?' · segment will populate from its filter':' · add contacts next'));
+  };
+  (function(){ var ll=$('lp-list'); if(ll) ll.addEventListener('click', function(e){ var row=e.target.closest('.lp-row'); if(!row) return; var l=LISTS[+row.dataset.i]; if(!l) return; cmpInsertList(l); lpClose(); }); var ov=$('lp-ov'); if(ov) ov.addEventListener('click', function(e){ if(e.target===this) lpClose(); }); })();
+  function cmpInsertList(l){
+    var row=$('cmp-to-row'); if(!row) return;
+    var chip=document.createElement('span'); chip.className='recipient-chip list-chip'; chip.setAttribute('data-name', l.name); chip.setAttribute('data-count', l.n);
+    chip.innerHTML='<span class="lico"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 3.5h10M2 7h10M2 10.5h6"/></svg></span> '+esc(l.name)+' <span class="cnt">'+l.n.toLocaleString()+'</span> <span class="x" onclick="cmpRemoveRecipient(this)">×</span>';
+    row.insertBefore(chip, row.querySelector('.cmp-addrecip'));
+    cmpSyncPreview(); toast(l.name+' added · '+l.n.toLocaleString()+' recipients');
+  }
+
+  /* ── Editor toolbar ── */
+  function updateToolbarState(){ try{ ['bold','italic','underline'].forEach(function(c){ var b=document.querySelector('.editor-toolbar [data-cmd="'+c+'"]'); if(b) b.classList.toggle('active', document.queryCommandState(c)); }); }catch(e){} }
+  document.querySelectorAll('.editor-toolbar [data-cmd]').forEach(function(b){
+    b.addEventListener('mousedown', function(e){ e.preventDefault(); });
+    b.addEventListener('click', function(e){ e.preventDefault(); var cmd=b.getAttribute('data-cmd'); var body=$('cmp-body'); if(body) body.focus();
+      try{
+        if(cmd==='createLink'){ var url=prompt('Link URL:','https://'); if(url) document.execCommand('createLink',false,url); }
+        else if(cmd==='insertImage'){ var src=prompt('Image URL:','https://'); if(src) document.execCommand('insertImage',false,src); }
+        else document.execCommand(cmd,false,null);
+      }catch(_){}
+      cmpSyncPreview(); updateToolbarState();
+    });
+  });
+  var fmt=$('cmp-format'); if(fmt) fmt.addEventListener('change', function(){ var body=$('cmp-body'); if(body) body.focus(); try{ document.execCommand('formatBlock', false, this.value==='h1'?'H1':this.value==='h2'?'H2':'P'); }catch(_){} cmpSyncPreview(); });
+  var mg=$('cmp-merge'); if(mg) mg.addEventListener('change', function(){ if(!this.value) return; var body=$('cmp-body'); if(!body){ this.selectedIndex=0; return; } body.focus();
+    var chip='<span class="merge">'+this.value+'</span>&nbsp;'; var before=body.innerHTML;
+    try{ document.execCommand('insertHTML', false, chip); }catch(_){}
+    if(body.innerHTML===before){ body.innerHTML += ' '+chip; } // fallback: no caret / unsupported
+    this.selectedIndex=0; cmpSyncPreview();
+  });
+  document.addEventListener('selectionchange', function(){ var s=window.getSelection&&window.getSelection(); var body=$('cmp-body'); if(s&&s.anchorNode&&body&&body.contains(s.anchorNode)) updateToolbarState(); });
+
+  /* ── Templates ── */
+  var TEMPLATES={
+    cash:{subject:"Your gift receipt from {{parish_name}}", body:'<p>Dear <span class="merge">{{first_name}}</span>,</p><p>Thank you for your gift of <span class="merge">{{last_gift_amount}}</span> received on <span class="merge">{{last_gift_date}}</span>. This letter is your official receipt for tax purposes — no goods or services were provided in exchange for this contribution.</p><p>With gratitude,<br>Diocese of Albany</p>'},
+    soft:{subject:"Acknowledging your generosity", body:'<p>Dear <span class="merge">{{first_name}}</span>,</p><p>We’re grateful to acknowledge the <span class="merge">{{last_gift_amount}}</span> gift made in your honor. Please note this is a soft-credit acknowledgement and <strong>not</strong> a tax receipt.</p><p>Warmly,<br>Sarah Reynolds</p>'},
+    pledge:{subject:"Pledge payment received — thank you", body:'<p>Dear <span class="merge">{{first_name}}</span>,</p><p>We’ve applied your payment of <span class="merge">{{last_gift_amount}}</span> to your Capital pledge. Your receipt is attached and available anytime at <span class="merge">{{receipt_link}}</span>.</p><p>Thank you,<br>Diocese of Albany</p>'},
+    welcome:{subject:"Welcome to {{parish_name}}’s giving family, {{first_name}}", body:'<p>Dear <span class="merge">{{first_name}}</span>,</p><p>Welcome, and thank you for your first gift! We’re so glad you’re part of our community. Here’s a little about what your generosity makes possible…</p><p>Blessings,<br>Father Michael Reilly</p>'}
+  };
+  window.cmpPickTemplate=function(el){
+    var tpl=el.getAttribute('data-tpl');
+    if(tpl==='new'){ toast('Template builder — starting from the current draft'); return; }
+    document.querySelectorAll('#cmp-templates .chip').forEach(function(c){ c.classList.remove('on'); }); el.classList.add('on');
+    if(tpl==='cathedral'){ $('cmp-subject').value=TEMPLATES._cathedral.subject; $('cmp-body').innerHTML=TEMPLATES._cathedral.body; }
+    else { var T=TEMPLATES[tpl]; if(!T) return; $('cmp-subject').value=T.subject; $('cmp-body').innerHTML=T.body; }
+    cmpSyncPreview(); toast('Template loaded · '+el.textContent.trim());
+  };
+
+  /* ── Recipients ── */
+  window.cmpRemoveRecipient=function(x){ var chip=x.closest('.recipient-chip'); if(chip) chip.remove(); cmpSyncPreview(); };
+  window.cmpAddRecipient=function(kind){
+    if(!window.atlasOpenModal){ return; }
+    window.atlasOpenModal({ title:'Add '+(kind==='cc'?'Cc':'recipient'), sub:'Search a donor or type an email address.',
+      fields:[{id:'ar-name',label:'Name',type:'text',placeholder:'e.g. Robert Lin'},{id:'ar-email',label:'Email',type:'text',placeholder:'name@email.com'}],
+      cta:'Add', onSave:function(v){ if(!v['ar-name']&&!v['ar-email']) return false; cmpInsertRecipient(kind, v['ar-name']||v['ar-email'], v['ar-email']); } });
+  };
+  function cmpInsertRecipient(kind, name, email){
+    var row=$(kind==='cc'?'cmp-cc-row':'cmp-to-row'); if(!row) return;
+    var chip=document.createElement('span'); chip.className='recipient-chip'; chip.setAttribute('data-name', name);
+    if(kind==='cc') chip.style.cssText='background:var(--purple-light);border-color:var(--purple-light);color:var(--purple)';
+    var init=(name.trim().charAt(0)||'?').toUpperCase();
+    chip.innerHTML='<span class="av"'+(kind==='cc'?' style="background:var(--purple)"':'')+'>'+esc(init)+'</span> '+esc(name)+(email?' <span class="muted" style="font-weight:400">&lt;'+esc(email)+'&gt;</span>':'')+' <span class="x"'+(kind==='cc'?' style="color:var(--purple)"':'')+' onclick="cmpRemoveRecipient(this)">×</span>';
+    row.insertBefore(chip, row.querySelector('.cmp-addrecip'));
+    cmpSyncPreview(); toast(name+' added');
+  }
+
+  /* ── Attachments ── */
+  var fi=$('cmp-file-input');
+  if(fi) fi.addEventListener('change', function(){ [].forEach.call(this.files, function(f){ addAttachChip(f.name, Math.max(1,Math.round(f.size/1024))+' KB'); }); this.value=''; });
+  function addAttachChip(name, size){
+    var list=$('cmp-attach-list'); if(!list) return;
+    var ext=((name.split('.').pop())||'file').toUpperCase().slice(0,4);
+    var d=document.createElement('div'); d.className='cmp-attach';
+    d.innerHTML='<div style="width:32px;height:32px;border-radius:8px;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700">'+esc(ext)+'</div><div style="flex:1"><div style="font-size:13px;font-weight:500">'+esc(name)+'</div><div style="font-size:11.5px;color:var(--text-3)">'+esc(size)+'</div></div><span class="x" style="cursor:pointer;color:var(--text-3);font-size:15px" onclick="this.closest(\'.cmp-attach\').remove()">×</span>';
+    list.appendChild(d); toast('Attached · '+name);
+  }
+
+  /* ── Device toggle ── */
+  window.cmpDevice=function(btn){ document.querySelectorAll('#cmp-device button').forEach(function(b){ b.classList.remove('on'); }); btn.classList.add('on'); var pv=$('cmp-preview-body'); if(pv) pv.classList.toggle('mobile', btn.getAttribute('data-device')==='mobile'); };
+
+  /* ── Template select (compact) ── */
+  window.cmpPickTemplateSel=function(sel){
+    var tpl=sel.value, txt=sel.options[sel.selectedIndex].text;
+    if(tpl==='new'){ toast('Template builder — starting from the current draft'); return; }
+    if(tpl==='cathedral'){ if(TEMPLATES._cathedral){ $('cmp-subject').value=TEMPLATES._cathedral.subject; $('cmp-body').innerHTML=TEMPLATES._cathedral.body; } }
+    else { var T=TEMPLATES[tpl]; if(!T) return; $('cmp-subject').value=T.subject; $('cmp-body').innerHTML=T.body; }
+    cmpSyncPreview(); toast('Template loaded · '+txt);
+  };
+  window.cmpGallery=function(){ toast('Template gallery — 12 branded layouts to start from'); };
+
+  /* ── Collapsible recipient card ── */
+  function updateRecipSummary(){
+    var to=[].map.call(document.querySelectorAll('#cmp-to-row .recipient-chip'),function(c){return c.getAttribute('data-name');});
+    var cc=[].map.call(document.querySelectorAll('#cmp-cc-row .recipient-chip'),function(c){return c.getAttribute('data-name');});
+    var fromSel=$('cmp-from'); var from=fromSel?fromSel.options[fromSel.selectedIndex].text.split(' · ')[0]:'';
+    var s='To: '+(to.length?to[0]+(to.length>1?' +'+(to.length-1):''):'—');
+    if(cc.length) s+='   ·   Cc: '+cc[0]+(cc.length>1?' +'+(cc.length-1):'');
+    s+='   ·   From: '+from;
+    var el=$('cmp-recip-summary'); if(el) el.textContent=s;
+  }
+  window.__cmpUpdateRecipSummary=updateRecipSummary;
+  window.cmpToggleRecip=function(){ var card=$('cmp-recip-card'); if(card){ updateRecipSummary(); card.classList.toggle('collapsed'); } };
+
+  /* ── Advanced block insert ── */
+  function insertBlock(html){
+    var body=$('cmp-body'); if(!body) return; body.focus();
+    var before=body.innerHTML;
+    try{ document.execCommand('insertHTML', false, html); }catch(_){}
+    if(body.innerHTML===before){ body.innerHTML = before + html; }
+    cmpSyncPreview(); toast('Block inserted');
+  }
+  function buttonHTML(label,url,color){
+    label=esc(label); url=esc(url);
+    if(color==='outline') return '<div style="text-align:center;margin:18px 0"><a href="'+url+'" style="display:inline-block;border:2px solid #2563EB;color:#2563EB;padding:11px 26px;border-radius:8px;font-weight:600;text-decoration:none">'+label+'</a></div>';
+    return '<div style="text-align:center;margin:18px 0"><a href="'+url+'" style="display:inline-block;background:'+color+';color:#fff;padding:12px 28px;border-radius:8px;font-weight:600;text-decoration:none">'+label+'</a></div>';
+  }
+  var BLOCKS={
+    columns:'<table width="100%" cellpadding="0" cellspacing="0" style="margin:14px 0"><tr><td width="50%" valign="top" style="padding-right:10px;font-size:14px;color:#334155">Left column — add your text or image here.</td><td width="50%" valign="top" style="padding-left:10px;font-size:14px;color:#334155">Right column — add your text or image here.</td></tr></table>',
+    banner:'<div style="background:linear-gradient(135deg,#0E1E35,#2563EB);color:#fff;padding:26px 22px;border-radius:10px;margin:16px 0;text-align:center"><div style="font-family:\'DM Serif Display\',serif;font-size:22px">Your gift changes lives</div><div style="opacity:.85;font-size:13px;margin-top:6px">Cathedral Restoration · 2026</div></div>',
+    image:'<div style="margin:16px 0;text-align:center"><div style="background:#EFF6FF;border:1px dashed #BFDBFE;border-radius:10px;padding:34px;color:#64748B;font-size:13px">🖼 Image — click to replace (recommended 600×300)</div></div>',
+    divider:'<hr style="border:none;border-top:1px solid #E2E8F0;margin:20px 0">',
+    header:'<table width="100%" style="border-bottom:2px solid #2563EB;margin-bottom:16px"><tr><td style="padding:8px 0"><span style="font-family:\'DM Serif Display\',serif;font-size:20px;color:#0E1E35">St. Mary\'s Cathedral</span></td><td align="right" style="font-size:12px;color:#64748B">Diocese of Albany</td></tr></table>',
+    footer:'<div style="border-top:1px solid #E2E8F0;margin-top:22px;padding-top:16px;font-size:11.5px;color:#94A3B8;text-align:center;line-height:1.6">St. Mary\'s Cathedral · 125 Eagle St, Albany, NY 12202<br>You\'re receiving this because you\'re a valued supporter of the Diocese.<br><a href="#" style="color:#2563EB">Update preferences</a> · <a href="#" style="color:#2563EB">Unsubscribe</a><br>IRS Pub 1771 compliant · EIN 14-0000000</div>',
+    social:'<div style="text-align:center;margin:16px 0"><a href="#" style="display:inline-block;width:34px;height:34px;line-height:34px;border-radius:50%;background:#0E1E35;color:#fff;text-decoration:none;margin:0 4px;font-weight:700">f</a><a href="#" style="display:inline-block;width:34px;height:34px;line-height:34px;border-radius:50%;background:#0E1E35;color:#fff;text-decoration:none;margin:0 4px;font-weight:700">in</a><a href="#" style="display:inline-block;width:34px;height:34px;line-height:34px;border-radius:50%;background:#0E1E35;color:#fff;text-decoration:none;margin:0 4px;font-weight:700">X</a><a href="#" style="display:inline-block;width:34px;height:34px;line-height:34px;border-radius:50%;background:#0E1E35;color:#fff;text-decoration:none;margin:0 4px;font-weight:700">▶</a></div>'
+  };
+  window.cmpInsert=function(type){ if(BLOCKS[type]) insertBlock(BLOCKS[type]); };
+
+  /* ── Compose modal (button + send test) ── */
+  var cmpOv;
+  function ensureOv(){
+    if(cmpOv) return cmpOv;
+    cmpOv=document.createElement('div'); cmpOv.id='cmp-ov';
+    cmpOv.innerHTML='<div class="cm-card"><div class="cm-hd"><h3></h3><p></p></div><div class="cm-bd"></div><div class="cm-ft"><button class="btn btn-ghost" id="cm-cancel">Cancel</button><button class="btn btn-primary" id="cm-ok">OK</button></div></div>';
+    document.body.appendChild(cmpOv);
+    cmpOv.addEventListener('click', function(e){ if(e.target===cmpOv) closeModal(); });
+    cmpOv.querySelector('#cm-cancel').addEventListener('click', closeModal);
+    return cmpOv;
+  }
+  function openModal(title,sub,bodyHTML,cta,onOk){
+    var o=ensureOv();
+    o.querySelector('h3').textContent=title; o.querySelector('.cm-hd p').textContent=sub;
+    o.querySelector('.cm-bd').innerHTML=bodyHTML;
+    var ok=o.querySelector('#cm-ok'); var ok2=ok.cloneNode(false); ok2.id='cm-ok'; ok2.className=ok.className; ok2.textContent=cta; ok.parentNode.replaceChild(ok2,ok);
+    ok2.addEventListener('click', onOk);
+    o.classList.add('show');
+    var f=o.querySelector('.cm-bd input,.cm-bd select'); if(f) setTimeout(function(){ f.focus(); },30);
+  }
+  function closeModal(){ if(cmpOv) cmpOv.classList.remove('show'); }
+  window.cmpInsertButtonModal=function(){
+    openModal('Insert button','Add a call-to-action button to the email body.',
+      '<label class="cm-fl">Button text</label><input class="cm-fld" id="bt-label" value="Donate now">'+
+      '<label class="cm-fl" style="margin-top:12px">Link URL</label><input class="cm-fld" id="bt-url" value="https://give.diocese.org">'+
+      '<label class="cm-fl" style="margin-top:12px">Style</label><div class="bt-styles" id="bt-styles"><button type="button" class="bt-sw on" data-c="#2563EB" style="background:#2563EB"></button><button type="button" class="bt-sw" data-c="#15803D" style="background:#15803D"></button><button type="button" class="bt-sw" data-c="#BE185D" style="background:#BE185D"></button><button type="button" class="bt-sw" data-c="outline" style="background:#fff;border:2px solid #2563EB"></button></div>',
+      'Insert button', function(){ var c=document.querySelector('#bt-styles .bt-sw.on'); var color=c?c.getAttribute('data-c'):'#2563EB'; insertBlock(buttonHTML(document.getElementById('bt-label').value||'Donate now', document.getElementById('bt-url').value||'#', color)); closeModal(); });
+    var sw=document.querySelectorAll('#bt-styles .bt-sw'); sw.forEach(function(b){ b.addEventListener('click', function(){ sw.forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); }); });
+  };
+  window.cmpSendTest=function(){
+    openModal('Send a test','See exactly what recipients get — merge fields resolved with sample data.',
+      '<label class="cm-fl">Send test to</label><input class="cm-fld" id="ct-email" value="sarah.reynolds@diocese.org">'+
+      '<label class="cm-fl" style="margin-top:12px">Preview as</label><select class="cm-fld" id="ct-dev"><option>Desktop</option><option>Mobile</option></select>'+
+      '<label class="cm-chk"><input type="checkbox" id="ct-merge" checked> Resolve merge fields with a sample donor (Margaret O\'Brien)</label>',
+      'Send test', function(){ var e=(document.getElementById('ct-email').value||'you').trim(); closeModal(); toast('Test sent to '+e+' · check your inbox'); });
+  };
+
+  /* ── Wire live-updating inputs + boot ── */
+  function boot(){
+    // capture the initial (Cathedral) template so switching back restores it
+    TEMPLATES._cathedral={ subject:$('cmp-subject')?$('cmp-subject').value:'', body:$('cmp-body')?$('cmp-body').innerHTML:'' };
+    var body=$('cmp-body'); if(body) body.addEventListener('input', cmpSyncPreview);
+    var subj=$('cmp-subject'); if(subj) subj.addEventListener('input', cmpSyncPreview);
+    var fs=$('cmp-from'); if(fs) fs.addEventListener('change', function(){ cmpSyncPreview(); updateRecipSummary(); });
+    // recipient card: collapse by default so subject + body are above the fold
+    updateRecipSummary();
+    var rc=$('cmp-recip-card'); if(rc) rc.classList.add('collapsed');
+    cmpSyncPreview();
+  }
+  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+
 <!-- ════════════════════════════════════════════════════════
      Atlas Dead-CTA Rescue · v1
      Single click-delegation script that catches button/anchor
@@ -946,6 +1271,40 @@ body {
      Safe to load on every page — no-ops when the text isn't in
      ACTIONS, leaving page-native handlers and the wire-script alone.
      ════════════════════════════════════════════════════════ -->
+<style id="cmp-adv-css">
+  /* compact template row */
+  .cmp-compact{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px !important}
+  .cmp-inline-lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
+  .cmp-compliance{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--green);font-weight:600;margin-left:auto}
+  /* collapsible recipient */
+  .cmp-collapse-hd{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+  .cmp-recip-summary{font-size:12.5px;color:var(--text-2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:none}
+  .cmp-chev{color:var(--text-3);font-size:12px;transition:transform .15s}
+  #cmp-recip-card.collapsed #cmp-recip-body{display:none}
+  #cmp-recip-card.collapsed .cmp-recip-summary{display:block}
+  #cmp-recip-card.collapsed .cmp-chev{transform:rotate(-90deg)}
+  /* insert toolbar */
+  .editor-insertbar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:7px 10px;background:var(--surface,#F8FAFC);border-bottom:1px solid var(--border)}
+  .ins-lbl{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin-right:4px}
+  .ins-btn{display:inline-flex;align-items:center;gap:5px;font:600 11.5px 'DM Sans',sans-serif;color:var(--text-2);background:#fff;border:1px solid var(--border);border-radius:7px;padding:5px 9px;cursor:pointer}
+  .ins-btn:hover{border-color:var(--blue);color:var(--blue)}
+  .ins-ico{font-size:12px;line-height:1}
+  /* compose modal */
+  #cmp-ov{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100060;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',sans-serif}
+  #cmp-ov.show{display:flex}
+  #cmp-ov .cm-card{background:#fff;border-radius:16px;width:100%;max-width:460px;box-shadow:0 24px 64px rgba(15,23,42,.3);overflow:hidden}
+  #cmp-ov .cm-hd{padding:18px 22px 6px}
+  #cmp-ov .cm-hd h3{font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy,#0E1E35)}
+  #cmp-ov .cm-hd p{font-size:12.5px;color:var(--text-3);margin-top:5px;line-height:1.5}
+  #cmp-ov .cm-bd{padding:14px 22px}
+  #cmp-ov .cm-ft{padding:12px 22px 20px;display:flex;gap:10px;justify-content:flex-end}
+  #cmp-ov .cm-fl{display:block;font:600 11px 'DM Sans',sans-serif;color:var(--text-2);margin-bottom:5px}
+  #cmp-ov .cm-fld{width:100%;border:1px solid var(--border);border-radius:9px;padding:9px 11px;font:400 13px 'DM Sans',sans-serif}
+  #cmp-ov .cm-chk{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--text-2);margin-top:14px;cursor:pointer}
+  #cmp-ov .bt-styles{display:flex;gap:8px}
+  #cmp-ov .bt-sw{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);cursor:pointer}
+  #cmp-ov .bt-sw.on{outline:2px solid var(--blue);outline-offset:2px}
+</style>
 <style id="atlas-rescue-css">
   #atlas-rescue-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background:#0F172A; color:white; padding:12px 18px; border-radius:10px; box-shadow:0 8px 24px rgba(15,23,42,.20); font-size:13px; font-family:'DM Sans',sans-serif; z-index:100010; display:flex; align-items:center; gap:10px; opacity:0; transition:opacity .2s,transform .2s; pointer-events:none; max-width: 480px; }
   #atlas-rescue-toast.show { opacity:1; transform:translateX(-50%); pointer-events:auto; }

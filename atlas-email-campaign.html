@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Email · Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0E1E35;--blue:#2563EB;--blue-d:#1D4ED8;--blue-pale:#EFF6FF;--green:#15803D;--green-l:#DCFCE7;--amber:#D97706;--rose:#BE185D;--purple:#7C3AED;--text:#0F172A;--text-2:#334155;--text-3:#64748B;--border:#E2E8F0;--surface:#F1F5F9;--bg:#F8FAFC;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex}
+  a{color:inherit}
+  .sidebar{width:220px;background:var(--navy);flex-shrink:0;display:flex;flex-direction:column;height:100vh;overflow-y:auto}
+  .sidebar-logo{padding:18px 18px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .logo-mark{width:52px;height:40px;display:flex;align-items:center;justify-content:center}.logo-mark svg{width:52px;height:40px}
+  .logo-name{font-family:'DM Serif Display',serif;font-size:20px;color:#fff;line-height:1}
+  .logo-sub{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:3px}
+  .sidebar-scroll{flex:1;padding-top:6px}
+  .nav-group{padding:8px 8px 0}.nav-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:0 10px;margin-bottom:4px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);text-decoration:none;margin-bottom:1px}
+  .nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
+  .nav-item.active{background:var(--blue);color:#fff}.nav-item svg{width:14px;height:14px}
+  .sidebar-search{margin:12px 12px 6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer}
+  .sidebar-search svg{width:13px;height:13px;color:rgba(255,255,255,.3);flex-shrink:0}
+  .sidebar-search input{background:none;border:none;outline:none;width:100%;font-size:12px;color:rgba(255,255,255,.6);font-family:'DM Sans',sans-serif;cursor:pointer}
+  .sidebar-search input::placeholder{color:rgba(255,255,255,.3)}
+  .nav-badge{margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.6);border-radius:10px;padding:1px 7px;font-size:10px;font-weight:600}
+  .nav-item.active .nav-badge{background:rgba(255,255,255,.2);color:#fff}
+  .nav-badge.alert{background:#EF4444;color:#fff}
+  .sidebar-user{margin-top:auto;padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:9px}
+  .user-avatar{width:30px;height:30px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+  .user-name{font-size:12px;font-weight:500;color:rgba(255,255,255,.75)}.user-role{font-size:10px;color:rgba(255,255,255,.35)}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+  .topbar{height:56px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 22px;flex-shrink:0}
+  .back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);text-decoration:none;font-weight:600}
+  .tb-title{font-family:'DM Serif Display',serif;font-size:17px;color:var(--navy)}
+  .saved{margin-left:auto;font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:6px}
+  .saved .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+
+  /* stepper */
+  .stepper{background:#fff;border-bottom:1px solid var(--border);padding:12px 24px;display:flex;gap:6px;flex-shrink:0;overflow-x:auto}
+  .step{display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:10px;cursor:pointer;white-space:nowrap;border:1px solid transparent}
+  .step:hover{background:var(--surface)}
+  .step.on{background:var(--blue-pale);border-color:#DBEAFE}
+  .step .num{width:24px;height:24px;border-radius:50%;background:var(--surface);color:var(--text-3);display:flex;align-items:center;justify-content:center;font:700 12px 'DM Sans';flex-shrink:0}
+  .step.on .num{background:var(--blue);color:#fff}
+  .step.done .num{background:var(--green);color:#fff}
+  .step .lb{font:600 12.5px 'DM Sans';color:var(--text-2)}
+  .step.on .lb{color:var(--navy)}
+  .step-arrow{color:var(--border);align-self:center}
+
+  .content{flex:1;overflow-y:auto;padding:26px}
+  .wrap{max-width:820px;margin:0 auto}
+  .wrap.wide{max-width:1120px}
+  h2.step-h{font-family:'DM Serif Display',serif;font-size:24px;color:var(--navy);margin-bottom:4px}
+  p.step-sub{font-size:13px;color:var(--text-3);margin-bottom:20px}
+  .card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:16px}
+  .card h3{font:700 11px 'DM Sans';letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:14px}
+  .lbl{display:block;font:600 12px 'DM Sans';color:var(--text-2);margin:14px 0 6px}
+  .lbl:first-child{margin-top:0}
+  .fld{width:100%;border:1px solid var(--border);border-radius:9px;padding:10px 12px;font:400 13px 'DM Sans'}
+  .fld:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .hint{font-size:11.5px;color:var(--text-3);margin-top:5px}
+
+  /* audience */
+  .aud-list{display:flex;flex-direction:column;gap:8px}
+  .aud{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:11px;cursor:pointer}
+  .aud:hover{border-color:var(--blue)}
+  .aud.on{border-color:var(--blue);background:var(--blue-pale)}
+  .aud .ck{width:18px;height:18px;border:2px solid var(--border);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff}
+  .aud.on .ck{background:var(--blue);border-color:var(--blue)}
+  .aud .nm{flex:1;font:600 13.5px 'DM Sans';color:var(--text)}
+  .aud .sub{font-size:11.5px;color:var(--text-3)}
+  .aud .cnt{font:700 14px 'DM Sans';color:var(--navy)}
+  .reach{background:var(--navy);color:#fff;border-radius:14px;padding:18px 20px;margin-top:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+  .reach .big{font-family:'DM Serif Display',serif;font-size:32px;line-height:1}
+  .reach .k{font-size:11px;text-transform:uppercase;letter-spacing:.05em;opacity:.6}
+  .reach .sup{font-size:12px;opacity:.85}
+  .reach .sup b{opacity:1}
+  .abrow{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13px;color:var(--text-2)}
+
+  /* templates */
+  .tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .tpl{border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;background:#fff}
+  .tpl:hover{border-color:var(--blue);box-shadow:0 6px 18px rgba(37,99,235,.1)}
+  .tpl.on{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue)}
+  .tpl .thumb{height:120px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:#94A3B8;position:relative}
+  .tpl .thumb .mini{width:70%;background:#fff;border:1px solid var(--border);border-radius:4px;padding:8px}
+  .tpl .thumb .mini .l{height:5px;background:#E2E8F0;border-radius:2px;margin-bottom:4px}
+  .tpl .thumb .mini .l.b{background:#2563EB;width:40%;height:8px}
+  .tpl .nm{padding:10px 12px;font:600 13px 'DM Sans';color:var(--text)}
+  .tpl .nm small{display:block;font-weight:400;color:var(--text-3);font-size:11px;margin-top:2px}
+  /* template list (screenshot style) */
+  .tpl-bar{display:flex;gap:10px;margin-bottom:14px}
+  .tpl-search{flex:1;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:9px;padding:9px 12px}
+  .tpl-search svg{width:14px;height:14px;color:var(--text-3)}
+  .tpl-search input{border:none;outline:none;flex:1;font:400 13px 'DM Sans'}
+  .tpl-blank{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1.5px dashed var(--border);border-radius:12px;cursor:pointer;margin-bottom:16px;background:#fff}
+  .tpl-blank:hover{border-color:var(--blue)}
+  .tpl-blank.on{border-style:solid;border-color:var(--blue);background:var(--blue-pale)}
+  .tpl-sech{font:700 10.5px 'DM Sans';letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px}
+  .tpl-list{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .tpl-row{display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid #F1F5F9;cursor:pointer}
+  .tpl-row:last-child{border-bottom:none}
+  .tpl-row:hover{background:#F8FAFF}
+  .tpl-row.on{background:var(--blue-pale)}
+  .tpl-th{width:44px;height:44px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px}
+  .tnm{font:600 14px 'DM Sans';color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tsub{font-size:12px;color:var(--text-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tpl-chk{width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+  .tpl-use{font:600 12px 'DM Sans';color:var(--blue);border:1px solid #DBEAFE;border-radius:7px;padding:5px 12px;flex-shrink:0}
+  .tpl-row:hover .tpl-use{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .tpl-empty{padding:26px;text-align:center;color:var(--text-3);font-size:13px}
+  /* manual email chips */
+  .echips{display:flex;flex-wrap:wrap;gap:8px;min-height:24px}
+  .echip{display:inline-flex;align-items:center;gap:7px;background:var(--blue-pale);border:1px solid #DBEAFE;color:var(--blue-d);border-radius:99px;padding:5px 8px 5px 12px;font:600 12.5px 'DM Sans'}
+  .echip .x{cursor:pointer;color:var(--text-3);font-size:14px}
+  .echip .x:hover{color:var(--rose)}
+
+  /* design */
+  .ebframe{width:100%;height:560px;border:1px solid var(--border);border-radius:14px;background:#fff}
+  .persona{background:var(--blue-pale);border:1px solid #DBEAFE;border-radius:12px;padding:12px 16px;font-size:12.5px;color:var(--text-2);margin-bottom:14px;display:flex;gap:10px;align-items:center}
+
+  /* preview */
+  .pv-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .devtog{display:inline-flex;background:var(--surface);border-radius:9px;padding:3px}
+  .devtog button{border:none;background:transparent;border-radius:7px;padding:7px 14px;font:600 12px 'DM Sans';color:var(--text-3);cursor:pointer}
+  .devtog button.on{background:#fff;color:var(--navy);box-shadow:0 1px 2px rgba(15,23,42,.08)}
+  .pv-frame{background:#fff;border:1px solid var(--border);border-radius:12px;margin:0 auto;overflow:hidden;transition:max-width .2s;max-width:620px}
+  .pv-frame.mobile{max-width:360px}
+  .pv-head{padding:12px 18px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-3)}
+  .pv-head b{color:var(--text)}
+  .pv-body{padding:6px 4px;max-height:440px;overflow-y:auto}
+  /* validation */
+  .val{display:flex;align-items:flex-start;gap:11px;padding:11px 14px;border-bottom:1px solid #F1F5F9}
+  .val:last-child{border-bottom:none}
+  .val .ic{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}
+  .val.pass .ic{background:var(--green)}.val.warn .ic{background:var(--amber)}.val.fail .ic{background:#B91C1C}
+  .val .t{font:600 13px 'DM Sans';color:var(--text)}
+  .val .s{font-size:11.5px;color:var(--text-3);margin-top:1px}
+
+  /* schedule */
+  .radio{display:flex;gap:11px;align-items:flex-start;padding:14px 16px;border:1px solid var(--border);border-radius:12px;cursor:pointer;margin-bottom:10px}
+  .radio.on{border-color:var(--blue);background:var(--blue-pale)}
+  .radio .rt{font:600 14px 'DM Sans';color:var(--text)}
+  .radio .rs{font-size:12px;color:var(--text-3);margin-top:2px}
+  .confirm{background:var(--surface);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+  .confirm .cr{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px dashed var(--border)}
+  .confirm .cr:last-child{border-bottom:none}
+  .confirm .cr .k{color:var(--text-3)}.confirm .cr .v{color:var(--text);font-weight:600;text-align:right}
+
+  /* sent success */
+  .sent{text-align:center;padding:40px 20px}
+  .sent .big-ic{width:76px;height:76px;border-radius:50%;background:var(--green-l);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 18px}
+  .sent h2{font-family:'DM Serif Display',serif;font-size:28px;color:var(--navy)}
+  .sent p{font-size:14px;color:var(--text-3);margin-top:8px}
+
+  /* footer nav */
+  .footnav{background:#fff;border-top:1px solid var(--border);padding:14px 26px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+  .btn{font:600 13px 'DM Sans';padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text-2);cursor:pointer;display:inline-flex;align-items:center;gap:7px;text-decoration:none}
+  .btn:hover{border-color:var(--blue);color:var(--blue)}
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+  .btn.primary:hover{background:var(--blue-d);color:#fff}
+  .btn.primary:disabled{opacity:.5;cursor:not-allowed;background:var(--blue)}
+  .btn.ghost{border-color:transparent}
+  .foot-note{margin-left:auto;font-size:12px;color:var(--text-3)}
+
+  #ov{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100;display:none;align-items:center;justify-content:center;padding:24px}
+  #ov.show{display:flex}
+  #ov .m{background:#fff;border-radius:16px;width:100%;max-width:440px;box-shadow:0 24px 64px rgba(15,23,42,.3);overflow:hidden}
+  #ov .mh{padding:18px 22px 6px}.mh h3{font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy)}.mh p{font-size:12.5px;color:var(--text-3);margin-top:5px}
+  #ov .mb{padding:14px 22px}#ov .mf{padding:12px 22px 20px;display:flex;gap:10px;justify-content:flex-end}
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:#0F172A;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;z-index:200;opacity:0;transition:.2s;display:flex;gap:10px;align-items:center}
+  #toast.show{opacity:1;transform:translateX(-50%)}#toast .i{width:20px;height:20px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px}
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark"><svg viewBox="0 0 160 120" fill="none"><line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/><line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/><line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/><circle cx="22" cy="92" r="4" fill="#fff"/><circle cx="58" cy="58" r="5" fill="#fff"/><circle cx="98" cy="38" r="5.5" fill="#fff"/><circle cx="138" cy="24" r="7" fill="#C8A04A"/></svg></div><div><div class="logo-name">Atlas</div><div class="logo-sub">By GiveCentral</div></div></div>
+    <a href="atlas-search.html" style="display:block;text-decoration:none">
+      <div class="sidebar-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input type="text" placeholder="Search donors, gifts…" readonly></div>
+    </a>
+    <div class="sidebar-scroll">
+      <div class="nav-group"><div class="nav-label">Main</div>
+        <a class="nav-item" href="atlas-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>Dashboard</a>
+        <a class="nav-item" href="atlas-donors-list.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>Donors<span class="nav-badge">3,847</span></a>
+        <a class="nav-item" href="atlas-gifts-pledges.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M7 1.5v11M2 6.5h10"/></svg>Gifts &amp; pledges<span class="nav-badge">142</span></a>
+        <a class="nav-item" href="atlas-campaign-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>Campaigns</a>
+        <div class="nav-subwrap" style="margin:2px 0 4px 20px;border-left:1.5px solid rgba(255,255,255,.12)">
+          <a class="nav-item" href="atlas-funds.html" style="padding-left:14px;font-size:11.5px;border-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><ellipse cx="7" cy="3.5" rx="5" ry="2"/><path d="M2 3.5v7c0 1.1 2.2 2 5 2s5-.9 5-2v-7M2 7c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg>Funds</a>
+          <a class="nav-item" href="atlas-appeals.html" style="padding-left:14px;font-size:11.5px;border-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 3.5h10v5H6l-2.5 2v-2H2z"/></svg>Appeals</a>
+        </div>
+        <a class="nav-item" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>Reports</a>
+      </div>
+      <div class="nav-group" style="margin-top:8px"><div class="nav-label">Fundraising</div>
+        <a class="nav-item" href="atlas-pipeline.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4"/></svg>Prospect pipeline<span class="nav-badge">28</span></a>
+        <a class="nav-item" href="atlas-tasks.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>Tasks &amp; reminders<span class="nav-badge alert">7</span></a>
+        <a class="nav-item active" href="atlas-communications.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>Communications</a>
+        <a class="nav-item" href="atlas-events-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>Events</a>
+        <a class="nav-item" href="atlas-volunteer-management.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Volunteers</a>
+      </div>
+      <div class="nav-group" style="margin-top:8px"><div class="nav-label">Intelligence</div>
+        <a class="nav-item" href="atlas-guru-ai.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>Guru AI</a>
+        <a class="nav-item" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>Analytics</a>
+      </div>
+      <div class="nav-group" style="margin-top:8px"><div class="nav-label">Admin</div>
+        <a class="nav-item" href="atlas-users-roles.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Users &amp; roles</a>
+        <a class="nav-item" href="atlas-tags.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/></svg>Tags &amp; Segment</a>
+        <a class="nav-item" href="atlas-integrations.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>Integrations</a>
+        <a class="nav-item" href="atlassmarttriggers.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M7.6 1.5L3 8h3.7l-.6 4.6L11 5.9H7.4z"/></svg>Smart Triggers</a>
+        <a class="nav-item" href="atlas-sync.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>Sync</a>
+        <a class="nav-item" href="atlas-location-manage.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>Location portal</a>
+      </div>
+    </div>
+    <div class="sidebar-user"><div class="user-avatar">SR</div><div><div class="user-name">Sarah Reynolds</div><div class="user-role">Development Director</div></div></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <a class="back" href="atlas-communications.html"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg> Communications</a>
+      <span class="tb-title">Create Email</span>
+      <span class="saved" id="saved"><span class="dot"></span> Draft saved</span>
+    </div>
+
+    <div class="stepper" id="stepper"></div>
+    <div class="content"><div id="stepbody"></div></div>
+    <div class="footnav" id="footnav"></div>
+  </div>
+
+  <div id="ov"></div>
+  <div id="toast"><span class="i">✓</span><span class="msg"></span></div>
+
+<iframe id="eb-hidden" src="atlas-email-builder.html?embed=1" style="display:none"></iframe>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  function toast(m){ var t=$('toast'); t.querySelector('.msg').textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('show');},2400); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function fmt(n){ return (n||0).toLocaleString(); }
+
+  var STEPS=[
+    {n:1,k:'details',lb:'Email details'},
+    {n:2,k:'audience',lb:'Select audience'},
+    {n:3,k:'template',lb:'Choose template'},
+    {n:4,k:'design',lb:'Design email'},
+    {n:5,k:'preview',lb:'Preview & test'},
+    {n:6,k:'send',lb:'Send or schedule'}
+  ];
+  var LISTS=[
+    {id:'all',nm:'All active donors',sub:'Everyone with a gift in 24 months',n:3847},
+    {id:'major',nm:'Major donors ($10k+)',sub:'Lifetime or single-gift ≥ $10k',n:128},
+    {id:'cathedral',nm:'Cathedral Capital segment',sub:'Interested in the restoration',n:128540},
+    {id:'annual',nm:'Annual Appeal 2026 list',sub:'Full appeal audience',n:312480},
+    {id:'lapsed',nm:'Lapsed + LYBUNT',sub:'Gave last year, not this year',n:312},
+    {id:'firsttime',nm:'First-time donors (90d)',sub:'Recently acquired',n:842}
+  ];
+  var TEMPLATES=[
+    {id:'thankyou',nm:'Major-donor thank-you',sub:'Used 142 times · Last edited Apr 28 by Sarah R.',emoji:'💚',bg:'#DBEAFE',used:142,edited:20},
+    {id:'receipt',nm:'Tax receipt · Pub 1771',sub:'Used 2,840 times · Auto-attached to gifts',emoji:'🧾',bg:'#FEF3C7',used:2840,edited:2},
+    {id:'welcome',nm:'First-time donor welcome (touch 1 of 5)',sub:'Used 412 times · Triggered on first gift',emoji:'👋',bg:'#EDE9FE',used:412,edited:8},
+    {id:'pledge',nm:'Pledge installment reminder',sub:'Used 348 times · Auto-sent 7 days before due',emoji:'📅',bg:'#DCFCE7',used:348,edited:5},
+    {id:'lapsed',nm:'Lapsed donor re-engagement',sub:'Used 8 times · Quarterly',emoji:'💌',bg:'#FCE7F3',used:8,edited:40},
+    {id:'event',nm:'Event invitation · annual gala',sub:'Used 14 times · Last edited Feb 12',emoji:'🎉',bg:'#DBEAFE',used:14,edited:60},
+    {id:'soft',nm:'Soft-credit acknowledgement (no tax)',sub:'Used 67 times · DAF & matching gifts',emoji:'📋',bg:'#FEF3C7',used:67,edited:15},
+    {id:'midpoint',nm:'Campaign mid-point update',sub:'Used 23 times · Campaign milestones',emoji:'📊',bg:'#EDE9FE',used:23,edited:30},
+    {id:'cultivation',nm:'Major gift cultivation letter',sub:'Used 31 times · Personalized outreach',emoji:'⭐',bg:'#DBEAFE',used:31,edited:12},
+    {id:'matching',nm:'Matching gift notification',sub:'Used 5 times · Auto on match confirmation',emoji:'🎁',bg:'#DCFCE7',used:5,edited:22},
+    {id:'memorial',nm:'In-memoriam tribute acknowledgement',sub:'Used 12 times · Memorial gifts',emoji:'🕊️',bg:'#FCE7F3',used:12,edited:18},
+    {id:'yearend',nm:'Year-end giving summary',sub:'Used 189 times · January batch',emoji:'📆',bg:'#DCFCE7',used:189,edited:10}
+  ];
+
+  var S={
+    step:1, maxStep:1,
+    name:'Cathedral year-end appeal', subject:'', preview:'',
+    from:'Sarah Reynolds · sarah.reynolds@diocese.org', replyTo:'Same as From',
+    lists:[], manualEmails:[], abTest:false,
+    template:null, tplQuery:'', tplSort:'used', html:'', device:'desktop',
+    schedule:{mode:'now', date:'', time:'09:00', tz:'ET'}
+  };
+
+  // builder html sync (from hidden/design iframe)
+  window.addEventListener('message', function(e){ var m=e.data||{}; if(m.type==='eb-html' && typeof m.html==='string'){ S.html=m.html; flashSaved(); } });
+
+  function selectedLists(){ return LISTS.filter(function(l){ return S.lists.indexOf(l.id)!==-1; }); }
+  function grossCount(){ return selectedLists().reduce(function(a,l){return a+l.n;},0); }
+  function suppressed(){ return Math.round(grossCount()*0.018); }
+  function reach(){ return grossCount()-suppressed()+S.manualEmails.length; }
+
+  function flashSaved(){ var s=$('saved'); s.style.opacity='.4'; setTimeout(function(){ s.style.opacity='1'; },200); }
+
+  // ── Stepper ──
+  function renderStepper(){
+    $('stepper').innerHTML=STEPS.map(function(st,i){
+      var cls=st.n===S.step?'on':(st.n<S.maxStep?'done':'');
+      return (i>0?'<span class="step-arrow">›</span>':'')+'<div class="step '+cls+'" data-step="'+st.n+'"><span class="num">'+(st.n<S.maxStep&&st.n!==S.step?'✓':st.n)+'</span><span class="lb">'+st.lb+'</span></div>';
+    }).join('');
+    $('stepper').querySelectorAll('.step').forEach(function(el){ el.addEventListener('click', function(){ go(+el.dataset.step); }); });
+  }
+
+  function go(n){ if(n<1||n>6) return; S.step=n; if(n>S.maxStep) S.maxStep=n; render(); }
+  function next(){ if(S.step<6) go(S.step+1); }
+  function back(){ if(S.step>1) go(S.step-1); }
+
+  // ── Step renderers ──
+  function stepDetails(){
+    return '<div class="wrap"><h2 class="step-h">Email details</h2><p class="step-sub">Name it for your team and set what recipients see in their inbox.</p>'+
+      '<div class="card">'+
+      '<label class="lbl">Email name <span style="color:#94A3B8;font-weight:400">(internal)</span></label><input class="fld" id="f-name" value="'+esc(S.name)+'">'+
+      '<label class="lbl">Subject line</label><input class="fld" id="f-subject" placeholder="e.g. Help us finish the Cathedral, {{first_name}}" value="'+esc(S.subject)+'">'+
+      '<p class="hint">Use merge fields like <code>{{first_name}}</code>. 41–50 characters tends to perform best.</p>'+
+      '<label class="lbl">Preview text</label><input class="fld" id="f-preview" placeholder="The snippet shown after the subject in most inboxes" value="'+esc(S.preview)+'">'+
+      '<div class="row2" style="margin-top:14px"><div><label class="lbl">From</label><select class="fld" id="f-from"><option>Sarah Reynolds · sarah.reynolds@diocese.org</option><option>Bridget McCarthy · bridget@diocese.org</option><option>St. Mary\'s Cathedral · cathedral@diocese.org</option></select></div>'+
+      '<div><label class="lbl">Reply-to</label><select class="fld" id="f-reply"><option>Same as From</option><option>donations@diocese.org</option></select></div></div>'+
+      '</div></div>';
+  }
+  function stepAudience(){
+    var g=grossCount(),su=suppressed(),r=reach();
+    return '<div class="wrap"><h2 class="step-h">Select audience</h2><p class="step-sub">Pick lists, tags, or segments — or type a few addresses. Suppressed contacts are removed automatically.</p>'+
+      '<div class="card"><h3 style="display:flex;align-items:center;justify-content:space-between">Lists &amp; segments <button class="btn" style="padding:6px 11px;font-size:12px" onclick="cwAddList()">+ Add new list</button></h3><div class="aud-list">'+
+      LISTS.map(function(l){ var on=S.lists.indexOf(l.id)!==-1; return '<div class="aud'+(on?' on':'')+'" data-l="'+l.id+'"><div class="ck">'+(on?'✓':'')+'</div><div style="flex:1"><div class="nm">'+l.nm+'</div><div class="sub">'+l.sub+'</div></div><div class="cnt">'+fmt(l.n)+'</div></div>'; }).join('')+
+      '</div>'+
+      '<div class="abrow"><label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="f-ab" '+(S.abTest?'checked':'')+'> Run an A/B test (split subject line across a sample first)</label></div>'+
+      '</div>'+
+      '<div class="card"><h3>Or send to specific people</h3><p class="hint" style="margin:-6px 0 10px">Type 2–4 email addresses to reach individuals without a list.</p>'+
+      '<div class="echips" id="echips">'+ (S.manualEmails.length? S.manualEmails.map(function(e,i){ return '<span class="echip">'+esc(e)+'<span class="x" data-i="'+i+'">×</span></span>'; }).join('') : '<span class="hint" style="align-self:center">No addresses added yet.</span>') +'</div>'+
+      '<div style="display:flex;gap:8px;margin-top:10px"><input class="fld" id="manual-email" placeholder="name@email.org" style="flex:1"><button class="btn" id="add-email-btn">Add</button></div>'+
+      '</div>'+
+      '<div class="reach"><div><div class="k">Estimated reach</div><div class="big">'+fmt(r)+'</div></div>'+
+      '<div class="sup">Lists gross: <b>'+fmt(g)+'</b><br>− Suppressed (unsub · bounced · DNC): <b>'+fmt(su)+'</b>'+(S.manualEmails.length?'<br>+ Manual addresses: <b>'+S.manualEmails.length+'</b>':'')+'<br>= Will receive: <b>'+fmt(r)+'</b></div></div>'+
+      '</div>';
+  }
+  function stepTemplate(){
+    var q=(S.tplQuery||'').toLowerCase();
+    var list=TEMPLATES.filter(function(t){ return !q || (t.nm+' '+t.sub).toLowerCase().indexOf(q)!==-1; });
+    if(S.tplSort==='used') list=list.slice().sort(function(a,b){return b.used-a.used;});
+    else if(S.tplSort==='name') list=list.slice().sort(function(a,b){return a.nm.localeCompare(b.nm);});
+    else if(S.tplSort==='edited') list=list.slice().sort(function(a,b){return a.edited-b.edited;});
+    var blankOn=S.template==='blank';
+    return '<div class="wrap"><h2 class="step-h">Choose a template</h2><p class="step-sub">Start blank or from a reusable template — it loads straight into the builder.</p>'+
+      '<div class="tpl-bar">'+
+        '<div class="tpl-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="tpl-q" placeholder="Search templates…" value="'+esc(S.tplQuery)+'"></div>'+
+        '<select class="fld" id="tpl-sort" style="max-width:190px"><option value="used"'+(S.tplSort==='used'?' selected':'')+'>Sort: Most used</option><option value="name"'+(S.tplSort==='name'?' selected':'')+'>Sort: Name A–Z</option><option value="edited"'+(S.tplSort==='edited'?' selected':'')+'>Sort: Recently edited</option></select>'+
+      '</div>'+
+      '<div class="tpl-blank'+(blankOn?' on':'')+'" data-t="blank"><div class="tpl-th" style="background:#EFF6FF;color:#2563EB">＋</div><div style="flex:1"><div class="tnm">Start from blank</div><div class="tsub">Build your own layout in the drag-and-drop editor</div></div>'+(blankOn?'<span class="tpl-chk">✓</span>':'')+'</div>'+
+      '<div class="tpl-sech">Email templates · '+list.length+' shown</div>'+
+      '<div class="tpl-list">'+ (list.length? list.map(function(t){ var on=S.template===t.id; return '<div class="tpl-row'+(on?' on':'')+'" data-t="'+t.id+'"><div class="tpl-th" style="background:'+t.bg+'">'+t.emoji+'</div><div style="flex:1;min-width:0"><div class="tnm">'+t.nm+'</div><div class="tsub">'+t.sub+'</div></div>'+(on?'<span class="tpl-chk">✓</span>':'<span class="tpl-use">Use</span>')+'</div>'; }).join('') : '<div class="tpl-empty">No templates match “'+esc(S.tplQuery)+'”.</div>') +'</div></div>';
+  }
+  function stepDesign(){
+    return '<div class="wrap wide"><h2 class="step-h">Design your email</h2><p class="step-sub">Drag blocks to build the layout. Add personalization with merge fields.</p>'+
+      '<div class="persona">✨ <div><b>Personalization on.</b> Merge fields like {{first_name}} and {{last_gift_amount}} resolve per recipient at send. Preview as a specific donor in the next step.</div></div>'+
+      '<iframe class="ebframe" id="eb-design" src="atlas-email-builder.html?embed=1"></iframe></div>';
+  }
+  function stepPreview(){
+    var checks=runValidation();
+    var body=S.html || '<div style="padding:30px;text-align:center;color:#94A3B8">No content yet — go back to Design to build your email.</div>';
+    return '<div class="wrap"><h2 class="step-h">Preview &amp; test</h2><p class="step-sub">See it as recipients will, run the pre-send check, and send yourself a test.</p>'+
+      '<div class="pv-toolbar"><div class="devtog" id="devtog"><button class="'+(S.device==='desktop'?'on':'')+'" data-d="desktop">Desktop</button><button class="'+(S.device==='mobile'?'on':'')+'" data-d="mobile">Mobile</button></div>'+
+      '<button class="btn" onclick="cwTest()" style="margin-left:auto">Send test email</button></div>'+
+      '<div class="pv-frame'+(S.device==='mobile'?' mobile':'')+'"><div class="pv-head"><b>'+esc(S.from.split(' · ')[0])+'</b> &nbsp; '+esc(S.subject||'(no subject)')+'</div><div class="pv-body">'+body+'</div></div>'+
+      '<div class="card" style="margin-top:18px"><h3>Pre-send validation</h3><div>'+checks.map(function(c){ return '<div class="val '+c.s+'"><span class="ic">'+(c.s==='pass'?'✓':c.s==='warn'?'!':'✕')+'</span><div><div class="t">'+c.t+'</div><div class="s">'+c.d+'</div></div></div>'; }).join('')+'</div></div>'+
+      '</div>';
+  }
+  function stepSend(){
+    var r=reach();
+    var when = S.schedule.mode==='now' ? 'Immediately' : ((S.schedule.date||'a chosen date')+' · '+S.schedule.time+' '+S.schedule.tz);
+    return '<div class="wrap"><h2 class="step-h">Send or schedule</h2><p class="step-sub">Final check before it goes out. Large sends are throttled to protect deliverability.</p>'+
+      '<div class="confirm">'+
+        '<div class="cr"><span class="k">Email</span><span class="v">'+esc(S.name)+'</span></div>'+
+        '<div class="cr"><span class="k">Subject</span><span class="v">'+esc(S.subject||'—')+'</span></div>'+
+        '<div class="cr"><span class="k">From</span><span class="v">'+esc(S.from.split(' · ')[0])+'</span></div>'+
+        '<div class="cr"><span class="k">Audience</span><span class="v">'+fmt(r)+' recipients</span></div>'+
+        '<div class="cr"><span class="k">When</span><span class="v">'+when+'</span></div>'+
+      '</div>'+
+      '<div class="card"><h3>Delivery</h3>'+
+      '<div class="radio '+(S.schedule.mode==='now'?'on':'')+'" data-m="now"><input type="radio" name="sch" '+(S.schedule.mode==='now'?'checked':'')+'><div><div class="rt">Send now</div><div class="rs">Begins immediately · large sends throttled over ~30–60 min</div></div></div>'+
+      '<div class="radio '+(S.schedule.mode==='sched'?'on':'')+'" data-m="sched"><input type="radio" name="sch" '+(S.schedule.mode==='sched'?'checked':'')+'><div style="flex:1"><div class="rt">Schedule</div><div class="rs">Pick a date and time. Send-time optimization available.</div>'+
+        '<div id="sched-fields" style="display:'+(S.schedule.mode==='sched'?'flex':'none')+';gap:10px;margin-top:10px"><input class="fld" type="date" id="sch-date" value="'+S.schedule.date+'" style="max-width:170px"><input class="fld" type="time" id="sch-time" value="'+S.schedule.time+'" style="max-width:120px"><select class="fld" id="sch-tz" style="max-width:90px"><option>ET</option><option>CT</option><option>MT</option><option>PT</option></select></div>'+
+      '</div></div>'+
+      '</div></div>';
+  }
+  function stepSent(){
+    var r=reach();
+    var scheduled=S.schedule.mode==='sched';
+    return '<div class="wrap"><div class="sent"><div class="big-ic">'+(scheduled?'⏱':'✓')+'</div>'+
+      '<h2>'+(scheduled?'Email scheduled':'Email sent')+'</h2>'+
+      '<p>'+(scheduled?('“'+esc(S.name)+'” will send to '+fmt(r)+' recipients on '+(S.schedule.date||'the chosen date')+' at '+S.schedule.time+' '+S.schedule.tz+'.'):('“'+esc(S.name)+'” is going out to '+fmt(r)+' recipients now. Delivery is throttled to protect your sender reputation.'))+'</p>'+
+      '<div style="display:flex;gap:12px;justify-content:center;margin-top:22px"><a class="btn" href="atlas-communications.html">Back to Communications</a><a class="btn primary" href="atlas-message-detail.html?subj='+encodeURIComponent(S.subject||S.name)+'&type=appeal&recips='+r+'&del=0.986&open=0.25">View analytics</a></div>'+
+      '</div></div>';
+  }
+
+  function runValidation(){
+    var h=(S.html||'').toLowerCase(), out=[];
+    out.push(S.subject.trim() ? {s:'pass',t:'Subject line set',d:'“'+esc(S.subject)+'”'} : {s:'fail',t:'Subject line missing',d:'Add a subject in Email details.'});
+    out.push(reach()>0 ? {s:'pass',t:'Audience selected',d:fmt(reach())+' recipients after suppression'} : {s:'fail',t:'No audience',d:'Select at least one list or segment.'});
+    out.push(S.html ? {s:'pass',t:'Email content added',d:'Built in the drag-and-drop editor'} : {s:'warn',t:'No content yet',d:'Design your email before sending.'});
+    out.push(h.indexOf('unsubscribe')!==-1 ? {s:'pass',t:'Unsubscribe link present',d:'Required by CAN-SPAM'} : {s:'warn',t:'No unsubscribe link found',d:'Add a Footer block — it includes the unsubscribe link.'});
+    out.push((h.indexOf('albany')!==-1||h.indexOf('address')!==-1||h.indexOf('st ')!==-1) ? {s:'pass',t:'Physical mailing address present',d:'Required by CAN-SPAM'} : {s:'warn',t:'Mailing address not detected',d:'Include your address in the footer.'});
+    var merges=((S.html||'').match(/{{/g)||[]).length;
+    out.push({s:'pass',t:'Merge fields',d:merges+' found · will resolve per recipient at send'});
+    out.push({s:'pass',t:'Sender authentication',d:'SPF + DKIM verified for diocese.org'});
+    out.push({s:'pass',t:'Spam score',d:'2.1 / 10 — low risk'});
+    return out;
+  }
+  function hasFail(){ return runValidation().some(function(c){return c.s==='fail';}); }
+
+  // ── Master render + footer ──
+  function render(){
+    renderStepper();
+    var body=$('stepbody');
+    if(S.step===7){ body.innerHTML=stepSent(); $('footnav').style.display='none'; return; }
+    var k=STEPS[S.step-1].k;
+    $('footnav').style.display='flex';
+    if(k==='details') body.innerHTML=stepDetails();
+    else if(k==='audience') body.innerHTML=stepAudience();
+    else if(k==='template') body.innerHTML=stepTemplate();
+    else if(k==='design') body.innerHTML=stepDesign();
+    else if(k==='preview') body.innerHTML=stepPreview();
+    else if(k==='send') body.innerHTML=stepSend();
+    wireStep(k);
+    renderFoot(k);
+  }
+  function renderFoot(k){
+    var f=$('footnav');
+    var primary = S.step===6 ? '<button class="btn primary" id="f-primary">'+(S.schedule.mode==='sched'?'Schedule email':'Send to '+fmt(reach())+' recipients')+'</button>' : '<button class="btn primary" id="f-primary">Next: '+STEPS[S.step].lb+' →</button>';
+    var note = S.step===5 && hasFail() ? '<span class="foot-note" style="color:#B91C1C">Resolve the failed checks before sending.</span>' : '<span class="foot-note">Step '+S.step+' of 6 · draft auto-saved</span>';
+    f.innerHTML='<button class="btn ghost" id="f-back" '+(S.step===1?'style="visibility:hidden"':'')+'>← Back</button>'+note+primary;
+    $('f-back').addEventListener('click', back);
+    $('f-primary').addEventListener('click', function(){
+      if(S.step===5 && hasFail()){ toast('Fix the failed checks first'); return; }
+      if(S.step===6){ if(S.schedule.mode==='sched' && !S.schedule.date){ toast('Pick a date and time to schedule'); return; } doSend(); return; }
+      next();
+    });
+  }
+
+  function wireStep(k){
+    if(k==='details'){
+      $('f-name').addEventListener('input',function(){S.name=this.value;flashSaved();});
+      $('f-subject').addEventListener('input',function(){S.subject=this.value;flashSaved();});
+      $('f-preview').addEventListener('input',function(){S.preview=this.value;});
+      $('f-from').addEventListener('change',function(){S.from=this.value;});
+      $('f-reply').addEventListener('change',function(){S.replyTo=this.value;});
+    } else if(k==='audience'){
+      body_.querySelectorAll('.aud').forEach(function(el){ el.addEventListener('click',function(){ var id=el.dataset.l; var i=S.lists.indexOf(id); if(i===-1)S.lists.push(id); else S.lists.splice(i,1); render(); }); });
+      var ab=$('f-ab'); if(ab) ab.addEventListener('change',function(){S.abTest=this.checked;});
+      function addEmail(){ var inp=$('manual-email'); var v=(inp.value||'').trim(); if(!v) return; if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ toast('Enter a valid email address'); return; } if(S.manualEmails.indexOf(v)===-1) S.manualEmails.push(v); inp.value=''; render(); }
+      var ae=$('add-email-btn'); if(ae) ae.addEventListener('click', addEmail);
+      var me=$('manual-email'); if(me) me.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); addEmail(); } });
+      var ec=$('echips'); if(ec) ec.addEventListener('click', function(e){ var x=e.target.closest('.x'); if(!x) return; S.manualEmails.splice(+x.dataset.i,1); render(); });
+    } else if(k==='template'){
+      body_.querySelectorAll('.tpl-row,.tpl-blank').forEach(function(el){ el.addEventListener('click',function(){ S.template=el.dataset.t; render(); var t=TEMPLATES.filter(function(x){return x.id===S.template;})[0]; toast((t?t.nm:'Blank')+' selected'); }); });
+      var tq=$('tpl-q'); if(tq){ tq.addEventListener('input',function(){ S.tplQuery=this.value; var pos=this.selectionStart; render(); var n=$('tpl-q'); if(n){ n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){}}}); }
+      var ts=$('tpl-sort'); if(ts) ts.addEventListener('change',function(){ S.tplSort=this.value; render(); });
+    } else if(k==='design'){
+      var fr=$('eb-design'); if(fr){ fr.addEventListener('load',function(){ /* if a template chosen, load into builder */ if(S.template && S.template!=='blank'){ try{ fr.contentWindow.postMessage({type:'eb-request'},'*'); }catch(_){} } }); }
+    } else if(k==='preview'){
+      var dt=$('devtog'); if(dt) dt.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; S.device=b.dataset.d; render(); });
+    } else if(k==='send'){
+      body_.querySelectorAll('.radio').forEach(function(el){ el.addEventListener('click',function(){ S.schedule.mode=el.dataset.m; render(); }); });
+      var sd=$('sch-date'), stime=$('sch-time'), stz=$('sch-tz');
+      if(sd) sd.addEventListener('change',function(){S.schedule.date=this.value;});
+      if(stime) stime.addEventListener('change',function(){S.schedule.time=this.value;});
+      if(stz) stz.addEventListener('change',function(){S.schedule.tz=this.value;});
+    }
+  }
+  var body_={ querySelectorAll:function(s){ return $('stepbody').querySelectorAll(s); } };
+
+  function doSend(){
+    var ov=$('ov');
+    var r=reach(), sch=S.schedule.mode==='sched';
+    ov.innerHTML='<div class="m"><div class="mh"><h3>'+(sch?'Schedule this email?':'Send to '+fmt(r)+' recipients?')+'</h3><p>'+(sch?('It will send on '+(S.schedule.date||'the chosen date')+' at '+S.schedule.time+' '+S.schedule.tz+'.'):('“'+esc(S.name)+'” will begin sending immediately.'))+'</p></div>'+
+      '<div class="mb" style="font-size:13px;color:#334155">This action can\'t be undone once delivery starts. Suppressed contacts are excluded automatically.</div>'+
+      '<div class="mf"><button class="btn" id="c-cancel">Cancel</button><button class="btn primary" id="c-go">'+(sch?'Schedule':'Send now')+'</button></div></div>';
+    ov.classList.add('show');
+    ov.querySelector('#c-cancel').addEventListener('click',function(){ov.classList.remove('show');});
+    ov.querySelector('#c-go').addEventListener('click',function(){ ov.classList.remove('show'); S.step=7; render(); if(S.schedule.mode==='now'){ setTimeout(function(){ window.location=analyticsURL(); }, 2000); } });
+  }
+  function analyticsURL(){ var r=reach(); return 'atlas-message-detail.html?subj='+encodeURIComponent(S.subject||S.name)+'&type=appeal&sender='+encodeURIComponent(S.from.split(' · ')[0])+'&camp='+encodeURIComponent(S.name)+'&recips='+r+'&del=0.986&open=0.25&clicked='+Math.round(r*0.25*0.12)+'&bounced='+Math.round(r*0.014); }
+  window.cwAddList=function(){
+    var ov=$('ov');
+    ov.innerHTML='<div class="m"><div class="mh"><h3>Add a new list / segment</h3><p>Create a list to send to. Refine it later in Tags &amp; Segments.</p></div>'+
+      '<div class="mb"><label class="lbl">List name</label><input class="fld" id="nl-name" placeholder="e.g. FY26 Cathedral leadership">'+
+      '<label class="lbl" style="margin-top:12px">Source</label><select class="fld" id="nl-src"><option value="empty">Start empty · add contacts later</option><option value="dynamic">Dynamic · donors matching criteria</option><option value="import">Import from CSV</option></select>'+
+      '<label class="lbl" style="margin-top:12px">Estimated size</label><input class="fld" id="nl-size" type="number" min="0" value="0"></div>'+
+      '<div class="mf"><button class="btn" id="nl-cancel">Cancel</button><button class="btn primary" id="nl-go">Create &amp; select</button></div></div>';
+    ov.classList.add('show');
+    ov.querySelector('#nl-cancel').addEventListener('click',function(){ov.classList.remove('show');});
+    ov.querySelector('#nl-go').addEventListener('click',function(){
+      var nm=($('nl-name').value||'').trim(); if(!nm){ $('nl-name').focus(); return; }
+      var src=$('nl-src').value;
+      if(src==='import'){ ov.classList.remove('show'); window.open('atlas-outreach-lists.html?import=csv','_blank'); toast('Opening CSV importer for “'+nm+'”'); return; }
+      var size=Math.max(0,parseInt($('nl-size').value||'0',10)||0);
+      var id='new'+Date.now(); LISTS.push({id:id,nm:nm,sub:(src==='dynamic'?'Dynamic segment':'New list'),n:size}); S.lists.push(id);
+      ov.classList.remove('show'); render(); toast('“'+nm+'” created and selected');
+    });
+  };
+
+  window.cwTest=function(){
+    var ov=$('ov');
+    ov.innerHTML='<div class="m"><div class="mh"><h3>Send a test</h3><p>See exactly what recipients will get — merge fields resolved with sample data.</p></div>'+
+      '<div class="mb"><label class="lbl">Send test to</label><input class="fld" id="t-email" value="sarah.reynolds@diocese.org"></div>'+
+      '<div class="mf"><button class="btn" id="t-cancel">Cancel</button><button class="btn primary" id="t-go">Send test</button></div></div>';
+    ov.classList.add('show');
+    ov.querySelector('#t-cancel').addEventListener('click',function(){ov.classList.remove('show');});
+    ov.querySelector('#t-go').addEventListener('click',function(){ var e=$('t-email').value||'you'; ov.classList.remove('show'); toast('Test sent to '+e+' · check your inbox'); });
+  };
+  $('ov').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
+
+  render();
+})();
+</script>
+</body>
+</html>

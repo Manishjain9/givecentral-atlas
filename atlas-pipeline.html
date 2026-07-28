@@ -98,18 +98,18 @@
 
     /* Pipeline summary strip */
     .pipeline-strip {
-      background: white; border-bottom: 1px solid var(--border); padding: 10px 24px;
+      background: white; border-bottom: 1px solid var(--border); padding: 7px 24px;
       display: flex; align-items: center; gap: 0; flex-shrink: 0;
     }
     .ps-item {
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-      padding: 0 20px; border-right: 1px solid var(--border); cursor: pointer;
+      display: flex; flex-direction: row; align-items: baseline; gap: 6px;
+      padding: 2px 18px; border-right: 1px solid var(--border); cursor: pointer;
       transition: background .15s; border-radius: 8px;
     }
     .ps-item:first-child { padding-left: 0; }
     .ps-item:last-child { border-right: none; }
     .ps-item:hover { background: var(--surface); }
-    .ps-value { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text); letter-spacing: -.02em; line-height: 1; }
+    .ps-value { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--text); letter-spacing: -.02em; line-height: 1; }
     .ps-label { font-size: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--text-3); }
     .ps-sub   { font-size: 10px; color: var(--text-3); }
     .ps-divider { flex: 1; }
@@ -247,7 +247,7 @@
     /* ══ DETAIL DRAWER ══ */
     .detail-drawer {
       width: 340px; flex-shrink: 0; background: white; border-left: 1px solid var(--border);
-      display: flex; flex-direction: column; overflow-y: auto; height: calc(100vh - 52px - 44px);
+      display: flex; flex-direction: column; overflow-y: auto; align-self: stretch; min-height: 0;
       transition: transform .25s ease, opacity .25s;
     }
     .detail-drawer.hidden { transform: translateX(100%); opacity: 0; pointer-events: none; }
@@ -326,6 +326,145 @@
     .stage-col:nth-child(5) { animation-delay: .20s; }
     .detail-drawer:not(.hidden) { animation: slideIn .25s ease forwards; }
     .prospect-card { animation: fadeUp .2s ease forwards; opacity: 0; }
+
+    /* ══ GLOBAL SEARCH (jump to card) ══ */
+    .gsearch { position:relative; }
+    .tb-gsearch { flex:1; max-width:460px; margin:0 18px; }
+    .tb-search { display:flex; align-items:center; gap:8px; background:var(--surface,#F1F5F9); border:1px solid var(--border); border-radius:9px; padding:8px 12px; transition:border-color .15s, box-shadow .15s; }
+    .tb-search:focus-within { border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.1); background:white; }
+    .tb-search svg { width:14px; height:14px; color:var(--text-3); flex-shrink:0; }
+    .tb-search input { border:none; outline:none; flex:1; background:transparent; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text); }
+    .gsearch-results { position:absolute; top:calc(100% + 6px); left:0; right:0; background:white; border:1px solid var(--border); border-radius:11px; box-shadow:0 16px 40px rgba(15,23,42,.24); padding:6px; z-index:100040; display:none; max-height:60vh; overflow-y:auto; }
+    .gsearch-results.show { display:block; }
+    .gsr-head { font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); padding:6px 8px 4px; }
+    .gsr-item { display:flex; align-items:center; gap:10px; padding:8px 9px; border-radius:8px; cursor:pointer; }
+    .gsr-item:hover, .gsr-item.active { background:var(--blue-pale,#EFF6FF); }
+    .gsr-av { width:28px; height:28px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; }
+    .gsr-main { min-width:0; flex:1; }
+    .gsr-nm { font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .gsr-sub { font-size:11px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .gsr-ask { font-size:12px; font-weight:700; color:var(--text-2); font-family:'DM Mono',monospace; flex-shrink:0; }
+    .gsr-empty { padding:14px 10px; font-size:12.5px; color:var(--text-3); text-align:center; }
+    .gsr-kbd { font-size:10px; color:var(--text-3); padding:6px 9px; border-top:1px solid var(--border); margin-top:4px; display:flex; gap:12px; }
+
+    /* ══ FIND / SCOPE / VIEWS CONTROL BAR ══ */
+    .ps-clickable { cursor:pointer; border-radius:9px; transition:background .15s; }
+    .ps-clickable:hover { background:var(--surface,#F1F5F9); }
+    .pipe-controls { padding:8px 24px; border-bottom:1px solid var(--border); background:white; display:flex; flex-direction:column; gap:8px; flex-shrink:0; }
+    .pc-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .facet-menu.combined { min-width:440px; display:grid; grid-template-columns:1fr 1fr; gap:4px 14px; padding:12px; }
+    .facet-menu.combined .fm-group:nth-child(1){ grid-column:1 / -1; } /* Stage spans full width */
+    .fm-h { font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); padding:4px 6px 3px; }
+    .facet-menu.combined .facet-opt { padding:5px 8px; }
+    .pc-divider { width:1px; height:20px; background:var(--border); }
+    .pc-search { display:flex; align-items:center; gap:7px; background:var(--surface,#F1F5F9); border:1px solid var(--border); border-radius:9px; padding:6px 10px; min-width:200px; max-width:240px; }
+    .pc-search:focus-within { border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.1); background:white; }
+    .pc-search svg { width:14px; height:14px; color:var(--text-3); flex-shrink:0; }
+    .pc-search input { border:none; outline:none; flex:1; background:transparent; font-family:'DM Sans',sans-serif; font-size:12.5px; color:var(--text); }
+    .pc-search-x { color:var(--text-3); cursor:pointer; font-size:15px; line-height:1; display:none; }
+    .pc-search.has-val .pc-search-x { display:block; }
+    .pc-search-x:hover { color:var(--rose); }
+    .prospect-card.search-hidden { display:none !important; }
+    .kb-search-area { padding:8px; display:flex; flex-direction:column; gap:8px; }
+    .kb-search-hd { font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--blue); padding:2px 2px 4px; }
+    .stage-col .col-nomatch { display:none; font-size:11.5px; color:var(--text-3); text-align:center; padding:12px 8px; }
+    .stage-col.no-match .col-nomatch { display:block; }
+    .scope-chips { display:inline-flex; background:var(--surface,#F1F5F9); border-radius:9px; padding:3px; gap:2px; }
+    .scope-chip { padding:5px 11px; border:none; background:transparent; border-radius:7px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text-3); cursor:pointer; }
+    .scope-chip.active { background:white; color:var(--navy,#0E1E35); box-shadow:0 1px 2px rgba(15,23,42,.08); }
+    .view-pills { display:flex; gap:6px; flex-wrap:wrap; }
+    .view-pill { padding:5px 11px; border:1px solid var(--border); background:white; border-radius:99px; font-family:'DM Sans',sans-serif; font-size:11.5px; font-weight:600; color:var(--text-2); cursor:pointer; white-space:nowrap; }
+    .view-pill:hover { border-color:var(--blue); color:var(--blue); }
+    .view-pill.active { background:var(--navy,#0E1E35); border-color:var(--navy,#0E1E35); color:white; }
+    .view-pill.view-save { color:var(--blue); border-style:dashed; }
+    .pc-facets-label { font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); }
+    .facet { position:relative; }
+    .facet-btn { padding:6px 11px; border:1px solid var(--border); background:white; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; color:var(--text-2); cursor:pointer; display:flex; align-items:center; gap:5px; }
+    .facet-btn:hover { border-color:var(--blue); }
+    .facet.on .facet-btn { border-color:var(--blue); color:var(--blue); background:var(--blue-pale,#EFF6FF); }
+    .facet-cnt { font-weight:700; color:var(--blue); }
+    .facet-menu { position:absolute; top:100%; left:0; margin-top:6px; background:white; border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 28px rgba(15,23,42,.14); padding:6px; min-width:190px; z-index:1200; }
+    .facet-opt { display:flex; align-items:center; gap:9px; padding:7px 9px; border-radius:7px; cursor:pointer; font-size:12.5px; color:var(--text-2); }
+    .facet-opt:hover { background:var(--blue-pale,#EFF6FF); }
+    .facet-opt input { pointer-events:none; }
+    .pc-clear { border:none; background:transparent; color:var(--text-3); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer; text-decoration:underline; }
+    .pc-clear:hover { color:var(--rose); }
+    .pc-result { font-size:12.5px; color:var(--text-2); font-weight:600; margin-left:4px; }
+    .pc-result strong { color:var(--navy,#0E1E35); }
+    .pc-legend { display:flex; gap:12px; margin-left:auto; }
+    .pc-legend-item { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text-3); }
+    .pc-dot { width:8px; height:8px; border-radius:50%; }
+
+    /* collapsible kanban columns */
+    .stage-col.collapsed { width:64px; min-width:64px; }
+    .stage-col.collapsed .cards-area, .stage-col.collapsed .col-more, .stage-col.collapsed .col-showing, .stage-col.collapsed .add-card-btn, .stage-col.collapsed .stage-value { display:none !important; }
+    .stage-col.collapsed .stage-header { writing-mode:vertical-rl; transform:rotate(180deg); gap:8px; height:auto; padding:10px 0; }
+    .stage-col .stage-header { cursor:pointer; }
+    .prospect-card.prio-overdue { border-left:3px solid var(--rose); }
+    .prospect-card.prio-due { border-left:3px solid var(--amber); }
+
+    /* ══ LIST VIEW ══ */
+    .list-view { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; background:var(--bg,#F8FAFC); }
+    .lv-toolbar { display:flex; align-items:center; gap:12px; padding:14px 24px 12px; flex-shrink:0; }
+    .lv-search { flex:1; max-width:520px; display:flex; align-items:center; gap:8px; background:white; border:1px solid var(--border); border-radius:9px; padding:8px 12px; }
+    .lv-search svg { width:14px; height:14px; color:var(--text-3); flex-shrink:0; }
+    .lv-search input { border:none; outline:none; flex:1; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text); background:transparent; }
+    .lv-scalepill { font-size:11px; font-weight:600; color:#7C3AED; background:#F5F3FF; border:1px solid #E9D5FF; border-radius:99px; padding:5px 11px; white-space:nowrap; }
+    .lv-density { display:flex; margin-left:auto; background:white; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+    .lv-dbtn { padding:6px 12px; font-size:11.5px; font-weight:500; color:var(--text-3); background:white; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; }
+    .lv-dbtn.active { background:var(--navy,#0E1E35); color:white; }
+
+    .lv-bulkbar { display:none; align-items:center; gap:10px; margin:0 24px 10px; padding:9px 14px; background:var(--navy,#0E1E35); border-radius:10px; animation:fadeUp .18s ease; }
+    .lv-bulkbar.show { display:flex; }
+    .lv-bulkcount { color:white; font-size:12.5px; margin-right:4px; }
+    .lv-bulkcount strong { font-size:14px; }
+    .lv-bulkbtn { font-size:12px; font-weight:600; color:white; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); border-radius:7px; padding:6px 12px; cursor:pointer; font-family:'DM Sans',sans-serif; }
+    .lv-bulkbtn:hover { background:rgba(255,255,255,.22); }
+    .lv-bulkbtn.ghost { background:transparent; border-color:transparent; color:#93C5FD; margin-left:auto; }
+
+    .lv-tablewrap { flex:1; overflow:auto; margin:0 24px; border:1px solid var(--border); border-radius:12px; background:white; }
+    .lv-table { border-collapse:separate; border-spacing:0; width:100%; font-family:'DM Sans',sans-serif; font-size:13px; }
+    .lv-table thead th { position:sticky; top:0; z-index:3; background:#F8FAFC; color:var(--text-3); font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; text-align:left; padding:11px 14px; border-bottom:1px solid var(--border); white-space:nowrap; }
+    .lv-table th.lv-sort { cursor:pointer; user-select:none; }
+    .lv-table th.lv-sort:hover { color:var(--blue); }
+    .lv-table th .lv-arrow { font-size:9px; margin-left:3px; color:var(--blue); }
+    .lv-table th.lv-num, .lv-table td.lv-num { text-align:right; }
+    .lv-frozen { position:sticky; left:0; z-index:4; background:#F8FAFC; }
+    .lv-table tbody td.lv-frozen { background:white; z-index:2; }
+    .lv-checkcol { width:38px; text-align:center !important; padding-left:12px; padding-right:6px; }
+    .lv-namecol { left:38px; min-width:190px; }
+    .lv-table tbody td { padding:11px 14px; border-bottom:1px solid #F1F5F9; color:var(--text-2); white-space:nowrap; }
+    .lv-table tbody tr { cursor:pointer; }
+    .lv-table tbody tr:hover td { background:#F8FAFF; }
+    .lv-table tbody tr:hover td.lv-frozen { background:#F8FAFF; }
+    .lv-table tbody tr.sel td { background:#EFF6FF; }
+    .lv-table tbody tr.sel td.lv-frozen { background:#EFF6FF; }
+    .lv-name { display:flex; align-items:center; gap:9px; }
+    .lv-av { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; flex-shrink:0; }
+    .lv-nm { font-weight:600; color:var(--text); }
+    .lv-stage { display:inline-block; padding:3px 9px; border-radius:99px; font-size:11px; font-weight:600; }
+    .lv-ask { font-weight:700; color:var(--text); font-family:'DM Mono',monospace; }
+    .lv-ai { display:inline-flex; width:20px; height:20px; border-radius:5px; align-items:center; justify-content:center; font-weight:700; font-size:11px; color:white; font-family:'DM Mono',monospace; }
+    .lv-ai.A{background:#15803D}.lv-ai.B{background:#22C55E}.lv-ai.C{background:#D97706}
+    .lv-overdue { color:var(--rose); font-weight:600; }
+    .list-view.compact .lv-table tbody td { padding:6px 14px; }
+    .list-view.compact .lv-av { width:20px; height:20px; font-size:9px; }
+
+    .lv-footer { display:flex; align-items:center; justify-content:space-between; padding:12px 24px; flex-shrink:0; }
+    .lv-pageinfo { font-size:12.5px; color:var(--text-3); }
+    .lv-pageinfo strong { color:var(--text); }
+    .lv-pager { display:flex; align-items:center; gap:8px; }
+    .lv-pagesize { font-size:12px; color:var(--text-3); display:flex; align-items:center; gap:5px; }
+    .lv-pagesize select { border:1px solid var(--border); border-radius:6px; padding:4px 6px; font-family:'DM Sans',sans-serif; font-size:12px; }
+    .lv-pgbtn { font-size:12px; font-weight:600; color:var(--text-2); background:white; border:1px solid var(--border); border-radius:7px; padding:6px 11px; cursor:pointer; font-family:'DM Sans',sans-serif; }
+    .lv-pgbtn:hover:not(:disabled) { border-color:var(--blue); color:var(--blue); }
+    .lv-pgbtn:disabled { opacity:.4; cursor:default; }
+    .lv-pagenum { font-size:12.5px; color:var(--text-2); font-weight:600; padding:0 4px; }
+
+    /* Kanban column load-more + aggregate */
+    .col-more { margin:2px 8px 8px; padding:8px; text-align:center; font-size:11.5px; font-weight:600; color:var(--blue); background:var(--blue-pale,#EFF6FF); border:1px dashed #BFDBFE; border-radius:8px; cursor:pointer; }
+    .col-more:hover { background:#DBEAFE; }
+    .col-showing { font-size:10.5px; color:var(--text-3); text-align:center; padding:2px 0 4px; }
   </style>
 
 <style id="atlas-sidebar-fix">
@@ -625,11 +764,7 @@ body {
 
     <!-- Topbar -->
     <div class="topbar">
-      <div class="topbar-icon">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
-      </div>
       <span class="topbar-title">Prospect pipeline</span>
-      <span style="font-size:12px;color:var(--text-3);margin-left:10px">· <a href="atlas-pipeline-flow.html" style="color:var(--blue);font-weight:500">end-to-end flow doc</a> · <a href="atlas-pipeline-forecast.html" style="color:var(--blue);font-weight:500">forecast</a> · <a href="atlas-portfolio-assign.html" style="color:var(--blue);font-weight:500">rebalance</a></span>
       <div class="topbar-right">
         <div class="view-toggle">
           <button class="vt-btn active">
@@ -661,13 +796,51 @@ body {
       <div class="ps-item"><div class="ps-value">28</div><div class="ps-label">Prospects</div></div>
       <div class="ps-item"><div class="ps-value" style="color:var(--purple)">$1.84M</div><div class="ps-label">Pipeline value</div></div>
       <div class="ps-item"><div class="ps-value" style="color:var(--green)">$200k</div><div class="ps-label">Won this year</div></div>
-      <div class="ps-item"><div class="ps-value" style="color:var(--amber)">6</div><div class="ps-label">Due this week</div></div>
-      <div class="ps-item"><div class="ps-value" style="color:var(--rose)">3</div><div class="ps-label">Overdue</div></div>
-      <div class="ps-filter-wrap">
+      <div class="ps-item ps-clickable" data-stat="asks" title="Show asks due this week"><div class="ps-value" style="color:var(--amber)">6</div><div class="ps-label">Due this week ›</div></div>
+      <div class="ps-item ps-clickable" data-stat="overdue" title="Show overdue moves"><div class="ps-value" style="color:var(--rose)">3</div><div class="ps-label">Overdue ›</div></div>
+      <div class="ps-filter-wrap" style="display:none">
         <span class="ps-filter-label">Officer:</span>
         <select class="ps-filter-select"><option>All officers</option><option>Sarah Reynolds</option><option>Mark Collins</option></select>
         <span class="ps-filter-label">Campaign:</span>
         <select class="ps-filter-select"><option>All campaigns</option><option>CMA 2026</option><option>Cathedral Capital</option></select>
+      </div>
+    </div>
+
+    <!-- ══ FIND / SCOPE / VIEWS CONTROL BAR (single compact row) ══ -->
+    <div class="pipe-controls" id="pipe-controls">
+      <div class="pc-row">
+        <div class="pc-search">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+          <input id="board-search" type="text" placeholder="Search prospects…" autocomplete="off">
+          <span class="pc-search-x" id="board-search-x" title="Clear">×</span>
+        </div>
+        <div class="scope-chips" id="scope-chips">
+          <button class="scope-chip active" data-scope="mine">Mine</button>
+          <button class="scope-chip" data-scope="team">Team</button>
+          <button class="scope-chip" data-scope="all">All</button>
+        </div>
+        <div class="pc-divider"></div>
+        <div class="view-pills" id="view-pills">
+          <button class="view-pill active" data-view="all">All</button>
+          <button class="view-pill" data-view="attention">🔴 Needs attention</button>
+          <button class="view-pill" data-view="asks">Asks this week</button>
+          <button class="view-pill" data-view="overdue">Overdue</button>
+          <button class="view-pill" data-view="hot">Hot · uncontacted</button>
+          <button class="view-pill" data-view="major">$25k+ ask</button>
+          <button class="view-pill" data-view="stalled">Stalled 90d+</button>
+          <button class="view-pill view-save" data-view="__save" title="Save the current filters as a named view">＋ Save</button>
+        </div>
+        <div class="pc-divider"></div>
+        <div class="facet facet-all" id="facet-all">
+          <button class="facet-btn" id="filters-btn"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" style="width:11px;height:11px"><path d="M1 2h10M3 6h6M5 10h2"/></svg> Filters <span class="facet-cnt" id="filters-cnt"></span> ▾</button>
+        </div>
+        <button class="pc-clear" id="pc-clear">Clear</button>
+        <span class="pc-result" id="pc-result">—</span>
+        <div class="pc-legend">
+          <span class="pc-legend-item"><span class="pc-dot" style="background:var(--rose)"></span>Overdue</span>
+          <span class="pc-legend-item"><span class="pc-dot" style="background:var(--amber)"></span>Due soon</span>
+          <span class="pc-legend-item"><span class="pc-dot" style="background:var(--green)"></span>On track</span>
+        </div>
       </div>
     </div>
 
@@ -1083,6 +1256,61 @@ body {
 
       </div><!-- /board-wrap -->
 
+      <!-- ══ LIST VIEW (in-page, paginated, sortable, bulk-select) ══ -->
+      <div class="list-view" id="list-view" style="display:none">
+        <div class="lv-toolbar">
+          <div class="lv-search">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+            <input id="lv-search" placeholder="Search 1,284,300 prospects by name, officer, campaign…" autocomplete="off">
+          </div>
+          <span class="lv-scalepill" title="Rows are paginated and rendered on demand — the same UI serves 1M+ records from the server">⚡ Server-paginated · scales past 1M rows</span>
+          <div class="lv-density">
+            <button class="lv-dbtn active" data-density="comfortable">Comfortable</button>
+            <button class="lv-dbtn" data-density="compact">Compact</button>
+          </div>
+        </div>
+
+        <div class="lv-bulkbar" id="lv-bulkbar">
+          <span class="lv-bulkcount"><strong id="lv-selcount">0</strong> selected</span>
+          <button class="lv-bulkbtn" data-bulk="assign">Assign officer</button>
+          <button class="lv-bulkbtn" data-bulk="segment">Add to segment</button>
+          <button class="lv-bulkbtn" data-bulk="task">Add task</button>
+          <button class="lv-bulkbtn" data-bulk="export">Export</button>
+          <button class="lv-bulkbtn ghost" data-bulk="clear">Clear</button>
+        </div>
+
+        <div class="lv-tablewrap">
+          <table class="lv-table" id="lv-table">
+            <thead>
+              <tr>
+                <th class="lv-frozen lv-checkcol"><input type="checkbox" id="lv-selall" title="Select all on this page"></th>
+                <th class="lv-frozen lv-namecol lv-sort" data-sort="name">Prospect</th>
+                <th class="lv-sort" data-sort="stage">Stage</th>
+                <th class="lv-sort" data-sort="officer">Officer</th>
+                <th class="lv-sort lv-num" data-sort="ask">Ask</th>
+                <th class="lv-sort" data-sort="campaign">Campaign</th>
+                <th class="lv-sort lv-num" data-sort="days">Days in stage</th>
+                <th class="lv-sort" data-sort="next">Next action</th>
+                <th class="lv-sort" data-sort="ai">AI</th>
+                <th class="lv-sort" data-sort="last">Last activity</th>
+              </tr>
+            </thead>
+            <tbody id="lv-body"></tbody>
+          </table>
+        </div>
+
+        <div class="lv-footer">
+          <div class="lv-pageinfo" id="lv-pageinfo">Showing 0–0 of 0</div>
+          <div class="lv-pager">
+            <label class="lv-pagesize">Rows: <select id="lv-pagesize"><option>25</option><option selected>50</option><option>100</option></select></label>
+            <button class="lv-pgbtn" id="lv-first">« First</button>
+            <button class="lv-pgbtn" id="lv-prev">‹ Prev</button>
+            <span class="lv-pagenum" id="lv-pagenum">Page 1</span>
+            <button class="lv-pgbtn" id="lv-next">Next ›</button>
+          </div>
+        </div>
+      </div>
+
       <!-- ══ DETAIL DRAWER ══ -->
       <div class="detail-drawer hidden" id="drawer">
         <div class="drawer-header">
@@ -1332,17 +1560,22 @@ body {
         });
       });
 
-      // 2) Kanban / List view toggle — List routes to the tabular forecast view
+      // 2) Kanban / List view toggle — switches in-page (no navigation)
       document.querySelectorAll('.vt-btn').forEach(function(btn){
         btn.addEventListener('click', function(){
           var label = btn.textContent.trim();
-          if (label === 'List') {
-            // Tabular view of the same prospects → forecast page has the table layout
-            window.location = 'atlas-pipeline-forecast.html';
-            return;
-          }
           document.querySelectorAll('.vt-btn').forEach(function(b){ b.classList.remove('active'); });
           btn.classList.add('active');
+          var board = document.getElementById('board');
+          var list  = document.getElementById('list-view');
+          if (label === 'List') {
+            if (board) board.style.display = 'none';
+            if (list)  list.style.display = 'flex';
+            if (window.LV && window.LV.render) window.LV.render();
+          } else {
+            if (list)  list.style.display = 'none';
+            if (board) board.style.display = 'flex';
+          }
         });
       });
 
@@ -1358,14 +1591,89 @@ body {
           strip.style.cssText = 'background:white;border-bottom:1px solid #E2E8F0;padding:10px 24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-family:DM Sans,sans-serif;font-size:12px;animation:fadeUp .2s ease;';
           strip.innerHTML =
             '<span style="font-size:11px;color:#64748B;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:0 4px">Filter by</span>' +
-            ['Solicitor: Sarah','Stage: Cultivation','Ask: $25k+','Campaign: Cathedral','Days in stage: &lt; 90'].map(function(l){
-              return '<span style="padding:5px 11px;border-radius:99px;background:#EFF6FF;border:1px solid #DBEAFE;color:#2563EB;font-weight:600;cursor:pointer">' + l + ' ×</span>';
-            }).join('') +
-            '<span style="padding:5px 11px;border-radius:99px;background:white;border:1px dashed #E2E8F0;color:#64748B;cursor:pointer">+ Add filter</span>' +
-            '<span style="margin-left:auto;font-size:11.5px;color:#64748B">Showing <strong style="color:#0F172A">14 of 28</strong> · <a href="atlas-segment-builder.html" style="color:#2563EB;font-weight:500">Build saved segment →</a></span>';
+            '<span id="if-chips" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></span>' +
+            '<span id="if-add" style="padding:5px 11px;border-radius:99px;background:white;border:1px dashed #E2E8F0;color:#64748B;cursor:pointer;position:relative">+ Add filter</span>' +
+            '<span style="margin-left:auto;font-size:11.5px;color:#64748B">Showing <strong id="if-count" style="color:#0F172A">28 of 28</strong> · <a href="atlas-segment-builder.html" style="color:#2563EB;font-weight:500">Build saved segment →</a></span>';
           var ps = document.querySelector('.pipeline-strip');
           if (ps && ps.parentNode) ps.parentNode.insertBefore(strip, ps);
           else document.querySelector('.topbar').after(strip);
+
+          // ── Working chips + Add filter ──
+          var chipsWrap = strip.querySelector('#if-chips');
+          var addBtn    = strip.querySelector('#if-add');
+          var countEl   = strip.querySelector('#if-count');
+          var TOTAL = 28;
+          // field → options catalogue
+          var CATALOG = {
+            'Solicitor': ['Sarah Reynolds','Mark Collins','Bridget McCarthy','Unassigned'],
+            'Stage': ['Identification','Qualification','Cultivation','Solicitation','Stewardship'],
+            'Ask amount': ['$1k+','$10k+','$25k+','$100k+'],
+            'Campaign': ['Cathedral Capital','CMA 2026','Annual Appeal'],
+            'Days in stage': ['< 30','< 90','> 90 (stale)'],
+            'AI score': ['A rated','B rated','C or below']
+          };
+          var active = [];  // {field,value}
+          function recount(){
+            // simulate a narrowing count so the UI feels live
+            var n = active.length ? Math.max(3, TOTAL - active.length * 5) : TOTAL;
+            if (countEl) countEl.textContent = n + ' of ' + TOTAL;
+          }
+          function renderChips(){
+            chipsWrap.innerHTML = active.map(function(f,i){
+              return '<span data-i="'+i+'" style="padding:5px 11px;border-radius:99px;background:#EFF6FF;border:1px solid #DBEAFE;color:#2563EB;font-weight:600;cursor:default">'+f.field+': '+f.value+' <span class="if-x" style="cursor:pointer;margin-left:2px">×</span></span>';
+            }).join('');
+            chipsWrap.querySelectorAll('.if-x').forEach(function(x){
+              x.addEventListener('click', function(){
+                active.splice(parseInt(x.closest('[data-i]').dataset.i,10),1);
+                renderChips(); recount();
+              });
+            });
+            recount();
+          }
+          function closeMenu(){ var m=document.getElementById('if-menu'); if(m) m.remove(); }
+          addBtn.addEventListener('click', function(e){
+            e.stopPropagation();
+            if (document.getElementById('if-menu')) { closeMenu(); return; }
+            var menu = document.createElement('div');
+            menu.id = 'if-menu';
+            menu.style.cssText = 'position:absolute;top:100%;left:0;margin-top:6px;background:white;border:1px solid #E2E8F0;border-radius:10px;box-shadow:0 10px 28px rgba(15,23,42,.14);padding:8px;min-width:230px;z-index:1200;font-size:12.5px;color:#334155;';
+            menu.innerHTML = '<div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#94A3B8;padding:4px 6px 8px">Choose a field</div>';
+            Object.keys(CATALOG).forEach(function(field){
+              var row = document.createElement('div');
+              row.style.cssText = 'padding:8px 9px;border-radius:7px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;';
+              row.innerHTML = '<span>'+field+'</span><span style="color:#CBD5E1">›</span>';
+              row.addEventListener('mouseenter', function(){ row.style.background='#EFF6FF'; });
+              row.addEventListener('mouseleave', function(){ row.style.background='transparent'; });
+              row.addEventListener('click', function(ev){
+                ev.stopPropagation();
+                // second level: values
+                menu.innerHTML = '<div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#94A3B8;padding:4px 6px 8px">'+field+'</div>';
+                CATALOG[field].forEach(function(val){
+                  var vr = document.createElement('div');
+                  vr.style.cssText = 'padding:8px 9px;border-radius:7px;cursor:pointer;';
+                  vr.textContent = val;
+                  vr.addEventListener('mouseenter', function(){ vr.style.background='#EFF6FF'; });
+                  vr.addEventListener('mouseleave', function(){ vr.style.background='transparent'; });
+                  vr.addEventListener('click', function(e2){
+                    e2.stopPropagation();
+                    active.push({field:field,value:val});
+                    renderChips(); closeMenu();
+                  });
+                  menu.appendChild(vr);
+                });
+              });
+              menu.appendChild(row);
+            });
+            addBtn.appendChild(menu);
+            setTimeout(function(){
+              document.addEventListener('click', function cl(ev){
+                if (!addBtn.contains(ev.target)) { closeMenu(); document.removeEventListener('click', cl); }
+              });
+            }, 10);
+          });
+          // seed with a couple of demo filters so the strip isn't empty
+          active = [{field:'Stage',value:'Cultivation'},{field:'Ask amount',value:'$25k+'}];
+          renderChips();
         });
       }
 
@@ -2148,6 +2456,596 @@ body {
     })();
   </script>
 
+<script id="pipeline-cta-fixes">
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    // ── A) Column "+ Add prospect" buttons → open the add-prospect wizard ──
+    document.querySelectorAll('.add-card-btn').forEach(function(b){
+      var t = (b.textContent || '').trim().toLowerCase();
+      if (t.indexOf('add prospect') !== -1) {
+        b.addEventListener('click', function(e){
+          e.preventDefault(); e.stopPropagation();
+          window.location = 'atlas-add-prospect.html';
+        }, true);
+      }
+    });
+
+    // ── B) Officer + Campaign selects filter the board ──
+    var selects = document.querySelectorAll('.ps-filter-select');
+    var officerSel  = selects[0];
+    var campaignSel = selects[1];
+    // campaign → keywords that identify matching cards (best-effort text match)
+    var CAMPAIGN_KEYS = {
+      'CMA 2026': ['cma','annual','ministry appeal'],
+      'Cathedral Capital': ['cathedral','capital','benefactor']
+    };
+    function applyFilters(){
+      var off = officerSel ? officerSel.value : 'All officers';
+      var camp = campaignSel ? campaignSel.value : 'All campaigns';
+      var keys = CAMPAIGN_KEYS[camp] || null;
+      document.querySelectorAll('.stage-col').forEach(function(col){
+        var shown = 0, val = 0;
+        col.querySelectorAll('.prospect-card').forEach(function(card){
+          var offEl = card.querySelector('.pc-officer');
+          var offName = offEl ? offEl.textContent.trim() : '';
+          var okOff  = (off === 'All officers') || offName.indexOf(off) !== -1;
+          var okCamp = !keys || keys.some(function(k){ return card.textContent.toLowerCase().indexOf(k) !== -1; });
+          var show = okOff && okCamp;
+          card.style.display = show ? '' : 'none';
+          if (show) {
+            shown++;
+            var askEl = card.querySelector('.pc-ask');
+            if (askEl) {
+              var m = askEl.textContent.replace(/[^0-9.]/g,'');
+              if (m) val += parseFloat(m) * (/k/i.test(askEl.textContent) ? 1000 : 1);
+            }
+          }
+        });
+        // Note: column count/value show the true stage aggregate (set by the
+        // kanban-cap script) and are intentionally NOT overwritten with the
+        // visible-card count — the board is a capped window, not the full set.
+      });
+    }
+    if (officerSel)  officerSel.addEventListener('change', function(){ applyFilters(); if(window.LV) window.LV.render(); });
+    if (campaignSel) campaignSel.addEventListener('change', function(){ applyFilters(); if(window.LV) window.LV.render(); });
+  });
+})();
+</script>
+
+<script id="pipeline-list-engine">
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    // ── Deterministic demo dataset (stands in for a 1M+ server-paged table) ──
+    var FIRST = ['Margaret','Thomas','James','Patricia','Michael','Susan','William','Anne','Robert','Mary','John','Elena','Marco','Laura','Frank','Daniel','Catherine','Peter','Bridget','Sean','Kathleen','Brian','Maureen','Dennis','Colleen','Patrick','Eileen','Kevin','Sheila','Liam','Nora','Declan','Aoife','Cormac','Siobhan'];
+    var LAST = ['O\'Brien','Sullivan','Grant','Walsh','Nguyen','DiNapoli','Russo','Carter','Stafford','Kowalski','Morrison','Fitzgerald','Romano','Riccardi','Lin','Whitmore','Kelleher','Doherty','Byrne','Murphy','Kennedy','Gallagher','Brennan','Donovan','Flanagan','Hayes','McCarthy','Quinn','Reilly','Kavanagh'];
+    var STAGES = [
+      {n:'Identification', bg:'#EFF6FF', fg:'#2563EB'},
+      {n:'Qualification',  bg:'#F0FDFA', fg:'#0D9488'},
+      {n:'Cultivation',    bg:'#ECFDF5', fg:'#15803D'},
+      {n:'Solicitation',   bg:'#FFFBEB', fg:'#B45309'},
+      {n:'Stewardship',    bg:'#F5F3FF', fg:'#7C3AED'},
+      {n:'Closed · Won',   bg:'#DCFCE7', fg:'#166534'}
+    ];
+    var OFFICERS = ['Sarah Reynolds','Mark Collins','Bridget McCarthy','Julia Kelleher'];
+    var CAMPAIGNS = ['Cathedral Capital','CMA 2026','Annual Appeal'];
+    var NEXTS = ['Discovery call','Cultivation visit','Send proposal','Ask meeting','Thank-you call','Pledge follow-up','Site tour','Steward report'];
+    var AVCOL = [['#EDE9FE','#7C3AED'],['#DBEAFE','#2563EB'],['#DCFCE7','#15803D'],['#FEF3C7','#B45309'],['#FCE7F3','#BE185D']];
+    var DRAWER_KEYS = ['obrien','walsh','grant','sullivan'];
+    var TOTAL = 1000;
+
+    function rand(seed){ var x = Math.sin(seed*127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+    function make(i){
+      var f = FIRST[Math.floor(rand(i*1.1)*FIRST.length)];
+      var l = LAST[Math.floor(rand(i*2.3)*LAST.length)];
+      var st = STAGES[Math.floor(rand(i*3.7)*STAGES.length)];
+      var of = OFFICERS[Math.floor(rand(i*4.9)*OFFICERS.length)];
+      var cp = CAMPAIGNS[Math.floor(rand(i*5.5)*CAMPAIGNS.length)];
+      var askBands = [1000,2500,5000,10000,25000,50000,100000];
+      var ask = askBands[Math.floor(rand(i*6.1)*askBands.length)];
+      var days = 1 + Math.floor(rand(i*7.3)*180);
+      var ai = ['A','B','C'][Math.floor(rand(i*8.9)*3)];
+      var nx = NEXTS[Math.floor(rand(i*9.2)*NEXTS.length)];
+      var dueIn = Math.floor(rand(i*10.4)*30) - 6; // some overdue
+      var lastAgo = 1 + Math.floor(rand(i*11.8)*60);
+      var col = AVCOL[i % AVCOL.length];
+      return { id:i, first:f, last:l, name:f+' '+l, initials:(f[0]+l[0]).toUpperCase(),
+        stage:st, officer:of, campaign:cp, ask:ask, days:days, ai:ai, next:nx, dueIn:dueIn, lastAgo:lastAgo, avbg:col[0], avfg:col[1] };
+    }
+    var DATA = []; for (var i=0;i<TOTAL;i++) DATA.push(make(i));
+
+    // ── Shared filter state (also driven by the control bar) ──
+    var SCOPE_MAP = { mine:['Sarah Reynolds'], team:['Sarah Reynolds','Mark Collins'], all:[] };
+    window.PIPE = window.PIPE || { scope:'mine', view:'all', stages:[], officers:[], campaigns:[], askMin:0, ai:[], search:'' };
+    var VIEW_PRED = {
+      all:       function(r){ return true; },
+      attention: function(r){ return r.dueIn<0 || r.days>90; },
+      asks:      function(r){ return r.stage.n==='Solicitation' && r.dueIn>=0 && r.dueIn<=7; },
+      overdue:   function(r){ return r.dueIn<0; },
+      hot:       function(r){ return r.ai==='A' && r.lastAgo>30; },
+      major:     function(r){ return r.ask>=25000 && r.stage.n==='Solicitation'; },
+      stalled:   function(r){ return r.days>90; }
+    };
+
+    // ── State ──
+    var state = { page:1, size:50, sort:'priority', dir:1, sel:{} };
+    var body = document.getElementById('lv-body');
+    if (!body) return;
+
+    function fmtAsk(v){ return v>=1000 ? '$'+(v/1000)+'k' : '$'+v; }
+
+    function filtered(){
+      var P=window.PIPE, q=(P.search||'').toLowerCase();
+      var scopeOfficers = SCOPE_MAP[P.scope] || [];
+      var vp = VIEW_PRED[P.view] || VIEW_PRED.all;
+      return DATA.filter(function(r){
+        if (scopeOfficers.length && scopeOfficers.indexOf(r.officer)===-1) return false;
+        if (P.stages.length && P.stages.indexOf(r.stage.n)===-1) return false;
+        if (P.officers.length && P.officers.indexOf(r.officer)===-1) return false;
+        if (P.campaigns.length && P.campaigns.indexOf(r.campaign)===-1) return false;
+        if (P.askMin && r.ask < P.askMin) return false;
+        if (P.ai.length && P.ai.indexOf(r.ai)===-1) return false;
+        if (!vp(r)) return false;
+        if (q && (r.name+' '+r.officer+' '+r.campaign+' '+r.stage.n).toLowerCase().indexOf(q)===-1) return false;
+        return true;
+      });
+    }
+    function prioScore(r){
+      var s=0;
+      if (r.dueIn<0) s -= 100000; else s += r.dueIn*10;          // overdue first, then soonest due
+      s += ({A:-3000,B:-1500,C:0})[r.ai];                        // hotter score first
+      s -= r.ask/100;                                            // larger ask first
+      if (r.days>90) s -= 500;                                   // stalled bumps up
+      return s;
+    }
+    function sorted(rows){
+      var k=state.sort, d=state.dir;
+      return rows.slice().sort(function(a,b){
+        var av,bv;
+        switch(k){
+          case 'priority': av=prioScore(a); bv=prioScore(b); break;
+          case 'ask': av=a.ask; bv=b.ask; break;
+          case 'days': av=a.days; bv=b.days; break;
+          case 'ai': av=a.ai; bv=b.ai; break;
+          case 'stage': av=a.stage.n; bv=b.stage.n; break;
+          case 'officer': av=a.officer; bv=b.officer; break;
+          case 'campaign': av=a.campaign; bv=b.campaign; break;
+          case 'next': av=a.next; bv=b.next; break;
+          case 'last': av=a.lastAgo; bv=b.lastAgo; break;
+          default: av=a.last+a.first; bv=b.last+b.first;
+        }
+        if (av<bv) return -1*d; if (av>bv) return 1*d; return 0;
+      });
+    }
+
+    function render(){
+      var rows = sorted(filtered());
+      var total = rows.length;
+      var maxPage = Math.max(1, Math.ceil(total/state.size));
+      if (state.page>maxPage) state.page=maxPage;
+      var start=(state.page-1)*state.size, end=Math.min(start+state.size, total);
+      var pageRows = rows.slice(start,end);
+
+      body.innerHTML = pageRows.map(function(r){
+        var due = r.dueIn<0 ? '<span class="lv-overdue">'+Math.abs(r.dueIn)+'d overdue</span>' : 'in '+r.dueIn+'d';
+        return '<tr data-id="'+r.id+'" class="'+(state.sel[r.id]?'sel':'')+'">'+
+          '<td class="lv-frozen lv-checkcol"><input type="checkbox" class="lv-rowcheck" '+(state.sel[r.id]?'checked':'')+'></td>'+
+          '<td class="lv-frozen lv-namecol"><div class="lv-name"><div class="lv-av" style="background:'+r.avbg+';color:'+r.avfg+'">'+r.initials+'</div><span class="lv-nm">'+r.name+'</span></div></td>'+
+          '<td><span class="lv-stage" style="background:'+r.stage.bg+';color:'+r.stage.fg+'">'+r.stage.n+'</span></td>'+
+          '<td>'+r.officer+'</td>'+
+          '<td class="lv-num"><span class="lv-ask">'+fmtAsk(r.ask)+'</span></td>'+
+          '<td>'+r.campaign+'</td>'+
+          '<td class="lv-num">'+r.days+'d</td>'+
+          '<td>'+r.next+' · <span style="color:var(--text-3)">'+due+'</span></td>'+
+          '<td><span class="lv-ai '+r.ai+'">'+r.ai+'</span></td>'+
+          '<td style="color:var(--text-3)">'+r.lastAgo+'d ago</td>'+
+        '</tr>';
+      }).join('');
+
+      // header sort arrows
+      document.querySelectorAll('.lv-table th.lv-sort').forEach(function(th){
+        var a=th.querySelector('.lv-arrow'); if(a) a.remove();
+        if (th.dataset.sort===state.sort){ var s=document.createElement('span'); s.className='lv-arrow'; s.textContent=state.dir>0?'▲':'▼'; th.appendChild(s); }
+      });
+
+      // footer
+      var P=window.PIPE;
+      var isFiltered = P.scope!=='all' || P.view!=='all' || P.stages.length || P.officers.length || P.campaigns.length || P.askMin || P.ai.length || P.search;
+      var info=document.getElementById('lv-pageinfo');
+      info.innerHTML = total? ('Showing <strong>'+(start+1)+'–'+end+'</strong> of <strong>'+total.toLocaleString()+'</strong>'+(isFiltered?' (filtered)':'')) : 'No matching prospects';
+      var res=document.getElementById('pc-result');
+      if (res) res.innerHTML = '<strong>'+total.toLocaleString()+'</strong> '+(total===1?'prospect':'prospects')+(isFiltered?' match':'');
+      document.getElementById('lv-pagenum').textContent = 'Page '+state.page+' of '+maxPage;
+      document.getElementById('lv-first').disabled = state.page<=1;
+      document.getElementById('lv-prev').disabled  = state.page<=1;
+      document.getElementById('lv-next').disabled  = state.page>=maxPage;
+
+      // select-all reflects page state
+      var pageIds = pageRows.map(function(r){return r.id;});
+      var allSel = pageIds.length>0 && pageIds.every(function(id){return state.sel[id];});
+      var sa=document.getElementById('lv-selall'); if(sa) sa.checked=allSel;
+      updateBulk();
+    }
+    window.LV = { render:render, data:DATA, fmtAsk:fmtAsk, query:function(){ return sorted(filtered()); } };
+
+    function updateBulk(){
+      var n=Object.keys(state.sel).length;
+      var bar=document.getElementById('lv-bulkbar');
+      document.getElementById('lv-selcount').textContent=n;
+      bar.classList.toggle('show', n>0);
+    }
+    function lvToast(msg){
+      var t=document.getElementById('dnd-toast');
+      if(!t){ t=document.createElement('div'); t.id='dnd-toast'; t.innerHTML='<span class="ico">✓</span><span class="msg"></span><span class="undo" style="display:none"></span>'; document.body.appendChild(t); }
+      t.querySelector('.msg').textContent=msg; t.classList.add('show');
+      clearTimeout(t._t); t._t=setTimeout(function(){ t.classList.remove('show'); },2600);
+    }
+
+    // ── Events ──
+    body.addEventListener('click', function(e){
+      var tr=e.target.closest('tr'); if(!tr) return;
+      var id=parseInt(tr.dataset.id,10);
+      if (e.target.classList.contains('lv-rowcheck')){
+        if (e.target.checked) state.sel[id]=true; else delete state.sel[id];
+        tr.classList.toggle('sel', !!state.sel[id]);
+        updateBulk();
+        var sa=document.getElementById('lv-selall');
+        var checks=body.querySelectorAll('.lv-rowcheck');
+        if(sa) sa.checked=[].every.call(checks,function(c){return c.checked;}) && checks.length>0;
+        return;
+      }
+      // row click → open the shared detail drawer
+      if (typeof window.openDrawer==='function'){ try{ window.openDrawer(DRAWER_KEYS[id % DRAWER_KEYS.length]); }catch(_){}}
+    });
+    document.getElementById('lv-selall').addEventListener('change', function(){
+      var rows = sorted(filtered()); var start=(state.page-1)*state.size;
+      var pageRows = rows.slice(start, start+state.size);
+      pageRows.forEach(function(r){ if(this.checked) state.sel[r.id]=true; else delete state.sel[r.id]; }, this);
+      render();
+    });
+    document.querySelectorAll('.lv-table th.lv-sort').forEach(function(th){
+      th.addEventListener('click', function(){
+        var k=th.dataset.sort;
+        if (state.sort===k) state.dir*=-1; else { state.sort=k; state.dir=1; }
+        state.page=1; render();
+      });
+    });
+    var search=document.getElementById('lv-search');
+    var deb; search.addEventListener('input', function(){ clearTimeout(deb); deb=setTimeout(function(){ window.PIPE.search=search.value; state.page=1; render(); },160); });
+    document.getElementById('lv-pagesize').addEventListener('change', function(){ state.size=parseInt(this.value,10); state.page=1; render(); });
+    document.getElementById('lv-first').addEventListener('click', function(){ state.page=1; render(); });
+    document.getElementById('lv-prev').addEventListener('click', function(){ if(state.page>1){state.page--; render();} });
+    document.getElementById('lv-next').addEventListener('click', function(){ state.page++; render(); });
+    document.querySelectorAll('.lv-dbtn').forEach(function(b){
+      b.addEventListener('click', function(){
+        document.querySelectorAll('.lv-dbtn').forEach(function(x){x.classList.remove('active');});
+        b.classList.add('active');
+        document.getElementById('list-view').classList.toggle('compact', b.dataset.density==='compact');
+      });
+    });
+    document.querySelectorAll('.lv-bulkbtn').forEach(function(b){
+      b.addEventListener('click', function(){
+        var n=Object.keys(state.sel).length, a=b.dataset.bulk;
+        if (a==='clear'){ state.sel={}; render(); return; }
+        var msg={assign:'Reassign officer for '+n+' prospects…',segment:n+' prospects added to a segment',task:'Bulk task created for '+n+' prospects',export:'Exporting '+n+' prospects to CSV…'}[a];
+        lvToast(msg);
+        if (a==='segment'||a==='task'||a==='export'){ state.sel={}; render(); }
+      });
+    });
+
+    render(); // pre-render so first toggle is instant
+  });
+})();
+</script>
+
+<script id="pipeline-kanban-cap">
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    var STAGE_TOTAL = { 'Identification':4120, 'Qualification':2860, 'Cultivation':3412, 'Solicitation':940, 'Stewardship':1680, 'Closed · Won':612 };
+    var FIRST=['Margaret','Thomas','James','Patricia','Michael','Susan','William','Anne','John','Elena','Daniel','Catherine','Bridget','Sean','Kathleen','Brian','Liam','Nora','Declan','Aoife'];
+    var LAST=['O\'Brien','Sullivan','Grant','Walsh','Nguyen','Russo','Carter','Kowalski','Fitzgerald','Byrne','Murphy','Kennedy','Gallagher','Brennan','Donovan','Hayes','Quinn','Reilly'];
+    var OFFICERS=['Sarah Reynolds','Mark Collins','Bridget McCarthy','Julia Kelleher'];
+    var ASKS=['$1k','$2.5k','$5k','$10k','$25k','$50k'];
+    var AV=[['#EDE9FE','#7C3AED'],['#DBEAFE','#2563EB'],['#DCFCE7','#15803D'],['#FEF3C7','#B45309'],['#FCE7F3','#BE185D']];
+    var seed=1;
+    function pick(a){ seed=(seed*9301+49297)%233280; return a[Math.floor((seed/233280)*a.length)]; }
+
+    document.querySelectorAll('.stage-col').forEach(function(col){
+      var nameEl=col.querySelector('.stage-name'); if(!nameEl) return;
+      var stage=nameEl.textContent.trim();
+      var total=STAGE_TOTAL[stage]; if(!total) return;
+      var area=col.querySelector('.cards-area');
+      var addBtn=col.querySelector('.add-card-btn');
+      if(!area) return;
+
+      // update the header count to the true (large) aggregate
+      var cntEl=col.querySelector('.stage-count'); if(cntEl) cntEl.textContent=total.toLocaleString();
+
+      var shownWrap=document.createElement('div'); shownWrap.className='col-showing';
+      var moreBtn=document.createElement('div'); moreBtn.className='col-more';
+
+      function shownCount(){ return area.querySelectorAll('.prospect-card').length; }
+      function refresh(){
+        var s=shownCount();
+        shownWrap.textContent='Showing '+s+' of '+total.toLocaleString();
+        if (s>=Math.min(total, 80)) { moreBtn.style.display='none'; }
+        else { moreBtn.style.display=''; moreBtn.textContent='Load '+Math.min(25, total-s)+' more'; }
+      }
+      moreBtn.addEventListener('click', function(){
+        var n=Math.min(25, total-shownCount());
+        for(var k=0;k<n;k++){
+          var f=pick(FIRST), l=pick(LAST), of=pick(OFFICERS), ask=pick(ASKS), col2=AV[(shownCount()+k)%AV.length], days=1+((seed)%120);
+          var card=document.createElement('div');
+          card.className='prospect-card';
+          card.style.cursor='pointer';
+          card.innerHTML=
+            '<div class="pc-top"><div class="pc-avatar" style="background:'+col2[0]+';color:'+col2[1]+'">'+(f[0]+l[0]).toUpperCase()+'</div>'+
+            '<div class="pc-info"><div class="pc-name">'+f+' '+l+'</div><div class="pc-org">'+of+'’s portfolio</div></div>'+
+            '<div class="pc-ask">'+ask+'</div></div>'+
+            '<div class="pc-footer"><div class="pc-officer"><div class="pc-officer-avatar" style="background:var(--blue)">'+of.split(' ').map(function(x){return x[0];}).join('')+'</div>'+of+'</div>'+
+            '<div class="pc-days days-fresh">'+days+'d in stage</div></div>';
+          card.addEventListener('click', function(){ if(typeof window.openDrawer==='function'){ try{ window.openDrawer('walsh'); }catch(_){}}});
+          area.appendChild(card);
+        }
+        refresh();
+      });
+
+      area.after(shownWrap);
+      shownWrap.after(moreBtn);
+      // keep the add button below the load-more
+      if (addBtn) col.appendChild(addBtn);
+      refresh();
+    });
+  });
+})();
+</script>
+
+<script id="pipeline-controls">
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    window.PIPE = window.PIPE || { scope:'mine', view:'all', stages:[], officers:[], campaigns:[], askMin:0, ai:[], search:'' };
+    var P = window.PIPE;
+
+    var FACETS = {
+      stage:    { multi:true,  opts:['Identification','Qualification','Cultivation','Solicitation','Stewardship','Closed · Won'], key:'stages' },
+      officer:  { multi:true,  opts:['Sarah Reynolds','Mark Collins','Bridget McCarthy','Julia Kelleher'], key:'officers' },
+      campaign: { multi:true,  opts:['Cathedral Capital','CMA 2026','Annual Appeal'], key:'campaigns' },
+      ai:       { multi:true,  opts:['A','B','C'], key:'ai' },
+      ask:      { multi:false, opts:[['Any',0],['$10k+',10000],['$25k+',25000],['$100k+',100000]], key:'askMin' }
+    };
+    var SCOPE_OFF = { mine:['Sarah Reynolds'], team:['Sarah Reynolds','Mark Collins'], all:[] };
+
+    function switchToList(){
+      var listBtn=[].slice.call(document.querySelectorAll('.vt-btn')).filter(function(b){return b.textContent.trim()==='List';})[0];
+      var board=document.getElementById('board'), list=document.getElementById('list-view');
+      if (list && list.style.display==='none' || (list && getComputedStyle(list).display==='none')) {
+        document.querySelectorAll('.vt-btn').forEach(function(b){ b.classList.remove('active'); });
+        if (listBtn) listBtn.classList.add('active');
+        if (board) board.style.display='none';
+        if (list)  list.style.display='flex';
+      }
+    }
+    // Facet/scope filtering of the board's own cards (no text search)
+    function applyKanban(){
+      var scopeOff = SCOPE_OFF[P.scope]||[];
+      document.querySelectorAll('.stage-col').forEach(function(col){
+        var stage = col.querySelector('.stage-name') ? col.querySelector('.stage-name').textContent.trim() : '';
+        var stageOk = !P.stages.length || P.stages.indexOf(stage)!==-1;
+        col.style.display = stageOk ? '' : 'none';
+        col.querySelectorAll('.cards-area > .prospect-card').forEach(function(card){
+          var offEl=card.querySelector('.pc-officer'); var off=offEl?offEl.textContent.trim():'';
+          var okScope = !scopeOff.length || scopeOff.some(function(o){return off.indexOf(o)!==-1;});
+          var okOff   = !P.officers.length || P.officers.some(function(o){return off.indexOf(o)!==-1;});
+          var okCamp  = !P.campaigns.length || P.campaigns.some(function(c){return card.textContent.indexOf(c)!==-1;});
+          card.style.display = (okScope&&okOff&&okCamp) ? '' : 'none';
+        });
+      });
+    }
+
+    // Show/hide the column's normal content (static + loaded cards, load-more, add btn)
+    function toggleNormal(col, show){
+      ['.cards-area','.col-showing','.col-more','.add-card-btn'].forEach(function(sel){
+        var el=col.querySelector(sel); if(el) el.style.display = show ? '' : 'none';
+      });
+    }
+    function fmtAsk(v){ return (window.LV&&window.LV.fmtAsk)?window.LV.fmtAsk(v):('$'+v); }
+    function cardHTML(r){
+      var due = r.dueIn<0 ? '<span style="color:var(--rose);font-weight:600">'+Math.abs(r.dueIn)+'d overdue</span>' : r.days+'d in stage';
+      return '<div class="prospect-card kb-hit" style="cursor:pointer" data-nm="'+r.name+'" data-ini="'+r.initials+'" data-bg="'+r.avbg+'" data-fg="'+r.avfg+'" data-stage="'+r.stage.n+'" data-off="'+r.officer+'" data-ask="'+fmtAsk(r.ask)+'">'+
+        '<div class="pc-top"><div class="pc-avatar" style="background:'+r.avbg+';color:'+r.avfg+'">'+r.initials+'</div>'+
+        '<div class="pc-info"><div class="pc-name">'+r.name+'</div><div class="pc-org">'+r.campaign+'</div></div>'+
+        '<div class="pc-ask">'+fmtAsk(r.ask)+'</div></div>'+
+        '<div class="pc-footer"><div class="pc-officer"><div class="pc-officer-avatar" style="background:var(--blue)">'+r.officer.split(' ').map(function(x){return x[0];}).join('')+'</div>'+r.officer+'</div>'+
+        '<div class="pc-days days-fresh">'+due+'</div></div></div>';
+    }
+    // Data-driven: render each stage column from the full filtered set
+    // (applies scope + views + facets + search — so every pill filters the board)
+    function renderKanbanData(){
+      var rows = (window.LV && window.LV.query) ? window.LV.query() : [];
+      var byStage = {};
+      rows.forEach(function(r){ (byStage[r.stage.n]=byStage[r.stage.n]||[]).push(r); });
+      document.querySelectorAll('.stage-col').forEach(function(col){
+        var stage=col.querySelector('.stage-name')?col.querySelector('.stage-name').textContent.trim():'';
+        var stageOk=!P.stages.length||P.stages.indexOf(stage)!==-1;
+        col.style.display=stageOk?'':'none';
+        toggleNormal(col,false);
+        var area=col.querySelector('.kb-search-area');
+        if(!area){ area=document.createElement('div'); area.className='kb-search-area'; var ca=col.querySelector('.cards-area'); if(ca&&ca.parentNode) ca.parentNode.insertBefore(area, ca.nextSibling); else col.appendChild(area); }
+        area.style.display='';
+        var list = byStage[stage] || [];
+        area.innerHTML='<div class="kb-search-hd">'+list.length+' match'+(list.length===1?'':'es')+'</div>'+
+          (list.length? list.slice(0,60).map(cardHTML).join('') : '<div class="col-nomatch" style="display:block">No matches in this stage</div>');
+        area.querySelectorAll('.kb-hit').forEach(function(c){
+          c.addEventListener('click', function(){
+            if(window.openDrawer){ try{ window.openDrawer('obrien'); }catch(_){}}
+            var nm=document.getElementById('d-name'), org=document.getElementById('d-org'), av=document.getElementById('d-avatar');
+            if(nm) nm.textContent=c.dataset.nm;
+            if(org) org.textContent=c.dataset.stage+' · '+c.dataset.off+' · ask '+c.dataset.ask;
+            if(av){ av.textContent=c.dataset.ini; av.style.background=c.dataset.bg; av.style.color=c.dataset.fg; }
+          });
+        });
+      });
+    }
+    function clearKanbanData(){
+      document.querySelectorAll('.stage-col').forEach(function(col){
+        var area=col.querySelector('.kb-search-area'); if(area) area.style.display='none';
+        toggleNormal(col,true);
+      });
+    }
+    function apply(switchView){
+      if (window.LV && window.LV.render) window.LV.render();
+      var active = (P.view && P.view!=='all') || P.stages.length || P.officers.length || P.campaigns.length || P.askMin || P.ai.length || (P.search||'').trim();
+      if (active) renderKanbanData();          // data-driven: pills/facets/search all filter the board
+      else { clearKanbanData(); applyKanban(); } // default: original hero cards, scope show/hide
+      if (switchView) switchToList();
+    }
+    window.PIPE_apply = apply;
+
+    // ── Scope chips ──
+    document.querySelectorAll('.scope-chip').forEach(function(chip){
+      chip.addEventListener('click', function(){
+        document.querySelectorAll('.scope-chip').forEach(function(c){c.classList.remove('active');});
+        chip.classList.add('active');
+        P.scope = chip.dataset.scope;
+        apply(false);
+      });
+    });
+
+    // ── View pills ──
+    function setView(v){
+      P.view = v;
+      document.querySelectorAll('.view-pill').forEach(function(p){ p.classList.toggle('active', p.dataset.view===v); });
+    }
+    document.querySelectorAll('.view-pill').forEach(function(pill){
+      pill.addEventListener('click', function(){
+        if (pill.dataset.view==='__save'){
+          var nm = prompt('Name this view (saved to Views):');
+          if (nm){
+            var np=document.createElement('button'); np.className='view-pill active'; np.dataset.view='saved-'+Date.now(); np.textContent='★ '+nm;
+            document.querySelectorAll('.view-pill').forEach(function(p){p.classList.remove('active');});
+            var saveBtn=document.querySelector('.view-save');
+            saveBtn.parentNode.insertBefore(np, saveBtn);
+            // snapshot current filters onto the pill
+            var snap=JSON.stringify({scope:P.scope,view:P.view,stages:P.stages.slice(),officers:P.officers.slice(),campaigns:P.campaigns.slice(),askMin:P.askMin,ai:P.ai.slice()});
+            np.addEventListener('click', function(){
+              var s=JSON.parse(snap); P.scope=s.scope;P.view=s.view;P.stages=s.stages;P.officers=s.officers;P.campaigns=s.campaigns;P.askMin=s.askMin;P.ai=s.ai;
+              document.querySelectorAll('.view-pill').forEach(function(p){p.classList.remove('active');}); np.classList.add('active');
+              document.querySelectorAll('.scope-chip').forEach(function(c){c.classList.toggle('active',c.dataset.scope===s.scope);});
+              syncFacetBtns(); apply(false);
+            });
+          }
+          return;
+        }
+        setView(pill.dataset.view);
+        apply(false);
+      });
+    });
+
+    // ── Clickable summary stats ──
+    document.querySelectorAll('.ps-clickable').forEach(function(item){
+      item.addEventListener('click', function(){
+        var v = item.dataset.stat==='asks' ? 'asks' : 'overdue';
+        setView(v); apply(false);
+      });
+    });
+
+    // ── Facet dropdowns ──
+    var FACET_LABELS = { stage:'Stage', officer:'Officer', campaign:'Campaign', ask:'Ask amount', ai:'AI grade' };
+    var facetWrap = document.getElementById('facet-all');
+    function facetActiveCount(){
+      var n=0;
+      Object.keys(FACETS).forEach(function(name){
+        var cfg=FACETS[name];
+        if (name==='ask') n += P.askMin?1:0; else n += (P[cfg.key]||[]).length;
+      });
+      return n;
+    }
+    function syncFacetBtns(){
+      var n=facetActiveCount();
+      if (facetWrap) facetWrap.classList.toggle('on', n>0);
+      var cnt=document.getElementById('filters-cnt'); if(cnt) cnt.textContent = n>0?('('+n+')'):'';
+    }
+    function closeFacets(){ document.querySelectorAll('.facet-menu').forEach(function(m){m.remove();}); }
+    // Single combined Filters dropdown holding every facet group
+    var filtersBtn = document.getElementById('filters-btn');
+    if (filtersBtn) filtersBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      if (facetWrap.querySelector('.facet-menu')){ closeFacets(); return; }
+      closeFacets();
+      var menu=document.createElement('div'); menu.className='facet-menu combined';
+      Object.keys(FACETS).forEach(function(name){
+        var cfg=FACETS[name];
+        var grp=document.createElement('div'); grp.className='fm-group';
+        var h=document.createElement('div'); h.className='fm-h'; h.textContent=FACET_LABELS[name]; grp.appendChild(h);
+        cfg.opts.forEach(function(opt){
+          var label = cfg.multi ? opt : opt[0];
+          var val   = cfg.multi ? opt : opt[1];
+          var checked = cfg.multi ? (P[cfg.key].indexOf(val)!==-1) : (P.askMin===val);
+          var row=document.createElement('div'); row.className='facet-opt';
+          row.innerHTML='<input type="'+(cfg.multi?'checkbox':'radio')+'" '+(checked?'checked':'')+'><span>'+label+'</span>';
+          row.addEventListener('click', function(ev){
+            ev.stopPropagation();
+            if (cfg.multi){
+              var i=P[cfg.key].indexOf(val);
+              if (i===-1) P[cfg.key].push(val); else P[cfg.key].splice(i,1);
+              row.querySelector('input').checked = P[cfg.key].indexOf(val)!==-1;
+            } else {
+              P.askMin = val;
+              grp.querySelectorAll('input').forEach(function(x){x.checked=false;});
+              row.querySelector('input').checked=true;
+            }
+            syncFacetBtns();
+            apply(false);
+          });
+          grp.appendChild(row);
+        });
+        menu.appendChild(grp);
+      });
+      facetWrap.appendChild(menu);
+      setTimeout(function(){ document.addEventListener('click', function cl(ev){ if(!facetWrap.contains(ev.target)){ closeFacets(); document.removeEventListener('click',cl);} }); },10);
+    });
+
+    // ── Clear all ──
+    document.getElementById('pc-clear').addEventListener('click', function(){
+      P.view='all'; P.stages=[]; P.officers=[]; P.campaigns=[]; P.askMin=0; P.ai=[]; P.search='';
+      var s=document.getElementById('lv-search'); if(s) s.value='';
+      setView('all'); syncFacetBtns(); closeFacets(); apply(false);
+    });
+
+    // ── Collapsible Kanban columns ──
+    document.querySelectorAll('.stage-col .stage-header').forEach(function(h){
+      h.addEventListener('click', function(e){
+        if (e.target.closest('.stage-count,.stage-value')) return;
+        h.parentNode.classList.toggle('collapsed');
+      });
+    });
+
+    // ── Board search (filters cards in every stage; also feeds the List) ──
+    var bs = document.getElementById('board-search');
+    var bsWrap = bs ? bs.closest('.pc-search') : null;
+    var bsX = document.getElementById('board-search-x');
+    var deb;
+    function runSearch(){
+      P.search = bs.value;
+      if (bsWrap) bsWrap.classList.toggle('has-val', !!bs.value.trim());
+      var lv = document.getElementById('lv-search'); if (lv) lv.value = bs.value;   // keep List search in sync
+      apply(false);   // filter current view (Kanban stays put; List updates too)
+    }
+    if (bs){
+      bs.addEventListener('input', function(){ clearTimeout(deb); deb=setTimeout(runSearch, 140); });
+      bs.addEventListener('keydown', function(e){ if(e.key==='Escape'){ bs.value=''; runSearch(); bs.blur(); } });
+    }
+    if (bsX) bsX.addEventListener('click', function(){ bs.value=''; runSearch(); bs.focus(); });
+    // ⌘K / Ctrl-K focuses the board search
+    document.addEventListener('keydown', function(e){
+      if ((e.metaKey||e.ctrlKey) && (e.key==='k'||e.key==='K')){ e.preventDefault(); if(bs){ bs.focus(); bs.select(); } }
+    });
+
+    // initial paint of result count
+    syncFacetBtns();
+    apply(false);
+  });
+})();
+</script>
 
 <style id="atlas-wire-style">
   /* Make originally-static elements feel clickable when wired */

@@ -669,17 +669,17 @@ body {
       <div class="page-sub">Every email and acknowledgement Atlas has sent on your team's behalf.</div>
     </div>
     <div class="flex gap-8">
-      <button class="btn btn-ghost"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.5M7 9v.5"/></svg> Schedule send</button>
-      <a class="btn btn-primary" href="atlas-email-compose.html"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg> Compose</a>
+      <a class="btn btn-ghost" href="atlas-email-compose.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg> Quick compose</a>
+      <a class="btn btn-primary" href="atlas-email-campaign.html"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg> Create Email</a>
     </div>
   </div>
 
   <!-- Stats -->
   <div class="cm-stats">
-    <div class="cm-stat delivered"><div class="l"><span class="pip"></span>Delivered today</div><div class="v">142</div><div class="d">99.3% delivery rate · 30-day avg</div></div>
-    <div class="cm-stat opens"><div class="l"><span class="pip"></span>Opens (24h)</div><div class="v">68%</div><div class="d">↑ 4pts vs. weekly avg · 38% click rate</div></div>
-    <div class="cm-stat bounce"><div class="l"><span class="pip"></span>Bounces (7d)</div><div class="v">3</div><div class="d">2 hard · 1 soft · auto-flagged DNC</div></div>
-    <div class="cm-stat scheduled"><div class="l"><span class="pip"></span>Scheduled</div><div class="v">14</div><div class="d">Next: tomorrow 8 AM · weekly recap</div></div>
+    <div class="cm-stat delivered" onclick="commsStatClick('delivered')"><div class="l"><span class="pip"></span>Delivered today</div><div class="v">142</div><div class="d">99.3% delivery rate · 30-day avg</div></div>
+    <div class="cm-stat opens" onclick="commsStatClick('opens')"><div class="l"><span class="pip"></span>Opens (24h)</div><div class="v">68%</div><div class="d">↑ 4pts vs. weekly avg · 38% click rate</div></div>
+    <div class="cm-stat bounce" onclick="commsStatClick('bounce')"><div class="l"><span class="pip"></span>Bounces (7d)</div><div class="v">3</div><div class="d">2 hard · 1 soft · auto-flagged DNC</div></div>
+    <div class="cm-stat scheduled" onclick="commsStatClick('scheduled')"><div class="l"><span class="pip"></span>Scheduled</div><div class="v">14</div><div class="d">Next: tomorrow 8 AM · weekly recap</div></div>
   </div>
 
   <!-- Tabs -->
@@ -697,7 +697,10 @@ body {
   <!-- ─── SENT pane (existing content) ─── -->
   <div class="tab-pane on" data-pane="sent">
 
-  <!-- Today -->
+  <!-- Scalable Sent archive (injected UI replaces the static feed below) -->
+  <div id="sent-archive"></div>
+
+  <!-- Today (legacy static feed — hidden when the archive mounts) -->
   <div class="section-h"><span>Today · May 4 · 6 sent</span><span class="line"></span></div>
   <div class="cm-list">
 
@@ -792,8 +795,8 @@ body {
 
   <!-- ─── SCHEDULED pane ─── -->
   <div class="tab-pane" data-pane="scheduled" style="display:none">
-    <div class="section-h"><span>Upcoming · 14 scheduled</span><span class="line"></span></div>
-    <p class="muted" style="text-align:center;padding:32px;background:white;border:1px dashed var(--border);border-radius:12px">Scheduled sends will appear here. See the "Scheduled · 14 upcoming" section above for the Sent tab's preview of these.</p>
+    <div class="section-h"><span>Upcoming · <span id="sched-count-inline">14</span> scheduled</span><span class="line"></span><a href="#" onclick="commsSchedule();return false" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none">+ Schedule a send</a></div>
+    <div class="cm-list" id="scheduled-list"></div>
   </div>
 
   <!-- ─── DRAFTS pane ─── -->
@@ -852,12 +855,54 @@ body {
         <div class="metric"><span class="v green">54% open · 28% RSVP</span><div class="bar"><div class="bar-f" style="width:54%;background:var(--green)"></div></div></div>
         <span class="tag green">Active</span>
       </a>
+      <a class="cm-row" href="atlas-email-compose.html">
+        <div class="ico" style="background:var(--amber-light);color:var(--amber);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2" width="8" height="10" rx="1"/><path d="M5 5h4M5 7.5h4M5 10h2.5"/></svg></div>
+        <div class="body"><div class="ttl">Soft-credit acknowledgement (no tax)</div><div class="meta"><span>Used 67 times</span><span>·</span><span>DAF &amp; matching gifts</span></div></div>
+        <div class="recipients"><span class="muted" style="font-size:11.5px">Subject · "Your gift through {source} was recorded, {first_name}"</span></div>
+        <div class="metric"><span class="v green">45% open</span><div class="bar"><div class="bar-f" style="width:45%;background:var(--green)"></div></div></div>
+        <span class="tag amber">No-tax</span>
+      </a>
+      <a class="cm-row" href="atlas-email-compose.html">
+        <div class="ico" style="background:var(--purple-light);color:var(--purple);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg></div>
+        <div class="body"><div class="ttl">Campaign mid-point update</div><div class="meta"><span>Used 23 times</span><span>·</span><span>Campaign milestones</span></div></div>
+        <div class="recipients"><span class="muted" style="font-size:11.5px">Subject · "We're halfway to our goal, {first_name}"</span></div>
+        <div class="metric"><span class="v green">51% open</span><div class="bar"><div class="bar-f" style="width:51%;background:var(--green)"></div></div></div>
+        <span class="tag green">Active</span>
+      </a>
+      <a class="cm-row" href="atlas-email-compose.html">
+        <div class="ico" style="background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1.5l1.6 3.3 3.6.5-2.6 2.5.6 3.6L7 9.7 3.8 11.4l.6-3.6L1.8 5.3l3.6-.5z"/></svg></div>
+        <div class="body"><div class="ttl">Major gift cultivation letter</div><div class="meta"><span>Used 31 times</span><span>·</span><span>Personalized outreach</span></div></div>
+        <div class="recipients"><span class="muted" style="font-size:11.5px">Subject · "A personal note from Father Michael, {first_name}"</span></div>
+        <div class="metric"><span class="v green">74% open</span><div class="bar"><div class="bar-f" style="width:74%;background:var(--green)"></div></div></div>
+        <span class="tag green">Active</span>
+      </a>
+      <a class="cm-row" href="atlas-email-compose.html">
+        <div class="ico" style="background:var(--green-light);color:var(--green);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 7l3 3 7-7"/></svg></div>
+        <div class="body"><div class="ttl">Matching gift notification</div><div class="meta"><span>Used 5 times</span><span>·</span><span>Auto on match confirmation</span></div></div>
+        <div class="recipients"><span class="muted" style="font-size:11.5px">Subject · "Great news — your gift was matched, {first_name}!"</span></div>
+        <div class="metric"><span class="v green">69% open</span><div class="bar"><div class="bar-f" style="width:69%;background:var(--green)"></div></div></div>
+        <span class="tag green">Active</span>
+      </a>
+      <a class="cm-row" href="atlas-email-compose.html">
+        <div class="ico" style="background:var(--rose-light);color:var(--rose);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2c2 2 4 2 4 5s-2 5-4 5-4-2-4-5 2-3 4-5z"/></svg></div>
+        <div class="body"><div class="ttl">In-memoriam tribute acknowledgement</div><div class="meta"><span>Used 12 times</span><span>·</span><span>Memorial gifts</span></div></div>
+        <div class="recipients"><span class="muted" style="font-size:11.5px">Subject · "In loving memory of {honoree_name}"</span></div>
+        <div class="metric"><span class="v green">58% open</span><div class="bar"><div class="bar-f" style="width:58%;background:var(--green)"></div></div></div>
+        <span class="tag green">Active</span>
+      </a>
+      <a class="cm-row" href="atlas-email-compose.html">
+        <div class="ico" style="background:var(--teal-light);color:var(--teal);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg></div>
+        <div class="body"><div class="ttl">Year-end giving summary</div><div class="meta"><span>Used 189 times</span><span>·</span><span>January batch</span></div></div>
+        <div class="recipients"><span class="muted" style="font-size:11.5px">Subject · "Your 2026 giving summary, {first_name}"</span></div>
+        <div class="metric"><span class="v green">63% open</span><div class="bar"><div class="bar-f" style="width:63%;background:var(--green)"></div></div></div>
+        <span class="tag green">Active</span>
+      </a>
     </div>
   </div>
 
   <!-- ─── LISTS & SEGMENTS pane ─── -->
   <div class="tab-pane" data-pane="lists" style="display:none">
-    <div class="section-h"><span>Outreach lists &amp; segments · 8 lists</span><span class="line"></span><a href="atlas-outreach-lists.html" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none">Manage all lists →</a></div>
+    <div class="section-h"><span>Outreach lists &amp; segments · 8 lists</span><span class="line"></span><a href="atlas-outreach-lists.html?import=csv" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none;margin-right:14px">↑ Import contacts (CSV)</a><a href="atlas-outreach-lists.html" class="btn-link" style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none">Manage all lists →</a></div>
     <p class="muted" style="padding:18px;background:var(--blue-pale);border:1px solid var(--blue-light);border-radius:10px;color:#1D4ED8;font-size:13px;display:flex;align-items:center;gap:10px">
       <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="width:16px;height:16px;flex-shrink:0"><path d="M7 2v5l3 2"/><circle cx="7" cy="7" r="5.5"/></svg>
       <span>Full list management lives on a dedicated page. <a href="atlas-outreach-lists.html" style="font-weight:600;color:inherit;text-decoration:underline">Open Outreach lists →</a></span>
@@ -1005,7 +1050,7 @@ body {
         '<div class="recipients"><strong>' + d.recipients.slice(0,1)[0] + '</strong>' + (recipientCount > 1 ? '<br><span class="muted" style="font-size:11.5px">+ ' + (recipientCount - 1) + ' more</span>' : '') + '</div>' +
         '<div class="metric"><span class="v">' + fmtAgo(d.lastEdited) + '</span><span class="l">' + new Date(d.lastEdited).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) + '</span></div>' +
         '<span class="tag ' + (d.autosaved ? 'amber' : 'green') + '" style="background:' + (d.autosaved ? 'var(--amber-light)' : 'var(--green-light)') + ';color:' + (d.autosaved ? 'var(--amber)' : 'var(--green)') + '">' + (d.autosaved ? 'Autosaved' : 'Manual save') + '</span>' +
-        '<div class="kebab" onclick="event.preventDefault();event.stopPropagation();if(window.atlasToast)atlasToast(\'Draft actions: Resume · Duplicate · Delete · Schedule send\');return false;"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>' +
+        '<div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>' +
       '</a>';
     }).join('');
   }
@@ -1025,6 +1070,121 @@ body {
 })();
 </script>
 
+<style id="comms-interactions-css">
+  .cm-stat { cursor:pointer; transition:border-color .12s, box-shadow .12s; }
+  .cm-stat:hover { border-color:#94A3B8; box-shadow:0 2px 8px rgba(15,23,42,.06); }
+  .kebab { cursor:pointer; color:var(--text-3); display:flex; align-items:center; justify-content:center; border-radius:6px; height:26px; }
+  .kebab:hover { background:var(--border-soft); color:var(--text); }
+  .cm-kmenu { position:absolute; z-index:100030; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 30px rgba(15,23,42,.16); padding:5px; min-width:196px; }
+  .cm-kmenu button { display:block; width:100%; text-align:left; background:none; border:none; font-family:'DM Sans',sans-serif; font-size:12.5px; color:var(--text-2); padding:8px 11px; border-radius:7px; cursor:pointer; }
+  .cm-kmenu button:hover { background:var(--surface); }
+  .cm-kmenu button.danger { color:var(--rose); }
+  .cm-kmenu button.danger:hover { background:var(--rose-light); }
+</style>
+<script id="comms-interactions">
+(function(){
+  function toast(m){ if(window.atlasToast){ window.atlasToast(m); return; } var t=document.getElementById('atlas-rescue-toast'); if(t){ t.querySelector('.msg').textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){ t.classList.remove('show'); },2600); } }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  var KEBAB_SVG='<svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg>';
+
+  /* ── Scheduled tab list ── */
+  var SCHEDULED=[
+    {ico:'appeal', subj:'Cathedral campaign weekly recap — Apr 28–May 4', meta:['Campaign update','Sarah Reynolds','Recurring · weekly'], to:'Cathedral committee', toSub:'12 recipients', when:'Tomorrow', time:'8:00 AM ET', tag:'Scheduled', tagc:'purple'},
+    {ico:'steward', subj:'Pledge reminder — Robert & Susan Lin · Cathedral', meta:['Pledge reminder','Auto · 14 days before due'], to:'Robert & Susan Lin', when:'May 16', time:'9:00 AM', tag:'Auto', tagc:'purple'},
+    {ico:'thank', subj:'Major-donor spring stewardship note', meta:['Stewardship','Bridget McCarthy'], to:'Major Gift Cultivation', toSub:'28 recipients', when:'May 8', time:'10:00 AM', tag:'Scheduled', tagc:'purple'},
+    {ico:'event', subj:"Bishop's Annual Gala — save the date", meta:['Event invitation','Julia Kelleher'], to:'Gala invite list', toSub:'480 recipients', when:'May 12', time:'7:00 AM', tag:'Scheduled', tagc:'purple'},
+    {ico:'appeal', subj:'Lenten appeal — final week push', meta:['Appeal','Auto-segmented'], to:'Lapsed + LYBUNT', toSub:'312 recipients', when:'May 20', time:'6:30 AM', tag:'Scheduled', tagc:'purple'},
+    {ico:'steward', subj:'New donor welcome — touch 2 of 5', meta:['Welcome series','5-touch automated'], to:'New Donor Welcome Series', toSub:'163 recipients', when:'May 22', time:'8:00 AM', tag:'Auto', tagc:'purple'}
+  ];
+  function schedRow(s){
+    return '<div class="cm-row" data-sched="1">'
+      + '<div class="ico '+esc(s.ico)+'"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10"/></svg></div>'
+      + '<div class="body"><div class="ttl">'+esc(s.subj)+'</div><div class="meta">'+s.meta.map(function(m,i){return (i?'<span>·</span>':'')+'<span>'+esc(m)+'</span>';}).join('')+'</div></div>'
+      + '<div class="recipients"><strong>'+esc(s.to)+'</strong>'+(s.toSub?'<br><span class="muted" style="font-size:11.5px">'+esc(s.toSub)+'</span>':'')+'</div>'
+      + '<div class="metric"><span class="v" style="color:var(--purple)">'+esc(s.when)+'</span><span class="l">'+esc(s.time)+'</span></div>'
+      + '<div></div>'
+      + '<span class="tag '+esc(s.tagc)+'" style="background:var(--purple-light);color:var(--purple)">'+esc(s.tag)+'</span>'
+      + '<div class="kebab">'+KEBAB_SVG+'</div>'
+      + '</div>';
+  }
+  function renderScheduled(){
+    var el=document.getElementById('scheduled-list'); if(!el) return;
+    el.innerHTML = SCHEDULED.map(schedRow).join('');
+    var n=SCHEDULED.length + 8; // seeded 6 shown + more implied
+    var inl=document.getElementById('sched-count-inline'); if(inl) inl.textContent=n;
+  }
+  window.__commsAddScheduled=function(o){ SCHEDULED.unshift({ico:'appeal', subj:o.subj, meta:['Scheduled by you'], to:o.to, when:o.when, time:o.time, tag:'Scheduled', tagc:'purple'}); renderScheduled(); };
+
+  /* ── Kebab menus (per pane) ── */
+  var ACTS={
+    sent:[['View donor record','r','atlas-donor-360.html'],['Resend email','t','Resend queued · sending shortly'],['Forward…','r','atlas-email-compose.html'],['View engagement report','t','Opens & clicks report · opening'],['Copy tracking link','t','Tracking link copied to clipboard']],
+    scheduled:[['Edit schedule','s',''],['Send now','t','Sending now · moved to Sent'],['Duplicate','t','Duplicated to a new scheduled send'],['Cancel send','d','Scheduled send cancelled']],
+    templates:[['Edit template','r','atlas-email-compose.html'],['Duplicate template','t','Template duplicated'],['Preview','t','Template preview opened'],['Archive','d','Template archived']],
+    lists:[['Open list','r','atlas-outreach-lists.html'],['Send to this list','r','atlas-email-compose.html'],['Edit segment','r','atlas-outreach-lists.html'],['Export CSV','t','List exported · CSV downloading']],
+    drafts:[['Resume editing','r','atlas-email-compose.html'],['Duplicate draft','t','Draft duplicated'],['Schedule send','s',''],['Delete draft','d','Draft deleted']]
+  };
+  var kmenu=null;
+  function closeK(){ if(kmenu){ kmenu.remove(); kmenu=null; } }
+  function paneOf(el){ var p=el.closest('.tab-pane'); return (p&&p.dataset.pane)||'sent'; }
+  function openK(anchor){
+    closeK(); var acts=ACTS[paneOf(anchor)]||ACTS.sent;
+    kmenu=document.createElement('div'); kmenu.className='cm-kmenu';
+    kmenu.innerHTML=acts.map(function(a,i){ return '<button data-i="'+i+'"'+(a[1]==='d'?' class="danger"':'')+'>'+esc(a[0])+'</button>'; }).join('');
+    document.body.appendChild(kmenu);
+    var r=anchor.getBoundingClientRect();
+    kmenu.style.top=(r.bottom+window.pageYOffset+4)+'px';
+    kmenu.style.left=Math.max(8, r.right+window.pageXOffset-kmenu.offsetWidth)+'px';
+    kmenu.addEventListener('click', function(ev){ var b=ev.target.closest('button'); if(!b) return; var a=acts[+b.dataset.i]; closeK();
+      if(a[1]==='r'){ toast('Opening…'); setTimeout(function(){ window.location=a[2]; },220); }
+      else if(a[1]==='s'){ commsSchedule(); }
+      else { toast(a[2]); }
+    });
+  }
+  // capture so we beat the row anchor's navigation
+  document.addEventListener('click', function(e){ var k=e.target.closest && e.target.closest('.kebab'); if(!k) return; e.preventDefault(); e.stopPropagation(); openK(k); }, true);
+  document.addEventListener('click', function(e){ if(kmenu && !kmenu.contains(e.target) && !(e.target.closest&&e.target.closest('.kebab'))) closeK(); });
+  window.addEventListener('scroll', closeK, true);
+
+  function ensureKebabs(){
+    document.querySelectorAll('#comms-tab-panes .cm-row').forEach(function(row){
+      if(!row.querySelector('.kebab')){ var k=document.createElement('div'); k.className='kebab'; k.innerHTML=KEBAB_SVG; row.appendChild(k); }
+    });
+  }
+
+  /* ── Schedule send modal ── */
+  window.commsSchedule=function(){
+    if(!window.atlasOpenModal){ toast('Schedule send'); return; }
+    window.atlasOpenModal({
+      title:'Schedule a send', sub:'Pick what to send and when — it lands in the Scheduled tab.',
+      fields:[
+        {id:'sch-what', label:'What to send', type:'select', options:['Cathedral campaign weekly recap','Major-donor thank-you','Pledge installment reminder','Event invitation · annual gala','New draft…']},
+        {id:'sch-to', label:'Recipients / list', type:'text', placeholder:'e.g. Spring 2026 Appeal (847)'},
+        {id:'sch-date', label:'Send date', type:'text', placeholder:'MM/DD/YYYY'},
+        {id:'sch-time', label:'Send time', type:'text', placeholder:'8:00 AM'}
+      ],
+      cta:'Schedule send',
+      onSave:function(v){
+        if(!v['sch-to']){ toast('Add a recipient or list first.'); return false; }
+        window.__commsAddScheduled({ subj:v['sch-what']||'Scheduled send', to:v['sch-to'], when:v['sch-date']||'Tomorrow', time:v['sch-time']||'8:00 AM' });
+        toast('Scheduled for '+(v['sch-date']||'tomorrow')+(v['sch-time']?' · '+v['sch-time']:'')+' · see the Scheduled tab');
+      }
+    });
+  };
+
+  /* ── KPI cards ── */
+  window.commsStatClick=function(k){
+    function go(tab){ var t=document.querySelector('#comms-tabs .tab[data-tab="'+tab+'"]'); if(t) window.switchCommsTab(tab,t); }
+    if(k==='scheduled'){ go('scheduled'); }
+    else if(k==='delivered'){ go('sent'); toast('142 delivered today · 99.3% delivery rate'); }
+    else if(k==='opens'){ toast('Engagement · 68% opens · 38% click rate'); }
+    else if(k==='bounce'){ toast('3 bounces · 2 hard flagged Do-Not-Contact'); }
+  };
+
+  function boot(){ renderScheduled(); ensureKebabs(); }
+  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+
 <!-- ════════════════════════════════════════════════════════
      Atlas Dead-CTA Rescue · v1
      Single click-delegation script that catches button/anchor
@@ -1033,6 +1193,480 @@ body {
      Safe to load on every page — no-ops when the text isn't in
      ACTIONS, leaving page-native handlers and the wire-script alone.
      ════════════════════════════════════════════════════════ -->
+<style id="sent-archive-css">
+  #sent-archive { display:flex; flex-direction:column; gap:14px; }
+  .sa-toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .sa-search { display:flex; align-items:center; gap:8px; background:var(--surface,#F1F5F9); border:1px solid var(--border); border-radius:9px; padding:8px 12px; min-width:240px; flex:1; max-width:360px; }
+  .sa-search:focus-within { border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.1); background:#fff; }
+  .sa-search svg { width:14px; height:14px; color:var(--text-3); flex-shrink:0; }
+  .sa-search input { border:none; outline:none; flex:1; background:transparent; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text); }
+  .sa-ranges { display:inline-flex; background:var(--surface,#F1F5F9); border-radius:9px; padding:3px; gap:2px; }
+  .sa-range { padding:6px 12px; border:none; background:transparent; border-radius:7px; font:600 12px 'DM Sans',sans-serif; color:var(--text-3); cursor:pointer; }
+  .sa-range.on { background:#fff; color:var(--navy,#0E1E35); box-shadow:0 1px 2px rgba(15,23,42,.08); }
+  .sa-facet { position:relative; }
+  .sa-fbtn { padding:7px 11px; border:1px solid var(--border); background:#fff; border-radius:8px; font:500 12px 'DM Sans',sans-serif; color:var(--text-2); cursor:pointer; display:flex; align-items:center; gap:5px; }
+  .sa-fbtn:hover { border-color:var(--blue); }
+  .sa-facet.on .sa-fbtn { border-color:var(--blue); color:var(--blue); background:var(--blue-pale,#EFF6FF); }
+  .sa-fcnt { font-weight:700; color:var(--blue); }
+  .sa-menu { position:absolute; top:100%; left:0; margin-top:6px; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 28px rgba(15,23,42,.14); padding:6px; min-width:200px; z-index:1200; }
+  .sa-opt { display:flex; align-items:center; gap:9px; padding:7px 9px; border-radius:7px; cursor:pointer; font-size:12.5px; color:var(--text-2); }
+  .sa-opt:hover { background:var(--blue-pale,#EFF6FF); }
+  .sa-attn { padding:7px 12px; border:1px solid #FECACA; background:#FEF2F2; color:#B91C1C; border-radius:8px; font:600 12px 'DM Sans',sans-serif; cursor:pointer; display:flex; align-items:center; gap:6px; }
+  .sa-attn.on { background:#B91C1C; color:#fff; border-color:#B91C1C; }
+  .sa-clear { border:none; background:transparent; color:var(--text-3); font:600 12px 'DM Sans',sans-serif; cursor:pointer; text-decoration:underline; }
+  .sa-result { font:600 12.5px 'DM Sans',sans-serif; color:var(--text-2); margin-left:auto; }
+  .sa-result strong { color:var(--navy,#0E1E35); }
+
+  .sa-chart { background:#fff; border:1px solid var(--border); border-radius:12px; padding:12px 16px; }
+  .sa-chart-hd { font:600 11px 'DM Sans',sans-serif; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); margin-bottom:10px; display:flex; justify-content:space-between; }
+  .sa-bars { display:flex; align-items:stretch; gap:4px; height:72px; }
+  .sa-bar { flex:1; background:var(--blue-pale,#EFF6FF); border-radius:4px 4px 0 0; position:relative; transition:background .15s; }
+  .sa-bar > i { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(180deg,#3B82F6,#2563EB); border-radius:4px 4px 0 0; min-height:3px; }
+  .sa-bar:hover { background:#DBEAFE; }
+  .sa-bar:hover > i { background:linear-gradient(180deg,#2563EB,#1D4ED8); }
+  .sa-xlabels { display:flex; gap:4px; margin-top:5px; }
+  .sa-xlabel { flex:1; text-align:center; font-size:9.5px; color:var(--text-3); white-space:nowrap; overflow:hidden; }
+  .sa-bar[title]:hover::after { content:attr(title); position:absolute; bottom:100%; left:50%; transform:translateX(-50%); background:#0F172A; color:#fff; font-size:10px; padding:3px 6px; border-radius:5px; white-space:nowrap; margin-bottom:4px; z-index:5; }
+
+  .sa-attn-banner { display:none; align-items:center; gap:12px; background:#FEF2F2; border:1px solid #FECACA; border-radius:11px; padding:11px 15px; }
+  .sa-attn-banner.show { display:flex; }
+  .sa-attn-banner .t { font:600 13px 'DM Sans',sans-serif; color:#991B1B; flex:1; }
+  .sa-abtn { font:600 12px 'DM Sans',sans-serif; padding:6px 11px; border-radius:7px; border:1px solid #FCA5A5; background:#fff; color:#B91C1C; cursor:pointer; }
+  .sa-abtn:hover { background:#FEE2E2; }
+
+  /* shared column grid for header + every row */
+  .sa-grid { display:grid; grid-template-columns:16px 30px minmax(0,1fr) 156px 236px 92px 26px; align-items:center; gap:12px; }
+  .sa-head { padding:9px 16px 7px; font:700 10px 'DM Sans',sans-serif; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); }
+  .sa-head span { white-space:nowrap; overflow:hidden; }
+  .sa-list { display:flex; flex-direction:column; gap:0; background:#fff; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .sa-row { padding:11px 16px; border-bottom:1px solid var(--border); cursor:pointer; }
+  .sa-row:last-child { border-bottom:none; }
+  .sa-row:hover { background:#F8FAFF; }
+  .sa-caret { width:16px; height:18px; border:none; background:transparent; color:var(--text-3); cursor:pointer; font-size:11px; transition:transform .15s; padding:0; }
+  .sa-caret.open { transform:rotate(90deg); }
+  .sa-caret.spacer { visibility:hidden; }
+  .sa-ico { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font:700 12px 'DM Mono',monospace; }
+  .sa-ico.t-receipt{background:#FEF3C7;color:#B45309}.sa-ico.t-ack{background:#DCFCE7;color:#15803D}.sa-ico.t-appeal{background:#DBEAFE;color:#2563EB}.sa-ico.t-steward{background:#DCFCE7;color:#15803D}.sa-ico.t-event{background:#EDE9FE;color:#7C3AED}.sa-ico.t-update{background:#DBEAFE;color:#2563EB}
+  .sa-body { min-width:0; }
+  .sa-subj { font:600 13px 'DM Sans',sans-serif; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sa-meta { font-size:11.5px; color:var(--text-3); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sa-to { font-size:12.5px; color:var(--text-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sa-to strong { color:var(--text); font-weight:600; }
+  .sa-perf { display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .sa-perf.sa-roll { flex-direction:row; gap:16px; }
+  .sa-roll .rk { font-size:9.5px; color:var(--text-3); text-transform:uppercase; letter-spacing:.04em; }
+  .sa-roll .rv { font:700 13px 'DM Sans',sans-serif; line-height:1.2; }
+  .sa-roll .g{color:var(--green,#15803D)}.sa-roll .b{color:var(--blue,#2563EB)}.sa-roll .r{color:#B91C1C}
+  .sa-pill { display:inline-block; padding:2px 8px; border-radius:99px; font:600 11px 'DM Sans',sans-serif; width:fit-content; }
+  .st-delivered{background:#DCFCE7;color:#166534}.st-opened{background:#DBEAFE;color:#1D4ED8}.st-bounced{background:#FEE2E2;color:#B91C1C}.st-failed{background:#FEE2E2;color:#B91C1C}
+  .sa-eng { font-size:11px; color:var(--text-3); }
+  .sa-tag { padding:3px 9px; border-radius:99px; font:600 11px 'DM Sans',sans-serif; text-align:center; white-space:nowrap; }
+  .sa-kebab { width:26px; height:26px; border:none; background:transparent; color:var(--text-3); cursor:pointer; border-radius:6px; }
+  .sa-kebab:hover { background:var(--surface); }
+  .sa-expand { background:#F8FAFC; border-bottom:1px solid var(--border); padding:6px 16px 12px 60px; }
+  .sa-rr { display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px dashed var(--border); font-size:12px; }
+  .sa-rr:last-child { border-bottom:none; }
+  .sa-rr .nm { flex:1; color:var(--text-2); }
+  .sa-viewall { display:inline-block; margin-top:8px; font:600 12px 'DM Sans',sans-serif; color:var(--blue); cursor:pointer; }
+  .sa-pager { display:flex; align-items:center; justify-content:space-between; padding:4px 2px; }
+  .sa-pginfo { font-size:12px; color:var(--text-3); }
+  .sa-pgbtns { display:flex; gap:8px; align-items:center; }
+  .sa-pgbtn { font:600 12px 'DM Sans',sans-serif; padding:6px 11px; border:1px solid var(--border); border-radius:7px; background:#fff; cursor:pointer; color:var(--text-2); }
+  .sa-pgbtn:disabled { opacity:.4; cursor:default; }
+  .sa-empty { text-align:center; padding:32px; color:var(--text-3); font-size:13px; }
+  /* kebab menu */
+  .sa-kmenu { position:fixed; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 12px 32px rgba(15,23,42,.18); padding:6px; min-width:190px; z-index:100060; font-family:'DM Sans',sans-serif; }
+  .sa-kmenu .it { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:7px; font-size:12.5px; color:var(--text-2); cursor:pointer; }
+  .sa-kmenu .it:hover { background:var(--blue-pale,#EFF6FF); }
+  .sa-kmenu .it.danger { color:#B91C1C; }
+  .sa-kmenu .it.danger:hover { background:#FEF2F2; }
+  .sa-kmenu .sep { height:1px; background:var(--border); margin:4px 2px; }
+  /* modal overlay */
+  #sa-ov { position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:100055; display:none; align-items:center; justify-content:center; padding:24px; font-family:'DM Sans',sans-serif; }
+  #sa-ov.show { display:flex; }
+  #sa-ov .card { background:#fff; border-radius:16px; width:100%; max-width:560px; max-height:82vh; display:flex; flex-direction:column; box-shadow:0 24px 64px rgba(15,23,42,.3); overflow:hidden; }
+  #sa-ov .hd { padding:18px 20px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; gap:12px; }
+  #sa-ov .hd h3 { font-family:'DM Serif Display',serif; font-size:19px; color:var(--navy,#0E1E35); margin:0; line-height:1.2; }
+  #sa-ov .hd p { font-size:12px; color:var(--text-3); margin:5px 0 0; }
+  #sa-ov .x { margin-left:auto; width:28px; height:28px; border:1px solid var(--border); border-radius:8px; background:#fff; cursor:pointer; color:var(--text-3); flex-shrink:0; }
+  #sa-ov .bd { padding:16px 20px; overflow-y:auto; }
+  #sa-ov .ft { padding:12px 20px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; }
+  #sa-ov .mbtn { font:600 12.5px 'DM Sans',sans-serif; padding:8px 14px; border-radius:8px; border:1px solid var(--border); background:#fff; color:var(--text-2); cursor:pointer; }
+  #sa-ov .mbtn.primary { background:var(--blue,#2563EB); border-color:var(--blue,#2563EB); color:#fff; }
+  #sa-ov .mstat { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:6px 0 14px; }
+  #sa-ov .mstat .c { background:var(--surface,#F8FAFC); border:1px solid var(--border); border-radius:10px; padding:10px 12px; }
+  #sa-ov .mstat .k { font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-3); }
+  #sa-ov .mstat .v { font:700 17px 'DM Sans',sans-serif; margin-top:3px; }
+  #sa-ov .mrow { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px dashed var(--border); font-size:12.5px; }
+  #sa-ov .mrow:last-child { border-bottom:none; }
+  #sa-ov .mrow .nm { flex:1; color:var(--text-2); }
+  #sa-ov .rsearch { display:flex; align-items:center; gap:8px; background:var(--surface,#F1F5F9); border:1px solid var(--border); border-radius:9px; padding:8px 11px; margin-bottom:10px; }
+  #sa-ov .rsearch input { border:none; outline:none; background:transparent; flex:1; font-size:13px; font-family:'DM Sans',sans-serif; }
+  #sa-ov .rpager { display:flex; align-items:center; justify-content:space-between; padding-top:10px; font-size:12px; color:var(--text-3); }
+</style>
+<script id="sent-archive-js">
+(function(){
+  function boot(){
+    var mount=document.getElementById('sent-archive');
+    if(!mount) return;
+    // Hide the legacy static feed inside the Sent pane
+    var pane=mount.closest('.tab-pane');
+    if(pane) Array.prototype.forEach.call(pane.children, function(c){ if(c!==mount) c.style.display='none'; });
+
+    // ── Demo dataset (stands in for 1M+ sends) ──
+    var TYPES=[
+      {k:'receipt', ico:'t-receipt', tag:'Receipt', tagc:'#FEF3C7|#B45309', label:'Receipt'},
+      {k:'ack', ico:'t-ack', tag:'Thank-you', tagc:'#DCFCE7|#15803D', label:'Acknowledgement'},
+      {k:'appeal', ico:'t-appeal', tag:'Appeal', tagc:'#DBEAFE|#1D4ED8', label:'Appeal'},
+      {k:'steward', ico:'t-steward', tag:'Stewardship', tagc:'#DCFCE7|#15803D', label:'Stewardship'},
+      {k:'event', ico:'t-event', tag:'Event', tagc:'#EDE9FE|#7C3AED', label:'Event'},
+      {k:'update', ico:'t-update', tag:'Update', tagc:'#DBEAFE|#1D4ED8', label:'Campaign update'}
+    ];
+    var SENDERS=['Sarah Reynolds','Bridget McCarthy','Julia Kelleher','Auto-generated'];
+    var CAMPAIGNS=['Cathedral Capital','CMA 2026','Annual Appeal','(none)'];
+    var FIRST=['Margaret','Thomas','James','Patricia','Michael','Susan','William','Anne','John','Elena','Daniel','Catherine','Bridget','Sean','Kathleen','Tessa','Robert','Laura'];
+    var LAST=['O\'Brien','Sullivan','Grant','Walsh','Nguyen','Russo','Carter','Kowalski','Byrne','Murphy','Kennedy','Greene','Lin','Hayes','Quinn'];
+    var SUBJ_IND={
+      receipt:['Tax receipt R-2026-','Your gift receipt · '],
+      ack:['Thank you for your gift, ','With gratitude for your generosity, '],
+      steward:['Welcome to St. Mary\'s giving family, ','A note of thanks, '],
+      appeal:['Your Cathedral needs you, ','Join the restoration, '],
+      event:['You\'re invited — Bishop\'s Gala, ','Save the date, '],
+      update:['Cathedral campaign update for ','Where your gift went, ']
+    };
+    var SUBJ_BLAST={
+      appeal:['Lenten appeal — final week push','Cathedral Capital year-end ask','Annual Appeal kickoff'],
+      update:['Cathedral campaign weekly recap','Q1 impact report to donors','Restoration milestone reached'],
+      event:['Bishop\'s Annual Gala — save the date','Parish festival invitation','Volunteer appreciation night'],
+      steward:['Major-donor spring stewardship note','Year in review — thank you','Legacy society update']
+    };
+    function rand(s){ var x=Math.sin(s*127.1+311.7)*43758.5453; return x-Math.floor(x); }
+    var NOW=new Date(2026,4,4,15,0,0); // May 4 2026 3pm
+    function make(i){
+      var isBlast = rand(i*1.7) > 0.72;
+      var t = isBlast ? [TYPES[2],TYPES[5],TYPES[4],TYPES[3]][Math.floor(rand(i*2.1)*4)]
+                      : TYPES[Math.floor(rand(i*2.1)*TYPES.length)];
+      var daysAgo = Math.floor(rand(i*3.3)*90);
+      var date = new Date(NOW.getTime() - daysAgo*86400000 - Math.floor(rand(i*4.4)*12)*3600000);
+      var sender = SENDERS[Math.floor(rand(i*5.2)*SENDERS.length)];
+      if(t.k==='receipt') sender='Auto-generated';
+      var camp = CAMPAIGNS[Math.floor(rand(i*6.6)*CAMPAIGNS.length)];
+      if(isBlast){
+        var recips = [80,250,900,4200,28000,128540,312480][Math.floor(rand(i*7.1)*7)];
+        var delRate = 0.965 + rand(i*8.2)*0.03;
+        var delivered = Math.round(recips*delRate);
+        var bounced = recips - delivered;
+        var openRate = 0.18 + rand(i*9.3)*0.4;
+        var opened = Math.round(delivered*openRate);
+        var clicked = Math.round(opened*(0.06+rand(i*10.1)*0.18));
+        var complaints = rand(i*11.4)>0.85 ? Math.round(recips*0.0003) : 0;
+        var dnc = rand(i*12.6)>0.8 ? Math.floor(rand(i*13.1)*6) : 0;
+        var bounceRate = bounced/recips;
+        var subjArr = SUBJ_BLAST[t.k]||SUBJ_BLAST.appeal;
+        var attention = complaints>0 || dnc>0 || bounceRate>0.03;
+        return {id:i,isBlast:true,type:t,subject:subjArr[Math.floor(rand(i*14.2)*subjArr.length)],sender:sender,campaign:camp,date:date,
+          recipients:recips,delivered:delivered,bounced:bounced,opened:opened,clicked:clicked,complaints:complaints,dnc:dnc,
+          delRate:delRate,openRate:openRate,bounceRate:bounceRate,attention:attention};
+      } else {
+        var f=FIRST[Math.floor(rand(i*7.7)*FIRST.length)], l=LAST[Math.floor(rand(i*8.8)*LAST.length)];
+        var roll=rand(i*9.9);
+        var status = roll>0.97 ? 'failed' : roll>0.93 ? 'bounced' : roll>0.42 ? 'opened' : 'delivered';
+        var clicked = status==='opened' && rand(i*10.5)>0.6;
+        var subjArr = SUBJ_IND[t.k]||SUBJ_IND.ack;
+        var subj = subjArr[Math.floor(rand(i*11.9)*subjArr.length)] + (t.k==='receipt' ? String(1000+i).slice(-4) : f);
+        return {id:i,isBlast:false,type:t,subject:subj,sender:sender,campaign:camp,date:date,
+          recipients:1,recipientName:f+' '+l,status:status,opened:status==='opened',clicked:clicked,
+          attention:(status==='bounced'||status==='failed')};
+      }
+    }
+    var MSGS=[]; for(var i=0;i<600;i++) MSGS.push(make(i));
+    MSGS.sort(function(a,b){ return b.date-a.date; });
+
+    // ── State ──
+    var S={ range:90, search:'', types:[], statuses:[], campaigns:[], attn:false, page:1, size:25 };
+    var FACETS={
+      types:{opts:TYPES.map(function(t){return [t.label,t.k];}), key:'types'},
+      statuses:{opts:[['Delivered','delivered'],['Opened','opened'],['Bounced','bounced'],['Failed','failed']], key:'statuses'},
+      campaigns:{opts:CAMPAIGNS.map(function(c){return [c,c];}), key:'campaigns'}
+    };
+
+    function inRange(m){ if(S.range>=9999) return true; return (NOW-m.date)/86400000 <= S.range; }
+    function statusOf(m){ return m.isBlast ? (m.bounceRate>0.03?'bounced':(m.openRate>0.35?'opened':'delivered')) : m.status; }
+    function filtered(){
+      var q=S.search.trim().toLowerCase();
+      return MSGS.filter(function(m){
+        if(!inRange(m)) return false;
+        if(S.attn && !m.attention) return false;
+        if(S.types.length && S.types.indexOf(m.type.k)===-1) return false;
+        if(S.campaigns.length && S.campaigns.indexOf(m.campaign)===-1) return false;
+        if(S.statuses.length && S.statuses.indexOf(statusOf(m))===-1) return false;
+        if(q){ var hay=(m.subject+' '+m.sender+' '+m.campaign+' '+(m.recipientName||'')).toLowerCase(); if(hay.indexOf(q)===-1) return false; }
+        return true;
+      });
+    }
+    function fmtNum(n){ return n>=1000 ? (n>=1000000?(n/1000000).toFixed(1)+'M':(n/1000).toFixed(n>=100000?0:1)+'k') : String(n); }
+    function fmtDate(d){ var t=(NOW-d)/86400000; if(t<1&&d.getDate()===NOW.getDate())return 'Today '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+
+    // ── Build UI shell ──
+    mount.innerHTML =
+      '<div class="sa-toolbar">'+
+        '<div class="sa-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="sa-q" placeholder="Search recipient, subject, campaign, sender…" autocomplete="off"></div>'+
+        '<div class="sa-ranges" id="sa-ranges"><button class="sa-range" data-r="7">7d</button><button class="sa-range" data-r="30">30d</button><button class="sa-range on" data-r="90">90d</button><button class="sa-range" data-r="9999">All</button></div>'+
+        '<div class="sa-facet" data-f="types"><button class="sa-fbtn">Type <span class="sa-fcnt"></span> ▾</button></div>'+
+        '<div class="sa-facet" data-f="statuses"><button class="sa-fbtn">Status <span class="sa-fcnt"></span> ▾</button></div>'+
+        '<div class="sa-facet" data-f="campaigns"><button class="sa-fbtn">Campaign <span class="sa-fcnt"></span> ▾</button></div>'+
+        '<button class="sa-attn" id="sa-attn">⚠ Needs attention <span id="sa-attn-n"></span></button>'+
+        '<button class="sa-clear" id="sa-clear">Clear</button>'+
+        '<span class="sa-result" id="sa-result">—</span>'+
+      '</div>'+
+      '<div class="sa-attn-banner" id="sa-banner"><div class="t"></div><button class="sa-abtn" data-a="suppress">Suppress bad addresses</button><button class="sa-abtn" data-a="reverify">Re-verify</button><button class="sa-abtn" data-a="export">Export list</button></div>'+
+      '<div class="sa-chart" id="sa-chart"></div>'+
+      '<div class="sa-head sa-grid"><span></span><span></span><span>Message</span><span>Recipient</span><span>Performance</span><span>Type</span><span></span></div>'+
+      '<div class="sa-list" id="sa-list"></div>'+
+      '<div class="sa-pager"><span class="sa-pginfo" id="sa-pginfo"></span><div class="sa-pgbtns"><button class="sa-pgbtn" id="sa-prev">‹ Prev</button><span class="sa-pginfo" id="sa-pgnum"></span><button class="sa-pgbtn" id="sa-next">Next ›</button></div></div>';
+
+    var listEl=document.getElementById('sa-list');
+
+    function renderChart(rows){
+      var el=document.getElementById('sa-chart');
+      var days = S.range>=9999 ? 90 : S.range;
+      var weekly = days>31;
+      var buckets = weekly ? Math.ceil(days/7) : days;
+      var vol=new Array(buckets).fill(0);    // emails sent (sum of recipients)
+      var msg=new Array(buckets).fill(0);    // message count (for tooltip)
+      rows.forEach(function(m){ var d=Math.floor((NOW-m.date)/86400000); if(d<0)d=0; if(d>=days)return; var bi=weekly?Math.floor(d/7):d; if(bi<buckets){ vol[bi]+=m.recipients; msg[bi]++; } });
+      vol.reverse(); msg.reverse();
+      var max=Math.max(1,Math.max.apply(null,vol));
+      var total=vol.reduce(function(a,b){return a+b;},0);
+      // x-axis labels: show a few evenly-spaced marks (oldest → newest)
+      var labels=vol.map(function(v,i){
+        var show = (i===0) || (i===buckets-1) || (buckets<=14 ? true : (i%Math.ceil(buckets/8)===0));
+        if(!show) return '';
+        if(weekly){ var wksAgo=(buckets-1-i)*7; var dt=new Date(NOW.getTime()-wksAgo*86400000); return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+        var dd=new Date(NOW.getTime()-(buckets-1-i)*86400000); return dd.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      });
+      el.innerHTML='<div class="sa-chart-hd"><span>Send volume · '+(S.range>=9999?'all time':'last '+S.range+' days')+'</span>'+
+        '<span><strong style="color:var(--navy,#0E1E35)">'+fmtNum(total)+'</strong> emails sent · '+rows.length.toLocaleString()+' messages · peak '+fmtNum(max)+'/'+(weekly?'wk':'day')+'</span></div>'+
+        '<div class="sa-bars">'+vol.map(function(v,i){ return '<div class="sa-bar" title="'+labels[i]+(weekly?' (week)':'')+' · '+fmtNum(v)+' emails · '+msg[i]+' message'+(msg[i]===1?'':'s')+'"><i style="height:'+(v>0?Math.max(4,Math.round(Math.sqrt(v/max)*100)):0)+'%"></i></div>'; }).join('')+'</div>'+
+        '<div class="sa-xlabels">'+labels.map(function(l){ return '<div class="sa-xlabel">'+l+'</div>'; }).join('')+'</div>';
+    }
+
+    function rowHTML(m){
+      var t=m.type, tc=t.tagc.split('|');
+      var tag='<span class="sa-tag" style="background:'+tc[0]+';color:'+tc[1]+'">'+t.tag+'</span>';
+      if(m.isBlast){
+        return '<div class="sa-row sa-grid blast" data-id="'+m.id+'">'+
+          '<button class="sa-caret">▸</button>'+
+          '<div class="sa-ico '+t.ico+'">'+t.label[0]+'</div>'+
+          '<div class="sa-body"><div class="sa-subj">'+m.subject+'</div><div class="sa-meta">'+t.label+' · '+m.sender+' · '+m.campaign+' · '+fmtDate(m.date)+'</div></div>'+
+          '<div class="sa-to">'+fmtNum(m.recipients)+' recipients</div>'+
+          '<div class="sa-perf sa-roll">'+
+            '<div><div class="rk">Delivered</div><div class="rv g">'+(m.delRate*100).toFixed(1)+'%</div></div>'+
+            '<div><div class="rk">Opened</div><div class="rv b">'+(m.openRate*100).toFixed(0)+'%</div></div>'+
+            '<div><div class="rk">Bounced</div><div class="rv '+(m.bounceRate>0.03?'r':'')+'">'+fmtNum(m.bounced)+'</div></div>'+
+          '</div>'+tag+
+          '<button class="sa-kebab">⋯</button>'+
+        '</div><div class="sa-expand" data-exp="'+m.id+'" style="display:none"></div>';
+      }
+      var st=statusOf(m);
+      var eng = m.opened ? (m.clicked?'Opened · clicked':'Opened') : (st==='delivered'?'Not yet opened':'—');
+      return '<div class="sa-row sa-grid" data-id="'+m.id+'">'+
+        '<span class="sa-caret spacer">▸</span>'+
+        '<div class="sa-ico '+t.ico+'">'+t.label[0]+'</div>'+
+        '<div class="sa-body"><div class="sa-subj">'+m.subject+'</div><div class="sa-meta">'+t.label+' · '+m.sender+' · '+m.campaign+' · '+fmtDate(m.date)+'</div></div>'+
+        '<div class="sa-to"><strong>'+m.recipientName+'</strong></div>'+
+        '<div class="sa-perf"><span class="sa-pill st-'+st+'">'+st.charAt(0).toUpperCase()+st.slice(1)+'</span><span class="sa-eng">'+eng+'</span></div>'+
+        tag+'<button class="sa-kebab">⋯</button></div>';
+    }
+
+    function expandHTML(m){
+      var names=[]; for(var k=0;k<6;k++){ var f=FIRST[Math.floor(rand(m.id*3+k)*FIRST.length)], l=LAST[Math.floor(rand(m.id*5+k)*LAST.length)]; var r=rand(m.id*7+k); var st=r>0.97?'failed':r>0.94?'bounced':r>0.45?'opened':'delivered'; names.push({n:f+' '+l,st:st}); }
+      return '<div style="font:600 11px \'DM Sans\';color:#64748B;text-transform:uppercase;letter-spacing:.05em;padding:6px 0">Sample of '+fmtNum(m.recipients)+' recipients</div>'+
+        names.map(function(x){ return '<div class="sa-rr"><span class="nm">'+x.n+'</span><span class="sa-pill st-'+x.st+'">'+x.st.charAt(0).toUpperCase()+x.st.slice(1)+'</span></div>'; }).join('')+
+        '<span class="sa-viewall" data-viewall="'+m.id+'">View all '+fmtNum(m.recipients)+' recipients →</span>';
+    }
+
+    function render(){
+      var rows=filtered();
+      renderChart(rows);
+      // attention count (always over range, ignoring attn toggle)
+      var attnAll=MSGS.filter(function(m){ return inRange(m)&&m.attention; });
+      document.getElementById('sa-attn-n').textContent='('+attnAll.length+')';
+      var banner=document.getElementById('sa-banner');
+      if(S.attn){ banner.classList.add('show'); banner.querySelector('.t').textContent='Deliverability worklist — '+rows.length+' messages with bounces, complaints, or DNC flags need review.'; }
+      else banner.classList.remove('show');
+      // paginate
+      var total=rows.length, maxPage=Math.max(1,Math.ceil(total/S.size));
+      if(S.page>maxPage)S.page=maxPage;
+      var start=(S.page-1)*S.size, pageRows=rows.slice(start,start+S.size);
+      listEl.innerHTML = pageRows.length ? pageRows.map(rowHTML).join('') : '<div class="sa-empty">No messages match these filters.</div>';
+      document.getElementById('sa-pginfo').textContent = total? ('Showing '+(start+1)+'–'+Math.min(start+S.size,total)+' of '+total.toLocaleString()) : '';
+      document.getElementById('sa-pgnum').textContent='Page '+S.page+' / '+maxPage;
+      document.getElementById('sa-prev').disabled=S.page<=1;
+      document.getElementById('sa-next').disabled=S.page>=maxPage;
+      var isF = S.search||S.types.length||S.statuses.length||S.campaigns.length||S.attn||S.range<9999;
+      document.getElementById('sa-result').innerHTML='<strong>'+total.toLocaleString()+'</strong> messages'+(isF?' match':'');
+      syncFacets();
+    }
+    function syncFacets(){
+      document.querySelectorAll('.sa-facet').forEach(function(f){
+        var n=S[f.dataset.f].length; f.classList.toggle('on',n>0); f.querySelector('.sa-fcnt').textContent=n>0?('('+n+')'):'';
+      });
+      document.getElementById('sa-attn').classList.toggle('on',S.attn);
+    }
+
+    // ── Events ──
+    var q=document.getElementById('sa-q'), deb;
+    q.addEventListener('input', function(){ clearTimeout(deb); deb=setTimeout(function(){ S.search=q.value; S.page=1; render(); },140); });
+    document.getElementById('sa-ranges').addEventListener('click', function(e){ var b=e.target.closest('.sa-range'); if(!b)return; document.querySelectorAll('.sa-range').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); S.range=parseInt(b.dataset.r,10); S.page=1; render(); });
+    document.getElementById('sa-attn').addEventListener('click', function(){ S.attn=!S.attn; S.page=1; render(); });
+    document.getElementById('sa-clear').addEventListener('click', function(){ S.search='';q.value='';S.types=[];S.statuses=[];S.campaigns=[];S.attn=false;S.range=90;S.page=1; document.querySelectorAll('.sa-range').forEach(function(x){x.classList.toggle('on',x.dataset.r==='90');}); render(); });
+    document.getElementById('sa-prev').addEventListener('click', function(){ if(S.page>1){S.page--;render();} });
+    document.getElementById('sa-next').addEventListener('click', function(){ S.page++; render(); });
+
+    function closeMenus(){ document.querySelectorAll('.sa-menu').forEach(function(m){m.remove();}); }
+    document.querySelectorAll('.sa-facet').forEach(function(f){
+      var cfg=FACETS[f.dataset.f];
+      f.querySelector('.sa-fbtn').addEventListener('click', function(e){
+        e.stopPropagation();
+        if(f.querySelector('.sa-menu')){ closeMenus(); return; }
+        closeMenus();
+        var menu=document.createElement('div'); menu.className='sa-menu';
+        cfg.opts.forEach(function(o){
+          var checked=S[cfg.key].indexOf(o[1])!==-1;
+          var row=document.createElement('div'); row.className='sa-opt';
+          row.innerHTML='<input type="checkbox" '+(checked?'checked':'')+'><span>'+o[0]+'</span>';
+          row.addEventListener('click', function(ev){ ev.stopPropagation(); var i=S[cfg.key].indexOf(o[1]); if(i===-1)S[cfg.key].push(o[1]); else S[cfg.key].splice(i,1); row.querySelector('input').checked=S[cfg.key].indexOf(o[1])!==-1; S.page=1; render(); });
+          menu.appendChild(row);
+        });
+        f.appendChild(menu);
+        setTimeout(function(){ document.addEventListener('click', function cl(ev){ if(!f.contains(ev.target)){ closeMenus(); document.removeEventListener('click',cl);} }); },10);
+      });
+    });
+
+    function toast(msg){ if(window.atlasToast) return window.atlasToast(msg); var t=document.getElementById('atlas-rescue-toast'); if(t){ t.querySelector('.msg').textContent=msg; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},2500);} }
+    document.getElementById('sa-banner').addEventListener('click', function(e){ var b=e.target.closest('.sa-abtn'); if(!b)return; var a=b.dataset.a; toast({suppress:'Bad addresses suppressed · added to DNC list',reverify:'Re-verification queued for bounced addresses',export:'Deliverability list exported to CSV'}[a]); });
+
+    // ── Modal overlay (message detail + recipient list) ──
+    var ov=document.createElement('div'); ov.id='sa-ov';
+    ov.innerHTML='<div class="card"><div class="hd"><div style="min-width:0"><h3></h3><p></p></div><button class="x">✕</button></div><div class="bd"></div><div class="ft"></div></div>';
+    document.body.appendChild(ov);
+    function closeOv(){ ov.classList.remove('show'); }
+    ov.addEventListener('click', function(e){ if(e.target===ov||e.target.closest('.x')) closeOv(); });
+    function msgById(id){ return MSGS.find(function(x){ return x.id==id; }); }
+    // Build the dedicated Message Detail URL with this message's context
+    function detailURL(m, action){
+      var recips = m.isBlast ? m.recipients : 1;
+      var del = m.isBlast ? m.delRate : (m.status==='bounced'||m.status==='failed'?0:1);
+      var open = m.isBlast ? m.openRate : (m.opened?1:0);
+      var q = { subj:m.subject, type:m.type.k, sender:m.sender, camp:m.campaign, recips:recips, del:del.toFixed(4), open:open.toFixed(4),
+                clicked:(m.clicked||0), bounced:(m.isBlast?m.bounced:(m.status==='bounced'?1:0)), compl:(m.complaints||0), dnc:(m.dnc||0), date:fmtDate(m.date) };
+      if(action) q.action=action;
+      var parts=[]; for(var k in q){ parts.push(k+'='+encodeURIComponent(q[k])); }
+      return 'atlas-message-detail.html?'+parts.join('&');
+    }
+    function gotoDetail(m, action){ window.location = detailURL(m, action); }
+    window.__msgDetailURL = detailURL; window.__msgById = msgById;
+    function genRecips(m){
+      var pool=[], cap=Math.min(m.recipients,220);
+      for(var k=0;k<cap;k++){ var f=FIRST[Math.floor(rand(m.id*3.1+k*1.7)*FIRST.length)], l=LAST[Math.floor(rand(m.id*5.3+k*2.3)*LAST.length)]; var r=rand(m.id*7.7+k*3.1); var st=r>0.985?'failed':r>0.965?'bounced':r>0.5?'opened':'delivered'; pool.push({n:f+' '+l, e:(f+'.'+l).toLowerCase().replace(/[^a-z.]/g,'')+'@email.org', st:st}); }
+      return pool;
+    }
+    function openMsg(m){
+      var t=m.type;
+      ov.querySelector('h3').textContent=m.subject;
+      ov.querySelector('.hd p').textContent=t.label+' · '+m.sender+' · '+m.campaign+' · '+m.date.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' '+m.date.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      var bd=ov.querySelector('.bd'), ft=ov.querySelector('.ft');
+      if(m.isBlast){
+        bd.innerHTML='<div class="mstat">'+
+          '<div class="c"><div class="k">Recipients</div><div class="v">'+fmtNum(m.recipients)+'</div></div>'+
+          '<div class="c"><div class="k">Delivered</div><div class="v" style="color:#15803D">'+(m.delRate*100).toFixed(1)+'%</div></div>'+
+          '<div class="c"><div class="k">Opened</div><div class="v" style="color:#2563EB">'+(m.openRate*100).toFixed(0)+'%</div></div>'+
+          '<div class="c"><div class="k">Bounced</div><div class="v" style="color:#B91C1C">'+fmtNum(m.bounced)+'</div></div></div>'+
+          '<p style="font-size:12.5px;color:#64748B">Clicked '+fmtNum(m.clicked)+' · Complaints '+(m.complaints||0)+' · DNC '+(m.dnc||0)+'</p>';
+        ft.innerHTML='<button class="mbtn" data-a="recips">View all recipients</button><button class="mbtn" data-a="export">Export</button><button class="mbtn primary" data-a="resend">Resend to non-openers</button>';
+      } else {
+        var st=statusOf(m);
+        bd.innerHTML='<div class="mrow"><span class="nm"><strong>'+m.recipientName+'</strong></span><span class="sa-pill st-'+st+'">'+st.charAt(0).toUpperCase()+st.slice(1)+'</span></div>'+
+          '<p style="font-size:12.5px;color:#334155;margin-top:10px">'+(m.opened?('Opened'+(m.clicked?' and clicked a link.':' the message.')):(st==='delivered'?'Delivered but not opened yet.':('Message '+st+' — needs attention.')))+'</p>';
+        ft.innerHTML='<a class="mbtn" href="atlas-donor-360.html">View donor profile</a><button class="mbtn" data-a="resend">Resend</button><button class="mbtn primary" data-a="view">Open message</button>';
+      }
+      ft.querySelectorAll('[data-a]').forEach(function(b){ b.addEventListener('click', function(){ var a=b.dataset.a; if(a==='recips'){ openRecips(m); return; } toast(({export:'Message export queued · CSV ready',resend:'Resend queued to '+(m.isBlast?'non-openers':'recipient'),view:'Opening message preview'})[a]||'Done'); closeOv(); }); });
+      ov.classList.add('show');
+    }
+    function openRecips(m){
+      var pool=genRecips(m), q='', page=1, size=25;
+      ov.querySelector('h3').textContent='Recipients';
+      ov.querySelector('.hd p').textContent=m.subject+' · '+fmtNum(m.recipients)+' recipients';
+      var bd=ov.querySelector('.bd'), ft=ov.querySelector('.ft');
+      ft.innerHTML='<button class="mbtn" data-a="export">Export list</button><button class="mbtn primary" data-a="done">Done</button>';
+      ft.querySelector('[data-a="done"]').addEventListener('click', closeOv);
+      ft.querySelector('[data-a="export"]').addEventListener('click', function(){ toast('Recipient list exported · '+fmtNum(m.recipients)+' rows'); });
+      function draw(){
+        var f=pool.filter(function(r){ return !q || (r.n+' '+r.e).toLowerCase().indexOf(q)!==-1; });
+        var maxPage=Math.max(1,Math.ceil(f.length/size)); if(page>maxPage)page=maxPage;
+        var start=(page-1)*size, rows=f.slice(start,start+size);
+        bd.innerHTML='<div class="rsearch"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="rq" placeholder="Search recipients…"></div>'+
+          (rows.length? rows.map(function(r){ return '<div class="mrow"><span class="nm"><strong>'+r.n+'</strong> · <span style="color:#94A3B8">'+r.e+'</span></span><span class="sa-pill st-'+r.st+'">'+r.st.charAt(0).toUpperCase()+r.st.slice(1)+'</span></div>'; }).join('') : '<p style="text-align:center;color:#94A3B8;padding:20px">No recipients match.</p>')+
+          '<div class="rpager"><span>Showing '+(f.length?start+1:0)+'–'+Math.min(start+size,f.length)+' of <strong>'+m.recipients.toLocaleString()+'</strong>'+(m.recipients>pool.length?' · first '+pool.length+' loaded (server-paginated)':'')+'</span><span><button class="mbtn" id="rprev">‹ Prev</button> <button class="mbtn" id="rnext">Next ›</button></span></div>';
+        var qi=bd.querySelector('#rq'); qi.value=q;
+        qi.addEventListener('input', function(){ q=qi.value.toLowerCase().trim(); page=1; draw(); var n=bd.querySelector('#rq'); if(n) n.focus(); });
+        bd.querySelector('#rprev').addEventListener('click', function(){ if(page>1){page--;draw();} });
+        bd.querySelector('#rnext').addEventListener('click', function(){ if(page<maxPage){page++;draw();} });
+      }
+      draw();
+      ov.classList.add('show');
+    }
+    function openKebab(btn,m){
+      document.querySelectorAll('.sa-kmenu').forEach(function(x){x.remove();});
+      var menu=document.createElement('div'); menu.className='sa-kmenu';
+      var items = m.isBlast
+        ? [['View message','view'],['View all recipients','recips'],['Export CSV','export'],['sep'],['Resend to all','resendall'],['Resend to non-openers','resend'],['Suppress bounces','suppress','danger']]
+        : [['View message','view'],['View donor profile','donor'],['Resend','resend'],['Export','export'],['sep'],['Suppress recipient','suppress','danger']];
+      menu.innerHTML=items.map(function(it){ return it[0]==='sep' ? '<div class="sep"></div>' : '<div class="it'+(it[2]?' '+it[2]:'')+'" data-a="'+it[1]+'">'+it[0]+'</div>'; }).join('');
+      document.body.appendChild(menu);
+      var r=btn.getBoundingClientRect(); menu.style.top=(r.bottom+4)+'px'; menu.style.left=Math.min(r.left, window.innerWidth-206)+'px';
+      menu.addEventListener('click', function(e){ var it=e.target.closest('.it'); if(!it)return; var a=it.dataset.a; menu.remove();
+        if(a==='view') gotoDetail(m);
+        else if(a==='recips') gotoDetail(m,'recipients');
+        else if(a==='resend') gotoDetail(m,'resend');
+        else if(a==='resendall') gotoDetail(m,'resendall');
+        else if(a==='suppress') gotoDetail(m,'suppress');
+        else if(a==='donor') window.location='atlas-donor-360.html';
+        else toast(({export:'Export queued · CSV ready · '+(m.isBlast?m.recipients.toLocaleString()+' rows':'1 row')})[a]||'Done'); });
+      setTimeout(function(){ document.addEventListener('click', function cl(ev){ if(!menu.contains(ev.target)){ menu.remove(); document.removeEventListener('click',cl);} }); },10);
+    }
+
+    // Row interactions (delegated) — row opens a message detail modal (no redirect)
+    listEl.addEventListener('click', function(e){
+      var kb=e.target.closest('.sa-kebab');
+      if(kb){ e.stopPropagation(); openKebab(kb, msgById(kb.closest('.sa-row').dataset.id)); return; }
+      var caret=e.target.closest('.sa-caret:not(.spacer)');
+      if(caret){ var row=caret.closest('.sa-row'); var exp=row.nextElementSibling; if(exp&&exp.classList.contains('sa-expand')){ var m=msgById(row.dataset.id); if(exp.style.display==='none'){ exp.innerHTML=expandHTML(m); exp.style.display='block'; caret.classList.add('open'); } else { exp.style.display='none'; caret.classList.remove('open'); } } return; }
+      if(e.target.closest('.sa-viewall')){ gotoDetail(msgById(e.target.closest('.sa-viewall').dataset.viewall),'recipients'); return; }
+      var rr=e.target.closest('.sa-row'); if(rr){ gotoDetail(msgById(rr.dataset.id)); }
+    });
+
+    // ── Clickable KPI cards (override the earlier handler) ──
+    window.commsStatClick=function(which){
+      var sentTab=document.querySelector('#comms-tabs .tab[data-tab="sent"]');
+      if(which==='scheduled'){ var s=document.querySelector('#comms-tabs .tab[data-tab="scheduled"]'); if(window.switchCommsTab&&s) window.switchCommsTab('scheduled',s); return; }
+      if(window.switchCommsTab&&sentTab) window.switchCommsTab('sent',sentTab);
+      S.search='';q.value='';S.types=[];S.campaigns=[];S.attn=false;
+      if(which==='delivered'){ S.statuses=['delivered']; S.range=7; }
+      else if(which==='opens'){ S.statuses=['opened']; S.range=7; }
+      else if(which==='bounce'){ S.statuses=[]; S.attn=true; S.range=90; }
+      document.querySelectorAll('.sa-range').forEach(function(x){x.classList.toggle('on',parseInt(x.dataset.r,10)===S.range);});
+      S.page=1; render();
+      mount.scrollIntoView({behavior:'smooth',block:'nearest'});
+    };
+
+    render();
+  }
+  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+
 <style id="atlas-rescue-css">
   #atlas-rescue-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background:#0F172A; color:white; padding:12px 18px; border-radius:10px; box-shadow:0 8px 24px rgba(15,23,42,.20); font-size:13px; font-family:'DM Sans',sans-serif; z-index:100010; display:flex; align-items:center; gap:10px; opacity:0; transition:opacity .2s,transform .2s; pointer-events:none; max-width: 480px; }
   #atlas-rescue-toast.show { opacity:1; transform:translateX(-50%); pointer-events:auto; }

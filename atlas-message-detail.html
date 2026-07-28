@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Message · Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0E1E35;--blue:#2563EB;--blue-d:#1D4ED8;--blue-pale:#EFF6FF;
+    --green:#15803D;--green-l:#DCFCE7;--amber:#D97706;--rose:#BE185D;--purple:#7C3AED;
+    --text:#0F172A;--text-2:#334155;--text-3:#64748B;--border:#E2E8F0;--surface:#F1F5F9;--bg:#F8FAFC;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex}
+  a{color:inherit}
+  /* ══ SIDEBAR (matches the rest of Atlas) ══ */
+  .sidebar{width:220px;background:var(--navy);flex-shrink:0;display:flex;flex-direction:column;height:100vh;overflow-y:auto}
+  .sidebar-logo{padding:18px 18px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .logo-mark{width:52px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .logo-mark svg{width:52px;height:40px}
+  .logo-text-wrap{display:flex;flex-direction:column}
+  .logo-name{font-family:'DM Serif Display',serif;font-size:20px;color:#fff;line-height:1}
+  .logo-sub{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:3px}
+  .sidebar-search{margin:12px 12px 6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer}
+  .sidebar-search svg{width:13px;height:13px;color:rgba(255,255,255,.3);flex-shrink:0}
+  .sidebar-search input{background:none;border:none;outline:none;width:100%;font-size:12px;color:rgba(255,255,255,.6);font-family:'DM Sans',sans-serif;cursor:pointer}
+  .sidebar-search input::placeholder{color:rgba(255,255,255,.3)}
+  .sidebar-scroll{flex:1;overflow-y:auto;overflow-x:hidden}
+  .nav-group{padding:8px 8px 0}
+  .nav-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:0 10px;margin-bottom:4px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;transition:all .15s;margin-bottom:1px;text-decoration:none}
+  .nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
+  .nav-item.active{background:var(--blue);color:#fff}
+  .nav-item svg{width:14px;height:14px;flex-shrink:0}
+  .nav-badge{margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.6);border-radius:10px;padding:1px 7px;font-size:10px;font-weight:600}
+  .nav-item.active .nav-badge{background:rgba(255,255,255,.2);color:#fff}
+  .nav-badge.alert{background:#EF4444;color:#fff}
+  .sidebar-user{margin-top:auto;padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:9px;cursor:pointer;transition:background .15s}
+  .sidebar-user:hover{background:rgba(255,255,255,.04)}
+  .user-avatar{width:30px;height:30px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+  .user-name{font-size:12px;font-weight:500;color:rgba(255,255,255,.75)}
+  .user-role{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px}
+  /* Main */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+  .topbar{height:54px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 24px;flex-shrink:0}
+  .back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);text-decoration:none;font-weight:600}
+  .crumb{font-size:13px;color:var(--text-3)}
+  .scroll{flex:1;overflow-y:auto;padding:22px 26px 60px}
+  .wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+
+  /* header card */
+  .mh{background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px 22px}
+  .mh-top{display:flex;align-items:flex-start;gap:14px}
+  .mh-ico{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font:700 16px 'DM Mono';flex-shrink:0}
+  .mh h1{font-family:'DM Serif Display',serif;font-size:25px;color:var(--navy);line-height:1.15}
+  .mh .meta{font-size:12.5px;color:var(--text-3);margin-top:6px}
+  .mh .tags{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+  .tg{padding:3px 10px;border-radius:99px;font:600 11px 'DM Sans'}
+  .mh-actions{margin-left:auto;display:flex;gap:9px;flex-shrink:0}
+  .btn{font:600 12.5px 'DM Sans';padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:#fff;color:var(--text-2);cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+  .btn:hover{border-color:var(--blue);color:var(--blue)}
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+  .btn.primary:hover{background:var(--blue-d);color:#fff}
+  .btn.danger{color:#B91C1C;border-color:#FCA5A5}
+  .btn.danger:hover{background:#FEF2F2}
+
+  /* template strip */
+  .tmpl{display:flex;align-items:center;gap:14px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+  .tmpl-thumb{width:52px;height:64px;border-radius:8px;border:1px solid var(--border);background:linear-gradient(180deg,#fff,#F8FAFC);flex-shrink:0;position:relative;overflow:hidden}
+  .tmpl-thumb::before{content:"";position:absolute;top:8px;left:8px;right:8px;height:8px;border-radius:2px;background:#DBEAFE}
+  .tmpl-thumb::after{content:"";position:absolute;top:22px;left:8px;right:20px;bottom:8px;border-radius:2px;background:repeating-linear-gradient(180deg,#E2E8F0 0 2px,transparent 2px 7px)}
+  .tmpl .l{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3)}
+  .tmpl .n{font:600 13.5px 'DM Sans';color:var(--navy);margin-top:2px}
+  .tmpl .s{font-size:11.5px;color:var(--text-3);margin-top:2px}
+
+  /* cockpit */
+  .grid2{display:grid;grid-template-columns:1fr 340px;gap:18px}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+  .card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px 20px}
+  .card h3{font:700 11px 'DM Sans';letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:14px}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .kpi{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:13px 14px}
+  .kpi .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3)}
+  .kpi .v{font-family:'DM Serif Display',serif;font-size:24px;color:var(--navy);line-height:1;margin-top:6px}
+  .kpi .d{font-size:11px;color:var(--text-3);margin-top:5px}
+  .kpi .v.g{color:var(--green)}.kpi .v.b{color:var(--blue)}.kpi .v.r{color:#B91C1C}
+  /* funnel */
+  .funnel{display:flex;flex-direction:column;gap:9px}
+  .fn{display:flex;align-items:center;gap:10px}
+  .fn .lab{width:80px;font-size:11.5px;color:var(--text-2);flex-shrink:0}
+  .fn .track{flex:1;height:22px;background:var(--surface);border-radius:6px;overflow:hidden}
+  .fn .fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 8px;color:#fff;font:600 11px 'DM Sans'}
+  .fn .val{width:64px;text-align:right;font:600 12px 'DM Sans';color:var(--text-2);flex-shrink:0}
+  /* opens chart */
+  .oc-bars{display:flex;align-items:stretch;gap:3px;height:80px}
+  .oc-bar{flex:1;background:var(--blue-pale);border-radius:3px 3px 0 0;position:relative}
+  .oc-bar>i{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,#3B82F6,#2563EB);border-radius:3px 3px 0 0;min-height:2px}
+  .oc-x{display:flex;gap:3px;margin-top:5px}
+  .oc-x span{flex:1;text-align:center;font-size:9px;color:var(--text-3)}
+
+  /* tabs */
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border)}
+  .tab{padding:10px 16px;font:600 13px 'DM Sans';color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab.on{color:var(--blue);border-bottom-color:var(--blue)}
+  .pane{display:none;padding-top:16px}
+  .pane.on{display:block}
+
+  /* recipients */
+  .rc-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .rc-search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 11px;min-width:230px;flex:1;max-width:320px}
+  .rc-search input{border:none;outline:none;background:transparent;flex:1;font:400 13px 'DM Sans'}
+  .rc-search svg{width:14px;height:14px;color:var(--text-3)}
+  .chips{display:inline-flex;background:var(--surface);border-radius:9px;padding:3px;gap:2px}
+  .chip{padding:6px 12px;border:none;background:transparent;border-radius:7px;font:600 12px 'DM Sans';color:var(--text-3);cursor:pointer}
+  .chip.on{background:#fff;color:var(--navy);box-shadow:0 1px 2px rgba(15,23,42,.08)}
+  .rc-count{margin-left:auto;font:600 12.5px 'DM Sans';color:var(--text-2)}
+  .rc-count strong{color:var(--navy)}
+  .bulkbar{display:none;align-items:center;gap:10px;background:var(--navy);border-radius:10px;padding:9px 14px;margin-bottom:12px}
+  .bulkbar.show{display:flex}
+  .bulkbar .c{color:#fff;font-size:12.5px}.bulkbar .c strong{font-size:14px}
+  .bulkbar .bb{font:600 12px 'DM Sans';color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:7px;padding:6px 11px;cursor:pointer}
+  .bulkbar .bb:hover{background:rgba(255,255,255,.22)}
+  .bulkbar .bb.ghost{background:transparent;border-color:transparent;color:#93C5FD;margin-left:auto}
+  .rt{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;font-size:13px}
+  .rt th{position:sticky;top:0;background:#F8FAFC;text-align:left;font:700 10.5px 'DM Sans';letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);padding:10px 14px;border-bottom:1px solid var(--border)}
+  .rt td{padding:10px 14px;border-bottom:1px solid #F1F5F9;color:var(--text-2)}
+  .rt tr:last-child td{border-bottom:none}
+  .rt tbody tr:hover td{background:#F8FAFF}
+  .rt .ck{width:36px;text-align:center}
+  .rt .nm strong{color:var(--text)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:99px;font:600 11px 'DM Sans'}
+  .st-delivered{background:#DCFCE7;color:#166534}.st-opened{background:#DBEAFE;color:#1D4ED8}.st-clicked{background:#EDE9FE;color:#6D28D9}.st-bounced{background:#FEE2E2;color:#B91C1C}.st-failed{background:#FEE2E2;color:#B91C1C}
+  .rt-foot{display:flex;align-items:center;justify-content:space-between;padding:10px 2px;font-size:12.5px;color:var(--text-3)}
+  .pgbtn{font:600 12px 'DM Sans';padding:6px 11px;border:1px solid var(--border);border-radius:7px;background:#fff;cursor:pointer;color:var(--text-2)}
+  .pgbtn:disabled{opacity:.4;cursor:default}
+
+  /* content preview */
+  .email{max-width:620px;margin:0 auto;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff}
+  .email .eh{padding:14px 20px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-3)}
+  .email .eb{padding:26px 28px;font-size:14px;line-height:1.7;color:var(--text-2)}
+  .email .eb h2{font-family:'DM Serif Display',serif;color:var(--navy);font-size:20px;margin-bottom:14px}
+  .email .cta{display:inline-block;margin:14px 0;background:var(--blue);color:#fff;padding:10px 20px;border-radius:8px;font-weight:600;text-decoration:none}
+
+  /* timeline */
+  .tl{position:relative;padding-left:22px}
+  .tl::before{content:"";position:absolute;left:5px;top:4px;bottom:4px;width:2px;background:var(--border)}
+  .tl-i{position:relative;padding:0 0 16px 12px}
+  .tl-i::before{content:"";position:absolute;left:-21px;top:3px;width:10px;height:10px;border-radius:50%;background:var(--blue);border:2px solid #fff}
+  .tl-i .t{font:600 13px 'DM Sans';color:var(--text)}
+  .tl-i .s{font-size:12px;color:var(--text-3);margin-top:2px}
+
+  /* modal */
+  #ov{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100;display:none;align-items:center;justify-content:center;padding:24px}
+  #ov.show{display:flex}
+  #ov .m{background:#fff;border-radius:16px;width:100%;max-width:520px;box-shadow:0 24px 64px rgba(15,23,42,.3);overflow:hidden}
+  #ov .mh2{padding:18px 22px 8px}
+  #ov .mh2 h3{font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy)}
+  #ov .mh2 p{font-size:12.5px;color:var(--text-3);margin-top:5px}
+  #ov .mb{padding:14px 22px}
+  #ov .mf{padding:14px 22px 20px;display:flex;gap:10px;justify-content:flex-end}
+  #ov label.fl{display:block;font:600 11px 'DM Sans';color:var(--text-2);margin:12px 0 5px}
+  #ov .fld{width:100%;border:1px solid var(--border);border-radius:9px;padding:9px 11px;font:400 13px 'DM Sans'}
+  #ov .callout{background:var(--blue-pale);border:1px solid #DBEAFE;border-radius:11px;padding:13px 15px;font-size:13px;color:var(--text-2)}
+  #ov .callout b{color:var(--navy)}
+  .radio{display:flex;gap:9px;align-items:flex-start;padding:9px 11px;border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-top:8px}
+  .radio.on{border-color:var(--blue);background:var(--blue-pale)}
+  .radio .rt2{font:600 13px 'DM Sans';color:var(--text)}
+  .radio .rs{font-size:11.5px;color:var(--text-3);margin-top:2px}
+
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:#0F172A;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;z-index:200;opacity:0;transition:.2s;display:flex;gap:10px;align-items:center}
+  #toast.show{opacity:1;transform:translateX(-50%)}
+  #toast .i{width:20px;height:20px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px}
+</style>
+</head>
+<body>
+  <!-- Sidebar (shared Atlas nav) -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
+          <circle cx="22" cy="92" r="4" fill="white"/>
+          <circle cx="58" cy="58" r="5" fill="white"/>
+          <circle cx="98" cy="38" r="5.5" fill="white"/>
+          <circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
+          <circle cx="138" cy="24" r="7" fill="#C8A04A"/>
+          <circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="logo-text-wrap"><span class="logo-name">Atlas</span><span class="logo-sub">By GiveCentral</span></div>
+    </div>
+
+    <a href="atlas-search.html" style="display:block;text-decoration:none">
+      <div class="sidebar-search">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+        <input type="text" placeholder="Search donors, gifts…" readonly>
+      </div>
+    </a>
+
+    <div class="sidebar-scroll">
+      <div class="nav-group">
+        <div class="nav-label">Main</div>
+        <a class="nav-item" href="atlas-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>Dashboard</a>
+        <a class="nav-item" href="atlas-donors-list.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>Donors<span class="nav-badge">3,847</span></a>
+        <a class="nav-item" href="atlas-gifts-pledges.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>Gifts &amp; pledges<span class="nav-badge">142</span></a>
+        <a class="nav-item" href="atlas-campaign-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>Campaigns</a>
+        <div class="nav-subwrap" style="margin:2px 0 4px 20px;border-left:1.5px solid rgba(255,255,255,.12)">
+          <a class="nav-item" href="atlas-funds.html" style="padding-left:14px;font-size:11.5px;border-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><ellipse cx="7" cy="3.5" rx="5" ry="2"/><path d="M2 3.5v7c0 1.1 2.2 2 5 2s5-.9 5-2v-7M2 7c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg>Funds</a>
+          <a class="nav-item" href="atlas-appeals.html" style="padding-left:14px;font-size:11.5px;border-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v5H6l-2.5 2v-2H2z"/></svg>Appeals</a>
+        </div>
+        <a class="nav-item" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>Reports</a>
+      </div>
+      <div class="nav-group" style="margin-top:8px">
+        <div class="nav-label">Fundraising</div>
+        <a class="nav-item" href="atlas-pipeline.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>Prospect pipeline<span class="nav-badge">28</span></a>
+        <a class="nav-item" href="atlas-tasks.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>Tasks &amp; reminders<span class="nav-badge alert">7</span></a>
+        <a class="nav-item active" href="atlas-communications.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>Communications</a>
+        <a class="nav-item" href="atlas-events-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>Events</a>
+        <a class="nav-item" href="atlas-volunteer-management.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Volunteers</a>
+      </div>
+      <div class="nav-group" style="margin-top:8px">
+        <div class="nav-label">Intelligence</div>
+        <a class="nav-item" href="atlas-guru-ai.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>Guru AI</a>
+        <a class="nav-item" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>Analytics</a>
+      </div>
+      <div class="nav-group" style="margin-top:8px">
+        <div class="nav-label">Admin</div>
+        <a class="nav-item" href="atlas-users-roles.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Users &amp; roles</a>
+        <a class="nav-item" href="atlas-tags.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/></svg>Tags &amp; Segment</a>
+        <a class="nav-item" href="atlas-integrations.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>Integrations</a>
+        <a class="nav-item" href="atlassmarttriggers.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.6 1.5L3 8h3.7l-.6 4.6L11 5.9H7.4z"/></svg>Smart Triggers</a>
+        <a class="nav-item" href="atlas-sync.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>Sync</a>
+        <a class="nav-item" href="atlas-location-manage.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>Location portal</a>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">SR</div>
+      <div><div class="user-name">Sarah Reynolds</div><div class="user-role">Development Director</div></div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <a class="back" href="atlas-communications.html"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg> Communications</a>
+      <span class="crumb">/ Message detail</span>
+    </div>
+
+    <div class="scroll">
+      <div class="wrap" id="wrap"><!-- rendered by JS --></div>
+    </div>
+  </div>
+
+  <div id="ov"></div>
+  <div id="toast"><span class="i">✓</span><span class="msg"></span></div>
+
+<script>
+(function(){
+  // ── Read message context from query params (with sensible defaults) ──
+  var P=new URLSearchParams(location.search);
+  function num(k,d){ var v=parseFloat(P.get(k)); return isNaN(v)?d:v; }
+  var TYPES={
+    receipt:{label:'Receipt',bg:'#FEF3C7',fg:'#B45309',tmpl:'Standard cash receipt · IRS Pub 1771'},
+    ack:{label:'Acknowledgement',bg:'#DCFCE7',fg:'#15803D',tmpl:'Cathedral major-donor thank-you'},
+    steward:{label:'Stewardship',bg:'#DCFCE7',fg:'#15803D',tmpl:'First-time donor welcome'},
+    appeal:{label:'Appeal',bg:'#DBEAFE',fg:'#1D4ED8',tmpl:'Cathedral capital ask letter'},
+    event:{label:'Event',bg:'#EDE9FE',fg:'#7C3AED',tmpl:"Bishop's Gala save-the-date"},
+    update:{label:'Campaign update',bg:'#DBEAFE',fg:'#1D4ED8',tmpl:'Cathedral campaign weekly recap'}
+  };
+  var M={
+    subject: P.get('subj') || 'Cathedral Capital year-end ask',
+    typeKey: P.get('type') || 'appeal',
+    sender: P.get('sender') || 'Bridget McCarthy',
+    campaign: P.get('camp') || 'Annual Appeal',
+    recipients: Math.round(num('recips',312480)),
+    delRate: num('del',0.986),
+    openRate: num('open',0.25),
+    clicked: Math.round(num('clicked',0)),
+    bounced: Math.round(num('bounced',0)),
+    complaints: Math.round(num('compl',0)),
+    dnc: Math.round(num('dnc',0)),
+    date: P.get('date') || 'Today 9:00 AM'
+  };
+  var T=TYPES[M.typeKey]||TYPES.appeal;
+  var delivered=Math.round(M.recipients*M.delRate);
+  if(!M.bounced) M.bounced=M.recipients-delivered;
+  var opened=Math.round(delivered*M.openRate);
+  if(!M.clicked) M.clicked=Math.round(opened*0.12);
+  var nonOpeners=Math.max(0,delivered-opened);
+
+  function fmt(n){ n=Math.round(n); return n>=1000000?(n/1000000).toFixed(2)+'M':n>=1000?(n/1000).toFixed(n>=100000?0:1)+'k':String(n); }
+  function toast(msg){ var t=document.getElementById('toast'); t.querySelector('.msg').textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('show');},2600); }
+
+  // ── Render page ──
+  var wrap=document.getElementById('wrap');
+  wrap.innerHTML=
+    '<div class="mh">'+
+      '<div class="mh-top">'+
+        '<div class="mh-ico" style="background:'+T.bg+';color:'+T.fg+'">'+T.label[0]+'</div>'+
+        '<div style="min-width:0">'+
+          '<h1>'+M.subject+'</h1>'+
+          '<div class="meta">'+T.label+' · '+M.sender+' · '+M.campaign+' · '+M.date+' · via SendGrid</div>'+
+          '<div class="tags">'+
+            '<span class="tg" style="background:'+T.bg+';color:'+T.fg+'">'+T.label+'</span>'+
+            '<span class="tg" style="background:#DCFCE7;color:#166534">Delivered '+(M.delRate*100).toFixed(1)+'%</span>'+
+            (M.bounced>M.recipients*0.03?'<span class="tg" style="background:#FEE2E2;color:#B91C1C">High bounce</span>':'')+
+            (M.recipients>1?'<span class="tg" style="background:var(--surface);color:#475569">'+M.recipients.toLocaleString()+' recipients</span>':'')+
+          '</div>'+
+        '</div>'+
+        '<div class="mh-actions">'+
+          '<button class="btn" id="a-export">Export</button>'+
+          '<button class="btn danger" id="a-suppress">Suppress bounces</button>'+
+          '<button class="btn primary" id="a-resend">Resend to non-openers</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="tmpl">'+
+        '<div class="tmpl-thumb"></div>'+
+        '<div style="flex:1"><div class="l">Template used</div><div class="n">'+T.tmpl+'</div><div class="s">Locked branding · merge fields: {first_name}, {gift_amount}, {campaign}</div></div>'+
+        '<button class="btn" id="a-tmpl">View template</button>'+
+        '<button class="btn" id="a-dup">Duplicate send</button>'+
+      '</div>'+
+    '</div>'+
+
+    '<div class="grid2">'+
+      '<div class="card">'+
+        '<h3>Performance</h3>'+
+        '<div class="kpis">'+
+          '<div class="kpi"><div class="k">Recipients</div><div class="v">'+fmt(M.recipients)+'</div><div class="d">'+M.recipients.toLocaleString()+' total</div></div>'+
+          '<div class="kpi"><div class="k">Delivered</div><div class="v g">'+(M.delRate*100).toFixed(1)+'%</div><div class="d">'+fmt(delivered)+' inboxes</div></div>'+
+          '<div class="kpi"><div class="k">Opened</div><div class="v b">'+(M.openRate*100).toFixed(0)+'%</div><div class="d">'+fmt(opened)+' opens</div></div>'+
+          '<div class="kpi"><div class="k">Clicked</div><div class="v b">'+(delivered?(M.clicked/delivered*100).toFixed(1):0)+'%</div><div class="d">'+fmt(M.clicked)+' clicks</div></div>'+
+          '<div class="kpi"><div class="k">Bounced</div><div class="v r">'+fmt(M.bounced)+'</div><div class="d">'+(M.recipients?(M.bounced/M.recipients*100).toFixed(1):0)+'% rate</div></div>'+
+          '<div class="kpi"><div class="k">Complaints · DNC</div><div class="v r">'+(M.complaints+M.dnc)+'</div><div class="d">'+M.complaints+' spam · '+M.dnc+' unsub</div></div>'+
+        '</div>'+
+        '<div style="margin-top:18px"><div class="l" style="font:700 10.5px \'DM Sans\';letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px">Delivery funnel</div>'+funnelHTML()+'</div>'+
+      '</div>'+
+      '<div class="card">'+
+        '<h3>Opens · first 48 hours</h3>'+
+        openChart()+
+        '<div style="margin-top:14px;font-size:12px;color:var(--text-3)">Peak engagement in the first <b style="color:var(--navy)">3 hours</b>. '+fmt(nonOpeners)+' delivered recipients haven\'t opened yet — <a href="#" id="oc-resend" style="color:var(--blue);font-weight:600;text-decoration:none">resend to them →</a></div>'+
+      '</div>'+
+    '</div>'+
+
+    '<div class="card">'+
+      '<div class="tabs" id="tabs">'+
+        '<div class="tab on" data-t="recips">Recipients</div>'+
+        '<div class="tab" data-t="content">Content</div>'+
+        '<div class="tab" data-t="timeline">Timeline</div>'+
+      '</div>'+
+      '<div class="pane on" data-p="recips" id="pane-recips"></div>'+
+      '<div class="pane" data-p="content" id="pane-content"></div>'+
+      '<div class="pane" data-p="timeline" id="pane-timeline"></div>'+
+    '</div>';
+
+  function funnelHTML(){
+    var steps=[['Sent',M.recipients,'#94A3B8'],['Delivered',delivered,'#15803D'],['Opened',opened,'#2563EB'],['Clicked',M.clicked,'#7C3AED']];
+    var max=M.recipients||1;
+    return '<div class="funnel">'+steps.map(function(s){
+      var pct=Math.round(s[1]/max*100);
+      return '<div class="fn"><span class="lab">'+s[0]+'</span><div class="track"><div class="fill" style="width:'+Math.max(6,pct)+'%;background:'+s[2]+'">'+pct+'%</div></div><span class="val">'+fmt(s[1])+'</span></div>';
+    }).join('')+'</div>';
+  }
+  function openChart(){
+    // synthetic 48h opens curve, front-loaded
+    var hrs=24, arr=[];
+    for(var h=0;h<hrs;h++){ var v=Math.exp(-h/5)*(0.6+0.4*Math.sin(h))+0.04; arr.push(Math.max(0.02,v)); }
+    var max=Math.max.apply(null,arr);
+    return '<div class="oc-bars">'+arr.map(function(v){ return '<div class="oc-bar" title="'+fmt(opened*v/max/3)+' opens"><i style="height:'+Math.round(v/max*100)+'%"></i></div>'; }).join('')+'</div>'+
+      '<div class="oc-x"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>24h</span><span>48h</span></div>';
+  }
+
+  // ── Recipients tab (heavy, paginated) ──
+  var FIRST=['Margaret','Thomas','James','Patricia','Michael','Susan','William','Anne','John','Elena','Daniel','Catherine','Bridget','Sean','Kathleen','Tessa','Robert','Laura','Kevin','Nora','Liam','Aoife','Declan','Colleen'];
+  var LAST=['O\'Brien','Sullivan','Grant','Walsh','Nguyen','Russo','Carter','Kowalski','Byrne','Murphy','Kennedy','Greene','Lin','Hayes','Quinn','Gallagher','Brennan','Donovan','Reilly','Kavanagh'];
+  function rnd(s){ var x=Math.sin(s*127.1+311.7)*43758.5453; return x-Math.floor(x); }
+  var POOL=[]; var poolCap=Math.min(M.recipients,600);
+  for(var i=0;i<poolCap;i++){
+    var f=FIRST[Math.floor(rnd(i*1.7)*FIRST.length)], l=LAST[Math.floor(rnd(i*2.9)*LAST.length)];
+    var r=rnd(i*3.3);
+    var st = r>0.985?'failed' : r>1-(M.bounced/M.recipients||0.01)-0.015?'bounced' : r>1-M.delRate*M.openRate*1.0?'opened' : 'delivered';
+    // fold clicked into a subset of opened
+    if(st==='opened' && rnd(i*4.1)>0.82) st='clicked';
+    POOL.push({id:i,n:f+' '+l,e:(f+'.'+l).toLowerCase().replace(/[^a-z.]/g,'')+'@email.org',st:st});
+  }
+  var R={q:'',filter:'all',page:1,size:25,sel:{}};
+  var pane=document.getElementById('pane-recips');
+  function rcFiltered(){
+    return POOL.filter(function(x){
+      if(R.filter==='opened' && !(x.st==='opened'||x.st==='clicked')) return false;
+      if(R.filter==='notopened' && !(x.st==='delivered')) return false;
+      if(R.filter==='bounced' && !(x.st==='bounced'||x.st==='failed')) return false;
+      if(R.filter==='clicked' && x.st!=='clicked') return false;
+      if(R.q && (x.n+' '+x.e).toLowerCase().indexOf(R.q)===-1) return false;
+      return true;
+    });
+  }
+  function scaleTotal(n){ return Math.round(n/POOL.length*M.recipients); } // project pool count onto full audience
+  function renderRecips(){
+    var f=rcFiltered();
+    var totalProjected = R.filter==='all'&&!R.q ? M.recipients : scaleTotal(f.length);
+    var maxPage=Math.max(1,Math.ceil(f.length/R.size)); if(R.page>maxPage)R.page=maxPage;
+    var start=(R.page-1)*R.size, rows=f.slice(start,start+R.size);
+    var selN=Object.keys(R.sel).length;
+    pane.innerHTML=
+      '<div class="rc-bar">'+
+        '<div class="rc-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="rc-q" placeholder="Search recipient name or email…"></div>'+
+        '<div class="chips" id="rc-chips">'+
+          [['all','All'],['opened','Opened'],['clicked','Clicked'],['notopened','Not opened'],['bounced','Bounced']].map(function(c){ return '<button class="chip'+(R.filter===c[0]?' on':'')+'" data-f="'+c[0]+'">'+c[1]+'</button>'; }).join('')+
+        '</div>'+
+        '<span class="rc-count"><strong>'+totalProjected.toLocaleString()+'</strong> recipients</span>'+
+      '</div>'+
+      '<div class="bulkbar'+(selN?' show':'')+'" id="rc-bulk"><span class="c"><strong>'+selN+'</strong> selected</span><button class="bb" data-b="resend">Resend</button><button class="bb" data-b="suppress">Suppress</button><button class="bb" data-b="segment">Add to segment</button><button class="bb" data-b="export">Export</button><button class="bb ghost" data-b="clear">Clear</button></div>'+
+      '<table class="rt"><thead><tr><th class="ck"><input type="checkbox" id="rc-all"></th><th>Recipient</th><th>Email</th><th>Status</th><th>Last event</th></tr></thead><tbody>'+
+        (rows.length? rows.map(function(x){ return '<tr data-id="'+x.id+'"><td class="ck"><input type="checkbox" class="rc-ck" '+(R.sel[x.id]?'checked':'')+'></td><td class="nm"><strong>'+x.n+'</strong></td><td style="color:#94A3B8">'+x.e+'</td><td><span class="pill st-'+x.st+'">'+cap(x.st)+'</span></td><td style="color:#94A3B8">'+eventFor(x.st)+'</td></tr>'; }).join('') : '<tr><td colspan="5" style="text-align:center;padding:26px;color:#94A3B8">No recipients match.</td></tr>')+
+      '</tbody></table>'+
+      '<div class="rt-foot"><span>Showing '+(f.length?start+1:0)+'–'+Math.min(start+R.size,f.length)+' of <strong>'+totalProjected.toLocaleString()+'</strong>'+(M.recipients>POOL.length?' · '+POOL.length+' loaded in this window (server-paginated)':'')+'</span><span><button class="pgbtn" id="rc-prev">‹ Prev</button> <span style="padding:0 8px">Page '+R.page+' / '+maxPage+'</span> <button class="pgbtn" id="rc-next">Next ›</button></span></div>';
+    // wire
+    var qi=pane.querySelector('#rc-q'); qi.value=R.q;
+    qi.addEventListener('input', function(){ R.q=qi.value.toLowerCase().trim(); R.page=1; renderRecips(); var n=pane.querySelector('#rc-q'); if(n)n.focus(); });
+    pane.querySelector('#rc-chips').addEventListener('click', function(e){ var b=e.target.closest('.chip'); if(!b)return; R.filter=b.dataset.f; R.page=1; renderRecips(); });
+    pane.querySelector('#rc-prev').addEventListener('click', function(){ if(R.page>1){R.page--;renderRecips();} });
+    pane.querySelector('#rc-next').addEventListener('click', function(){ if(R.page<maxPage){R.page++;renderRecips();} });
+    pane.querySelector('#rc-all').addEventListener('change', function(){ rows.forEach(function(x){ if(this.checked)R.sel[x.id]=1; else delete R.sel[x.id]; },this); renderRecips(); });
+    pane.querySelectorAll('.rc-ck').forEach(function(ck){ ck.addEventListener('change', function(){ var id=ck.closest('tr').dataset.id; if(ck.checked)R.sel[id]=1; else delete R.sel[id]; renderRecips(); }); });
+    var bulk=pane.querySelector('#rc-bulk'); if(bulk) bulk.addEventListener('click', function(e){ var b=e.target.closest('.bb'); if(!b)return; var a=b.dataset.b; if(a==='clear'){R.sel={};renderRecips();return;} toast(({resend:'Resend queued to '+selN+' recipients',suppress:selN+' recipients suppressed · added to DNC',segment:selN+' recipients added to a segment',export:'Exporting '+selN+' recipients to CSV'})[a]); if(a!=='resend'){R.sel={};} renderRecips(); });
+  }
+  function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+  function eventFor(st){ return ({delivered:'Delivered · 9:01 AM',opened:'Opened · 11:24 AM',clicked:'Clicked link · 11:26 AM',bounced:'Hard bounce · 9:00 AM',failed:'Send failed · 9:00 AM'})[st]||'—'; }
+
+  // ── Content tab ──
+  document.getElementById('pane-content').innerHTML=
+    '<div class="email"><div class="eh"><b>From:</b> '+M.sender+' &lt;dev@diocese.org&gt; · <b>Subject:</b> '+M.subject+'</div>'+
+    '<div class="eb"><h2>'+M.subject+'</h2>'+
+    '<p>Dear {first_name},</p>'+
+    '<p>Because of friends like you, the '+M.campaign+' is closer than ever to restoring the Cathedral for the next generation. Your past generosity has already made a visible difference.</p>'+
+    '<p>Will you consider a year-end gift to help us finish strong?</p>'+
+    '<a class="cta" href="#">Give to {campaign} →</a>'+
+    '<p style="color:#94A3B8;font-size:12px;margin-top:18px">Template: '+T.tmpl+' · merge fields resolved per recipient · IRS Pub 1771 compliant footer.</p>'+
+    '</div></div>';
+
+  // ── Timeline tab ──
+  document.getElementById('pane-timeline').innerHTML=
+    '<div class="tl">'+
+      tl('Send completed', fmt(delivered)+' of '+M.recipients.toLocaleString()+' delivered · '+fmt(M.bounced)+' bounced', M.date)+
+      tl('Engagement rising', fmt(opened)+' opens · '+fmt(M.clicked)+' clicks in first 3 hours', 'Within 3h of send')+
+      tl('Deliverability check', (M.bounced>M.recipients*0.03?'Bounce rate above 3% — review list hygiene':'Bounce rate healthy · sender reputation stable'), 'Auto · +1h')+
+      tl('Suppression sync', (M.complaints+M.dnc)+' complaints/unsubscribes auto-added to DNC', 'Auto · ongoing')+
+      tl('Message created', 'Composed from "'+T.tmpl+'" by '+M.sender, M.date)+
+    '</div>';
+  function tl(t,s,d){ return '<div class="tl-i"><div class="t">'+t+'</div><div class="s">'+s+' · '+d+'</div></div>'; }
+
+  // tabs
+  document.getElementById('tabs').addEventListener('click', function(e){ var t=e.target.closest('.tab'); if(!t)return; document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');}); t.classList.add('on'); document.querySelectorAll('.pane').forEach(function(p){ p.classList.toggle('on', p.dataset.p===t.dataset.t); }); });
+
+  renderRecips();
+
+  // ── Modal helpers ──
+  var ov=document.getElementById('ov');
+  function closeOv(){ ov.classList.remove('show'); ov.innerHTML=''; }
+  ov.addEventListener('click', function(e){ if(e.target===ov) closeOv(); });
+
+  function openResend(){
+    ov.innerHTML='<div class="m"><div class="mh2"><h3>Resend to non-openers</h3><p>'+M.subject+'</p></div>'+
+      '<div class="mb">'+
+        '<div class="callout"><b>'+fmt(nonOpeners)+'</b> recipients ('+nonOpeners.toLocaleString()+') were delivered but haven\'t opened. Resending to non-openers typically recovers <b>8–14%</b> more opens.</div>'+
+        '<label class="fl">Send</label>'+
+        '<div class="radio on" data-r="now"><input type="radio" name="rs" checked><div><div class="rt2">Send now</div><div class="rs">Goes out immediately to non-openers</div></div></div>'+
+        '<div class="radio" data-r="sched"><input type="radio" name="rs"><div><div class="rt2">Schedule</div><div class="rs">Pick a better time window</div></div></div>'+
+        '<div id="sched-when" style="display:none"><label class="fl">When</label><input class="fld" type="datetime-local"></div>'+
+        '<label class="fl">Freshen the subject line (optional)</label>'+
+        '<input class="fld" id="rs-subj" value="Reminder: '+M.subject+'">'+
+      '</div>'+
+      '<div class="mf"><button class="btn" id="rs-cancel">Cancel</button><button class="btn primary" id="rs-go">Resend to '+fmt(nonOpeners)+'</button></div></div>';
+    ov.classList.add('show');
+    ov.querySelectorAll('.radio').forEach(function(r){ r.addEventListener('click', function(){ ov.querySelectorAll('.radio').forEach(function(x){x.classList.remove('on');}); r.classList.add('on'); r.querySelector('input').checked=true; document.getElementById('sched-when').style.display=r.dataset.r==='sched'?'block':'none'; }); });
+    ov.querySelector('#rs-cancel').addEventListener('click', closeOv);
+    ov.querySelector('#rs-go').addEventListener('click', function(){ var when=ov.querySelector('.radio.on').dataset.r==='sched'?'scheduled':'sending now'; closeOv(); toast('Resend '+when+' to '+nonOpeners.toLocaleString()+' non-openers'); });
+  }
+  function openResendAll(){
+    ov.innerHTML='<div class="m"><div class="mh2"><h3>Resend to all recipients</h3><p>'+M.subject+'</p></div>'+
+      '<div class="mb">'+
+        '<div class="callout">Resends the entire audience — <b>'+fmt(M.recipients)+'</b> recipients ('+M.recipients.toLocaleString()+'). Suppressed / bounced addresses are still skipped automatically.</div>'+
+        '<label class="fl">Send</label>'+
+        '<div class="radio on" data-r="now"><input type="radio" name="rs" checked><div><div class="rt2">Send now</div><div class="rs">Goes out immediately to everyone</div></div></div>'+
+        '<div class="radio" data-r="sched"><input type="radio" name="rs"><div><div class="rt2">Schedule</div><div class="rs">Pick a better time window</div></div></div>'+
+        '<div id="sched-when2" style="display:none"><label class="fl">When</label><input class="fld" type="datetime-local"></div>'+
+        '<label class="fl">Freshen the subject line (optional)</label>'+
+        '<input class="fld" id="ra-subj" value="'+M.subject+'">'+
+      '</div>'+
+      '<div class="mf"><button class="btn" id="ra-cancel">Cancel</button><button class="btn primary" id="ra-go">Resend to '+fmt(M.recipients)+'</button></div></div>';
+    ov.classList.add('show');
+    ov.querySelectorAll('.radio').forEach(function(r){ r.addEventListener('click', function(){ ov.querySelectorAll('.radio').forEach(function(x){x.classList.remove('on');}); r.classList.add('on'); r.querySelector('input').checked=true; document.getElementById('sched-when2').style.display=r.dataset.r==='sched'?'block':'none'; }); });
+    ov.querySelector('#ra-cancel').addEventListener('click', closeOv);
+    ov.querySelector('#ra-go').addEventListener('click', function(){ var when=ov.querySelector('.radio.on').dataset.r==='sched'?'scheduled':'sending now'; closeOv(); toast('Resend '+when+' to all '+M.recipients.toLocaleString()+' recipients'); });
+  }
+  function openSuppress(){
+    ov.innerHTML='<div class="m"><div class="mh2"><h3>Suppress bounced addresses</h3><p>Protect your sender reputation</p></div>'+
+      '<div class="mb"><div class="callout"><b>'+fmt(M.bounced)+'</b> addresses hard-bounced on this send. Suppressing adds them to the diocese DNC list so future sends skip them automatically.</div></div>'+
+      '<div class="mf"><button class="btn" id="sp-cancel">Cancel</button><button class="btn danger" id="sp-go">Suppress '+fmt(M.bounced)+' addresses</button></div></div>';
+    ov.classList.add('show');
+    ov.querySelector('#sp-cancel').addEventListener('click', closeOv);
+    ov.querySelector('#sp-go').addEventListener('click', function(){ closeOv(); toast(M.bounced.toLocaleString()+' addresses suppressed · added to DNC list'); });
+  }
+
+  document.getElementById('a-resend').addEventListener('click', openResend);
+  document.getElementById('oc-resend').addEventListener('click', function(e){ e.preventDefault(); openResend(); });
+  document.getElementById('a-suppress').addEventListener('click', openSuppress);
+  document.getElementById('a-export').addEventListener('click', function(){ toast('Full send report exported · CSV ('+M.recipients.toLocaleString()+' rows)'); });
+  document.getElementById('a-tmpl').addEventListener('click', function(){ document.querySelector('.tab[data-t="content"]').click(); document.querySelector('.scroll').scrollTo({top:9999,behavior:'smooth'}); });
+  document.getElementById('a-dup').addEventListener('click', function(){ window.location='atlas-email-compose.html'; });
+
+  // Auto-open a flow when arriving via a kebab action
+  var act=P.get('action');
+  if(act==='resend') setTimeout(openResend,60);
+  else if(act==='resendall') setTimeout(openResendAll,60);
+  else if(act==='suppress') setTimeout(openSuppress,60);
+  else if(act==='recipients') { /* recipients tab is default */ }
+})();
+</script>
+</body>
+</html>
