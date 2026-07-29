@@ -217,7 +217,7 @@
 
   <div class="main">
     <div class="topbar">
-      <a class="back" id="eb-back" href="atlas-email-compose.html"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg> <span id="eb-back-lb">Compose</span></a>
+      <a class="back" id="eb-back" href="atlas-communications.html"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg> <span id="eb-back-lb">Communications</span></a>
       <span class="tb-title" id="eb-title">Email builder</span>
       <input id="eb-tplname" placeholder="Template name…" style="display:none;border:1px solid var(--border);border-radius:8px;padding:7px 11px;font:500 13px 'DM Sans';min-width:220px">
       <div class="tb-actions">
@@ -236,7 +236,7 @@
     <div class="work">
       <div class="canvas-wrap">
         <div class="canvas" id="canvas">
-          <div class="cv-precap">Use this area to offer a short preview of your email's content. &nbsp; <a href="#">View this email in your browser</a></div>
+          <div class="cv-precap">Use this area to offer a short preview of your email's content. &nbsp; <a href="#" data-eb-viewbrowser="1">View this email in your browser</a></div>
           <div class="cv-section header"><span class="section-lbl">Header</span><div class="blocks" id="sec-header" data-sec="header"></div></div>
           <div class="cv-section body"><span class="section-lbl" style="background:#2563EB">Body</span><div class="blocks" id="sec-body" data-sec="body"></div></div>
           <div class="cv-section footer"><span class="section-lbl">Footer</span><div class="blocks" id="sec-footer" data-sec="footer"></div></div>
@@ -580,7 +580,7 @@
   // ── Top actions ──
   window.ebSave=function(){ toast('Draft saved · '+countBlocks()+' blocks'); };
   window.ebTest=function(){ toast('Test sent to sarah.reynolds@diocese.org'); };
-  window.ebContinue=function(){ window.location='atlas-email-compose.html'; };
+  window.ebContinue=function(){ toast('Design saved · choose your audience next'); setTimeout(function(){ window.location='atlas-email-campaign.html'; }, 400); };
   window.ebTour=function(){ toast('Quick tour — drag blocks from the right onto the canvas'); };
   function countBlocks(){ return MODEL.header.length+MODEL.body.length+MODEL.footer.length; }
 
@@ -668,6 +668,7 @@
   }
   window.ebInspiration=ebInspiration;
   document.addEventListener('click',function(e){ var a=e.target.closest('[data-insp]'); if(a){ e.preventDefault(); ebInspiration(); } }, true);
+  document.addEventListener('click',function(e){ var v=e.target.closest('[data-eb-viewbrowser]'); if(v){ e.preventDefault(); if(window.ebPreview) ebPreview(); } }, true);
 
   var TPLMODE = new URLSearchParams(location.search).get('mode')==='template';
   if(TPLMODE && !EMBED){
