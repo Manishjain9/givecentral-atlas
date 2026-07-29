@@ -621,8 +621,10 @@
   }
   function openSuppress(){
     ov.innerHTML='<div class="m"><div class="mh2"><h3>Suppress bounced addresses</h3><p>Protect your sender reputation</p></div>'+
-      '<div class="mb"><div class="callout"><b>'+fmt(M.bounced)+'</b> addresses hard-bounced on this send. Suppressing adds them to the diocese DNC list so future sends skip them automatically.</div></div>'+
+      '<div class="mb"><div class="callout"><b>'+fmt(M.bounced)+'</b> addresses hard-bounced on this send. Suppressing adds them to the diocese DNC list so future sends skip them automatically.</div>'+
+      '<div style="margin-top:12px;font-size:13px"><a href="#" id="sp-view" style="color:var(--blue);font-weight:600;text-decoration:none">View the full list of '+fmt(M.bounced)+' bounced addresses →</a></div></div>'+
       '<div class="mf"><button class="btn" id="sp-cancel">Cancel</button><button class="btn danger" id="sp-go">Suppress '+fmt(M.bounced)+' addresses</button></div></div>';
+    ov.querySelector('#sp-view').addEventListener('click', function(e){ e.preventDefault(); closeOv(); var tb=document.querySelector('.tab[data-t="recips"]'); if(tb) tb.click(); R.filter='bounced'; R.page=1; renderRecips(); var host=(document.getElementById('tabs')||document.querySelector('.tabs')); if(host){ var card=host.closest('.card')||host; card.scrollIntoView({behavior:'smooth',block:'start'}); } });
     ov.classList.add('show');
     ov.querySelector('#sp-cancel').addEventListener('click', closeOv);
     ov.querySelector('#sp-go').addEventListener('click', function(){ closeOv(); toast(M.bounced.toLocaleString()+' addresses suppressed · added to DNC list'); });

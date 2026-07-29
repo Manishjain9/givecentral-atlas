@@ -1031,6 +1031,7 @@ body {
         '<div class="kebab"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></div>' +
       '</a>';
     }).join('');
+    if(window.__cmPaginate) window.__cmPaginate('drafts-list',10);
   }
 
   // Expose for compose page to call after saving
@@ -1053,6 +1054,12 @@ body {
   .cm-stat:hover { border-color:#94A3B8; box-shadow:0 2px 8px rgba(15,23,42,.06); }
   .kebab { cursor:pointer; color:var(--text-3); display:flex; align-items:center; justify-content:center; border-radius:6px; height:26px; }
   .kebab:hover { background:var(--border-soft); color:var(--text); }
+  .cmp-pager { display:flex; align-items:center; justify-content:space-between; padding:11px 4px 2px; font-size:12px; color:var(--text-3); }
+  .cmp-nav { display:flex; align-items:center; gap:8px; }
+  .cmp-page { font-size:12px; color:var(--text-2); }
+  .cmp-btn { border:1px solid var(--border); background:#fff; color:var(--text-2); border-radius:7px; padding:5px 11px; font:600 12px 'DM Sans'; cursor:pointer; }
+  .cmp-btn:hover:not(:disabled) { background:var(--blue-pale); color:var(--blue); border-color:var(--blue); }
+  .cmp-btn:disabled { opacity:.45; cursor:not-allowed; }
   .cm-kmenu { position:absolute; z-index:100030; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 30px rgba(15,23,42,.16); padding:5px; min-width:196px; }
   .cm-kmenu button { display:block; width:100%; text-align:left; background:none; border:none; font-family:'DM Sans',sans-serif; font-size:12.5px; color:var(--text-2); padding:8px 11px; border-radius:7px; cursor:pointer; }
   .cm-kmenu button:hover { background:var(--surface); }
@@ -1107,6 +1114,7 @@ body {
     var n=SCHEDULED.length+us.length;
     var inl=document.getElementById('sched-count-inline'); if(inl) inl.textContent=n.toLocaleString();
     var tc=document.getElementById('tab-ct-scheduled'); if(tc) tc.textContent=n.toLocaleString();
+    if(window.__cmPaginate) window.__cmPaginate('scheduled-list',10);
   }
   window.__commsAddScheduled=function(o){
     var rec={ico:'appeal', subj:o.subj, meta:['Scheduled by you'], to:o.to, toSub:o.toSub||'', when:o.when, time:o.time, tag:'Scheduled', tagc:'purple'};
@@ -1167,6 +1175,38 @@ body {
     ov.onclick=function(e){ if(e.target===ov) close(); };
   }
   window.commsSendNow=commsSendNow;
+  // Detailed cancel-confirmation for a scheduled send
+  function commsCancelScheduled(row){
+    var g=function(sel){ var e=row&&row.querySelector(sel); return e?e.textContent.trim():''; };
+    var subj=g('.body .ttl'), to=g('.recipients strong'), cntTxt=g('.recipients .muted'), when=g('.metric .v'), time=g('.metric .l');
+    var meta=[]; if(row) row.querySelectorAll('.body .meta span').forEach(function(s){ var t=s.textContent.trim(); if(t && t!=='·') meta.push(t); });
+    var sender=meta.length?meta[meta.length-1]:'Your team';
+    var recNum=(cntTxt.match(/[\d,]+/)||[])[0] || to || '—';
+    var ov=document.getElementById('cs-cancel-ov');
+    if(!ov){ ov=document.createElement('div'); ov.id='cs-cancel-ov'; ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100096;display:flex;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif'; document.body.appendChild(ov); }
+    ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:520px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.32);overflow:hidden;max-height:90vh;display:flex;flex-direction:column">'+
+      '<div style="background:#FEF2F2;border-bottom:1px solid #FECACA;padding:18px 22px;display:flex;align-items:flex-start;gap:12px"><div style="width:34px;height:34px;border-radius:50%;background:#FEE2E2;color:#B91C1C;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚠</div><div style="flex:1"><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#B91C1C;font-weight:700">Cancel scheduled send</div><h3 style="font-family:\'DM Serif Display\',serif;font-size:20px;margin:3px 0 0;color:#0E1E35">'+esc(subj||'Scheduled email')+'</h3></div><button id="csx-x" style="background:rgba(0,0,0,.05);border:none;color:#64748B;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;flex-shrink:0">×</button></div>'+
+      '<div style="padding:18px 22px;overflow:auto">'+
+        '<div style="display:grid;grid-template-columns:130px 1fr;gap:9px 14px;font-size:13px">'+
+          '<div style="color:#64748B">Audience</div><div style="color:#0F172A;font-weight:600">'+esc(to||'—')+'</div>'+
+          '<div style="color:#64748B">Recipients</div><div style="color:#0F172A;font-weight:600">'+esc(recNum)+'</div>'+
+          '<div style="color:#64748B">From</div><div style="color:#0F172A">'+esc(sender)+'</div>'+
+          '<div style="color:#64748B">Scheduled for</div><div style="color:#0F172A;font-weight:600">'+esc((when||'—')+(time?' · '+time:''))+'</div>'+
+        '</div>'+
+        '<div style="margin-top:16px;padding:12px 14px;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;font-size:12.5px;color:#B91C1C;line-height:1.5">This scheduled email <b>will not be sent</b>. The '+esc(recNum)+' recipients won’t receive it. A copy is kept in <b>Drafts</b> so you can reschedule it later.</div>'+
+        '<label style="display:flex;gap:9px;align-items:flex-start;margin-top:14px;font-size:13px;color:#334155;cursor:pointer"><input type="checkbox" id="csx-ack" style="margin-top:2px"><span>I understand this scheduled send will be cancelled and won’t go out.</span></label>'+
+      '</div>'+
+      '<div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 22px;border-top:1px solid #E2E8F0"><button id="csx-keep" style="border:1px solid #E2E8F0;background:#fff;color:#334155;padding:10px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Keep scheduled</button><button id="csx-go" disabled style="border:none;background:#DC2626;color:#fff;padding:10px 18px;border-radius:9px;font:600 13px DM Sans;cursor:not-allowed;opacity:.5">Cancel this send</button></div>'+
+    '</div>';
+    ov.style.display='flex';
+    var go=ov.querySelector('#csx-go'), ack=ov.querySelector('#csx-ack');
+    ack.onchange=function(){ go.disabled=!ack.checked; go.style.cursor=ack.checked?'pointer':'not-allowed'; go.style.opacity=ack.checked?'1':'.5'; };
+    function close(){ ov.style.display='none'; }
+    ov.querySelector('#csx-keep').onclick=close; ov.querySelector('#csx-x').onclick=close;
+    ov.onclick=function(e){ if(e.target===ov) close(); };
+    go.onclick=function(){ if(go.disabled) return; close(); if(row){ row.remove(); updateCount('scheduled'); } toast('Scheduled send cancelled · “'+subj+'” moved to Drafts'); };
+  }
+  window.commsCancelScheduled=commsCancelScheduled;
   // Duplicate-with-rename modal (list / template / draft / scheduled send)
   function commsDuplicate(kind, row, pane){
     var g=function(sel){ var e=row&&row.querySelector(sel); return e?e.textContent.trim():''; };
@@ -1197,6 +1237,28 @@ body {
     };
   }
   window.commsDuplicate=commsDuplicate;
+  // Client-side pagination (10 / page) for large lists — Lists, Templates, Drafts, Scheduled
+  var CMP_PAGE={};
+  function cmPaginate(listId, size){
+    size=size||10;
+    var list=document.getElementById(listId); if(!list) return;
+    var old=document.getElementById(listId+'-pager'); if(old) old.remove();
+    var rows=[].slice.call(list.children).filter(function(el){ return el.classList && el.classList.contains('cm-row'); });
+    if(rows.length<=size){ rows.forEach(function(r){ r.style.display=''; }); return; }
+    var maxPage=Math.ceil(rows.length/size);
+    var page=CMP_PAGE[listId]||1; if(page>maxPage)page=maxPage; if(page<1)page=1; CMP_PAGE[listId]=page;
+    var pager=document.createElement('div'); pager.id=listId+'-pager'; pager.className='cmp-pager';
+    list.parentNode.insertBefore(pager, list.nextSibling);
+    function draw(){
+      var start=(page-1)*size;
+      rows.forEach(function(r,i){ r.style.display=(i>=start && i<start+size)?'':'none'; });
+      pager.innerHTML='<span>Showing '+(start+1)+'–'+Math.min(start+size,rows.length)+' of '+rows.length.toLocaleString()+'</span>'+
+        '<span class="cmp-nav"><button class="cmp-btn" data-p="prev"'+(page<=1?' disabled':'')+'>‹ Prev</button><span class="cmp-page">Page '+page+' / '+maxPage+'</span><button class="cmp-btn" data-p="next"'+(page>=maxPage?' disabled':'')+'>Next ›</button></span>';
+    }
+    pager.addEventListener('click', function(e){ var b=e.target.closest('.cmp-btn'); if(!b||b.disabled) return; page+=(b.dataset.p==='next'?1:-1); if(page<1)page=1; if(page>maxPage)page=maxPage; CMP_PAGE[listId]=page; draw(); });
+    draw();
+  }
+  window.__cmPaginate=cmPaginate;
   function updateCount(pane){
     var map={ scheduled:['scheduled-list','sched-count-inline'], drafts:['drafts-list','drafts-count-inline'], templates:['templates-list',null], lists:['lists-list','lists-count-inline'] };
     var m=map[pane]; if(!m) return;
@@ -1204,12 +1266,13 @@ body {
     var n=listEl.querySelectorAll('.cm-row').length;
     if(m[1]){ var inl=document.getElementById(m[1]); if(inl) inl.textContent=n.toLocaleString(); }
     var tabc=document.querySelector('#comms-tabs .tab[data-tab="'+pane+'"] .ct'); if(tabc) tabc.textContent=n>=1000?n.toLocaleString():String(n);
+    cmPaginate(m[0],10);
   }
 
   /* ── Kebab menus (per pane) — fully functional ── */
   var ACTS={
     sent:[{t:'View message',k:'navrow'},{t:'Resend to non-openers',k:'toast',v:'Resend queued to non-openers · sending shortly'},{t:'Forward…',k:'nav',v:'atlas-email-compose.html'},{t:'View engagement report',k:'toast',v:'Opens & clicks report opening…'},{t:'Copy tracking link',k:'toast',v:'Tracking link copied to clipboard'}],
-    scheduled:[{t:'Edit schedule',k:'sched'},{t:'Send now',k:'sendnow'},{t:'Duplicate',k:'dupmodal',kind:'scheduled send'},{t:'Cancel send',k:'del',danger:true,title:'Cancel scheduled send?',body:'This email will not go out. You can recreate it later from Drafts.',ok:'Cancel send',done:'Scheduled send cancelled'}],
+    scheduled:[{t:'Edit schedule',k:'sched'},{t:'Send now',k:'sendnow'},{t:'Duplicate',k:'dupmodal',kind:'scheduled send'},{t:'Cancel send',k:'cancelsched',danger:true}],
     templates:[{t:'Edit in builder',k:'edittpl'},{t:'Duplicate template',k:'dupmodal',kind:'template'},{t:'Set as default',k:'toast',v:'Set as the default template'},{t:'Archive',k:'del',danger:true,title:'Archive this template?',body:'Archived templates are hidden from the list but can be restored later.',ok:'Archive',done:'Template archived'},{t:'Delete',k:'del',danger:true,title:'Delete this template?',body:'This permanently removes the template and cannot be undone.',ok:'Delete',done:'Template deleted'}],
     lists:[{t:'Open list',k:'openlist'},{t:'Send to this list',k:'navlist'},{t:'Duplicate list',k:'dupmodal',kind:'list'},{t:'Export CSV',k:'toast',v:'List exported · CSV downloading'},{t:'Delete list',k:'del',danger:true,title:'Delete this list?',body:'Donors stay in your database — only this list / segment is removed.',ok:'Delete list',done:'List deleted'}],
     drafts:[{t:'Resume editing',k:'navrow'},{t:'Duplicate draft',k:'dupmodal',kind:'draft'},{t:'Schedule send',k:'sched'},{t:'Delete draft',k:'del',danger:true,title:'Delete this draft?',body:'This draft will be permanently removed.',ok:'Delete draft',done:'Draft deleted'}]
@@ -1232,6 +1295,7 @@ body {
       else if(a.k==='openlist'){ var lnm=((row&&row.querySelector('.ttl'))||{}).textContent.trim()||''; var lcnt=(((row&&row.querySelector('.meta'))||{}).textContent||'').replace(/[^0-9]/g,''); toast('Opening '+lnm+'…'); setTimeout(function(){ window.location='atlas-outreach-lists.html?name='+encodeURIComponent(lnm)+(lcnt?'&count='+lcnt:''); },200); }
       else if(a.k==='edittpl'){ var tnm=((row&&row.querySelector('.ttl'))||{}).textContent.trim()||''; toast('Opening “'+tnm+'” in the builder…'); setTimeout(function(){ window.location='atlas-email-builder.html?mode=template&tpl='+encodeURIComponent(tnm); },200); }
       else if(a.k==='dupmodal'){ commsDuplicate(a.kind||'item', row, pane); }
+      else if(a.k==='cancelsched'){ commsCancelScheduled(row); }
       else if(a.k==='sched'){ commsSchedule(); }
       else if(a.k==='dup'){ if(row){ var c=row.cloneNode(true); row.parentNode.insertBefore(c,row.nextSibling); updateCount(pane); } toast(a.v||'Duplicated'); }
       else if(a.k==='del'){ commsConfirm({title:a.title,body:a.body,ok:a.ok,danger:a.danger}, function(){ if(row){ row.remove(); updateCount(pane); } toast(a.done||'Removed'); }); }
@@ -1381,6 +1445,7 @@ body {
     var lc=document.getElementById('lists-count-inline'); if(lc) lc.textContent=total.toLocaleString();
     var tabc=document.querySelector('#comms-tabs .tab[data-tab="lists"] .ct'); if(tabc) tabc.textContent=total.toLocaleString();
     if(typeof ensureKebabs==='function') ensureKebabs();
+    cmPaginate('lists-list',10);
   }
   window.__commsRenderLists=commsRenderLists;
   // called by Add-new-list / CSV importer to persist + surface a new list
@@ -1408,6 +1473,7 @@ body {
     var tabc=document.querySelector('#comms-tabs .tab[data-tab="templates"] .ct'); if(tabc) tabc.textContent=String(n);
     var sh=host.parentNode.querySelector('.section-h span'); if(sh) sh.textContent='Email templates · '+n+' reusable';
     if(typeof ensureKebabs==='function') ensureKebabs();
+    cmPaginate('templates-list',10);
   }
   window.__commsRenderUserTemplates=renderUserTemplates;
 
@@ -1614,7 +1680,7 @@ body {
     MSGS.sort(function(a,b){ return b.date-a.date; });
 
     // ── State ──
-    var S={ range:90, search:'', types:[], statuses:[], campaigns:[], attn:false, page:1, size:25 };
+    var S={ range:90, search:'', types:[], statuses:[], campaigns:[], attn:false, page:1, size:10 };
     var FACETS={
       types:{opts:TYPES.map(function(t){return [t.label,t.k];}), key:'types'},
       statuses:{opts:[['Delivered','delivered'],['Opened','opened'],['Bounced','bounced'],['Failed','failed']], key:'statuses'},
