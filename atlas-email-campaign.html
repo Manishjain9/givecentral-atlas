@@ -446,6 +446,7 @@
     else if(S.tplSort==='edited') list=list.slice().sort(function(a,b){return a.edited-b.edited;});
     var blankOn=S.template==='blank';
     return '<div class="wrap wide"><h2 class="step-h">Choose a template</h2><p class="step-sub">Start blank or from a reusable template — it loads straight into the builder.</p>'+
+      (S.resumeFrom==='draft'?'<div class="persona" style="background:#FFFBEB;border-color:#FDE68A;margin-bottom:14px">📝 <div><b>Resumed draft.</b> This draft was built from <b>'+esc(S.resumeTpl||'a blank layout')+'</b> — it’s pre-selected below (marked ✓). Pick a different template to start over.</div></div>':'')+
       '<div class="tpl-bar">'+
         '<div class="tpl-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="tpl-q" placeholder="Search templates…" value="'+esc(S.tplQuery)+'"></div>'+
         '<select class="fld" id="tpl-sort" style="max-width:190px"><option value="used"'+(S.tplSort==='used'?' selected':'')+'>Sort: Most used</option><option value="name"'+(S.tplSort==='name'?' selected':'')+'>Sort: Name A–Z</option><option value="edited"'+(S.tplSort==='edited'?' selected':'')+'>Sort: Recently edited</option></select>'+
@@ -764,7 +765,12 @@
     }
     // Resume a draft as the Create New Email flow
     var draftId=P.get('draft');
-    if(draftId){ var dnm=(P.get('name')||'Draft').trim(); S.subject=dnm; S.name=dnm; S.resumeFrom='draft'; S.resumeLabel=dnm; }
+    if(draftId){ var dnm=(P.get('name')||'Draft').trim(); S.subject=dnm; S.name=dnm; S.resumeFrom='draft'; S.resumeLabel=dnm;
+      var tid=P.get('tpl');
+      if(!tid){ var dn=dnm.toLowerCase(); var pairs=[['receipt','receipt'],['welcome','welcome'],['pledge','pledge'],['laps','lapsed'],['gala','event'],['event','event'],['soft','soft'],['mid','midpoint'],['cultivat','cultivation'],['match','matching'],['memori','memorial'],['year','yearend'],['thank','thankyou']]; for(var pi=0;pi<pairs.length;pi++){ if(dn.indexOf(pairs[pi][0])!==-1){ tid=pairs[pi][1]; break; } } }
+      if(tid && TEMPLATES.some(function(t){return t.id===tid;})){ S.template=tid; var tt=TEMPLATES.filter(function(t){return t.id===tid;})[0]; S.resumeTpl=tt?tt.nm:tid; }
+      else { S.template='blank'; S.resumeTpl='a blank layout'; }
+    }
     // Duplicate a previous send into a new email
     var dupSubj=P.get('dupSubject');
     if(dupSubj){ S.subject=dupSubj; S.name='Copy of '+dupSubj; S.resumeFrom='dup'; S.resumeLabel=dupSubj; }
