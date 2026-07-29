@@ -100,6 +100,16 @@
   .oc-bar>i{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,#3B82F6,#2563EB);border-radius:3px 3px 0 0;min-height:2px}
   .oc-x{display:flex;gap:3px;margin-top:5px}
   .oc-x span{flex:1;text-align:center;font-size:9px;color:var(--text-3)}
+  .oc-tabs{display:flex;gap:4px;flex-wrap:wrap}
+  .oc-tab{border:1px solid var(--border);background:#fff;color:var(--text-2);border-radius:20px;padding:5px 11px;font:600 11.5px 'DM Sans';cursor:pointer;white-space:nowrap}
+  .oc-tab:hover{background:var(--blue-pale);color:var(--blue)}
+  .oc-tab.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .oc-bars2{display:flex;align-items:flex-end;gap:3px;height:80px}
+  .hb-row{margin-bottom:0}
+  .hb-track{height:10px;background:var(--surface);border-radius:5px;overflow:hidden}
+  .hb-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#3B82F6,#2563EB)}
+  .oc-leg{display:flex;gap:16px;margin-top:9px;font-size:11px;color:var(--text-3)}
+  .oc-leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 
   /* tabs */
   .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border)}
@@ -331,7 +341,7 @@
         '<div class="tmpl-thumb"></div>'+
         '<div style="flex:1"><div class="l">Template used</div><div class="n">'+T.tmpl+'</div><div class="s">Locked branding · merge fields: {first_name}, {gift_amount}, {campaign}</div></div>'+
         '<button class="btn" id="a-tmpl">View template</button>'+
-        '<button class="btn" id="a-dup">Duplicate send</button>'+
+        '<button class="btn" id="a-dup">Duplicate as new email</button>'+
       '</div>'+
     '</div>'+
 
@@ -349,9 +359,9 @@
         '<div style="margin-top:18px"><div class="l" style="font:700 10.5px \'DM Sans\';letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px">Delivery funnel</div>'+funnelHTML()+'</div>'+
       '</div>'+
       '<div class="card">'+
-        '<h3>Opens · first 48 hours</h3>'+
-        openChart()+
-        '<div style="margin-top:14px;font-size:12px;color:var(--text-3)">Peak engagement in the first <b style="color:var(--navy)">3 hours</b>. '+fmt(nonOpeners)+' delivered recipients haven\'t opened yet — <a href="#" id="oc-resend" style="color:var(--blue);font-weight:600;text-decoration:none">resend to them →</a></div>'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><h3 id="oc-title" style="margin:0">Opens · first 48 hours</h3><div class="oc-tabs" id="oc-tabs"></div></div>'+
+        '<div id="oc-chart" style="margin-top:16px;min-height:104px"></div>'+
+        '<div id="oc-cap" style="margin-top:14px;font-size:12px;color:var(--text-3);line-height:1.5"></div>'+
       '</div>'+
     '</div>'+
 
@@ -402,13 +412,78 @@
       return '<div class="fn"><span class="lab">'+s[0]+'</span><div class="track"><div class="fill" style="width:'+Math.max(6,pct)+'%;background:'+s[2]+'">'+pct+'%</div></div><span class="val">'+fmt(s[1])+'</span></div>';
     }).join('')+'</div>';
   }
-  function openChart(){
-    // synthetic 48h opens curve, front-loaded
-    var hrs=24, arr=[];
-    for(var h=0;h<hrs;h++){ var v=Math.exp(-h/5)*(0.6+0.4*Math.sin(h))+0.04; arr.push(Math.max(0.02,v)); }
-    var max=Math.max.apply(null,arr);
-    return '<div class="oc-bars">'+arr.map(function(v){ return '<div class="oc-bar" title="'+fmt(opened*v/max/3)+' opens"><i style="height:'+Math.round(v/max*100)+'%"></i></div>'; }).join('')+'</div>'+
-      '<div class="oc-x"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>24h</span><span>48h</span></div>';
+  // ── Multi-view chart switcher for the Opens/engagement card ──
+  var CHARTS=[
+    {k:'opens48', lb:'Opens · 48h',    title:'Opens · first 48 hours'},
+    {k:'clicks48',lb:'Clicks · 48h',   title:'Clicks · first 48 hours'},
+    {k:'compare', lb:'Opens vs clicks',title:'Opens vs clicks · 48 hours'},
+    {k:'hod',     lb:'Hour of day',    title:'Engagement by hour of day'},
+    {k:'domains', lb:'Top domains',    title:'Open rate by email domain'},
+    {k:'devices', lb:'Devices',        title:'Opens by device'}
+  ];
+  var OC_TIME_X=['0h','6h','12h','18h','24h','48h'];
+  function vbars(arr,xl,titleFn){
+    var max=Math.max.apply(null,arr)||1;
+    return '<div class="oc-bars">'+arr.map(function(v,i){ return '<div class="oc-bar" title="'+(titleFn?titleFn(v,i):'')+'"><i style="height:'+Math.round(v/max*100)+'%"></i></div>'; }).join('')+'</div>'+
+      '<div class="oc-x">'+xl.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>';
+  }
+  function hbars(rows){
+    return '<div style="display:flex;flex-direction:column;gap:12px;padding:6px 0">'+rows.map(function(r){
+      return '<div class="hb-row"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text-2);font-weight:500">'+r.label+'</span><span style="color:var(--text-3)">'+r.sub+'</span></div><div class="hb-track"><div class="hb-fill" style="width:'+r.pct+'%'+(r.color?';background:'+r.color:'')+'"></div></div></div>';
+    }).join('')+'</div>';
+  }
+  function opensCurve(){ var a=[]; for(var h=0;h<24;h++){ a.push(Math.max(0.02, Math.exp(-h/5)*(0.6+0.4*Math.sin(h))+0.04)); } return a; }
+  function clicksCurve(){ var a=[]; for(var h=0;h<24;h++){ a.push(Math.max(0.01, Math.exp(-h/7)*(0.5+0.3*Math.cos(h))+0.02)); } return a; }
+  function hodCurve(){ var a=[]; for(var h=0;h<24;h++){ var m=Math.exp(-Math.pow(h-9,2)/6), e=Math.exp(-Math.pow(h-20,2)/6)*0.9; a.push(0.05+m+e); } return a; }
+  function drawChart(k){
+    var host=document.getElementById('oc-chart'), cap=document.getElementById('oc-cap'), title=document.getElementById('oc-title');
+    var meta=CHARTS.filter(function(c){return c.k===k;})[0]||CHARTS[0]; if(title) title.textContent=meta.title;
+    var html='', capHTML='';
+    if(k==='opens48'){
+      var o=opensCurve(),mx=Math.max.apply(null,o);
+      html=vbars(o,OC_TIME_X,function(v){return fmt(opened*v/mx/3)+' opens';});
+      capHTML='Peak engagement in the first <b style="color:var(--navy)">3 hours</b>. '+fmt(nonOpeners)+' delivered recipients haven\'t opened yet — <a href="#" id="oc-resend" style="color:var(--blue);font-weight:600;text-decoration:none">resend to them →</a>';
+    } else if(k==='clicks48'){
+      var c=clicksCurve(),mc=Math.max.apply(null,c);
+      html=vbars(c,OC_TIME_X,function(v){return fmt(M.clicked*v/mc/3)+' clicks';});
+      capHTML='Clicks concentrate in the first <b style="color:var(--navy)">6 hours</b>. '+fmt(M.clicked)+' total clicks · '+(delivered?(M.clicked/delivered*100).toFixed(1):0)+'% click-through rate.';
+    } else if(k==='compare'){
+      var oo=opensCurve(), cc=clicksCurve(), mm=Math.max(Math.max.apply(null,oo),Math.max.apply(null,cc))||1;
+      html='<div class="oc-bars2">'+oo.map(function(v,i){ return '<div style="flex:1;display:flex;gap:1px;align-items:flex-end;height:100%" title="'+fmt(opened*v/mm/3)+' opens · '+fmt(M.clicked*cc[i]/mm/3)+' clicks"><i style="flex:1;height:'+Math.round(v/mm*100)+'%;background:var(--blue-pale);border-radius:3px 3px 0 0"></i><i style="flex:1;height:'+Math.round(cc[i]/mm*100)+'%;background:linear-gradient(180deg,#3B82F6,#2563EB);border-radius:3px 3px 0 0"></i></div>'; }).join('')+'</div>'+
+        '<div class="oc-x">'+OC_TIME_X.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>'+
+        '<div class="oc-leg"><span><i style="background:var(--blue-pale)"></i>Opens</span><span><i style="background:#2563EB"></i>Clicks</span></div>';
+      capHTML='Opens lead clicks by roughly <b style="color:var(--navy)">2×</b> across the first two days — the gap widens after hour 6.';
+    } else if(k==='hod'){
+      var hd=hodCurve();
+      html=vbars(hd,['12a','4a','8a','12p','4p','8p'],function(v,i){return i+':00 · '+Math.round(v*100)+' rel.';});
+      capHTML='Best engagement windows: <b style="color:var(--navy)">8–10 AM</b> and <b style="color:var(--navy)">7–9 PM</b>. Schedule future sends near these peaks.';
+    } else if(k==='domains'){
+      html=hbars([
+        {label:'Diocese.org',sub:(Math.round(M.openRate*100+18)||0)+'% open',pct:Math.min(100,Math.round(M.openRate*100+18))},
+        {label:'Gmail',sub:(Math.round(M.openRate*100+6))+'% open',pct:Math.min(100,Math.round(M.openRate*100+6)),color:'linear-gradient(90deg,#EA4335,#c5221f)'},
+        {label:'Outlook / Hotmail',sub:(Math.round(M.openRate*100-2))+'% open',pct:Math.max(4,Math.round(M.openRate*100-2)),color:'linear-gradient(90deg,#0F6CBD,#0a4c86)'},
+        {label:'iCloud',sub:(Math.round(M.openRate*100-6))+'% open',pct:Math.max(4,Math.round(M.openRate*100-6)),color:'linear-gradient(90deg,#8E8E93,#636366)'},
+        {label:'Yahoo',sub:(Math.round(M.openRate*100-11))+'% open',pct:Math.max(4,Math.round(M.openRate*100-11)),color:'linear-gradient(90deg,#6001D2,#3f018c)'}
+      ]);
+      capHTML='<b style="color:var(--navy)">Diocese.org and Gmail</b> open best. Yahoo lags — worth a list-hygiene pass on those addresses.';
+    } else if(k==='devices'){
+      html=hbars([
+        {label:'📱 Mobile',sub:'63% · '+fmt(Math.round(opened*0.63))+' opens',pct:63},
+        {label:'💻 Desktop',sub:'31% · '+fmt(Math.round(opened*0.31))+' opens',pct:31,color:'linear-gradient(90deg,#7C3AED,#5b21b6)'},
+        {label:'📟 Tablet',sub:'6% · '+fmt(Math.round(opened*0.06))+' opens',pct:6,color:'linear-gradient(90deg,#15803D,#0f5e2c)'}
+      ]);
+      capHTML='<b style="color:var(--navy)">63% opened on mobile</b> — keep subject lines under ~40 chars and buttons finger-friendly.';
+    }
+    if(host) host.innerHTML=html;
+    if(cap) cap.innerHTML=capHTML;
+    var rs=document.getElementById('oc-resend'); if(rs) rs.addEventListener('click',function(e){ e.preventDefault(); openResend(); });
+    var tabs=document.getElementById('oc-tabs'); if(tabs) tabs.querySelectorAll('.oc-tab').forEach(function(t){ t.classList.toggle('on', t.dataset.k===k); });
+  }
+  function initCharts(){
+    var tabs=document.getElementById('oc-tabs'); if(!tabs) return;
+    tabs.innerHTML=CHARTS.map(function(c){ return '<button class="oc-tab'+(c.k==='opens48'?' on':'')+'" data-k="'+c.k+'">'+c.lb+'</button>'; }).join('');
+    tabs.addEventListener('click',function(e){ var b=e.target.closest('.oc-tab'); if(!b) return; drawChart(b.dataset.k); });
+    drawChart('opens48');
   }
 
   // ── Recipients tab (heavy, paginated) ──
@@ -508,7 +583,7 @@
         '<label class="fl">Send</label>'+
         '<div class="radio on" data-r="now"><input type="radio" name="rs" checked><div><div class="rt2">Send now</div><div class="rs">Goes out immediately to non-openers</div></div></div>'+
         '<div class="radio" data-r="sched"><input type="radio" name="rs"><div><div class="rt2">Schedule</div><div class="rs">Pick a better time window</div></div></div>'+
-        '<div id="sched-when" style="display:none"><label class="fl">When</label><input class="fld" type="datetime-local"></div>'+
+        '<div id="sched-when" style="display:none"><label class="fl">When</label><div style="display:flex;gap:8px"><input class="fld" type="text" placeholder="yyyy-mm-dd" autocomplete="off" style="flex:1"><input class="fld" type="time" value="09:00" style="max-width:120px"></div></div>'+
         '<label class="fl">Freshen the subject line (optional)</label>'+
         '<input class="fld" id="rs-subj" value="Reminder: '+M.subject+'">'+
       '</div>'+
@@ -525,7 +600,7 @@
         '<label class="fl">Send</label>'+
         '<div class="radio on" data-r="now"><input type="radio" name="rs" checked><div><div class="rt2">Send now</div><div class="rs">Goes out immediately to everyone</div></div></div>'+
         '<div class="radio" data-r="sched"><input type="radio" name="rs"><div><div class="rt2">Schedule</div><div class="rs">Pick a better time window</div></div></div>'+
-        '<div id="sched-when2" style="display:none"><label class="fl">When</label><input class="fld" type="datetime-local"></div>'+
+        '<div id="sched-when2" style="display:none"><label class="fl">When</label><div style="display:flex;gap:8px"><input class="fld" type="text" placeholder="yyyy-mm-dd" autocomplete="off" style="flex:1"><input class="fld" type="time" value="09:00" style="max-width:120px"></div></div>'+
         '<label class="fl">Freshen the subject line (optional)</label>'+
         '<input class="fld" id="ra-subj" value="'+M.subject+'">'+
       '</div>'+
@@ -545,7 +620,7 @@
   }
 
   document.getElementById('a-resend').addEventListener('click', openResend);
-  document.getElementById('oc-resend').addEventListener('click', function(e){ e.preventDefault(); openResend(); });
+  initCharts();
   document.getElementById('a-suppress').addEventListener('click', openSuppress);
   document.getElementById('a-export').addEventListener('click', function(){ toast('Full send report exported · CSV ('+M.recipients.toLocaleString()+' rows)'); });
   document.getElementById('a-tmpl').addEventListener('click', function(){ document.querySelector('.tab[data-t="content"]').click(); document.querySelector('.scroll').scrollTo({top:9999,behavior:'smooth'}); });
@@ -556,7 +631,7 @@
   if(act==='resend') setTimeout(openResend,60);
   else if(act==='resendall') setTimeout(openResendAll,60);
   else if(act==='suppress') setTimeout(openSuppress,60);
-  else if(act==='recipients') { /* recipients tab is default */ }
+  else if(act==='recipients') { setTimeout(function(){ var tb=document.querySelector('.tab[data-t="recips"]'); if(tb) tb.click(); var card=(document.getElementById('tabs')||document.querySelector('.tabs')); if(card){ var host=card.closest('.card')||card; host.scrollIntoView({behavior:'smooth',block:'start'}); host.style.transition='box-shadow .3s'; host.style.boxShadow='0 0 0 2px var(--blue)'; setTimeout(function(){ host.style.boxShadow=''; },1400); } }, 120); }
 })();
 </script>
 <!-- ATLAS-DATEPICKER v1 : reusable click-to-open calendar for text date fields -->

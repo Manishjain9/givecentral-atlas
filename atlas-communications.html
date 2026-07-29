@@ -1820,10 +1820,10 @@ body {
         var st=statusOf(m);
         bd.innerHTML='<div class="mrow"><span class="nm"><strong>'+m.recipientName+'</strong></span><span class="sa-pill st-'+st+'">'+st.charAt(0).toUpperCase()+st.slice(1)+'</span></div>'+
           '<p style="font-size:12.5px;color:#334155;margin-top:10px">'+(m.opened?('Opened'+(m.clicked?' and clicked a link.':' the message.')):(st==='delivered'?'Delivered but not opened yet.':('Message '+st+' — needs attention.')))+'</p>';
-        var _dn=m.recipientName||'', _de=m.recipientEmail||(_dn?_dn.toLowerCase().replace(/[^a-z]+/g,'.').replace(/^\.|\.$/g,'')+'@email.org':''); var _durl='atlas-donor-360.html'+(_dn?'?name='+encodeURIComponent(_dn)+'&email='+encodeURIComponent(_de):'');
+        var _dn=m.recipientName||'', _de=m.recipientEmail||(_dn?_dn.toLowerCase().replace(/[^a-z]+/g,'.').replace(/^\.|\.$/g,'')+'@email.org':''); var _durl='atlas-donor-360.html?from=comms'+(_dn?'&name='+encodeURIComponent(_dn)+'&email='+encodeURIComponent(_de):'');
         ft.innerHTML='<a class="mbtn" href="'+_durl+'">View donor profile</a><button class="mbtn" data-a="resend">Resend</button><button class="mbtn primary" data-a="view">Open message</button>';
       }
-      ft.querySelectorAll('[data-a]').forEach(function(b){ b.addEventListener('click', function(){ var a=b.dataset.a; if(a==='recips'){ openRecips(m); return; } toast(({export:'Message export queued · CSV ready',resend:'Resend queued to '+(m.isBlast?'non-openers':'recipient'),view:'Opening message preview'})[a]||'Done'); closeOv(); }); });
+      ft.querySelectorAll('[data-a]').forEach(function(b){ b.addEventListener('click', function(){ var a=b.dataset.a; if(a==='recips'){ openRecips(m); return; } if(a==='resend'){ closeOv(); commsResend(m, m.isBlast?'nonopeners':'all'); return; } toast(({export:'Message export queued · CSV ready',view:'Opening message preview'})[a]||'Done'); closeOv(); }); });
       ov.classList.add('show');
     }
     function openRecips(m){
@@ -1849,6 +1849,50 @@ body {
       draw();
       ov.classList.add('show');
     }
+    // Full-detail resend modal — review, permission, or open the whole Create Email flow
+    function commsResend(m, mode){
+      var esc=function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+      var deliv=Math.round(m.recipients*(m.isBlast?m.delRate:1));
+      var opened=Math.round(deliv*(m.isBlast?m.openRate:(m.opened?1:0)));
+      var clicked=m.clicked||Math.round(opened*0.12);
+      var nonOpen=Math.max(0,deliv-opened);
+      var target = mode==='nonopeners'? nonOpen : m.recipients;
+      var t=m.type||{label:'Email'};
+      var ov=document.getElementById('sa-resend-ov');
+      if(!ov){ ov=document.createElement('div'); ov.id='sa-resend-ov'; ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100097;display:flex;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif'; document.body.appendChild(ov); }
+      var pct=function(n){ return deliv?((n/deliv)*100).toFixed(1)+'%':'0%'; };
+      ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:560px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.32);overflow:hidden;max-height:90vh;display:flex;flex-direction:column">'+
+        '<div style="background:linear-gradient(135deg,#0E1E35,#2563EB);color:#fff;padding:18px 22px;display:flex;align-items:flex-start;gap:12px"><div style="flex:1"><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.82">'+(mode==='nonopeners'?'Resend to non-openers':'Resend to all recipients')+'</div><h3 style="font-family:\'DM Serif Display\',serif;font-size:20px;margin:3px 0 0">'+esc(m.subject)+'</h3></div><button id="rs-x" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;flex-shrink:0">×</button></div>'+
+        '<div style="padding:18px 22px;overflow:auto">'+
+          '<div style="display:grid;grid-template-columns:130px 1fr;gap:9px 14px;font-size:13px">'+
+            '<div style="color:#64748B">Type</div><div style="color:#0F172A;font-weight:600">'+esc(t.label)+'</div>'+
+            '<div style="color:#64748B">From</div><div style="color:#0F172A">'+esc(m.sender||'—')+'</div>'+
+            '<div style="color:#64748B">Campaign</div><div style="color:#0F172A">'+esc(m.campaign||'—')+'</div>'+
+            '<div style="color:#64748B">Originally sent</div><div style="color:#0F172A">'+esc(fmtDate(m.date))+' · '+fmtNum(m.recipients)+' recipients</div>'+
+          '</div>'+
+          '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0">'+
+            '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px;text-align:center"><div style="font-size:11px;color:#64748B">Delivered</div><div style="font-weight:700;color:#15803D">'+fmtNum(deliv)+'</div></div>'+
+            '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px;text-align:center"><div style="font-size:11px;color:#64748B">Opened</div><div style="font-weight:700;color:#2563EB">'+pct(opened)+'</div></div>'+
+            '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px;text-align:center"><div style="font-size:11px;color:#64748B">Not opened</div><div style="font-weight:700;color:#B45309">'+fmtNum(nonOpen)+'</div></div>'+
+          '</div>'+
+          '<div style="padding:12px 14px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;font-size:13px;color:#1E3A8A">This will resend “'+esc(m.subject)+'” to <b>'+fmtNum(target)+'</b> '+(mode==='nonopeners'?'recipients who haven’t opened it yet':'recipients on the original send')+'. Suppressed and bounced addresses are excluded automatically.</div>'+
+          '<label style="display:flex;gap:9px;align-items:flex-start;margin-top:14px;font-size:13px;color:#334155;cursor:pointer"><input type="checkbox" id="rs-ack" style="margin-top:2px"><span>I’ve reviewed the details above and want to resend to these '+fmtNum(target)+' recipients.</span></label>'+
+        '</div>'+
+        '<div style="display:flex;gap:10px;align-items:center;padding:14px 22px;border-top:1px solid #E2E8F0;flex-wrap:wrap">'+
+          '<button id="rs-review" style="border:1px solid #2563EB;background:#fff;color:#2563EB;padding:10px 15px;border-radius:9px;font:600 12.5px DM Sans;cursor:pointer">Review in Create Email flow →</button>'+
+          '<span style="flex:1"></span>'+
+          '<button id="rs-cancel" style="border:1px solid #E2E8F0;background:#fff;color:#334155;padding:10px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Cancel</button>'+
+          '<button id="rs-go" disabled style="border:none;background:#2563EB;color:#fff;padding:10px 18px;border-radius:9px;font:600 13px DM Sans;cursor:not-allowed;opacity:.5">Resend to '+fmtNum(target)+'</button>'+
+        '</div></div>';
+      ov.style.display='flex';
+      var go=ov.querySelector('#rs-go'), ack=ov.querySelector('#rs-ack');
+      ack.onchange=function(){ go.disabled=!ack.checked; go.style.cursor=ack.checked?'pointer':'not-allowed'; go.style.opacity=ack.checked?'1':'.5'; };
+      function close(){ ov.style.display='none'; }
+      ov.querySelector('#rs-cancel').onclick=close; ov.querySelector('#rs-x').onclick=close;
+      ov.onclick=function(e){ if(e.target===ov) close(); };
+      ov.querySelector('#rs-review').onclick=function(){ window.location='atlas-email-campaign.html?dupSubject='+encodeURIComponent(m.subject)+'&type='+encodeURIComponent(t.k||'appeal'); };
+      go.onclick=function(){ if(go.disabled) return; close(); toast('Resend queued · '+fmtNum(target)+' recipients · '+(mode==='nonopeners'?'non-openers':'all')); };
+    }
     function openKebab(btn,m){
       document.querySelectorAll('.sa-kmenu').forEach(function(x){x.remove();});
       var menu=document.createElement('div'); menu.className='sa-kmenu';
@@ -1861,10 +1905,10 @@ body {
       menu.addEventListener('click', function(e){ var it=e.target.closest('.it'); if(!it)return; var a=it.dataset.a; menu.remove();
         if(a==='view') gotoDetail(m);
         else if(a==='recips') gotoDetail(m,'recipients');
-        else if(a==='resend') gotoDetail(m,'resend');
-        else if(a==='resendall') gotoDetail(m,'resendall');
+        else if(a==='resend') commsResend(m,'nonopeners');
+        else if(a==='resendall') commsResend(m,'all');
         else if(a==='suppress') gotoDetail(m,'suppress');
-        else if(a==='donor'){ var dn=m.recipientName||''; var de=m.recipientEmail||(dn?dn.toLowerCase().replace(/[^a-z]+/g,'.').replace(/^\.|\.$/g,'')+'@email.org':''); window.location='atlas-donor-360.html'+(dn?'?name='+encodeURIComponent(dn)+'&email='+encodeURIComponent(de):''); }
+        else if(a==='donor'){ var dn=m.recipientName||''; var de=m.recipientEmail||(dn?dn.toLowerCase().replace(/[^a-z]+/g,'.').replace(/^\.|\.$/g,'')+'@email.org':''); window.location='atlas-donor-360.html?from=comms'+(dn?'&name='+encodeURIComponent(dn)+'&email='+encodeURIComponent(de):''); }
         else toast(({export:'Export queued · CSV ready · '+(m.isBlast?m.recipients.toLocaleString()+' rows':'1 row')})[a]||'Done'); });
       setTimeout(function(){ document.addEventListener('click', function cl(ev){ if(!menu.contains(ev.target)){ menu.remove(); document.removeEventListener('click',cl);} }); },10);
     }
