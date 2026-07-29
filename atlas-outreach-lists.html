@@ -335,7 +335,7 @@ a { color:inherit; text-decoration:none; }
     <h1 class="ph-title">Outreach lists</h1>
     <span class="ph-count" id="lists-count">8 lists · 1,502 unique donors reached</span>
     <div class="ph-actions">
-      <button class="btn btn-ghost" onclick="toast('Importing list members from CSV…')">
+      <button class="btn btn-ghost" onclick="openCsvWizard()">
         <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v7M3 5l3 3 3-3"/><path d="M1.5 10.5h9"/></svg>
         Import CSV
       </button>
@@ -466,6 +466,65 @@ a { color:inherit; text-decoration:none; }
     </div>
   </div>
 </div>
+
+<!-- CSV import wizard -->
+<style id="csvw-css">
+  #csvw-ov { position:fixed; inset:0; background:rgba(15,23,42,.5); backdrop-filter:blur(3px); z-index:400; display:none; align-items:center; justify-content:center; padding:24px; }
+  #csvw-ov.show { display:flex; }
+  .csvw { background:#fff; border-radius:16px; width:100%; max-width:620px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 28px 70px rgba(15,23,42,.32); overflow:hidden; }
+  .csvw-h { padding:18px 22px 14px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; gap:12px; }
+  .csvw-h .t { font-family:'DM Serif Display',serif; font-size:21px; color:var(--text); }
+  .csvw-h .s { font-size:12.5px; color:var(--text-3); margin-top:3px; }
+  .csvw-x { margin-left:auto; width:30px; height:30px; border-radius:8px; border:1px solid var(--border); background:#fff; cursor:pointer; font-size:15px; color:var(--text-3); }
+  .csvw-x:hover { background:var(--surface); }
+  .csvw-steps { display:flex; gap:8px; padding:12px 22px; border-bottom:1px solid var(--border-soft); }
+  .csvw-step { font-size:11.5px; font-weight:600; color:var(--text-3); display:flex; align-items:center; gap:6px; }
+  .csvw-step .n { width:20px; height:20px; border-radius:50%; background:var(--surface); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:10.5px; }
+  .csvw-step.on { color:var(--blue); } .csvw-step.on .n { background:var(--blue); color:#fff; border-color:var(--blue); }
+  .csvw-step.done .n { background:var(--green); color:#fff; border-color:var(--green); }
+  .csvw-b { padding:20px 22px; overflow-y:auto; flex:1; }
+  .csvw-f { padding:14px 22px; border-top:1px solid var(--border); display:flex; align-items:center; gap:10px; justify-content:flex-end; }
+  .csvw-drop { border:2px dashed var(--border); border-radius:12px; padding:34px 20px; text-align:center; cursor:pointer; transition:border-color .15s, background .15s; }
+  .csvw-drop:hover, .csvw-drop.drag { border-color:var(--blue); background:var(--blue-pale); }
+  .csvw-drop svg { width:34px; height:34px; color:var(--blue); }
+  .csvw-drop .big { font-size:14px; font-weight:600; color:var(--text); margin-top:10px; }
+  .csvw-drop .sm { font-size:12px; color:var(--text-3); margin-top:4px; }
+  .csvw-file { display:flex; align-items:center; gap:10px; margin-top:14px; padding:10px 12px; background:var(--surface); border:1px solid var(--border); border-radius:9px; font-size:12.5px; color:var(--text-2); }
+  .csvw-map { display:grid; grid-template-columns:1fr 1fr; gap:10px 14px; }
+  .csvw-map .fl { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--text-2); margin-bottom:5px; }
+  .csvw-sel, .csvw-inp { width:100%; font-family:'DM Sans',sans-serif; font-size:13px; padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:#fff; color:var(--text); }
+  .csvw-tbl { width:100%; border-collapse:collapse; font-size:12px; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+  .csvw-tbl th { text-align:left; background:var(--surface); padding:7px 10px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--text-3); border-bottom:1px solid var(--border); }
+  .csvw-tbl td { padding:7px 10px; border-bottom:1px solid var(--border-soft); color:var(--text-2); }
+  .csvw-tbl tr:last-child td { border-bottom:none; }
+  .csvw-tbl td.dup { color:var(--amber); }
+  .csvw-sum { display:flex; gap:10px; margin-bottom:14px; }
+  .csvw-sum .card { flex:1; border:1px solid var(--border); border-radius:10px; padding:11px 13px; }
+  .csvw-sum .card .v { font-size:20px; font-weight:700; color:var(--text); }
+  .csvw-sum .card .v.g { color:var(--green); } .csvw-sum .card .v.a { color:var(--amber); }
+  .csvw-sum .card .l { font-size:11px; color:var(--text-3); margin-top:2px; }
+  .csvw-btn { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; padding:9px 16px; border-radius:9px; cursor:pointer; border:1px solid transparent; }
+  .csvw-btn.ghost { background:#fff; border-color:var(--border); color:var(--text-2); }
+  .csvw-btn.primary { background:var(--blue); color:#fff; }
+  .csvw-btn.primary:disabled { opacity:.5; cursor:default; }
+  .csvw-btn.primary:hover:not(:disabled) { background:#1D4ED8; }
+</style>
+<div id="csvw-ov">
+  <div class="csvw">
+    <div class="csvw-h">
+      <div><div class="t">Import contacts from CSV</div><div class="s" id="csvw-sub">Upload a file, map the columns, then create the list.</div></div>
+      <button class="csvw-x" onclick="csvwClose()">×</button>
+    </div>
+    <div class="csvw-steps">
+      <div class="csvw-step on" data-s="1"><span class="n">1</span> Upload</div>
+      <div class="csvw-step" data-s="2"><span class="n">2</span> Map columns</div>
+      <div class="csvw-step" data-s="3"><span class="n">3</span> Review &amp; create</div>
+    </div>
+    <div class="csvw-b" id="csvw-body"></div>
+    <div class="csvw-f" id="csvw-foot"></div>
+  </div>
+</div>
+<input type="file" id="csvw-file-input" accept=".csv,text/csv" style="display:none">
 
 <!-- Detail drawer -->
 <div class="drawer-scrim" id="drawer-scrim" onclick="closeDrawer()"></div>
@@ -782,8 +841,132 @@ document.addEventListener('keydown', (e) => {
   if (document.getElementById('list-drawer').classList.contains('show')) { closeDrawer(); return; }
 });
 
+/* ─── CSV import wizard ─── */
+var csvw = { step:1, name:'', headers:[], data:[], map:{first:-1,last:-1,email:-1,phone:-1}, fname:'' };
+function escv(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+window.openCsvWizard = function(){
+  csvw = { step:1, name:'', headers:[], data:[], map:{first:-1,last:-1,email:-1,phone:-1}, fname:'' };
+  csvwRender();
+  document.getElementById('csvw-ov').classList.add('show');
+};
+window.csvwClose = function(){ document.getElementById('csvw-ov').classList.remove('show'); };
+function csvwSteps(){ [].forEach.call(document.querySelectorAll('.csvw-step'), function(s){ var n=+s.getAttribute('data-s'); s.classList.toggle('on', n===csvw.step); s.classList.toggle('done', n<csvw.step); }); }
+function parseCSV(text){
+  var rows=[], row=[], cur='', inq=false;
+  for(var i=0;i<text.length;i++){ var c=text[i];
+    if(inq){ if(c==='"'){ if(text[i+1]==='"'){ cur+='"'; i++; } else inq=false; } else cur+=c; }
+    else { if(c==='"') inq=true; else if(c===','){ row.push(cur); cur=''; } else if(c==='\n'){ row.push(cur); rows.push(row); row=[]; cur=''; } else if(c==='\r'){} else cur+=c; }
+  }
+  if(cur!==''||row.length){ row.push(cur); rows.push(row); }
+  return rows.filter(function(r){ return r.some(function(x){ return String(x).trim()!==''; }); });
+}
+function guessCol(headers, keys){ for(var i=0;i<headers.length;i++){ var h=headers[i].toLowerCase(); for(var k=0;k<keys.length;k++){ if(h.indexOf(keys[k])>-1) return i; } } return -1; }
+function csvwHandleText(text, fname){
+  var rows=parseCSV(text);
+  if(rows.length<2){ toast('That CSV looks empty — needs a header row plus at least one contact.'); return; }
+  csvw.headers = rows[0].map(function(h){ return String(h).trim(); });
+  csvw.data = rows.slice(1);
+  csvw.name = (fname||'Imported list').replace(/\.csv$/i,'');
+  csvw.fname = fname||'contacts.csv';
+  csvw.map = { first:guessCol(csvw.headers,['first','fname','given']), last:guessCol(csvw.headers,['last','lname','surname','family']), email:guessCol(csvw.headers,['email','e-mail','mail']), phone:guessCol(csvw.headers,['phone','mobile','cell','tel']) };
+  csvw.step = 2; csvwRender();
+}
+window.csvwLoadText = csvwHandleText;
+function cellv(r, idx){ return (idx>=0 && r[idx]!=null) ? String(r[idx]).trim() : ''; }
+function validEmail(e){ return /.+@.+\..+/.test(e); }
+function csvwStats(){
+  var seen={}, dupes=0, missing=0, valid=0;
+  csvw.data.forEach(function(r){ var e=cellv(r,csvw.map.email).toLowerCase(); if(!e||!validEmail(e)){ missing++; return; } if(seen[e]){ dupes++; } else { seen[e]=1; valid++; } });
+  return { total:csvw.data.length, valid:valid, dupes:dupes, missing:missing };
+}
+function csvwWireDrop(){
+  var dz=document.getElementById('csvw-drop'), inp=document.getElementById('csvw-file-input'); if(!dz||!inp) return;
+  dz.onclick=function(){ inp.click(); };
+  inp.onchange=function(){ var fl=inp.files&&inp.files[0]; if(!fl) return; var rd=new FileReader(); rd.onload=function(){ csvwHandleText(String(rd.result), fl.name); }; rd.readAsText(fl); inp.value=''; };
+  dz.ondragover=function(e){ e.preventDefault(); dz.classList.add('drag'); };
+  dz.ondragleave=function(){ dz.classList.remove('drag'); };
+  dz.ondrop=function(e){ e.preventDefault(); dz.classList.remove('drag'); var fl=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(!fl) return; var rd=new FileReader(); rd.onload=function(){ csvwHandleText(String(rd.result), fl.name); }; rd.readAsText(fl); };
+}
+function csvwRender(){
+  csvwSteps();
+  var b=document.getElementById('csvw-body'), f=document.getElementById('csvw-foot');
+  if(csvw.step===1){
+    b.innerHTML = '<div class="csvw-drop" id="csvw-drop">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2"/></svg>'
+      + '<div class="big">Drop a CSV here, or click to choose a file</div>'
+      + '<div class="sm">First row should be column headers (name, email, phone…).</div>'
+      + '</div>'
+      + '<div style="font-size:11.5px;color:var(--text-3);margin-top:12px"><a href="#" onclick="csvwSample();return false" style="color:var(--blue);font-weight:600;text-decoration:none">Download a sample template</a> if you\'re unsure of the format.</div>';
+    f.innerHTML = '<button class="csvw-btn ghost" onclick="csvwClose()">Cancel</button>';
+    setTimeout(csvwWireDrop, 0);
+  } else if(csvw.step===2){
+    var opts = function(sel){ return '<option value="-1">— Skip —</option>' + csvw.headers.map(function(h,i){ return '<option value="'+i+'"'+(i===sel?' selected':'')+'>'+escv(h)+'</option>'; }).join(''); };
+    b.innerHTML = '<div style="margin-bottom:16px"><span class="fl">List name</span><input class="csvw-inp" id="csvw-name" value="'+escv(csvw.name)+'"></div>'
+      + '<div style="font-size:12px;color:var(--text-3);margin-bottom:10px">Detected <strong>'+csvw.headers.length+'</strong> columns and <strong>'+csvw.data.length+'</strong> rows. Map them to Atlas fields:</div>'
+      + '<div class="csvw-map">'
+        + '<div><span class="fl">First name</span><select class="csvw-sel" data-map="first">'+opts(csvw.map.first)+'</select></div>'
+        + '<div><span class="fl">Last name</span><select class="csvw-sel" data-map="last">'+opts(csvw.map.last)+'</select></div>'
+        + '<div><span class="fl">Email <span style="color:var(--rose)">*</span></span><select class="csvw-sel" data-map="email">'+opts(csvw.map.email)+'</select></div>'
+        + '<div><span class="fl">Phone</span><select class="csvw-sel" data-map="phone">'+opts(csvw.map.phone)+'</select></div>'
+      + '</div>';
+    f.innerHTML = '<button class="csvw-btn ghost" onclick="csvw.step=1;csvwRender()">Back</button><button class="csvw-btn primary" onclick="csvwToReview()">Next: review</button>';
+    [].forEach.call(b.querySelectorAll('.csvw-sel'), function(s){ s.addEventListener('change', function(){ csvw.map[s.getAttribute('data-map')]=+s.value; }); });
+    document.getElementById('csvw-name').addEventListener('input', function(){ csvw.name=this.value; });
+  } else {
+    var st=csvwStats(); var preview=csvw.data.slice(0,8), seen={};
+    b.innerHTML = '<div class="csvw-sum">'
+        + '<div class="card"><div class="v g">'+st.valid+'</div><div class="l">New contacts</div></div>'
+        + '<div class="card"><div class="v a">'+st.dupes+'</div><div class="l">Duplicate emails</div></div>'
+        + '<div class="card"><div class="v">'+st.missing+'</div><div class="l">Missing / invalid</div></div>'
+      + '</div>'
+      + '<div style="font-size:12px;color:var(--text-3);margin-bottom:8px">Preview · first '+preview.length+' of '+csvw.data.length+' rows</div>'
+      + '<table class="csvw-tbl"><thead><tr><th>Name</th><th>Email</th><th>Phone</th></tr></thead><tbody>'
+        + preview.map(function(r){ var em=cellv(r,csvw.map.email).toLowerCase(); var dup=em&&seen[em]; if(em) seen[em]=1; var nm=(cellv(r,csvw.map.first)+' '+cellv(r,csvw.map.last)).trim()||'—';
+            return '<tr><td>'+escv(nm)+'</td><td class="'+(dup?'dup':'')+'">'+escv(cellv(r,csvw.map.email)||'—')+(dup?' · dup':'')+'</td><td>'+escv(cellv(r,csvw.map.phone)||'—')+'</td></tr>'; }).join('')
+      + '</tbody></table>'
+      + (csvw.map.email<0 ? '<div style="font-size:12px;color:var(--rose);margin-top:10px">Map an Email column to import — Atlas needs it to dedupe and send.</div>' : '');
+    f.innerHTML = '<button class="csvw-btn ghost" onclick="csvw.step=2;csvwRender()">Back</button><button class="csvw-btn primary" '+(csvw.map.email<0?'disabled':'')+' onclick="csvwCreate()">Create list · '+st.valid+' contacts</button>';
+  }
+}
+window.csvwToReview=function(){ if(csvw.map.email<0){ toast('Pick which column holds the email address.'); } csvw.step=3; csvwRender(); };
+window.csvwSample=function(){
+  var csv='First Name,Last Name,Email,Phone\nMargaret,O\'Brien,margaret@example.com,(727) 555-0100\nRobert,Lin,rlin@example.com,(727) 555-0111\n';
+  try{ var blob=new Blob([csv],{type:'text/csv'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='atlas-contacts-template.csv'; a.click(); }catch(e){}
+  toast('Sample template downloading…');
+};
+window.csvwCreate=function(){
+  if(csvw.map.email<0) return; var st=csvwStats(); var name=(csvw.name||'Imported list').trim();
+  LISTS.unshift({ id:'L'+(LISTS.length+1).toString().padStart(2,'0'), name:name, desc:'Imported from '+(csvw.fname||'CSV')+' · '+st.valid+' contacts', members:st.valid, type:'manual', status:'active', engagement:0, owner:'Sarah Reynolds', ownerAv:'SR', avBg:'var(--blue)', lastActivity:'Just now', updated:'2026-05-04', activity:'Imported '+st.valid+' contacts from CSV ('+st.dupes+' duplicates skipped)', sampleMembers:[] });
+  renderLists(); csvwClose();
+  toast('List "'+name+'" created · '+st.valid+' contacts imported'+(st.dupes?' · '+st.dupes+' duplicates skipped':''), 'success');
+};
+if(/[?&]import=csv/.test(location.search)) setTimeout(openCsvWizard, 300);
+
 // Initial render
 renderLists();
+
+// ── Deep-link: open a specific list's dedicated detail when arriving via ?list / ?name ──
+(function(){
+  var P=new URLSearchParams(location.search);
+  var wantName=(P.get('name')||'').trim(), wantId=(P.get('list')||'').trim();
+  if(!wantName && !wantId) return;
+  var match=null;
+  if(wantName){ var wn=wantName.toLowerCase(); match=LISTS.find(function(l){return l.name.toLowerCase()===wn;}) || LISTS.find(function(l){return l.name.toLowerCase().indexOf(wn)!==-1 || wn.indexOf(l.name.toLowerCase())!==-1;}); }
+  if(!match && wantId){ match=LISTS.find(function(l){return l.id===wantId;}); }
+  if(!match){
+    // synthesize a dedicated detail for a list that isn't in this screen's seed data
+    var cnt=parseInt(P.get('count'),10)||parseInt((P.get('listCount')||''),10)||1240;
+    var FN=['Margaret','Thomas','James','Patricia','Michael','Susan','Anne','John','Elena','Catherine','Bridget','Sean','Kathleen','Robert','Laura','Nora'];
+    var LN=["O'Brien",'Sullivan','Walsh','Nguyen','Russo','Carter','Byrne','Murphy','Kennedy','Greene','Lin','Hayes','Quinn','Gallagher','Reilly'];
+    var sample=[]; for(var i=0;i<6;i++){ sample.push({name:FN[(i*5+3)%FN.length]+' '+LN[(i*7+2)%LN.length], sub:['Major donor','Recurring monthly','First-time donor','Active · 3 gifts','Lapsed · re-engage','Household · 4 gifts'][i]}); }
+    match={ id:'ext', name:wantName||wantId, desc:'Opened from a link in Communications. Members shown are a representative sample of this list.',
+      members:cnt, type:'dynamic', status:'active', engagement:Math.round(30+Math.random()*40), owner:'Sarah Reynolds',
+      lastActivity:'Just opened', updated:new Date().toISOString().slice(0,10),
+      activity:'List opened from Communications → Lists & segments<br>'+cnt.toLocaleString()+' current members<br>Segment refreshes automatically', sampleMembers:sample };
+    LISTS.unshift(match);
+  }
+  setTimeout(function(){ openListDrawer(match.id); }, 120);
+})();
 </script>
 
 

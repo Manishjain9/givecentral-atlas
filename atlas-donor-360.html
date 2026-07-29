@@ -3328,5 +3328,21 @@ body {
 })();
 </script>
 <!-- /ATLAS-NAVCOLLAPSE -->
+<!-- Reflect a linked recipient (from Communications → Sent → View donor profile) -->
+<script>
+(function(){
+  var P=new URLSearchParams(location.search); var nm=(P.get('name')||'').trim(); if(!nm) return;
+  var em=(P.get('email')||'').trim() || (nm.toLowerCase().replace(/[^a-z]+/g,'.').replace(/^\.|\.$/g,'')+'@email.org');
+  function ini(s){ return s.split(/\s+/).filter(Boolean).slice(0,2).map(function(p){return p[0];}).join('').toUpperCase(); }
+  function apply(){
+    document.querySelectorAll('.donor-name').forEach(function(e){ e.textContent=nm; });
+    document.querySelectorAll('.donor-avatar').forEach(function(e){ if(!e.querySelector('img')) e.textContent=ini(nm); });
+    var bc=document.querySelector('.breadcrumb span'); if(bc) bc.textContent=nm;
+    var cv=document.querySelector('.contact-value'); if(cv && /@/.test(cv.textContent)) cv.textContent=em;
+    document.title='GiveCentral Atlas — '+nm;
+  }
+  if(document.readyState!=='loading') apply(); else document.addEventListener('DOMContentLoaded', apply);
+})();
+</script>
 </body>
 </html>

@@ -1017,7 +1017,7 @@ body {
     }
     list.innerHTML = all.map(function(d){
       var recipientCount = d.recipients.length + (d.cc ? d.cc.length : 0);
-      return '<a class="cm-row" href="atlas-email-compose.html?draft=' + encodeURIComponent(d.id) + '" style="cursor:pointer">' +
+      return '<a class="cm-row" href="atlas-email-campaign.html?draft=' + encodeURIComponent(d.id) + '&name=' + encodeURIComponent(d.subject||'Draft') + '" style="cursor:pointer">' +
         '<div class="ico" style="background:var(--amber-light);color:var(--amber);display:flex;align-items:center;justify-content:center">' +
           '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 12.5L4 8l8-8 2 2-8 8L1.5 12.5z"/></svg>' +
         '</div>' +
@@ -1128,6 +1128,75 @@ body {
     ov.onclick=function(e){ if(e.target===ov) ov.style.display='none'; };
   }
   window.commsConfirm=commsConfirm;
+  // Rich "Send now" review modal for a scheduled email — forces a review before sending
+  function commsSendNow(row){
+    var g=function(sel){ var e=row&&row.querySelector(sel); return e?e.textContent.trim():''; };
+    var subj=g('.body .ttl'), to=g('.recipients strong'), cntTxt=g('.recipients .muted'), when=g('.metric .v'), time=g('.metric .l');
+    var meta=[]; if(row) row.querySelectorAll('.body .meta span').forEach(function(s){ var t=s.textContent.trim(); if(t && t!=='·') meta.push(t); });
+    var sender=meta.length?meta[meta.length-1]:'Your team';
+    var recNum=(cntTxt.match(/[\d,]+/)||[])[0] || to || 'all';
+    var checks=[['Deliverability looks healthy','SPF + DKIM verified for diocese.org · spam score 2.1/10'],['Unsubscribe link present','Required by CAN-SPAM'],['Physical mailing address included','St. Mary’s Cathedral · 125 Eagle St, Albany, NY'],['Suppression list applied','Bounced, unsubscribed & DNC contacts removed automatically']];
+    var ov=document.getElementById('sn-ov');
+    if(!ov){ ov=document.createElement('div'); ov.id='sn-ov'; ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100095;display:flex;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif'; document.body.appendChild(ov); }
+    ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:540px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.32);overflow:hidden;max-height:90vh;display:flex;flex-direction:column">'+
+      '<div style="background:linear-gradient(135deg,#0E1E35,#2563EB);color:#fff;padding:18px 22px;display:flex;align-items:flex-start;gap:12px"><div style="flex:1"><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.82">Review before sending</div><h3 style="font-family:\'DM Serif Display\',serif;font-size:20px;margin:3px 0 0">'+esc(subj||'Scheduled email')+'</h3></div><button id="sn-x" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;flex-shrink:0">×</button></div>'+
+      '<div style="padding:18px 22px;overflow:auto">'+
+        '<div style="display:grid;grid-template-columns:130px 1fr;gap:9px 14px;font-size:13px">'+
+          '<div style="color:#64748B">Audience</div><div style="color:#0F172A;font-weight:600">'+esc(to||'—')+'</div>'+
+          '<div style="color:#64748B">Recipients</div><div style="color:#0F172A;font-weight:600">'+esc(recNum)+'</div>'+
+          '<div style="color:#64748B">From</div><div style="color:#0F172A">'+esc(sender)+'</div>'+
+          '<div style="color:#64748B">Was scheduled for</div><div style="color:#0F172A">'+esc((when||'—')+(time?' · '+time:''))+'</div>'+
+        '</div>'+
+        '<div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#64748B;margin:18px 0 8px">Pre-send checklist</div>'+
+        '<div style="border:1px solid #E2E8F0;border-radius:10px;overflow:hidden">'+
+          checks.map(function(c,i){ return '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 13px'+(i<checks.length-1?';border-bottom:1px solid #F1F5F9':'')+'"><span style="color:#15803D;font-weight:700;line-height:1.3">✓</span><div><div style="font-size:13px;font-weight:600;color:#0F172A">'+c[0]+'</div><div style="font-size:11.5px;color:#64748B">'+c[1]+'</div></div></div>'; }).join('')+
+        '</div>'+
+        '<div style="margin-top:14px;padding:11px 13px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:9px;font-size:12.5px;color:#92400E;line-height:1.5">⚠ Sending now overrides the schedule and begins delivery <b>immediately</b>. Large sends are throttled over ~30–60 min. This can’t be undone once it starts.</div>'+
+        '<label style="display:flex;gap:9px;align-items:flex-start;margin-top:14px;font-size:13px;color:#334155;cursor:pointer"><input type="checkbox" id="sn-ack" style="margin-top:2px"><span>I’ve reviewed the recipients and content, and I’m ready to send now.</span></label>'+
+      '</div>'+
+      '<div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 22px;border-top:1px solid #E2E8F0">'+
+        '<button id="sn-cancel" style="border:1px solid #E2E8F0;background:#fff;color:#334155;padding:10px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Cancel</button>'+
+        '<button id="sn-go" disabled style="border:none;background:#2563EB;color:#fff;padding:10px 18px;border-radius:9px;font:600 13px DM Sans;cursor:not-allowed;opacity:.5">Send now to '+esc(recNum)+' recipients</button>'+
+      '</div></div>';
+    ov.style.display='flex';
+    var go=ov.querySelector('#sn-go'), ack=ov.querySelector('#sn-ack');
+    ack.onchange=function(){ go.disabled=!ack.checked; go.style.cursor=ack.checked?'pointer':'not-allowed'; go.style.opacity=ack.checked?'1':'.5'; };
+    function close(){ ov.style.display='none'; }
+    ov.querySelector('#sn-cancel').onclick=close; ov.querySelector('#sn-x').onclick=close;
+    go.onclick=function(){ if(go.disabled) return; close(); if(row){ row.remove(); updateCount('scheduled'); } toast('Sending now · “'+subj+'” moved to Sent'); };
+    ov.onclick=function(e){ if(e.target===ov) close(); };
+  }
+  window.commsSendNow=commsSendNow;
+  // Duplicate-with-rename modal (list / template / draft / scheduled send)
+  function commsDuplicate(kind, row, pane){
+    var g=function(sel){ var e=row&&row.querySelector(sel); return e?e.textContent.trim():''; };
+    var name=g('.ttl')||g('.body .ttl')||'Untitled';
+    var sub=g('.recipients')|| (row?(((row.querySelector('.meta'))||{}).textContent||'').replace(/\s+/g,' ').trim():'');
+    var ov=document.getElementById('dupl-ov');
+    if(!ov){ ov=document.createElement('div'); ov.id='dupl-ov'; ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100096;display:flex;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif'; document.body.appendChild(ov); }
+    var defName=name+' (copy)';
+    ov.innerHTML='<div style="background:#fff;border-radius:15px;max-width:460px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">'+
+      '<div style="padding:18px 22px 6px"><div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748B">Duplicate '+esc(kind)+'</div><h3 style="font-family:\'DM Serif Display\',serif;font-size:19px;color:#0E1E35;margin:3px 0 0">Make a copy of this '+esc(kind)+'</h3></div>'+
+      '<div style="padding:12px 22px 4px">'+
+        '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:9px;padding:11px 13px;margin-bottom:14px"><div style="font-size:12.5px;font-weight:600;color:#0F172A">'+esc(name)+'</div>'+(sub?'<div style="font-size:11.5px;color:#64748B;margin-top:2px">'+esc(sub)+'</div>':'')+'</div>'+
+        '<label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:5px">Name the copy</label>'+
+        '<input id="dupl-name" value="'+esc(defName)+'" style="width:100%;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px;font:400 13.5px DM Sans">'+
+        '<p style="font-size:11.5px;color:#94A3B8;margin-top:8px">The copy keeps all content and settings'+(kind==='scheduled send'?' but is unscheduled — you’ll pick a new send time.':(kind==='list'?' and the same members.':'.'))+'</p>'+
+      '</div>'+
+      '<div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 22px;border-top:1px solid #E2E8F0;margin-top:8px"><button id="dupl-cancel" style="border:1px solid #E2E8F0;background:#fff;color:#334155;padding:9px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Cancel</button><button id="dupl-go" style="border:none;background:#2563EB;color:#fff;padding:9px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Create copy</button></div>'+
+    '</div>';
+    ov.style.display='flex';
+    var nameInp=ov.querySelector('#dupl-name'); setTimeout(function(){ try{ nameInp.focus(); nameInp.select(); }catch(_){} },30);
+    function close(){ ov.style.display='none'; }
+    ov.querySelector('#dupl-cancel').onclick=close;
+    ov.onclick=function(e){ if(e.target===ov) close(); };
+    ov.querySelector('#dupl-go').onclick=function(){
+      var nn=(nameInp.value||defName).trim();
+      if(row){ var c=row.cloneNode(true); var ttl=c.querySelector('.ttl')||c.querySelector('.body .ttl'); if(ttl) ttl.textContent=nn; if(pane==='scheduled'){ var tg=c.querySelector('.tag'); if(tg) tg.textContent='Scheduled'; } row.parentNode.insertBefore(c, row.nextSibling); updateCount(pane); }
+      close(); toast('Copy created · “'+nn+'”');
+    };
+  }
+  window.commsDuplicate=commsDuplicate;
   function updateCount(pane){
     var map={ scheduled:['scheduled-list','sched-count-inline'], drafts:['drafts-list','drafts-count-inline'], templates:['templates-list',null], lists:['lists-list','lists-count-inline'] };
     var m=map[pane]; if(!m) return;
@@ -1140,10 +1209,10 @@ body {
   /* ── Kebab menus (per pane) — fully functional ── */
   var ACTS={
     sent:[{t:'View message',k:'navrow'},{t:'Resend to non-openers',k:'toast',v:'Resend queued to non-openers · sending shortly'},{t:'Forward…',k:'nav',v:'atlas-email-compose.html'},{t:'View engagement report',k:'toast',v:'Opens & clicks report opening…'},{t:'Copy tracking link',k:'toast',v:'Tracking link copied to clipboard'}],
-    scheduled:[{t:'Edit schedule',k:'sched'},{t:'Send now',k:'sendnow'},{t:'Duplicate',k:'dup',v:'Duplicated to a new scheduled send'},{t:'Cancel send',k:'del',danger:true,title:'Cancel scheduled send?',body:'This email will not go out. You can recreate it later from Drafts.',ok:'Cancel send',done:'Scheduled send cancelled'}],
-    templates:[{t:'Edit in builder',k:'nav',v:'atlas-email-builder.html?mode=template'},{t:'Duplicate template',k:'dup',v:'Template duplicated'},{t:'Set as default',k:'toast',v:'Set as the default template'},{t:'Archive',k:'del',danger:true,title:'Archive this template?',body:'Archived templates are hidden from the list but can be restored later.',ok:'Archive',done:'Template archived'},{t:'Delete',k:'del',danger:true,title:'Delete this template?',body:'This permanently removes the template and cannot be undone.',ok:'Delete',done:'Template deleted'}],
-    lists:[{t:'Open list',k:'navrow'},{t:'Send to this list',k:'navlist'},{t:'Duplicate list',k:'dup',v:'List duplicated'},{t:'Export CSV',k:'toast',v:'List exported · CSV downloading'},{t:'Delete list',k:'del',danger:true,title:'Delete this list?',body:'Donors stay in your database — only this list / segment is removed.',ok:'Delete list',done:'List deleted'}],
-    drafts:[{t:'Resume editing',k:'navrow'},{t:'Duplicate draft',k:'dup',v:'Draft duplicated'},{t:'Schedule send',k:'sched'},{t:'Delete draft',k:'del',danger:true,title:'Delete this draft?',body:'This draft will be permanently removed.',ok:'Delete draft',done:'Draft deleted'}]
+    scheduled:[{t:'Edit schedule',k:'sched'},{t:'Send now',k:'sendnow'},{t:'Duplicate',k:'dupmodal',kind:'scheduled send'},{t:'Cancel send',k:'del',danger:true,title:'Cancel scheduled send?',body:'This email will not go out. You can recreate it later from Drafts.',ok:'Cancel send',done:'Scheduled send cancelled'}],
+    templates:[{t:'Edit in builder',k:'edittpl'},{t:'Duplicate template',k:'dupmodal',kind:'template'},{t:'Set as default',k:'toast',v:'Set as the default template'},{t:'Archive',k:'del',danger:true,title:'Archive this template?',body:'Archived templates are hidden from the list but can be restored later.',ok:'Archive',done:'Template archived'},{t:'Delete',k:'del',danger:true,title:'Delete this template?',body:'This permanently removes the template and cannot be undone.',ok:'Delete',done:'Template deleted'}],
+    lists:[{t:'Open list',k:'openlist'},{t:'Send to this list',k:'navlist'},{t:'Duplicate list',k:'dupmodal',kind:'list'},{t:'Export CSV',k:'toast',v:'List exported · CSV downloading'},{t:'Delete list',k:'del',danger:true,title:'Delete this list?',body:'Donors stay in your database — only this list / segment is removed.',ok:'Delete list',done:'List deleted'}],
+    drafts:[{t:'Resume editing',k:'navrow'},{t:'Duplicate draft',k:'dupmodal',kind:'draft'},{t:'Schedule send',k:'sched'},{t:'Delete draft',k:'del',danger:true,title:'Delete this draft?',body:'This draft will be permanently removed.',ok:'Delete draft',done:'Draft deleted'}]
   };
   var kmenu=null;
   function closeK(){ if(kmenu){ kmenu.remove(); kmenu=null; } }
@@ -1160,10 +1229,13 @@ body {
       if(a.k==='nav'){ toast('Opening…'); setTimeout(function(){ window.location=a.v; },200); }
       else if(a.k==='navrow'){ var href=row&&row.getAttribute('href'); toast('Opening…'); setTimeout(function(){ if(href) window.location=href; },200); }
       else if(a.k==='navlist'){ var nm=((row&&row.querySelector('.ttl'))||{}).textContent||''; var cnt=(((row&&row.querySelector('.meta'))||{}).textContent||'').replace(/[^0-9]/g,''); toast('Starting email to '+nm+'…'); setTimeout(function(){ window.location='atlas-email-campaign.html?listName='+encodeURIComponent(nm.trim())+(cnt?'&listCount='+cnt:''); },220); }
+      else if(a.k==='openlist'){ var lnm=((row&&row.querySelector('.ttl'))||{}).textContent.trim()||''; var lcnt=(((row&&row.querySelector('.meta'))||{}).textContent||'').replace(/[^0-9]/g,''); toast('Opening '+lnm+'…'); setTimeout(function(){ window.location='atlas-outreach-lists.html?name='+encodeURIComponent(lnm)+(lcnt?'&count='+lcnt:''); },200); }
+      else if(a.k==='edittpl'){ var tnm=((row&&row.querySelector('.ttl'))||{}).textContent.trim()||''; toast('Opening “'+tnm+'” in the builder…'); setTimeout(function(){ window.location='atlas-email-builder.html?mode=template&tpl='+encodeURIComponent(tnm); },200); }
+      else if(a.k==='dupmodal'){ commsDuplicate(a.kind||'item', row, pane); }
       else if(a.k==='sched'){ commsSchedule(); }
       else if(a.k==='dup'){ if(row){ var c=row.cloneNode(true); row.parentNode.insertBefore(c,row.nextSibling); updateCount(pane); } toast(a.v||'Duplicated'); }
       else if(a.k==='del'){ commsConfirm({title:a.title,body:a.body,ok:a.ok,danger:a.danger}, function(){ if(row){ row.remove(); updateCount(pane); } toast(a.done||'Removed'); }); }
-      else if(a.k==='sendnow'){ commsConfirm({title:'Send this email now?',body:'It will begin sending immediately and move to the Sent tab.',ok:'Send now'}, function(){ if(row){ row.remove(); updateCount('scheduled'); } toast('Sending now · moved to Sent'); }); }
+      else if(a.k==='sendnow'){ commsSendNow(row); }
       else { toast(a.v||'Done'); }
     });
   }
@@ -1748,7 +1820,8 @@ body {
         var st=statusOf(m);
         bd.innerHTML='<div class="mrow"><span class="nm"><strong>'+m.recipientName+'</strong></span><span class="sa-pill st-'+st+'">'+st.charAt(0).toUpperCase()+st.slice(1)+'</span></div>'+
           '<p style="font-size:12.5px;color:#334155;margin-top:10px">'+(m.opened?('Opened'+(m.clicked?' and clicked a link.':' the message.')):(st==='delivered'?'Delivered but not opened yet.':('Message '+st+' — needs attention.')))+'</p>';
-        ft.innerHTML='<a class="mbtn" href="atlas-donor-360.html">View donor profile</a><button class="mbtn" data-a="resend">Resend</button><button class="mbtn primary" data-a="view">Open message</button>';
+        var _dn=m.recipientName||'', _de=m.recipientEmail||(_dn?_dn.toLowerCase().replace(/[^a-z]+/g,'.').replace(/^\.|\.$/g,'')+'@email.org':''); var _durl='atlas-donor-360.html'+(_dn?'?name='+encodeURIComponent(_dn)+'&email='+encodeURIComponent(_de):'');
+        ft.innerHTML='<a class="mbtn" href="'+_durl+'">View donor profile</a><button class="mbtn" data-a="resend">Resend</button><button class="mbtn primary" data-a="view">Open message</button>';
       }
       ft.querySelectorAll('[data-a]').forEach(function(b){ b.addEventListener('click', function(){ var a=b.dataset.a; if(a==='recips'){ openRecips(m); return; } toast(({export:'Message export queued · CSV ready',resend:'Resend queued to '+(m.isBlast?'non-openers':'recipient'),view:'Opening message preview'})[a]||'Done'); closeOv(); }); });
       ov.classList.add('show');
@@ -1791,7 +1864,7 @@ body {
         else if(a==='resend') gotoDetail(m,'resend');
         else if(a==='resendall') gotoDetail(m,'resendall');
         else if(a==='suppress') gotoDetail(m,'suppress');
-        else if(a==='donor') window.location='atlas-donor-360.html';
+        else if(a==='donor'){ var dn=m.recipientName||''; var de=m.recipientEmail||(dn?dn.toLowerCase().replace(/[^a-z]+/g,'.').replace(/^\.|\.$/g,'')+'@email.org':''); window.location='atlas-donor-360.html'+(dn?'?name='+encodeURIComponent(dn)+'&email='+encodeURIComponent(de):''); }
         else toast(({export:'Export queued · CSV ready · '+(m.isBlast?m.recipients.toLocaleString()+' rows':'1 row')})[a]||'Done'); });
       setTimeout(function(){ document.addEventListener('click', function cl(ev){ if(!menu.contains(ev.target)){ menu.remove(); document.removeEventListener('click',cl);} }); },10);
     }
