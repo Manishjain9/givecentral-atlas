@@ -1136,6 +1136,17 @@ body {
     ov.onclick=function(e){ if(e.target===ov) ov.style.display='none'; };
   }
   window.commsConfirm=commsConfirm;
+  // Toast with an Undo action (used for destructive removals)
+  function commsUndoToast(msg, onUndo){
+    var t=document.getElementById('cm-undo'); if(t) t.remove();
+    t=document.createElement('div'); t.id='cm-undo';
+    t.style.cssText='position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#0E1E35;color:#fff;padding:12px 18px;border-radius:11px;box-shadow:0 12px 34px rgba(0,0,0,.3);display:flex;align-items:center;gap:16px;z-index:100100;font:500 13px DM Sans;max-width:90vw';
+    t.innerHTML='<span>'+esc(msg)+'</span><button style="background:none;border:none;color:#93C5FD;cursor:pointer;font:700 13px DM Sans;white-space:nowrap">Undo</button>';
+    document.body.appendChild(t);
+    var to=setTimeout(function(){ if(t.parentNode) t.remove(); }, 6000);
+    t.querySelector('button').onclick=function(){ clearTimeout(to); t.remove(); if(onUndo) onUndo(); };
+  }
+  window.commsUndoToast=commsUndoToast;
   // Rich "Send now" review modal for a scheduled email — forces a review before sending
   function commsSendNow(row){
     var g=function(sel){ var e=row&&row.querySelector(sel); return e?e.textContent.trim():''; };
@@ -1204,7 +1215,7 @@ body {
     function close(){ ov.style.display='none'; }
     ov.querySelector('#csx-keep').onclick=close; ov.querySelector('#csx-x').onclick=close;
     ov.onclick=function(e){ if(e.target===ov) close(); };
-    go.onclick=function(){ if(go.disabled) return; close(); if(row){ row.remove(); updateCount('scheduled'); } toast('Scheduled send cancelled · “'+subj+'” moved to Drafts'); };
+    go.onclick=function(){ if(go.disabled) return; close(); var parent=row&&row.parentNode, next=row&&row.nextSibling; if(row){ row.remove(); updateCount('scheduled'); } commsUndoToast('Scheduled send cancelled · “'+subj+'” moved to Drafts', function(){ if(row&&parent){ parent.insertBefore(row,next); updateCount('scheduled'); } }); };
   }
   window.commsCancelScheduled=commsCancelScheduled;
   // Duplicate-with-rename modal (list / template / draft / scheduled send)
@@ -1298,7 +1309,7 @@ body {
       else if(a.k==='cancelsched'){ commsCancelScheduled(row); }
       else if(a.k==='sched'){ commsSchedule(); }
       else if(a.k==='dup'){ if(row){ var c=row.cloneNode(true); row.parentNode.insertBefore(c,row.nextSibling); updateCount(pane); } toast(a.v||'Duplicated'); }
-      else if(a.k==='del'){ commsConfirm({title:a.title,body:a.body,ok:a.ok,danger:a.danger}, function(){ if(row){ row.remove(); updateCount(pane); } toast(a.done||'Removed'); }); }
+      else if(a.k==='del'){ commsConfirm({title:a.title,body:a.body,ok:a.ok,danger:a.danger}, function(){ var parent=row&&row.parentNode, next=row&&row.nextSibling; if(row){ row.remove(); updateCount(pane); } commsUndoToast((a.done||'Removed'), function(){ if(row&&parent){ parent.insertBefore(row,next); updateCount(pane); } }); }); }
       else if(a.k==='sendnow'){ commsSendNow(row); }
       else { toast(a.v||'Done'); }
     });

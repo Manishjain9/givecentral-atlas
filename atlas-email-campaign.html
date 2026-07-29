@@ -550,12 +550,56 @@
     var scheduled=S.schedule.mode==='sched';
     var c=abCounts();
     var abNote = S.ab.on ? '<div style="max-width:520px;margin:14px auto 0;padding:13px 16px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;font-size:13px;color:#1E3A8A;text-align:left">🧪 <b>A/B test running.</b> Variants A &amp; B went to '+fmt(c.test)+' recipients ('+c.pct+'%). We’ll measure '+abMetricLabel()+' and '+(S.ab.autoSend?'auto-send the winner':'notify you to pick the winner')+' after '+S.ab.windowH+' hours — then reach the remaining <b>'+fmt(c.winner)+'</b>.</div>' : '';
-    return '<div class="wrap"><div class="sent"><div class="big-ic">'+(scheduled?'⏱':'✓')+'</div>'+
-      '<h2>'+(scheduled?'Email scheduled':(S.ab.on?'A/B test sent':'Email sent'))+'</h2>'+
-      '<p>'+(scheduled?('“'+esc(S.name)+'” will send to '+fmt(r)+' recipients on '+prettyDate(S.schedule.date)+' at '+prettyTime(S.schedule.time)+' '+tzOf(S.schedule.tz).ab+'.'):(S.ab.on?('The test batch of “'+esc(S.name)+'” is going out now. The winning variant reaches the rest automatically.'):('“'+esc(S.name)+'” is going out to '+fmt(r)+' recipients now. Delivery is throttled to protect your sender reputation.')))+'</p>'+
+    if(scheduled){
+      return '<div class="wrap"><div class="sent"><div class="big-ic">⏱</div>'+
+        '<h2>Email scheduled</h2>'+
+        '<p>“'+esc(S.name)+'” will send to '+fmt(r)+' recipients on '+prettyDate(S.schedule.date)+' at '+prettyTime(S.schedule.time)+' '+tzOf(S.schedule.tz).ab+'.</p>'+abNote+
+        '<div style="display:flex;gap:12px;justify-content:center;margin-top:22px"><a class="btn" href="atlas-communications.html">Back to Communications</a><a class="btn primary" href="'+analyticsURL()+'">View analytics</a></div>'+
+        '</div></div>';
+    }
+    // Immediate send — live progress
+    var sendTarget = S.ab.on ? c.test : r;
+    return '<div class="wrap"><div class="sent"><div class="big-ic" id="sp-ic">📤</div>'+
+      '<h2 id="sp-h">'+(S.ab.on?'Sending A/B test…':'Sending…')+'</h2>'+
+      '<p id="sp-sub">Delivering “'+esc(S.name)+'” to <b>'+fmt(sendTarget)+'</b> recipients. Large sends are throttled over ~30–60 min to protect your sender reputation.</p>'+
+      '<div style="max-width:480px;margin:20px auto 0">'+
+        '<div style="height:12px;background:#E2E8F0;border-radius:7px;overflow:hidden"><div id="sp-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#3B82F6,#2563EB);border-radius:7px;transition:width .35s ease"></div></div>'+
+        '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:#64748B;margin-top:9px"><span id="sp-count">0 delivered</span><span id="sp-rate"></span><span id="sp-eta">estimating…</span></div>'+
+        '<div style="display:flex;gap:10px;justify-content:center;margin-top:18px" id="sp-ctrls"><button class="btn" id="sp-pause">Pause</button><a class="btn" href="atlas-communications.html">Run in background</a></div>'+
+      '</div>'+
       abNote+
-      '<div style="display:flex;gap:12px;justify-content:center;margin-top:22px"><a class="btn" href="atlas-communications.html">Back to Communications</a><a class="btn primary" href="'+analyticsURL()+'">View analytics</a></div>'+
+      '<div id="sp-done" style="display:none;margin-top:20px"><a class="btn primary" href="'+analyticsURL()+'">View analytics</a> <a class="btn" href="atlas-communications.html">Back to Communications</a></div>'+
+      '<input type="hidden" id="sp-target" value="'+sendTarget+'">'+
       '</div></div>';
+  }
+  var _spTimer=null, _spPaused=false, _spDone=0;
+  function startSendProgress(){
+    _spPaused=false; _spDone=0;
+    var target=parseInt(($('sp-target')||{}).value,10)||reach();
+    var bar=$('sp-bar'), cnt=$('sp-count'), eta=$('sp-eta'), rate=$('sp-rate');
+    var stepN=Math.max(1,Math.round(target/40)); // ~40 ticks to complete
+    var perMin=Math.max(1,Math.round(target/45)); // throttle rate/min (≈45 min full)
+    if(rate) rate.textContent='~'+fmt(perMin)+'/min';
+    if(_spTimer) clearInterval(_spTimer);
+    _spTimer=setInterval(function(){
+      if(_spPaused) return;
+      _spDone=Math.min(target,_spDone+stepN);
+      var pct=target?Math.round(_spDone/target*100):100;
+      if(bar) bar.style.width=pct+'%';
+      if(cnt) cnt.textContent=fmt(_spDone)+' of '+fmt(target)+' delivered ('+pct+'%)';
+      var remain=target-_spDone; var minsLeft=Math.ceil(remain/perMin);
+      if(eta) eta.textContent = remain<=0 ? 'complete' : ('~'+minsLeft+' min left');
+      if(_spDone>=target){
+        clearInterval(_spTimer); _spTimer=null;
+        var ic=$('sp-ic'); if(ic) ic.textContent='✓';
+        var h=$('sp-h'); if(h) h.textContent=(S.ab.on?'A/B test sent':'Email sent');
+        var sub=$('sp-sub'); if(sub) sub.innerHTML='“'+esc(S.name)+'” was delivered to <b>'+fmt(target)+'</b> recipients.'+(S.ab.on?' The winning variant will reach the remaining audience automatically.':'');
+        var ctrls=$('sp-ctrls'); if(ctrls) ctrls.style.display='none';
+        var done=$('sp-done'); if(done) done.style.display='';
+      }
+    }, 140);
+    var pb=$('sp-pause');
+    if(pb) pb.addEventListener('click', function(){ _spPaused=!_spPaused; pb.textContent=_spPaused?'Resume':'Pause'; var h=$('sp-h'); if(h&&_spDone<target) h.textContent=_spPaused?'Paused':'Sending…'; });
   }
 
   function runValidation(){
@@ -582,7 +626,7 @@
   function render(){
     renderStepper();
     var body=$('stepbody');
-    if(S.step===7){ body.innerHTML=stepSent(); $('footnav').style.display='none'; return; }
+    if(S.step===7){ body.innerHTML=stepSent(); $('footnav').style.display='none'; if(S.schedule.mode!=='sched') startSendProgress(); return; }
     var k=STEPS[S.step-1].k;
     $('footnav').style.display='flex';
     if(k==='details') body.innerHTML=stepDetails();
@@ -696,7 +740,7 @@
       '<div class="mf"><button class="btn" id="c-cancel">Cancel</button><button class="btn primary" id="c-go">'+(sch?'Schedule':'Send now')+'</button></div></div>';
     ov.classList.add('show');
     ov.querySelector('#c-cancel').addEventListener('click',function(){ov.classList.remove('show');});
-    ov.querySelector('#c-go').addEventListener('click',function(){ ov.classList.remove('show'); S.step=7; render(); if(S.schedule.mode==='now'){ setTimeout(function(){ window.location=analyticsURL(); }, 2000); } });
+    ov.querySelector('#c-go').addEventListener('click',function(){ ov.classList.remove('show'); S.step=7; render(); });
   }
   function analyticsURL(){ var r=reach(); var ab=S.ab.on?('&ab=1&abvar='+encodeURIComponent(S.ab.variable)+'&abpct='+abCounts().pct+'&abmetric='+S.ab.metric+'&abtest='+abCounts().test+'&abA='+encodeURIComponent(abVarValue('A'))+'&abB='+encodeURIComponent(abVarValue('B'))):''; return 'atlas-message-detail.html?subj='+encodeURIComponent(S.subject||S.name)+'&type=appeal&sender='+encodeURIComponent(S.from.split(' · ')[0])+'&camp='+encodeURIComponent(S.name)+'&recips='+r+'&del=0.986&open=0.25&clicked='+Math.round(r*0.25*0.12)+'&bounced='+Math.round(r*0.014)+ab; }
   window.cwAddList=function(){
