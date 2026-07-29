@@ -418,7 +418,27 @@
     drawPv(); ov.classList.add('show');
     function drawPv(){ var f=document.getElementById('pv-frame'); f.className='pframe'+(pvMode!=='desktop'?' '+pvMode:''); var c=$('canvas'); var w=DESIGN.width; f.innerHTML='<div class="pfhd"><b>'+SAMPLE.parish_name+'</b> · to '+SAMPLE.first_name+' '+SAMPLE.last_name+'</div><div class="pfbody" style="max-width:'+w+'px;margin:0 auto;font-family:'+((c.style.fontFamily)||'DM Sans')+'">'+resolveMerge(serializeEmail())+'</div>'; }
   };
-  window.ebHistory=function(){ toast('Version history · 4 autosaved versions (every 30s) · latest 2 min ago'); };
+  window.ebHistory=function(){
+    var ov=document.getElementById('eb-hist-ov');
+    if(!ov){ ov=document.createElement('div'); ov.id='eb-hist-ov'; ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif'; document.body.appendChild(ov); }
+    var now=Date.now(), mins=[2,32,62,122,1502];
+    var who=['Sarah Reynolds','Sarah Reynolds','Bridget McCarthy','Sarah Reynolds','Sarah Reynolds'];
+    var note=['Auto-saved','Auto-saved','Edited footer + button color','Auto-saved','Created from template'];
+    function ago(m){ if(m<60) return m+' min ago'; var h=Math.round(m/60); return h<24?(h+' hr ago'):(Math.round(h/24)+' days ago'); }
+    var rows=mins.map(function(m,i){ var cur=i===0; return '<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #F1F5F9">'+
+      '<div style="width:9px;height:9px;border-radius:50%;background:'+(cur?'#2563EB':'#CBD5E1')+';flex-shrink:0"></div>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#0F172A">'+note[i]+(cur?' <span style="color:#2563EB;font-weight:700">· current</span>':'')+'</div><div style="font-size:11.5px;color:#64748B">'+who[i]+' · '+ago(m)+'</div></div>'+
+      (cur?'':'<button class="btn eb-hist-restore" data-i="'+i+'" style="font-size:12px">Restore</button>')+
+    '</div>'; }).join('');
+    ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:480px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.32);overflow:hidden;max-height:86vh;display:flex;flex-direction:column">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)"><div><h3 style="font-family:\'DM Serif Display\',serif;font-size:19px;color:var(--navy);margin:0">Version history</h3><p style="font-size:12px;color:var(--text-3);margin:3px 0 0">Auto-saves every 30 seconds · last 5 versions kept</p></div><button id="eb-hist-x" style="background:none;border:none;font-size:20px;color:#94A3B8;cursor:pointer;line-height:1">×</button></div>'+
+      '<div style="overflow:auto">'+rows+'</div>'+
+    '</div>';
+    ov.style.display='flex';
+    ov.querySelector('#eb-hist-x').onclick=function(){ ov.style.display='none'; };
+    ov.onclick=function(e){ if(e.target===ov) ov.style.display='none'; };
+    ov.querySelectorAll('.eb-hist-restore').forEach(function(b){ b.onclick=function(){ ov.style.display='none'; toast('Restored version from '+ago(mins[+b.dataset.i])+' · you can undo from history'); }; });
+  };
   window.addEventListener('message', function(e){ var m=e.data||{}; if(m.type==='eb-load' && typeof m.html==='string'){ MODEL.body=[{id:'b'+Math.random().toString(36).slice(2,8),type:'text',data:{align:'left',html:m.html}}]; renderAll(); } else if(m.type==='eb-load-template' && m.tpl){ if(loadTemplate(m.tpl)){ sync(); } } else if(m.type==='eb-request'){ sync(); } });
 
   // ── Palette render ──
@@ -429,12 +449,34 @@
   }
 
   // ── Design tab ──
-  var DESIGN={width:640,btn:'#2563EB',link:'#2563EB',bg:'#FFFFFF',page:'#F8FAFC',btnStyle:'8px'};
+  var DESIGN={width:640,btn:'#2563EB',link:'#2563EB',bg:'#FFFFFF',page:'#F8FAFC',btnStyle:'8px',compliance:'general'};
+  var COMPLIANCE={
+    general:{lb:'General email · no receipt', reqs:[], line:''},
+    receipt:{lb:'Tax receipt · IRS Pub 1771', reqs:[['States the tax-deductible amount', /tax.?deduct|deductible/i],['“No goods or services” statement', /no goods or services/i],['Org name & EIN / Pub 1771 reference', /EIN|Pub\s*1771/i]], line:'This letter is your official receipt. {{org_name}} (EIN 14-0000000) is a tax-exempt organization; your gift of {{donation_amount}} is tax-deductible to the extent allowed by law. No goods or services were provided in exchange (IRS Pub 1771).'},
+    notax:{lb:'Acknowledgement · no tax (DAF, stock, soft-credit)', reqs:[['States no additional tax receipt is issued', /no (additional )?tax (receipt|document)|already issued|acknowledgement only/i]], line:'This is an acknowledgement only — no additional tax receipt will be issued for this gift (e.g. donor-advised fund, stock, or soft-credit gifts are receipted by the sponsoring institution).'}
+  };
+  function complianceNote(){
+    var mode=DESIGN.compliance||'general', spec=COMPLIANCE[mode];
+    if(!spec || !spec.reqs.length) return '<p style="font-size:11.5px;color:#94A3B8;margin-top:8px">No special receipting requirements for a general email.</p>';
+    var txt=''; try{ txt=serializeEmail(); }catch(_){ txt=($('canvas')||{}).textContent||''; }
+    var rows=spec.reqs.map(function(r){ var ok=r[1].test(txt); return '<div style="display:flex;gap:8px;align-items:flex-start;font-size:12px;margin-top:6px"><span style="color:'+(ok?'#15803D':'#B45309')+';font-weight:700;line-height:1.3">'+(ok?'✓':'!')+'</span><span style="color:'+(ok?'#334155':'#92400E')+'">'+r[0]+(ok?'':' — not detected yet')+'</span></div>'; }).join('');
+    return '<div style="margin-top:8px;padding:11px 13px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:9px">'+
+      '<div style="font-size:11px;color:#92400E;font-weight:700;letter-spacing:.03em;text-transform:uppercase;margin-bottom:2px">Required for this type</div>'+rows+
+      '<button class="btn" id="dsg-cmp-insert" style="margin-top:11px;width:100%;justify-content:center">Insert required '+(mode==='receipt'?'receipt':'acknowledgement')+' line</button></div>';
+  }
+  function insertComplianceLine(){
+    var spec=COMPLIANCE[DESIGN.compliance]; if(!spec||!spec.line) return;
+    var b=mk('text',{align:'left',html:'<p style="font-size:12px;color:#64748B">'+spec.line+'</p>'});
+    MODEL.footer.push(b); renderAll(); if(window.toast) toast('Compliance line added to the footer');
+  }
   var COLORS=['#2563EB','#0E1E35','#15803D','#BE185D','#7C3AED','#D97706'];
   var BGCOLORS=['#FFFFFF','#F8FAFC','#F1F5F9','#FEF3C7','#EFF6FF','#0E1E35'];
   function renderDesign(){
     function swset(key,arr){ arr=arr||COLORS; return '<div class="swatches">'+arr.map(function(c){return '<div class="sw'+(DESIGN[key]===c?' on':'')+'" data-key="'+key+'" data-c="'+c+'" style="background:'+c+';'+(c==='#FFFFFF'?'border-color:#CBD5E1':'')+'"></div>';}).join('')+'</div>'; }
     $('pane-design').innerHTML=
+      '<div class="dsg-group"><div class="dsg-h">Compliance &amp; receipt type</div>'+
+      '<div class="dsg-row"><span>Email type</span><select class="fld" id="dsg-compliance">'+Object.keys(COMPLIANCE).map(function(k){return '<option value="'+k+'"'+(DESIGN.compliance===k?' selected':'')+'>'+COMPLIANCE[k].lb+'</option>';}).join('')+'</select></div>'+
+      '<div id="dsg-cmp-note">'+complianceNote()+'</div></div>'+
       '<div class="dsg-group"><div class="dsg-h">Layout &amp; background</div>'+
       '<div class="dsg-row"><span>Content width</span><select class="fld" id="dsg-width"><option value="600"'+(DESIGN.width===600?' selected':'')+'>600 px (standard)</option><option value="640"'+(DESIGN.width===640?' selected':'')+'>640 px</option><option value="700"'+(DESIGN.width===700?' selected':'')+'>700 px (wide)</option></select></div>'+
       '<div class="dsg-row"><span>Email background</span>'+swset('bg',BGCOLORS)+'</div></div>'+
@@ -444,6 +486,9 @@
       '<div class="dsg-group"><div class="dsg-h">Links &amp; type</div>'+
       '<div class="dsg-row"><span>Link color</span>'+swset('link')+'</div>'+
       '<div class="dsg-row"><span>Body font</span><select class="fld" id="dsg-font"><option>DM Sans</option><option>Georgia</option><option>Helvetica</option><option>Arial</option></select></div></div>';
+    function rebindCmpInsert(){ var ib=$('dsg-cmp-insert'); if(ib) ib.onclick=function(){ insertComplianceLine(); var n=$('dsg-cmp-note'); if(n){ n.innerHTML=complianceNote(); rebindCmpInsert(); } }; }
+    var dc=$('dsg-compliance'); if(dc) dc.addEventListener('change', function(){ DESIGN.compliance=this.value; var note=$('dsg-cmp-note'); if(note){ note.innerHTML=complianceNote(); rebindCmpInsert(); } });
+    rebindCmpInsert();
     $('dsg-width').addEventListener('change', function(){ DESIGN.width=+this.value; applyDesign(); });
     $('dsg-btnstyle').addEventListener('change', function(){ DESIGN.btnStyle=this.value; applyDesign(); });
     $('dsg-font').addEventListener('change', function(){ $('canvas').style.fontFamily=this.value+', sans-serif'; toast('Font set · '+this.value); });
@@ -581,7 +626,48 @@
   window.ebSave=function(){ toast('Draft saved · '+countBlocks()+' blocks'); };
   window.ebTest=function(){ toast('Test sent to sarah.reynolds@diocese.org'); };
   window.ebContinue=function(){ toast('Design saved · choose your audience next'); setTimeout(function(){ window.location='atlas-email-campaign.html'; }, 400); };
-  window.ebTour=function(){ toast('Quick tour — drag blocks from the right onto the canvas'); };
+  window.ebTour=function(){
+    var contSel = (document.getElementById('eb-savetpl') && document.getElementById('eb-savetpl').offsetParent!==null) ? '#eb-savetpl' : '#eb-continue';
+    var STEPS=[
+      {sel:'#pane-content .palette', t:'1 · Block palette', b:'Drag any block — Text, Image, Button, Divider, Social, and more — onto the canvas, or just click it to add.'},
+      {sel:'#canvas', t:'2 · Your email canvas', b:'This is your live email. Click a block to edit it inline, drag to reorder, and hover to duplicate or delete.'},
+      {sel:'#ptabs', t:'3 · Content & Design', b:'“Content” manages your blocks. Switch to “Design” for brand colours, fonts, button style, and the compliance / receipt type.'},
+      {sel:'#eb-preview', t:'4 · Preview', b:'See exactly how it looks on desktop, mobile, tablet and dark mode — with sample recipient data and merge fields resolved.'},
+      {sel:contSel, t:'5 · Save & continue', b:'When you’re happy, save a draft, publish the template, or continue to choose your audience and send.'}
+    ];
+    var i=0, spot=document.getElementById('tour-spot'), tip=document.getElementById('tour-tip');
+    if(!spot){ spot=document.createElement('div'); spot.id='tour-spot'; spot.style.cssText='position:fixed;z-index:100200;border-radius:10px;box-shadow:0 0 0 9999px rgba(15,23,42,.58);transition:all .22s ease;pointer-events:none'; document.body.appendChild(spot); }
+    if(!tip){ tip=document.createElement('div'); tip.id='tour-tip'; tip.style.cssText='position:fixed;z-index:100201;max-width:300px;background:#fff;border-radius:12px;box-shadow:0 16px 40px rgba(15,23,42,.3);padding:16px 18px;font-family:DM Sans,sans-serif'; document.body.appendChild(tip); }
+    function end(){ if(spot)spot.remove(); if(tip)tip.remove(); document.removeEventListener('keydown',onKey); }
+    function onKey(e){ if(e.key==='Escape') end(); else if(e.key==='ArrowRight') go(1); else if(e.key==='ArrowLeft') go(-1); }
+    function go(d){ i+=d; if(i<0)i=0; if(i>=STEPS.length){ end(); return; } draw(); }
+    function draw(){
+      var s=STEPS[i], el=document.querySelector(s.sel);
+      if(!el){ go(1); return; }
+      try{ el.scrollIntoView({block:'nearest',behavior:'smooth'}); }catch(_){}
+      var r=el.getBoundingClientRect(), pad=8;
+      spot.style.top=(r.top-pad)+'px'; spot.style.left=(r.left-pad)+'px'; spot.style.width=(r.width+pad*2)+'px'; spot.style.height=(r.height+pad*2)+'px';
+      tip.innerHTML='<div style="font:700 13.5px \'DM Sans\';color:#0E1E35;margin-bottom:5px">'+s.t+'</div>'+
+        '<div style="font-size:12.5px;color:#475569;line-height:1.5">'+s.b+'</div>'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-top:14px">'+
+        '<span style="font-size:11px;color:#94A3B8">'+(i+1)+' / '+STEPS.length+'</span><span style="flex:1"></span>'+
+        '<button id="tr-skip" style="border:none;background:none;color:#64748B;font:600 12px \'DM Sans\';cursor:pointer">Skip</button>'+
+        (i>0?'<button id="tr-back" style="border:1px solid #E2E8F0;background:#fff;color:#334155;border-radius:8px;padding:6px 12px;font:600 12px \'DM Sans\';cursor:pointer">Back</button>':'')+
+        '<button id="tr-next" style="border:none;background:#2563EB;color:#fff;border-radius:8px;padding:6px 13px;font:600 12px \'DM Sans\';cursor:pointer">'+(i===STEPS.length-1?'Done':'Next')+'</button>'+
+        '</div>';
+      // position tooltip: prefer below, else above, clamp horizontally
+      tip.style.visibility='hidden'; tip.style.top='0px'; tip.style.left='0px';
+      var th=tip.offsetHeight, tw=tip.offsetWidth, top=r.bottom+14, left=r.left;
+      if(top+th+12>window.innerHeight) top=Math.max(12, r.top-th-14);
+      left=Math.min(left, window.innerWidth-tw-12); left=Math.max(12,left);
+      tip.style.top=top+'px'; tip.style.left=left+'px'; tip.style.visibility='visible';
+      tip.querySelector('#tr-skip').onclick=end;
+      tip.querySelector('#tr-next').onclick=function(){ go(1); };
+      var bk=tip.querySelector('#tr-back'); if(bk) bk.onclick=function(){ go(-1); };
+    }
+    document.addEventListener('keydown',onKey);
+    draw();
+  };
   function countBlocks(){ return MODEL.header.length+MODEL.body.length+MODEL.footer.length; }
 
   // ── Boot ──

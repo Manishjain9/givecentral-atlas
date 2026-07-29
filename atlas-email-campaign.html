@@ -309,9 +309,18 @@
     {id:'yearend',nm:'Year-end giving summary',sub:'Used 189 times · January batch',emoji:'📆',bg:'#DCFCE7',used:189,edited:10}
   ];
 
+  // Sample donor directory for the "search specific people" picker
+  var DONORS=(function(){
+    var F=['Margaret','Thomas','James','Patricia','Michael','Susan','Anne','John','Elena','Catherine','Bridget','Sean','Kathleen','Robert','Laura','Nora','Liam','Aoife','Declan','Colleen','David','Maria','Peter','Grace','Daniel','Ruth','Kevin','Helen','Brian','Joan'];
+    var L=["O'Brien",'Sullivan','Walsh','Nguyen','Russo','Carter','Byrne','Murphy','Kennedy','Greene','Lin','Hayes','Quinn','Gallagher','Reilly','Donovan','Brennan','Kavanagh','Romano','Grant'];
+    var T=['Major donor · $84k lifetime','Recurring $50/mo','First-time donor','Board member','Lapsed · re-engage','Legacy Society','Monthly sustainer','Event attendee','Volunteer','Capital pledge donor'];
+    var out=[]; for(var i=0;i<200;i++){ var f=F[i%F.length], l=L[(i*7)%L.length]; out.push({n:f+' '+l, e:(f+'.'+l).toLowerCase().replace(/[^a-z.]/g,'')+'@email.org', t:T[i%T.length]}); }
+    return out;
+  })();
+
   var S={
     step:1, maxStep:1,
-    name:'Cathedral year-end appeal', subject:'', preview:'',
+    name:'', subject:'', preview:'', pplQuery:'',
     from:'Sarah Reynolds · sarah.reynolds@diocese.org', replyTo:'Same as From',
     lists:[], manualEmails:[], audQuery:'',
     ab:{on:false, variable:'subject', subjectB:'', fromB:'Bridget McCarthy · bridget@diocese.org', samplePct:20, metric:'open', windowH:4, autoSend:true},
@@ -370,7 +379,7 @@
       (S.resumeFrom==='draft'?'<div class="persona" style="background:#FFFBEB;border-color:#FDE68A;margin-bottom:14px">📝 <div><b>Resumed from a draft.</b> Your subject and name are carried over — continue through the steps to finish and send “'+esc(S.resumeLabel||'')+'”.</div></div>':'')+
       (S.resumeFrom==='dup'?'<div class="persona" style="background:#EFF6FF;border-color:#BFDBFE;margin-bottom:14px">📄 <div><b>Duplicating a previous send.</b> Same subject as “'+esc(S.resumeLabel||'')+'” — adjust anything, pick your audience, and send as a new email.</div></div>':'')+
       '<div class="card">'+
-      '<label class="lbl">Email name <span style="color:#94A3B8;font-weight:400">(internal)</span></label><input class="fld" id="f-name" value="'+esc(S.name)+'">'+
+      '<label class="lbl">Email name <span style="color:#94A3B8;font-weight:400">(internal)</span></label><input class="fld" id="f-name" placeholder="e.g. Cathedral year-end appeal" value="'+esc(S.name)+'">'+
       '<label class="lbl">Subject line</label><input class="fld" id="f-subject" placeholder="e.g. Help us finish the Cathedral, {{first_name}}" value="'+esc(S.subject)+'">'+
       '<p class="hint">Use merge fields like <code>{{first_name}}</code>. 41–50 characters tends to perform best.</p>'+
       '<label class="lbl">Preview text</label><input class="fld" id="f-preview" placeholder="The snippet shown after the subject in most inboxes" value="'+esc(S.preview)+'">'+
@@ -382,12 +391,16 @@
     var g=grossCount(),su=suppressed(),r=reach();
     var q=(S.audQuery||'').toLowerCase();
     var shown=LISTS.filter(function(l){ return !q || (l.nm+' '+l.sub).toLowerCase().indexOf(q)!==-1; });
+    var pq=(S.pplQuery||'').toLowerCase();
+    var pplMatches= pq ? DONORS.filter(function(p){ return (p.n+' '+p.e).toLowerCase().indexOf(pq)!==-1; }) : [];
     return '<div class="wrap"><h2 class="step-h">Select audience</h2><p class="step-sub">Add specific people, or pick from your lists &amp; segments. Suppressed contacts are removed automatically.</p>'+
       (S.prefillFrom?'<div class="persona" style="background:#EFF6FF;border-color:#BFDBFE;margin-bottom:14px">📨 <div><b>Recipient pre-filled from your link.</b> This email is set to go to <b>'+esc(S.prefillFrom)+'</b>'+(S.prefillKind==='list'?' (list selected below)':' (added under “specific people” below)')+'. Add or remove recipients anytime.</div></div>':'')+
       // manual — on top so it\'s visible
-      '<div class="card"><h3>Send to specific people</h3><p class="hint" style="margin:-6px 0 10px">Type email addresses to reach individuals directly — great for a quick send.</p>'+
-      '<div class="echips" id="echips">'+ (S.manualEmails.length? S.manualEmails.map(function(e,i){ return '<span class="echip">'+esc(e)+'<span class="x" data-i="'+i+'">×</span></span>'; }).join('') : '<span class="hint" style="align-self:center">No addresses added yet.</span>') +'</div>'+
-      '<div style="display:flex;gap:8px;margin-top:10px"><input class="fld" id="manual-email" placeholder="name@email.org" style="flex:1"><button class="btn" id="add-email-btn">Add</button></div>'+
+      '<div class="card"><h3>Send to specific people</h3><p class="hint" style="margin:-6px 0 10px">Search your donors by name, or type any email address to reach individuals directly.</p>'+
+      '<div class="aud-search"><svg viewBox="0 0 14 14" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="ppl-q" placeholder="Search donors by name or email…" value="'+esc(S.pplQuery)+'"></div>'+
+      (S.pplQuery ? ('<div class="ppl-results" id="ppl-results" style="border:1px solid var(--border);border-radius:9px;margin-bottom:10px;max-height:220px;overflow:auto">'+ (pplMatches.length? pplMatches.slice(0,12).map(function(p){ var added=S.manualEmails.indexOf(p.e)!==-1; return '<div class="ppl-row" data-e="'+esc(p.e)+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--surface)"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">'+esc(p.n)+'</div><div style="font-size:11.5px;color:var(--text-3)">'+esc(p.e)+' · '+esc(p.t)+'</div></div><button class="btn ppl-add" '+(added?'disabled style="opacity:.5"':'')+'>'+(added?'✓ Added':'Add')+'</button></div>'; }).join('') : '<div class="aud-empty" style="padding:14px;text-align:center;color:var(--text-3);font-size:12.5px">No donors match “'+esc(S.pplQuery)+'”.</div>') +'</div>') : '')+
+      '<div class="echips" id="echips">'+ (S.manualEmails.length? S.manualEmails.map(function(e,i){ return '<span class="echip">'+esc(e)+'<span class="x" data-i="'+i+'">×</span></span>'; }).join('') : '<span class="hint" style="align-self:center">No individual recipients added yet.</span>') +'</div>'+
+      '<div style="display:flex;gap:8px;margin-top:10px"><input class="fld" id="manual-email" placeholder="or type name@email.org" style="flex:1"><button class="btn" id="add-email-btn">Add</button></div>'+
       '</div>'+
       // lists — searchable + scrollable (handles 100+)
       '<div class="card"><h3 style="display:flex;align-items:center;justify-content:space-between">Lists &amp; segments · '+LISTS.length+' <button class="btn" style="padding:6px 11px;font-size:12px" onclick="cwAddList()">+ Add new list</button></h3>'+
@@ -609,6 +622,11 @@
     out.push(S.html ? {s:'pass',t:'Email content added',d:'Built in the drag-and-drop editor'} : {s:'warn',t:'No content yet',d:'Design your email before sending.',g:4,gl:'Design email'});
     out.push(h.indexOf('unsubscribe')!==-1 ? {s:'pass',t:'Unsubscribe link present',d:'Required by CAN-SPAM'} : {s:'warn',t:'No unsubscribe link found',d:'Add a Footer block — it includes the unsubscribe link.',g:4,gl:'Design email'});
     out.push((h.indexOf('albany')!==-1||h.indexOf('address')!==-1||h.indexOf('st ')!==-1) ? {s:'pass',t:'Physical mailing address present',d:'Required by CAN-SPAM'} : {s:'warn',t:'Mailing address not detected',d:'Include your address in the footer.',g:4,gl:'Design email'});
+    // Compliance: a tax receipt should go to actual gift donors, not a broad promotional list
+    var isReceipt = S.template==='receipt' || /receipt|tax|pub\s*1771/i.test((S.name||'')+' '+(S.subject||''));
+    if(isReceipt){
+      out.push(reach()>2000 ? {s:'fail',t:'Tax receipt sent to a broad audience',d:'Receipts (IRS Pub 1771) must go only to donors of a specific gift — not a '+fmt(reach())+'-recipient promotional list. Narrow the audience or switch the template.',g:2,gl:'Select audience'} : {s:'pass',t:'Receipt audience looks appropriate',d:'Sending to '+fmt(reach())+' recipient'+(reach()===1?'':'s')+' — small, gift-specific audience'});
+    }
     if(S.ab.on){ var c=abCounts();
       out.push(abReady() ? {s:'pass',t:'A/B variants ready',d:'Testing '+(S.ab.variable==='from'?'from name':'subject line')+' · A vs B'} : {s:'fail',t:'A/B variants incomplete',d:'Both variants must be filled and different.',g:2,gl:'Select audience'});
       out.push(c.perVar>=1000 ? {s:'pass',t:'A/B sample large enough',d:fmt(c.perVar)+' per variant · statistically usable'} : {s:'warn',t:'A/B sample is small',d:'Only '+fmt(c.perVar)+' per variant — results may not be significant.',g:2,gl:'Select audience'});
@@ -687,6 +705,8 @@
       var me=$('manual-email'); if(me) me.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); addEmail(); } });
       var ec=$('echips'); if(ec) ec.addEventListener('click', function(e){ var x=e.target.closest('.x'); if(!x) return; S.manualEmails.splice(+x.dataset.i,1); render(); });
       var aq=$('aud-q'); if(aq) aq.addEventListener('input', function(){ S.audQuery=this.value; var pos=this.selectionStart; render(); var n=$('aud-q'); if(n){ n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){}} });
+      var pq=$('ppl-q'); if(pq) pq.addEventListener('input', function(){ S.pplQuery=this.value; var pos=this.selectionStart; render(); var n=$('ppl-q'); if(n){ n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){}} });
+      var pr=$('ppl-results'); if(pr) pr.addEventListener('click', function(e){ var row=e.target.closest('.ppl-row'); if(!row) return; var em=row.dataset.e; if(em && S.manualEmails.indexOf(em)===-1){ S.manualEmails.push(em); toast('Added '+em); } render(); });
     } else if(k==='template'){
       body_.querySelectorAll('.tplc').forEach(function(el){ el.addEventListener('click',function(){ S.template=el.dataset.t; render(); var t=TEMPLATES.filter(function(x){return x.id===S.template;})[0]; toast((t?t.nm:'Blank')+' selected'); }); });
       var tq=$('tpl-q'); if(tq){ tq.addEventListener('input',function(){ S.tplQuery=this.value; var pos=this.selectionStart; render(); var n=$('tpl-q'); if(n){ n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){}}}); }

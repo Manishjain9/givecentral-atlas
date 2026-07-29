@@ -320,15 +320,10 @@ a { color:inherit; text-decoration:none; }
 <div class="topbar">
   <span class="topbar-title">Outreach lists</span>
   <span class="topbar-date" id="topbar-date">Monday, May 4, 2026</span>
-  <div class="topbar-search">
-    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M7.5 7.5l2.5 2.5"/></svg>
-    Search outreach lists <kbd>⌘K</kbd>
-  </div>
-  <div class="topbar-right">
-    <button class="tb-btn" onclick="window.location='atlas-communications.html'">← Communications</button>
-  </div>
+  <div class="topbar-right"></div>
 </div>
 
+<div id="index-view">
 <!-- Page header -->
 <div class="page-head">
   <div class="ph-title-row">
@@ -361,24 +356,24 @@ a { color:inherit; text-decoration:none; }
 <!-- KPIs -->
 <div class="kpi-row">
   <div class="kpi">
-    <div class="lbl">Total reach (unique donors)</div>
-    <div class="val">1,502</div>
-    <div class="meta">across 8 active lists · 39% of constituents</div>
+    <div class="lbl">Total reach (recipients)</div>
+    <div class="val" id="kpi-reach">—</div>
+    <div class="meta" id="kpi-reach-sub">—</div>
   </div>
   <div class="kpi">
     <div class="lbl">Engagement (30-day open rate)</div>
-    <div class="val green">42%</div>
-    <div class="meta">▲ 6pp vs. last 30 days</div>
+    <div class="val green" id="kpi-eng">—</div>
+    <div class="meta" id="kpi-eng-sub">—</div>
   </div>
   <div class="kpi">
     <div class="lbl">Click-through</div>
-    <div class="val">12.8%</div>
+    <div class="val" id="kpi-ctr">—</div>
     <div class="meta">$2,840 avg gift from list clicks</div>
   </div>
   <div class="kpi">
     <div class="lbl">Scheduled sends</div>
-    <div class="val amber">2</div>
-    <div class="meta">Next: Spring Appeal · Fri 9 AM</div>
+    <div class="val amber" id="kpi-sched">—</div>
+    <div class="meta" id="kpi-sched-sub">—</div>
   </div>
 </div>
 
@@ -388,9 +383,10 @@ a { color:inherit; text-decoration:none; }
     <div class="lc-head">
       <span class="h-title">All outreach lists</span>
       <span class="h-count" id="rendered-count">Showing 8 of 8</span>
-      <div class="h-filter">
+      <div class="h-filter" style="gap:10px">
+        <div style="display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 11px"><svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="list-search" placeholder="Search lists…" style="border:none;background:none;outline:none;font:400 12.5px 'DM Sans';width:150px" oninput="listPage=1;renderLists()"></div>
         <span>Sort by</span>
-        <select id="sort-select" onchange="renderLists()">
+        <select id="sort-select" onchange="listPage=1;renderLists()">
           <option value="recent">Recently updated</option>
           <option value="name">Name (A-Z)</option>
           <option value="members">Member count (high to low)</option>
@@ -403,7 +399,7 @@ a { color:inherit; text-decoration:none; }
         <tr>
           <th>List</th>
           <th>Members</th>
-          <th>Type</th>
+          <th title="Dynamic = auto-updates from saved filter criteria. Manual = you add contacts one-by-one or by import." style="cursor:help">Type ⓘ</th>
           <th>Status</th>
           <th>Engagement</th>
           <th>Owner</th>
@@ -413,8 +409,13 @@ a { color:inherit; text-decoration:none; }
       </thead>
       <tbody id="lists-tbody"></tbody>
     </table>
+    <div id="lists-pager" style="display:flex;align-items:center;justify-content:space-between;padding:12px 4px 2px;font-size:12px;color:var(--text-3)"></div>
   </div>
 </div>
+</div><!-- /#index-view -->
+
+<!-- Dedicated single-list workspace -->
+<div id="list-detail" style="display:none;padding:0 28px 28px"></div>
 
 </div><!-- /.main -->
 
@@ -553,8 +554,8 @@ a { color:inherit; text-decoration:none; }
     <div style="font-size:12px;color:var(--text-2);line-height:1.7" id="dr-activity">—</div>
   </div>
   <div class="dr-actions">
-    <button class="btn btn-ghost" onclick="toast('Editing list settings…')">Edit settings</button>
-    <button class="btn btn-ghost" onclick="window.location='atlas-email-compose.html'">Send email</button>
+    <button class="btn btn-ghost" onclick="drEditSettings()">Edit settings</button>
+    <button class="btn btn-ghost" onclick="drSendEmail()">Send email</button>
     <button class="btn btn-blue" onclick="window.location='atlas-donors-list.html'">View all members →</button>
   </div>
 </div>
@@ -567,129 +568,40 @@ a { color:inherit; text-decoration:none; }
 
 <script>
 /* ─── Demo data ─── */
-const LISTS = [
-  {
-    id:'L01', name:'Spring 2026 Appeal',
-    desc:'Active donors who gave in the last 18 months — primary audience for the spring CMA email series.',
-    members:847, type:'dynamic', status:'active', engagement:48, owner:'Sarah Reynolds', ownerAv:'SR', avBg:'var(--blue)',
-    lastActivity:'3 days ago · email "April update" sent to 847', updated:'2026-05-01',
-    activity:'Sent "Spring update — thank you" on May 1 · 42% open rate · 162 clicks<br>Members refreshed automatically on Apr 30 · +18 new donors qualified<br>List created by Sarah Reynolds on Feb 14, 2026',
-    sampleMembers:[
-      {name:"Margaret O'Brien",sub:'Major donor · $84.2k lifetime'},
-      {name:'James Patterson',sub:'Recurring $250/mo · 11 mos'},
-      {name:'Smith Family Household',sub:'$42.18k lifetime · 6 gifts'},
-      {name:'Robert & Susan Lin',sub:'$120.5k lifetime · $50k open pledge'},
-      {name:'Catherine Romano',sub:'First-time donor · Feb 2026'},
-      {name:'David Walsh',sub:'Recurring $50/mo · 24 mos'}
-    ]
-  },
-  {
-    id:'L02', name:'Major Gift Cultivation',
-    desc:'High-capacity prospects and active majors. Used for personal outreach, no bulk emails.',
-    members:28, type:'manual', status:'active', engagement:67, owner:'Fr. Patrick',
-    ownerAv:'FP', avBg:'var(--purple)',
-    lastActivity:'Yesterday · 4 donors added by Sarah R.', updated:'2026-05-03',
-    activity:'4 new members added yesterday from Donors page bulk-select<br>Margaret O\'Brien tagged as ready-to-ask on Apr 28<br>List created by Fr. Patrick on Jan 8, 2026',
-    sampleMembers:[
-      {name:"Margaret O'Brien",sub:'$84.2k lifetime · ready to ask'},
-      {name:'Diocesan Foundation',sub:'$185k lifetime · grant cycle Q3'},
-      {name:'Robert & Susan Lin',sub:'$120.5k lifetime · Capital campaign'},
-      {name:'Schwab Charitable DAF',sub:'$45k lifetime · DAF intermediary'},
-      {name:'Acme Construction LLC',sub:'$24k lifetime · matching gift'},
-      {name:"Patricia O'Sullivan",sub:'$56k lifetime · estate intent'}
-    ]
-  },
-  {
-    id:'L03', name:'New Donor Welcome Series',
-    desc:'First-time donors in the last 90 days. Receives an automated 5-touch onboarding sequence.',
-    members:163, type:'dynamic', status:'active', engagement:58, owner:'Sarah Reynolds',
-    ownerAv:'SR', avBg:'var(--blue)',
-    lastActivity:'Today · 2 new members qualified', updated:'2026-05-04',
-    activity:'5-touch welcome series running · 142 donors complete cycle<br>2 new donors qualified today<br>List created Jan 1, 2026',
-    sampleMembers:[
-      {name:'Catherine Romano',sub:'$500 first gift · Feb 14'},
-      {name:'Michael Garcia',sub:'$100 first gift · Mar 22'},
-      {name:'Aisha Williams',sub:'$250 first gift · Apr 5'},
-      {name:'Tom Hendricks',sub:'$1k first gift · Apr 18'},
-      {name:'Jennifer Park',sub:'$50 recurring · Apr 22'},
-      {name:'Daniel Costa',sub:'$200 first gift · May 1'}
-    ]
-  },
-  {
-    id:'L04', name:'Pledge Reminder · Q2',
-    desc:'Donors with installment pledge payments due in May or June.',
-    members:52, type:'dynamic', status:'scheduled', engagement:71, owner:'Sarah Reynolds',
-    ownerAv:'SR', avBg:'var(--blue)',
-    lastActivity:'Scheduled for Fri 9 AM', updated:'2026-05-04',
-    activity:'Reminder email scheduled for May 15 at 9 AM<br>Members auto-refreshed daily from pledge schedule<br>52 reminders queued',
-    sampleMembers:[
-      {name:'Robert & Susan Lin',sub:'$12.5k due May 15'},
-      {name:'Smith Family',sub:'$2k due May 20'},
-      {name:'Diocesan Foundation',sub:'$25k due Jun 1'},
-      {name:'James Patterson',sub:'$250 due May 6'},
-      {name:'Anonymous Trust',sub:'$10k due May 12'},
-      {name:'Walsh Foundation',sub:'$5k due Jun 15'}
-    ]
-  },
-  {
-    id:'L05', name:'Lapsed Donor Win-back',
-    desc:'Donors who gave 2+ years ago but not in the last 24 months. Quarterly re-engagement series.',
-    members:412, type:'dynamic', status:'active', engagement:18, owner:'Bridget McCarthy',
-    ownerAv:'BM', avBg:'var(--purple)',
-    lastActivity:'Last sent Mar 18 · "We miss you"', updated:'2026-04-15',
-    activity:'"We miss you" send on Mar 18 · 18% open · 7 reactivated<br>Next send scheduled for Jun 18<br>List created May 2025',
-    sampleMembers:[
-      {name:'Eleanor Vance',sub:'Last gave Jan 2024'},
-      {name:'Harold & Mary Kim',sub:'Last gave Sep 2023'},
-      {name:'Tyler Anderson',sub:'Last gave Dec 2023'},
-      {name:'Rebecca Cohen',sub:'Last gave Mar 2024'},
-      {name:'St. Joseph Knights',sub:'Last gave Nov 2023'},
-      {name:'Patricia Doyle',sub:'Last gave Oct 2023'}
-    ]
-  },
-  {
-    id:'L06', name:'Easter 2026 Appeal',
-    desc:'One-time appeal list for the Easter offertory campaign. Closed Apr 30.',
-    members:1240, type:'manual', status:'archived', engagement:34, owner:'Sarah Reynolds',
-    ownerAv:'SR', avBg:'var(--blue)',
-    lastActivity:'Archived Apr 30', updated:'2026-04-30',
-    activity:'Campaign complete · $48,200 raised · 412 gifts attributed<br>List archived Apr 30, 2026<br>Final send Mar 28 · 34% open rate',
-    sampleMembers:[
-      {name:'(archived list)',sub:'1,240 historical members'}
-    ]
-  },
-  {
-    id:'L07', name:'Board members & council',
-    desc:'Diocesan parish council + finance committee. Internal-only updates.',
-    members:24, type:'manual', status:'active', engagement:89, owner:'Fr. Patrick',
-    ownerAv:'FP', avBg:'var(--purple)',
-    lastActivity:'2 weeks ago', updated:'2026-04-20',
-    activity:'Monthly council briefing sent · 89% open<br>Member list maintained manually by Fr. Patrick<br>Created Jul 2023',
-    sampleMembers:[
-      {name:"Margaret O'Brien",sub:'Finance committee chair'},
-      {name:'Bridget McCarthy',sub:'Council secretary'},
-      {name:'Robert Lin',sub:'Capital campaign chair'},
-      {name:'Fr. Patrick',sub:'Pastor · ex-officio'}
-    ]
-  },
-  {
-    id:'L08', name:'Capital campaign · early commits',
-    desc:'Draft list for the cathedral capital campaign quiet phase.',
-    members:9, type:'manual', status:'draft', engagement:0, owner:'Fr. Patrick',
-    ownerAv:'FP', avBg:'var(--purple)',
-    lastActivity:'Draft · not yet sent', updated:'2026-04-29',
-    activity:'List in draft · no sends yet<br>9 donors added during quiet-phase planning<br>Created Apr 25, 2026',
-    sampleMembers:[
-      {name:"Margaret O'Brien",sub:'Verbal commit · $50k'},
-      {name:'Robert & Susan Lin',sub:'Verbal commit · $100k'},
-      {name:'Diocesan Foundation',sub:'Grant pending · $250k'}
-    ]
+const LISTS = (function(){
+  var BASE=['Spring 2026 Appeal','Major Gift Cultivation','New Donor Welcome Series','Cathedral Capital segment','Annual Appeal','Lapsed + LYBUNT','Monthly Sustainers','Board & Trustees','Active Volunteers','Gala invite list','Parish leaders','Legacy Society','First-time donors 90d','Recurring givers','Event attendees','DAF & matching gifts','Young professionals','Cathedral committee','Choir & music ministry','School families','Capital pledge donors','Memorial gift givers',"Bishop's Circle",'Stewardship follow-up'];
+  var SUF=['','2026',"· St. Mary's",'· Diocese-wide','· Q1','· Q2','· west deanery','· east deanery',''];
+  var COUNTS=[12,28,163,312,480,847,1240,3847,12800,128540,312480];
+  var STAT=['active','active','active','paused','draft'];
+  var OWN=[['Sarah Reynolds','SR','var(--blue)'],['Bridget McCarthy','BM','var(--purple)'],['Fr. Patrick','FP','var(--teal)'],['Julia Kelleher','JK','var(--rose)']];
+  var DESC=['Active donors who gave recently — primary send audience.','High-capacity prospects and active majors for personal outreach.','First-time donors in an automated 5-touch onboarding sequence.','Segment tied to the Cathedral capital campaign.','Full appeal audience across the diocese.','Gave last year but not this year — re-engagement.','Monthly recurring givers.','Board, trustees and council members.'];
+  var SAMP=[{name:"Margaret O'Brien",sub:'Major donor · $84.2k lifetime'},{name:'James Patterson',sub:'Recurring $250/mo · 11 mos'},{name:'Robert & Susan Lin',sub:'$120.5k lifetime · open pledge'},{name:'Catherine Romano',sub:'First-time donor · Feb 2026'},{name:'David Walsh',sub:'Recurring $50/mo · 24 mos'},{name:'Smith Family Household',sub:'$42.18k lifetime · 6 gifts'}];
+  function rnd(s){ var x=Math.sin(s*53.1+7.7)*43758.5453; return x-Math.floor(x); }
+  var out=[];
+  for(var i=0;i<112;i++){
+    var nm=(BASE[i%BASE.length]+' '+SUF[Math.floor(rnd(i*1.7)*SUF.length)]).trim();
+    var n=COUNTS[Math.floor(rnd(i*2.3)*COUNTS.length)];
+    var tRaw=Math.floor(rnd(i*3.1)*3);
+    var type=(tRaw===0)?'dynamic':'manual';
+    var status=STAT[Math.floor(rnd(i*4.9)*STAT.length)];
+    var eng=status==='draft'?0:20+Math.floor(rnd(i*5.5)*55);
+    var ow=OWN[Math.floor(rnd(i*6.7)*OWN.length)];
+    var days=1+Math.floor(rnd(i*8.3)*29);
+    out.push({ id:'L'+(i+1), name:nm, desc:DESC[i%DESC.length], members:n, type:type, status:status, engagement:eng,
+      owner:ow[0], ownerAv:ow[1], avBg:ow[2],
+      lastActivity:(status==='draft'?'Not sent yet':(days===1?'Today':days+' days ago')),
+      updated:'2026-05-'+String(1+(i%28)).padStart(2,'0'),
+      activity:(type==='dynamic'?'Dynamic segment · auto-refreshes from saved criteria<br>':'Manual list · contacts added directly<br>')+n.toLocaleString()+' current members · created by '+ow[0],
+      sampleMembers:SAMP });
   }
-];
+  return out;
+})();
 
 /* ─── Render ─── */
 let activeView = 'all';
 let activeSort = 'recent';
+let listPage = 1;
+const LIST_PAGE_SIZE = 10;
 
 function renderLists(){
   const sort = document.getElementById('sort-select').value;
@@ -702,6 +614,11 @@ function renderLists(){
   else if (activeView === 'archived') rows = rows.filter(r => r.status === 'archived');
   else if (activeView === 'mine') rows = rows.filter(r => r.owner === 'Sarah Reynolds');
 
+  // Text search by name / description / owner
+  var sq=(document.getElementById('list-search')||{}).value||'';
+  sq=sq.trim().toLowerCase();
+  if(sq) rows = rows.filter(function(r){ return (r.name+' '+(r.desc||'')+' '+(r.owner||'')).toLowerCase().indexOf(sq)!==-1; });
+
   // Sort
   if (sort === 'recent') rows.sort((a,b) => b.updated.localeCompare(a.updated));
   else if (sort === 'name') rows.sort((a,b) => a.name.localeCompare(b.name));
@@ -709,11 +626,14 @@ function renderLists(){
   else if (sort === 'engagement') rows.sort((a,b) => b.engagement - a.engagement);
 
   const tbody = document.getElementById('lists-tbody');
+  var total = rows.length, maxPage = Math.max(1, Math.ceil(total/LIST_PAGE_SIZE));
+  if (listPage > maxPage) listPage = maxPage; if (listPage < 1) listPage = 1;
+  var start = (listPage-1)*LIST_PAGE_SIZE, pageRows = rows.slice(start, start+LIST_PAGE_SIZE);
   if (rows.length === 0) {
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-3);padding:36px;font-style:italic">No lists match this view</td></tr>';
   } else {
-    tbody.innerHTML = rows.map(r => `
-      <tr onclick="openListDrawer('${r.id}')">
+    tbody.innerHTML = pageRows.map(r => `
+      <tr onclick="openListPage('${r.id}')">
         <td>
           <div class="lt-name">${r.name}</div>
           <div class="lt-desc">${r.desc}</div>
@@ -727,14 +647,39 @@ function renderLists(){
         <td><span class="lt-owner"><span class="lt-owner-av" style="background:${r.avBg}">${r.ownerAv}</span>${r.owner}</span></td>
         <td><span class="lt-date">${r.lastActivity}</span></td>
         <td class="right">
-          <button class="lt-kebab" onclick="event.stopPropagation();showKebab('${r.id}')" aria-label="Actions">
+          <button class="lt-kebab" onclick="event.stopPropagation();showKebab('${r.id}',event)" aria-label="Actions">
             <svg viewBox="0 0 14 14" fill="currentColor"><circle cx="3" cy="7" r="1.3"/><circle cx="7" cy="7" r="1.3"/><circle cx="11" cy="7" r="1.3"/></svg>
           </button>
         </td>
       </tr>`).join('');
   }
-  document.getElementById('rendered-count').textContent = `Showing ${rows.length} of ${LISTS.length}`;
+  document.getElementById('rendered-count').textContent = total ? `Showing ${start+1}–${Math.min(start+LIST_PAGE_SIZE,total)} of ${total}` : 'Showing 0';
   document.getElementById('lists-count').textContent = `${LISTS.length} lists · ${LISTS.filter(r=>r.status!=='archived').reduce((s,r)=>s+r.members,0).toLocaleString()} unique donors reached`;
+  var pg=document.getElementById('lists-pager');
+  if(pg){ pg.innerHTML = total<=LIST_PAGE_SIZE ? '' :
+    '<span>Page '+listPage+' of '+maxPage+'</span>'+
+    '<span style="display:flex;gap:8px"><button class="btn btn-ghost" data-p="prev"'+(listPage<=1?' disabled':'')+'>‹ Prev</button><button class="btn btn-ghost" data-p="next"'+(listPage>=maxPage?' disabled':'')+'>Next ›</button></span>'; }
+  setChipCounts();
+}
+function listGoPage(d){ listPage += d; renderLists(); }
+function setChipCounts(){
+  var c={all:LISTS.length,active:0,scheduled:0,draft:0,archived:0,mine:0};
+  LISTS.forEach(function(l){ if(c[l.status]!=null)c[l.status]++; if(l.owner==='Sarah Reynolds')c.mine++; });
+  document.querySelectorAll('.view-chip').forEach(function(ch){ var v=ch.dataset.view, ct=ch.querySelector('.ct'); if(ct&&c[v]!=null) ct.textContent=c[v]; });
+}
+function updateKpis(){
+  function set(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; }
+  var active=LISTS.filter(function(l){return l.status==='active';});
+  var reach=active.reduce(function(s,l){return s+l.members;},0);
+  var avgEng=active.length?Math.round(active.reduce(function(s,l){return s+l.engagement;},0)/active.length):0;
+  var sched=LISTS.filter(function(l){return l.status==='scheduled';}).length;
+  set('kpi-reach', reach.toLocaleString());
+  set('kpi-reach-sub', 'across '+active.length+' active list'+(active.length===1?'':'s')+' of '+LISTS.length);
+  set('kpi-eng', avgEng+'%');
+  set('kpi-eng-sub', 'avg open rate across active lists');
+  set('kpi-ctr', (avgEng*0.3).toFixed(1)+'%');
+  set('kpi-sched', String(sched));
+  set('kpi-sched-sub', sched? (sched+' send'+(sched>1?'s':'')+' queued') : 'None upcoming');
 }
 
 /* ─── Views ─── */
@@ -743,14 +688,46 @@ document.querySelectorAll('.view-chip').forEach(chip => {
     document.querySelectorAll('.view-chip').forEach(c => c.classList.remove('on'));
     chip.classList.add('on');
     activeView = chip.dataset.view;
+    listPage = 1;
     renderLists();
   });
 });
+document.getElementById('lists-pager').addEventListener('click', function(e){ var b=e.target.closest('button[data-p]'); if(!b||b.disabled) return; listGoPage(b.dataset.p==='next'?1:-1); });
 
 /* ─── Detail drawer ─── */
+var drCurrent=null;
+function drEditSettings(){
+  if(!drCurrent) return;
+  var m=document.getElementById('dr-settings-ov');
+  if(!m){ m=document.createElement('div'); m.id='dr-settings-ov'; m.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif'; document.body.appendChild(m); }
+  m.innerHTML='<div style="background:#fff;border-radius:14px;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">'+
+    '<div style="padding:18px 22px 6px"><div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)">List settings</div><h3 style="font-family:\'DM Serif Display\',serif;font-size:19px;color:var(--navy);margin:3px 0 0">Edit “'+drCurrent.name+'”</h3></div>'+
+    '<div style="padding:14px 22px">'+
+      '<label style="display:block;font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:5px">List name</label><input id="drs-name" value="'+drCurrent.name.replace(/"/g,'&quot;')+'" style="width:100%;border:1px solid var(--border);border-radius:9px;padding:9px 12px;font:400 13.5px DM Sans">'+
+      '<label style="display:block;font-size:12px;font-weight:600;color:var(--text-2);margin:12px 0 5px">Type</label><select id="drs-type" style="width:100%;border:1px solid var(--border);border-radius:9px;padding:9px 12px;font:400 13.5px DM Sans"><option value="dynamic"'+(drCurrent.type==='dynamic'?' selected':'')+'>Dynamic · auto-updates from criteria</option><option value="manual"'+(drCurrent.type!=='dynamic'?' selected':'')+'>Manual · you add contacts</option></select>'+
+      '<label style="display:block;font-size:12px;font-weight:600;color:var(--text-2);margin:12px 0 5px">Status</label><select id="drs-status" style="width:100%;border:1px solid var(--border);border-radius:9px;padding:9px 12px;font:400 13.5px DM Sans"><option'+(drCurrent.status==='active'?' selected':'')+'>active</option><option'+(drCurrent.status==='paused'?' selected':'')+'>paused</option><option'+(drCurrent.status==='draft'?' selected':'')+'>draft</option></select>'+
+    '</div>'+
+    '<div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--border)"><button class="btn btn-ghost" onclick="document.getElementById(\'dr-settings-ov\').remove()">Cancel</button><button class="btn btn-blue" onclick="drSaveSettings()">Save changes</button></div>'+
+  '</div>';
+  m.style.display='flex';
+  m.onclick=function(e){ if(e.target===m) m.remove(); };
+}
+function drSaveSettings(){
+  if(!drCurrent) return;
+  var nm=document.getElementById('drs-name').value.trim()||drCurrent.name;
+  drCurrent.name=nm; drCurrent.type=document.getElementById('drs-type').value; drCurrent.status=document.getElementById('drs-status').value;
+  document.getElementById('dr-settings-ov').remove();
+  document.getElementById('dr-title').textContent=nm;
+  renderLists(); toast('List settings saved · '+nm);
+}
+function drSendEmail(){
+  if(!drCurrent){ window.location='atlas-email-campaign.html'; return; }
+  window.location='atlas-email-campaign.html?listName='+encodeURIComponent(drCurrent.name)+'&listCount='+(drCurrent.members||0);
+}
 function openListDrawer(id){
   const list = LISTS.find(l => l.id === id);
   if (!list) return;
+  drCurrent = list;
   document.getElementById('dr-title').textContent = list.name;
   document.getElementById('dr-meta').textContent = `${list.type === 'dynamic' ? '⚡ Dynamic list' : 'Manual list'} · created by ${list.owner} · last updated ${list.lastActivity}`;
   document.getElementById('dr-members').textContent = list.members.toLocaleString();
@@ -816,11 +793,168 @@ function createList(){
   toast('List "' + name + '" created · ' + (initialMembers ? initialMembers + ' members added' : 'ready to add donors'), 'success');
 }
 
-/* ─── Kebab (simple) ─── */
-function showKebab(id){
-  const list = LISTS.find(l => l.id === id);
+/* ─── Dedicated single-list workspace ─── */
+var LD={ list:null, tab:'members', mpage:1, mq:'', sel:{} };
+function ldRnd(s){ var x=Math.sin(s*91.7+13.3)*43758.5453; return x-Math.floor(x); }
+function ldMembers(list){
+  var FN=['Margaret','Thomas','James','Patricia','Michael','Susan','Anne','John','Elena','Catherine','Bridget','Sean','Kathleen','Robert','Laura','Nora','Liam','Aoife','Declan','Colleen','David','Maria','Peter','Grace'];
+  var LN=["O'Brien",'Sullivan','Walsh','Nguyen','Russo','Carter','Byrne','Murphy','Kennedy','Greene','Lin','Hayes','Quinn','Gallagher','Reilly','Donovan','Brennan','Romano','Grant','Walsh'];
+  var TAG=['Major donor','Recurring monthly','First-time donor','Active · 3 gifts','Lapsed','Household','Board member','Volunteer'];
+  var ST=['subscribed','subscribed','subscribed','subscribed','unsubscribed','bounced'];
+  var GIFT=[25,50,100,250,500,1000,5000,10000];
+  var seed=0; for(var k=0;k<list.id.length;k++) seed+=list.id.charCodeAt(k)*(k+1);
+  var cap=Math.min(list.members,240), out=[];
+  for(var i=0;i<cap;i++){ var f=FN[Math.floor(ldRnd(seed+i*1.3)*FN.length)], l=LN[Math.floor(ldRnd(seed+i*2.7)*LN.length)];
+    out.push({ n:f+' '+l, e:(f+'.'+l).toLowerCase().replace(/[^a-z.]/g,'')+'@email.org', tag:TAG[Math.floor(ldRnd(seed+i*3.1)*TAG.length)], gift:'$'+GIFT[Math.floor(ldRnd(seed+i*4.3)*GIFT.length)].toLocaleString(), st:ST[Math.floor(ldRnd(seed+i*5.9)*ST.length)], joined:(1+Math.floor(ldRnd(seed+i*6.7)*24))+' mo ago' }); }
+  return out;
+}
+function ldActivity(list){
+  if(list.status==='draft') return [];
+  var subs=['Spring update — thank you','April newsletter','Pledge reminder','Event invitation','Impact report'];
+  var seed=0; for(var k=0;k<list.id.length;k++) seed+=list.id.charCodeAt(k);
+  var n=2+Math.floor(ldRnd(seed*1.1)*4), out=[];
+  for(var i=0;i<n;i++){ var op=list.engagement? Math.max(10,list.engagement-5+Math.floor(ldRnd(seed+i*2.2)*10)):0;
+    out.push({ subj:subs[i%subs.length], date:(2+i*7)+' days ago', recips:list.members, open:op, click:Math.round(op*0.3) }); }
+  return out;
+}
+function pill(st){ var c={active:['#DCFCE7','#166534'],paused:['#FEF3C7','#92400E'],draft:['#F1F5F9','#64748B'],archived:['#FEE2E2','#B91C1C'],scheduled:['#DBEAFE','#1D4ED8']}[st]||['#F1F5F9','#64748B']; return '<span style="background:'+c[0]+';color:'+c[1]+';font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:capitalize">'+st+'</span>'; }
+function stPill(st){ var c={subscribed:['#DCFCE7','#166534'],unsubscribed:['#FEF3C7','#92400E'],bounced:['#FEE2E2','#B91C1C']}[st]; return '<span style="background:'+c[0]+';color:'+c[1]+';font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px">'+st+'</span>'; }
+function ldShell(list){
+  var eng=list.engagement||0, ctr=(eng*0.3).toFixed(1);
+  return '<div style="padding-top:20px">'+
+    '<div style="display:flex;align-items:center;gap:7px;font-size:13px;flex-wrap:wrap">'+
+      '<a href="atlas-communications.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--blue);font-weight:600;text-decoration:none"><svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg>Communications</a>'+
+      '<span style="color:#CBD5E1">/</span>'+
+      '<a href="#" onclick="showIndex();return false" style="color:var(--blue);font-weight:600;text-decoration:none">Outreach lists</a>'+
+      '<span style="color:#CBD5E1">/</span>'+
+      '<span style="color:var(--text);font-weight:500">'+list.name+'</span>'+
+    '</div>'+
+    '<div style="display:flex;align-items:flex-start;gap:14px;margin-top:12px;flex-wrap:wrap">'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1 style="font-family:\'DM Serif Display\',serif;font-size:26px;color:var(--text);margin:0">'+list.name+'</h1>'+
+        '<span style="background:'+(list.type==='dynamic'?'var(--purple-light)':'var(--surface)')+';color:'+(list.type==='dynamic'?'var(--purple)':'var(--text-2)')+';font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px">'+(list.type==='dynamic'?'⚡ Dynamic':'Manual')+'</span>'+pill(list.status)+'</div>'+
+        '<div style="font-size:12.5px;color:var(--text-3);margin-top:6px">Owned by '+list.owner+' · '+(list.status==='draft'?'not sent yet':'last activity '+list.lastActivity)+' · '+list.members.toLocaleString()+' members</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+        '<button class="btn btn-blue" onclick="ldSend()"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M1 6h9M6 2l4 4-4 4"/></svg> Send email</button>'+
+        '<button class="btn btn-ghost" onclick="ldEdit()">Edit settings</button>'+
+        '<button class="btn btn-ghost" onclick="ldAdd()">Add members</button>'+
+        '<button class="btn btn-ghost" onclick="ldExport()">Export CSV</button>'+
+        '<button class="btn btn-ghost" onclick="ldMore(event)">⋯</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="kpi-row" style="padding:18px 0 6px;background:none;grid-template-columns:repeat(4,1fr)">'+
+      '<div class="kpi"><div class="lbl">Members</div><div class="val">'+list.members.toLocaleString()+'</div><div class="meta">'+(list.type==='dynamic'?'auto-updating':'manual list')+'</div></div>'+
+      '<div class="kpi"><div class="lbl">30-day open rate</div><div class="val green">'+(eng?eng+'%':'—')+'</div><div class="meta">'+(eng?'engagement':'not sent yet')+'</div></div>'+
+      '<div class="kpi"><div class="lbl">Click-through</div><div class="val">'+(eng?ctr+'%':'—')+'</div><div class="meta">from list clicks</div></div>'+
+      '<div class="kpi"><div class="lbl">Last send</div><div class="val" style="font-size:16px">'+(list.status==='draft'?'—':list.lastActivity)+'</div><div class="meta">'+(list.status==='draft'?'no sends yet':'via Communications')+'</div></div>'+
+    '</div>'+
+    '<div style="display:flex;gap:4px;border-bottom:1px solid var(--border);margin-top:14px">'+
+      ['members|Members','membership|Membership','activity|Activity'].map(function(t){ var p=t.split('|'); return '<button class="ld-tab" data-t="'+p[0]+'" onclick="ldSetTab(\''+p[0]+'\')" style="border:none;background:none;padding:11px 16px;font:600 13px \'DM Sans\';color:var(--text-3);border-bottom:2px solid transparent;cursor:pointer">'+p[1]+'</button>'; }).join('')+
+    '</div>'+
+    '<div id="ld-pane" style="padding-top:16px"></div>'+
+  '</div>';
+}
+function ldSetTab(t){ LD.tab=t; LD.mpage=1; ldRenderTab(); }
+function ldRenderTab(){
+  var list=LD.list; var pane=document.getElementById('ld-pane'); if(!pane) return;
+  document.querySelectorAll('.ld-tab').forEach(function(b){ var on=b.dataset.t===LD.tab; b.style.color=on?'var(--blue)':'var(--text-3)'; b.style.borderBottomColor=on?'var(--blue)':'transparent'; });
+  if(LD.tab==='members'){
+    var all=ldMembers(list), q=LD.mq.toLowerCase();
+    var f=q? all.filter(function(m){return (m.n+' '+m.e).toLowerCase().indexOf(q)!==-1;}):all;
+    var size=10, maxP=Math.max(1,Math.ceil(f.length/size)); if(LD.mpage>maxP)LD.mpage=maxP; var start=(LD.mpage-1)*size, rows=f.slice(start,start+size);
+    var selN=Object.keys(LD.sel).length;
+    pane.innerHTML=
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="flex:1;display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 11px;max-width:280px"><svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="ld-mq" placeholder="Search members…" value="'+escv(LD.mq)+'" style="border:none;background:none;outline:none;font:400 12.5px \'DM Sans\';flex:1"></div><span style="font-size:12px;color:var(--text-3)">'+f.length.toLocaleString()+' of '+list.members.toLocaleString()+'</span></div>'+
+      (selN?'<div style="display:flex;align-items:center;gap:10px;background:var(--navy);color:#fff;border-radius:9px;padding:9px 14px;margin-bottom:10px;font:600 12.5px \'DM Sans\'"><span>'+selN+' selected</span><span style="flex:1"></span><button class="ld-bulk" data-b="addlist" style="border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:7px;padding:5px 11px;font:600 12px \'DM Sans\';cursor:pointer">Add to list</button><button class="ld-bulk" data-b="export" style="border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:7px;padding:5px 11px;font:600 12px \'DM Sans\';cursor:pointer">Export</button><button class="ld-bulk" data-b="suppress" style="border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:7px;padding:5px 11px;font:600 12px \'DM Sans\';cursor:pointer">Suppress</button><button class="ld-bulk" data-b="remove" style="border:1px solid #FCA5A5;background:none;color:#FCA5A5;border-radius:7px;padding:5px 11px;font:600 12px \'DM Sans\';cursor:pointer">Remove</button><button class="ld-bulk" data-b="clear" style="border:none;background:none;color:#fff;cursor:pointer;font:600 12px \'DM Sans\'">Clear</button></div>':'')+
+      '<table class="lists-table"><thead><tr><th style="width:30px"></th><th>Member</th><th>Segment tag</th><th>Last gift</th><th>Status</th><th>Joined</th></tr></thead><tbody>'+
+      (rows.length? rows.map(function(m){ var key=m.e; return '<tr><td><input type="checkbox" class="ld-ck" data-k="'+escv(key)+'" '+(LD.sel[key]?'checked':'')+'></td><td><div class="lt-name">'+m.n+'</div><div class="lt-desc">'+m.e+'</div></td><td><span style="font-size:12px;color:var(--text-2)">'+m.tag+'</span></td><td>'+m.gift+'</td><td>'+stPill(m.st)+'</td><td><span class="lt-date">'+m.joined+'</span></td></tr>'; }).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:30px">No members match.</td></tr>')+
+      '</tbody></table>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 2px;font-size:12px;color:var(--text-3)"><span>Showing '+(f.length?start+1:0)+'–'+Math.min(start+size,f.length)+' of '+f.length.toLocaleString()+(list.members>all.length?' · first '+all.length+' loaded (server-paginated)':'')+'</span><span style="display:flex;gap:8px"><button class="btn btn-ghost" id="ldm-prev" '+(LD.mpage<=1?'disabled':'')+'>‹ Prev</button><button class="btn btn-ghost" id="ldm-next" '+(LD.mpage>=maxP?'disabled':'')+'>Next ›</button></span></div>';
+    var qi=pane.querySelector('#ld-mq'); if(qi) qi.addEventListener('input',function(){ LD.mq=this.value; LD.mpage=1; ldRenderTab(); var n=document.getElementById('ld-mq'); if(n){n.focus();try{n.setSelectionRange(n.value.length,n.value.length);}catch(_){}} });
+    pane.querySelectorAll('.ld-ck').forEach(function(ck){ ck.addEventListener('change',function(){ var k=ck.dataset.k; if(ck.checked)LD.sel[k]=1; else delete LD.sel[k]; ldRenderTab(); }); });
+    var pv=pane.querySelector('#ldm-prev'); if(pv) pv.addEventListener('click',function(){ if(LD.mpage>1){LD.mpage--;ldRenderTab();} });
+    var nx=pane.querySelector('#ldm-next'); if(nx) nx.addEventListener('click',function(){ if(LD.mpage<maxP){LD.mpage++;ldRenderTab();} });
+    pane.querySelectorAll('.ld-bulk').forEach(function(b){ b.addEventListener('click',function(){ var a=b.dataset.b, n=Object.keys(LD.sel).length; if(a==='clear'){LD.sel={};ldRenderTab();return;} toast(({addlist:n+' members — pick a list to add to',export:'Exporting '+n+' members to CSV',suppress:n+' members suppressed · added to DNC',remove:n+' members removed from this list'})[a]); if(a!=='addlist'){LD.sel={};} ldRenderTab(); }); });
+  } else if(LD.tab==='membership'){
+    if(list.type==='dynamic'){
+      pane.innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;max-width:620px">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font-weight:700;color:var(--text)">⚡ Dynamic membership rules</div><button class="btn btn-ghost" onclick="toast(\'Opening the segment builder…\')">Edit criteria</button></div>'+
+        '<p style="font-size:12.5px;color:var(--text-3);margin-bottom:14px">Members are recalculated automatically whenever a donor matches (or stops matching) these rules.</p>'+
+        ['Gave a gift in the last 18 months','Deanery is “East” or “Diocese-wide”','Email status is subscribed','Excludes: hard-bounced, DNC'].map(function(c,i){ return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border)"><span style="font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-pale);border-radius:6px;padding:2px 7px">'+(i===0?'IF':'AND')+'</span><span style="font-size:13px;color:var(--text-2)">'+c+'</span></div>'; }).join('')+
+        '<div style="margin-top:14px;font-size:12px;color:var(--text-3)">Last recalculated '+list.lastActivity+' · '+list.members.toLocaleString()+' members currently match.</div>'+
+      '</div>';
+    } else {
+      pane.innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;max-width:620px">'+
+        '<div style="font-weight:700;color:var(--text);margin-bottom:8px">Manual list</div>'+
+        '<p style="font-size:12.5px;color:var(--text-3);margin-bottom:14px">Members are added by hand or imported. This list has '+list.members.toLocaleString()+' members.</p>'+
+        '<div style="display:flex;gap:8px"><button class="btn btn-blue" onclick="ldAdd()">Add members</button><button class="btn btn-ghost" onclick="openCsvWizard()">Import CSV</button></div>'+
+      '</div>';
+    }
+  } else {
+    var acts=ldActivity(list);
+    pane.innerHTML = acts.length ?
+      '<table class="lists-table"><thead><tr><th>Email sent</th><th>Date</th><th>Recipients</th><th>Open rate</th><th>Click rate</th></tr></thead><tbody>'+
+      acts.map(function(a){ return '<tr><td><div class="lt-name">'+a.subj+'</div></td><td><span class="lt-date">'+a.date+'</span></td><td>'+a.recips.toLocaleString()+'</td><td style="color:var(--green);font-weight:600">'+a.open+'%</td><td>'+a.click+'%</td></tr>'; }).join('')+
+      '</tbody></table>' :
+      '<div style="text-align:center;padding:44px 20px;color:var(--text-3)"><div style="font-size:30px;margin-bottom:8px">📭</div><div style="font-weight:600;color:var(--text)">No sends yet</div><div style="font-size:13px;margin-top:4px">Email this list from the Send button above — activity will appear here.</div></div>';
+  }
+}
+function openListPage(id){
+  var list=LISTS.find(function(l){return l.id===id;});
+  if(!list){ var m=/^list-(\d+)$/.exec(id||''); if(m){ list=LISTS[(+m[1])-1]; } }
+  if(!list) return;
+  LD={ list:list, tab:'members', mpage:1, mq:'', sel:{} };
+  document.getElementById('index-view').style.display='none';
+  var host=document.getElementById('list-detail'); host.style.display='';
+  host.innerHTML=ldShell(list); ldRenderTab();
+  try{ window.scrollTo(0,0); history.replaceState(null,'','atlas-outreach-lists.html?list='+encodeURIComponent(list.id)); }catch(_){}
+}
+window.openListPage=openListPage;
+function showIndex(){ var h=document.getElementById('list-detail'); if(h){h.style.display='none';h.innerHTML='';} var iv=document.getElementById('index-view'); if(iv) iv.style.display=''; try{ history.replaceState(null,'','atlas-outreach-lists.html'); }catch(_){} }
+window.showIndex=showIndex;
+function ldSend(){ toast('Starting email to '+LD.list.name+'…'); setTimeout(function(){ window.location='atlas-email-campaign.html?listName='+encodeURIComponent(LD.list.name)+'&listCount='+(LD.list.members||0); },200); }
+function ldEdit(){ drCurrent=LD.list; drEditSettings(); }
+function ldAdd(){ if(LD.list.type==='dynamic'){ toast('Dynamic list — edit the criteria to change who’s included'); ldSetTab('membership'); } else { openCsvWizard(); } }
+function ldExport(){ toast('Exporting '+LD.list.members.toLocaleString()+' members to CSV'); }
+function ldMore(ev){
+  var old=document.getElementById('ld-more'); if(old){old.remove();return;}
+  var m=document.createElement('div'); m.id='ld-more'; m.style.cssText='position:fixed;z-index:400;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 34px rgba(15,23,42,.18);padding:6px;min-width:170px;font-family:DM Sans,sans-serif';
+  m.innerHTML=[['Duplicate','dup'],['Archive','arch'],['Delete','del']].map(function(it){ return '<button data-a="'+it[1]+'" style="display:block;width:100%;text-align:left;border:none;background:none;padding:8px 11px;border-radius:7px;font:500 13px \'DM Sans\';color:'+(it[1]==='del'?'var(--rose)':'var(--text-2)')+';cursor:pointer">'+it[0]+'</button>'; }).join('');
+  document.body.appendChild(m); var r=ev.currentTarget.getBoundingClientRect(); m.style.top=(r.bottom+4)+'px'; m.style.left=Math.max(8,r.right-m.offsetWidth)+'px';
+  m.querySelectorAll('button').forEach(function(b){ b.onmouseenter=function(){b.style.background='var(--blue-pale)';}; b.onmouseleave=function(){b.style.background='none';}; });
+  m.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; var a=b.dataset.a; m.remove(); var list=LD.list;
+    if(a==='dup'){ var copy=Object.assign({},list,{id:'L'+(LISTS.length+1)+'-'+Math.floor(Math.random()*9999),name:list.name+' (copy)',status:'draft',engagement:0,lastActivity:'Just now'}); LISTS.unshift(copy); renderLists(); toast('Duplicated · '+copy.name,'success'); }
+    else if(a==='arch'){ atlasConfirm({icon:'warn',title:'Archive this list?',message:'It will be hidden from active views but can be restored.',confirmText:'Archive',onConfirm:function(){ list.status='archived'; renderLists(); showIndex(); toast('List archived · '+list.name); }}); }
+    else if(a==='del'){ atlasConfirm({icon:'danger',danger:true,title:'Delete this list?',message:'Donors stay in your database — only “'+list.name+'” is removed.',confirmText:'Delete list',onConfirm:function(){ var i=LISTS.indexOf(list); if(i>-1)LISTS.splice(i,1); renderLists(); showIndex(); toast('List deleted · '+list.name); }}); }
+  });
+  setTimeout(function(){ document.addEventListener('click',function cl(e2){ if(!m.contains(e2.target)){ m.remove(); document.removeEventListener('click',cl); } }); },10);
+}
+
+/* ─── Kebab (functional popup menu) ─── */
+function showKebab(id, ev){
+  var list = LISTS.find(function(l){ return l.id === id; });
   if (!list) return;
-  toast('Kebab menu would show: Edit · Duplicate · Send email · Export members · Archive · Delete');
+  var old=document.getElementById('lk-menu'); if(old) old.remove();
+  var m=document.createElement('div'); m.id='lk-menu';
+  m.style.cssText='position:fixed;z-index:400;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 34px rgba(15,23,42,.18);padding:6px;min-width:186px;font-family:DM Sans,sans-serif';
+  var items=[['Open list','open'],['Send email','send'],['Duplicate','dup'],['Edit settings','edit'],['Export members','export'],['sep'],['Delete list','del']];
+  m.innerHTML=items.map(function(it){ if(it[0]==='sep') return '<div style="height:1px;background:var(--border);margin:5px 4px"></div>'; return '<button data-a="'+it[1]+'" style="display:block;width:100%;text-align:left;border:none;background:none;padding:8px 11px;border-radius:7px;font:500 13px \'DM Sans\';color:'+(it[1]==='del'?'var(--rose)':'var(--text-2)')+';cursor:pointer">'+it[0]+'</button>'; }).join('');
+  document.body.appendChild(m);
+  var btn=(ev&&(ev.currentTarget||ev.target)); var r=btn?btn.getBoundingClientRect():{bottom:80,top:60,left:window.innerWidth-220};
+  var top=r.bottom+4, left=Math.min(r.left, window.innerWidth-m.offsetWidth-10);
+  if(top+m.offsetHeight>window.innerHeight) top=r.top-m.offsetHeight-4;
+  m.style.top=top+'px'; m.style.left=Math.max(8,left)+'px';
+  m.querySelectorAll('button').forEach(function(b){ b.onmouseenter=function(){b.style.background='var(--blue-pale)';}; b.onmouseleave=function(){b.style.background='none';}; });
+  m.addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; var a=b.dataset.a; m.remove();
+    if(a==='open'){ openListPage(id); }
+    else if(a==='send'){ toast('Starting email to '+list.name+'…'); setTimeout(function(){ window.location='atlas-email-campaign.html?listName='+encodeURIComponent(list.name)+'&listCount='+(list.members||0); },200); }
+    else if(a==='dup'){ var copy=Object.assign({},list,{id:'L'+(LISTS.length+1)+'-'+Math.floor(Math.random()*9999),name:list.name+' (copy)',status:'draft',engagement:0,lastActivity:'Just now',updated:'2026-05-04'}); LISTS.unshift(copy); renderLists(); toast('Duplicated · '+copy.name,'success'); }
+    else if(a==='edit'){ drCurrent=list; drEditSettings(); }
+    else if(a==='export'){ toast('Exporting '+list.members.toLocaleString()+' members to CSV'); }
+    else if(a==='del'){ atlasConfirm({icon:'danger',danger:true,title:'Delete this list?',message:'Donors stay in your database — only the list “'+list.name+'” is removed.',confirmText:'Delete list',onConfirm:function(){ var i=LISTS.indexOf(list); if(i>-1)LISTS.splice(i,1); renderLists(); toast('List deleted · '+list.name); }}); }
+  });
+  setTimeout(function(){ document.addEventListener('click', function cl(e2){ if(!m.contains(e2.target)){ m.remove(); document.removeEventListener('click',cl); } }); }, 10);
 }
 
 /* ─── Toast ─── */
@@ -944,28 +1078,24 @@ if(/[?&]import=csv/.test(location.search)) setTimeout(openCsvWizard, 300);
 
 // Initial render
 renderLists();
+updateKpis();
 
-// ── Deep-link: open a specific list's dedicated detail when arriving via ?list / ?name ──
+// Deep-link: open the dedicated list workspace when arriving with ?list= / ?name= (e.g. a row click from Communications)
 (function(){
   var P=new URLSearchParams(location.search);
-  var wantName=(P.get('name')||'').trim(), wantId=(P.get('list')||'').trim();
-  if(!wantName && !wantId) return;
-  var match=null;
-  if(wantName){ var wn=wantName.toLowerCase(); match=LISTS.find(function(l){return l.name.toLowerCase()===wn;}) || LISTS.find(function(l){return l.name.toLowerCase().indexOf(wn)!==-1 || wn.indexOf(l.name.toLowerCase())!==-1;}); }
-  if(!match && wantId){ match=LISTS.find(function(l){return l.id===wantId;}); }
-  if(!match){
-    // synthesize a dedicated detail for a list that isn't in this screen's seed data
-    var cnt=parseInt(P.get('count'),10)||parseInt((P.get('listCount')||''),10)||1240;
-    var FN=['Margaret','Thomas','James','Patricia','Michael','Susan','Anne','John','Elena','Catherine','Bridget','Sean','Kathleen','Robert','Laura','Nora'];
-    var LN=["O'Brien",'Sullivan','Walsh','Nguyen','Russo','Carter','Byrne','Murphy','Kennedy','Greene','Lin','Hayes','Quinn','Gallagher','Reilly'];
-    var sample=[]; for(var i=0;i<6;i++){ sample.push({name:FN[(i*5+3)%FN.length]+' '+LN[(i*7+2)%LN.length], sub:['Major donor','Recurring monthly','First-time donor','Active · 3 gifts','Lapsed · re-engage','Household · 4 gifts'][i]}); }
-    match={ id:'ext', name:wantName||wantId, desc:'Opened from a link in Communications. Members shown are a representative sample of this list.',
-      members:cnt, type:'dynamic', status:'active', engagement:Math.round(30+Math.random()*40), owner:'Sarah Reynolds',
-      lastActivity:'Just opened', updated:new Date().toISOString().slice(0,10),
-      activity:'List opened from Communications → Lists & segments<br>'+cnt.toLocaleString()+' current members<br>Segment refreshes automatically', sampleMembers:sample };
-    LISTS.unshift(match);
+  var id=(P.get('list')||'').trim(), nm=(P.get('name')||'').trim();
+  if(!id && !nm) return;
+  var target=null;
+  if(id){ target=LISTS.find(function(l){return l.id===id;}); if(!target){ var m=/^list-(\d+)$/.exec(id); if(m) target=LISTS[(+m[1])-1]; } }
+  if(!target && nm){ var wn=nm.toLowerCase(); target=LISTS.find(function(l){return l.name.toLowerCase()===wn;}) || LISTS.find(function(l){return l.name.toLowerCase().indexOf(wn)!==-1;}); }
+  // If the name passed from the link differs from the resolved list, trust the link's name so the workspace title matches what was clicked
+  if(target && nm && target.name.toLowerCase()!==nm.toLowerCase()){ target.name=nm; }
+  if(!target && nm){ // synthesize so the workspace always reflects the clicked list
+    var cnt=parseInt(P.get('count'),10)||0;
+    target={ id:'ext-'+Date.now(), name:nm, desc:'Opened from Communications.', members:cnt, type:'manual', status:'active', engagement:0, owner:'Sarah Reynolds', ownerAv:'SR', avBg:'var(--blue)', lastActivity:'Just now', updated:'2026-05-04', activity:'Opened from Communications · '+cnt.toLocaleString()+' members', sampleMembers:[] };
+    LISTS.unshift(target);
   }
-  setTimeout(function(){ openListDrawer(match.id); }, 120);
+  if(target) openListPage(target.id);
 })();
 </script>
 

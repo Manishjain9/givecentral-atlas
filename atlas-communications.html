@@ -692,7 +692,7 @@ body {
     <div class="tab"         data-tab="scheduled" onclick="switchCommsTab('scheduled', this)">Scheduled <span class="ct" id="tab-ct-scheduled">126</span></div>
     <div class="tab"         data-tab="drafts"    onclick="switchCommsTab('drafts', this)">Drafts <span class="ct">3</span></div>
     <div class="tab"         data-tab="templates" onclick="switchCommsTab('templates', this)">Templates <span class="ct">12</span></div>
-    <div class="tab"         data-tab="lists"     onclick="switchCommsTab('lists', this)">Lists &amp; segments <span class="ct">112</span></div>
+    <div class="tab"         data-tab="lists"     onclick="switchCommsTab('lists', this)">Outreach lists <span class="ct">112</span></div>
   </div>
 
   <!-- ═══ TAB PANES ═══ -->
@@ -815,7 +815,8 @@ body {
 
   <!-- ─── TEMPLATES pane ─── -->
   <div class="tab-pane" data-pane="templates" style="display:none">
-    <div class="section-h"><span>Email templates · 12 reusable</span><span class="line"></span><a href="atlas-email-builder.html?mode=template" class="cta-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg> New template</a></div>
+    <div class="section-h"><span>Email templates · 12 reusable</span><span class="line"></span><span style="display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px 11px;text-transform:none;letter-spacing:0"><svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="tpl-search" placeholder="Search templates…" oninput="window.__tplSearch&&window.__tplSearch(this.value)" style="border:none;background:none;outline:none;font:400 12.5px 'DM Sans';width:150px"></span><a href="atlas-email-builder.html?mode=template" class="cta-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg> New template</a></div>
+    <div id="tpl-filters" style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:0 4px 12px"></div>
     <div class="cm-list" id="templates-list">
       <!-- 6 template entries — these are visual demos, not interactive -->
       <a class="cm-row" href="atlas-email-compose.html">
@@ -907,7 +908,7 @@ body {
 
   <!-- ─── LISTS & SEGMENTS pane ─── -->
   <div class="tab-pane" data-pane="lists" style="display:none">
-    <div class="section-h"><span>Outreach lists &amp; segments · <span id="lists-count-inline">112</span> lists</span><span class="line"></span><a href="#" onclick="commsImport();return false" class="cta-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg> Add new list</a></div>
+    <div class="section-h"><span>Outreach lists · <span id="lists-count-inline">112</span> lists</span><span class="line"></span><a href="#" onclick="commsImport();return false" class="cta-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg> Add new list</a></div>
     <div class="cm-list" style="margin-top:12px" id="lists-list"></div>
   </div>
 
@@ -1359,7 +1360,7 @@ body {
   var ACTS={
     sent:[{t:'View message',k:'navrow'},{t:'Resend to non-openers',k:'toast',v:'Resend queued to non-openers · sending shortly'},{t:'Forward…',k:'nav',v:'atlas-email-compose.html'},{t:'View engagement report',k:'toast',v:'Opens & clicks report opening…'},{t:'Copy tracking link',k:'toast',v:'Tracking link copied to clipboard'}],
     scheduled:[{t:'Edit schedule',k:'sched'},{t:'Send now',k:'sendnow'},{t:'Duplicate',k:'dupmodal',kind:'scheduled send'},{t:'Cancel send',k:'cancelsched',danger:true}],
-    templates:[{t:'Edit in builder',k:'edittpl'},{t:'Duplicate template',k:'dupmodal',kind:'template'},{t:'Set as default',k:'toast',v:'Set as the default template'},{t:'Archive',k:'del',danger:true,title:'Archive this template?',body:'Archived templates are hidden from the list but can be restored later.',ok:'Archive',done:'Template archived'},{t:'Delete',k:'del',danger:true,title:'Delete this template?',body:'This permanently removes the template and cannot be undone.',ok:'Delete',done:'Template deleted'}],
+    templates:[{t:'Edit in builder',k:'edittpl'},{t:'Duplicate template',k:'dupmodal',kind:'template'},{t:'Set as default',k:'setdefault'},{t:'Archive',k:'del',danger:true,title:'Archive this template?',body:'Archived templates are hidden from the list but can be restored later.',ok:'Archive',done:'Template archived'},{t:'Delete',k:'del',danger:true,title:'Delete this template?',body:'This permanently removes the template and cannot be undone.',ok:'Delete',done:'Template deleted'}],
     lists:[{t:'Open list',k:'openlist'},{t:'Send to this list',k:'navlist'},{t:'Duplicate list',k:'dupmodal',kind:'list'},{t:'Export CSV',k:'toast',v:'List exported · CSV downloading'},{t:'Delete list',k:'del',danger:true,title:'Delete this list?',body:'Donors stay in your database — only this list / segment is removed.',ok:'Delete list',done:'List deleted'}],
     drafts:[{t:'Resume editing',k:'navrow'},{t:'Duplicate draft',k:'dupmodal',kind:'draft'},{t:'Schedule send',k:'sched'},{t:'Delete draft',k:'del',danger:true,title:'Delete this draft?',body:'This draft will be permanently removed.',ok:'Delete draft',done:'Draft deleted'}]
   };
@@ -1380,6 +1381,7 @@ body {
       else if(a.k==='navlist'){ var nm=((row&&row.querySelector('.ttl'))||{}).textContent||''; var cnt=(((row&&row.querySelector('.meta'))||{}).textContent||'').replace(/[^0-9]/g,''); toast('Starting email to '+nm+'…'); setTimeout(function(){ window.location='atlas-email-campaign.html?listName='+encodeURIComponent(nm.trim())+(cnt?'&listCount='+cnt:''); },220); }
       else if(a.k==='openlist'){ var lnm=((row&&row.querySelector('.ttl'))||{}).textContent.trim()||''; var lcnt=(((row&&row.querySelector('.meta'))||{}).textContent||'').replace(/[^0-9]/g,''); toast('Opening '+lnm+'…'); setTimeout(function(){ window.location='atlas-outreach-lists.html?name='+encodeURIComponent(lnm)+(lcnt?'&count='+lcnt:''); },200); }
       else if(a.k==='edittpl'){ var tnm=((row&&row.querySelector('.ttl'))||{}).textContent.trim()||''; toast('Opening “'+tnm+'” in the builder…'); setTimeout(function(){ window.location='atlas-email-builder.html?mode=template&tpl='+encodeURIComponent(tnm); },200); }
+      else if(a.k==='setdefault'){ if(window.__setDefaultTemplate) window.__setDefaultTemplate(row); toast('Set as the default template'); }
       else if(a.k==='dupmodal'){ commsDuplicate(a.kind||'item', row, pane); }
       else if(a.k==='cancelsched'){ commsCancelScheduled(row); }
       else if(a.k==='sched'){ commsSchedule(); }
@@ -1390,7 +1392,7 @@ body {
     });
   }
   // capture so we beat the row anchor's navigation
-  document.addEventListener('click', function(e){ var k=e.target.closest && e.target.closest('.kebab'); if(!k) return; e.preventDefault(); e.stopPropagation(); openK(k); }, true);
+  document.addEventListener('click', function(e){ var k=e.target.closest && e.target.closest('.kebab'); if(!k) return; var pane=k.closest('.tab-pane'); if(pane && pane.dataset.pane==='templates') return; /* templates use their own rich menu */ e.preventDefault(); e.stopPropagation(); openK(k); }, true);
   document.addEventListener('click', function(e){ if(kmenu && !kmenu.contains(e.target) && !(e.target.closest&&e.target.closest('.kebab'))) closeK(); });
   window.addEventListener('scroll', closeK, true);
 
@@ -1507,7 +1509,7 @@ body {
       var eng=st[0]==='Draft'?0:20+Math.floor(rnd(i*5.5)*55);
       var col=COLORS[i%COLORS.length];
       var slug='list-'+(i+1);
-      rows.push('<a class="cm-row" href="atlas-outreach-lists.html?list='+slug+'">'+
+      rows.push('<a class="cm-row" href="atlas-outreach-lists.html?list='+slug+'&name='+encodeURIComponent(nm.trim())+'&count='+n+'">'+
         '<div class="ico" style="background:'+col[0]+';color:'+col[1]+';display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10M2 7h10M2 10.5h6"/></svg></div>'+
         '<div class="body"><div class="ttl">'+nm.trim()+'</div><div class="meta"><span>'+n.toLocaleString()+' donors</span><span>·</span><span>'+ty+'</span><span>·</span><span>'+st[0]+'</span></div></div>'+
         '<div class="recipients"><span class="muted" style="font-size:11.5px">'+(st[0]==='Draft'?'Not sent yet':'Last send '+(1+Math.floor(rnd(i*6.1)*20))+' days ago')+'</span></div>'+
@@ -1518,7 +1520,7 @@ body {
     // prepend any user-added lists (persisted from Add-new-list / CSV import)
     var user=[]; try{ user=JSON.parse(localStorage.getItem('atlas_user_lists')||'[]'); }catch(_){}
     var userRows=user.slice().reverse().map(function(u){ var col=COLORS[0];
-      return '<a class="cm-row" data-user="1" href="atlas-outreach-lists.html?list='+encodeURIComponent(u.slug||('user-'+(u.ts||0)))+'">'+
+      return '<a class="cm-row" data-user="1" href="atlas-outreach-lists.html?list='+encodeURIComponent(u.slug||('user-'+(u.ts||0)))+'&name='+encodeURIComponent(u.nm)+'&count='+(u.n||0)+'">'+
         '<div class="ico" style="background:'+col[0]+';color:'+col[1]+';display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10M2 7h10M2 10.5h6"/></svg></div>'+
         '<div class="body"><div class="ttl">'+esc(u.nm)+'</div><div class="meta"><span>'+(u.n||0).toLocaleString()+' donors</span><span>·</span><span>'+esc(u.type||'Imported CSV')+'</span><span>·</span><span>Just added by you</span></div></div>'+
         '<div class="recipients"><span class="muted" style="font-size:11.5px">Not sent yet</span></div>'+
@@ -1559,7 +1561,7 @@ body {
     var tabc=document.querySelector('#comms-tabs .tab[data-tab="templates"] .ct'); if(tabc) tabc.textContent=String(n);
     var sh=host.parentNode.querySelector('.section-h span'); if(sh) sh.textContent='Email templates · '+n+' reusable';
     if(typeof ensureKebabs==='function') ensureKebabs();
-    cmPaginate('templates-list',10); cmEmpty('templates-list');
+    if(window.__renderTplView) window.__renderTplView(); else { cmPaginate('templates-list',10); cmEmpty('templates-list'); }
   }
   window.__commsRenderUserTemplates=renderUserTemplates;
 
@@ -1889,6 +1891,9 @@ body {
       document.getElementById('sa-next').disabled=S.page>=maxPage;
       var isF = S.search||S.types.length||S.statuses.length||S.campaigns.length||S.attn||S.range<9999;
       document.getElementById('sa-result').innerHTML='<strong>'+total.toLocaleString()+'</strong> messages'+(isF?' match':'');
+      // Only show Clear when a filter is actually applied (changed from defaults)
+      var anyFilter = !!(S.search||S.types.length||S.statuses.length||S.campaigns.length||S.attn||S.range!==90);
+      var clr=document.getElementById('sa-clear'); if(clr) clr.style.display=anyFilter?'':'none';
       syncFacets();
     }
     function syncFacets(){
@@ -1928,7 +1933,9 @@ body {
     });
 
     function toast(msg){ if(window.atlasToast) return window.atlasToast(msg); var t=document.getElementById('atlas-rescue-toast'); if(t){ t.querySelector('.msg').textContent=msg; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},2500);} }
-    document.getElementById('sa-banner').addEventListener('click', function(e){ var b=e.target.closest('.sa-abtn'); if(!b)return; var a=b.dataset.a; toast({suppress:'Bad addresses suppressed · added to DNC list',reverify:'Re-verification queued for bounced addresses',export:'Deliverability list exported to CSV'}[a]); });
+    document.getElementById('sa-banner').addEventListener('click', function(e){ var b=e.target.closest('.sa-abtn'); if(!b)return; var a=b.dataset.a;
+      if(a==='suppress'){ if(window.commsConfirm){ window.commsConfirm({title:'Suppress bad addresses?',body:'Hard-bounced and complained addresses across these flagged sends will be added to the diocese DNC list so future sends skip them automatically.',ok:'Suppress addresses',danger:true}, function(){ toast('Bad addresses suppressed · added to DNC list'); }); } else { toast('Bad addresses suppressed · added to DNC list'); } return; }
+      toast({reverify:'Re-verification queued for bounced addresses',export:'Deliverability list exported to CSV'}[a]||'Done'); });
 
     // ── Modal overlay (message detail + recipient list) ──
     var ov=document.createElement('div'); ov.id='sa-ov';
@@ -2269,7 +2276,7 @@ body {
 (function(){
   var SAMPLE={first_name:'Margaret',last_name:"O'Brien",org_name:'Diocese of Albany',parish_name:"St. Mary's Cathedral",donation_amount:'$10,000',amount:'$500',event_name:"Bishop's Annual Gala",year:'2026',seq:'0148'};
   function resolve(s){ return String(s||'').replace(/\{\{?\s*([a-z_]+)\s*\}?\}/gi,function(m,k){ return SAMPLE[k]!=null?('<span style="background:#EFF6FF;color:#2563EB;border-radius:4px;padding:0 3px">'+SAMPLE[k]+'</span>'):m; }); }
-  function tplInfo(row){ return { nm:((row.querySelector('.ttl')||{}).textContent||'Template').trim(), subj:(((row.querySelector('.recipients')||{}).textContent||'').match(/[“"]([^”"]*)[”"]/)||[])[1]||'' }; }
+  function tplInfo(row){ var nm=tplName(row)||'Template'; return { nm:nm, subj:(((row.querySelector('.recipients')||{}).textContent||'').match(/[“"]([^”"]*)[”"]/)||[])[1]||'' }; }
   var curTpl=null;
   function openPreview(t){
     curTpl=t; var ov=document.getElementById('tp-ov'); document.getElementById('tp-title').textContent='Preview · '+t.nm;
@@ -2316,7 +2323,8 @@ body {
   document.getElementById('tp-ov').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
 
   function toast(m){ if(window.atlasToast){window.atlasToast(m);return;} var t=document.getElementById('atlas-rescue-toast'); if(t){t.querySelector('.msg').textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);} }
-  function closeMenus(){ document.querySelectorAll('.tplmenu').forEach(function(m){m.remove();}); }
+  var _tplOutside=null;
+  function closeMenus(){ document.querySelectorAll('.tplmenu').forEach(function(m){m.remove();}); if(_tplOutside){ document.removeEventListener('click',_tplOutside); _tplOutside=null; } }
   function openMenu(x,y,t,row){
     closeMenus();
     var m=document.createElement('div'); m.className='tplmenu';
@@ -2330,23 +2338,176 @@ body {
       ['Share with team','share','<circle cx="4" cy="7" r="1.5"/><circle cx="10" cy="3.5" r="1.5"/><circle cx="10" cy="10.5" r="1.5"/><path d="M5.3 6.3l3.4-2M5.3 7.7l3.4 2"/>'],
       ['Move to folder','folder','<path d="M1.5 3.5h4l1 1.5h6v6h-11z"/>'],
       ['sep'],
-      ['Archive','archive','<rect x="1.5" y="2.5" width="11" height="3" rx="1"/><path d="M2.5 5.5v6h9v-6M5.5 8h3"/>','danger'],
+      (metaFor(t.nm).archived ? ['Restore','restore','<path d="M2 7a5 5 0 1 1 1.5 3.5M2 10.5V7h3.5"/>'] : ['Archive','archive','<rect x="1.5" y="2.5" width="11" height="3" rx="1"/><path d="M2.5 5.5v6h9v-6M5.5 8h3"/>','danger']),
       ['Delete','delete','<path d="M2 3.5h10M5 3.5V2h4v1.5M3.5 3.5l.5 9h6l.5-9"/>','danger']
     ];
     m.innerHTML=items.map(function(it){ return it[0]==='sep'?'<div class="sep"></div>':'<div class="it'+(it[3]?' '+it[3]:'')+'" data-a="'+it[1]+'"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">'+it[2]+'</svg>'+it[0]+'</div>'; }).join('');
     document.body.appendChild(m);
     m.style.left=Math.min(x, window.innerWidth-224)+'px'; m.style.top=Math.min(y, window.innerHeight-380)+'px';
+    var isSystem = /\bSystem\b/.test(((row.querySelector('.tag')||{}).textContent||'')) || /pub\s*1771|tax receipt/i.test(t.nm);
     m.addEventListener('click',function(e){ var it=e.target.closest('.it'); if(!it)return; var a=it.dataset.a; closeMenus();
+      if(isSystem && (a==='rename'||a==='delete'||a==='archive')){ toast('“'+t.nm+'” is a system template — it’s locked to stay compliant and can’t be '+(a==='rename'?'renamed':a==='delete'?'deleted':'archived')+'.'); return; }
       if(a==='preview') openPreview(t);
       else if(a==='edit') window.location='atlas-email-builder.html?mode=template&tpl='+encodeURIComponent(t.nm);
-      else if(a==='dup'){ var c=row.cloneNode(true); c.querySelector('.ttl').textContent=t.nm+' (copy)'; row.parentNode.insertBefore(c,row.nextSibling); toast('“'+t.nm+'” duplicated'); }
-      else if(a==='rename'){ var nn=prompt('Rename template',t.nm); if(nn){ row.querySelector('.ttl').textContent=nn; toast('Renamed to “'+nn+'”'); } }
-      else if(a==='delete'){ if(confirm('Delete “'+t.nm+'”? This can\'t be undone.')){ row.remove(); toast('Template deleted'); } }
-      else toast(({default:'“'+t.nm+'” set as default',share:'Shared with your team',folder:'Moved to a folder',archive:'“'+t.nm+'” archived'})[a]||'Done'); });
-    setTimeout(function(){ document.addEventListener('click',function cl(ev){ if(!m.contains(ev.target)){ closeMenus(); document.removeEventListener('click',cl); } }); },10);
+      else if(a==='dup'){ var c=row.cloneNode(true); var b=c.querySelector('.tpl-default-badge'); if(b)b.remove(); c.querySelector('.ttl').textContent=t.nm+' (copy)'; row.parentNode.insertBefore(c,row.nextSibling); toast('“'+t.nm+'” duplicated'); }
+      else if(a==='rename'){ tplRename(row, t.nm); }
+      else if(a==='delete'){ tplDelete(row, t.nm); }
+      else if(a==='archive'){ tplArchive(row, t.nm); }
+      else if(a==='restore'){ tplRestore(row, t.nm); }
+      else if(a==='default'){ try{ localStorage.setItem('atlas_default_template', t.nm); }catch(_){}; renderTplView(); toast('“'+t.nm+'” set as the default template'); }
+      else if(a==='share'){ shareModal(row, t.nm); }
+      else if(a==='folder'){ moveToFolderModal(row, t.nm); }
+      else toast('Done'); });
+    _tplOutside=function(ev){ if(!m.contains(ev.target)) closeMenus(); };
+    setTimeout(function(){ document.addEventListener('click',_tplOutside); },10);
+  }
+  function setDefaultTemplate(row){
+    var host=document.getElementById('templates-list'); if(!host||!row) return;
+    host.querySelectorAll('.tpl-default-badge').forEach(function(b){ b.remove(); });
+    var ttl=row.querySelector('.ttl');
+    if(ttl && !ttl.querySelector('.tpl-default-badge')){
+      var b=document.createElement('span'); b.className='tpl-default-badge';
+      b.style.cssText='display:inline-block;margin-left:8px;font-size:10px;font-weight:700;color:#1D4ED8;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:20px;padding:1px 8px;vertical-align:middle';
+      b.textContent='★ Default'; ttl.appendChild(b);
+    }
+    try{ row.scrollIntoView({block:'nearest'}); }catch(_){}
+  }
+  window.__setDefaultTemplate=setDefaultTemplate;
+
+  // ── Template management: folders, archive lifecycle, sharing (persisted) ──
+  var TPL_FILTER='all', TPL_Q='', TPL_PAGE=1;
+  function tplMeta(){ try{ return JSON.parse(localStorage.getItem('atlas_tpl_meta')||'{}'); }catch(_){ return {}; } }
+  function saveTplMeta(m){ try{ localStorage.setItem('atlas_tpl_meta', JSON.stringify(m)); }catch(_){} }
+  function tplFolders(){ try{ return JSON.parse(localStorage.getItem('atlas_tpl_folders')||'[]'); }catch(_){ return []; } }
+  function saveTplFolders(f){ try{ localStorage.setItem('atlas_tpl_folders', JSON.stringify(f)); }catch(_){} }
+  function tplName(row){ var ttl=row.querySelector('.ttl'); if(!ttl) return ''; if(ttl.getAttribute('data-tpl-name')) return ttl.getAttribute('data-tpl-name'); var s=''; for(var n=ttl.firstChild;n;n=n.nextSibling){ if(n.nodeType===1 && n.classList && n.classList.contains('tpl-badge')) break; s+=(n.nodeType===3?n.nodeValue:(n.textContent||'')); } s=s.trim(); ttl.setAttribute('data-tpl-name', s); return s; }
+  function metaFor(name){ var m=tplMeta(); return m[name]||{}; }
+  function setMeta(name, patch){ var m=tplMeta(); m[name]=Object.assign({}, m[name]||{}, patch); saveTplMeta(m); }
+  function applyRowBadges(row){
+    var name=tplName(row), meta=metaFor(name), dflt=localStorage.getItem('atlas_default_template'), ttl=row.querySelector('.ttl'); if(!ttl) return;
+    [].forEach.call(ttl.querySelectorAll('.tpl-badge'),function(b){b.remove();});
+    function badge(txt,bg,fg,bd){ var s=document.createElement('span'); s.className='tpl-badge'; s.style.cssText='display:inline-block;margin-left:6px;font-size:10px;font-weight:700;border-radius:20px;padding:1px 8px;vertical-align:middle;background:'+bg+';color:'+fg+(bd?';border:1px solid '+bd:''); s.textContent=txt; ttl.appendChild(s); }
+    if(dflt&&dflt===name) badge('★ Default','#EFF6FF','#1D4ED8','#BFDBFE');
+    if(meta.folder) badge('📁 '+meta.folder,'#F1F5F9','#475569');
+    if(meta.shared&&meta.shared.scope&&meta.shared.scope!=='me') badge(meta.shared.scope==='org'?'🌐 Org':'👥 Team','#ECFDF5','#15803D');
+  }
+  function renderTplFilters(){
+    var bar=document.getElementById('tpl-filters'), host=document.getElementById('templates-list'); if(!bar||!host) return;
+    var meta=tplMeta(), rows=[].slice.call(host.querySelectorAll('.cm-row')), folders=tplFolders();
+    var active=rows.filter(function(r){return !metaFor(tplName(r)).archived;}).length;
+    var arch=rows.filter(function(r){return metaFor(tplName(r)).archived;}).length;
+    function chip(key,label,count){ var on=TPL_FILTER===key; return '<button class="tpl-fchip" data-f="'+encodeURIComponent(key)+'" style="border:1px solid '+(on?'#2563EB':'var(--border)')+';background:'+(on?'#EFF6FF':'#fff')+';color:'+(on?'#1D4ED8':'var(--text-2)')+';border-radius:20px;padding:5px 12px;font:600 12px \'DM Sans\';cursor:pointer">'+label+(count!=null?' <span style="opacity:.55">'+count+'</span>':'')+'</button>'; }
+    var html=chip('all','All',active);
+    folders.forEach(function(f){ var c=rows.filter(function(r){var m=metaFor(tplName(r));return !m.archived&&m.folder===f;}).length; html+=chip(f,'📁 '+f,c); });
+    html+=chip('archived','Archived',arch);
+    html+='<button id="tpl-newfolder" style="border:1px dashed var(--border);background:#fff;color:var(--text-3);border-radius:20px;padding:5px 12px;font:600 12px \'DM Sans\';cursor:pointer">+ New folder</button>';
+    bar.innerHTML=html;
+    bar.querySelectorAll('.tpl-fchip').forEach(function(b){ b.addEventListener('click',function(){ TPL_FILTER=decodeURIComponent(b.dataset.f); TPL_PAGE=1; renderTplView(); }); });
+    var nf=document.getElementById('tpl-newfolder'); if(nf) nf.addEventListener('click', newFolderModal);
+  }
+  function renderTplView(){
+    var host=document.getElementById('templates-list'); if(!host) return;
+    var meta=tplMeta(), rows=[].slice.call(host.querySelectorAll('.cm-row'));
+    rows.forEach(applyRowBadges);
+    var q=(TPL_Q||'').toLowerCase();
+    var visible=rows.filter(function(r){ var m=metaFor(tplName(r));
+      if(TPL_FILTER==='archived') return !!m.archived;
+      if(m.archived) return false;
+      if(TPL_FILTER!=='all' && (m.folder||'')!==TPL_FILTER) return false;
+      if(q && r.textContent.toLowerCase().indexOf(q)===-1) return false;
+      return true; });
+    var pager=document.getElementById('templates-list-pager'); if(pager) pager.remove();
+    var em=document.getElementById('tpl-empty'); if(em) em.remove();
+    rows.forEach(function(r){ r.style.display='none'; });
+    var paginate=(TPL_FILTER==='all' && !q);
+    if(paginate){
+      var size=10, maxP=Math.max(1,Math.ceil(visible.length/size)); if(TPL_PAGE>maxP)TPL_PAGE=maxP; if(TPL_PAGE<1)TPL_PAGE=1; var start=(TPL_PAGE-1)*size;
+      visible.forEach(function(r,i){ r.style.display=(i>=start&&i<start+size)?'':'none'; });
+      if(visible.length>size){ var pg=document.createElement('div'); pg.id='templates-list-pager'; pg.className='cmp-pager'; pg.innerHTML='<span>Showing '+(start+1)+'–'+Math.min(start+size,visible.length)+' of '+visible.length+'</span><span class="cmp-nav"><button class="cmp-btn" data-p="prev"'+(TPL_PAGE<=1?' disabled':'')+'>‹ Prev</button><span class="cmp-page">Page '+TPL_PAGE+' / '+maxP+'</span><button class="cmp-btn" data-p="next"'+(TPL_PAGE>=maxP?' disabled':'')+'>Next ›</button></span>'; host.parentNode.insertBefore(pg,host.nextSibling); pg.addEventListener('click',function(e){ var b=e.target.closest('.cmp-btn'); if(!b||b.disabled)return; TPL_PAGE+=(b.dataset.p==='next'?1:-1); renderTplView(); }); }
+    } else { visible.forEach(function(r){ r.style.display=''; }); }
+    if(!visible.length){ var e2=document.createElement('div'); e2.id='tpl-empty'; e2.style.cssText='text-align:center;padding:36px;color:var(--text-3);font-size:13px'; e2.textContent=(TPL_FILTER==='archived'?'No archived templates yet.':(q?'No templates match your search.':'No templates in this folder yet.')); host.appendChild(e2); }
+    renderTplFilters();
+  }
+  window.__renderTplView=renderTplView;
+  function tplSearch(q){ TPL_Q=q||''; TPL_PAGE=1; renderTplView(); }
+  window.__tplSearch=tplSearch;
+  function tplModalShell(title, bodyHTML, okLabel, onOk, danger){
+    var ov=document.getElementById('tpl-modal-ov');
+    if(!ov){ ov=document.createElement('div'); ov.id='tpl-modal-ov'; ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100099;display:flex;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif'; document.body.appendChild(ov); }
+    ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">'+
+      '<div style="padding:18px 22px 6px"><h3 style="font-family:\'DM Serif Display\',serif;font-size:19px;color:#0E1E35;margin:0">'+title+'</h3></div>'+
+      '<div style="padding:12px 22px">'+bodyHTML+'</div>'+
+      '<div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 22px;border-top:1px solid #E2E8F0"><button id="tplm-cancel" style="border:1px solid #E2E8F0;background:#fff;color:#334155;padding:9px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Cancel</button><button id="tplm-ok" style="border:none;background:'+(danger?'#DC2626':'#2563EB')+';color:#fff;padding:9px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">'+okLabel+'</button></div>'+
+    '</div>';
+    ov.style.display='flex'; function close(){ ov.style.display='none'; }
+    ov.querySelector('#tplm-cancel').onclick=close; ov.onclick=function(e){ if(e.target===ov) close(); };
+    ov.querySelector('#tplm-ok').onclick=function(){ if(onOk(ov)!==false) close(); };
+    return ov;
+  }
+  function newFolderModal(){
+    tplModalShell('New folder','<label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:5px">Folder name</label><input id="tplm-folder" placeholder="e.g. Appeals" style="width:100%;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px;font:400 13.5px DM Sans">','Create folder',function(ov){ var nm=(ov.querySelector('#tplm-folder').value||'').trim(); if(!nm) return false; var fs=tplFolders(); if(fs.indexOf(nm)===-1){ fs.push(nm); saveTplFolders(fs); } TPL_FILTER=nm; TPL_PAGE=1; renderTplView(); toast('Folder “'+nm+'” created'); });
+    setTimeout(function(){ var i=document.getElementById('tplm-folder'); if(i){try{i.focus();}catch(_){}} },20);
+  }
+  function moveToFolderModal(row, name){
+    var folders=tplFolders(), cur=metaFor(name).folder||'';
+    var opts=['<option value="">— No folder —</option>'].concat(folders.map(function(f){return '<option value="'+f+'"'+(f===cur?' selected':'')+'>'+f+'</option>';})).join('');
+    tplModalShell('Move “'+name+'” to a folder',
+      '<label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:5px">Folder</label><select id="tplm-sel" style="width:100%;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px;font:400 13.5px DM Sans">'+opts+'</select>'+
+      '<label style="display:block;font-size:12px;font-weight:600;color:#334155;margin:12px 0 5px">…or create a new folder</label><input id="tplm-new" placeholder="New folder name" style="width:100%;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px;font:400 13.5px DM Sans">',
+      'Move',function(ov){ var nw=(ov.querySelector('#tplm-new').value||'').trim(); var sel=ov.querySelector('#tplm-sel').value; var folder=nw||sel;
+        if(nw){ var fs=tplFolders(); if(fs.indexOf(nw)===-1){ fs.push(nw); saveTplFolders(fs); } }
+        setMeta(name,{folder:folder||null}); renderTplView(); toast(folder?('Moved to “'+folder+'”'):'Removed from folder'); });
+  }
+  function shareModal(row, name){
+    var s=metaFor(name).shared||{scope:'me',perm:'view'};
+    function radio(nm,val,cur,label,sub){ return '<label style="display:flex;gap:9px;align-items:flex-start;padding:8px 0;cursor:pointer"><input type="radio" name="'+nm+'" value="'+val+'"'+(cur===val?' checked':'')+' style="margin-top:2px"><span><b style="font-size:13px;color:#0F172A">'+label+'</b><br><span style="font-size:11.5px;color:#64748B">'+sub+'</span></span></label>'; }
+    tplModalShell('Share “'+name+'”',
+      '<div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#64748B;margin-bottom:2px">Who can see it</div>'+
+      radio('scope','me',s.scope,'Just me','Only you can use this template')+
+      radio('scope','team',s.scope,'My team','Everyone on the development team')+
+      radio('scope','org',s.scope,'Whole organization','All Atlas users in the diocese')+
+      '<div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#64748B;margin:12px 0 2px">Permission</div>'+
+      radio('perm','view',s.perm,'Can use','They can send with it, not change it')+
+      radio('perm','edit',s.perm,'Can edit','They can modify the template'),
+      'Save sharing',function(ov){ var scope=(ov.querySelector('input[name=scope]:checked')||{}).value||'me'; var perm=(ov.querySelector('input[name=perm]:checked')||{}).value||'view'; setMeta(name,{shared:{scope:scope,perm:perm}}); renderTplView(); toast(scope==='me'?'Sharing turned off':('Shared with '+(scope==='org'?'your organization':'your team')+' · can '+perm)); });
+  }
+  function tplRestore(row, name){ setMeta(name,{archived:false}); renderTplView(); toast('“'+name+'” restored'); }
+
+  function tplRename(row, cur){
+    var esc=function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+    var ov=document.getElementById('tpl-rename-ov');
+    if(!ov){ ov=document.createElement('div'); ov.id='tpl-rename-ov'; ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100098;display:flex;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif'; document.body.appendChild(ov); }
+    ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">'+
+      '<div style="padding:18px 22px 6px"><h3 style="font-family:\'DM Serif Display\',serif;font-size:19px;color:#0E1E35;margin:0">Rename template</h3></div>'+
+      '<div style="padding:12px 22px"><label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:5px">Template name</label><input id="tpl-rename-in" value="'+esc(cur)+'" style="width:100%;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px;font:400 13.5px DM Sans"></div>'+
+      '<div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 22px;border-top:1px solid #E2E8F0"><button id="tpl-rename-cancel" style="border:1px solid #E2E8F0;background:#fff;color:#334155;padding:9px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Cancel</button><button id="tpl-rename-go" style="border:none;background:#2563EB;color:#fff;padding:9px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Save</button></div>'+
+    '</div>';
+    ov.style.display='flex'; var inp=ov.querySelector('#tpl-rename-in'); setTimeout(function(){ try{inp.focus();inp.select();}catch(_){} },20);
+    function close(){ ov.style.display='none'; }
+    ov.querySelector('#tpl-rename-cancel').onclick=close; ov.onclick=function(e){ if(e.target===ov) close(); };
+    ov.querySelector('#tpl-rename-go').onclick=function(){ var nn=(inp.value||'').trim(); if(!nn){ inp.focus(); return; } var ttl=row.querySelector('.ttl'); var old=ttl.getAttribute('data-tpl-name')||cur;
+      var mm=tplMeta(); if(mm[old]){ mm[nn]=mm[old]; delete mm[old]; saveTplMeta(mm); }
+      try{ if(localStorage.getItem('atlas_default_template')===old) localStorage.setItem('atlas_default_template',nn); }catch(_){}
+      ttl.textContent=nn; ttl.setAttribute('data-tpl-name', nn); close(); if(window.__renderTplView) window.__renderTplView(); toast('Renamed to “'+nn+'”'); };
+  }
+  function tplDelete(row, nm){
+    if(window.commsConfirm){ window.commsConfirm({title:'Delete this template?',body:'“'+nm+'” will be removed. You can undo this for a few seconds.',ok:'Delete',danger:true}, function(){ doDel(); }); }
+    else { row.remove(); toast('Template deleted'); }
+    function doDel(){ var parent=row.parentNode, next=row.nextSibling; row.remove(); if(window.__commsRenderUserTemplates){} if(window.commsUndoToast){ window.commsUndoToast('Template deleted · “'+nm+'”', function(){ if(parent) parent.insertBefore(row,next); }); } else toast('Template deleted'); }
+  }
+  function tplArchive(row, nm){
+    setMeta(nm,{archived:true}); renderTplView();
+    if(window.commsUndoToast) window.commsUndoToast('Template archived · “'+nm+'”', function(){ setMeta(nm,{archived:false}); renderTplView(); });
+    else toast('Template archived');
   }
   var list=document.getElementById('templates-list');
-  if(list) list.addEventListener('click',function(e){ var row=e.target.closest('.cm-row'); if(!row) return; if(e.target.closest('.kebab')) return; e.preventDefault(); var r=row.getBoundingClientRect(); openMenu(e.clientX, e.clientY||r.bottom, tplInfo(row), row); });
+  if(list) list.addEventListener('click',function(e){ var row=e.target.closest('.cm-row'); if(!row) return; e.preventDefault();
+    var kb=e.target.closest('.kebab');
+    if(kb){ var r=kb.getBoundingClientRect(); openMenu(Math.min(r.left, window.innerWidth-232), r.bottom+4, tplInfo(row), row); }
+    else { openPreview(tplInfo(row)); }
+  });
+  // Re-apply the saved default badge after (re)render
+  window.__applyDefaultTemplate=function(){ try{ var dn=localStorage.getItem('atlas_default_template'); if(!dn) return; var host=document.getElementById('templates-list'); if(!host) return; [].forEach.call(host.querySelectorAll('.cm-row'),function(row){ var t=(row.querySelector('.ttl')||{}).textContent||''; if(t.replace(/★ Default/,'').trim()===dn){ setDefaultTemplate(row); } }); }catch(_){} };
 })();
 </script>
 <style id="atlas-rescue-css">
