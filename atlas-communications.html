@@ -799,7 +799,8 @@ body {
 
   <!-- ─── SCHEDULED pane ─── -->
   <div class="tab-pane" data-pane="scheduled" style="display:none">
-    <div class="section-h"><span>Upcoming · <span id="sched-count-inline">14</span> scheduled</span><span class="line"></span><a href="#" onclick="commsSchedule();return false" class="cta-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg> Schedule a send</a></div>
+    <div class="section-h"><span>Upcoming · <span id="sched-count-inline">14</span> scheduled</span><span class="line"></span><button type="button" class="sched-select-btn" id="sched-select-btn" onclick="schedToggleSelect()">Select</button><a href="#" onclick="commsSchedule();return false" class="cta-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg> Schedule a send</a></div>
+    <div class="cm-bulkbar" id="sched-bulkbar"></div>
     <div class="cm-list" id="scheduled-list"></div>
   </div>
 
@@ -1060,6 +1061,18 @@ body {
   .cmp-btn { border:1px solid var(--border); background:#fff; color:var(--text-2); border-radius:7px; padding:5px 11px; font:600 12px 'DM Sans'; cursor:pointer; }
   .cmp-btn:hover:not(:disabled) { background:var(--blue-pale); color:var(--blue); border-color:var(--blue); }
   .cmp-btn:disabled { opacity:.45; cursor:not-allowed; }
+  .cm-row { position:relative; }
+  .cm-selbox { position:absolute; left:14px; top:50%; transform:translateY(-50%); display:none; width:16px; height:16px; cursor:pointer; z-index:2; accent-color:var(--blue); }
+  #scheduled-list.selecting .cm-selbox { display:block; }
+  #scheduled-list.selecting .cm-row { padding-left:42px; }
+  .cm-bulkbar { display:none; align-items:center; gap:12px; background:var(--navy); color:#fff; padding:10px 16px; border-radius:10px; margin-bottom:10px; font:600 12.5px 'DM Sans'; }
+  .cm-bulkbar.show { display:flex; }
+  .cm-bulkbar .sp { flex:1; }
+  .cm-bulkbar button { border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); color:#fff; border-radius:7px; padding:6px 12px; font:600 12px 'DM Sans'; cursor:pointer; }
+  .cm-bulkbar button:hover { background:rgba(255,255,255,.16); }
+  .cm-bulkbar button.danger { border-color:#FCA5A5; color:#FCA5A5; }
+  .sched-select-btn { font:600 12px 'DM Sans'; color:var(--blue); background:none; border:1px solid var(--border); border-radius:8px; padding:6px 12px; cursor:pointer; }
+  .sched-select-btn.on { background:var(--blue); color:#fff; border-color:var(--blue); }
   .cm-kmenu { position:absolute; z-index:100030; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 30px rgba(15,23,42,.16); padding:5px; min-width:196px; }
   .cm-kmenu button { display:block; width:100%; text-align:left; background:none; border:none; font-family:'DM Sans',sans-serif; font-size:12.5px; color:var(--text-2); padding:8px 11px; border-radius:7px; cursor:pointer; }
   .cm-kmenu button:hover { background:var(--surface); }
@@ -1097,6 +1110,7 @@ body {
   })();
   function schedRow(s){
     return '<div class="cm-row" data-sched="1">'
+      + '<input type="checkbox" class="cm-selbox" title="Select">'
       + '<div class="ico '+esc(s.ico)+'"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10"/></svg></div>'
       + '<div class="body"><div class="ttl">'+esc(s.subj)+'</div><div class="meta">'+s.meta.map(function(m,i){return (i?'<span>·</span>':'')+'<span>'+esc(m)+'</span>';}).join('')+'</div></div>'
       + '<div class="recipients"><strong>'+esc(s.to)+'</strong>'+(s.toSub?'<br><span class="muted" style="font-size:11.5px">'+esc(s.toSub)+'</span>':'')+'</div>'
@@ -1115,12 +1129,56 @@ body {
     var inl=document.getElementById('sched-count-inline'); if(inl) inl.textContent=n.toLocaleString();
     var tc=document.getElementById('tab-ct-scheduled'); if(tc) tc.textContent=n.toLocaleString();
     if(window.__cmPaginate) window.__cmPaginate('scheduled-list',10);
+    if(window.__cmEmpty) window.__cmEmpty('scheduled-list');
   }
   window.__commsAddScheduled=function(o){
     var rec={ico:'appeal', subj:o.subj, meta:['Scheduled by you'], to:o.to, toSub:o.toSub||'', when:o.when, time:o.time, tag:'Scheduled', tagc:'purple'};
     try{ var arr=userSched(); arr.push(rec); localStorage.setItem('atlas_user_scheduled', JSON.stringify(arr)); }catch(_){ SCHEDULED.unshift(rec); }
     renderScheduled();
   };
+
+  /* ── Bulk selection for Scheduled ── */
+  function schedDomCount(){
+    var list=document.getElementById('scheduled-list'); if(!list) return;
+    var n=list.querySelectorAll('.cm-row').length;
+    var inl=document.getElementById('sched-count-inline'); if(inl) inl.textContent=n.toLocaleString();
+    var tc=document.getElementById('tab-ct-scheduled'); if(tc) tc.textContent=n.toLocaleString();
+    if(window.__cmPaginate) window.__cmPaginate('scheduled-list',10);
+    if(window.__cmEmpty) window.__cmEmpty('scheduled-list');
+  }
+  function schedSelected(){ return [].slice.call(document.querySelectorAll('#scheduled-list .cm-row')).filter(function(r){ var c=r.querySelector('.cm-selbox'); return c&&c.checked; }); }
+  function schedSyncBar(){
+    var bar=document.getElementById('sched-bulkbar'); if(!bar) return;
+    var sel=schedSelected();
+    if(!sel.length){ bar.classList.remove('show'); bar.innerHTML=''; return; }
+    bar.classList.add('show');
+    bar.innerHTML='<span><b>'+sel.length+'</b> selected</span><span class="sp"></span>'+
+      '<button data-b="dup">Duplicate</button><button data-b="export">Export CSV</button><button class="danger" data-b="cancel">Cancel sends</button><button data-b="clear">Clear</button>';
+  }
+  window.schedToggleSelect=function(){
+    var list=document.getElementById('scheduled-list'), btn=document.getElementById('sched-select-btn'); if(!list) return;
+    var on=list.classList.toggle('selecting'); if(btn){ btn.classList.toggle('on',on); btn.textContent=on?'Done':'Select'; }
+    if(!on){ list.querySelectorAll('.cm-selbox').forEach(function(c){c.checked=false;}); schedSyncBar(); }
+  };
+  document.addEventListener('change', function(e){ if(e.target && e.target.classList && e.target.classList.contains('cm-selbox') && e.target.closest('#scheduled-list')) schedSyncBar(); });
+  document.addEventListener('click', function(e){
+    var b=e.target.closest && e.target.closest('#sched-bulkbar button'); if(!b) return;
+    var act=b.dataset.b, sel=schedSelected();
+    if(act==='clear'){ sel.forEach(function(r){ var c=r.querySelector('.cm-selbox'); if(c)c.checked=false; }); schedSyncBar(); return; }
+    if(act==='export'){ toast('Exporting '+sel.length+' scheduled emails to CSV'); return; }
+    if(act==='dup'){ sel.forEach(function(r){ var c=r.cloneNode(true); var cb=c.querySelector('.cm-selbox'); if(cb)cb.checked=false; r.parentNode.insertBefore(c, r.nextSibling); }); schedDomCount(); toast(sel.length+' scheduled sends duplicated'); schedSyncBar(); return; }
+    if(act==='cancel'){
+      var doCancel=function(){
+        var refs=sel.map(function(r){ return {row:r, parent:r.parentNode, next:r.nextSibling}; });
+        sel.forEach(function(r){ r.remove(); }); schedDomCount(); schedSyncBar();
+        var undo=function(){ refs.forEach(function(o){ if(o.parent) o.parent.insertBefore(o.row,o.next); }); schedDomCount(); };
+        if(window.commsUndoToast) window.commsUndoToast(sel.length+' scheduled send'+(sel.length>1?'s':'')+' cancelled', undo); else toast('Cancelled');
+      };
+      if(window.commsConfirm) window.commsConfirm({title:'Cancel '+sel.length+' scheduled send'+(sel.length>1?'s':'')+'?', body:'These emails will not go out. Copies are kept in Drafts so you can reschedule them later.', ok:'Cancel '+sel.length+' send'+(sel.length>1?'s':''), danger:true}, doCancel);
+      else doCancel();
+      return;
+    }
+  });
 
   /* ── Confirmation modal (reusable) ── */
   function commsConfirm(opts, onOk){
@@ -1270,6 +1328,23 @@ body {
     draw();
   }
   window.__cmPaginate=cmPaginate;
+  // Empty-state renderer for a list container when it has zero rows
+  var CM_EMPTY={
+    'scheduled-list':{ic:'📭',t:'No scheduled emails',d:'Nothing is queued to send right now.',cta:'Schedule a send',fn:'commsSchedule()'},
+    'templates-list':{ic:'📄',t:'No templates yet',d:'Create a reusable template to speed up future sends.',cta:'New template',href:'atlas-email-builder.html?mode=template'},
+    'lists-list':{ic:'📋',t:'No lists or segments',d:'Add a list or import contacts to start targeting an audience.',cta:'Add new list',fn:'commsImport()'},
+    'drafts-list':{ic:'✍️',t:'No drafts',d:'Drafts you save while composing will show up here.'}
+  };
+  function cmEmpty(listId){
+    var list=document.getElementById(listId); if(!list) return false;
+    if(list.querySelectorAll('.cm-row').length>0) return false;
+    var e=CM_EMPTY[listId]||{ic:'📭',t:'Nothing here yet',d:''};
+    var pg=document.getElementById(listId+'-pager'); if(pg) pg.remove();
+    var cta=e.cta ? (e.href ? '<a href="'+e.href+'" class="cta-btn" style="text-decoration:none">'+e.cta+'</a>' : '<button class="cta-btn" onclick="'+e.fn+'">'+e.cta+'</button>') : '';
+    list.innerHTML='<div class="cm-empty" style="text-align:center;padding:44px 20px;background:#fff;border:1px dashed var(--border);border-radius:12px"><div style="font-size:34px;margin-bottom:10px">'+e.ic+'</div><div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">'+e.t+'</div><div style="font-size:13px;color:var(--text-3);margin-bottom:18px">'+(e.d||'')+'</div>'+cta+'</div>';
+    return true;
+  }
+  window.__cmEmpty=cmEmpty;
   function updateCount(pane){
     var map={ scheduled:['scheduled-list','sched-count-inline'], drafts:['drafts-list','drafts-count-inline'], templates:['templates-list',null], lists:['lists-list','lists-count-inline'] };
     var m=map[pane]; if(!m) return;
@@ -1277,7 +1352,7 @@ body {
     var n=listEl.querySelectorAll('.cm-row').length;
     if(m[1]){ var inl=document.getElementById(m[1]); if(inl) inl.textContent=n.toLocaleString(); }
     var tabc=document.querySelector('#comms-tabs .tab[data-tab="'+pane+'"] .ct'); if(tabc) tabc.textContent=n>=1000?n.toLocaleString():String(n);
-    cmPaginate(m[0],10);
+    cmPaginate(m[0],10); cmEmpty(m[0]);
   }
 
   /* ── Kebab menus (per pane) — fully functional ── */
@@ -1456,7 +1531,7 @@ body {
     var lc=document.getElementById('lists-count-inline'); if(lc) lc.textContent=total.toLocaleString();
     var tabc=document.querySelector('#comms-tabs .tab[data-tab="lists"] .ct'); if(tabc) tabc.textContent=total.toLocaleString();
     if(typeof ensureKebabs==='function') ensureKebabs();
-    cmPaginate('lists-list',10);
+    cmPaginate('lists-list',10); cmEmpty('lists-list');
   }
   window.__commsRenderLists=commsRenderLists;
   // called by Add-new-list / CSV importer to persist + surface a new list
@@ -1484,7 +1559,7 @@ body {
     var tabc=document.querySelector('#comms-tabs .tab[data-tab="templates"] .ct'); if(tabc) tabc.textContent=String(n);
     var sh=host.parentNode.querySelector('.section-h span'); if(sh) sh.textContent='Email templates · '+n+' reusable';
     if(typeof ensureKebabs==='function') ensureKebabs();
-    cmPaginate('templates-list',10);
+    cmPaginate('templates-list',10); cmEmpty('templates-list');
   }
   window.__commsRenderUserTemplates=renderUserTemplates;
 
