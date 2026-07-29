@@ -1891,7 +1891,16 @@ body {
       ov.querySelector('#rs-cancel').onclick=close; ov.querySelector('#rs-x').onclick=close;
       ov.onclick=function(e){ if(e.target===ov) close(); };
       ov.querySelector('#rs-review').onclick=function(){ window.location='atlas-email-campaign.html?dupSubject='+encodeURIComponent(m.subject)+'&type='+encodeURIComponent(t.k||'appeal'); };
-      go.onclick=function(){ if(go.disabled) return; close(); toast('Resend queued · '+fmtNum(target)+' recipients · '+(mode==='nonopeners'?'non-openers':'all')); };
+      go.onclick=function(){ if(go.disabled) return;
+        ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:460px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.32);overflow:hidden;text-align:center;padding:32px 28px">'+
+          '<div style="width:56px;height:56px;border-radius:50%;background:#DCFCE7;color:#15803D;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px">✓</div>'+
+          '<h3 style="font-family:\'DM Serif Display\',serif;font-size:21px;color:#0E1E35;margin:0 0 8px">Resend queued</h3>'+
+          '<p style="font-size:13px;color:#475569;line-height:1.55;margin:0 auto;max-width:360px">“'+esc(m.subject)+'” is being resent to <b>'+fmtNum(target)+'</b> '+(mode==='nonopeners'?'recipients who haven’t opened it yet':'recipients from the original send')+'. Delivery is throttled to protect your sender reputation.</p>'+
+          '<p style="font-size:12px;color:#94A3B8;margin:10px 0 22px">It will appear in the Sent tab shortly.</p>'+
+          '<button id="rs-done" style="border:none;background:#2563EB;color:#fff;padding:11px 26px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Done</button>'+
+        '</div>';
+        ov.querySelector('#rs-done').onclick=close;
+      };
     }
     function openKebab(btn,m){
       document.querySelectorAll('.sa-kmenu').forEach(function(x){x.remove();});
