@@ -1099,38 +1099,72 @@ body {
       + '<div class="kebab">'+KEBAB_SVG+'</div>'
       + '</div>';
   }
+  function userSched(){ try{ return JSON.parse(localStorage.getItem('atlas_user_scheduled')||'[]'); }catch(_){ return []; } }
   function renderScheduled(){
     var el=document.getElementById('scheduled-list'); if(!el) return;
-    el.innerHTML = SCHEDULED.map(schedRow).join('');
-    var n=SCHEDULED.length;
-    var inl=document.getElementById('sched-count-inline'); if(inl) inl.textContent=n;
-    var tc=document.getElementById('tab-ct-scheduled'); if(tc) tc.textContent=n;
+    var us=userSched().slice().reverse();
+    el.innerHTML = us.map(schedRow).join('') + SCHEDULED.map(schedRow).join('');
+    var n=SCHEDULED.length+us.length;
+    var inl=document.getElementById('sched-count-inline'); if(inl) inl.textContent=n.toLocaleString();
+    var tc=document.getElementById('tab-ct-scheduled'); if(tc) tc.textContent=n.toLocaleString();
   }
-  window.__commsAddScheduled=function(o){ SCHEDULED.unshift({ico:'appeal', subj:o.subj, meta:['Scheduled by you'], to:o.to, when:o.when, time:o.time, tag:'Scheduled', tagc:'purple'}); renderScheduled(); };
+  window.__commsAddScheduled=function(o){
+    var rec={ico:'appeal', subj:o.subj, meta:['Scheduled by you'], to:o.to, toSub:o.toSub||'', when:o.when, time:o.time, tag:'Scheduled', tagc:'purple'};
+    try{ var arr=userSched(); arr.push(rec); localStorage.setItem('atlas_user_scheduled', JSON.stringify(arr)); }catch(_){ SCHEDULED.unshift(rec); }
+    renderScheduled();
+  };
 
-  /* ── Kebab menus (per pane) ── */
+  /* ── Confirmation modal (reusable) ── */
+  function commsConfirm(opts, onOk){
+    var ov=document.getElementById('cc-ov');
+    if(!ov){ ov=document.createElement('div'); ov.id='cc-ov'; ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100090;display:flex;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif'; document.body.appendChild(ov); }
+    ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">'+
+      '<div style="padding:20px 22px 8px"><h3 style="font-family:DM Serif Display,serif;font-size:19px;color:#0E1E35;margin:0">'+esc(opts.title||'Are you sure?')+'</h3><p style="font-size:13px;color:#475569;margin:8px 0 0;line-height:1.5">'+esc(opts.body||'')+'</p></div>'+
+      '<div style="display:flex;gap:10px;justify-content:flex-end;padding:16px 22px"><button id="cc-cancel" style="border:1px solid #E2E8F0;background:#fff;color:#334155;padding:9px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Cancel</button><button id="cc-ok" style="border:none;background:'+(opts.danger?'#DC2626':'#2563EB')+';color:#fff;padding:9px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">'+esc(opts.ok||'Confirm')+'</button></div>'+
+    '</div>';
+    ov.style.display='flex';
+    ov.querySelector('#cc-cancel').onclick=function(){ ov.style.display='none'; };
+    ov.querySelector('#cc-ok').onclick=function(){ ov.style.display='none'; if(onOk) onOk(); };
+    ov.onclick=function(e){ if(e.target===ov) ov.style.display='none'; };
+  }
+  window.commsConfirm=commsConfirm;
+  function updateCount(pane){
+    var map={ scheduled:['scheduled-list','sched-count-inline'], drafts:['drafts-list','drafts-count-inline'], templates:['templates-list',null], lists:['lists-list','lists-count-inline'] };
+    var m=map[pane]; if(!m) return;
+    var listEl=document.getElementById(m[0]); if(!listEl) return;
+    var n=listEl.querySelectorAll('.cm-row').length;
+    if(m[1]){ var inl=document.getElementById(m[1]); if(inl) inl.textContent=n.toLocaleString(); }
+    var tabc=document.querySelector('#comms-tabs .tab[data-tab="'+pane+'"] .ct'); if(tabc) tabc.textContent=n>=1000?n.toLocaleString():String(n);
+  }
+
+  /* ── Kebab menus (per pane) — fully functional ── */
   var ACTS={
-    sent:[['View donor record','r','atlas-donor-360.html'],['Resend email','t','Resend queued · sending shortly'],['Forward…','r','atlas-email-compose.html'],['View engagement report','t','Opens & clicks report · opening'],['Copy tracking link','t','Tracking link copied to clipboard']],
-    scheduled:[['Edit schedule','s',''],['Send now','t','Sending now · moved to Sent'],['Duplicate','t','Duplicated to a new scheduled send'],['Cancel send','d','Scheduled send cancelled']],
-    templates:[['Edit template','r','atlas-email-compose.html'],['Duplicate template','t','Template duplicated'],['Preview','t','Template preview opened'],['Archive','d','Template archived']],
-    lists:[['Open list','r','atlas-outreach-lists.html'],['Send to this list','r','atlas-email-compose.html'],['Edit segment','r','atlas-outreach-lists.html'],['Export CSV','t','List exported · CSV downloading']],
-    drafts:[['Resume editing','r','atlas-email-compose.html'],['Duplicate draft','t','Draft duplicated'],['Schedule send','s',''],['Delete draft','d','Draft deleted']]
+    sent:[{t:'View message',k:'navrow'},{t:'Resend to non-openers',k:'toast',v:'Resend queued to non-openers · sending shortly'},{t:'Forward…',k:'nav',v:'atlas-email-compose.html'},{t:'View engagement report',k:'toast',v:'Opens & clicks report opening…'},{t:'Copy tracking link',k:'toast',v:'Tracking link copied to clipboard'}],
+    scheduled:[{t:'Edit schedule',k:'sched'},{t:'Send now',k:'sendnow'},{t:'Duplicate',k:'dup',v:'Duplicated to a new scheduled send'},{t:'Cancel send',k:'del',danger:true,title:'Cancel scheduled send?',body:'This email will not go out. You can recreate it later from Drafts.',ok:'Cancel send',done:'Scheduled send cancelled'}],
+    templates:[{t:'Edit in builder',k:'nav',v:'atlas-email-builder.html?mode=template'},{t:'Duplicate template',k:'dup',v:'Template duplicated'},{t:'Set as default',k:'toast',v:'Set as the default template'},{t:'Archive',k:'del',danger:true,title:'Archive this template?',body:'Archived templates are hidden from the list but can be restored later.',ok:'Archive',done:'Template archived'},{t:'Delete',k:'del',danger:true,title:'Delete this template?',body:'This permanently removes the template and cannot be undone.',ok:'Delete',done:'Template deleted'}],
+    lists:[{t:'Open list',k:'navrow'},{t:'Send to this list',k:'navlist'},{t:'Duplicate list',k:'dup',v:'List duplicated'},{t:'Export CSV',k:'toast',v:'List exported · CSV downloading'},{t:'Delete list',k:'del',danger:true,title:'Delete this list?',body:'Donors stay in your database — only this list / segment is removed.',ok:'Delete list',done:'List deleted'}],
+    drafts:[{t:'Resume editing',k:'navrow'},{t:'Duplicate draft',k:'dup',v:'Draft duplicated'},{t:'Schedule send',k:'sched'},{t:'Delete draft',k:'del',danger:true,title:'Delete this draft?',body:'This draft will be permanently removed.',ok:'Delete draft',done:'Draft deleted'}]
   };
   var kmenu=null;
   function closeK(){ if(kmenu){ kmenu.remove(); kmenu=null; } }
   function paneOf(el){ var p=el.closest('.tab-pane'); return (p&&p.dataset.pane)||'sent'; }
   function openK(anchor){
-    closeK(); var acts=ACTS[paneOf(anchor)]||ACTS.sent;
+    closeK(); var pane=paneOf(anchor), acts=ACTS[pane]||ACTS.sent;
     kmenu=document.createElement('div'); kmenu.className='cm-kmenu';
-    kmenu.innerHTML=acts.map(function(a,i){ return '<button data-i="'+i+'"'+(a[1]==='d'?' class="danger"':'')+'>'+esc(a[0])+'</button>'; }).join('');
+    kmenu.innerHTML=acts.map(function(a,i){ return '<button data-i="'+i+'"'+(a.k==='del'?' class="danger"':'')+'>'+esc(a.t)+'</button>'; }).join('');
     document.body.appendChild(kmenu);
     var r=anchor.getBoundingClientRect();
     kmenu.style.top=(r.bottom+window.pageYOffset+4)+'px';
     kmenu.style.left=Math.max(8, r.right+window.pageXOffset-kmenu.offsetWidth)+'px';
-    kmenu.addEventListener('click', function(ev){ var b=ev.target.closest('button'); if(!b) return; var a=acts[+b.dataset.i]; closeK();
-      if(a[1]==='r'){ toast('Opening…'); setTimeout(function(){ window.location=a[2]; },220); }
-      else if(a[1]==='s'){ commsSchedule(); }
-      else { toast(a[2]); }
+    kmenu.addEventListener('click', function(ev){ var b=ev.target.closest('button'); if(!b) return; var a=acts[+b.dataset.i]; var row=anchor.closest('.cm-row'); closeK();
+      if(a.k==='nav'){ toast('Opening…'); setTimeout(function(){ window.location=a.v; },200); }
+      else if(a.k==='navrow'){ var href=row&&row.getAttribute('href'); toast('Opening…'); setTimeout(function(){ if(href) window.location=href; },200); }
+      else if(a.k==='navlist'){ var nm=((row&&row.querySelector('.ttl'))||{}).textContent||''; var cnt=(((row&&row.querySelector('.meta'))||{}).textContent||'').replace(/[^0-9]/g,''); toast('Starting email to '+nm+'…'); setTimeout(function(){ window.location='atlas-email-campaign.html?listName='+encodeURIComponent(nm.trim())+(cnt?'&listCount='+cnt:''); },220); }
+      else if(a.k==='sched'){ commsSchedule(); }
+      else if(a.k==='dup'){ if(row){ var c=row.cloneNode(true); row.parentNode.insertBefore(c,row.nextSibling); updateCount(pane); } toast(a.v||'Duplicated'); }
+      else if(a.k==='del'){ commsConfirm({title:a.title,body:a.body,ok:a.ok,danger:a.danger}, function(){ if(row){ row.remove(); updateCount(pane); } toast(a.done||'Removed'); }); }
+      else if(a.k==='sendnow'){ commsConfirm({title:'Send this email now?',body:'It will begin sending immediately and move to the Sent tab.',ok:'Send now'}, function(){ if(row){ row.remove(); updateCount('scheduled'); } toast('Sending now · moved to Sent'); }); }
+      else { toast(a.v||'Done'); }
     });
   }
   // capture so we beat the row anchor's navigation
@@ -1259,11 +1293,53 @@ body {
         '<span class="tag '+(st[1]||'')+'"'+(st[1]?'':' style="background:var(--surface);color:var(--text-3)"')+'>'+st[0]+'</span>'+
         '</a>');
     }
-    host.innerHTML=rows.join('');
-    var lc=document.getElementById('lists-count-inline'); if(lc) lc.textContent='112';
+    // prepend any user-added lists (persisted from Add-new-list / CSV import)
+    var user=[]; try{ user=JSON.parse(localStorage.getItem('atlas_user_lists')||'[]'); }catch(_){}
+    var userRows=user.slice().reverse().map(function(u){ var col=COLORS[0];
+      return '<a class="cm-row" data-user="1" href="atlas-outreach-lists.html?list='+encodeURIComponent(u.slug||('user-'+(u.ts||0)))+'">'+
+        '<div class="ico" style="background:'+col[0]+';color:'+col[1]+';display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10M2 7h10M2 10.5h6"/></svg></div>'+
+        '<div class="body"><div class="ttl">'+esc(u.nm)+'</div><div class="meta"><span>'+(u.n||0).toLocaleString()+' donors</span><span>·</span><span>'+esc(u.type||'Imported CSV')+'</span><span>·</span><span>Just added by you</span></div></div>'+
+        '<div class="recipients"><span class="muted" style="font-size:11.5px">Not sent yet</span></div>'+
+        '<div class="metric"><span class="v" style="color:var(--text-3)">New</span></div>'+
+        '<span class="tag green">Active</span>'+
+        '</a>';
+    });
+    host.innerHTML=userRows.join('')+rows.join('');
+    var total=112+user.length;
+    var lc=document.getElementById('lists-count-inline'); if(lc) lc.textContent=total.toLocaleString();
+    var tabc=document.querySelector('#comms-tabs .tab[data-tab="lists"] .ct'); if(tabc) tabc.textContent=total.toLocaleString();
+    if(typeof ensureKebabs==='function') ensureKebabs();
   }
   window.__commsRenderLists=commsRenderLists;
-  function boot(){ renderScheduled(); commsRenderLists(); ensureKebabs(); }
+  // called by Add-new-list / CSV importer to persist + surface a new list
+  window.__commsAddList=function(o){
+    try{ var arr=JSON.parse(localStorage.getItem('atlas_user_lists')||'[]'); arr.push({nm:o.nm, n:o.n||0, type:o.type||'Imported CSV', slug:'user-'+Date.now(), ts:Date.now()}); localStorage.setItem('atlas_user_lists', JSON.stringify(arr)); }catch(_){}
+    commsRenderLists();
+  };
+
+  /* ── User-added templates (published from the Email Builder) ── */
+  function renderUserTemplates(){
+    var host=document.getElementById('templates-list'); if(!host) return;
+    var arr=[]; try{ arr=JSON.parse(localStorage.getItem('atlas_user_templates')||'[]'); }catch(_){}
+    host.querySelectorAll('.cm-row[data-user="1"]').forEach(function(r){ r.remove(); });
+    arr.slice().reverse().forEach(function(t){
+      var a=document.createElement('a'); a.className='cm-row'; a.setAttribute('data-user','1'); a.href='atlas-email-builder.html?mode=template&tpl='+encodeURIComponent(t.nm);
+      a.innerHTML='<div class="ico" style="background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 2h6l2 2v8H3z"/><path d="M9 2v2h2"/></svg></div>'+
+        '<div class="body"><div class="ttl">'+esc(t.nm)+'</div><div class="meta"><span>Just published by you</span><span>·</span><span>Custom design</span></div></div>'+
+        '<div class="recipients"><span class="muted" style="font-size:11.5px">'+esc(t.subj||'Custom template')+'</span></div>'+
+        '<div class="metric"><span class="v" style="color:var(--text-3)">New</span></div>'+
+        '<span class="tag">Draft</span>';
+      host.insertBefore(a, host.firstChild);
+    });
+    // refresh the Templates tab count = static rows + user rows
+    var n=host.querySelectorAll('.cm-row').length;
+    var tabc=document.querySelector('#comms-tabs .tab[data-tab="templates"] .ct'); if(tabc) tabc.textContent=String(n);
+    var sh=host.parentNode.querySelector('.section-h span'); if(sh) sh.textContent='Email templates · '+n+' reusable';
+    if(typeof ensureKebabs==='function') ensureKebabs();
+  }
+  window.__commsRenderUserTemplates=renderUserTemplates;
+
+  function boot(){ renderScheduled(); commsRenderLists(); renderUserTemplates(); ensureKebabs(); }
   if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
 })();
 </script>
@@ -1862,7 +1938,7 @@ body {
       '<label class="lbl">New list name</label><input class="fld" id="ci-name" value="'+CI.name+'">';
     ft.innerHTML='<button class="btn" id="ci-back2">← Back</button><button class="btn primary" id="ci-create" '+(s.valid?'':'disabled')+'>Import '+fmt(s.valid)+' contacts</button>';
     document.getElementById('ci-back2').addEventListener('click',function(){CI.step=2;render();});
-    document.getElementById('ci-create').addEventListener('click',function(){ var nm=(document.getElementById('ci-name').value||'Imported contacts').trim(); addListRow(nm, s.valid); close(); toastMsg('“'+nm+'” created · '+fmt(s.valid)+' contacts imported'); });
+    document.getElementById('ci-create').addEventListener('click',function(){ var nm=(document.getElementById('ci-name').value||'Imported contacts').trim(); if(window.__commsAddList){ window.__commsAddList({nm:nm, n:s.valid, type:'Imported CSV'}); } else { addListRow(nm, s.valid); } close(); toastMsg('“'+nm+'” created · '+fmt(s.valid)+' contacts imported · see Lists & segments'); var t=document.querySelector('#comms-tabs .tab[data-tab="lists"]'); if(window.switchCommsTab&&t) window.switchCommsTab('lists',t); });
   }
   function addListRow(nm, count){
     var host=document.querySelector('[data-pane="lists"] .cm-list'); if(!host) return;

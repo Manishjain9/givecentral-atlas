@@ -313,7 +313,9 @@
     step:1, maxStep:1,
     name:'Cathedral year-end appeal', subject:'', preview:'',
     from:'Sarah Reynolds · sarah.reynolds@diocese.org', replyTo:'Same as From',
-    lists:[], manualEmails:[], abTest:false, audQuery:'',
+    lists:[], manualEmails:[], audQuery:'',
+    ab:{on:false, variable:'subject', subjectB:'', fromB:'Bridget McCarthy · bridget@diocese.org', samplePct:20, metric:'open', windowH:4, autoSend:true},
+    previewVariant:'A',
     template:null, tplQuery:'', tplSort:'used', html:'', device:'desktop',
     schedule:{mode:'now', date:'', time:'09:00', tz:'America/New_York', optimize:false}
   };
@@ -325,6 +327,27 @@
   function grossCount(){ return selectedLists().reduce(function(a,l){return a+l.n;},0); }
   function suppressed(){ return Math.round(grossCount()*0.018); }
   function reach(){ return grossCount()-suppressed()+S.manualEmails.length; }
+
+  // ── A/B test math (scales to millions) ──
+  function abCounts(){
+    var r=reach();
+    var pct=Math.max(2,Math.min(50,S.ab.samplePct));
+    var test=Math.round(r*pct/100);
+    var perVar=Math.floor(test/2);
+    test=perVar*2;                 // even split
+    var winner=r-test;             // remainder gets the winning variant
+    return {reach:r, pct:pct, test:test, perVar:perVar, winner:winner};
+  }
+  function abVarValue(which){
+    if(S.ab.variable==='from') return (which==='A'? S.from : S.ab.fromB).split(' · ')[0];
+    return which==='A' ? (S.subject||'(subject A empty)') : (S.ab.subjectB||'(subject B empty)');
+  }
+  function abReady(){
+    if(!S.ab.on) return true;
+    var a=abVarValue('A').trim(), b=abVarValue('B').trim();
+    return a && b && a!==b && !/empty\)$/.test(a) && !/empty\)$/.test(b);
+  }
+  function abMetricLabel(){ return S.ab.metric==='click'?'click rate':'open rate'; }
 
   function flashSaved(){ var s=$('saved'); s.style.opacity='.4'; setTimeout(function(){ s.style.opacity='1'; },200); }
 
@@ -358,6 +381,7 @@
     var q=(S.audQuery||'').toLowerCase();
     var shown=LISTS.filter(function(l){ return !q || (l.nm+' '+l.sub).toLowerCase().indexOf(q)!==-1; });
     return '<div class="wrap"><h2 class="step-h">Select audience</h2><p class="step-sub">Add specific people, or pick from your lists &amp; segments. Suppressed contacts are removed automatically.</p>'+
+      (S.prefillFrom?'<div class="persona" style="background:#EFF6FF;border-color:#BFDBFE;margin-bottom:14px">📨 <div><b>Recipient pre-filled from your link.</b> This email is set to go to <b>'+esc(S.prefillFrom)+'</b>'+(S.prefillKind==='list'?' (list selected below)':' (added under “specific people” below)')+'. Add or remove recipients anytime.</div></div>':'')+
       // manual — on top so it\'s visible
       '<div class="card"><h3>Send to specific people</h3><p class="hint" style="margin:-6px 0 10px">Type email addresses to reach individuals directly — great for a quick send.</p>'+
       '<div class="echips" id="echips">'+ (S.manualEmails.length? S.manualEmails.map(function(e,i){ return '<span class="echip">'+esc(e)+'<span class="x" data-i="'+i+'">×</span></span>'; }).join('') : '<span class="hint" style="align-self:center">No addresses added yet.</span>') +'</div>'+
@@ -367,11 +391,50 @@
       '<div class="card"><h3 style="display:flex;align-items:center;justify-content:space-between">Lists &amp; segments · '+LISTS.length+' <button class="btn" style="padding:6px 11px;font-size:12px" onclick="cwAddList()">+ Add new list</button></h3>'+
       '<div class="aud-search"><svg viewBox="0 0 14 14" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="aud-q" placeholder="Search '+LISTS.length+' lists & segments…" value="'+esc(S.audQuery)+'">'+(S.lists.length?'<span class="aud-seln">'+S.lists.length+' selected</span>':'')+'</div>'+
       '<div class="aud-scroll">'+ (shown.length? shown.map(function(l){ var on=S.lists.indexOf(l.id)!==-1; return '<div class="aud'+(on?' on':'')+'" data-l="'+l.id+'"><div class="ck">'+(on?'✓':'')+'</div><div style="flex:1;min-width:0"><div class="nm">'+l.nm+'</div><div class="sub">'+l.sub+'</div></div><div class="cnt">'+fmt(l.n)+'</div></div>'; }).join('') : '<div class="aud-empty">No lists match “'+esc(S.audQuery)+'”.</div>') +'</div>'+
-      '<div class="abrow"><label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="f-ab" '+(S.abTest?'checked':'')+'> Run an A/B test (split subject line across a sample first)</label></div>'+
+      '<div class="abrow"><label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="f-ab" '+(S.ab.on?'checked':'')+'> <b>Run an A/B test</b> <span style="color:#94A3B8;font-weight:400">— test a variable on a sample, auto-send the winner to the rest</span></label></div>'+
+      abPanel()+
       '</div>'+
       '<div class="reach"><div><div class="k">Estimated reach</div><div class="big">'+fmt(r)+'</div></div>'+
       '<div class="sup">Lists gross: <b>'+fmt(g)+'</b><br>− Suppressed (unsub · bounced · DNC): <b>'+fmt(su)+'</b>'+(S.manualEmails.length?'<br>+ Manual addresses: <b>'+S.manualEmails.length+'</b>':'')+'<br>= Will receive: <b>'+fmt(r)+'</b></div></div>'+
       '</div>';
+  }
+  function abPanel(){
+    if(!S.ab.on) return '';
+    var c=abCounts(), isFrom=S.ab.variable==='from';
+    function segBtn(v,lb){ var on=S.ab.variable===v; return '<button type="button" class="ab-seg" data-var="'+v+'" style="flex:1;border:1px solid '+(on?'#2563EB':'#E2E8F0')+';background:'+(on?'#EFF6FF':'#fff')+';color:'+(on?'#1D4ED8':'#334155')+';padding:8px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">'+lb+'</button>'; }
+    var variantFields = isFrom ?
+        '<label class="lbl" style="font-size:12px">Variant A — From</label><input class="fld" value="'+esc(S.from.split(' · ')[0])+'" disabled style="background:#F8FAFC">'+
+        '<label class="lbl" style="font-size:12px;margin-top:8px">Variant B — From</label><select class="fld" id="ab-fromB"><option>Bridget McCarthy · bridget@diocese.org</option><option>St. Mary\'s Cathedral · cathedral@diocese.org</option><option>Fr. Michael Reilly · rector@diocese.org</option></select>'
+      :
+        '<label class="lbl" style="font-size:12px">Variant A — Subject line</label><input class="fld" id="ab-a" placeholder="Subject A (from Email details)" value="'+esc(S.subject)+'">'+
+        '<label class="lbl" style="font-size:12px;margin-top:8px">Variant B — Subject line</label><input class="fld" id="ab-b" placeholder="A different subject to test" value="'+esc(S.ab.subjectB)+'">';
+    return '<div class="ab-panel" style="margin-top:12px;border:1px solid #DBEAFE;background:#F8FBFF;border-radius:12px;padding:16px">'+
+      '<div style="font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#2563EB;margin-bottom:8px">A/B test setup</div>'+
+      '<label class="lbl" style="font-size:12px">What to test</label>'+
+      '<div style="display:flex;gap:8px;margin-bottom:12px">'+segBtn('subject','Subject line')+segBtn('from','From name')+'</div>'+
+      variantFields+
+      // sample slider
+      '<div style="margin-top:16px;display:flex;align-items:center;justify-content:space-between"><label class="lbl" style="font-size:12px;margin:0">Test sample size</label><span style="font-weight:700;color:#0F172A"><span id="ab-pct">'+c.pct+'</span>% of audience</span></div>'+
+      '<input type="range" id="ab-sample" min="2" max="50" step="1" value="'+c.pct+'" style="width:100%;margin:8px 0;accent-color:#2563EB">'+
+      '<div class="ab-cnts" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">'+
+        '<div style="background:#fff;border:1px solid #E2E8F0;border-radius:9px;padding:9px"><div style="font-size:11px;color:#64748B">Variant A</div><div style="font-weight:700;color:#2563EB" id="ab-per-a">'+fmt(c.perVar)+'</div></div>'+
+        '<div style="background:#fff;border:1px solid #E2E8F0;border-radius:9px;padding:9px"><div style="font-size:11px;color:#64748B">Variant B</div><div style="font-weight:700;color:#7C3AED" id="ab-per-b">'+fmt(c.perVar)+'</div></div>'+
+        '<div style="background:#fff;border:1px solid #E2E8F0;border-radius:9px;padding:9px"><div style="font-size:11px;color:#64748B">Winner → rest</div><div style="font-weight:700;color:#15803D" id="ab-win">'+fmt(c.winner)+'</div></div>'+
+      '</div>'+
+      // winner metric + window + auto
+      '<div class="row2" style="margin-top:14px">'+
+        '<div><label class="lbl" style="font-size:12px">Winning metric</label><select class="fld" id="ab-metric"><option value="open"'+(S.ab.metric==='open'?' selected':'')+'>Highest open rate</option><option value="click"'+(S.ab.metric==='click'?' selected':'')+'>Highest click rate</option></select></div>'+
+        '<div><label class="lbl" style="font-size:12px">Decide after</label><select class="fld" id="ab-window">'+[[1,'1 hour'],[4,'4 hours'],[8,'8 hours'],[24,'24 hours']].map(function(o){return '<option value="'+o[0]+'"'+(S.ab.windowH==o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>'+
+      '</div>'+
+      '<label style="display:flex;gap:9px;align-items:flex-start;margin-top:12px;font-size:13px;color:#334155;cursor:pointer"><input type="checkbox" id="ab-auto" '+(S.ab.autoSend?'checked':'')+' style="margin-top:2px"><span><b>Auto-send winner</b> to the remaining <span id="ab-auto-n">'+fmt(c.winner)+'</span> recipients</span></label>'+
+      '<div id="ab-summary" style="margin-top:14px;padding:11px 13px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:9px;font-size:13px;color:#1E3A8A">'+abSummary()+'</div>'+
+    '</div>';
+  }
+  function abSummary(){
+    var c=abCounts();
+    if(!abReady()) return '<span style="color:#B45309">⚠ Fill in both variants (they must differ) to run the test.</span>';
+    return '<b>Test '+c.pct+'%</b> ('+fmt(c.test)+' recipients) — A vs B on '+(S.ab.variable==='from'?'from name':'subject line')+'. '+
+      (S.ab.autoSend?('Winner by '+abMetricLabel()+' after '+S.ab.windowH+'h auto-sends to the remaining <b>'+fmt(c.winner)+'</b>.'):('You’ll pick the winner manually after '+S.ab.windowH+'h; the remaining <b>'+fmt(c.winner)+'</b> wait.'));
   }
   function stepTemplate(){
     var q=(S.tplQuery||'').toLowerCase();
@@ -412,9 +475,10 @@
     return '<div class="wrap wide"><h2 class="step-h">Preview &amp; test</h2><p class="step-sub">See it as recipients will, run the pre-send check, and send yourself a test.</p>'+
       '<div class="pv-split" style="display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start">'+
         '<div>'+
+          (S.ab.on?('<div class="ab-pills" style="display:flex;gap:8px;margin-bottom:10px">'+['A','B'].map(function(v){var on=S.previewVariant===v;return '<button class="ab-pill" data-v="'+v+'" style="border:1px solid '+(on?'#2563EB':'#E2E8F0')+';background:'+(on?'#EFF6FF':'#fff')+';color:'+(on?'#1D4ED8':'#334155')+';border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer">Variant '+v+'</button>';}).join('')+'<span style="align-self:center;font-size:12px;color:#64748B">'+(S.ab.variable==='from'?'From':'Subject')+': <b>'+esc(abVarValue(S.previewVariant))+'</b></span></div>'):'')+
           '<div class="pv-toolbar"><div class="devtog" id="devtog"><button class="'+(S.device==='desktop'?'on':'')+'" data-d="desktop">Desktop</button><button class="'+(S.device==='mobile'?'on':'')+'" data-d="mobile">Mobile</button></div>'+
           '<button class="btn" onclick="cwTest()" style="margin-left:auto">Send test email</button></div>'+
-          '<div class="pv-frame'+(S.device==='mobile'?' mobile':'')+'"><div class="pv-head"><b>'+esc(S.from.split(' · ')[0])+'</b> &nbsp; '+esc(S.subject||'(no subject)')+'</div><div class="pv-body">'+body+'</div></div>'+
+          '<div class="pv-frame'+(S.device==='mobile'?' mobile':'')+'"><div class="pv-head"><b>'+esc(S.ab.on&&S.ab.variable==='from'?abVarValue(S.previewVariant):S.from.split(' · ')[0])+'</b> &nbsp; '+esc((S.ab.on&&S.ab.variable==='subject'?abVarValue(S.previewVariant):S.subject)||'(no subject)')+'</div><div class="pv-body">'+body+'</div></div>'+
         '</div>'+
         '<aside class="pv-check" style="position:sticky;top:12px;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">'+
           '<div style="padding:13px 16px;background:'+status.bg+';border-bottom:1px solid '+status.bd+'"><div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748B">Pre-send check</div><div style="font-weight:700;color:'+status.c+';font-size:14px;margin-top:2px">'+status.t+'</div></div>'+
@@ -455,6 +519,7 @@
         '<div class="cr"><span class="k">From</span><span class="v">'+esc(S.from.split(' · ')[0])+'</span></div>'+
         '<div class="cr"><span class="k">Audience</span><span class="v">'+fmt(r)+' recipients</span></div>'+
         '<div class="cr"><span class="k">When</span><span class="v" id="when-v">'+whenText()+'</span></div>'+
+        (S.ab.on?('<div class="cr"><span class="k">A/B test</span><span class="v">'+abCounts().pct+'% sample ('+fmt(abCounts().test)+') · winner by '+abMetricLabel()+' after '+S.ab.windowH+'h → '+fmt(abCounts().winner)+'</span></div>'):'')+
       '</div>'+
       '<div class="card"><h3>Delivery</h3>'+
       '<div class="radio '+(S.schedule.mode==='now'?'on':'')+'" data-m="now"><input type="radio" name="sch" '+(S.schedule.mode==='now'?'checked':'')+'><div><div class="rt">Send now</div><div class="rs">Begins immediately · large sends throttled over ~30–60 min</div></div></div>'+
@@ -480,10 +545,13 @@
   function stepSent(){
     var r=reach();
     var scheduled=S.schedule.mode==='sched';
+    var c=abCounts();
+    var abNote = S.ab.on ? '<div style="max-width:520px;margin:14px auto 0;padding:13px 16px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;font-size:13px;color:#1E3A8A;text-align:left">🧪 <b>A/B test running.</b> Variants A &amp; B went to '+fmt(c.test)+' recipients ('+c.pct+'%). We’ll measure '+abMetricLabel()+' and '+(S.ab.autoSend?'auto-send the winner':'notify you to pick the winner')+' after '+S.ab.windowH+' hours — then reach the remaining <b>'+fmt(c.winner)+'</b>.</div>' : '';
     return '<div class="wrap"><div class="sent"><div class="big-ic">'+(scheduled?'⏱':'✓')+'</div>'+
-      '<h2>'+(scheduled?'Email scheduled':'Email sent')+'</h2>'+
-      '<p>'+(scheduled?('“'+esc(S.name)+'” will send to '+fmt(r)+' recipients on '+prettyDate(S.schedule.date)+' at '+prettyTime(S.schedule.time)+' '+tzOf(S.schedule.tz).ab+'.'):('“'+esc(S.name)+'” is going out to '+fmt(r)+' recipients now. Delivery is throttled to protect your sender reputation.'))+'</p>'+
-      '<div style="display:flex;gap:12px;justify-content:center;margin-top:22px"><a class="btn" href="atlas-communications.html">Back to Communications</a><a class="btn primary" href="atlas-message-detail.html?subj='+encodeURIComponent(S.subject||S.name)+'&type=appeal&recips='+r+'&del=0.986&open=0.25">View analytics</a></div>'+
+      '<h2>'+(scheduled?'Email scheduled':(S.ab.on?'A/B test sent':'Email sent'))+'</h2>'+
+      '<p>'+(scheduled?('“'+esc(S.name)+'” will send to '+fmt(r)+' recipients on '+prettyDate(S.schedule.date)+' at '+prettyTime(S.schedule.time)+' '+tzOf(S.schedule.tz).ab+'.'):(S.ab.on?('The test batch of “'+esc(S.name)+'” is going out now. The winning variant reaches the rest automatically.'):('“'+esc(S.name)+'” is going out to '+fmt(r)+' recipients now. Delivery is throttled to protect your sender reputation.')))+'</p>'+
+      abNote+
+      '<div style="display:flex;gap:12px;justify-content:center;margin-top:22px"><a class="btn" href="atlas-communications.html">Back to Communications</a><a class="btn primary" href="'+analyticsURL()+'">View analytics</a></div>'+
       '</div></div>';
   }
 
@@ -494,6 +562,11 @@
     out.push(S.html ? {s:'pass',t:'Email content added',d:'Built in the drag-and-drop editor'} : {s:'warn',t:'No content yet',d:'Design your email before sending.',g:4,gl:'Design email'});
     out.push(h.indexOf('unsubscribe')!==-1 ? {s:'pass',t:'Unsubscribe link present',d:'Required by CAN-SPAM'} : {s:'warn',t:'No unsubscribe link found',d:'Add a Footer block — it includes the unsubscribe link.',g:4,gl:'Design email'});
     out.push((h.indexOf('albany')!==-1||h.indexOf('address')!==-1||h.indexOf('st ')!==-1) ? {s:'pass',t:'Physical mailing address present',d:'Required by CAN-SPAM'} : {s:'warn',t:'Mailing address not detected',d:'Include your address in the footer.',g:4,gl:'Design email'});
+    if(S.ab.on){ var c=abCounts();
+      out.push(abReady() ? {s:'pass',t:'A/B variants ready',d:'Testing '+(S.ab.variable==='from'?'from name':'subject line')+' · A vs B'} : {s:'fail',t:'A/B variants incomplete',d:'Both variants must be filled and different.',g:2,gl:'Select audience'});
+      out.push(c.perVar>=1000 ? {s:'pass',t:'A/B sample large enough',d:fmt(c.perVar)+' per variant · statistically usable'} : {s:'warn',t:'A/B sample is small',d:'Only '+fmt(c.perVar)+' per variant — results may not be significant.',g:2,gl:'Select audience'});
+      out.push({s:'pass',t:'A/B send plan',d:'Test '+c.pct+'% ('+fmt(c.test)+'), winner by '+abMetricLabel()+' after '+S.ab.windowH+'h → '+fmt(c.winner)});
+    }
     var merges=((S.html||'').match(/{{/g)||[]).length;
     out.push({s:'pass',t:'Merge fields',d:merges+' found · will resolve per recipient at send'});
     out.push({s:'pass',t:'Sender authentication',d:'SPF + DKIM verified for diocese.org'});
@@ -524,13 +597,20 @@
     var note = S.step===5 && hasFail() ? '<span class="foot-note" style="color:#B91C1C">Resolve the failed checks before sending.</span>' : '<span class="foot-note">Step '+S.step+' of 6 · draft auto-saved</span>';
     f.innerHTML='<button class="btn ghost" id="f-back" '+(S.step===1?'style="visibility:hidden"':'')+'>← Back</button>'+note+primary;
     $('f-back').addEventListener('click', back);
+    gatePrimary();
     $('f-primary').addEventListener('click', function(){
       if(S.step===5 && hasFail()){ toast('Fix the failed checks first'); return; }
       if(S.step===6){ if(S.schedule.mode==='sched' && !S.schedule.date){ toast('Pick a date and time to schedule'); return; } doSend(); return; }
       next();
     });
   }
-
+  function gatePrimary(){
+    var p=$('f-primary'); if(!p) return;
+    var block = (S.step===6 && S.schedule.mode==='sched' && !S.schedule.date) || (S.step===5 && hasFail());
+    p.style.opacity = block ? '.5' : '';
+    p.style.cursor = block ? 'not-allowed' : 'pointer';
+    p.setAttribute('aria-disabled', block ? 'true' : 'false');
+  }
   function wireStep(k){
     if(k==='details'){
       $('f-name').addEventListener('input',function(){S.name=this.value;flashSaved();});
@@ -540,7 +620,21 @@
       $('f-reply').addEventListener('change',function(){S.replyTo=this.value;});
     } else if(k==='audience'){
       body_.querySelectorAll('.aud').forEach(function(el){ el.addEventListener('click',function(){ var id=el.dataset.l; var i=S.lists.indexOf(id); if(i===-1)S.lists.push(id); else S.lists.splice(i,1); render(); }); });
-      var ab=$('f-ab'); if(ab) ab.addEventListener('change',function(){S.abTest=this.checked;});
+      var ab=$('f-ab'); if(ab) ab.addEventListener('change',function(){S.ab.on=this.checked; render();});
+      // segmented variable buttons
+      body_.querySelectorAll('.ab-seg').forEach(function(bt){ bt.addEventListener('click',function(){ S.ab.variable=bt.dataset.var; render(); }); });
+      function abRefresh(){ var c=abCounts();
+        var set=function(id,v){ var el=$(id); if(el) el.textContent=v; };
+        set('ab-pct',c.pct); set('ab-per-a',fmt(c.perVar)); set('ab-per-b',fmt(c.perVar)); set('ab-win',fmt(c.winner)); set('ab-auto-n',fmt(c.winner));
+        var s=$('ab-summary'); if(s) s.innerHTML=abSummary();
+      }
+      var abA=$('ab-a'); if(abA) abA.addEventListener('input',function(){ S.subject=this.value; abRefresh(); });
+      var abB=$('ab-b'); if(abB) abB.addEventListener('input',function(){ S.ab.subjectB=this.value; abRefresh(); });
+      var abFB=$('ab-fromB'); if(abFB) abFB.addEventListener('change',function(){ S.ab.fromB=this.value; abRefresh(); });
+      var abS=$('ab-sample'); if(abS) abS.addEventListener('input',function(){ S.ab.samplePct=+this.value; abRefresh(); });
+      var abM=$('ab-metric'); if(abM) abM.addEventListener('change',function(){ S.ab.metric=this.value; abRefresh(); });
+      var abW=$('ab-window'); if(abW) abW.addEventListener('change',function(){ S.ab.windowH=+this.value; abRefresh(); });
+      var abAu=$('ab-auto'); if(abAu) abAu.addEventListener('change',function(){ S.ab.autoSend=this.checked; abRefresh(); });
       function addEmail(){ var inp=$('manual-email'); var v=(inp.value||'').trim(); if(!v) return; if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ toast('Enter a valid email address'); return; } if(S.manualEmails.indexOf(v)===-1) S.manualEmails.push(v); inp.value=''; render(); }
       var ae=$('add-email-btn'); if(ae) ae.addEventListener('click', addEmail);
       var me=$('manual-email'); if(me) me.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); addEmail(); } });
@@ -551,9 +645,17 @@
       var tq=$('tpl-q'); if(tq){ tq.addEventListener('input',function(){ S.tplQuery=this.value; var pos=this.selectionStart; render(); var n=$('tpl-q'); if(n){ n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){}}}); }
       var ts=$('tpl-sort'); if(ts) ts.addEventListener('change',function(){ S.tplSort=this.value; render(); });
     } else if(k==='design'){
-      var fr=$('eb-design'); if(fr){ fr.addEventListener('load',function(){ /* if a template chosen, load into builder */ if(S.template && S.template!=='blank'){ try{ fr.contentWindow.postMessage({type:'eb-request'},'*'); }catch(_){} } }); }
+      var fr=$('eb-design'); if(fr){ fr.addEventListener('load',function(){
+        if(S.template && S.template!=='blank'){
+          var t=TEMPLATES.filter(function(x){return x.id===S.template;})[0];
+          var nm=t?t.nm:S.template;
+          try{ fr.contentWindow.postMessage({type:'eb-load-template', tpl:nm},'*'); }catch(_){}
+          setTimeout(function(){ try{ fr.contentWindow.postMessage({type:'eb-request'},'*'); }catch(_){} }, 220);
+        }
+      }); }
     } else if(k==='preview'){
       var dt=$('devtog'); if(dt) dt.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; S.device=b.dataset.d; render(); });
+      body_.querySelectorAll('.ab-pill').forEach(function(p){ p.addEventListener('click',function(){ S.previewVariant=p.dataset.v; render(); }); });
       body_.querySelectorAll('[data-goto]').forEach(function(el){
         el.addEventListener('click',function(){ gotoStep(+el.dataset.goto); });
         el.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); gotoStep(+el.dataset.goto); } });
@@ -561,8 +663,8 @@
         el.addEventListener('mouseleave',function(){ el.style.background=''; });
       });
     } else if(k==='send'){
-      body_.querySelectorAll('.radio').forEach(function(el){ el.addEventListener('click',function(){ S.schedule.mode=el.dataset.m; render(); }); });
-      function refreshSched(){ var s=$('sch-summary'); if(s) s.innerHTML=schedSummary(); var w=$('when-v'); if(w) w.textContent=whenText(); var fp=$('f-primary'); if(fp && S.step===6) fp.textContent=(S.schedule.mode==='sched'?'Schedule email':'Send to '+fmt(reach())+' recipients'); }
+      body_.querySelectorAll('.radio').forEach(function(el){ el.addEventListener('click',function(e){ if(e.target.closest('#sched-fields')) return; if(S.schedule.mode===el.dataset.m) return; S.schedule.mode=el.dataset.m; render(); }); });
+      function refreshSched(){ var s=$('sch-summary'); if(s) s.innerHTML=schedSummary(); var w=$('when-v'); if(w) w.textContent=whenText(); var fp=$('f-primary'); if(fp && S.step===6) fp.textContent=(S.schedule.mode==='sched'?'Schedule email':'Send to '+fmt(reach())+' recipients'); gatePrimary(); }
       var sd=$('sch-date'), stime=$('sch-time'), stz=$('sch-tz'), sopt=$('sch-opt');
       if(sd) sd.addEventListener('change',function(){S.schedule.date=this.value; S.schedule.preset='custom'; body_.querySelectorAll('.sch-chip').forEach(function(c){ var on=c.dataset.preset==='custom'; c.classList.toggle('on',on); c.style.borderColor=on?'#2563EB':'#E2E8F0'; c.style.background=on?'#EFF6FF':'#fff'; c.style.color=on?'#1D4ED8':'#334155'; }); refreshSched();});
       if(stime) stime.addEventListener('input',function(){S.schedule.time=this.value; refreshSched();});
@@ -585,14 +687,15 @@
   function doSend(){
     var ov=$('ov');
     var r=reach(), sch=S.schedule.mode==='sched';
-    ov.innerHTML='<div class="m"><div class="mh"><h3>'+(sch?'Schedule this email?':'Send to '+fmt(r)+' recipients?')+'</h3><p>'+(sch?('It will send on '+prettyDate(S.schedule.date)+' at '+prettyTime(S.schedule.time)+' '+tzOf(S.schedule.tz).ab+'.'):('“'+esc(S.name)+'” will begin sending immediately.'))+'</p></div>'+
+    var abH = S.ab.on ? ('<div style="margin-top:10px;padding:10px 12px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;font-size:12.5px;color:#1E3A8A">🧪 A/B: test batch of <b>'+fmt(abCounts().test)+'</b> ('+abCounts().pct+'%). Winner by '+abMetricLabel()+' after '+S.ab.windowH+'h '+(S.ab.autoSend?'auto-sends':'is offered')+' to the remaining <b>'+fmt(abCounts().winner)+'</b>.</div>') : '';
+    ov.innerHTML='<div class="m"><div class="mh"><h3>'+(sch?'Schedule this email?':(S.ab.on?'Start A/B test?':'Send to '+fmt(r)+' recipients?'))+'</h3><p>'+(sch?('It will send on '+prettyDate(S.schedule.date)+' at '+prettyTime(S.schedule.time)+' '+tzOf(S.schedule.tz).ab+'.'):(S.ab.on?('The '+abCounts().pct+'% test batch of “'+esc(S.name)+'” begins immediately.'):('“'+esc(S.name)+'” will begin sending immediately.')))+'</p>'+abH+'</div>'+
       '<div class="mb" style="font-size:13px;color:#334155">This action can\'t be undone once delivery starts. Suppressed contacts are excluded automatically.</div>'+
       '<div class="mf"><button class="btn" id="c-cancel">Cancel</button><button class="btn primary" id="c-go">'+(sch?'Schedule':'Send now')+'</button></div></div>';
     ov.classList.add('show');
     ov.querySelector('#c-cancel').addEventListener('click',function(){ov.classList.remove('show');});
     ov.querySelector('#c-go').addEventListener('click',function(){ ov.classList.remove('show'); S.step=7; render(); if(S.schedule.mode==='now'){ setTimeout(function(){ window.location=analyticsURL(); }, 2000); } });
   }
-  function analyticsURL(){ var r=reach(); return 'atlas-message-detail.html?subj='+encodeURIComponent(S.subject||S.name)+'&type=appeal&sender='+encodeURIComponent(S.from.split(' · ')[0])+'&camp='+encodeURIComponent(S.name)+'&recips='+r+'&del=0.986&open=0.25&clicked='+Math.round(r*0.25*0.12)+'&bounced='+Math.round(r*0.014); }
+  function analyticsURL(){ var r=reach(); var ab=S.ab.on?('&ab=1&abvar='+encodeURIComponent(S.ab.variable)+'&abpct='+abCounts().pct+'&abmetric='+S.ab.metric+'&abtest='+abCounts().test+'&abA='+encodeURIComponent(abVarValue('A'))+'&abB='+encodeURIComponent(abVarValue('B'))):''; return 'atlas-message-detail.html?subj='+encodeURIComponent(S.subject||S.name)+'&type=appeal&sender='+encodeURIComponent(S.from.split(' · ')[0])+'&camp='+encodeURIComponent(S.name)+'&recips='+r+'&del=0.986&open=0.25&clicked='+Math.round(r*0.25*0.12)+'&bounced='+Math.round(r*0.014)+ab; }
   window.cwAddList=function(){
     var ov=$('ov'); var detected=0;
     ov.innerHTML='<div class="m" style="max-width:500px"><div class="mh"><h3>Add a new list / segment</h3><p>Create a list to send to. Bulk upload handles files up to ~5,000,000 rows.</p></div>'+
@@ -642,6 +745,31 @@
     ov.querySelector('#t-go').addEventListener('click',function(){ var e=$('t-email').value||'you'; ov.classList.remove('show'); toast('Test sent to '+e+' · check your inbox'); });
   };
   $('ov').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
+
+  // ── Prefill recipient when arriving from a donor / contact / list link ──
+  (function prefill(){
+    var P=new URLSearchParams(location.search);
+    var raw=(P.get('emails')||P.get('email')||P.get('to')||'');
+    var emails=raw.split(/[,;]+/).map(function(s){return s.trim();}).filter(function(s){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);});
+    emails.forEach(function(e){ if(S.manualEmails.indexOf(e)===-1) S.manualEmails.push(e); });
+    var listId=P.get('listId')||P.get('list');
+    if(listId){ var byId=LISTS.filter(function(l){return l.id===listId;})[0]; if(byId && S.lists.indexOf(byId.id)===-1) S.lists.push(byId.id); }
+    var listName=P.get('listName');
+    if(listName){
+      var byNm=LISTS.filter(function(l){return l.nm.toLowerCase()===listName.toLowerCase();})[0] || LISTS.filter(function(l){return l.nm.toLowerCase().indexOf(listName.toLowerCase())!==-1;})[0];
+      if(byNm){ if(S.lists.indexOf(byNm.id)===-1) S.lists.push(byNm.id); }
+      else { var nid='ext-'+Date.now(); var n=parseInt(P.get('listCount'),10)||0; LISTS.unshift({id:nid,nm:listName,sub:'From link',n:n}); S.lists.push(nid); }
+    }
+    var donor=P.get('donor')||P.get('name');
+    if(donor||emails.length||listId||listName){
+      var listLabel = listName || ((LISTS.filter(function(l){return l.id===listId;})[0]||{}).nm) || '';
+      S.prefillFrom = donor || listLabel || (emails.length?emails.join(', '):'') || '';
+      S.prefillKind = (listId||listName) ? 'list' : 'people';
+      if(donor) S.name='Email to '+donor;
+      else if(listLabel) S.name='Email to '+listLabel;
+      else if(emails.length===1) S.name='Email to '+emails[0];
+    }
+  })();
 
   render();
 })();

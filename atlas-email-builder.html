@@ -419,7 +419,7 @@
     function drawPv(){ var f=document.getElementById('pv-frame'); f.className='pframe'+(pvMode!=='desktop'?' '+pvMode:''); var c=$('canvas'); var w=DESIGN.width; f.innerHTML='<div class="pfhd"><b>'+SAMPLE.parish_name+'</b> · to '+SAMPLE.first_name+' '+SAMPLE.last_name+'</div><div class="pfbody" style="max-width:'+w+'px;margin:0 auto;font-family:'+((c.style.fontFamily)||'DM Sans')+'">'+resolveMerge(serializeEmail())+'</div>'; }
   };
   window.ebHistory=function(){ toast('Version history · 4 autosaved versions (every 30s) · latest 2 min ago'); };
-  window.addEventListener('message', function(e){ var m=e.data||{}; if(m.type==='eb-load' && typeof m.html==='string'){ MODEL.body=[{id:'b'+Math.random().toString(36).slice(2,8),type:'text',data:{align:'left',html:m.html}}]; renderAll(); } else if(m.type==='eb-request'){ sync(); } });
+  window.addEventListener('message', function(e){ var m=e.data||{}; if(m.type==='eb-load' && typeof m.html==='string'){ MODEL.body=[{id:'b'+Math.random().toString(36).slice(2,8),type:'text',data:{align:'left',html:m.html}}]; renderAll(); } else if(m.type==='eb-load-template' && m.tpl){ if(loadTemplate(m.tpl)){ sync(); } } else if(m.type==='eb-request'){ sync(); } });
 
   // ── Palette render ──
   function renderPalette(){
@@ -586,7 +586,19 @@
 
   // ── Boot ──
   // ── Template mode: design-only surface for "New template" ──
-  window.ebSaveTemplate=function(){ var nm=(document.getElementById('eb-tplname').value||'Untitled template').trim(); toast('Template “'+nm+'” saved · reusable from Communications → Templates'); setTimeout(function(){ window.location='atlas-communications.html'; }, 1000); };
+  window.ebSaveTemplate=function(){
+    var nm=(document.getElementById('eb-tplname').value||'Untitled template').trim();
+    // pull a subject-ish line from the first heading/text block for a nicer list entry
+    var subj='';
+    try{ for(var i=0;i<MODEL.body.length && !subj;i++){ var d=MODEL.body[i].data; if(d&&d.html){ var m=d.html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(); if(m) subj=m.slice(0,60); } } }catch(_){}
+    try{
+      var arr=JSON.parse(localStorage.getItem('atlas_user_templates')||'[]');
+      arr.unshift({nm:nm, subj:subj||('Custom template · '+nm), tag:'Draft', ts:Date.now()});
+      localStorage.setItem('atlas_user_templates', JSON.stringify(arr));
+    }catch(_){}
+    toast('Template “'+nm+'” published · added to Communications → Templates');
+    setTimeout(function(){ window.location='atlas-communications.html#templates'; }, 900);
+  };
   // ── Real content library for each template ──
   var LOGO='<div style="font-family:\'DM Serif Display\',serif;font-size:22px;color:#0E1E35">St. Mary\'s Cathedral</div><div style="font-size:10px;color:#64748B;letter-spacing:.12em;text-transform:uppercase;margin-top:2px">Diocese of Albany</div>';
   var FOOT='St. Mary\'s Cathedral · 125 Eagle St, Albany, NY 12202<br>Diocese of Albany · EIN 14-0000000<br><a href="#">Update preferences</a> · <a href="#">Unsubscribe</a>';
