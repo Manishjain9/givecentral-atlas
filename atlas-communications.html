@@ -693,6 +693,7 @@ body {
     <div class="tab"         data-tab="drafts"    onclick="switchCommsTab('drafts', this)">Drafts <span class="ct">3</span></div>
     <div class="tab"         data-tab="templates" onclick="switchCommsTab('templates', this)">Templates <span class="ct">12</span></div>
     <div class="tab"         data-tab="lists"     onclick="switchCommsTab('lists', this)">Outreach lists <span class="ct">112</span></div>
+    <div class="tab"         data-tab="suppressed" onclick="switchCommsTab('suppressed', this)">Suppressed <span class="ct" id="tab-ct-suppressed">284</span></div>
   </div>
 
   <!-- ═══ TAB PANES ═══ -->
@@ -910,6 +911,11 @@ body {
   <div class="tab-pane" data-pane="lists" style="display:none">
     <div class="section-h"><span>Outreach lists · <span id="lists-count-inline">112</span> lists</span><span class="line"></span><a href="#" onclick="commsImport();return false" class="cta-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 3v8M3 7h8"/></svg> Add new list</a></div>
     <div class="cm-list" style="margin-top:12px" id="lists-list"></div>
+  </div>
+
+  <!-- ─── SUPPRESSED (Do-Not-Contact) pane ─── -->
+  <div class="tab-pane" data-pane="suppressed" style="display:none">
+    <div id="supp-mount"></div>
   </div>
 
   </div><!-- /#comms-tab-panes -->
@@ -3481,5 +3487,146 @@ body {
 })();
 </script>
 <!-- /ATLAS-NAVCOLLAPSE -->
+
+<!-- Suppressed (Do-Not-Contact) tab pane -->
+<script id="comms-suppressed-js">
+(function(){
+  function boot(){
+    var mount = document.getElementById('supp-mount');
+    if (!mount) return;
+
+    var css = document.createElement('style'); css.id='supp-css';
+    css.textContent =
+      '.supp-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}'+
+      '.supp-card{border:1px solid var(--border);border-radius:14px;padding:16px 18px;background:#fff}'+
+      '.supp-card .lb{display:flex;align-items:center;gap:7px;font:700 11px "DM Sans",sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)}'+
+      '.supp-card .dot{width:8px;height:8px;border-radius:50%}'+
+      '.supp-card .num{font:700 30px "DM Sans",sans-serif;color:var(--navy,#0E1E35);margin:8px 0 2px;line-height:1}'+
+      '.supp-card .sub{font-size:12px;color:var(--text-3)}'+
+      '.supp-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}'+
+      '.supp-h{font-family:"DM Serif Display",serif;font-size:18px;color:var(--navy,#0E1E35)}'+
+      '.supp-h span{font-family:"DM Sans",sans-serif;font-size:13px;color:var(--text-3);font-weight:500}'+
+      '.supp-search{display:flex;align-items:center;gap:8px;background:var(--surface,#F1F5F9);border:1px solid var(--border);border-radius:9px;padding:8px 12px;min-width:230px;margin-left:auto}'+
+      '.supp-search input{border:none;outline:none;background:transparent;font:13px "DM Sans",sans-serif;color:var(--text);flex:1}'+
+      '.supp-chips{display:flex;gap:6px;flex-wrap:wrap}'+
+      '.supp-chip{border:1px solid var(--border);background:#fff;border-radius:8px;padding:7px 12px;font:600 12px "DM Sans",sans-serif;color:var(--text-2);cursor:pointer}'+
+      '.supp-chip:hover{border-color:var(--blue)}'+
+      '.supp-chip.on{background:var(--navy,#0E1E35);border-color:var(--navy,#0E1E35);color:#fff}'+
+      '.supp-table{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#fff}'+
+      '.supp-thead,.supp-row{display:grid;grid-template-columns:minmax(0,1.5fr) 130px minmax(0,1.4fr) 130px 90px;gap:14px;align-items:center;padding:12px 18px}'+
+      '.supp-thead{font:700 10px "DM Sans",sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);border-bottom:1px solid var(--border);background:var(--surface,#F8FAFC)}'+
+      '.supp-row{border-bottom:1px solid var(--border)}.supp-row:last-child{border-bottom:none}.supp-row:hover{background:#F8FAFF}'+
+      '.supp-nm{font:600 13px "DM Sans",sans-serif;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
+      '.supp-em{font-size:11.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
+      '.supp-tag{display:inline-block;padding:3px 9px;border-radius:99px;font:600 11px "DM Sans",sans-serif}'+
+      '.supp-src{font-size:12.5px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
+      '.supp-date{font-size:12.5px;color:var(--text-2)}'+
+      '.supp-remove{justify-self:end;border:1px solid #FCA5A5;background:#fff;color:#B91C1C;border-radius:7px;padding:6px 12px;font:600 12px "DM Sans",sans-serif;cursor:pointer}'+
+      '.supp-remove:hover{background:#FEF2F2}'+
+      '.supp-pager{display:flex;align-items:center;justify-content:space-between;padding:12px 4px 2px;font-size:12px;color:var(--text-3)}'+
+      '.supp-pbtn{border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 11px;font:600 12px "DM Sans",sans-serif;cursor:pointer;color:var(--text-2)}'+
+      '.supp-pbtn:disabled{opacity:.4;cursor:default}'+
+      '.supp-empty{text-align:center;padding:30px;color:var(--text-3);font-size:13px}';
+    document.head.appendChild(css);
+
+    var REASONS = {
+      hard:     {label:'Hard bounce',  bg:'#FEE2E2', fg:'#B91C1C', dot:'#EF4444', sub:'Auto-suppressed',       count:141, risky:false},
+      unsub:    {label:'Unsubscribed', bg:'#DBEAFE', fg:'#1D4ED8', dot:'#3B82F6', sub:'Donor-requested',       count:89,  risky:true},
+      complaint:{label:'Complaint',    bg:'#FEF3C7', fg:'#B45309', dot:'#F59E0B', sub:'SES complaint feedback', count:12,  risky:true},
+      manual:   {label:'Manual',       bg:'#FEF9C3', fg:'#A16207', dot:'#EAB308', sub:'Staff-added',            count:42,  risky:false}
+    };
+    var ORDER=['hard','unsub','complaint','manual'];
+    var FIRST=['Catherine','Michael','Laura','Robert','Anne','James','Margaret','Thomas','Patricia','Susan','William','Elena','Daniel','Bridget','Sean','Kathleen','Brian','Maureen','Dennis','Colleen','Patrick','Eileen','Kevin','Sheila','Liam','Nora'];
+    var LAST=['Hayes','O\'Brien','Lin','Smith','Kowalski','Nguyen','Sullivan','Grant','Walsh','Russo','Carter','Fitzgerald','Byrne','Murphy','Kennedy','Gallagher','Brennan','Donovan','Quinn','Reilly','Doherty','Kavanagh'];
+    var DOMAINS=['example.com','gmail.com','stmichaels.org','diocese.org','cathedralcapital.org','yahoo.com','icloud.com'];
+    var CAMPS=['Q1 impact report to donors','Cathedral Capital year-end ask','Lenten appeal — final week push','Where your gift went','Spring 2026 Appeal','Annual Appeal 2026','Bishop\'s Gala invite'];
+    function rnd(s){ var x=Math.sin(s*53.13+7.7)*43758.5453; return x-Math.floor(x); }
+    var NOW=new Date(2026,4,4);
+    function dstr(off){ var d=new Date(NOW.getTime()-off*86400000); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+
+    var removed = (function(){ try{ return JSON.parse(localStorage.getItem('atlas_comms_unsuppressed')||'[]'); }catch(_){ return []; } })();
+    function saveRemoved(){ try{ localStorage.setItem('atlas_comms_unsuppressed', JSON.stringify(removed)); }catch(_){} }
+
+    var DATA=[]; var idc=0;
+    ORDER.forEach(function(rk){
+      for (var i=0;i<REASONS[rk].count;i++){
+        var s=idc*1.7+3.1;
+        var f=FIRST[Math.floor(rnd(s)*FIRST.length)], l=LAST[Math.floor(rnd(s*1.9)*LAST.length)];
+        var em=(f+'.'+l).toLowerCase().replace(/[^a-z.]/g,'')+'@'+DOMAINS[Math.floor(rnd(s*2.3)*DOMAINS.length)];
+        var src = rk==='manual' ? '—' : CAMPS[Math.floor(rnd(s*3.7)*CAMPS.length)];
+        DATA.push({ id:idc, name:f+' '+l, email:em, reason:rk, src:src, off:Math.floor(rnd(s*4.4)*40) });
+        idc++;
+      }
+    });
+    DATA.sort(function(a,b){ return a.off-b.off; });
+    DATA = DATA.filter(function(x){ return removed.indexOf(x.email)===-1; });
+
+    var state={ q:'', filter:'', page:1, size:12 };
+
+    function counts(){ var c={hard:0,unsub:0,complaint:0,manual:0}; DATA.forEach(function(x){ c[x.reason]++; }); return c; }
+    function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function toast(msg){ if(window.atlasToast) return window.atlasToast(msg); var t=document.getElementById('atlas-rescue-toast'); if(t){ (t.querySelector('.msg')||t).textContent=msg; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},2500);} }
+
+    function render(){
+      var c=counts();
+      var cardsHTML = ORDER.map(function(rk){ var R=REASONS[rk];
+        return '<div class="supp-card"><div class="lb"><span class="dot" style="background:'+R.dot+'"></span>'+R.label.toUpperCase()+'</div><div class="num">'+c[rk].toLocaleString()+'</div><div class="sub">'+R.sub+'</div></div>';
+      }).join('');
+      var chips='<button class="supp-chip'+(state.filter===''?' on':'')+'" data-f="">All</button>'+
+        ORDER.map(function(rk){ return '<button class="supp-chip'+(state.filter===rk?' on':'')+'" data-f="'+rk+'">'+REASONS[rk].label+'</button>'; }).join('');
+      var rows = DATA.filter(function(x){ return (!state.filter||x.reason===state.filter) && (!state.q || (x.name+' '+x.email).toLowerCase().indexOf(state.q)!==-1); });
+      var total=rows.length, maxPage=Math.max(1,Math.ceil(total/state.size));
+      if(state.page>maxPage) state.page=maxPage;
+      var start=(state.page-1)*state.size, pageRows=rows.slice(start,start+state.size);
+      var body = pageRows.length ? pageRows.map(function(x){ var R=REASONS[x.reason];
+        return '<div class="supp-row" data-id="'+x.id+'">'+
+          '<div style="min-width:0"><div class="supp-nm">'+esc(x.name)+'</div><div class="supp-em">'+esc(x.email)+'</div></div>'+
+          '<div><span class="supp-tag" style="background:'+R.bg+';color:'+R.fg+'">'+R.label+'</span></div>'+
+          '<div class="supp-src">'+esc(x.src)+'</div>'+
+          '<div class="supp-date">'+dstr(x.off)+'</div>'+
+          '<button class="supp-remove" data-id="'+x.id+'">Remove</button>'+
+        '</div>';
+      }).join('') : '<div class="supp-empty">No suppressed contacts match.</div>';
+
+      mount.innerHTML =
+        '<div class="supp-cards">'+cardsHTML+'</div>'+
+        '<div class="supp-bar"><div class="supp-h">All suppressed contacts <span>· '+DATA.length.toLocaleString()+' total</span></div>'+
+          '<div class="supp-search"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="supp-q" placeholder="Search name or email…" value="'+esc(state.q)+'"></div>'+
+          '<div class="supp-chips">'+chips+'</div>'+
+        '</div>'+
+        '<div class="supp-table"><div class="supp-thead"><span>Constituent</span><span>Type</span><span>Source campaign</span><span>Suppressed on</span><span style="justify-self:end">Action</span></div>'+body+'</div>'+
+        '<div class="supp-pager"><span>Showing '+(total?start+1:0)+'–'+Math.min(start+state.size,total)+' of <strong>'+total.toLocaleString()+'</strong></span><span><button class="supp-pbtn" id="supp-prev"'+(state.page<=1?' disabled':'')+'>‹ Prev</button> <button class="supp-pbtn" id="supp-next"'+(state.page>=maxPage?' disabled':'')+'>Next ›</button></span></div>';
+
+      // tab count = current total
+      var tc=document.getElementById('tab-ct-suppressed'); if(tc) tc.textContent=DATA.length.toLocaleString();
+
+      var q=mount.querySelector('#supp-q'); q.addEventListener('input', function(){ state.q=q.value.toLowerCase().trim(); state.page=1; render(); var n=mount.querySelector('#supp-q'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } });
+      mount.querySelectorAll('.supp-chip').forEach(function(ch){ ch.addEventListener('click', function(){ state.filter=ch.dataset.f; state.page=1; render(); }); });
+      var pv=mount.querySelector('#supp-prev'), nx=mount.querySelector('#supp-next');
+      if(pv) pv.addEventListener('click', function(){ if(state.page>1){ state.page--; render(); } });
+      if(nx) nx.addEventListener('click', function(){ if(state.page<maxPage){ state.page++; render(); } });
+      mount.querySelectorAll('.supp-remove').forEach(function(btn){ btn.addEventListener('click', function(){ removeOne(+btn.dataset.id); }); });
+    }
+
+    function removeOne(id){
+      var x=DATA.filter(function(r){ return r.id===id; })[0]; if(!x) return; var R=REASONS[x.reason];
+      var opts = R.risky
+        ? {title:'Restore '+x.name+'?', body:'<b>'+esc(x.email)+'</b> was suppressed because they '+(x.reason==='complaint'?'filed a spam complaint':'unsubscribed')+'. Re-adding them without fresh, explicit consent risks a CAN-SPAM / CASL violation. Only remove if you have new documented consent.', ok:'Remove anyway', danger:true}
+        : {title:'Remove '+x.name+' from suppression?', body:'<b>'+esc(x.email)+'</b> ('+R.label.toLowerCase()+') will be eligible to receive email again. Do this only if the suppression was a mistake.', ok:'Remove from suppression', danger:false};
+      function doIt(){
+        var i=DATA.indexOf(x); if(i!==-1) DATA.splice(i,1);
+        if(removed.indexOf(x.email)===-1){ removed.push(x.email); saveRemoved(); }
+        render();
+        if(window.commsUndoToast){ window.commsUndoToast(x.name+' removed from suppression', function(){ DATA.splice(Math.min(i,DATA.length),0,x); DATA.sort(function(a,b){return a.off-b.off;}); var j=removed.indexOf(x.email); if(j!==-1){ removed.splice(j,1); saveRemoved(); } render(); }); }
+        else toast(x.name+' removed from suppression');
+      }
+      if(window.commsConfirm) window.commsConfirm(opts, doIt); else doIt();
+    }
+
+    render();
+  }
+  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
 </body>
 </html>
