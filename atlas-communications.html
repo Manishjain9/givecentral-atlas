@@ -1821,7 +1821,7 @@ body {
         '<button class="sa-clear" id="sa-clear">Clear</button>'+
         '<span class="sa-result" id="sa-result">—</span>'+
       '</div>'+
-      '<div class="sa-attn-banner" id="sa-banner"><div class="t"></div><button class="sa-abtn" data-a="viewsup">View suppression list</button><button class="sa-abtn" data-a="suppress">Suppress bad addresses</button><button class="sa-abtn" data-a="reverify">Re-verify</button><button class="sa-abtn" data-a="export">Export list</button></div>'+
+      '<div class="sa-attn-banner" id="sa-banner"><div class="t"></div><button class="sa-abtn" data-a="viewsup">View suppression list</button><button class="sa-abtn" data-a="suppress">Suppress bad addresses</button><button class="sa-abtn" data-a="export">Export list</button></div>'+
       '<div class="sa-chart" id="sa-chart"></div>'+
       '<div class="sa-head sa-grid"><span></span><span></span><span>Message</span><span>Recipient</span><span>Performance</span><span>Type</span><span></span></div>'+
       '<div class="sa-list" id="sa-list"></div>'+
@@ -1984,14 +1984,6 @@ body {
       var st=flaggedStats();
       if(a==='viewsup'){ openSuppression(); return; }
       if(a==='suppress'){ if(window.commsConfirm){ window.commsConfirm({title:'Suppress '+fmtNum(st.bad)+' bad addresses?',body:'The '+fmtNum(st.bounced)+' hard-bounced and '+fmtNum(st.complaints)+' complained addresses across these '+st.msgs+' flagged sends will be added to the diocese DNC list so future sends skip them automatically.',ok:'Suppress '+fmtNum(st.bad)+' addresses',danger:true}, function(){ toast(fmtNum(st.bad)+' addresses suppressed · added to DNC list'); }); } else { toast('Bad addresses suppressed · added to DNC list'); } return; }
-      if(a==='reverify'){ saProcess({
-        title:'Re-verifying flagged addresses',
-        sub:'Running a fresh SMTP + MX check on the '+fmtNum(st.bad)+' addresses that bounced or complained across '+st.msgs+' sends. Ones that pass stay on your lists; the rest are moved to DNC.',
-        count:st.bad,
-        progress:function(n,t){ return 'Verified '+fmtNum(n)+' of '+fmtNum(t)+' addresses…'; },
-        result:function(s){ var ok=Math.round(s.bad*0.36), bad=s.bad-ok; return {line:'<span style="color:#166534">✓ '+fmtNum(ok)+' now valid — restored to lists.</span><br><span style="color:#B91C1C">'+fmtNum(bad)+' still undeliverable — moved to DNC.</span>', after:function(){ toast('Re-verify complete · '+fmtNum(ok)+' restored, '+fmtNum(bad)+' to DNC'); }};
-        }
-      }); return; }
       if(a==='export'){
         var rows=filtered();
         var head=['Message','Campaign','Sent','Recipients','Delivered','Bounced','Complaints','DNC','Bounce rate'];
