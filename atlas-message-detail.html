@@ -379,7 +379,10 @@
     '</div>';
 
   function abCardHTML(){
-    if(!M.abOn) return '';
+    if(!M.abOn) return '<div class="card"><h3>🧪 A/B test</h3>'+
+      '<div style="display:flex;align-items:center;gap:14px;padding:8px 2px"><div style="font-size:30px">🅰️🅱️</div>'+
+      '<div style="flex:1"><div style="font-weight:600;color:var(--text)">This send was not A/B tested</div><div style="font-size:12.5px;color:var(--text-3);margin-top:3px">One version went to everyone. Next time, test two subject lines (or from-names) on a small sample and auto-send the winner to the rest.</div></div>'+
+      '<a class="btn primary" href="atlas-email-campaign.html?dupSubject='+encodeURIComponent(M.subject)+'&type='+encodeURIComponent(M.typeKey)+'" style="text-decoration:none">Resend as an A/B test →</a></div></div>';
     var perVar=Math.floor(M.abTest/2);
     var winnerGroup=Math.max(0,M.recipients-M.abTest);
     var isClick=M.abMetric==='click';
@@ -551,8 +554,9 @@
     '<p>Dear {first_name},</p>'+
     '<p>Because of friends like you, the '+M.campaign+' is closer than ever to restoring the Cathedral for the next generation. Your past generosity has already made a visible difference.</p>'+
     '<p>Will you consider a year-end gift to help us finish strong?</p>'+
-    '<a class="cta" href="#">Give to {campaign} →</a>'+
-    '<p style="color:#94A3B8;font-size:12px;margin-top:18px">Template: '+T.tmpl+' · merge fields resolved per recipient · IRS Pub 1771 compliant footer.</p>'+
+    '<a class="cta" href="atlas-donate-onetime.html" target="_blank" rel="noopener">Give to '+M.campaign+' →</a>'+
+    '<p style="color:#94A3B8;font-size:11.5px;margin-top:8px">↑ This is the donate button recipients see — it opens your '+M.campaign+' giving page. Clicks on it are what drive the click-through rate above.</p>'+
+    '<p style="color:#94A3B8;font-size:12px;margin-top:14px">Template: '+T.tmpl+' · merge fields resolved per recipient · IRS Pub 1771 compliant footer.</p>'+
     '</div></div>';
 
   // ── Timeline tab ──

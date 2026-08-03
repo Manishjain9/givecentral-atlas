@@ -1688,6 +1688,18 @@ body {
   #sa-ov .rsearch { display:flex; align-items:center; gap:8px; background:var(--surface,#F1F5F9); border:1px solid var(--border); border-radius:9px; padding:8px 11px; margin-bottom:10px; }
   #sa-ov .rsearch input { border:none; outline:none; background:transparent; flex:1; font-size:13px; font-family:'DM Sans',sans-serif; }
   #sa-ov .rpager { display:flex; align-items:center; justify-content:space-between; padding-top:10px; font-size:12px; color:var(--text-3); }
+  .sup-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .sup-chip { border:1px solid var(--border); background:#fff; border-radius:99px; padding:4px 10px; font:600 11.5px 'DM Sans',sans-serif; color:var(--text-2); cursor:pointer; }
+  .sup-chip b { color:var(--navy,#0E1E35); margin-left:3px; }
+  .sup-chip:hover { border-color:var(--blue); }
+  .sup-chip.on { background:var(--blue,#2563EB); border-color:var(--blue,#2563EB); color:#fff; }
+  .sup-chip.on b { color:#fff; }
+  .sup-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+  .sup-row:last-of-type { border-bottom:none; }
+  .sup-pill { display:inline-block; padding:2px 9px; border-radius:99px; font:600 11px 'DM Sans',sans-serif; }
+  .sup-lock { margin-left:5px; font-size:11px; color:#B45309; cursor:help; }
+  .sup-remove { flex-shrink:0; border:1px solid var(--border); background:#fff; color:var(--text-2); border-radius:7px; padding:6px 11px; font:600 12px 'DM Sans',sans-serif; cursor:pointer; }
+  .sup-remove:hover { border-color:#B91C1C; color:#B91C1C; background:#FEF2F2; }
 </style>
 <script id="sent-archive-js">
 (function(){
@@ -1797,14 +1809,13 @@ body {
       '<div class="sa-toolbar">'+
         '<div class="sa-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="sa-q" placeholder="Search recipient, subject, campaign, sender…" autocomplete="off"></div>'+
         '<div class="sa-ranges" id="sa-ranges"><button class="sa-range" data-r="7">7d</button><button class="sa-range" data-r="30">30d</button><button class="sa-range on" data-r="90">90d</button><button class="sa-range" data-r="9999">All</button></div>'+
-        '<div class="sa-facet" data-f="types"><button class="sa-fbtn">Type <span class="sa-fcnt"></span> ▾</button></div>'+
         '<div class="sa-facet" data-f="statuses"><button class="sa-fbtn">Status <span class="sa-fcnt"></span> ▾</button></div>'+
         '<div class="sa-facet" data-f="campaigns"><button class="sa-fbtn">Campaign <span class="sa-fcnt"></span> ▾</button></div>'+
         '<button class="sa-attn" id="sa-attn">⚠ Needs attention <span id="sa-attn-n"></span></button>'+
         '<button class="sa-clear" id="sa-clear">Clear</button>'+
         '<span class="sa-result" id="sa-result">—</span>'+
       '</div>'+
-      '<div class="sa-attn-banner" id="sa-banner"><div class="t"></div><button class="sa-abtn" data-a="suppress">Suppress bad addresses</button><button class="sa-abtn" data-a="reverify">Re-verify</button><button class="sa-abtn" data-a="export">Export list</button></div>'+
+      '<div class="sa-attn-banner" id="sa-banner"><div class="t"></div><button class="sa-abtn" data-a="viewsup">View suppression list</button><button class="sa-abtn" data-a="suppress">Suppress bad addresses</button><button class="sa-abtn" data-a="reverify">Re-verify</button><button class="sa-abtn" data-a="export">Export list</button></div>'+
       '<div class="sa-chart" id="sa-chart"></div>'+
       '<div class="sa-head sa-grid"><span></span><span></span><span>Message</span><span>Recipient</span><span>Performance</span><span>Type</span><span></span></div>'+
       '<div class="sa-list" id="sa-list"></div>'+
@@ -1933,9 +1944,61 @@ body {
     });
 
     function toast(msg){ if(window.atlasToast) return window.atlasToast(msg); var t=document.getElementById('atlas-rescue-toast'); if(t){ t.querySelector('.msg').textContent=msg; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},2500);} }
+    // Sum the deliverability problems across the currently-flagged (filtered) sends
+    function flaggedStats(){
+      var rows=filtered(), msgs=0, bounced=0, complaints=0, dnc=0;
+      rows.forEach(function(m){ msgs++; bounced+=(m.bounced||0); complaints+=(m.complaints||0); dnc+=(m.dnc||0); });
+      return {msgs:msgs, bounced:bounced, complaints:complaints, dnc:dnc, bad:bounced+complaints+dnc};
+    }
+    // Lightweight process overlay with a progress bar → result state
+    function saProcess(opts){
+      var st=flaggedStats();
+      var pv=document.createElement('div'); pv.id='sa-proc';
+      pv.style.cssText='position:fixed;inset:0;z-index:9600;background:rgba(14,30,53,.42);display:flex;align-items:center;justify-content:center;padding:20px';
+      pv.innerHTML='<div style="background:#fff;border-radius:14px;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(14,30,53,.28);overflow:hidden">'+
+        '<div style="padding:20px 22px 16px"><div style="font:700 16px \'DM Sans\',sans-serif;color:#0E1E35">'+opts.title+'</div>'+
+        '<div style="font:13px \'DM Sans\',sans-serif;color:#64748B;margin-top:4px;line-height:1.5">'+opts.sub+'</div>'+
+        '<div style="margin-top:16px;height:8px;border-radius:6px;background:#E2E8F0;overflow:hidden"><div id="sa-proc-bar" style="height:100%;width:6%;background:linear-gradient(90deg,#2563EB,#1D4ED8);border-radius:6px;transition:width .18s ease"></div></div>'+
+        '<div id="sa-proc-status" style="font:12px \'DM Mono\',monospace;color:#94A3B8;margin-top:8px">Starting…</div></div>'+
+        '<div id="sa-proc-ft" style="padding:12px 22px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:8px"><button class="sa-abtn" id="sa-proc-cancel" style="border-color:#CBD5E1;color:#475569">Cancel</button></div></div>';
+      document.body.appendChild(pv);
+      var bar=pv.querySelector('#sa-proc-bar'), status=pv.querySelector('#sa-proc-status');
+      var done=false; pv.querySelector('#sa-proc-cancel').addEventListener('click', function(){ if(!done){ clearInterval(iv); } pv.remove(); });
+      var p=6, total=opts.count||st.bad; var iv=setInterval(function(){
+        p+=Math.random()*22+10; if(p>=100){ p=100; clearInterval(iv); finish(); }
+        bar.style.width=p+'%'; status.textContent=opts.progress(Math.min(total,Math.round(total*p/100)), total);
+      }, 240);
+      function finish(){ done=true; status.textContent='Complete'; var res=opts.result(st);
+        pv.querySelector('#sa-proc-status').innerHTML=res.line;
+        pv.querySelector('#sa-proc-ft').innerHTML='<button class="sa-abtn primary" id="sa-proc-done" style="border-color:#2563EB;background:#2563EB;color:#fff">Done</button>';
+        pv.querySelector('#sa-proc-done').addEventListener('click', function(){ pv.remove(); if(res.after) res.after(); });
+      }
+    }
     document.getElementById('sa-banner').addEventListener('click', function(e){ var b=e.target.closest('.sa-abtn'); if(!b)return; var a=b.dataset.a;
-      if(a==='suppress'){ if(window.commsConfirm){ window.commsConfirm({title:'Suppress bad addresses?',body:'Hard-bounced and complained addresses across these flagged sends will be added to the diocese DNC list so future sends skip them automatically.',ok:'Suppress addresses',danger:true}, function(){ toast('Bad addresses suppressed · added to DNC list'); }); } else { toast('Bad addresses suppressed · added to DNC list'); } return; }
-      toast({reverify:'Re-verification queued for bounced addresses',export:'Deliverability list exported to CSV'}[a]||'Done'); });
+      var st=flaggedStats();
+      if(a==='viewsup'){ openSuppression(); return; }
+      if(a==='suppress'){ if(window.commsConfirm){ window.commsConfirm({title:'Suppress '+fmtNum(st.bad)+' bad addresses?',body:'The '+fmtNum(st.bounced)+' hard-bounced and '+fmtNum(st.complaints)+' complained addresses across these '+st.msgs+' flagged sends will be added to the diocese DNC list so future sends skip them automatically.',ok:'Suppress '+fmtNum(st.bad)+' addresses',danger:true}, function(){ toast(fmtNum(st.bad)+' addresses suppressed · added to DNC list'); }); } else { toast('Bad addresses suppressed · added to DNC list'); } return; }
+      if(a==='reverify'){ saProcess({
+        title:'Re-verifying flagged addresses',
+        sub:'Running a fresh SMTP + MX check on the '+fmtNum(st.bad)+' addresses that bounced or complained across '+st.msgs+' sends. Ones that pass stay on your lists; the rest are moved to DNC.',
+        count:st.bad,
+        progress:function(n,t){ return 'Verified '+fmtNum(n)+' of '+fmtNum(t)+' addresses…'; },
+        result:function(s){ var ok=Math.round(s.bad*0.36), bad=s.bad-ok; return {line:'<span style="color:#166534">✓ '+fmtNum(ok)+' now valid — restored to lists.</span><br><span style="color:#B91C1C">'+fmtNum(bad)+' still undeliverable — moved to DNC.</span>', after:function(){ toast('Re-verify complete · '+fmtNum(ok)+' restored, '+fmtNum(bad)+' to DNC'); }};
+        }
+      }); return; }
+      if(a==='export'){
+        var rows=filtered();
+        var head=['Message','Campaign','Sent','Recipients','Delivered','Bounced','Complaints','DNC','Bounce rate'];
+        var csv=[head.join(',')];
+        rows.forEach(function(m){ var f=function(v){ v=(''+(v==null?'':v)).replace(/"/g,'""'); return /[",\n]/.test(v)?'"'+v+'"':v; };
+          var dt=(m.date&&m.date.toLocaleDateString)?m.date.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}):'';
+          csv.push([f(m.subject||m.name||m.title||('Message '+m.id)), f(m.campaign||''), f(dt), m.recipients||0, m.delivered||0, m.bounced||0, m.complaints||0, m.dnc||0, ((m.bounceRate||0)*100).toFixed(1)+'%'].join(',')); });
+        var blob=new Blob([csv.join('\n')],{type:'text/csv'}); var url=URL.createObjectURL(blob);
+        var lnk=document.createElement('a'); lnk.href=url; lnk.download='deliverability-worklist-'+(new Date().toISOString().slice(0,10))+'.csv';
+        document.body.appendChild(lnk); lnk.click(); document.body.removeChild(lnk); setTimeout(function(){ URL.revokeObjectURL(url); },1500);
+        toast('Exported '+st.msgs+' messages · '+fmtNum(st.bad)+' flagged addresses → CSV'); return;
+      }
+      toast('Done'); });
 
     // ── Modal overlay (message detail + recipient list) ──
     var ov=document.createElement('div'); ov.id='sa-ov';
@@ -2008,6 +2071,90 @@ body {
       draw();
       ov.classList.add('show');
     }
+
+    // ── Suppression (Do-Not-Contact) list: who is suppressed, why, and un-suppress ──
+    var SUP_REASONS={
+      hard:     {label:'Hard bounce',    why:'Mail server rejected it permanently — the mailbox does not exist.',        c:'#FEE2E2|#B91C1C', risky:false},
+      complaint:{label:'Spam complaint', why:'Recipient marked a previous email as spam.',                                c:'#FEF3C7|#B45309', risky:true},
+      unsub:    {label:'Unsubscribed',   why:'Recipient opted out through the unsubscribe link.',                        c:'#EDE9FE|#7C3AED', risky:true},
+      manual:   {label:'Manually added', why:'A staff member added this address to the Do-Not-Contact list.',           c:'#DBEAFE|#1D4ED8', risky:false},
+      invalid:  {label:'Invalid address',why:'Address is malformed or failed format validation.',                       c:'#F1F5F9|#475569', risky:false}
+    };
+    var SUP_ORDER=['hard','complaint','unsub','manual','invalid'];
+    function supRemovedSet(){ try{ return JSON.parse(localStorage.getItem('atlas_unsuppressed')||'[]'); }catch(_){ return []; } }
+    function supSaveRemoved(arr){ try{ localStorage.setItem('atlas_unsuppressed', JSON.stringify(arr)); }catch(_){} }
+    var SUPPRESSED=(function(){
+      var out=[], removed=supRemovedSet(), N=142;
+      for(var i=0;i<N;i++){
+        var f=FIRST[Math.floor(rand(i*2.7+1.3)*FIRST.length)], l=LAST[Math.floor(rand(i*3.9+2.1)*LAST.length)];
+        var e=(f+'.'+l).toLowerCase().replace(/[^a-z.]/g,'')+['@gmail.com','@yahoo.com','@outlook.com','@icloud.com','@diocese.org','@aol.com'][Math.floor(rand(i*4.4)*6)];
+        var rr=rand(i*5.5); var rk = rr>0.62?'hard': rr>0.40?'unsub': rr>0.24?'complaint': rr>0.10?'manual':'invalid';
+        var days=Math.floor(rand(i*6.6)*400);
+        out.push({ id:i, name:f+' '+l, email:e, reason:rk, days:days, source:CAMPAIGNS[Math.floor(rand(i*7.7)*CAMPAIGNS.length)] });
+      }
+      return out.filter(function(x){ return removed.indexOf(x.email)===-1; });
+    })();
+    function supDateLabel(days){ var d=new Date(NOW.getTime()-days*86400000); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+    function openSuppression(){
+      var q='', rfilter='', page=1, size=12;
+      ov.querySelector('h3').textContent='Suppression list';
+      var bd=ov.querySelector('.bd'), ft=ov.querySelector('.ft');
+      function counts(){ var c={}; SUP_ORDER.forEach(function(k){c[k]=0;}); SUPPRESSED.forEach(function(x){ c[x.reason]++; }); return c; }
+      function draw(){
+        ov.querySelector('.hd p').textContent=fmtNum(SUPPRESSED.length)+' addresses on the diocese Do-Not-Contact list · future sends skip them automatically';
+        var cc=counts();
+        var chips='<button class="sup-chip'+(rfilter===''?' on':'')+'" data-r="">All <b>'+fmtNum(SUPPRESSED.length)+'</b></button>'+
+          SUP_ORDER.map(function(k){ return '<button class="sup-chip'+(rfilter===k?' on':'')+'" data-r="'+k+'">'+SUP_REASONS[k].label+' <b>'+fmtNum(cc[k])+'</b></button>'; }).join('');
+        var f=SUPPRESSED.filter(function(x){ return (!rfilter||x.reason===rfilter) && (!q||(x.name+' '+x.email).toLowerCase().indexOf(q)!==-1); });
+        var maxPage=Math.max(1,Math.ceil(f.length/size)); if(page>maxPage)page=maxPage;
+        var start=(page-1)*size, rows=f.slice(start,start+size);
+        bd.innerHTML='<div class="rsearch"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="supq" placeholder="Search name or email…"></div>'+
+          '<div class="sup-chips">'+chips+'</div>'+
+          (rows.length? rows.map(function(x){ var R=SUP_REASONS[x.reason]; var col=R.c.split('|');
+            return '<div class="sup-row" data-id="'+x.id+'">'+
+              '<div style="min-width:0;flex:1"><div style="font:600 13px \'DM Sans\',sans-serif;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+x.name+'</div>'+
+              '<div style="font-size:11.5px;color:#94A3B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+x.email+'</div></div>'+
+              '<div style="min-width:150px"><span class="sup-pill" style="background:'+col[0]+';color:'+col[1]+'">'+R.label+'</span>'+(R.risky?'<span class="sup-lock" title="Restoring is a compliance risk">⚠</span>':'')+'<div style="font-size:11px;color:#94A3B8;margin-top:3px">'+supDateLabel(x.days)+' · '+x.source+'</div></div>'+
+              '<button class="sup-remove" data-id="'+x.id+'">Remove</button>'+
+            '</div>'; }).join('')
+            : '<div style="text-align:center;color:#94A3B8;padding:26px;font-size:13px">No suppressed addresses match.</div>')+
+          '<div class="rpager"><span>Showing '+(f.length?start+1:0)+'–'+Math.min(start+size,f.length)+' of <strong>'+fmtNum(f.length)+'</strong></span><span><button class="mbtn" id="supprev">‹ Prev</button> <button class="mbtn" id="supnext">Next ›</button></span></div>';
+        var qi=bd.querySelector('#supq'); qi.value=q;
+        qi.addEventListener('input', function(){ q=qi.value.toLowerCase().trim(); page=1; draw(); var n=bd.querySelector('#supq'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } });
+        bd.querySelectorAll('.sup-chip').forEach(function(c){ c.addEventListener('click', function(){ rfilter=c.dataset.r; page=1; draw(); }); });
+        bd.querySelector('#supprev').addEventListener('click', function(){ if(page>1){page--;draw();} });
+        bd.querySelector('#supnext').addEventListener('click', function(){ if(page<maxPage){page++;draw();} });
+        bd.querySelectorAll('.sup-remove').forEach(function(btn){ btn.addEventListener('click', function(ev){ ev.stopPropagation(); removeSup(+btn.dataset.id); }); });
+      }
+      function removeSup(id){
+        var x=SUPPRESSED.filter(function(r){ return r.id===id; })[0]; if(!x) return; var R=SUP_REASONS[x.reason];
+        var opts = R.risky
+          ? {title:'Restore '+x.name+'?', body:'<b>'+x.email+'</b> was suppressed because they '+(x.reason==='complaint'?'marked your email as spam':'unsubscribed')+'. Emailing them again without fresh, explicit consent risks a CAN-SPAM / CASL violation and can hurt your sender reputation. Only remove this if you have new documented consent.', ok:'Remove anyway', danger:true}
+          : {title:'Remove '+x.name+' from suppression?', body:'<b>'+x.email+'</b> was suppressed — '+R.why.charAt(0).toLowerCase()+R.why.slice(1)+' Removing it makes the address eligible to receive email again. Do this only if the suppression was a mistake.', ok:'Remove from suppression', danger:false};
+        function doRemove(){
+          var i=SUPPRESSED.indexOf(x); if(i!==-1) SUPPRESSED.splice(i,1);
+          var rem=supRemovedSet(); if(rem.indexOf(x.email)===-1){ rem.push(x.email); supSaveRemoved(rem); }
+          draw();
+          if(window.commsUndoToast){ window.commsUndoToast(x.name+' removed from suppression', function(){ SUPPRESSED.splice(Math.min(i,SUPPRESSED.length),0,x); var r2=supRemovedSet(); var j=r2.indexOf(x.email); if(j!==-1){ r2.splice(j,1); supSaveRemoved(r2); } draw(); }); }
+          else toast(x.name+' removed from suppression');
+        }
+        if(window.commsConfirm) window.commsConfirm(opts, doRemove); else doRemove();
+      }
+      ft.innerHTML='<button class="mbtn" data-a="supexport">Export list</button><button class="mbtn primary" data-a="done">Done</button>';
+      ft.querySelector('[data-a="done"]').addEventListener('click', closeOv);
+      ft.querySelector('[data-a="supexport"]').addEventListener('click', function(){
+        var head=['Name','Email','Reason','Suppressed on','Source'];
+        var esc=function(v){ v=(''+(v==null?'':v)).replace(/"/g,'""'); return /[",\n]/.test(v)?'"'+v+'"':v; };
+        var lines=[head.join(',')].concat(SUPPRESSED.map(function(x){ return [esc(x.name),esc(x.email),esc(SUP_REASONS[x.reason].label),esc(supDateLabel(x.days)),esc(x.source)].join(','); }));
+        var blob=new Blob([lines.join('\n')],{type:'text/csv'}); var url=URL.createObjectURL(blob);
+        var lnk=document.createElement('a'); lnk.href=url; lnk.download='suppression-list-'+(new Date().toISOString().slice(0,10))+'.csv'; document.body.appendChild(lnk); lnk.click(); document.body.removeChild(lnk); setTimeout(function(){ URL.revokeObjectURL(url); },1500);
+        toast('Suppression list exported · '+fmtNum(SUPPRESSED.length)+' addresses → CSV');
+      });
+      draw();
+      ov.classList.add('show');
+    }
+    window.__openSuppression=openSuppression;
+
     // Full-detail resend modal — review, permission, or open the whole Create Email flow
     function commsResend(m, mode){
       var esc=function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };

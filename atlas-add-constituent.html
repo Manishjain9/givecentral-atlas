@@ -303,6 +303,11 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
 
 .section-h { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); margin:24px 0 12px; padding-top:18px; border-top:1px solid var(--border); }
+.autofill-btn { float:right; margin-top:-2px; font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; letter-spacing:0; text-transform:none; color:var(--blue,#2563EB); background:var(--blue-pale,#EFF6FF); border:1px solid #DBEAFE; border-radius:7px; padding:3px 9px; cursor:pointer; }
+.autofill-btn:hover { background:#DBEAFE; }
+.addr-help { font-size:11.5px; color:var(--text-3); margin:-4px 0 12px; line-height:1.45; }
+.addr-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.addr-col-h { font-size:11px; font-weight:600; color:var(--text-2); margin-bottom:8px; }
 .section-h:first-of-type { padding-top:0; border-top:none; margin-top:0; }
 
 /* Type cards */
@@ -953,6 +958,21 @@ body {
             <div><span class="lbl">Salutation in letters</span><input class="fld" value="Catherine"></div>
           </div>
 
+          <div class="section-h">Addressee &amp; salutation <button type="button" class="autofill-btn" id="ind-autofill">↻ Auto-generate</button></div>
+          <p class="addr-help">How this person is addressed on mailings and receipts. Auto-built from name + prefix — edit any field to override.</p>
+          <div class="addr-grid">
+            <div class="addr-col">
+              <div class="addr-col-h">Addressee</div>
+              <div><span class="lbl">Formal</span><input class="fld" id="ind-addr-formal" value="Ms. Catherine Romano"></div>
+              <div class="mt-8"><span class="lbl">Informal</span><input class="fld" id="ind-addr-informal" value="Catherine Romano"></div>
+            </div>
+            <div class="addr-col">
+              <div class="addr-col-h">Salutation</div>
+              <div><span class="lbl">Formal</span><input class="fld" id="ind-sal-formal" value="Ms. Romano"></div>
+              <div class="mt-8"><span class="lbl">Informal</span><input class="fld" id="ind-sal-informal" value="Catherine"></div>
+            </div>
+          </div>
+
           <div class="section-h">Personal</div>
           <div class="row3">
             <div><span class="lbl">Date of birth</span><input class="fld" type="date"></div>
@@ -1048,12 +1068,29 @@ body {
             Add another household member
           </div>
 
-          <div class="section-h">Mailing &amp; envelope preferences</div>
-          <div class="row2">
+          <div class="section-h">Addressee &amp; salutation <button type="button" class="autofill-btn" id="hh-autofill">↻ Auto-generate</button></div>
+          <p class="addr-help">Joint forms used on envelopes, letters, and receipts. Auto-built from the two members — edit any field to override.</p>
+          <div class="addr-grid">
+            <div class="addr-col">
+              <div class="addr-col-h">Joint addressee</div>
+              <div><span class="lbl">Formal</span><input class="fld" id="hh-addr-formal" value="Mr. and Mrs. Thomas Sullivan"></div>
+              <div class="mt-8"><span class="lbl">Informal</span><input class="fld" id="hh-addr-informal" value="Thomas and Margaret Sullivan"></div>
+            </div>
+            <div class="addr-col">
+              <div class="addr-col-h">Joint salutation</div>
+              <div><span class="lbl">Formal</span><input class="fld" id="hh-sal-formal" value="Mr. &amp; Mrs. Sullivan"></div>
+              <div class="mt-8"><span class="lbl">Informal</span><input class="fld" id="hh-sal-informal" value="Thomas and Margaret"></div>
+            </div>
+          </div>
+          <div class="row2 mt-12" style="margin-top:14px">
             <div>
               <span class="lbl">Envelope addressee</span>
-              <input class="fld" value="Mr. &amp; Mrs. Thomas Sullivan">
-              <div class="muted" style="font-size:11px;margin-top:4px">Formal — appears on outer envelope</div>
+              <select class="fld" id="hh-envelope">
+                <option selected>Joint formal — Mr. and Mrs. Thomas Sullivan</option>
+                <option>Joint informal — Thomas and Margaret Sullivan</option>
+                <option>Household label — The Sullivan Family</option>
+              </select>
+              <div class="muted" style="font-size:11px;margin-top:4px">Which form prints on the outer envelope.</div>
             </div>
             <div>
               <span class="lbl">Receipt addressee</span>
@@ -2013,6 +2050,38 @@ body {
       if (last) last.querySelector('input').focus();
     });
     renderMembers();
+
+    // ── Auto-generate addressee & salutation ──
+    function setVal(id, v){ var e = document.getElementById(id); if (e) e.value = v; }
+    // Individual
+    var indAuto = document.getElementById('ind-autofill');
+    if (indAuto) indAuto.addEventListener('click', function(){
+      var prefixSel = document.querySelector('[data-tf="Individual"] select.fld');
+      var prefix = prefixSel && prefixSel.value !== '—' ? prefixSel.value : '';
+      var first = (document.getElementById('ind-first')||{}).value || '';
+      var last  = (document.getElementById('ind-last')||{}).value || '';
+      setVal('ind-addr-formal',   (prefix ? prefix + ' ' : '') + (first + ' ' + last).trim());
+      setVal('ind-addr-informal', (first + ' ' + last).trim());
+      setVal('ind-sal-formal',    (prefix ? prefix + ' ' : '') + last);
+      setVal('ind-sal-informal',  first);
+    });
+    // Household
+    var hhAuto = document.getElementById('hh-autofill');
+    if (hhAuto) hhAuto.addEventListener('click', function(){
+      var ms = (typeof HH_MEMBERS !== 'undefined') ? HH_MEMBERS : [];
+      var a = ms[0] || {}, b = ms[1] || {};
+      var last = a.last || b.last || 'Household';
+      var pa = /female|ms|mrs/i.test(a.rel||'') ? 'Mrs.' : 'Mr.';
+      // simplest reliable joint forms
+      var jointFormal   = 'Mr. and Mrs. ' + (a.first || '') + ' ' + last;
+      var jointInformal = (a.first||'') + ' and ' + (b.first||'') + ' ' + last;
+      setVal('hh-addr-formal',   jointFormal.replace(/\s+/g,' ').trim());
+      setVal('hh-addr-informal', jointInformal.replace(/\s+/g,' ').trim());
+      setVal('hh-sal-formal',    'Mr. & Mrs. ' + last);
+      setVal('hh-sal-informal',  (a.first||'') + ' and ' + (b.first||''));
+      var env = document.getElementById('hh-envelope');
+      if (env && env.options[0]) env.options[0].text = 'Joint formal — ' + jointFormal.replace(/\s+/g,' ').trim();
+    });
 
     // ════════════════════════════════════════════════════════
     // ORG: AUTHORIZED CONTACTS list

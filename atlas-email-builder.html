@@ -314,7 +314,7 @@
       socialshare:{nets:['f','X','in'],urls:defaultUrls(['f','X','in'])},
       socialfollow:{nets:['f','in','ig','X'],urls:defaultUrls(['f','in','ig','X'])},
       button:{label:'Donate now',url:'https://give.diocese.org',align:'center',color:'#2563EB'},
-      footer:{html:"St. Mary's Cathedral · 125 Eagle St, Albany, NY 12202<br>Copyright © 2026 · All rights reserved.<br><a href='#'>Update preferences</a> · <a href='#'>Unsubscribe</a>"},
+      footer:{html:"St. Mary's Cathedral · 125 Eagle St, Albany, NY 12202<br>Copyright © 2026 · All rights reserved.<br><a href='{{unsubscribe_url}}'>Update preferences</a> · <a href='{{unsubscribe_url}}'>Unsubscribe</a>"},
       video:{title:'Watch: the bell tower restoration'},
       code:{code:'<!-- Custom HTML -->\\n<p style="color:#2563EB">Hello {{first_name}}</p>'}
     };
@@ -405,7 +405,7 @@
   function flashSaved(){ var s=document.getElementById('eb-saved'); if(!s) return; s.textContent='Saving…'; s.style.color='var(--text-3)'; clearTimeout(s._t); s._t=setTimeout(function(){ s.textContent='✓ Auto-saved'; s.style.color='var(--green)'; },500); }
   function sync(){ flashSaved(); if(EMBED && window.parent!==window){ try{ window.parent.postMessage({type:'eb-html', html:serializeEmail()}, '*'); }catch(_){} } }
   // ── Preview (Desktop / Tablet / Mobile / Dark · sample data) ──
-  var SAMPLE={first_name:'Margaret',last_name:"O'Brien",org_name:'Diocese of Albany',parish_name:"St. Mary's Cathedral",donation_amount:'$10,000',event_name:"Bishop's Annual Gala"};
+  var SAMPLE={first_name:'Margaret',last_name:"O'Brien",salutation:"Mrs. O'Brien",org_name:'Diocese of Albany',parish_name:"St. Mary's Cathedral",fund_name:'Cathedral Restoration',donation_amount:'$10,000',last_gift_date:'March 12, 2026',donor_since:'2011',giving_this_year:'$12,500',pledge_balance:'$40,000',event_name:"Bishop's Annual Gala",unsubscribe_url:'https://give.diocese.org/u/abc123'};
   function resolveMerge(html){ return String(html||'').replace(/\{\{?\s*([a-z_]+)\s*\}?\}/gi,function(m,k){ return SAMPLE[k]!=null?('<span style="background:#EFF6FF;color:#2563EB;border-radius:3px;padding:0 2px">'+SAMPLE[k]+'</span>'):m; }); }
   var pvMode='desktop';
   window.ebPreview=function(){
@@ -451,16 +451,17 @@
   // ── Design tab ──
   var DESIGN={width:640,btn:'#2563EB',link:'#2563EB',bg:'#FFFFFF',page:'#F8FAFC',btnStyle:'8px',compliance:'general'};
   var COMPLIANCE={
-    general:{lb:'General email · no receipt', reqs:[], line:''},
-    receipt:{lb:'Tax receipt · IRS Pub 1771', reqs:[['States the tax-deductible amount', /tax.?deduct|deductible/i],['“No goods or services” statement', /no goods or services/i],['Org name & EIN / Pub 1771 reference', /EIN|Pub\s*1771/i]], line:'This letter is your official receipt. {{org_name}} (EIN 14-0000000) is a tax-exempt organization; your gift of {{donation_amount}} is tax-deductible to the extent allowed by law. No goods or services were provided in exchange (IRS Pub 1771).'},
-    notax:{lb:'Acknowledgement · no tax (DAF, stock, soft-credit)', reqs:[['States no additional tax receipt is issued', /no (additional )?tax (receipt|document)|already issued|acknowledgement only/i]], line:'This is an acknowledgement only — no additional tax receipt will be issued for this gift (e.g. donor-advised fund, stock, or soft-credit gifts are receipted by the sponsoring institution).'}
+    general:{lb:'General email · no receipt', desc:'A normal appeal, newsletter, event invite, or update. No tax-receipt language required — just the CAN-SPAM footer (mailing address + unsubscribe).', reqs:[], line:''},
+    receipt:{lb:'Tax receipt · IRS Pub 1771', desc:'The donor’s official IRS receipt for a completed cash gift. Must state the tax-deductible amount, confirm no goods/services were exchanged, and include your org name & EIN (Pub 1771).', reqs:[['States the tax-deductible amount', /tax.?deduct|deductible/i],['“No goods or services” statement', /no goods or services/i],['Org name & EIN / Pub 1771 reference', /EIN|Pub\s*1771/i]], line:'This letter is your official receipt. {{org_name}} (EIN 14-0000000) is a tax-exempt organization; your gift of {{donation_amount}} is tax-deductible to the extent allowed by law. No goods or services were provided in exchange (IRS Pub 1771).'},
+    notax:{lb:'Acknowledgement · no tax (DAF, stock, soft-credit)', desc:'A thank-you for a gift whose tax receipt is issued elsewhere — donor-advised funds, stock/securities, or soft-credited gifts. Must say no additional receipt will follow.', reqs:[['States no additional tax receipt is issued', /no (additional )?tax (receipt|document)|already issued|acknowledgement only/i]], line:'This is an acknowledgement only — no additional tax receipt will be issued for this gift (e.g. donor-advised fund, stock, or soft-credit gifts are receipted by the sponsoring institution).'}
   };
   function complianceNote(){
     var mode=DESIGN.compliance||'general', spec=COMPLIANCE[mode];
-    if(!spec || !spec.reqs.length) return '<p style="font-size:11.5px;color:#94A3B8;margin-top:8px">No special receipting requirements for a general email.</p>';
+    var desc='<div style="font-size:12px;color:#475569;line-height:1.5;margin-top:8px">'+(spec.desc||'')+'</div>';
+    if(!spec || !spec.reqs.length) return desc;
     var txt=''; try{ txt=serializeEmail(); }catch(_){ txt=($('canvas')||{}).textContent||''; }
     var rows=spec.reqs.map(function(r){ var ok=r[1].test(txt); return '<div style="display:flex;gap:8px;align-items:flex-start;font-size:12px;margin-top:6px"><span style="color:'+(ok?'#15803D':'#B45309')+';font-weight:700;line-height:1.3">'+(ok?'✓':'!')+'</span><span style="color:'+(ok?'#334155':'#92400E')+'">'+r[0]+(ok?'':' — not detected yet')+'</span></div>'; }).join('');
-    return '<div style="margin-top:8px;padding:11px 13px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:9px">'+
+    return desc+'<div style="margin-top:8px;padding:11px 13px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:9px">'+
       '<div style="font-size:11px;color:#92400E;font-weight:700;letter-spacing:.03em;text-transform:uppercase;margin-bottom:2px">Required for this type</div>'+rows+
       '<button class="btn" id="dsg-cmp-insert" style="margin-top:11px;width:100%;justify-content:center">Insert required '+(mode==='receipt'?'receipt':'acknowledgement')+' line</button></div>';
   }
@@ -505,7 +506,7 @@
     var name={text:'Text',boxed:'Boxed text',divider:'Divider',spacer:'Spacer',image:'Image',imagegroup:'Image group',imagecard:'Image card',imagecaption:'Image + caption',socialshare:'Social share',socialfollow:'Social follow',button:'Button',footer:'Footer',video:'Video',code:'Code'}[b.type]||b.type;
     var body='';
     function alignRow(){ return '<label class="set-fl">Alignment</label><div class="align-tog" data-set="align">'+['left','center','right'].map(function(a){return '<button data-v="'+a+'" class="'+(d.align===a?'on':'')+'">'+({left:'⟸',center:'≡',right:'⟹'})[a]+'</button>';}).join('')+'</div>'; }
-    var MERGE=[['First name','first_name'],['Last name','last_name'],['Organisation','org_name'],['Donation amount','donation_amount'],['Event name','event_name'],['Parish','parish_name']];
+    var MERGE=[['First name','first_name'],['Last name','last_name'],['Salutation','salutation'],['Organisation','org_name'],['Parish','parish_name'],['Fund name','fund_name'],['Donation amount','donation_amount'],['Last gift date','last_gift_date'],['Donor since','donor_since'],['Giving this year','giving_this_year'],['Pledge balance','pledge_balance'],['Event name','event_name'],['Unsubscribe URL','unsubscribe_url']];
     function mergeRow(){ return '<label class="set-fl">Personalization — insert merge tag</label><div class="mergechips">'+MERGE.map(function(m){return '<button type="button" class="mchip" data-tag="'+m[1]+'">'+m[0]+'</button>';}).join('')+'</div><p style="font-size:11px;color:#94A3B8;margin-top:6px">Tags resolve per recipient at send. Preview with sample data.</p>'; }
     if(b.type==='spacer'){
       body='<label class="set-fl">Height: <span id="sp-h">'+d.h+'</span> px</label><input class="set-fld" type="range" min="8" max="120" step="4" value="'+d.h+'" data-set="h" style="padding:0">';
@@ -564,7 +565,15 @@
     renderAll(); selectBlock(b.id); toast(PAL.filter(function(p){return p.t===type;})[0].n+' added');
   }
   function dupBlock(id){ var f=findBlock(id); if(!f) return; var copy=JSON.parse(JSON.stringify(f.b)); copy.id='b'+(Math.random().toString(36).slice(2,8)); MODEL[f.sec].splice(f.idx+1,0,copy); renderAll(); selectBlock(copy.id); toast('Block duplicated'); }
-  function delBlock(id){ var f=findBlock(id); if(!f) return; MODEL[f.sec].splice(f.idx,1); renderAll(); toast('Block deleted'); }
+  function delBlock(id){ var f=findBlock(id); if(!f) return;
+    if(f.b.type==='footer'){ var footers=(MODEL.footer||[]).filter(function(b){return b.type==='footer';}); if(footers.length<=1){ toast('The footer with the unsubscribe link is required by law (CAN-SPAM) and can’t be removed.'); return; } }
+    MODEL[f.sec].splice(f.idx,1); renderAll(); toast('Block deleted'); }
+  // Guarantee the footer always carries an unsubscribe link
+  function ensureUnsubscribe(){
+    var hasFooter=(MODEL.footer||[]).some(function(b){return b.type==='footer';});
+    if(!hasFooter){ MODEL.footer.push(makeBlock('footer')); }
+    (MODEL.footer||[]).forEach(function(b){ if(b.type==='footer' && !/unsubscribe/i.test(b.data.html||'')){ b.data.html=(b.data.html||'')+"<br><a href='{{unsubscribe_url}}'>Unsubscribe</a>"; } });
+  }
   function moveBlock(id,dir){ var f=findBlock(id); if(!f) return; var arr=MODEL[f.sec]; var ni=f.idx+dir; if(ni<0||ni>=arr.length) return; var tmp=arr[ni]; arr[ni]=arr[f.idx]; arr[f.idx]=tmp; renderAll(); selectBlock(id); }
   function selectBlock(id){ selId=id; document.querySelectorAll('.bk.sel').forEach(function(x){x.classList.remove('sel');}); var el=document.querySelector('.bk[data-id="'+id+'"]'); if(el) el.classList.add('sel'); showSettings(id); }
 
@@ -771,7 +780,7 @@
   // Resumed from a draft (Communications → Drafts → Resume editing)
   (function(){ var P=new URLSearchParams(location.search); var draft=P.get('draft'); if(draft && !EMBED){ var dn=P.get('name')||'Draft'; var t=$('eb-title'); if(t) t.textContent='Resume draft'; var nm=$('eb-tplname'); if(nm){ nm.style.display=''; nm.value=dn; } setTimeout(function(){ if(window.toast) toast('Resumed draft · “'+dn+'”'); }, 400); } })();
 
-  renderPalette(); renderAll(); applyDesign();
+  ensureUnsubscribe(); renderPalette(); renderAll(); applyDesign();
   document.addEventListener('click', function(e){ if(!e.target.closest('.canvas') && !e.target.closest('.panel')) { /* keep selection */ } });
 })();
 </script>

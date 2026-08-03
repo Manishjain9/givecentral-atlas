@@ -328,6 +328,16 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .donor-result .meta { font-size:11.5px; color:var(--text-3); margin-top:3px; display:flex; gap:10px; }
 .donor-result .right { margin-left:auto; text-align:right; font-size:11.5px; color:var(--text-3); }
 .donor-result .right b { display:block; font-size:13px; color:var(--text); font-weight:600; }
+.dp-results { display:none; position:absolute; top:100%; left:0; right:0; margin-top:4px; background:#fff; border:1px solid var(--border); border-radius:11px; box-shadow:0 12px 32px rgba(15,23,42,.14); z-index:60; max-height:288px; overflow-y:auto; padding:5px; }
+.dp-results.on { display:block; }
+.dp-row { display:flex; align-items:center; gap:11px; padding:9px 11px; border-radius:9px; cursor:pointer; }
+.dp-row:hover, .dp-row.active { background:var(--blue-pale); }
+.dp-row .av { width:32px; height:32px; border-radius:50%; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:11px; flex-shrink:0; }
+.dp-row .nm { font-weight:600; color:var(--navy); font-size:13px; }
+.dp-row .meta { font-size:11px; color:var(--text-3); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dp-row .right { margin-left:auto; text-align:right; font-size:11px; color:var(--text-3); flex-shrink:0; }
+.dp-row .right b { display:block; font-size:12px; color:var(--text); }
+.dp-row .mid { min-width:0; flex:1; }
 
 /* LAI scorer */
 .lai-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
@@ -350,6 +360,33 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .lai-card .grade.on.C { background:var(--amber); border-color:var(--amber); color:white; }
 .lai-card .grade.on.D { background:#F97316; border-color:#F97316; color:white; }
 .lai-card .grade.on.F { background:var(--rose); border-color:var(--rose); color:white; }
+.lai-legend { margin-top:16px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+.lai-legend .lg-h { font-size:12.5px; font-weight:600; color:var(--navy); margin-bottom:10px; }
+.lai-legend .lg-note { font-weight:400; color:var(--text-3); font-size:11px; }
+.lai-legend .lg-row { display:flex; align-items:flex-start; gap:10px; padding:5px 0; }
+.lai-legend .lg-k { width:22px; height:22px; border-radius:6px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:white; font-family:'DM Mono',monospace; }
+.lai-legend .lg-k.A { background:var(--green); }
+.lai-legend .lg-k.B { background:#22C55E; }
+.lai-legend .lg-k.C { background:var(--amber); }
+.lai-legend .lg-k.D { background:#F97316; }
+.lai-legend .lg-k.F { background:var(--rose); }
+.lai-legend .lg-v { font-size:11.5px; color:var(--text-2); line-height:1.5; padding-top:2px; }
+.lai-legend .lg-v b { color:var(--navy); }
+.lai-legend .lg-ceiling { margin-top:10px; padding-top:10px; border-top:1px dashed var(--border); font-size:11.5px; color:var(--text-2); line-height:1.55; }
+.lai-legend .lg-ceiling b { color:var(--navy); }
+.help-dot { display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; border-radius:50%; background:var(--border); color:var(--text-3); font-size:9px; font-weight:700; cursor:help; vertical-align:middle; margin-left:3px; }
+.field-help { font-size:10.5px; color:var(--text-3); margin-top:5px; line-height:1.4; }
+/* generic prospect modal */
+#pp-modal-ov { position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:100050; display:none; align-items:center; justify-content:center; padding:20px; font-family:'DM Sans',sans-serif; }
+#pp-modal-ov.on { display:flex; }
+#pp-modal-ov .m-card { background:white; border-radius:16px; width:100%; max-width:420px; box-shadow:0 24px 64px rgba(15,23,42,.28); overflow:hidden; }
+#pp-modal-ov .m-hd { padding:18px 20px 6px; }
+#pp-modal-ov .m-hd h3 { font-family:'DM Serif Display',serif; font-size:20px; color:var(--navy); margin:0; }
+#pp-modal-ov .m-hd p { font-size:12px; color:var(--text-3); margin:5px 0 0; }
+#pp-modal-ov .m-bd { padding:14px 20px; }
+#pp-modal-ov .m-bd .lbl { display:block; font-size:11px; font-weight:600; color:var(--text-2); margin-bottom:5px; }
+#pp-modal-ov .m-bd .fld { width:100%; }
+#pp-modal-ov .m-ft { padding:12px 20px 18px; display:flex; gap:10px; justify-content:flex-end; }
 
 .ask-band { background:linear-gradient(135deg, var(--gold-light), white); border:1px solid #F1D78F; border-radius:11px; padding:16px 18px; margin-top:14px; }
 .ask-band .lbl { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
@@ -781,9 +818,12 @@ body {
 
         <div class="section-h">Pick the donor</div>
         <span class="lbl">Search by name, email or phone</span>
-        <input class="fld" value="Margaret O'Brien" style="margin-bottom:10px">
+        <div style="position:relative;margin-bottom:10px">
+          <input class="fld" id="dp-search" placeholder="Start typing a name, email or phone…" autocomplete="off" value="Margaret O'Brien">
+          <div id="dp-results" class="dp-results"></div>
+        </div>
 
-        <div class="donor-result">
+        <div class="donor-result" id="dp-selected">
           <div class="av">M</div>
           <div style="flex:1">
             <div class="nm">Margaret O'Brien</div>
@@ -799,6 +839,9 @@ body {
             <b>$84,250 lifetime</b>
             Last gift Apr 2 · $10k
           </div>
+        </div>
+        <div id="dp-empty" style="display:none;border:1px dashed var(--border);border-radius:12px;padding:16px;text-align:center;color:var(--text-3);font-size:12.5px">
+          No donor matches “<span id="dp-empty-q"></span>”. <a href="atlas-add-constituent.html" style="color:var(--blue);font-weight:600">Add a brand-new constituent →</a>
         </div>
 
         <div class="section-h">Why is this person on your radar?</div>
@@ -871,6 +914,16 @@ body {
 
         </div>
 
+        <div class="lai-legend">
+          <div class="lg-h">What the grades mean <span class="lg-note">— click a letter in any card to re-grade</span></div>
+          <div class="lg-row"><span class="lg-k A">A</span><span class="lg-v"><b>Excellent</b> — strong, verified, top tier (e.g. board-level linkage · $10k+ capacity · active enthusiasm)</span></div>
+          <div class="lg-row"><span class="lg-k B">B</span><span class="lg-v"><b>Good</b> — solid signal, some verification (known relationship · $1k–$10k capacity · past giving)</span></div>
+          <div class="lg-row"><span class="lg-k C">C</span><span class="lg-v"><b>Moderate</b> — plausible but unproven; needs qualification before investing officer time</span></div>
+          <div class="lg-row"><span class="lg-k D">D</span><span class="lg-v"><b>Weak</b> — thin evidence; keep in identification, don't assign an officer yet</span></div>
+          <div class="lg-row"><span class="lg-k F">F</span><span class="lg-v"><b>None</b> — no linkage / capacity / interest found; do not advance</span></div>
+          <div class="lg-ceiling"><b>Ceiling rule:</b> the prospect's overall priority is capped by their <em>lowest</em> of the three grades — here <b>B</b> (Linkage). Raise the weakest axis to raise the ceiling.</div>
+        </div>
+
         <div class="section-h">Suggested ask range — Wealth Engine v1</div>
         <div class="ask-band">
           <div class="lbl">Recommended ask</div>
@@ -881,7 +934,7 @@ body {
         <div class="row2 mt-12" style="margin-top:14px">
           <div>
             <span class="lbl">Officer-pinned ask amount (optional)</span>
-            <input class="fld" placeholder="Override Wealth Engine">
+            <input class="fld" id="ask-pin" placeholder="Override Wealth Engine">
           </div>
           <div>
             <span class="lbl">Project / fund of interest</span>
@@ -911,13 +964,17 @@ body {
 
         <div class="section-h">Initial pipeline stage</div>
         <div class="stage-pick">
-          <div class="pill id"><span class="dot"></span>Identification</div>
-          <div class="pill qual on cult"><span class="dot"></span>Qualification</div>
-          <div class="pill cult"><span class="dot"></span>Cultivation</div>
-          <div class="pill solicit"><span class="dot"></span>Solicitation</div>
-          <div class="pill steward"><span class="dot"></span>Stewardship</div>
+          <div class="pill id on" data-stage="Identification" data-hint="<b>Identification</b> — the default entry point. Confirm the prospect has real capacity <em>and</em> affinity before an officer invests time. Best for cold or newly-screened names."><span class="dot"></span>Identification</div>
+          <div class="pill qual" data-stage="Qualification" data-hint="<b>Qualification</b> — a discovery call verifies interest and giving vehicle. Use when linkage is already strong (e.g. an existing donor like Margaret) so you can skip Identification."><span class="dot"></span>Qualification</div>
+          <div class="pill cult" data-stage="Cultivation" data-hint="<b>Cultivation</b> — build the relationship toward a specific ask (visits, tours, engagement). Enter here only if the prospect is already qualified and warm."><span class="dot"></span>Cultivation</div>
+          <div class="pill solicit" data-stage="Solicitation" data-hint="<b>Solicitation</b> — the ask is imminent or in progress. Enter here only for prospects with an active proposal on the table."><span class="dot"></span>Solicitation</div>
+          <div class="pill steward" data-stage="Stewardship" data-hint="<b>Stewardship</b> — the gift is closed; focus is thanking, reporting impact, and setting up the next ask. Enter here for recent closed-won donors."><span class="dot"></span>Stewardship</div>
         </div>
-        <p class="muted" style="font-size:11.5px;margin-top:8px">Margaret is an existing donor with strong linkage — start at <strong>Qualification</strong> (skip Identification). A discovery call confirms interest within 14 days.</p>
+        <p class="muted" id="stage-hint" style="font-size:11.5px;margin-top:8px"><b>Identification</b> — the default entry point. Confirm the prospect has real capacity <em>and</em> affinity before an officer invests time. Best for cold or newly-screened names.</p>
+        <div class="sol-suggestion" style="margin-top:10px">
+          <div class="ico">G</div>
+          <div class="body"><b>Guru AI suggests:</b> Margaret is an existing donor with strong linkage — you can safely start at <strong>Qualification</strong> and skip Identification. <a class="accept" data-jump="Qualification">Use Qualification →</a></div>
+        </div>
 
         <div class="section-h">Assign solicitor</div>
         <div class="row2">
@@ -945,7 +1002,7 @@ body {
           <div class="ico">G</div>
           <div class="body">
             <b>Guru AI suggests:</b> Sarah is your best match — 81% conversion rate on $10k+ Cathedral prospects, average cycle time 71 days, currently at 18 of 130 portfolio slots. Geography match (Albany).
-            <a class="accept">Already accepted →</a>
+            <a class="accept" id="accept-solicitor">Accept Sarah as solicitor →</a>
           </div>
         </div>
 
@@ -976,22 +1033,24 @@ body {
         <div class="row2 mt-12" style="margin-top:12px">
           <div>
             <span class="lbl">Target close date</span>
-            <select class="fld">
+            <select class="fld" id="target-close">
               <option>Within 30 days (urgent)</option>
               <option>Q3 2026</option>
               <option selected>Q4 2026</option>
               <option>2027</option>
               <option>Multi-year capital pledge</option>
+              <option value="__custom">Custom date…</option>
             </select>
           </div>
           <div>
-            <span class="lbl">Cultivation theme</span>
+            <span class="lbl">Cultivation theme <span class="help-dot" title="The messaging angle your officer leads with while building the relationship — it shapes talking points, the meeting brief, and which impact stories to share.">?</span></span>
             <select class="fld">
               <option selected>Capital · matched 1:1 framing</option>
               <option>Legacy / planned-giving</option>
               <option>Programmatic impact</option>
               <option>Recognition / naming</option>
             </select>
+            <p class="field-help">The angle the officer leads with (e.g. the 1:1 match) — drives talking points &amp; the meeting brief.</p>
           </div>
         </div>
 
@@ -1030,7 +1089,14 @@ body {
           <div class="row2 mt-12" style="margin-top:12px">
             <div>
               <span class="lbl">Owner</span>
-              <select class="fld"><option selected>Sarah Reynolds (you)</option></select>
+              <select class="fld" id="fm-owner">
+                <option selected>Sarah Reynolds (you) · primary solicitor</option>
+                <option>Bridget McCarthy · Dev Director</option>
+                <option>Julia Kelleher · Officer · Foundation</option>
+                <option>Mark Collins · Major Gifts Officer</option>
+                <option>Daniel Cho · DB Admin</option>
+              </select>
+              <p class="field-help">Defaults to you (the plan creator). Reassign to any team member to delegate this first move — they'll get the task and the auto-brief.</p>
             </div>
             <div>
               <span class="lbl">Priority</span>
@@ -1058,11 +1124,11 @@ Discovery framing: validate her enthusiasm, confirm capacity, ask about preferre
         <div class="row2">
           <div>
             <span class="lbl">Add to outreach segment</span>
-            <select class="fld">
+            <select class="fld" id="fm-segment">
               <option>(none)</option>
               <option selected>Cathedral major-donor cultivation (12 prospects)</option>
               <option>Q3 Capital pledge prospects (8 prospects)</option>
-              <option>Build new segment…</option>
+              <option value="__new">Build new segment…</option>
             </select>
           </div>
           <div>
@@ -1121,7 +1187,7 @@ Discovery framing: validate her enthusiasm, confirm capacity, ask about preferre
             Ready to add to pipeline
           </div>
           <button class="btn btn-ghost" data-go="3">← Back</button>
-          <button class="btn btn-ghost" onclick="alert('Saved as draft')">Save draft</button>
+          <button class="btn btn-ghost" id="btn-savedraft">Save draft</button>
           <button class="btn btn-primary" onclick="atlasConfirm({icon:'success',title:'Prospect added',message:'Margaret O\'Brien in Qualification · Sarah notified · task due May 18 · meeting brief queued · audit #AU-2026-1902 created',confirmText:'View pipeline',cancelText:'Stay here',onConfirm:function(){window.location='atlas-pipeline.html';}})">
             <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M3 7l3 3 5-6"/></svg>
             Add to pipeline
@@ -1188,18 +1254,309 @@ Discovery framing: validate her enthusiasm, confirm capacity, ask about preferre
       p.classList.add('on');
     });
   });
+  // ── LAI grades: clicking a grade updates the card detail, ceiling, ask range & summary ──
+  var LAI_DESC = {
+    L: { A:'Board-level or peer connection — a trustee or the Bishop can open the door directly.',
+         B:'Strong parish + board connections. Bishop has met her twice.',
+         C:'Some connection — a staff or volunteer relationship exists but is untested.',
+         D:'Thin linkage — no warm introducer identified yet.',
+         F:'No known relationship to the diocese.' },
+    A: { A:'Wealth Engine ask range $8k–$12k. Estate > $5M.',
+         B:'Wealth Engine ask range $1k–$10k. Solid capacity, some verification.',
+         C:'Moderate capacity — plausible but unproven. Confirm before a large ask.',
+         D:'Limited capacity signals — keep the ask modest.',
+         F:'No capacity found — not a major-gift prospect right now.' },
+    I: { A:'Mentioned Cathedral interest. Up 18% YoY giving.',
+         B:'Past giving to related funds; some expressed interest.',
+         C:'General affinity for the diocese; no signal on this project.',
+         D:'Little evidence of interest in this cause.',
+         F:'No affinity for this project identified.' }
+  };
+  var LAI_ASK = { A:'$8,000 – $12,000', B:'$1,000 – $10,000', C:'$500 – $2,500', D:'$100 – $500', F:'—' };
+  var LAI_ASK_SHORT = { A:'$8k–$12k', B:'$1k–$10k', C:'$500–$2.5k', D:'$100–$500', F:'—' };
+  var AXIS_NAME = { L:'Linkage', A:'Ability', I:'Interest' };
+  var GRADE_RANK = { A:5, B:4, C:3, D:2, F:1 };
+  function axisOf(card){ var lt=card.querySelector('.letter'); if(!lt) return 'L'; if(lt.classList.contains('A'))return 'A'; if(lt.classList.contains('I'))return 'I'; return 'L'; }
+  function refreshLAI(){
+    var cards = document.querySelectorAll('.lai-card');
+    var sel = { L:'B', A:'A', I:'A' };
+    cards.forEach(function(card){
+      var axis = axisOf(card);
+      var on = card.querySelector('.grade.on');
+      var grade = on ? on.textContent.trim() : 'A';
+      sel[axis] = grade;
+      var p = card.querySelector('p.muted');
+      if (p && LAI_DESC[axis] && LAI_DESC[axis][grade]) p.innerHTML = '<strong>'+grade+':</strong> '+LAI_DESC[axis][grade];
+    });
+    // ceiling = lowest-ranked grade
+    var order=['L','A','I'], lowAxis='L', lowRank=99;
+    order.forEach(function(ax){ var r=GRADE_RANK[sel[ax]]||1; if(r<lowRank){ lowRank=r; lowAxis=ax; } });
+    var ceil = document.querySelector('.lg-ceiling');
+    if (ceil) ceil.innerHTML = '<b>Ceiling rule:</b> the prospect’s overall priority is capped by their <em>lowest</em> of the three grades — here <b>'+sel[lowAxis]+'</b> ('+AXIS_NAME[lowAxis]+'). Raise the weakest axis to raise the ceiling.';
+    // ask range from Ability
+    var askVal = document.querySelector('.ask-band .val');
+    var pin = document.getElementById('ask-pin');
+    if (askVal && !(pin && pin.value.trim())) askVal.textContent = LAI_ASK[sel.A]||'—';
+    // footer summary
+    var foot = document.querySelector('.wiz-panel[data-panel="2"] .wiz-foot .left');
+    if (foot) foot.innerHTML = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--green)"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg> LAI: <strong style="color:var(--text-2)">'+sel.L+'/'+sel.A+'/'+sel.I+'</strong> · ask range <strong style="color:var(--text-2)">'+(LAI_ASK_SHORT[sel.A]||'—')+'</strong>';
+    // keep the step-4 review LAI tags in sync
+    var rev = document.querySelectorAll('.review-block');
+    rev.forEach(function(b){ var h=b.querySelector('h4'); if(h && /LAI score/.test(h.textContent)){
+      var tags=b.querySelectorAll('.review-row .tag');
+      var map=[sel.L,sel.A,sel.I];
+      tags.forEach(function(t,i){ if(i<3){ t.textContent=map[i]; } });
+      var askRow=b.querySelector('.review-row .v[style]'); if(askRow) askRow.textContent=LAI_ASK[sel.A]||'—';
+    }});
+  }
   grades.forEach(function(g){
     g.addEventListener('click', function(){
       var siblings = g.parentElement.querySelectorAll('.grade');
       siblings.forEach(function(x){ x.classList.remove('on'); });
       g.classList.add('on');
+      refreshLAI();
     });
   });
+  refreshLAI();
   toggles.forEach(function(t){
     t.addEventListener('click', function(){ t.classList.toggle('off'); });
   });
+
+  // ── Live donor search (Step 1) ──
+  (function(){
+    var input = document.getElementById('dp-search');
+    var results = document.getElementById('dp-results');
+    var selCard = document.getElementById('dp-selected');
+    var empty = document.getElementById('dp-empty');
+    if (!input || !results || !selCard) return;
+    var DONORS = [
+      { first:'Margaret', last:"O'Brien", email:'margaret.obrien@email.com', phone:'518-555-0142', parish:"St. Mary's Cathedral", tag:'Board member', color:'var(--rose)', life:'$84,250', lastGift:'Last gift Apr 2 · $10k' },
+      { first:'Ronald', last:'Walsh', email:'ronald.walsh@email.com', phone:'518-555-0188', parish:'St. Anthony’s Parish', tag:'Recurring donor', color:'#2563EB', life:'$41,900', lastGift:'Last gift Mar 18 · $2.5k' },
+      { first:'Gerald', last:'Fitzgerald', email:'gerald.fitz@email.com', phone:'518-555-0110', parish:'Holy Trinity', tag:'Major prospect', color:'#7C3AED', life:'$127,400', lastGift:'Last gift Feb 9 · $25k' },
+      { first:'Aldous', last:'Byrne', email:'aldous.byrne@email.com', phone:'518-555-0176', parish:'St. Mary’s Cathedral', tag:'Parish leader', color:'#15803D', life:'$18,600', lastGift:'Last gift Apr 28 · $1k' },
+      { first:'Donald', last:'Kavanagh', email:'donald.k@email.com', phone:'518-555-0133', parish:'Sacred Heart', tag:'Event attendee', color:'#B45309', life:'$9,250', lastGift:'Last gift Jan 22 · $500' },
+      { first:'Patricia', last:'Sullivan', email:'patricia.sullivan@email.com', phone:'518-555-0155', parish:'St. Anthony’s Parish', tag:'Wealth-screen flagged', color:'#BE185D', life:'$63,000', lastGift:'Last gift Mar 30 · $5k' },
+      { first:'Thomas', last:'Grant', email:'thomas.grant@email.com', phone:'518-555-0164', parish:'Holy Trinity', tag:'Peer-screen', color:'#0D9488', life:'$212,800', lastGift:'Last gift Apr 15 · $50k' },
+      { first:'Eileen', last:'Doherty', email:'eileen.doherty@email.com', phone:'518-555-0129', parish:'St. Mary’s Cathedral', tag:'Recurring donor', color:'#2563EB', life:'$27,400', lastGift:'Last gift Apr 1 · $1.2k' },
+      { first:'Michael', last:'Reilly', email:'michael.reilly@email.com', phone:'518-555-0198', parish:'Sacred Heart', tag:'Capital lead', color:'#7C3AED', life:'$55,100', lastGift:'Last gift Feb 27 · $8k' }
+    ];
+    var selected = DONORS[0];
+    function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function initials(d){ return (d.first[0]+d.last[0]).toUpperCase(); }
+    function paintSelected(d){
+      selected = d;
+      selCard.querySelector('.av').style.background = d.color;
+      selCard.querySelector('.av').textContent = initials(d);
+      selCard.querySelector('.nm').textContent = d.first+' '+d.last;
+      selCard.querySelector('.meta').innerHTML = '<span>'+esc(d.email)+'</span><span>•</span><span>'+esc(d.parish)+'</span><span>•</span><span>'+esc(d.tag)+'</span>';
+      selCard.querySelector('.right').innerHTML = '<b>'+esc(d.life)+' lifetime</b>'+esc(d.lastGift);
+      selCard.style.display = 'flex';
+      if (empty) empty.style.display = 'none';
+      // footer "Identified:"
+      var idf = document.querySelector('.wiz-panel[data-panel="1"] .wiz-foot .left');
+      if (idf){ var srcChip=document.querySelector('.src-chips .chip.on'); var src=srcChip?srcChip.textContent.replace(/^★\s*/,'').trim():'Recent large gift';
+        idf.innerHTML = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="color:var(--green)"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg> Identified: <strong style="color:var(--text-2)">'+esc(d.first+' '+d.last)+'</strong> — source: '+esc(src); }
+    }
+    var active = -1, matches = [];
+    function render(q){
+      q = (q||'').trim().toLowerCase();
+      matches = !q ? [] : DONORS.filter(function(d){ return (d.first+' '+d.last+' '+d.email+' '+d.phone+' '+d.parish).toLowerCase().indexOf(q) !== -1; });
+      active = -1;
+      if (!q){ results.classList.remove('on'); if(empty) empty.style.display='none'; return; }
+      if (!matches.length){ results.classList.remove('on'); if(empty){ empty.style.display='block'; document.getElementById('dp-empty-q').textContent = q; } return; }
+      if (empty) empty.style.display='none';
+      results.innerHTML = matches.map(function(d,i){
+        return '<div class="dp-row" data-i="'+i+'"><div class="av" style="background:'+d.color+'">'+initials(d)+'</div>'+
+          '<div class="mid"><div class="nm">'+esc(d.first+' '+d.last)+'</div><div class="meta">'+esc(d.email)+' · '+esc(d.parish)+'</div></div>'+
+          '<div class="right"><b>'+esc(d.life)+'</b>'+esc(d.lastGift)+'</div></div>';
+      }).join('');
+      results.classList.add('on');
+      results.querySelectorAll('.dp-row').forEach(function(row){
+        row.addEventListener('click', function(){ choose(matches[+row.dataset.i]); });
+      });
+    }
+    function choose(d){ paintSelected(d); input.value = d.first+' '+d.last; results.classList.remove('on'); }
+    input.addEventListener('input', function(){ render(input.value); });
+    input.addEventListener('focus', function(){ if(input.value.trim() && matches.length) results.classList.add('on'); });
+    input.addEventListener('keydown', function(e){
+      if (!results.classList.contains('on')) return;
+      var rows = results.querySelectorAll('.dp-row');
+      if (e.key==='ArrowDown'){ e.preventDefault(); active=Math.min(rows.length-1,active+1); }
+      else if (e.key==='ArrowUp'){ e.preventDefault(); active=Math.max(0,active-1); }
+      else if (e.key==='Enter'){ if(active>=0){ e.preventDefault(); choose(matches[active]); } return; }
+      else if (e.key==='Escape'){ results.classList.remove('on'); return; }
+      else return;
+      rows.forEach(function(r,i){ r.classList.toggle('active', i===active); });
+      if (rows[active]) rows[active].scrollIntoView({block:'nearest'});
+    });
+    document.addEventListener('click', function(e){ if (!input.contains(e.target) && !results.contains(e.target)) results.classList.remove('on'); });
+    // keep the Identified footer source in sync when a radar chip changes
+    document.querySelectorAll('.src-chips .chip').forEach(function(c){ c.addEventListener('click', function(){ paintSelected(selected); }); });
+  })();
+
+  // ── Per-stage hints + Guru accept ──
+  var hintEl = document.getElementById('stage-hint');
+  function setStage(name){
+    stagePills.forEach(function(p){
+      var on = p.dataset.stage === name;
+      p.classList.toggle('on', on);
+      if (on && hintEl && p.dataset.hint) hintEl.innerHTML = p.dataset.hint;
+    });
+  }
+  stagePills.forEach(function(p){
+    p.addEventListener('click', function(){ if (p.dataset.stage) setStage(p.dataset.stage); });
+  });
+  // Collapse an accepted Guru suggestion into a confirmed state (with Undo), instead of a dead link.
+  function confirmSuggestion(box, msg, undoFn){
+    if (!box) return;
+    var original = box.innerHTML;
+    box.classList.add('accepted');
+    box.style.borderColor = 'var(--green)';
+    box.style.background = 'var(--green-light)';
+    box.innerHTML = '<div class="ico" style="background:var(--green)">✓</div>'+
+      '<div class="body" style="color:#14532D"><b>'+msg+'</b> <a class="accept" href="#" style="color:#166534;margin-left:6px">Undo</a></div>';
+    box.querySelector('a.accept').addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      box.classList.remove('accepted');
+      box.style.borderColor = '';
+      box.style.background = '';
+      box.innerHTML = original;
+      wireSuggestions();
+      if (undoFn) undoFn();
+    });
+  }
+  function wireSuggestions(){
+    document.querySelectorAll('a.accept[data-jump]').forEach(function(a){
+      if (a.dataset.wired) return; a.dataset.wired='1';
+      a.addEventListener('click', function(e){
+        e.preventDefault(); e.stopPropagation();
+        var prevStage = document.querySelector('.stage-pick .pill.on');
+        prevStage = prevStage ? prevStage.dataset.stage : 'Identification';
+        setStage(a.dataset.jump);
+        confirmSuggestion(a.closest('.sol-suggestion'), 'Applied — starting at '+a.dataset.jump, function(){ setStage(prevStage); });
+      });
+    });
+    var acceptSol = document.getElementById('accept-solicitor');
+    if (acceptSol && !acceptSol.dataset.wired) {
+      acceptSol.dataset.wired='1';
+      acceptSol.addEventListener('click', function(e){
+        e.preventDefault(); e.stopPropagation();
+        var primary = document.querySelectorAll('.row2 select.fld')[0];
+        var prevIdx = primary ? primary.selectedIndex : 0;
+        if (primary) { for (var i=0;i<primary.options.length;i++){ if(/Sarah/.test(primary.options[i].text)){ primary.selectedIndex=i; break; } } }
+        confirmSuggestion(acceptSol.closest('.sol-suggestion'), 'Sarah Reynolds set as primary solicitor', function(){ if(primary) primary.selectedIndex=prevIdx; });
+      });
+    }
+  }
+  wireSuggestions();
+
+  // ── Generic modal helper (deferred: modal markup is parsed after this script) ──
+  document.addEventListener('DOMContentLoaded', function(){
+  var ov = document.getElementById('pp-modal-ov');
+  if (!ov) return;
+  function openModal(title, sub, bodyHTML, confirmText, onConfirm){
+    ov.querySelector('.m-hd h3').textContent = title;
+    ov.querySelector('.m-hd p').textContent = sub;
+    ov.querySelector('.m-bd').innerHTML = bodyHTML;
+    var ok = ov.querySelector('#pp-m-ok');
+    ok.textContent = confirmText;
+    ov.classList.add('on');
+    ok.onclick = function(){ onConfirm(); };
+    setTimeout(function(){ var f = ov.querySelector('.m-bd input,.m-bd select'); if (f) f.focus(); }, 30);
+  }
+  function closeModal(){ ov.classList.remove('on'); }
+  ov.querySelector('#pp-m-cancel').addEventListener('click', closeModal);
+  ov.addEventListener('click', function(e){ if (e.target === ov) closeModal(); });
+
+  // ── Target close date · custom ──
+  var tc = document.getElementById('target-close');
+  var tcPrev = tc ? tc.value : '';
+  if (tc) {
+    tc.addEventListener('focus', function(){ tcPrev = tc.value; });
+    tc.addEventListener('change', function(){
+      if (tc.value !== '__custom') { tcPrev = tc.value; return; }
+      openModal('Custom target close date','Pick the specific date you expect to close this gift.',
+        '<label class="lbl">Target close date</label><input type="date" class="fld" id="tc-date" value="2026-12-15">',
+        'Set date', function(){
+          var d = document.getElementById('tc-date').value;
+          if (!d) { closeModal(); return; }
+          var lbl = new Date(d + 'T00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+          var opt = document.createElement('option');
+          opt.textContent = 'Custom · ' + lbl; opt.selected = true;
+          tc.insertBefore(opt, tc.querySelector('option[value="__custom"]'));
+          closeModal();
+        });
+      // revert select to previous while modal decides
+      tc.value = tcPrev;
+    });
+  }
+
+  // ── Build new outreach segment ──
+  var seg = document.getElementById('fm-segment');
+  var segPrev = seg ? seg.value : '';
+  if (seg) {
+    seg.addEventListener('focus', function(){ segPrev = seg.value; });
+    seg.addEventListener('change', function(){
+      if (seg.value !== '__new') { segPrev = seg.value; return; }
+      openModal('Build a new outreach segment','This prospect will be added to it automatically.',
+        '<label class="lbl">Segment name</label><input class="fld" id="seg-name" placeholder="e.g. FY26 Cathedral leadership prospects">' +
+        '<label class="lbl" style="margin-top:12px">Segment type</label><select class="fld" id="seg-type"><option>Static — this prospect only for now</option><option>Dynamic — auto-add prospects matching criteria</option></select>',
+        'Create segment', function(){
+          var nm = (document.getElementById('seg-name').value || '').trim();
+          if (!nm) { document.getElementById('seg-name').focus(); return; }
+          var opt = document.createElement('option');
+          opt.textContent = nm + ' (1 prospect)'; opt.selected = true;
+          seg.insertBefore(opt, seg.querySelector('option[value="__new"]'));
+          closeModal();
+        });
+      seg.value = segPrev;
+    });
+  }
+
+  // ── Save draft ──
+  var sd = document.getElementById('btn-savedraft');
+  if (sd) {
+    sd.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      try { localStorage.setItem('atlas-prospect-draft', JSON.stringify({ name:'Margaret O\'Brien', stage:document.querySelector('.stage-pick .pill.on') ? document.querySelector('.stage-pick .pill.on').dataset.stage : 'Identification', saved: Date.now() })); } catch(_){}
+      if (window.atlasConfirm) {
+        atlasConfirm({icon:'success',title:'Draft saved',message:'This prospect plan is saved to Prospect pipeline → Drafts. You can resume and finish adding Margaret anytime.',confirmText:'Go to pipeline',cancelText:'Keep editing',onConfirm:function(){ window.location='atlas-pipeline.html'; }});
+      }
+    });
+  }
+  // ── Resume an existing draft (Drafts surface) ──
+  (function(){
+    var raw; try { raw = localStorage.getItem('atlas-prospect-draft'); } catch(_){ raw=null; }
+    if (!raw) return;
+    var draft; try { draft = JSON.parse(raw); } catch(_){ return; }
+    var content = document.querySelector('.wiz-content');
+    if (!content) return;
+    function ago(ts){ if(!ts) return 'recently'; var s=Math.floor((Date.now()-ts)/1000); if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+' min ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
+    var bar = document.createElement('div');
+    bar.style.cssText = 'display:flex;align-items:center;gap:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:11px;padding:11px 15px;margin-bottom:16px;font-family:\'DM Sans\',sans-serif';
+    bar.innerHTML = '<div style="width:28px;height:28px;border-radius:8px;background:#F59E0B;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700">⏸</div>'+
+      '<div style="flex:1;font-size:12.5px;color:#92400E;line-height:1.45"><b>Draft in progress</b> — '+(draft.name||'Untitled prospect')+' · '+(draft.stage||'Identification')+' stage · saved '+ago(draft.saved)+'.</div>'+
+      '<button id="pp-resume" style="border:1px solid #F59E0B;background:#F59E0B;color:#fff;border-radius:8px;padding:7px 13px;font:600 12px \'DM Sans\';cursor:pointer">Resume</button>'+
+      '<button id="pp-discard" style="border:1px solid #FCD34D;background:#fff;color:#92400E;border-radius:8px;padding:7px 13px;font:600 12px \'DM Sans\';cursor:pointer">Discard</button>';
+    content.insertBefore(bar, content.firstChild);
+    document.getElementById('pp-resume').addEventListener('click', function(){ bar.remove(); window.scrollTo({top:0,behavior:'smooth'}); });
+    document.getElementById('pp-discard').addEventListener('click', function(){ try{ localStorage.removeItem('atlas-prospect-draft'); }catch(_){} bar.remove(); });
+  })();
+  }); // end DOMContentLoaded
 })();
 </script>
+
+<!-- Generic prospect modal -->
+<div id="pp-modal-ov">
+  <div class="m-card">
+    <div class="m-hd"><h3>Title</h3><p>Sub</p></div>
+    <div class="m-bd"></div>
+    <div class="m-ft">
+      <button class="btn btn-ghost" id="pp-m-cancel">Cancel</button>
+      <button class="btn btn-primary" id="pp-m-ok">OK</button>
+    </div>
+  </div>
+</div>
 
 </div>
 

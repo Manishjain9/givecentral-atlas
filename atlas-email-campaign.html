@@ -474,6 +474,24 @@
       '<div class="persona">✨ <div><b>Personalization on.</b> Merge fields like {{first_name}} and {{last_gift_amount}} resolve per recipient at send. Preview as a specific donor in the next step.</div></div>'+
       '<iframe class="ebframe" id="eb-design" src="atlas-email-builder.html?embed=1"></iframe></div>';
   }
+  function audiencePanel(){
+    var sel=selectedLists();
+    var g=grossCount(), su=suppressed(), man=S.manualEmails.length, r=reach();
+    var listRows = sel.length
+      ? sel.map(function(l){ return '<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #F1F5F9;font-size:12.5px"><span style="color:#334155;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(l.nm)+'</span><span style="color:#64748B;font-variant-numeric:tabular-nums;flex-shrink:0">'+fmt(l.n)+'</span></div>'; }).join('')
+      : '<div style="padding:8px 0;font-size:12.5px;color:#B45309">⚠ No lists selected — <span data-goto="2" role="button" tabindex="0" style="cursor:pointer;color:#2563EB;font-weight:600">choose an audience →</span></div>';
+    var abLine = S.ab.on ? '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #E2E8F0;font-size:12px;color:#64748B">🧪 A/B: '+abCounts().pct+'% sample ('+fmt(abCounts().test)+') tested first · winner to remaining '+fmt(abCounts().winner)+'</div>' : '';
+    return '<aside style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff;margin-bottom:16px">'+
+      '<div style="padding:13px 16px;background:#F8FAFC;border-bottom:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:baseline">'+
+        '<div><div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748B">Who gets this</div><div style="font-weight:700;color:var(--navy,#0E1E35);font-size:20px;margin-top:1px;font-variant-numeric:tabular-nums">'+fmt(r)+'</div><div style="font-size:11px;color:#94A3B8;margin-top:-1px">will receive</div></div>'+
+        '<button class="btn" data-goto="2" style="font-size:12px;padding:5px 11px">Edit</button>'+
+      '</div>'+
+      '<div style="padding:12px 16px">'+
+        listRows+
+        (sel.length?('<div style="margin-top:9px;font-size:12px;color:#64748B;line-height:1.7">Lists gross <b style="color:#334155;float:right;font-variant-numeric:tabular-nums">'+fmt(g)+'</b><br>− Suppressed (unsub · bounced · DNC) <b style="color:#334155;float:right;font-variant-numeric:tabular-nums">'+fmt(su)+'</b>'+(man?'<br>+ Individual addresses <b style="color:#334155;float:right;font-variant-numeric:tabular-nums">'+man+'</b>':'')+'<br><span style="color:#334155;font-weight:600">= Will receive</span> <b style="color:var(--navy,#0E1E35);float:right;font-variant-numeric:tabular-nums">'+fmt(r)+'</b></div>'):'')+
+        abLine+
+      '</div></aside>';
+  }
   function stepPreview(){
     var checks=runValidation();
     var fails=checks.filter(function(c){return c.s==='fail';}).length;
@@ -496,10 +514,13 @@
           '<button class="btn" onclick="cwTest()" style="margin-left:auto">Send test email</button></div>'+
           '<div class="pv-frame'+(S.device==='mobile'?' mobile':'')+'"><div class="pv-head"><b>'+esc(S.ab.on&&S.ab.variable==='from'?abVarValue(S.previewVariant):S.from.split(' · ')[0])+'</b> &nbsp; '+esc((S.ab.on&&S.ab.variable==='subject'?abVarValue(S.previewVariant):S.subject)||'(no subject)')+'</div><div class="pv-body">'+body+'</div></div>'+
         '</div>'+
-        '<aside class="pv-check" style="position:sticky;top:12px;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">'+
+        '<div style="position:sticky;top:12px">'+
+        audiencePanel()+
+        '<aside class="pv-check" style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">'+
           '<div style="padding:13px 16px;background:'+status.bg+';border-bottom:1px solid '+status.bd+'"><div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748B">Pre-send check</div><div style="font-weight:700;color:'+status.c+';font-size:14px;margin-top:2px">'+status.t+'</div></div>'+
           '<div style="max-height:60vh;overflow:auto">'+rows+'</div>'+
         '</aside>'+
+        '</div>'+
       '</div></div>';
   }
   window.gotoStep=function(n){ S.step=n; render(); };

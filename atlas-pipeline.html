@@ -133,12 +133,16 @@
       background: #F1F5F9; border-radius: 12px; overflow: hidden; max-height: calc(100vh - 200px);
     }
     .stage-header {
-      padding: 12px 14px; display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+      padding: 12px 14px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap;
     }
     .stage-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .stage-name { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; flex: 1; }
     .stage-count { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
     .stage-value { font-size: 10px; font-weight: 600; margin-left: auto; padding: 2px 8px; border-radius: 10px; }
+    .stage-sub { flex-basis: 100%; font-size: 10.5px; font-weight: 500; line-height: 1.35; color: var(--text-3); text-transform: none; letter-spacing: 0; margin-top: 4px; }
+    .stage-start { flex-basis: 100%; margin-top: 5px; }
+    .stage-start span { display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #2563EB; background: #EFF6FF; border: 1px solid #DBEAFE; border-radius: 99px; padding: 2px 8px; }
+    .stage-col.col-id { box-shadow: inset 0 0 0 1.5px rgba(37,99,235,.35); }
 
     /* Stage color themes */
     .col-id    .stage-header { background: var(--id-bg);    }
@@ -165,6 +169,16 @@
     .col-stew  .stage-count  { background: #BBF7D0; color: var(--stew-text); }
     .col-stew  .stage-value  { background: #BBF7D0; color: var(--stew-text); }
 
+    .close-group { margin-bottom: 6px; }
+    .cg-hd { display:flex; align-items:center; gap:6px; font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:6px 4px 8px; }
+    .cg-hd .cg-n { margin-left:auto; font-weight:700; padding:1px 7px; border-radius:10px; }
+    .cg-won .cg-hd { color:#15803D; }
+    .cg-won .cg-hd .cg-n { background:#DCFCE7; color:#14532D; }
+    .cg-none .cg-hd { color:#9F1239; }
+    .cg-none .cg-hd .cg-n { background:#FFE4E6; color:#9F1239; }
+    .close-group + .close-group { border-top:1px dashed var(--border); padding-top:8px; }
+    .prospect-card.nogift { border-left:3px solid #BE185D; opacity:.9; }
+    .prospect-card.nogift .pc-ask { color:var(--text-3); font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; }
     .col-close .stage-header { background: #F0FDF4; }
     .col-close .stage-name   { color: #14532D; }
     .col-close .stage-dot    { background: #22C55E; }
@@ -356,6 +370,13 @@
     .facet-menu.combined .fm-group:nth-child(1){ grid-column:1 / -1; } /* Stage spans full width */
     .fm-h { font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); padding:4px 6px 3px; }
     .facet-menu.combined .facet-opt { padding:5px 8px; }
+    .fm-foot { grid-column:1 / -1; display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:11px; border-top:1px solid var(--border); }
+    .fm-foot .fm-count { font-size:12px; color:var(--text-3); margin-right:auto; }
+    .fm-foot .fm-count strong { color:var(--navy,#0E1E35); }
+    .fm-btn { font:600 12.5px 'DM Sans',sans-serif; padding:8px 15px; border-radius:8px; cursor:pointer; border:1px solid var(--border); background:#fff; color:var(--text-2); }
+    .fm-btn:hover { border-color:#94A3B8; }
+    .fm-btn.primary { background:var(--blue,#2563EB); border-color:var(--blue,#2563EB); color:#fff; }
+    .fm-btn.primary:hover { background:#1D4ED8; }
     .pc-divider { width:1px; height:20px; background:var(--border); }
     .pc-search { display:flex; align-items:center; gap:7px; background:var(--surface,#F1F5F9); border:1px solid var(--border); border-radius:9px; padding:6px 10px; min-width:200px; max-width:240px; }
     .pc-search:focus-within { border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.1); background:white; }
@@ -765,7 +786,6 @@ body {
     <!-- Topbar -->
     <div class="topbar">
       <span class="topbar-title">Prospect pipeline</span>
-      <span style="font-size:12px;color:var(--text-3);margin-left:10px">· <a href="atlas-pipeline-flow.html" style="color:var(--blue);font-weight:500">end-to-end flow doc</a> · <a href="atlas-pipeline-forecast.html" style="color:var(--blue);font-weight:500">forecast</a> · <a href="atlas-portfolio-assign.html" style="color:var(--blue);font-weight:500">rebalance</a></span>
       <div class="topbar-right">
         <div class="view-toggle">
           <button class="vt-btn active">
@@ -777,6 +797,14 @@ body {
             List
           </button>
         </div>
+        <a class="tb-btn tb-ghost" href="atlas-pipeline-forecast.html" style="text-decoration:none">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 10.5V6M6 10.5V2M10.5 10.5V4.5"/></svg>
+          Forecast
+        </a>
+        <a class="tb-btn tb-ghost" href="atlas-portfolio-assign.html" style="text-decoration:none">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 1.5v9M2.5 4h7M2.5 4l-1.2 2.4h2.4L2.5 4zM9.5 4L8.3 6.4h2.4L9.5 4z"/></svg>
+          Rebalance
+        </a>
         <button class="tb-btn tb-ghost">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="6" cy="3.5" r="1.5"/><path d="M6 5v4"/><circle cx="3" cy="8.5" r="1.5"/><circle cx="9" cy="8.5" r="1.5"/></svg>
           Filter
@@ -794,9 +822,9 @@ body {
 
     <!-- Pipeline summary strip -->
     <div class="pipeline-strip">
-      <div class="ps-item"><div class="ps-value">28</div><div class="ps-label">Prospects</div></div>
-      <div class="ps-item"><div class="ps-value" style="color:var(--purple)">$1.84M</div><div class="ps-label">Pipeline value</div></div>
-      <div class="ps-item"><div class="ps-value" style="color:var(--green)">$200k</div><div class="ps-label">Won this year</div></div>
+      <div class="ps-item ps-clickable" data-stat="all" title="Show all prospects — clears filters"><div class="ps-value">28</div><div class="ps-label">Prospects ›</div></div>
+      <div class="ps-item ps-clickable" data-stat="value" title="Open the pipeline forecast"><div class="ps-value" style="color:var(--purple)">$1.84M</div><div class="ps-label">Pipeline value ›</div></div>
+      <div class="ps-item ps-clickable" data-stat="won" title="Show closed-won prospects"><div class="ps-value" style="color:var(--green)">$200k</div><div class="ps-label">Won this year ›</div></div>
       <div class="ps-item ps-clickable" data-stat="asks" title="Show asks due this week"><div class="ps-value" style="color:var(--amber)">6</div><div class="ps-label">Due this week ›</div></div>
       <div class="ps-item ps-clickable" data-stat="overdue" title="Show overdue moves"><div class="ps-value" style="color:var(--rose)">3</div><div class="ps-label">Overdue ›</div></div>
       <div class="ps-filter-wrap" style="display:none">
@@ -1217,34 +1245,169 @@ body {
         <div class="stage-col col-close">
           <div class="stage-header">
             <div class="stage-dot"></div>
-            <div class="stage-name">Closed · Won</div>
-            <div class="stage-count">1</div>
-            <div class="stage-value">$100k</div>
+            <div class="stage-name">Closed</div>
+            <div class="stage-count">6</div>
+            <div class="stage-value">$165k</div>
           </div>
           <div class="cards-area">
 
-            <div class="prospect-card won" style="animation-delay:.09s">
-              <div class="pc-top">
-                <div class="pc-avatar" style="background:#DCFCE7;color:#15803D">MF</div>
-                <div class="pc-info">
-                  <div class="pc-name">The Morrison Foundation</div>
-                  <div class="pc-org">Corporate matching gift</div>
+            <div class="close-group cg-won" data-outcome="won">
+              <div class="cg-hd">✓ Won · gift secured <span class="cg-n">3</span></div>
+              <div class="cg-cards">
+
+                <div class="prospect-card won" style="animation-delay:.09s">
+                  <div class="pc-top">
+                    <div class="pc-avatar" style="background:#DCFCE7;color:#15803D">MF</div>
+                    <div class="pc-info">
+                      <div class="pc-name">The Morrison Foundation</div>
+                      <div class="pc-org">Corporate matching gift</div>
+                    </div>
+                    <div class="pc-ask" style="color:var(--green)">$100k</div>
+                  </div>
+                  <div class="pc-tags">
+                    <span class="pc-tag" style="background:var(--green-light);color:var(--green)">Gift received ✓</span>
+                  </div>
+                  <div class="pc-meta">
+                    <span class="pc-meta-item">
+                      <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M3 5l1.5 1.5L7.5 3"/></svg>
+                      Closed Mar 28, 2026
+                    </span>
+                  </div>
+                  <div class="pc-note">"First corporate major gift in 5 years. Thank you sent, recognition plaque ordered." — SR</div>
+                  <div class="pc-footer">
+                    <div class="pc-officer"><div class="pc-officer-avatar" style="background:var(--blue)">SR</div>Sarah Reynolds</div>
+                    <div class="pc-days days-won">Won ✓</div>
+                  </div>
                 </div>
-                <div class="pc-ask" style="color:var(--green)">$100k</div>
+
+                <div class="prospect-card won" style="animation-delay:.10s">
+                  <div class="pc-top">
+                    <div class="pc-avatar" style="background:#DCFCE7;color:#15803D">JP</div>
+                    <div class="pc-info">
+                      <div class="pc-name">James &amp; Patricia O'Brien</div>
+                      <div class="pc-org">Cathedral benefactor</div>
+                    </div>
+                    <div class="pc-ask" style="color:var(--green)">$25k</div>
+                  </div>
+                  <div class="pc-tags">
+                    <span class="pc-tag" style="background:var(--green-light);color:var(--green)">Gift received ✓</span>
+                  </div>
+                  <div class="pc-meta">
+                    <span class="pc-meta-item">
+                      <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M3 5l1.5 1.5L7.5 3"/></svg>
+                      Closed Apr 2, 2026
+                    </span>
+                  </div>
+                  <div class="pc-footer">
+                    <div class="pc-officer"><div class="pc-officer-avatar" style="background:var(--blue)">SR</div>Sarah Reynolds</div>
+                    <div class="pc-days days-won">Won ✓</div>
+                  </div>
+                </div>
+
+                <div class="prospect-card won" style="animation-delay:.12s">
+                  <div class="pc-top">
+                    <div class="pc-avatar" style="background:#DCFCE7;color:#15803D">EK</div>
+                    <div class="pc-info">
+                      <div class="pc-name">Eileen Kavanagh</div>
+                      <div class="pc-org">Legacy / planned gift</div>
+                    </div>
+                    <div class="pc-ask" style="color:#D97706">$40k</div>
+                  </div>
+                  <div class="pc-tags">
+                    <span class="pc-tag" style="background:#FEF3C7;color:#92400E">Pledged · awaiting gift</span>
+                  </div>
+                  <div class="pc-meta">
+                    <span class="pc-meta-item">
+                      <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M3 5l1.5 1.5L7.5 3"/></svg>
+                      Committed Apr 20, 2026 · first payment Jul 2026
+                    </span>
+                  </div>
+                  <div class="pc-footer">
+                    <div class="pc-officer"><div class="pc-officer-avatar" style="background:#7C3AED">JK</div>Julia Kelleher</div>
+                    <div class="pc-days days-won">Pledged</div>
+                  </div>
+                </div>
+
               </div>
-              <div class="pc-tags">
-                <span class="pc-tag" style="background:var(--green-light);color:var(--green)">Gift received ✓</span>
-              </div>
-              <div class="pc-meta">
-                <span class="pc-meta-item">
-                  <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M3 5l1.5 1.5L7.5 3"/></svg>
-                  Closed Mar 28, 2026
-                </span>
-              </div>
-              <div class="pc-note">"First corporate major gift in 5 years. Thank you sent, recognition plaque ordered." — SR</div>
-              <div class="pc-footer">
-                <div class="pc-officer"><div class="pc-officer-avatar" style="background:var(--blue)">SR</div>Sarah Reynolds</div>
-                <div class="pc-days days-won">Won ✓</div>
+            </div>
+
+            <div class="close-group cg-none" data-outcome="none">
+              <div class="cg-hd">✕ Closed · no gift <span class="cg-n">3</span></div>
+              <div class="cg-cards">
+
+                <div class="prospect-card nogift" style="animation-delay:.11s">
+                  <div class="pc-top">
+                    <div class="pc-avatar" style="background:#FCE7F3;color:#BE185D">HD</div>
+                    <div class="pc-info">
+                      <div class="pc-name">Harold &amp; Diane Pratt</div>
+                      <div class="pc-org">Annual Appeal prospect</div>
+                    </div>
+                    <div class="pc-ask">No gift</div>
+                  </div>
+                  <div class="pc-tags">
+                    <span class="pc-tag" style="background:#FFE4E6;color:#9F1239">No gift · gave elsewhere</span>
+                  </div>
+                  <div class="pc-meta">
+                    <span class="pc-meta-item">
+                      <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M3.5 3.5l3 3M6.5 3.5l-3 3"/></svg>
+                      Closed Apr 12, 2026 · revisit Q1 2027
+                    </span>
+                  </div>
+                  <div class="pc-note">"Chose to direct their gift to the parish school this year. Keep warm — strong long-term capacity." — MC</div>
+                  <div class="pc-footer">
+                    <div class="pc-officer"><div class="pc-officer-avatar" style="background:#BE185D">MC</div>Mark Collins</div>
+                    <div class="pc-days" style="background:#FFE4E6;color:#9F1239">No gift</div>
+                  </div>
+                </div>
+
+                <div class="prospect-card nogift" style="animation-delay:.13s">
+                  <div class="pc-top">
+                    <div class="pc-avatar" style="background:#FCE7F3;color:#BE185D">RT</div>
+                    <div class="pc-info">
+                      <div class="pc-name">Robert &amp; Teresa Lynch</div>
+                      <div class="pc-org">Major prospect</div>
+                    </div>
+                    <div class="pc-ask">No gift</div>
+                  </div>
+                  <div class="pc-tags">
+                    <span class="pc-tag" style="background:#FFE4E6;color:#9F1239">No gift · timing</span>
+                  </div>
+                  <div class="pc-meta">
+                    <span class="pc-meta-item">
+                      <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M3.5 3.5l3 3M6.5 3.5l-3 3"/></svg>
+                      Closed Mar 30, 2026 · revisit Q3 2026
+                    </span>
+                  </div>
+                  <div class="pc-footer">
+                    <div class="pc-officer"><div class="pc-officer-avatar" style="background:var(--blue)">SR</div>Sarah Reynolds</div>
+                    <div class="pc-days" style="background:#FFE4E6;color:#9F1239">No gift</div>
+                  </div>
+                </div>
+
+                <div class="prospect-card nogift" style="animation-delay:.15s">
+                  <div class="pc-top">
+                    <div class="pc-avatar" style="background:#FCE7F3;color:#BE185D">DW</div>
+                    <div class="pc-info">
+                      <div class="pc-name">Dennis Walsh</div>
+                      <div class="pc-org">Peer-screen prospect</div>
+                    </div>
+                    <div class="pc-ask">No gift</div>
+                  </div>
+                  <div class="pc-tags">
+                    <span class="pc-tag" style="background:#FFE4E6;color:#9F1239">No gift · unresponsive</span>
+                  </div>
+                  <div class="pc-meta">
+                    <span class="pc-meta-item">
+                      <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M3.5 3.5l3 3M6.5 3.5l-3 3"/></svg>
+                      Closed Feb 18, 2026 · archived
+                    </span>
+                  </div>
+                  <div class="pc-footer">
+                    <div class="pc-officer"><div class="pc-officer-avatar" style="background:#B45309">BM</div>Bridget McCarthy</div>
+                    <div class="pc-days" style="background:#FFE4E6;color:#9F1239">No gift</div>
+                  </div>
+                </div>
+
               </div>
             </div>
 
@@ -1527,17 +1690,56 @@ body {
       document.getElementById('drawer').classList.add('hidden');
     }
 
-    function selectStage(el) {
-      document.querySelectorAll('.stage-option').forEach(o => {
-        o.classList.remove('current');
-        o.querySelectorAll('.stage-opt-check').forEach(c => c.remove());
-      });
+    var STAGE_ORDER=['Identification','Cultivation','Solicitation','Stewardship','Closed / Won'];
+    function commitStageVisual(el){
+      document.querySelectorAll('.stage-option').forEach(function(o){ o.classList.remove('current'); o.querySelectorAll('.stage-opt-check').forEach(function(c){c.remove();}); });
       el.classList.add('current');
-      const check = document.createElement('span');
-      check.className = 'stage-opt-check';
-      check.textContent = '✓';
-      el.appendChild(check);
+      var check=document.createElement('span'); check.className='stage-opt-check'; check.textContent='✓'; el.appendChild(check);
     }
+    function selectStage(el){
+      var name=((el.querySelector('.stage-opt-name')||{}).textContent||'').trim();
+      var curEl=document.querySelector('.stage-option.current');
+      var curName=curEl?((curEl.querySelector('.stage-opt-name')||{}).textContent||'').trim():'';
+      if(name===curName) return;
+      if(name==='Closed / Won'){ if(window.openRecordWinModal) window.openRecordWinModal(); return; }   // route to the win/outcome flow
+      var ci=STAGE_ORDER.indexOf(curName), ni=STAGE_ORDER.indexOf(name);
+      if(ni>ci){ openStageMoveModal(name, curName, function(){ commitStageVisual(el); }); return; }        // forward move requires a next action
+      commitStageVisual(el);                                                                              // backward/lateral allowed
+    }
+    window.selectStage=selectStage;
+    function openStageMoveModal(toStage, fromStage, onConfirm){
+      var needAsk=(toStage==='Solicitation');
+      var ov=document.createElement('div'); ov.id='sm-overlay';
+      ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:10002;display:flex;align-items:center;justify-content:center;font-family:DM Sans,sans-serif';
+      var due=new Date(Date.now()+7*864e5).toISOString().slice(0,10);
+      ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:460px;width:94vw;box-shadow:0 24px 64px rgba(15,23,42,.3);overflow:hidden">'+
+        '<div style="padding:16px 20px;border-bottom:1px solid #E2E8F0"><div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#64748B">Move to '+toStage+'</div><h3 style="font-family:\'DM Serif Display\',serif;font-size:19px;color:#0E1E35;margin:3px 0 0">What’s the next move?</h3><p style="font-size:12px;color:#64748B;margin:4px 0 0">A prospect shouldn’t advance without a next action — this keeps the relationship on track.</p></div>'+
+        '<div style="padding:16px 20px">'+
+          (needAsk?'<label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:5px">Ask amount <span style="color:#BE185D">*</span></label><input id="sm-ask" placeholder="e.g. $25,000" style="width:100%;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px;font:400 13.5px DM Sans;margin-bottom:12px">':'')+
+          '<label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:5px">Next action <span style="color:#BE185D">*</span></label><textarea id="sm-act" rows="2" placeholder="e.g. Schedule the ask meeting with the Bishop" style="width:100%;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px;font:400 13.5px DM Sans;resize:vertical"></textarea>'+
+          '<label style="display:block;font-size:12px;font-weight:600;color:#334155;margin:12px 0 5px">Due date <span style="color:#BE185D">*</span></label><input id="sm-date" type="date" value="'+due+'" style="width:100%;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px;font:400 13.5px DM Sans">'+
+        '</div>'+
+        '<div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 20px;border-top:1px solid #E2E8F0"><button id="sm-cancel" style="border:1px solid #E2E8F0;background:#fff;color:#334155;padding:9px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Cancel</button><button id="sm-go" style="border:none;background:#2563EB;color:#fff;padding:9px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Move to '+toStage+'</button></div>'+
+      '</div>';
+      document.body.appendChild(ov);
+      function close(){ ov.remove(); }
+      ov.querySelector('#sm-cancel').onclick=close; ov.onclick=function(e){ if(e.target===ov) close(); };
+      ov.querySelector('#sm-go').onclick=function(){
+        var act=(ov.querySelector('#sm-act').value||'').trim(); var date=ov.querySelector('#sm-date').value;
+        var ask=needAsk?((ov.querySelector('#sm-ask').value||'').trim()):'';
+        if(needAsk && !ask){ ov.querySelector('#sm-ask').focus(); return; }
+        if(!act){ ov.querySelector('#sm-act').focus(); return; }
+        if(!date){ ov.querySelector('#sm-date').focus(); return; }
+        var tl=document.querySelector('.timeline');
+        if(tl){ var e=document.createElement('div'); e.className='tl-item'; e.style.cssText='animation:fadeUp .25s ease'; e.innerHTML='<div class="tl-dot" style="background:#DBEAFE;color:#1D4ED8"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 5h6M5 2l3 3-3 3"/></svg></div><div class="tl-body"><div class="tl-text"><strong>Moved to '+toStage+'</strong>'+(needAsk?(' · ask '+ask):'')+' — next: '+act.replace(/</g,'&lt;')+'</div><div class="tl-date">Due '+date+' · task added to your inbox</div></div>'; tl.insertBefore(e,tl.firstChild); }
+        var na=document.querySelector('.na-field'); if(na) na.value=act; var nad=document.querySelector('.na-date'); if(nad) nad.value=date;
+        close(); if(onConfirm) onConfirm();
+        var toast=document.getElementById('dnd-toast'); if(!toast){ toast=document.createElement('div'); toast.id='dnd-toast'; toast.innerHTML='<span class="ico">✓</span><span class="msg"></span><span class="undo">Undo</span>'; document.body.appendChild(toast); }
+        toast.querySelector('.ico').textContent='✓'; toast.querySelector('.msg').textContent='Moved to '+toStage+' · next action due '+date; var u=toast.querySelector('.undo'); if(u)u.style.display='none'; toast.classList.add('show'); clearTimeout(toast._timer); toast._timer=setTimeout(function(){toast.classList.remove('show');},3000);
+      };
+      setTimeout(function(){ var f=ov.querySelector(needAsk?'#sm-ask':'#sm-act'); if(f) try{f.focus();}catch(_){} },30);
+    }
+    window.openStageMoveModal=openStageMoveModal;
 
     /* ── CTA-completeness shim · added 2026-05-12 ───────────────────────
        Makes every clickable element on this page functional. */
@@ -1580,13 +1782,30 @@ body {
         });
       });
 
-      // 3) Filter — opens an inline filter strip directly under the topbar
+      // 3) Filter — routes to the SINGLE canonical filter system in the controls bar
+      //    (scope + view pills + Filters facets + search all live in #pipe-controls and
+      //     already filter both the board and the list — so we don't build a 2nd strip).
       var filterBtn = Array.prototype.find.call(document.querySelectorAll('.tb-btn.tb-ghost'), function(b){ return (b.textContent || '').trim() === 'Filter'; });
       if (filterBtn) {
         filterBtn.addEventListener('click', function(e){
           e.preventDefault();
+          var controls = document.getElementById('pipe-controls');
+          if (controls && controls.scrollIntoView) controls.scrollIntoView({ behavior:'smooth', block:'nearest' });
+          var fb = document.getElementById('filters-btn');
+          if (fb) { setTimeout(function(){ fb.click(); }, 60); }
+          return;
+        });
+      }
+      if (false) {
+        (function(filterBtn){
+          filterBtn.addEventListener('click', function(e){
+          e.preventDefault();
           var existing = document.getElementById('inline-filter');
-          if (existing) { existing.remove(); return; }
+          if (existing) {
+            existing.remove();
+            document.querySelectorAll('.stage-col').forEach(function(col){ col.classList.remove('no-match'); col.querySelectorAll('.prospect-card').forEach(function(c){ c.style.display=''; }); });
+            return;
+          }
           var strip = document.createElement('div');
           strip.id = 'inline-filter';
           strip.style.cssText = 'background:white;border-bottom:1px solid #E2E8F0;padding:10px 24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-family:DM Sans,sans-serif;font-size:12px;animation:fadeUp .2s ease;';
@@ -1614,10 +1833,46 @@ body {
             'AI score': ['A rated','B rated','C or below']
           };
           var active = [];  // {field,value}
+          var CAMP_KEYS = { 'Cathedral Capital':['cathedral','capital','benefactor'], 'CMA 2026':['cma','ministry appeal'], 'Annual Appeal':['annual','appeal'] };
+          function askNum(txt){ if(!txt) return 0; var n=parseFloat(txt.replace(/[^0-9.]/g,'')); if(isNaN(n))return 0; return /k/i.test(txt)?n*1000:(/m/i.test(txt)?n*1000000:n); }
+          function daysNum(txt){ if(!txt) return null; if(/new/i.test(txt)) return 0; var m=txt.match(/\d+/); return m?parseInt(m[0],10):null; }
+          function cardMatches(card){
+            // group chips by field → OR within a field, AND across fields
+            var byField = {};
+            active.forEach(function(f){ (byField[f.field]=byField[f.field]||[]).push(f.value); });
+            var col = card.closest('.stage-col');
+            var stageName = col ? (col.querySelector('.stage-name')||{}).textContent : '';
+            var officer = (card.querySelector('.pc-officer')||{}).textContent || '';
+            var askv = askNum((card.querySelector('.pc-ask')||{}).textContent);
+            var dv = daysNum((card.querySelector('.pc-days')||{}).textContent);
+            var text = card.textContent.toLowerCase();
+            return Object.keys(byField).every(function(field){
+              var vals = byField[field];
+              return vals.some(function(v){
+                if (field==='Solicitor') return v==='Unassigned' ? !/[A-Za-z]/.test(officer.replace(/unassigned/i,'')) || /unassigned/i.test(officer) : officer.indexOf(v)!==-1;
+                if (field==='Stage') return (stageName||'').toLowerCase().indexOf(v.toLowerCase())!==-1;
+                if (field==='Ask amount') return askv >= askNum(v);
+                if (field==='Campaign') return (CAMP_KEYS[v]||[v.toLowerCase()]).some(function(k){ return text.indexOf(k)!==-1; });
+                if (field==='Days in stage'){ if(dv===null) return true; if(v.indexOf('< 30')!==-1) return dv<30; if(v.indexOf('< 90')!==-1) return dv<90; if(v.indexOf('> 90')!==-1) return dv>90; return true; }
+                if (field==='AI score'){ return true; } // no per-card grade in demo data — don't hide
+                return true;
+              });
+            });
+          }
           function recount(){
-            // simulate a narrowing count so the UI feels live
-            var n = active.length ? Math.max(3, TOTAL - active.length * 5) : TOTAL;
-            if (countEl) countEl.textContent = n + ' of ' + TOTAL;
+            var shownTotal=0, total=0;
+            document.querySelectorAll('.stage-col').forEach(function(col){
+              var shown=0;
+              col.querySelectorAll('.prospect-card').forEach(function(card){
+                total++;
+                var ok = active.length===0 || cardMatches(card);
+                card.style.display = ok ? '' : 'none';
+                if (ok) shown++;
+              });
+              shownTotal += shown;
+              col.classList.toggle('no-match', shown===0 && active.length>0);
+            });
+            if (countEl) countEl.textContent = shownTotal + ' of ' + total;
           }
           function renderChips(){
             chipsWrap.innerHTML = active.map(function(f,i){
@@ -1675,7 +1930,8 @@ body {
           // seed with a couple of demo filters so the strip isn't empty
           active = [{field:'Stage',value:'Cultivation'},{field:'Ask amount',value:'$25k+'}];
           renderChips();
-        });
+          });
+        })(filterBtn);
       }
 
       // 4) Sort — opens a small dropdown with sort options
@@ -1689,19 +1945,32 @@ body {
           var menu = document.createElement('div');
           menu.id = 'sort-menu';
           menu.style.cssText = 'position:absolute;top:100%;right:0;margin-top:6px;background:white;border:1px solid #E2E8F0;border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.12);padding:6px;min-width:240px;z-index:1000;font-family:DM Sans,sans-serif;font-size:13px;';
-          var options = ['Ask amount ↓ (largest first)','Days in stage ↑ (most stale)','Last activity ↓ (most recent)','AI score ↓','Conversion likelihood ↓','Donor name A → Z'];
-          menu.innerHTML = options.map(function(o, i){
-            return '<div style="padding:8px 10px;border-radius:6px;cursor:pointer;color:#334155;display:flex;align-items:center;gap:9px"><span style="width:14px;height:14px;border-radius:50%;border:1.5px solid '+(i===0?'#2563EB':'#E2E8F0')+';background:'+(i===0?'#2563EB':'white')+';box-shadow:'+(i===0?'inset 0 0 0 3px white':'none')+';flex-shrink:0"></span>'+o+'</div>';
+          var SORTMAP = [
+            {label:'Ask amount ↓ (largest first)', lk:'ask',      ld:-1, kk:'ask',  kd:-1},
+            {label:'Days in stage ↓ (most stale)', lk:'days',     ld:-1, kk:'days', kd:-1},
+            {label:'Last activity ↓ (most recent)',lk:'last',     ld: 1, kk:'name', kd: 1},
+            {label:'AI grade ↑ (best first)',      lk:'ai',       ld: 1, kk:'ask',  kd:-1},
+            {label:'Conversion likelihood ↓',      lk:'priority', ld:-1, kk:'ask',  kd:-1},
+            {label:'Donor name A → Z',             lk:'name',     ld: 1, kk:'name', kd: 1}
+          ];
+          var activeIdx = parseInt(sortBtn.dataset.sortIdx || '0', 10);
+          menu.innerHTML = SORTMAP.map(function(o, i){
+            var on = i===activeIdx;
+            return '<div data-i="'+i+'" style="padding:8px 10px;border-radius:6px;cursor:pointer;color:#334155;display:flex;align-items:center;gap:9px"><span style="width:14px;height:14px;border-radius:50%;border:1.5px solid '+(on?'#2563EB':'#E2E8F0')+';background:'+(on?'#2563EB':'white')+';box-shadow:'+(on?'inset 0 0 0 3px white':'none')+';flex-shrink:0"></span>'+o.label+'</div>';
           }).join('');
-          menu.querySelectorAll('div').forEach(function(opt){
+          menu.querySelectorAll('div[data-i]').forEach(function(opt){
             opt.addEventListener('mouseenter', function(){ opt.style.background='#EFF6FF'; });
             opt.addEventListener('mouseleave', function(){ opt.style.background='transparent'; });
             opt.addEventListener('click', function(){
-              menu.querySelectorAll('span:first-child').forEach(function(c){ c.style.border='1.5px solid #E2E8F0'; c.style.background='white'; c.style.boxShadow='none'; });
+              var i = parseInt(opt.dataset.i, 10); var m = SORTMAP[i];
+              sortBtn.dataset.sortIdx = i;
+              menu.querySelectorAll('span').forEach(function(c){ c.style.border='1.5px solid #E2E8F0'; c.style.background='white'; c.style.boxShadow='none'; });
               opt.querySelector('span').style.border='1.5px solid #2563EB';
               opt.querySelector('span').style.background='#2563EB';
               opt.querySelector('span').style.boxShadow='inset 0 0 0 3px white';
-              setTimeout(function(){ menu.remove(); }, 200);
+              if (window.LV && window.LV.setSort) window.LV.setSort(m.lk, m.ld);   // list view + data-driven kanban
+              if (window.applyBoardSort) window.applyBoardSort(m.kk, m.kd);         // static kanban cards
+              setTimeout(function(){ menu.remove(); }, 180);
             });
           });
           sortBtn.appendChild(menu);
@@ -1720,7 +1989,36 @@ body {
         if (t === 'Move prospect here') {
           b.addEventListener('click', function(e){
             e.preventDefault(); e.stopPropagation();
-            alert('To move a prospect:\\n\\n  1. Click the stage chips inside the drawer (left side), OR\\n  2. Drag a card from another column onto this one.');
+            var targetCol = b.closest('.stage-col');
+            var targetName = targetCol ? (targetCol.querySelector('.stage-name')||{}).textContent.trim() : 'this stage';
+            // Gather candidate prospects from the columns to the left of the target
+            var cols = [].slice.call(document.querySelectorAll('.stage-col'));
+            var ti = cols.indexOf(targetCol);
+            var candidates = [];
+            cols.forEach(function(col, ci){
+              if (ci >= ti) return;
+              col.querySelectorAll('.prospect-card').forEach(function(card){
+                var nm=((card.querySelector('.pc-name')||{}).textContent||'').trim();
+                var stg=((col.querySelector('.stage-name')||{}).textContent||'').trim();
+                if(nm) candidates.push({ nm:nm, stg:stg, card:card });
+              });
+            });
+            if (!window.PipeModal){ return; }
+            var body = candidates.length
+              ? '<label>Prospect to move into '+targetName+'</label><select class="pbf" id="pb-move">'+candidates.map(function(c,i){ return '<option value="'+i+'">'+c.nm+' · '+c.stg+'</option>'; }).join('')+'</select>'+
+                '<p style="font-size:11.5px;color:#64748B;margin-top:9px">Moving a prospect here advances them in the pipeline. You can also drag a card between columns.</p>'
+              : '<p style="font-size:13px;color:#334155">No prospects in earlier stages are loaded on the board right now. Load more cards, or drag a card from another column onto this one.</p>';
+            window.PipeModal('Move a prospect here', 'Advance an existing prospect into '+targetName+'.', body,
+              candidates.length?'Move prospect':'Got it',
+              function(){
+                if (candidates.length){
+                  var idx=parseInt(document.getElementById('pb-move').value,10); var c=candidates[idx];
+                  var area = targetCol.querySelector('.cards-area'); if(area){ c.card.style.cssText+=';animation:popIn .25s ease'; area.insertBefore(c.card, area.firstChild); }
+                  if (window.atlasToast) window.atlasToast(c.nm+' moved to '+targetName);
+                  if (window.__kbRefreshBar) window.__kbRefreshBar();
+                }
+                window.PipeModalClose();
+              });
           });
         }
         if (t === 'Record a win') {
@@ -2228,6 +2526,15 @@ body {
             '</div>' +
             '<div class="rw-body">' +
               '<div class="rw-section">' +
+                '<div class="rw-label">How did it close? <span class="req">*</span></div>' +
+                '<div id="rw-outcome" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">' +
+                  '<label class="rw-check on" data-oc="gift"><input type="radio" name="rwoc" value="gift" checked>🎁 Gift received</label>' +
+                  '<label class="rw-check" data-oc="pledge"><input type="radio" name="rwoc" value="pledge">🤝 Pledge committed</label>' +
+                  '<label class="rw-check" data-oc="lost"><input type="radio" name="rwoc" value="lost">✕ Declined / lost</label>' +
+                '</div>' +
+                '<div class="rw-hint" id="rw-oc-hint">Gift is in hand — records the gift, queues the thank-you, and starts stewardship.</div>' +
+              '</div>' +
+              '<div class="rw-section">' +
                 '<div class="rw-label">Prospect <span class="req">*</span></div>' +
                 '<div class="rw-pp" id="rw-pp">' +
                   (prospects.length ? prospects.map(function(p, i){
@@ -2276,8 +2583,15 @@ body {
                   '<input class="rw-input" id="rw-date" type="date" value="' + today + '">' +
                 '</div>' +
               '</div>' +
+              '<div class="rw-section" id="rw-lost-sec" style="display:none">' +
+                '<div class="rw-row">' +
+                  '<div><div class="rw-label">Reason not won</div><select class="rw-select" id="rw-reason"><option>Gave to another priority</option><option>Timing — revisit later</option><option>Capacity lower than expected</option><option>Lost contact / unresponsive</option><option>Declined outright</option></select></div>' +
+                  '<div><div class="rw-label">Revisit on</div><input class="rw-input" id="rw-recycle" type="date"></div>' +
+                '</div>' +
+                '<div class="rw-hint">Keeps the relationship history and can auto-resurface the prospect for a future cycle.</div>' +
+              '</div>' +
               '<div class="rw-section">' +
-                '<div class="rw-label">Celebration note · the story behind the close <span class="req">*</span></div>' +
+                '<div class="rw-label" id="rw-story-label">Celebration note · the story behind the close <span class="req">*</span></div>' +
                 '<textarea class="rw-textarea" id="rw-story" placeholder="One sentence the team will see in the Wins feed — e.g. &#34;Bishop&#39;s personal call sealed it after 18 months of cultivation.&#34;" maxlength="220"></textarea>' +
                 '<div class="rw-hint"><span id="rw-count">0</span>/220 · this appears on the dashboard Wins ticker</div>' +
               '</div>' +
@@ -2323,6 +2637,24 @@ body {
         var counter = overlay.querySelector('#rw-count');
         story.addEventListener('input', function(){ counter.textContent = story.value.length; });
 
+        // Outcome switch (Gift received / Pledge committed / Declined-lost)
+        var OC='gift';
+        var ocHints={ gift:'Gift is in hand — records the gift, queues the thank-you, and starts stewardship.', pledge:'A commitment, not yet received — creates a pledge with a first-payment reminder; the prospect waits in “Won · awaiting gift”.', lost:'Not won this time — logs the reason and can resurface the prospect for a future cycle.' };
+        function applyOutcome(){
+          overlay.querySelectorAll('#rw-outcome .rw-check').forEach(function(l){ l.classList.toggle('on', l.querySelector('input').checked); });
+          var hint=overlay.querySelector('#rw-oc-hint'); if(hint) hint.textContent=ocHints[OC];
+          var lost=overlay.querySelector('#rw-lost-sec'); if(lost) lost.style.display=(OC==='lost')?'':'none';
+          ['#rw-amount','#rw-type','#rw-desig'].forEach(function(sel){ var s=overlay.querySelector(sel); if(s){ var sec=s.closest('.rw-section'); if(sec) sec.style.display=(OC==='lost')?'none':''; } });
+          var amtSec=overlay.querySelector('#rw-amount'); if(amtSec){ var lbl=amtSec.closest('.rw-section').querySelector('.rw-label'); if(lbl) lbl.innerHTML=(OC==='pledge'?'Committed amount':'Gift amount')+' <span class="req">*</span>'; }
+          var slbl=overlay.querySelector('#rw-story-label'); if(slbl) slbl.innerHTML=(OC==='lost'?'Note · what happened':'Celebration note · the story behind the close')+' <span class="req">*</span>';
+          var h=overlay.querySelector('.rw-head h3'), ic=overlay.querySelector('.rw-head .ico'), sv=overlay.querySelector('#rw-save');
+          if(OC==='gift'){ h.textContent='Record a major-gift win'; ic.textContent='🎉'; sv.innerHTML='Record win &amp; move to Closed · Won'; }
+          else if(OC==='pledge'){ h.textContent='Record a pledge commitment'; ic.textContent='🤝'; sv.innerHTML='Record pledge · move to Won (awaiting gift)'; }
+          else { h.textContent='Mark as not won'; ic.textContent='✕'; sv.textContent='Mark not won · keep history'; }
+        }
+        overlay.querySelectorAll('input[name=rwoc]').forEach(function(r){ r.addEventListener('change', function(){ OC=this.value; applyOutcome(); }); });
+        applyOutcome();
+
         function close(){ overlay.remove(); }
         overlay.querySelector('#rw-x').addEventListener('click', close);
         overlay.querySelector('#rw-cancel').addEventListener('click', close);
@@ -2330,11 +2662,12 @@ body {
 
         // Save handler
         overlay.querySelector('#rw-save').addEventListener('click', function(){
-          if (!selected) { alert('Pick the prospect this win belongs to.'); pp.scrollIntoView({block:'center'}); return; }
+          if (!selected) { alert('Pick the prospect this belongs to.'); pp.scrollIntoView({block:'center'}); return; }
           var amount = overlay.querySelector('#rw-amount').value.trim();
-          if (!amount) { alert('Enter the gift amount.'); overlay.querySelector('#rw-amount').focus(); return; }
+          if (OC!=='lost' && !amount) { alert('Enter the '+(OC==='pledge'?'committed':'gift')+' amount.'); overlay.querySelector('#rw-amount').focus(); return; }
           var storyTxt = story.value.trim();
-          if (!storyTxt) { alert('Add a one-line celebration note — the team sees this in the Wins feed.'); story.focus(); return; }
+          if (!storyTxt) { alert('Add a one-line note — the team sees this in the feed.'); story.focus(); return; }
+          var reason=(overlay.querySelector('#rw-reason')||{}).value||''; var recycle=(overlay.querySelector('#rw-recycle')||{}).value||'';
           var type   = overlay.querySelector('#rw-type').value;
           var desig  = overlay.querySelector('#rw-desig').value;
           var dateV  = overlay.querySelector('#rw-date').value || today;
@@ -2354,43 +2687,56 @@ body {
           }
           var dispAmt = amount.startsWith('$') ? amount : fmt(amtNum);
 
-          // 1) Move the card from its origin column to Closed/Won
+          // 1) Route the card by outcome
           var origCard = selected._card;
           var origCol  = origCard ? origCard.closest('.stage-col') : null;
-          var winCol   = document.querySelector('.col-close .cards-area');
-          if (origCard && winCol) {
-            // Style the moved card as a Won card
-            origCard.classList.add('won');
-            // Update meta to show close info
-            var amtEl = origCard.querySelector('.pc-ask');
-            if (amtEl) { amtEl.textContent = dispAmt; amtEl.style.color = '#15803D'; }
-            // Replace tags with "Gift received ✓"
-            var tags = origCard.querySelector('.pc-tags');
-            if (tags) tags.innerHTML = '<span class="pc-tag" style="background:#DCFCE7;color:#15803D">Gift received ✓</span>';
-            // Footer days badge
-            var days = origCard.querySelector('.pc-days');
-            if (days) { days.textContent = 'Won ✓'; days.className = 'pc-days days-won'; }
-            // Insert before Record-a-win button
-            var addBtn = winCol.parentNode.querySelector('.add-card-btn');
-            origCard.style.cssText += ';animation:popIn .25s ease';
-            winCol.appendChild(origCard);
-
-            // Update column counts/values via existing refresh helper if present, else manual
-            if (typeof refreshStageCounts === 'function') {
-              try { refreshStageCounts(); } catch(_) {}
-            } else {
-              // Manual: increment Closed/Won count + value, decrement origin
-              [origCol, document.querySelector('.col-close')].forEach(function(col){
-                if (!col) return;
-                var cnt = col.querySelector('.stage-count');
-                var n = col.querySelectorAll('.cards-area .prospect-card').length;
-                if (cnt) cnt.textContent = n;
-              });
+          // The Closed column is split into two outcome groups: Won (gift/pledge) and No gift (lost)
+          var wonCards  = document.querySelector('.col-close .cg-won .cg-cards');
+          var noneCards = document.querySelector('.col-close .cg-none .cg-cards');
+          function updCloseGroups(){
+            var col = document.querySelector('.col-close'); if(!col) return;
+            var w = col.querySelector('.cg-won .cg-cards'), n = col.querySelector('.cg-none .cg-cards');
+            var wn = w ? w.querySelectorAll('.prospect-card').length : 0;
+            var nn = n ? n.querySelectorAll('.prospect-card').length : 0;
+            var wl = col.querySelector('.cg-won .cg-n'), nl = col.querySelector('.cg-none .cg-n');
+            if (wl) wl.textContent = wn; if (nl) nl.textContent = nn;
+            var cnt = col.querySelector('.stage-count'); if (cnt) cnt.textContent = (wn + nn);
+          }
+          function decOrigin(){ if(origCol){ var c=origCol.querySelector('.stage-count'); if(c) c.textContent=origCol.querySelectorAll('.cards-area .prospect-card').length; } }
+          if (OC==='lost') {
+            // No gift received → move into the "Closed · no gift" group (kept, not deleted)
+            var reasonEl = overlay.querySelector('#rw-reason');
+            var reason = reasonEl ? (reasonEl.value || 'no gift') : 'no gift';
+            if (origCard && noneCards) {
+              origCard.classList.remove('won'); origCard.classList.add('nogift');
+              var lAsk = origCard.querySelector('.pc-ask');
+              if (lAsk) { lAsk.textContent = 'No gift'; lAsk.style.color=''; lAsk.style.fontFamily=''; }
+              var lTags = origCard.querySelector('.pc-tags');
+              if (lTags) lTags.innerHTML = '<span class="pc-tag" style="background:#FFE4E6;color:#9F1239">No gift · '+reason+'</span>';
+              var lDays = origCard.querySelector('.pc-days');
+              if (lDays) { lDays.textContent = 'No gift'; lDays.className='pc-days'; lDays.style.background='#FFE4E6'; lDays.style.color='#9F1239'; }
+              origCard.style.cssText += ';animation:popIn .25s ease';
+              noneCards.appendChild(origCard);
+              decOrigin(); updCloseGroups();
             }
+          } else if (origCard && wonCards) {
+            // Gift or pledge → "Won · gift secured" group
+            origCard.classList.remove('nogift'); origCard.classList.add('won');
+            var amtEl = origCard.querySelector('.pc-ask');
+            if (amtEl) { amtEl.textContent = dispAmt; amtEl.style.color = (OC==='pledge'?'#D97706':'#15803D'); amtEl.style.fontFamily=''; }
+            var tags = origCard.querySelector('.pc-tags');
+            if (tags) tags.innerHTML = OC==='pledge'
+              ? '<span class="pc-tag" style="background:#FEF3C7;color:#92400E">Pledged · awaiting gift</span>'
+              : '<span class="pc-tag" style="background:#DCFCE7;color:#15803D">Gift received ✓</span>';
+            var days = origCard.querySelector('.pc-days');
+            if (days) { days.textContent = OC==='pledge'?'Pledged':'Won ✓'; days.className = 'pc-days days-won'; days.style.background=''; days.style.color=''; }
+            origCard.style.cssText += ';animation:popIn .25s ease';
+            wonCards.appendChild(origCard);
+            decOrigin(); updCloseGroups();
           }
 
-          // 2) Update KPI strip · Won this year (find by label text)
-          document.querySelectorAll('.ps-item').forEach(function(item){
+          // 2) Update KPI strip · Won this year (received gifts only — pledges are committed, not received)
+          if (OC==='gift') document.querySelectorAll('.ps-item').forEach(function(item){
             var lbl = item.querySelector('.ps-label');
             if (lbl && /won this year/i.test(lbl.textContent)) {
               var val = item.querySelector('.ps-value');
@@ -2412,12 +2758,16 @@ body {
             if (tl) {
               var entry = document.createElement('div');
               entry.className = 'tl-item';
+              var dotBg = OC==='lost'?'#FEE2E2;color:#B91C1C':(OC==='pledge'?'#FEF3C7;color:#92400E':'#DCFCE7;color:#15803D');
+              var headTxt = OC==='gift' ? ('<strong>Gift closed</strong> — '+dispAmt+' '+type+' · '+desig)
+                : OC==='pledge' ? ('<strong>Pledge committed</strong> — '+dispAmt+' '+type+' · '+desig+' · awaiting first payment')
+                : ('<strong>Marked not won</strong> — '+reason+(recycle?(' · revisit '+recycle):''));
               entry.innerHTML =
-                '<div class="tl-dot" style="background:#DCFCE7;color:#15803D">' +
+                '<div class="tl-dot" style="background:' + dotBg + '">' +
                   '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2.5 5l1.8 1.8L7.5 3.5"/></svg>' +
                 '</div>' +
                 '<div class="tl-body">' +
-                  '<div class="tl-text"><strong>Gift closed</strong> — ' + dispAmt + ' ' + type + ' · ' + desig + '</div>' +
+                  '<div class="tl-text">' + headTxt + '</div>' +
                   '<div class="tl-date" style="font-style:italic">"' + storyTxt.replace(/</g,'&lt;') + '"</div>' +
                 '</div>';
               tl.insertBefore(entry, tl.firstChild);
@@ -2433,20 +2783,24 @@ body {
             document.body.appendChild(toast);
           }
           var undoBtn = toast.querySelector('.undo');
-          toast.querySelector('.ico').textContent = '🎉';
-          toast.querySelector('.msg').textContent = dispAmt + ' from ' + selected.name + ' recorded · ' + (steward ? 'stewardship task scheduled · ' : '') + (thanks ? 'thank-you queued' : '');
+          toast.querySelector('.ico').textContent = OC==='lost'?'✕':(OC==='pledge'?'🤝':'🎉');
+          toast.querySelector('.msg').textContent = OC==='gift'
+            ? (dispAmt + ' from ' + selected.name + ' recorded · ' + (thanks ? 'thank-you queued · ' : '') + (steward ? '90-day stewardship scheduled' : ''))
+            : OC==='pledge'
+              ? (dispAmt + ' pledge from ' + selected.name + ' · first-payment reminder set · in “Won · awaiting gift”')
+              : (selected.name + ' marked not won · reason logged' + (recycle?(' · revisit '+recycle):''));
           undoBtn.style.display = '';
           toast.classList.add('show');
           clearTimeout(toast._timer);
           // Undo: move the card back
           undoBtn.onclick = function(){
             if (origCard && origCol) {
-              origCard.classList.remove('won');
+              origCard.classList.remove('won'); origCard.style.opacity='1';
               var area = origCol.querySelector('.cards-area');
               if (area) area.appendChild(origCard);
+              var c=origCol.querySelector('.stage-count'); if(c) c.textContent=origCol.querySelectorAll('.cards-area .prospect-card').length;
             }
             toast.classList.remove('show');
-            alert('Win undone · prospect returned to ' + (selected.stage || 'previous stage') + '. Refresh to reset KPI totals.');
           };
           toast._timer = setTimeout(function(){ toast.classList.remove('show'); }, 6000);
 
@@ -2653,8 +3007,11 @@ body {
       var isFiltered = P.scope!=='all' || P.view!=='all' || P.stages.length || P.officers.length || P.campaigns.length || P.askMin || P.ai.length || P.search;
       var info=document.getElementById('lv-pageinfo');
       info.innerHTML = total? ('Showing <strong>'+(start+1)+'–'+end+'</strong> of <strong>'+total.toLocaleString()+'</strong>'+(isFiltered?' (filtered)':'')) : 'No matching prospects';
+      // "Clear" and the match count only make sense once an actual filter/view/search is applied (scope alone doesn't count)
+      var hasFilter = P.view!=='all' || P.stages.length || P.officers.length || P.campaigns.length || P.askMin || P.ai.length || (P.search||'').trim();
       var res=document.getElementById('pc-result');
-      if (res) res.innerHTML = '<strong>'+total.toLocaleString()+'</strong> '+(total===1?'prospect':'prospects')+(isFiltered?' match':'');
+      if (res){ res.innerHTML = '<strong>'+total.toLocaleString()+'</strong> '+(total===1?'prospect':'prospects')+' match'; res.style.display = hasFilter ? '' : 'none'; }
+      var clr=document.getElementById('pc-clear'); if(clr) clr.style.display = hasFilter ? '' : 'none';
       document.getElementById('lv-pagenum').textContent = 'Page '+state.page+' of '+maxPage;
       document.getElementById('lv-first').disabled = state.page<=1;
       document.getElementById('lv-prev').disabled  = state.page<=1;
@@ -2666,7 +3023,8 @@ body {
       var sa=document.getElementById('lv-selall'); if(sa) sa.checked=allSel;
       updateBulk();
     }
-    window.LV = { render:render, data:DATA, fmtAsk:fmtAsk, query:function(){ return sorted(filtered()); } };
+    window.LV = { render:render, data:DATA, fmtAsk:fmtAsk, query:function(){ return sorted(filtered()); },
+      setSort:function(k,d){ state.sort=k; state.dir=d; state.page=1; render(); if(window.PIPE_apply) window.PIPE_apply(false); } };
 
     function updateBulk(){
       var n=Object.keys(state.sel).length;
@@ -2725,11 +3083,17 @@ body {
     });
     document.querySelectorAll('.lv-bulkbtn').forEach(function(b){
       b.addEventListener('click', function(){
-        var n=Object.keys(state.sel).length, a=b.dataset.bulk;
+        var a=b.dataset.bulk;
         if (a==='clear'){ state.sel={}; render(); return; }
-        var msg={assign:'Reassign officer for '+n+' prospects…',segment:n+' prospects added to a segment',task:'Bulk task created for '+n+' prospects',export:'Exporting '+n+' prospects to CSV…'}[a];
-        lvToast(msg);
-        if (a==='segment'||a==='task'||a==='export'){ state.sel={}; render(); }
+        var items = DATA.filter(function(r){ return state.sel[r.id]; }).map(function(r){
+          return { name:r.name, stage:r.stage.n, officer:r.officer, ask:fmtAsk(r.ask), campaign:r.campaign };
+        });
+        if (window.PipeBulk){
+          window.PipeBulk.run(a, items, {
+            onAssign:function(off){ DATA.forEach(function(r){ if(state.sel[r.id]) r.officer=off; }); render(); },
+            onDone:function(){ if(a!=='assign'){ state.sel={}; render(); } }
+          });
+        } else { lvToast('Bulk '+a+' · '+items.length+' prospects'); if(a!=='assign'){ state.sel={}; render(); } }
       });
     });
 
@@ -2901,6 +3265,24 @@ body {
     }
     window.PIPE_apply = apply;
 
+    // Sort the visible Kanban cards in-place (works on static hero cards + grouped Closed column)
+    window.applyBoardSort = function(key, dir){
+      function val(card){
+        if (key==='ask'){ var t=(card.querySelector('.pc-ask')||{}).textContent||''; var n=parseFloat(t.replace(/[^0-9.]/g,''))||0; return /k/i.test(t)?n*1000:(/m/i.test(t)?n*1000000:n); }
+        if (key==='days'){ var d=(card.querySelector('.pc-days')||{}).textContent||''; if(/new/i.test(d)) return 0; var m=d.match(/\d+/); return m?parseInt(m[0],10):0; }
+        return ((card.querySelector('.pc-name')||{}).textContent||'').toLowerCase();
+      }
+      document.querySelectorAll('.cards-area').forEach(function(area){
+        var groups = area.querySelectorAll('.cg-cards');
+        var containers = groups.length ? [].slice.call(groups) : [area];
+        containers.forEach(function(c){
+          var cards = [].filter.call(c.children, function(el){ return el.classList && el.classList.contains('prospect-card'); });
+          cards.sort(function(a,b){ var av=val(a), bv=val(b); if(av<bv) return -1*dir; if(av>bv) return 1*dir; return 0; });
+          cards.forEach(function(cd){ c.appendChild(cd); });
+        });
+      });
+    };
+
     // ── Scope chips ──
     document.querySelectorAll('.scope-chip').forEach(function(chip){
       chip.addEventListener('click', function(){
@@ -2942,11 +3324,22 @@ body {
     });
 
     // ── Clickable summary stats ──
-    document.querySelectorAll('.ps-clickable').forEach(function(item){
-      item.addEventListener('click', function(){
-        var v = item.dataset.stat==='asks' ? 'asks' : 'overdue';
-        setView(v); apply(false);
-      });
+    var pipeStrip = document.querySelector('.pipeline-strip');
+    if (pipeStrip) pipeStrip.addEventListener('click', function(e){
+      var item = e.target.closest('.ps-clickable'); if(!item) return;
+      var stat = item.dataset.stat;
+      if (stat==='value' || stat==='weighted'){ window.location='atlas-pipeline-forecast.html'; return; }
+      if (stat==='all'){
+        P.view='all'; P.stages=[]; P.officers=[]; P.campaigns=[]; P.askMin=0; P.ai=[]; P.search='';
+        var s=document.getElementById('lv-search'); if(s) s.value='';
+        var bs=document.getElementById('board-search'); if(bs) bs.value='';
+        setView('all'); syncFacetBtns(); apply(false);
+      } else if (stat==='won'){
+        P.view='all'; setView('all'); P.stages=['Closed']; syncFacetBtns(); apply(false);
+      } else { // asks / overdue
+        setView(stat); apply(false);
+      }
+      var board=document.getElementById('board'); if(board&&board.scrollIntoView) board.scrollIntoView({behavior:'smooth',block:'nearest'});
     });
 
     // ── Facet dropdowns ──
@@ -2972,6 +3365,8 @@ body {
       e.stopPropagation();
       if (facetWrap.querySelector('.facet-menu')){ closeFacets(); return; }
       closeFacets();
+      // Snapshot current filters so Cancel can revert
+      var snap = { stages:P.stages.slice(), officers:P.officers.slice(), campaigns:P.campaigns.slice(), ai:P.ai.slice(), askMin:P.askMin };
       var menu=document.createElement('div'); menu.className='facet-menu combined';
       Object.keys(FACETS).forEach(function(name){
         var cfg=FACETS[name];
@@ -3001,7 +3396,24 @@ body {
         });
         menu.appendChild(grp);
       });
+      // Footer: live match count + Cancel / Apply
+      var foot=document.createElement('div'); foot.className='fm-foot';
+      foot.innerHTML='<span class="fm-count" id="fm-count"></span><button class="fm-btn" id="fm-cancel">Cancel</button><button class="fm-btn primary" id="fm-apply">Apply filters</button>';
+      menu.appendChild(foot);
+      function updFmCount(){
+        var n = (window.LV && window.LV.query) ? window.LV.query().length : 0;
+        var c=document.getElementById('fm-count'); if(c) c.innerHTML='<strong>'+n.toLocaleString()+'</strong> prospect'+(n===1?'':'s')+' match';
+      }
+      menu.querySelector('#fm-apply').addEventListener('click', function(ev){ ev.stopPropagation(); closeFacets(); });
+      menu.querySelector('#fm-cancel').addEventListener('click', function(ev){
+        ev.stopPropagation();
+        P.stages=snap.stages; P.officers=snap.officers; P.campaigns=snap.campaigns; P.ai=snap.ai; P.askMin=snap.askMin;
+        syncFacetBtns(); apply(false); closeFacets();
+      });
+      // refresh the live count whenever a facet option is toggled
+      menu.querySelectorAll('.facet-opt').forEach(function(r){ r.addEventListener('click', function(){ setTimeout(updFmCount, 0); }); });
       facetWrap.appendChild(menu);
+      updFmCount();
       setTimeout(function(){ document.addEventListener('click', function cl(ev){ if(!facetWrap.contains(ev.target)){ closeFacets(); document.removeEventListener('click',cl);} }); },10);
     });
 
@@ -4284,5 +4696,232 @@ body {
 })();
 </script>
 <!-- /ATLAS-NAVCOLLAPSE -->
+<!-- Weighted pipeline value (probability-weighted by stage) -->
+<script>
+(function(){
+  function pm(s){ s=(s||'').replace(/[^0-9.kKmM]/g,''); var n=parseFloat(s)||0; if(/m/i.test(s))n*=1e6; else if(/k/i.test(s))n*=1e3; return n; }
+  function fmt(n){ if(n>=1e6) return '$'+(n/1e6).toFixed(n%1e6===0?0:1)+'M'; if(n>=1e3) return '$'+Math.round(n/1e3)+'k'; return '$'+Math.round(n); }
+  var PROB={'col-id':0.10,'col-cul':0.25,'col-sol':0.55,'col-stew':0.90,'col-close':1.00};
+  function enrich(){
+    var totalW=0;
+    document.querySelectorAll('.stage-col').forEach(function(col){
+      var cls=[].filter.call(col.classList,function(c){return PROB[c]!=null;})[0]; if(!cls) return;
+      var vEl=col.querySelector('.stage-value'); if(!vEl) return;
+      var w=pm(vEl.textContent)*PROB[cls]; totalW+=w;
+      vEl.setAttribute('title','≈ '+fmt(w)+' probability-weighted ('+Math.round(PROB[cls]*100)+'% at this stage)');
+      vEl.style.cursor='help';
+    });
+    var strip=document.querySelector('.pipeline-strip'); if(!strip) return;
+    var wv=document.querySelector('#ps-weighted .ps-value');
+    if(wv){ wv.textContent=fmt(totalW); return; }
+    var it=document.createElement('div'); it.className='ps-item ps-clickable'; it.id='ps-weighted'; it.setAttribute('data-stat','weighted'); it.title='Open the pipeline forecast';
+    it.innerHTML='<div class="ps-value" style="color:var(--purple)">'+fmt(totalW)+'</div><div class="ps-label" title="Sum of each stage value × its close probability">Weighted pipeline ›</div>';
+    var items=strip.querySelectorAll('.ps-item'); if(items[1]&&items[1].after) items[1].after(it); else strip.appendChild(it);
+  }
+  if(document.readyState!=='loading') enrich(); else document.addEventListener('DOMContentLoaded', enrich);
+  setTimeout(enrich, 400);
+})();
+</script>
+
+<!-- Stage descriptions + entry-point highlight + resumable Drafts surface -->
+<script>
+(function(){
+  function run(){
+    // 1) One-line description under each stage header
+    var HINTS = {
+      'identification':'Confirm capacity + affinity before an officer invests time. Entry point for new names.',
+      'qualification':'A discovery call verifies interest and giving vehicle.',
+      'cultivation':'Build the relationship toward a specific ask — visits, tours, engagement.',
+      'solicitation':'The ask is on the table or imminent.',
+      'stewardship':'Gift closed — thank, report impact, and set up the next ask.',
+      'closed':'Two outcomes: won (gift or pledge secured) or closed with no gift. Both are kept — for stewardship or a future cycle.',
+      'won':'Gift secured. Recognition and renewal.'
+    };
+    document.querySelectorAll('.stage-col .stage-header').forEach(function(hd){
+      if (hd.querySelector('.stage-sub')) return;
+      var nm = (hd.querySelector('.stage-name')||{}).textContent || '';
+      var key = nm.trim().toLowerCase().split(/[^a-z]/)[0];
+      var txt = HINTS[key];
+      if (!txt) return;
+      var sub = document.createElement('div'); sub.className='stage-sub'; sub.textContent = txt;
+      hd.appendChild(sub);
+      // Mark the Identification column as the recommended entry point
+      if (key==='identification'){
+        var chip = document.createElement('div'); chip.className='stage-start';
+        chip.innerHTML='<span>▸ Start here — pipeline entry point</span>';
+        hd.appendChild(chip);
+      }
+    });
+
+    // 2) Resumable draft banner (drafts saved from Add-Prospect land here)
+    var raw; try { raw = localStorage.getItem('atlas-prospect-draft'); } catch(_){ raw=null; }
+    if (raw){
+      var draft; try { draft = JSON.parse(raw); } catch(_){ draft=null; }
+      if (draft){
+        var strip = document.querySelector('.pipeline-strip');
+        var host = strip && strip.parentNode;
+        if (host && !document.getElementById('pipe-draft-bar')){
+          function ago(ts){ if(!ts) return 'recently'; var s=Math.floor((Date.now()-ts)/1000); if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+' min ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
+          var bar=document.createElement('div'); bar.id='pipe-draft-bar';
+          bar.style.cssText='display:flex;align-items:center;gap:12px;margin:0 24px 12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:11px;padding:10px 15px;font-family:DM Sans,sans-serif';
+          bar.innerHTML='<div style="width:26px;height:26px;border-radius:7px;background:#F59E0B;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700">⏸</div>'+
+            '<div style="flex:1;font-size:12.5px;color:#92400E"><b>1 prospect plan in Drafts</b> — '+(draft.name||'Untitled')+' · '+(draft.stage||'Identification')+' stage · saved '+ago(draft.saved)+'.</div>'+
+            '<a href="atlas-add-prospect.html" style="text-decoration:none;border:1px solid #F59E0B;background:#F59E0B;color:#fff;border-radius:8px;padding:7px 13px;font:600 12px DM Sans;cursor:pointer">Resume draft</a>'+
+            '<button id="pipe-draft-discard" style="border:1px solid #FCD34D;background:#fff;color:#92400E;border-radius:8px;padding:7px 13px;font:600 12px DM Sans;cursor:pointer">Discard</button>';
+          host.insertBefore(bar, strip);
+          document.getElementById('pipe-draft-discard').addEventListener('click', function(){ try{ localStorage.removeItem('atlas-prospect-draft'); }catch(_){} bar.remove(); });
+        }
+      }
+    }
+  }
+  if (document.readyState!=='loading') run(); else document.addEventListener('DOMContentLoaded', run);
+  setTimeout(run, 500);
+})();
+</script>
+
+<!-- Shared bulk-action engine + Kanban multi-select -->
+<script>
+(function(){
+  var OFFICERS = ['Sarah Reynolds','Mark Collins','Bridget McCarthy','Julia Kelleher'];
+  var SEGMENTS = ['Cathedral major-donor cultivation','Q3 Capital pledge prospects','Year-end appeal','Lapsed reactivation'];
+
+  // ── styles ──
+  var css = document.createElement('style');
+  css.textContent =
+    '.kb-check{position:absolute;top:7px;left:7px;width:18px;height:18px;border:1.5px solid #CBD5E1;border-radius:5px;background:#fff;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:4;transition:all .12s}'+
+    '.prospect-card{position:relative}'+
+    '.prospect-card:hover .kb-check,.prospect-card.kb-selected .kb-check{display:flex}'+
+    '.prospect-card.kb-selected{box-shadow:0 0 0 2px #2563EB,0 4px 12px rgba(37,99,235,.18)}'+
+    '.prospect-card.kb-selected .kb-check{background:#2563EB;border-color:#2563EB}'+
+    '.kb-check svg{width:12px;height:12px;color:#fff;opacity:0}'+
+    '.prospect-card.kb-selected .kb-check svg{opacity:1}'+
+    '#kb-bulkbar{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:9500;display:none;align-items:center;gap:10px;background:#0E1E35;border-radius:12px;padding:11px 16px;box-shadow:0 16px 40px rgba(14,30,53,.35);font-family:DM Sans,sans-serif}'+
+    '#kb-bulkbar.show{display:flex}'+
+    '#kb-bulkbar .kbc{color:#fff;font-size:12.5px;margin-right:4px}#kb-bulkbar .kbc strong{font-size:14px}'+
+    '#kb-bulkbar button{font:600 12px DM Sans,sans-serif;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:7px;padding:7px 13px;cursor:pointer}'+
+    '#kb-bulkbar button:hover{background:rgba(255,255,255,.24)}'+
+    '#kb-bulkbar button.ghost{background:transparent;border-color:transparent;color:#93C5FD}'+
+    '#pb-ov{position:fixed;inset:0;background:rgba(14,30,53,.45);z-index:9600;display:none;align-items:center;justify-content:center;padding:22px;font-family:DM Sans,sans-serif}'+
+    '#pb-ov.show{display:flex}'+
+    '#pb-ov .pb-card{background:#fff;border-radius:16px;width:100%;max-width:440px;box-shadow:0 24px 60px rgba(14,30,53,.3);overflow:hidden}'+
+    '#pb-ov .pb-hd{padding:18px 20px 4px}#pb-ov .pb-hd h3{font-family:DM Serif Display,serif;font-size:19px;color:#0E1E35;margin:0}#pb-ov .pb-hd p{font-size:12px;color:#64748B;margin:5px 0 0}'+
+    '#pb-ov .pb-bd{padding:14px 20px}#pb-ov .pb-bd label{display:block;font-size:11px;font-weight:600;color:#334155;margin:10px 0 5px}#pb-ov .pb-bd .pbf{width:100%;border:1px solid #E2E8F0;border-radius:9px;padding:9px 11px;font:400 13.5px DM Sans,sans-serif}'+
+    '#pb-ov .pb-ft{padding:12px 20px 18px;display:flex;gap:10px;justify-content:flex-end}'+
+    '#pb-ov .pb-btn{font:600 12.5px DM Sans,sans-serif;padding:9px 15px;border-radius:9px;border:1px solid #E2E8F0;background:#fff;color:#334155;cursor:pointer}'+
+    '#pb-ov .pb-btn.primary{background:#2563EB;border-color:#2563EB;color:#fff}';
+  document.head.appendChild(css);
+
+  var CHK = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.2l2.3 2.3L9.5 3.5"/></svg>';
+
+  function toast(msg){
+    if (window.atlasToast) return window.atlasToast(msg);
+    var t=document.getElementById('dnd-toast');
+    if(!t){ t=document.createElement('div'); t.id='dnd-toast'; t.innerHTML='<span class="ico">✓</span><span class="msg"></span>'; document.body.appendChild(t); }
+    var m=t.querySelector('.msg')||t; m.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(function(){ t.classList.remove('show'); },2600);
+  }
+
+  // ── generic modal ──
+  var ov=document.createElement('div'); ov.id='pb-ov';
+  ov.innerHTML='<div class="pb-card"><div class="pb-hd"><h3></h3><p></p></div><div class="pb-bd"></div><div class="pb-ft"><button class="pb-btn" id="pb-cancel">Cancel</button><button class="pb-btn primary" id="pb-ok">Apply</button></div></div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click', function(e){ if(e.target===ov) ov.classList.remove('show'); });
+  ov.querySelector('#pb-cancel').addEventListener('click', function(){ ov.classList.remove('show'); });
+  function modal(title, sub, bodyHTML, okLabel, onOk){
+    ov.querySelector('h3').textContent=title; ov.querySelector('.pb-hd p').textContent=sub;
+    ov.querySelector('.pb-bd').innerHTML=bodyHTML;
+    var ok=ov.querySelector('#pb-ok'); ok.textContent=okLabel;
+    ok.onclick=function(){ onOk(); };
+    ov.classList.add('show');
+    setTimeout(function(){ var f=ov.querySelector('.pb-bd input,.pb-bd select'); if(f) f.focus(); },30);
+  }
+  function closeModal(){ ov.classList.remove('show'); }
+  window.PipeModal = modal; window.PipeModalClose = closeModal;
+
+  function csvEscape(v){ v=(''+(v==null?'':v)).replace(/"/g,'""'); return /[",\n]/.test(v)?'"'+v+'"':v; }
+  function exportCSV(items){
+    var head=['Prospect','Stage','Officer','Ask','Campaign'];
+    var lines=[head.join(',')].concat(items.map(function(p){ return [csvEscape(p.name),csvEscape(p.stage),csvEscape(p.officer),csvEscape(p.ask),csvEscape(p.campaign)].join(','); }));
+    var blob=new Blob([lines.join('\n')],{type:'text/csv'}); var url=URL.createObjectURL(blob);
+    var a=document.createElement('a'); a.href=url; a.download='prospects-'+(new Date().toISOString().slice(0,10))+'.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(url); },1500);
+  }
+
+  // Shared runner — items:[{name,stage,officer,ask,campaign}] ; hooks:{onAssign(officer), onDone()}
+  window.PipeBulk = { run:function(action, items, hooks){
+    hooks = hooks||{}; var n=items.length;
+    if (action==='export'){ exportCSV(items); toast('Exported '+n+' prospect'+(n===1?'':'s')+' → CSV'); if(hooks.onDone) hooks.onDone(); return; }
+    if (action==='assign'){
+      modal('Assign officer', 'Reassign '+n+' selected prospect'+(n===1?'':'s')+' to a gift officer.',
+        '<label>Gift officer</label><select class="pbf" id="pb-officer">'+OFFICERS.map(function(o){return '<option>'+o+'</option>';}).join('')+'</select>',
+        'Assign '+n, function(){ var off=document.getElementById('pb-officer').value; closeModal(); if(hooks.onAssign) hooks.onAssign(off); toast(off+' assigned to '+n+' prospect'+(n===1?'':'s')); if(hooks.onDone) hooks.onDone(); });
+      return;
+    }
+    if (action==='segment'){
+      modal('Add to segment', n+' prospect'+(n===1?'':'s')+' will be added to the segment you pick.',
+        '<label>Segment</label><select class="pbf" id="pb-seg">'+SEGMENTS.map(function(s){return '<option>'+s+'</option>';}).join('')+'<option value="__new">＋ New segment…</option></select>'+
+        '<div id="pb-newseg" style="display:none"><label>New segment name</label><input class="pbf" id="pb-segname" placeholder="e.g. FY26 leadership prospects"></div>',
+        'Add '+n, function(){ var sel=document.getElementById('pb-seg'); var nm=sel.value==='__new'?(document.getElementById('pb-segname').value||'New segment'):sel.value; closeModal(); toast(n+' prospect'+(n===1?'':'s')+' added to “'+nm+'”'); if(hooks.onDone) hooks.onDone(); });
+      var sel=document.getElementById('pb-seg'); if(sel) sel.addEventListener('change',function(){ document.getElementById('pb-newseg').style.display=sel.value==='__new'?'':'none'; });
+      return;
+    }
+    if (action==='task'){
+      var d=new Date(Date.now()+7*86400000).toISOString().slice(0,10);
+      modal('Add task', 'Create a task on all '+n+' selected prospect'+(n===1?'':'s')+'.',
+        '<label>Task</label><input class="pbf" id="pb-task" placeholder="e.g. Send cultivation letter" value="Follow-up call">'+
+        '<label>Due date</label><input class="pbf" type="date" id="pb-due" value="'+d+'">'+
+        '<label>Priority</label><select class="pbf" id="pb-prio"><option>Low</option><option selected>Medium</option><option>High</option></select>',
+        'Create '+n+' task'+(n===1?'':'s'), function(){ var t=document.getElementById('pb-task').value||'Task'; closeModal(); toast('“'+t+'” created for '+n+' prospect'+(n===1?'':'s')); if(hooks.onDone) hooks.onDone(); });
+      return;
+    }
+  }};
+
+  // ── Kanban multi-select ──
+  document.addEventListener('DOMContentLoaded', function(){
+    function injectChecks(root){
+      (root||document).querySelectorAll('.prospect-card:not([data-chk])').forEach(function(card){
+        card.setAttribute('data-chk','1');
+        var c=document.createElement('span'); c.className='kb-check'; c.innerHTML=CHK; card.insertBefore(c, card.firstChild);
+      });
+    }
+    injectChecks();
+    // re-inject after data-driven re-renders
+    var board=document.getElementById('board');
+    if (board && window.MutationObserver){
+      new MutationObserver(function(){ injectChecks(board); }).observe(board, {childList:true, subtree:true});
+    }
+    function cardData(card){
+      var col=card.closest('.stage-col');
+      return { name:((card.querySelector('.pc-name')||{}).textContent||'').trim(),
+        ask:((card.querySelector('.pc-ask')||{}).textContent||'').trim(),
+        officer:((card.querySelector('.pc-officer')||{}).textContent||'').trim(),
+        stage:((col&&col.querySelector('.stage-name'))?col.querySelector('.stage-name').textContent:'').trim(),
+        campaign:((card.querySelector('.pc-org')||{}).textContent||'').trim(), el:card };
+    }
+    function selectedCards(){ return [].slice.call(document.querySelectorAll('.prospect-card.kb-selected')); }
+    var bar=document.createElement('div'); bar.id='kb-bulkbar';
+    bar.innerHTML='<span class="kbc"><strong id="kb-selcount">0</strong> selected</span>'+
+      '<button data-b="assign">Assign officer</button><button data-b="segment">Add to segment</button>'+
+      '<button data-b="task">Add task</button><button data-b="export">Export</button>'+
+      '<button class="ghost" data-b="clear">Clear</button>';
+    document.body.appendChild(bar);
+    function refreshBar(){ var n=selectedCards().length; document.getElementById('kb-selcount').textContent=n; bar.classList.toggle('show', n>0); }
+    function toggle(card){ card.classList.toggle('kb-selected'); refreshBar(); }
+    // capture so the card's openDrawer onclick doesn't fire
+    document.addEventListener('click', function(e){
+      var chk=e.target.closest && e.target.closest('.kb-check'); if(!chk) return;
+      e.stopPropagation(); e.preventDefault(); var card=chk.closest('.prospect-card'); if(card) toggle(card);
+    }, true);
+    bar.addEventListener('click', function(e){
+      var b=e.target.closest('button'); if(!b) return; var a=b.dataset.b;
+      var cards=selectedCards(); var items=cards.map(cardData);
+      if (a==='clear'){ cards.forEach(function(c){ c.classList.remove('kb-selected'); }); refreshBar(); return; }
+      window.PipeBulk.run(a, items, {
+        onAssign:function(off){ var ini=off.split(' ').map(function(x){return x[0];}).join('').slice(0,2); cards.forEach(function(c){ var o=c.querySelector('.pc-officer'); if(o) o.innerHTML='<div class="pc-officer-avatar" style="background:var(--blue)">'+ini+'</div>'+off; }); },
+        onDone:function(){ if(a==='segment'||a==='task'||a==='export'){ /* keep selection */ } }
+      });
+    });
+    window.__kbRefreshBar = refreshBar;
+  });
+})();
+</script>
 </body>
 </html>
