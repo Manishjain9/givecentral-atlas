@@ -408,6 +408,22 @@
     .facet-opt { display:flex; align-items:center; gap:9px; padding:7px 9px; border-radius:7px; cursor:pointer; font-size:12.5px; color:var(--text-2); }
     .facet-opt:hover { background:var(--blue-pale,#EFF6FF); }
     .facet-opt input { pointer-events:none; }
+    /* Searchable dropdown facet (scales to 1000s of officers / campaigns) */
+    .fm-select { position:relative; }
+    .fm-si { width:100%; border:1px solid var(--border); border-radius:8px; padding:7px 10px; font:13px 'DM Sans',sans-serif; outline:none; box-sizing:border-box; }
+    .fm-si:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+    .fm-chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; }
+    .fm-chip { display:inline-flex; align-items:center; gap:5px; background:var(--blue-pale,#EFF6FF); border:1px solid #DBEAFE; color:#1D4ED8; border-radius:99px; padding:2px 4px 2px 9px; font:600 11.5px 'DM Sans',sans-serif; }
+    .fm-chip b { cursor:pointer; font-size:13px; line-height:1; padding:0 3px; }
+    .fm-results { position:absolute; left:0; right:0; top:100%; margin-top:4px; background:#fff; border:1px solid var(--border); border-radius:9px; box-shadow:0 12px 26px rgba(15,23,42,.16); max-height:200px; overflow:auto; z-index:30; display:none; padding:4px; }
+    .fm-results.on { display:block; }
+    .fm-r { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:6px; cursor:pointer; font-size:12.5px; color:var(--text-2); }
+    .fm-r:hover, .fm-r.active { background:var(--blue-pale,#EFF6FF); }
+    .fm-r .ck { width:15px; height:15px; border:1.5px solid #CBD5E1; border-radius:4px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; }
+    .fm-r.sel .ck { background:var(--blue); border-color:var(--blue); }
+    .fm-more { padding:6px 8px; font-size:11.5px; color:var(--text-3); }
+    .fm-selall { padding:7px 8px; font:600 12px 'DM Sans',sans-serif; color:var(--blue); cursor:pointer; border-radius:6px; border-bottom:1px solid var(--border); margin-bottom:2px; }
+    .fm-selall:hover { background:var(--blue-pale,#EFF6FF); }
     .pc-clear { border:none; background:transparent; color:var(--text-3); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer; text-decoration:underline; }
     .pc-clear:hover { color:var(--rose); }
     .pc-result { font-size:12.5px; color:var(--text-2); font-weight:600; margin-left:4px; }
@@ -827,11 +843,11 @@ body {
       <div class="ps-item ps-clickable" data-stat="won" title="Show closed-won prospects"><div class="ps-value" style="color:var(--green)">$200k</div><div class="ps-label">Won this year ›</div></div>
       <div class="ps-item ps-clickable" data-stat="asks" title="Show asks due this week"><div class="ps-value" style="color:var(--amber)">6</div><div class="ps-label">Due this week ›</div></div>
       <div class="ps-item ps-clickable" data-stat="overdue" title="Show overdue moves"><div class="ps-value" style="color:var(--rose)">3</div><div class="ps-label">Overdue ›</div></div>
-      <div class="ps-filter-wrap" style="display:none">
+      <div class="ps-filter-wrap">
         <span class="ps-filter-label">Officer:</span>
-        <select class="ps-filter-select"><option>All officers</option><option>Sarah Reynolds</option><option>Mark Collins</option></select>
+        <select class="ps-filter-select" id="ps-officer"><option>All officers</option><option>Sarah Reynolds</option><option>Mark Collins</option><option>Bridget McCarthy</option><option>Julia Kelleher</option></select>
         <span class="ps-filter-label">Campaign:</span>
-        <select class="ps-filter-select"><option>All campaigns</option><option>CMA 2026</option><option>Cathedral Capital</option></select>
+        <select class="ps-filter-select" id="ps-campaign"><option>All campaigns</option><option>Cathedral Capital</option><option>CMA 2026</option><option>Annual Appeal</option></select>
       </div>
     </div>
 
@@ -2861,8 +2877,20 @@ body {
         // visible-card count — the board is a capped window, not the full set.
       });
     }
-    if (officerSel)  officerSel.addEventListener('change', function(){ applyFilters(); if(window.LV) window.LV.render(); });
-    if (campaignSel) campaignSel.addEventListener('change', function(){ applyFilters(); if(window.LV) window.LV.render(); });
+    // Drive the ONE shared filter engine (PIPE) so board + list + count stay in sync
+    function pushSel(){
+      if(!window.PIPE) { applyFilters(); if(window.LV) window.LV.render(); return; }
+      window.PIPE.officers  = (officerSel  && officerSel.value !=='All officers')  ? [officerSel.value]  : [];
+      window.PIPE.campaigns = (campaignSel && campaignSel.value!=='All campaigns') ? [campaignSel.value] : [];
+      if(window.PIPE_apply) window.PIPE_apply(false);
+    }
+    if (officerSel)  officerSel.addEventListener('change', pushSel);
+    if (campaignSel) campaignSel.addEventListener('change', pushSel);
+    // Let other controls (Clear, Prospects KPI) reset these selects to match PIPE
+    window.__syncStandaloneFilters = function(){
+      if(officerSel)  officerSel.value  = (window.PIPE && window.PIPE.officers  && window.PIPE.officers.length===1)  ? window.PIPE.officers[0]  : 'All officers';
+      if(campaignSel) campaignSel.value = (window.PIPE && window.PIPE.campaigns && window.PIPE.campaigns.length===1) ? window.PIPE.campaigns[0] : 'All campaigns';
+    };
   });
 })();
 </script>
@@ -3334,6 +3362,7 @@ body {
         var s=document.getElementById('lv-search'); if(s) s.value='';
         var bs=document.getElementById('board-search'); if(bs) bs.value='';
         setView('all'); syncFacetBtns(); apply(false);
+        if(window.__syncStandaloneFilters) window.__syncStandaloneFilters();
       } else if (stat==='won'){
         P.view='all'; setView('all'); P.stages=['Closed']; syncFacetBtns(); apply(false);
       } else { // asks / overdue
@@ -3349,6 +3378,7 @@ body {
       var n=0;
       Object.keys(FACETS).forEach(function(name){
         var cfg=FACETS[name];
+        if (name==='officer' || name==='campaign') return; // these live in their own toolbar dropdowns
         if (name==='ask') n += P.askMin?1:0; else n += (P[cfg.key]||[]).length;
       });
       return n;
@@ -3368,10 +3398,56 @@ body {
       // Snapshot current filters so Cancel can revert
       var snap = { stages:P.stages.slice(), officers:P.officers.slice(), campaigns:P.campaigns.slice(), ai:P.ai.slice(), askMin:P.askMin };
       var menu=document.createElement('div'); menu.className='facet-menu combined';
+
+      // Large synthetic pools so the searchable facets behave like a real 1000s-of-rows dataset
+      var POOLS = (function(){
+        var F=['Aisling','Cormac','Niamh','Declan','Saoirse','Fionn','Orla','Ruairi','Maeve','Eoin','Sinead','Cian','Roisin','Padraig','Aoibhinn','Tadhg','Clodagh','Oisin','Aoife','Lorcan','Colm','Gráinne','Fergus','Nuala'];
+        var L=['Doyle','Byrne','Kennedy','Brennan','Gallagher','Nolan','Doherty','Kavanagh','Flynn','Regan','Molloy','Sheridan','Cassidy','Hogan','Buckley','Duffy','Lynch','Cullen','Whelan','Ryan'];
+        var off=[]; for(var i=0;i<L.length*F.length;i++){ off.push(F[i%F.length]+' '+L[Math.floor(i/F.length)%L.length]); }
+        var CT=['Annual Appeal','Cathedral Capital','CMA','Christmas Appeal','Easter Appeal',"Bishop's Gala",'Scholarship Fund','Building Fund','Food Pantry Drive','Youth Ministry','Music Ministry','Legacy Society','Seminary Fund','Parish Renewal','Disaster Relief'];
+        var CY=['2024','2025','2026','2027']; var camp=[]; CT.forEach(function(t){ CY.forEach(function(y){ camp.push(t+' '+y); }); });
+        function dedup(seed, extra){ var out=seed.slice(); extra.forEach(function(v){ if(out.indexOf(v)===-1) out.push(v); }); return out; }
+        return { officer: dedup(FACETS.officer.opts, off), campaign: dedup(FACETS.campaign.opts, camp) };
+      })();
+
+      // Searchable, chip-based multi-select for unbounded facets (Officer, Campaign)
+      function searchFacet(name, cfg, grp){
+        var key=cfg.key, pool=POOLS[name];
+        var box=document.createElement('div'); box.className='fm-select';
+        var input=document.createElement('input'); input.className='fm-si'; input.placeholder='Search '+FACET_LABELS[name].toLowerCase()+'… ('+pool.length.toLocaleString()+')'; input.autocomplete='off';
+        var results=document.createElement('div'); results.className='fm-results';
+        var chips=document.createElement('div'); chips.className='fm-chips';
+        box.appendChild(input); box.appendChild(results); grp.appendChild(box); grp.appendChild(chips);
+        box.addEventListener('click', function(e){ e.stopPropagation(); });
+        var matches=[];
+        function renderChips(){
+          chips.innerHTML = P[key].map(function(v){ return '<span class="fm-chip">'+v+'<b data-v="'+v.replace(/"/g,'&quot;')+'">×</b></span>'; }).join('');
+          chips.querySelectorAll('b').forEach(function(x){ x.addEventListener('click', function(e){ e.stopPropagation(); var v=x.getAttribute('data-v'); var i=P[key].indexOf(v); if(i!==-1)P[key].splice(i,1); commit(); }); });
+        }
+        function draw(){
+          var q=input.value.trim().toLowerCase();
+          matches = pool.filter(function(o){ return !q || o.toLowerCase().indexOf(q)!==-1; });
+          var cap=matches.slice(0,50), html='';
+          if (q && matches.length>1) html+='<div class="fm-selall" data-all="1">Select all '+matches.length.toLocaleString()+' matching “'+q+'”</div>';
+          html += cap.map(function(o){ var sel=P[key].indexOf(o)!==-1; return '<div class="fm-r'+(sel?' sel':'')+'" data-v="'+o.replace(/"/g,'&quot;')+'"><span class="ck">'+(sel?'✓':'')+'</span>'+o+'</div>'; }).join('');
+          if (matches.length>cap.length) html+='<div class="fm-more">+'+(matches.length-cap.length).toLocaleString()+' more — keep typing to narrow</div>';
+          results.innerHTML = html || '<div class="fm-more">No matches</div>';
+          results.querySelectorAll('.fm-r').forEach(function(r){ r.addEventListener('click', function(e){ e.stopPropagation(); toggle(r.getAttribute('data-v')); }); });
+          var all=results.querySelector('[data-all]'); if(all) all.addEventListener('click', function(e){ e.stopPropagation(); matches.forEach(function(o){ if(P[key].indexOf(o)===-1) P[key].push(o); }); commit(); });
+        }
+        function toggle(v){ var i=P[key].indexOf(v); if(i===-1)P[key].push(v); else P[key].splice(i,1); commit(); }
+        function commit(){ renderChips(); syncFacetBtns(); apply(false); updFmCount(); draw(); }
+        input.addEventListener('focus', function(){ draw(); results.classList.add('on'); });
+        input.addEventListener('input', function(){ draw(); results.classList.add('on'); });
+        input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); if(matches[0]) toggle(matches[0]); input.value=''; draw(); } else if(e.key==='Escape'){ results.classList.remove('on'); } });
+        renderChips();
+      }
+
       Object.keys(FACETS).forEach(function(name){
         var cfg=FACETS[name];
         var grp=document.createElement('div'); grp.className='fm-group';
         var h=document.createElement('div'); h.className='fm-h'; h.textContent=FACET_LABELS[name]; grp.appendChild(h);
+        if (name==='officer' || name==='campaign') return; // shown as dedicated toolbar dropdowns, not in this panel
         cfg.opts.forEach(function(opt){
           var label = cfg.multi ? opt : opt[0];
           var val   = cfg.multi ? opt : opt[1];
@@ -3422,6 +3498,7 @@ body {
       P.view='all'; P.stages=[]; P.officers=[]; P.campaigns=[]; P.askMin=0; P.ai=[]; P.search='';
       var s=document.getElementById('lv-search'); if(s) s.value='';
       setView('all'); syncFacetBtns(); closeFacets(); apply(false);
+      if(window.__syncStandaloneFilters) window.__syncStandaloneFilters();
     });
 
     // ── Collapsible Kanban columns ──
@@ -4788,19 +4865,6 @@ body {
   // ── styles ──
   var css = document.createElement('style');
   css.textContent =
-    '.kb-check{position:absolute;top:7px;left:7px;width:18px;height:18px;border:1.5px solid #CBD5E1;border-radius:5px;background:#fff;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:4;transition:all .12s}'+
-    '.prospect-card{position:relative}'+
-    '.prospect-card:hover .kb-check,.prospect-card.kb-selected .kb-check{display:flex}'+
-    '.prospect-card.kb-selected{box-shadow:0 0 0 2px #2563EB,0 4px 12px rgba(37,99,235,.18)}'+
-    '.prospect-card.kb-selected .kb-check{background:#2563EB;border-color:#2563EB}'+
-    '.kb-check svg{width:12px;height:12px;color:#fff;opacity:0}'+
-    '.prospect-card.kb-selected .kb-check svg{opacity:1}'+
-    '#kb-bulkbar{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:9500;display:none;align-items:center;gap:10px;background:#0E1E35;border-radius:12px;padding:11px 16px;box-shadow:0 16px 40px rgba(14,30,53,.35);font-family:DM Sans,sans-serif}'+
-    '#kb-bulkbar.show{display:flex}'+
-    '#kb-bulkbar .kbc{color:#fff;font-size:12.5px;margin-right:4px}#kb-bulkbar .kbc strong{font-size:14px}'+
-    '#kb-bulkbar button{font:600 12px DM Sans,sans-serif;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:7px;padding:7px 13px;cursor:pointer}'+
-    '#kb-bulkbar button:hover{background:rgba(255,255,255,.24)}'+
-    '#kb-bulkbar button.ghost{background:transparent;border-color:transparent;color:#93C5FD}'+
     '#pb-ov{position:fixed;inset:0;background:rgba(14,30,53,.45);z-index:9600;display:none;align-items:center;justify-content:center;padding:22px;font-family:DM Sans,sans-serif}'+
     '#pb-ov.show{display:flex}'+
     '#pb-ov .pb-card{background:#fff;border-radius:16px;width:100%;max-width:440px;box-shadow:0 24px 60px rgba(14,30,53,.3);overflow:hidden}'+
@@ -4874,53 +4938,6 @@ body {
     }
   }};
 
-  // ── Kanban multi-select ──
-  document.addEventListener('DOMContentLoaded', function(){
-    function injectChecks(root){
-      (root||document).querySelectorAll('.prospect-card:not([data-chk])').forEach(function(card){
-        card.setAttribute('data-chk','1');
-        var c=document.createElement('span'); c.className='kb-check'; c.innerHTML=CHK; card.insertBefore(c, card.firstChild);
-      });
-    }
-    injectChecks();
-    // re-inject after data-driven re-renders
-    var board=document.getElementById('board');
-    if (board && window.MutationObserver){
-      new MutationObserver(function(){ injectChecks(board); }).observe(board, {childList:true, subtree:true});
-    }
-    function cardData(card){
-      var col=card.closest('.stage-col');
-      return { name:((card.querySelector('.pc-name')||{}).textContent||'').trim(),
-        ask:((card.querySelector('.pc-ask')||{}).textContent||'').trim(),
-        officer:((card.querySelector('.pc-officer')||{}).textContent||'').trim(),
-        stage:((col&&col.querySelector('.stage-name'))?col.querySelector('.stage-name').textContent:'').trim(),
-        campaign:((card.querySelector('.pc-org')||{}).textContent||'').trim(), el:card };
-    }
-    function selectedCards(){ return [].slice.call(document.querySelectorAll('.prospect-card.kb-selected')); }
-    var bar=document.createElement('div'); bar.id='kb-bulkbar';
-    bar.innerHTML='<span class="kbc"><strong id="kb-selcount">0</strong> selected</span>'+
-      '<button data-b="assign">Assign officer</button><button data-b="segment">Add to segment</button>'+
-      '<button data-b="task">Add task</button><button data-b="export">Export</button>'+
-      '<button class="ghost" data-b="clear">Clear</button>';
-    document.body.appendChild(bar);
-    function refreshBar(){ var n=selectedCards().length; document.getElementById('kb-selcount').textContent=n; bar.classList.toggle('show', n>0); }
-    function toggle(card){ card.classList.toggle('kb-selected'); refreshBar(); }
-    // capture so the card's openDrawer onclick doesn't fire
-    document.addEventListener('click', function(e){
-      var chk=e.target.closest && e.target.closest('.kb-check'); if(!chk) return;
-      e.stopPropagation(); e.preventDefault(); var card=chk.closest('.prospect-card'); if(card) toggle(card);
-    }, true);
-    bar.addEventListener('click', function(e){
-      var b=e.target.closest('button'); if(!b) return; var a=b.dataset.b;
-      var cards=selectedCards(); var items=cards.map(cardData);
-      if (a==='clear'){ cards.forEach(function(c){ c.classList.remove('kb-selected'); }); refreshBar(); return; }
-      window.PipeBulk.run(a, items, {
-        onAssign:function(off){ var ini=off.split(' ').map(function(x){return x[0];}).join('').slice(0,2); cards.forEach(function(c){ var o=c.querySelector('.pc-officer'); if(o) o.innerHTML='<div class="pc-officer-avatar" style="background:var(--blue)">'+ini+'</div>'+off; }); },
-        onDone:function(){ if(a==='segment'||a==='task'||a==='export'){ /* keep selection */ } }
-      });
-    });
-    window.__kbRefreshBar = refreshBar;
-  });
 })();
 </script>
 </body>
