@@ -299,6 +299,18 @@
   // ── Social networks: labels + default profile URLs ──
   var SOCIAL_META={f:{lb:'Facebook',url:'https://facebook.com/StMarysCathedralAlbany'},X:{lb:'X / Twitter',url:'https://x.com/StMarysCathAlb'},in:{lb:'LinkedIn',url:'https://linkedin.com/company/diocese-of-albany'},ig:{lb:'Instagram',url:'https://instagram.com/stmaryscathedral'},yt:{lb:'YouTube',url:'https://youtube.com/@stmaryscathedral'}};
   function defaultUrls(nets){ var o={}; nets.forEach(function(n){ o[n]=(SOCIAL_META[n]||{}).url||'#'; }); return o; }
+  // Build the footer HTML from its structured compliance settings
+  function footerHTML(d){
+    var e=function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+    var line1=e(d.org||'')+(d.addr?' · '+e(d.addr):'');
+    var links=[];
+    if(d.prefsOn!==false) links.push("<a href='{{preferences_url}}'>"+e(d.prefsText||'Update preferences')+"</a>");
+    links.push("<a href='{{unsubscribe_url}}'>"+e(d.unsubText||'Unsubscribe')+"</a>");
+    var parts=[line1];
+    if(d.copyright) parts.push(e(d.copyright));
+    parts.push(links.join(' · '));
+    return parts.join('<br>');
+  }
   // ── Block factory (default data) ──
   function makeBlock(type){
     var id='b'+(Math.random().toString(36).slice(2,8));
@@ -314,11 +326,13 @@
       socialshare:{nets:['f','X','in'],urls:defaultUrls(['f','X','in'])},
       socialfollow:{nets:['f','in','ig','X'],urls:defaultUrls(['f','in','ig','X'])},
       button:{label:'Donate now',url:'https://give.diocese.org',align:'center',color:'#2563EB'},
-      footer:{html:"St. Mary's Cathedral · 125 Eagle St, Albany, NY 12202<br>Copyright © 2026 · All rights reserved.<br><a href='{{unsubscribe_url}}'>Update preferences</a> · <a href='{{unsubscribe_url}}'>Unsubscribe</a>"},
+      footer:{org:"St. Mary's Cathedral", addr:'125 Eagle St, Albany, NY 12202', copyright:'Copyright © 2026 · All rights reserved.', prefsOn:true, prefsText:'Update preferences', unsubText:'Unsubscribe', html:''},
       video:{title:'Watch: the bell tower restoration'},
       code:{code:'<!-- Custom HTML -->\\n<p style="color:#2563EB">Hello {{first_name}}</p>'}
     };
-    return {id:id, type:type, data:JSON.parse(JSON.stringify(defaults[type]||{}))};
+    var data=JSON.parse(JSON.stringify(defaults[type]||{}));
+    if(type==='footer') data.html=footerHTML(data);
+    return {id:id, type:type, data:data};
   }
 
   // ── Model: sections ──
@@ -405,7 +419,7 @@
   function flashSaved(){ var s=document.getElementById('eb-saved'); if(!s) return; s.textContent='Saving…'; s.style.color='var(--text-3)'; clearTimeout(s._t); s._t=setTimeout(function(){ s.textContent='✓ Auto-saved'; s.style.color='var(--green)'; },500); }
   function sync(){ flashSaved(); if(EMBED && window.parent!==window){ try{ window.parent.postMessage({type:'eb-html', html:serializeEmail()}, '*'); }catch(_){} } }
   // ── Preview (Desktop / Tablet / Mobile / Dark · sample data) ──
-  var SAMPLE={first_name:'Margaret',last_name:"O'Brien",salutation:"Mrs. O'Brien",org_name:'Diocese of Albany',parish_name:"St. Mary's Cathedral",fund_name:'Cathedral Restoration',donation_amount:'$10,000',last_gift_date:'March 12, 2026',donor_since:'2011',giving_this_year:'$12,500',pledge_balance:'$40,000',event_name:"Bishop's Annual Gala",unsubscribe_url:'https://give.diocese.org/u/abc123'};
+  var SAMPLE={first_name:'Margaret',last_name:"O'Brien",salutation:"Mrs. O'Brien",org_name:'Diocese of Albany',parish_name:"St. Mary's Cathedral",fund_name:'Cathedral Restoration',donation_amount:'$10,000',last_gift_date:'March 12, 2026',donor_since:'2011',giving_this_year:'$12,500',pledge_balance:'$40,000',event_name:"Bishop's Annual Gala",preferences_url:'https://give.diocese.org/p/abc123',unsubscribe_url:'https://give.diocese.org/u/abc123'};
   function resolveMerge(html){ return String(html||'').replace(/\{\{?\s*([a-z_]+)\s*\}?\}/gi,function(m,k){ return SAMPLE[k]!=null?('<span style="background:#EFF6FF;color:#2563EB;border-radius:3px;padding:0 2px">'+SAMPLE[k]+'</span>'):m; }); }
   var pvMode='desktop';
   window.ebPreview=function(){
@@ -506,7 +520,7 @@
     var name={text:'Text',boxed:'Boxed text',divider:'Divider',spacer:'Spacer',image:'Image',imagegroup:'Image group',imagecard:'Image card',imagecaption:'Image + caption',socialshare:'Social share',socialfollow:'Social follow',button:'Button',footer:'Footer',video:'Video',code:'Code'}[b.type]||b.type;
     var body='';
     function alignRow(){ return '<label class="set-fl">Alignment</label><div class="align-tog" data-set="align">'+['left','center','right'].map(function(a){return '<button data-v="'+a+'" class="'+(d.align===a?'on':'')+'">'+({left:'⟸',center:'≡',right:'⟹'})[a]+'</button>';}).join('')+'</div>'; }
-    var MERGE=[['First name','first_name'],['Last name','last_name'],['Salutation','salutation'],['Organisation','org_name'],['Parish','parish_name'],['Fund name','fund_name'],['Donation amount','donation_amount'],['Last gift date','last_gift_date'],['Donor since','donor_since'],['Giving this year','giving_this_year'],['Pledge balance','pledge_balance'],['Event name','event_name'],['Unsubscribe URL','unsubscribe_url']];
+    var MERGE=[['First name','first_name'],['Last name','last_name'],['Salutation','salutation'],['Organisation','org_name'],['Parish','parish_name'],['Fund name','fund_name'],['Donation amount','donation_amount'],['Last gift date','last_gift_date'],['Donor since','donor_since'],['Giving this year','giving_this_year'],['Pledge balance','pledge_balance'],['Event name','event_name'],['Preferences URL','preferences_url'],['Unsubscribe URL','unsubscribe_url']];
     function mergeRow(){ return '<label class="set-fl">Personalization — insert merge tag</label><div class="mergechips">'+MERGE.map(function(m){return '<button type="button" class="mchip" data-tag="'+m[1]+'">'+m[0]+'</button>';}).join('')+'</div><p style="font-size:11px;color:#94A3B8;margin-top:6px">Tags resolve per recipient at send. Preview with sample data.</p>'; }
     if(b.type==='spacer'){
       body='<label class="set-fl">Height: <span id="sp-h">'+d.h+'</span> px</label><input class="set-fld" type="range" min="8" max="120" step="4" value="'+d.h+'" data-set="h" style="padding:0">';
@@ -530,7 +544,18 @@
           '<input class="set-fld soc-url" data-soc="'+n[0]+'" value="'+esc((d.urls&&d.urls[n[0]])||'')+'" placeholder="https://…" style="margin-top:6px;font-size:12px;display:'+(on?'block':'none')+'">'+
         '</div>'; }).join('');
     } else if(b.type==='footer'){
-      body='<p style="font-size:12.5px;color:#64748B">Click the footer on the canvas to edit address and links.</p>';
+      body='<label class="set-fl">Organization name</label><input class="set-fld" id="ff-org" value="'+esc(d.org||'')+'">'+
+        '<label class="set-fl">Mailing address <span style="color:#B45309;font-weight:600">· required (CAN-SPAM)</span></label><input class="set-fld" id="ff-addr" value="'+esc(d.addr||'')+'">'+
+        '<label class="set-fl">Copyright line</label><input class="set-fld" id="ff-copy" value="'+esc(d.copyright||'')+'">'+
+        '<div style="margin-top:14px;padding-top:13px;border-top:1px solid #E2E8F0">'+
+          '<div class="set-fl" style="font-weight:700;color:var(--navy,#0E1E35)">Compliance links</div>'+
+          '<label style="display:flex;gap:8px;align-items:center;font-size:12.5px;color:#334155;margin-top:9px;cursor:pointer"><input type="checkbox" id="ff-prefs-on" '+(d.prefsOn!==false?'checked':'')+'> Show “Update preferences”</label>'+
+          '<input class="set-fld" id="ff-prefs" value="'+esc(d.prefsText||'Update preferences')+'"'+(d.prefsOn!==false?'':' disabled')+' style="margin-top:7px">'+
+          '<p style="font-size:11px;color:#94A3B8;margin:5px 0 0">Opens the donor preference center · resolves to <code style="background:#EFF6FF;color:#2563EB;border-radius:3px;padding:0 3px">{{preferences_url}}</code> per recipient.</p>'+
+          '<label class="set-fl" style="margin-top:13px">Unsubscribe link <span style="color:#B45309;font-weight:600">· required</span></label>'+
+          '<input class="set-fld" id="ff-unsub" value="'+esc(d.unsubText||'Unsubscribe')+'">'+
+          '<p style="font-size:11px;color:#94A3B8;margin:5px 0 0">One-click opt-out · resolves to <code style="background:#EFF6FF;color:#2563EB;border-radius:3px;padding:0 3px">{{unsubscribe_url}}</code>. Can’t be removed (CAN-SPAM).</p>'+
+        '</div>';
     } else if(b.type==='video'){
       body='<label class="set-fl">Video title</label><input class="set-fld" data-set="title" value="'+esc(d.title)+'"><label class="set-fl">Video URL</label><input class="set-fld" placeholder="https://youtu.be/…">';
     } else if(b.type==='code'){
@@ -550,6 +575,17 @@
     ps.querySelectorAll('.soc-url').forEach(function(inp){ inp.addEventListener('input', function(){ if(!d.urls)d.urls={}; d.urls[inp.getAttribute('data-soc')]=inp.value; renderAll(); reselect(); }); });
     ps.querySelectorAll('.mchip').forEach(function(ch){ ch.addEventListener('click', function(){ var tag='{{'+ch.dataset.tag+'}}'; var ed=document.querySelector('.bk[data-id="'+id+'"] [data-edit="html"]'); if(ed){ ed.innerHTML += ' <span style="background:#EFF6FF;color:#2563EB;border-radius:4px;padding:0 3px">'+tag+'</span>'; d.html=ed.innerHTML; renderAll(); reselect(); toast('Inserted '+tag); } }); });
     var sp=ps.querySelector('[data-set="h"]'); if(sp) sp.addEventListener('input', function(){ var l=document.getElementById('sp-h'); if(l) l.textContent=this.value; });
+    // Footer compliance-link setup
+    if(b.type==='footer'){
+      function rebuildFooter(){ d.html=footerHTML(d); renderAll(); reselect(); }
+      var ffOrg=$('ff-org'), ffAddr=$('ff-addr'), ffCopy=$('ff-copy'), ffPrefsOn=$('ff-prefs-on'), ffPrefs=$('ff-prefs'), ffUnsub=$('ff-unsub');
+      if(ffOrg) ffOrg.addEventListener('input', function(){ d.org=ffOrg.value; rebuildFooter(); });
+      if(ffAddr) ffAddr.addEventListener('input', function(){ d.addr=ffAddr.value; rebuildFooter(); });
+      if(ffCopy) ffCopy.addEventListener('input', function(){ d.copyright=ffCopy.value; rebuildFooter(); });
+      if(ffPrefs) ffPrefs.addEventListener('input', function(){ d.prefsText=ffPrefs.value; rebuildFooter(); });
+      if(ffUnsub) ffUnsub.addEventListener('input', function(){ d.unsubText=ffUnsub.value; rebuildFooter(); });
+      if(ffPrefsOn) ffPrefsOn.addEventListener('change', function(){ d.prefsOn=ffPrefsOn.checked; if(ffPrefs) ffPrefs.disabled=!ffPrefsOn.checked; rebuildFooter(); });
+    }
   }
   function reselect(){ var el=document.querySelector('.bk[data-id="'+selId+'"]'); if(el) el.classList.add('sel'); }
   function backToContent(){ selId=null; $('pane-settings').style.display='none'; $('pane-content').style.display=''; $('pane-design').style.display='none'; setTab('content'); document.querySelectorAll('.bk.sel').forEach(function(x){x.classList.remove('sel');}); }
@@ -696,7 +732,7 @@
   };
   // ── Real content library for each template ──
   var LOGO='<div style="font-family:\'DM Serif Display\',serif;font-size:22px;color:#0E1E35">St. Mary\'s Cathedral</div><div style="font-size:10px;color:#64748B;letter-spacing:.12em;text-transform:uppercase;margin-top:2px">Diocese of Albany</div>';
-  var FOOT='St. Mary\'s Cathedral · 125 Eagle St, Albany, NY 12202<br>Diocese of Albany · EIN 14-0000000<br><a href="#">Update preferences</a> · <a href="#">Unsubscribe</a>';
+  var FOOT='St. Mary\'s Cathedral · 125 Eagle St, Albany, NY 12202<br>Diocese of Albany · EIN 14-0000000<br><a href="{{preferences_url}}">Update preferences</a> · <a href="{{unsubscribe_url}}">Unsubscribe</a>';
   var TPL_CONTENT={
     thankyou:{banner:'<h1>Thank you, {{first_name}}</h1>',body:'<p>Dear {{first_name}},</p><p>Your generous gift of <b>{{donation_amount}}</b> to the Cathedral Capital Campaign arrived at a pivotal moment. Because of you, the bell-tower restoration is moving forward.</p><p>With deep gratitude,<br>Father Michael Reilly · Rector</p>',cta:{l:'See your impact',c:'#2563EB'}},
     receipt:{banner:'<h1>Your official gift receipt</h1>',body:'<p>Dear {{first_name}},</p><p>This confirms your tax-deductible gift of <b>{{donation_amount}}</b> to {{org_name}}. No goods or services were provided in exchange for this contribution.</p><p style="color:#64748B;font-size:12px">Receipt #R-2026-0148 · Retain for your records (IRS Pub 1771).</p>',cta:{l:'Download PDF receipt',c:'#15803D'}},

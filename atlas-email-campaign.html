@@ -784,41 +784,97 @@
     ov.querySelector('#c-go').addEventListener('click',function(){ ov.classList.remove('show'); S.step=7; render(); });
   }
   function analyticsURL(){ var r=reach(); var ab=S.ab.on?('&ab=1&abvar='+encodeURIComponent(S.ab.variable)+'&abpct='+abCounts().pct+'&abmetric='+S.ab.metric+'&abtest='+abCounts().test+'&abA='+encodeURIComponent(abVarValue('A'))+'&abB='+encodeURIComponent(abVarValue('B'))):''; return 'atlas-message-detail.html?subj='+encodeURIComponent(S.subject||S.name)+'&type=appeal&sender='+encodeURIComponent(S.from.split(' · ')[0])+'&camp='+encodeURIComponent(S.name)+'&recips='+r+'&del=0.986&open=0.25&clicked='+Math.round(r*0.25*0.12)+'&bounced='+Math.round(r*0.014)+ab; }
+  var CWNL_HIST={'Any giving history':1,'Gave in the last 12 months':.62,'Gave in the last 24 months':.80,'Lapsed — no gift in 12 months':.30,'New donors — first gift in 90 days':.12,'Recurring donors':.22,'Never given (prospects)':.35};
+  var CWNL_AMT={'Any gift amount':1,'$1+':.95,'$100+':.60,'$1,000+':.30,'$10,000+':.08,'$25,000+':.03};
+  var CWNL_PARISHES=["St. Mary's Cathedral","St. Anthony's","Holy Trinity","Sacred Heart","St. Michael's","Blessed Trinity","Our Lady of Angels","St. Patrick's"];
+  var CWNL_TAGS=['Board member','Volunteer','Major prospect','Legacy society','Event attendee','Parish leader','Recurring donor','Young professional'];
   window.cwAddList=function(){
-    var ov=$('ov'); var detected=0;
-    ov.innerHTML='<div class="m" style="max-width:500px"><div class="mh"><h3>Add a new list / segment</h3><p>Create a list to send to. Bulk upload handles files up to ~5,000,000 rows.</p></div>'+
+    if(!document.getElementById('cwnl-css')){ var cs=document.createElement('style'); cs.id='cwnl-css';
+      cs.textContent='.cnl-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:7px}'+
+        '.cnl-mode{border:1.5px solid #E2E8F0;border-radius:12px;padding:16px 8px;text-align:center;cursor:pointer;background:#fff;font-family:inherit}'+
+        '.cnl-mode:hover{border-color:#93C5FD}.cnl-mode.on{border-color:#2563EB;background:#EFF6FF}'+
+        '.cnl-mode .ic{font-size:22px;line-height:1}.cnl-mode .t{font:700 14.5px "DM Sans",sans-serif;color:var(--navy);margin-top:8px}.cnl-mode.on .t{color:#2563EB}.cnl-mode .s{font-size:11.5px;color:var(--text-3);margin-top:3px;line-height:1.35}'+
+        '.cnl-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}'+
+        '.cnl-match{margin-top:14px;display:flex;align-items:center;gap:14px;background:#F0FDF4;border:1px solid #86EFAC;border-radius:11px;padding:14px 16px}.cnl-match .n{font:700 27px "DM Sans",sans-serif;color:#15803D;line-height:1}.cnl-match .tx{font-size:12.5px;color:#166534;line-height:1.4}.cnl-match .tx b{display:block;font-size:14px;color:#14532D}'+
+        '.cnl-note,.cnl-info{margin-top:12px;background:#EFF6FF;border:1px solid #DBEAFE;border-radius:11px;padding:13px 15px;font-size:12.5px;color:#1D4ED8;line-height:1.5}'+
+        '.cnl-tabs{display:flex;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;margin-top:7px}.cnl-tab{flex:1;border:none;background:#F8FAFC;padding:12px;font:600 13px "DM Sans",sans-serif;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent}.cnl-tab.on{background:#fff;color:#2563EB;border-bottom-color:#2563EB}'+
+        '.cnl-drop{border:1.5px dashed #CBD5E1;border-radius:12px;padding:34px 18px;text-align:center;color:var(--text-3);margin-top:14px;cursor:pointer}.cnl-drop.over{border-color:#2563EB;background:#EFF6FF}.cnl-drop .em{font-size:26px}.cnl-drop .hd{font:700 14.5px "DM Sans",sans-serif;color:var(--navy);margin-top:8px}.cnl-drop .sub{font-size:12px;color:#94A3B8;margin-top:5px}'+
+        '.cnl-tip{font-size:11.5px;color:#94A3B8;margin:7px 0 0}.cnl-detect{margin-top:12px;font-size:12.5px;color:#334155;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px}'+
+        '.req{color:#E11D48}.opt{color:#94A3B8;font-weight:400}#ov .btn.primary:disabled{background:#93C5FD;border-color:#93C5FD;cursor:not-allowed}';
+      document.head.appendChild(cs); }
+    var ov=$('ov'); var detected=0, mode='empty';
+    ov.innerHTML='<div class="m" style="max-width:560px;max-height:90vh;overflow:auto"><div class="mh"><h3>Add a new list / segment</h3><p>Create a list to send to. Bulk upload handles files up to ~5,000,000 rows.</p></div>'+
       '<div class="mb">'+
-        '<label class="lbl">List name</label><input class="fld" id="nl-name" placeholder="e.g. FY26 Cathedral leadership">'+
-        '<label class="lbl" style="margin-top:12px">How to build it</label><select class="fld" id="nl-src"><option value="empty">Start empty · add contacts later</option><option value="dynamic">Dynamic · donors matching criteria</option><option value="bulk">Bulk upload · CSV or paste emails</option></select>'+
-        '<div id="nl-empty"><label class="lbl" style="margin-top:12px">Estimated size</label><input class="fld" id="nl-size" type="number" min="0" value="0"></div>'+
+        '<label class="lbl">List name <span class="req">*</span></label><input class="fld" id="nl-name" placeholder="e.g. FY26 Cathedral leadership">'+
+        '<label class="lbl" style="margin-top:14px">How to build it</label>'+
+        '<div class="cnl-cards" id="nl-mode">'+
+          '<button type="button" class="cnl-mode on" data-m="empty"><div class="ic">📋</div><div class="t">Start empty</div><div class="s">Add contacts manually later</div></button>'+
+          '<button type="button" class="cnl-mode" data-m="dynamic"><div class="ic">⚡</div><div class="t">Dynamic</div><div class="s">Auto-updates from donor criteria</div></button>'+
+          '<button type="button" class="cnl-mode" data-m="bulk"><div class="ic">📤</div><div class="t">Bulk upload</div><div class="s">CSV file or paste emails</div></button>'+
+        '</div>'+
+        '<div id="nl-empty"><label class="lbl" style="margin-top:14px">Estimated size <span class="opt">(optional)</span></label><input class="fld" id="nl-size" type="number" min="0" value="0"><p class="cnl-tip">Helps with planning. You can add contacts after creating the list.</p><div class="cnl-info">ℹ️ An empty manual list will be created. You can add contacts from the donor search, Tags &amp; Segments, or by importing later from the list detail page.</div></div>'+
+        '<div id="nl-dyn" style="display:none">'+
+          '<label class="lbl" style="margin-top:14px">Giving activity</label>'+
+          '<div class="cnl-2"><select class="fld" id="dyn-hist">'+Object.keys(CWNL_HIST).map(function(k){return '<option>'+k+'</option>';}).join('')+'</select>'+
+            '<select class="fld" id="dyn-amt">'+Object.keys(CWNL_AMT).map(function(k){return '<option>'+k+'</option>';}).join('')+'</select></div>'+
+          '<label class="lbl" style="margin-top:14px">Parish or entity <span class="opt">(optional)</span></label>'+
+          '<select class="fld" id="dyn-parish"><option>All parishes &amp; entities</option>'+CWNL_PARISHES.map(function(p){return '<option>'+p+'</option>';}).join('')+'</select>'+
+          '<label class="lbl" style="margin-top:14px">Tag <span class="opt">(optional)</span></label>'+
+          '<select class="fld" id="dyn-tag"><option>Any tag</option>'+CWNL_TAGS.map(function(t){return '<option>'+t+'</option>';}).join('')+'</select>'+
+          '<div class="cnl-match" id="dyn-match"></div>'+
+          '<div class="cnl-note">⚡ This list <b>updates automatically</b> — re-evaluated nightly and before every send. Donors who no longer match are removed.</div>'+
+        '</div>'+
         '<div id="nl-bulk" style="display:none">'+
-          '<div class="nl-drop" id="nl-drop"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#94A3B8" stroke-width="1.6" stroke-linecap="round"><path d="M12 16V6M8 10l4-4 4 4"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>'+
-            '<div class="nl-dtxt">Drop a CSV / TXT of email addresses<br><span>up to 5,000,000 rows · large files import in the background</span></div>'+
-            '<button type="button" class="btn" id="nl-browse" style="padding:6px 14px">Browse file</button><input type="file" id="nl-file" accept=".csv,.txt" style="display:none"></div>'+
-          '<div style="text-align:center;font-size:11px;color:#94A3B8;margin:9px 0">— or paste addresses —</div>'+
-          '<textarea class="fld" id="nl-paste" rows="4" placeholder="name@email.org, one per line or comma-separated"></textarea>'+
-          '<div class="nl-detect" id="nl-detect" style="display:none"></div>'+
+          '<label class="lbl" style="margin-top:14px">Upload method</label>'+
+          '<div class="cnl-tabs" id="bulk-tabs"><button type="button" class="cnl-tab on" data-t="csv">📄 CSV file</button><button type="button" class="cnl-tab" data-t="paste">✂️ Paste emails</button></div>'+
+          '<div id="bulk-csv"><div class="cnl-drop" id="nl-drop"><div class="em">📁</div><div class="hd">Drop your CSV here, or click to browse</div><div class="sub">Supports .csv · up to ~5,000,000 rows · max 500 MB</div><input type="file" id="nl-file" accept=".csv" style="display:none"></div></div>'+
+          '<div id="bulk-paste" style="display:none"><label class="lbl" style="margin-top:14px">Paste email addresses <span class="req">*</span></label><textarea class="fld" id="nl-paste" rows="5" placeholder="One per line, or comma-separated:&#10;james.obrien@cathedral.org&#10;margaret.sullivan@diocese.org&#10;john.smith@stmichaels.org"></textarea><p class="cnl-tip">Tip: paste up to 50,000 addresses. For larger lists use CSV upload.</p></div>'+
+          '<div class="cnl-detect" id="nl-detect" style="display:none"></div>'+
+          '<div class="cnl-info">ℹ️ Uploaded contacts are <b>matched against existing Atlas donors</b> by email. Unmatched addresses are added as contacts without a donor record. Suppressed emails are excluded at send time.</div>'+
         '</div>'+
       '</div>'+
-      '<div class="mf"><button class="btn" id="nl-cancel">Cancel</button><button class="btn primary" id="nl-go">Create &amp; select</button></div></div>';
+      '<div class="mf"><button class="btn" id="nl-cancel">Cancel</button><button class="btn primary" id="nl-go" disabled>Create &amp; select</button></div></div>';
     ov.classList.add('show');
-    function showDetect(n, srcTxt){ detected=n; var el=$('nl-detect'); if(n>0){ var dupes=Math.round(n*0.02); var add=n-dupes; el.style.display='block'; el.innerHTML='<b>'+fmt(n)+'</b> addresses '+srcTxt+' · ~'+fmt(dupes)+' duplicates removed · <b>'+fmt(add)+'</b> will be added'+(n>100000?'<div class="nl-warn">⏳ Large import — processed in the background. You\'ll be emailed when it\'s ready.</div>':''); } else { el.style.display='none'; } }
-    $('nl-src').addEventListener('change', function(){ var v=this.value; $('nl-empty').style.display=v==='empty'?'block':'none'; $('nl-bulk').style.display=v==='bulk'?'block':'none'; });
-    $('nl-browse').addEventListener('click', function(){ $('nl-file').click(); });
-    $('nl-file').addEventListener('change', function(){ var f=this.files&&this.files[0]; if(!f) return; showDetect(Math.max(1,Math.round(f.size/24)), 'in “'+f.name+'”'); });
+
+    function updateGo(){ var nm=($('nl-name').value||'').trim(); $('nl-go').disabled = !(nm && (mode!=='bulk' || detected>0)); }
+    $('nl-name').addEventListener('input', updateGo);
+    setTimeout(function(){ $('nl-name').focus(); }, 30);
+
+    $('nl-mode').addEventListener('click', function(e){ var b=e.target.closest('.cnl-mode'); if(!b) return; mode=b.dataset.m;
+      $('nl-mode').querySelectorAll('.cnl-mode').forEach(function(x){ x.classList.toggle('on', x===b); });
+      $('nl-empty').style.display=mode==='empty'?'block':'none';
+      $('nl-dyn').style.display=mode==='dynamic'?'block':'none';
+      $('nl-bulk').style.display=mode==='bulk'?'block':'none';
+      if(mode==='dynamic') dynRecalc();
+      updateGo();
+    });
+
+    function dynEstimate(){ var h=CWNL_HIST[$('dyn-hist').value]||1, a=CWNL_AMT[$('dyn-amt').value]||1; var pf=($('dyn-parish').value==='All parishes & entities')?1:.16; var tf=($('dyn-tag').value==='Any tag')?1:.2; return Math.max(0,Math.round(4512*h*a*pf*tf)); }
+    function dynSummary(){ var parts=[]; var hv=$('dyn-hist').value, av=$('dyn-amt').value, pv=$('dyn-parish').value, tv=$('dyn-tag').value;
+      if(hv!=='Any giving history') parts.push(hv); if(av!=='Any gift amount') parts.push(av); if(pv!=='All parishes & entities') parts.push(pv); if(tv!=='Any tag') parts.push(tv);
+      return parts.length ? ('Dynamic · '+parts.slice(0,2).join(' · ')+(parts.length>2?' +'+(parts.length-2):'')) : 'Dynamic · all active donors'; }
+    function dynRecalc(){ var el=$('dyn-match'); if(el) el.innerHTML='<div class="n">'+fmt(dynEstimate())+'</div><div class="tx"><b>donors match your criteria</b>Refreshes nightly · suppressed contacts excluded at send</div>'; }
+    ['dyn-hist','dyn-amt','dyn-parish','dyn-tag'].forEach(function(id){ var el=$(id); if(el) el.addEventListener('change', dynRecalc); });
+    dynRecalc();
+
+    function showDetect(n, srcTxt){ detected=n; var el=$('nl-detect'); if(n>0){ var dupes=Math.round(n*0.02), add=n-dupes; el.style.display='block'; el.innerHTML='<b>'+fmt(n)+'</b> addresses '+srcTxt+' · ~'+fmt(dupes)+' duplicates removed · <b>'+fmt(add)+'</b> will be added'+(n>100000?'<div style="margin-top:6px;color:#B45309">⏳ Large import — processed in the background.</div>':''); } else el.style.display='none'; updateGo(); }
+    $('bulk-tabs').addEventListener('click', function(e){ var b=e.target.closest('.cnl-tab'); if(!b) return; var t=b.dataset.t; $('bulk-tabs').querySelectorAll('.cnl-tab').forEach(function(x){x.classList.toggle('on',x===b);}); $('bulk-csv').style.display=t==='csv'?'block':'none'; $('bulk-paste').style.display=t==='paste'?'block':'none'; });
     var drop=$('nl-drop');
+    drop.addEventListener('click', function(){ $('nl-file').click(); });
     drop.addEventListener('dragover', function(e){ e.preventDefault(); drop.classList.add('over'); });
     drop.addEventListener('dragleave', function(){ drop.classList.remove('over'); });
     drop.addEventListener('drop', function(e){ e.preventDefault(); drop.classList.remove('over'); var f=e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) showDetect(Math.max(1,Math.round(f.size/24)), 'in “'+f.name+'”'); });
+    $('nl-file').addEventListener('change', function(){ var f=this.files&&this.files[0]; if(f) showDetect(Math.max(1,Math.round(f.size/24)), 'in “'+f.name+'”'); });
     $('nl-paste').addEventListener('input', function(){ var em=(this.value||'').split(/[\s,;]+/).filter(function(x){return /@/.test(x);}); showDetect(em.length, 'pasted'); });
+
     $('nl-cancel').addEventListener('click', function(){ ov.classList.remove('show'); });
     $('nl-go').addEventListener('click', function(){
       var nm=($('nl-name').value||'').trim(); if(!nm){ $('nl-name').focus(); return; }
-      var v=$('nl-src').value, count;
-      if(v==='bulk'){ if(!detected){ toast('Add a file or paste addresses first'); return; } count=detected; }
-      else if(v==='dynamic'){ count=0; }
-      else { count=Math.max(0,parseInt($('nl-size').value||'0',10)||0); }
-      var id='new'+Date.now(); LISTS.push({id:id,nm:nm,sub:(v==='bulk'?'Bulk upload · '+fmt(count)+' contacts':(v==='dynamic'?'Dynamic segment':'New list')),n:count}); S.lists.push(id);
+      var count, sub;
+      if(mode==='bulk'){ if(!detected){ toast('Add a file or paste addresses first'); return; } count=detected; sub='Bulk upload · '+fmt(count)+' contacts'; }
+      else if(mode==='dynamic'){ count=dynEstimate(); sub=dynSummary(); }
+      else { count=Math.max(0,parseInt($('nl-size').value||'0',10)||0); sub='New list'; }
+      var id='new'+Date.now(); LISTS.unshift({id:id,nm:nm,sub:sub,n:count}); S.lists.push(id);
       ov.classList.remove('show'); render(); toast('“'+nm+'” created'+(count?' · '+fmt(count)+' contacts':'')+' and selected');
     });
   };
