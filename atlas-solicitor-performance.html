@@ -678,29 +678,29 @@ body {
   </div>
 
   <div class="filter-bar">
-    <select class="fld">
+    <select class="fld" id="sp-campaign">
       <option selected>All campaigns</option>
       <option>Cathedral Capital 2026</option>
       <option>Annual Appeal 2026</option>
       <option>Bishop's Annual Gala 2026</option>
     </select>
-    <select class="fld">
+    <select class="fld" id="sp-timeframe">
       <option selected>This fiscal year (Jul 2025 – Jun 2026)</option>
       <option>This quarter</option>
       <option>This month</option>
       <option>Last 90 days</option>
       <option>Custom…</option>
     </select>
-    <select class="fld">
+    <select class="fld" id="sp-sort">
       <option selected>By raised $</option>
       <option>By closed count</option>
       <option>By portfolio size</option>
       <option>By conversion rate</option>
     </select>
-    <div class="right">5 officers · 63 prospects · $1.84M total pipeline value</div>
+    <div class="right" id="sp-summary">5 officers · 63 prospects · $1.84M total pipeline value</div>
   </div>
 
-  <div class="lb-card">
+  <div class="lb-card" id="sp-lb">
     <div class="lb-head">
       <div>#</div>
       <div>Officer</div>
@@ -782,54 +782,15 @@ body {
 
     <div class="card">
       <div class="card-header">
-        <span class="card-title">Sarah's pipeline by stage · 18 prospects</span>
-        <span class="card-action" style="font-size:11.5px;color:var(--blue);cursor:pointer">Open in Pipeline →</span>
+        <span class="card-title" id="sp-stage-title">Sarah's pipeline by stage · 18 prospects</span>
+        <span class="card-action" id="sp-open-pipeline" style="font-size:11.5px;color:var(--blue);cursor:pointer">Open in Pipeline →</span>
       </div>
-      <div class="card-body">
-        <div class="stage-row">
-          <span class="stage id"><span class="pip"></span>Identification</span>
-          <div class="bar"><div class="bar-f" style="width:30%;background:#94A3B8"></div></div>
-          <span class="v">3</span>
-          <span class="v">$45k</span>
-        </div>
-        <div class="stage-row">
-          <span class="stage cult"><span class="pip"></span>Cultivation</span>
-          <div class="bar"><div class="bar-f" style="width:60%;background:var(--blue)"></div></div>
-          <span class="v">6</span>
-          <span class="v">$280k</span>
-        </div>
-        <div class="stage-row">
-          <span class="stage sol"><span class="pip"></span>Solicitation</span>
-          <div class="bar"><div class="bar-f" style="width:80%;background:var(--amber)"></div></div>
-          <span class="v">2</span>
-          <span class="v">$95k</span>
-        </div>
-        <div class="stage-row">
-          <span class="stage stew"><span class="pip"></span>Stewardship</span>
-          <div class="bar"><div class="bar-f" style="width:70%;background:var(--purple)"></div></div>
-          <span class="v">7</span>
-          <span class="v">$486k</span>
-        </div>
-        <div class="stage-row">
-          <span class="stage won"><span class="pip"></span>Closed-won FY26</span>
-          <div class="bar"><div class="bar-f" style="width:100%;background:var(--green)"></div></div>
-          <span class="v">12</span>
-          <span class="v" style="color:var(--green)">$486k</span>
-        </div>
-      </div>
+      <div class="card-body" id="sp-stage-body"></div>
     </div>
 
     <div class="card">
-      <div class="card-header"><span class="card-title">Sarah's metrics</span></div>
-      <div class="card-body">
-        <div class="mini-stat"><span class="l">Conversion rate (cult → won)</span><span class="v" style="color:var(--green)">62%</span></div>
-        <div class="mini-stat"><span class="l">Avg cycle time</span><span class="v">71 days</span></div>
-        <div class="mini-stat"><span class="l">Avg gift size</span><span class="v">$16,200</span></div>
-        <div class="mini-stat"><span class="l">Activities logged · 30d</span><span class="v">42</span></div>
-        <div class="mini-stat"><span class="l">Calls / visits ratio</span><span class="v">2.1 : 1</span></div>
-        <div class="mini-stat"><span class="l">Tasks closed on time</span><span class="v" style="color:var(--green)">94%</span></div>
-        <div class="mini-stat"><span class="l">Top campaign</span><span class="v">Cathedral Capital ($310k)</span></div>
-      </div>
+      <div class="card-header"><span class="card-title" id="sp-metrics-title">Sarah's metrics</span></div>
+      <div class="card-body" id="sp-metrics-body"></div>
     </div>
   </div>
 
@@ -845,6 +806,77 @@ body {
      Safe to load on every page — no-ops when the text isn't in
      ACTIONS, leaving page-native handlers and the wire-script alone.
      ════════════════════════════════════════════════════════ -->
+<!-- Solicitor performance · officer drill-down, sort, filters -->
+<script id="sp-performance">
+(function(){
+  function boot(){
+    var lb=document.getElementById('sp-lb'); if(!lb) return;
+    var META={ 'Sarah Reynolds':{raised:486,closed:12,portfolio:18,conversion:62},
+      'Bridget McCarthy':{raised:324,closed:9,portfolio:15,conversion:48},
+      'Julia Kelleher':{raised:198,closed:7,portfolio:22,conversion:40},
+      'Daniel Cho':{raised:98,closed:0,portfolio:0,conversion:0},
+      'Unattributed':{raised:94,closed:0,portfolio:0,conversion:0} };
+    var DETAIL={
+      'Sarah Reynolds':{ portfolio:18, stages:[
+        ['Identification','id','#94A3B8',30,3,'$45k'],['Cultivation','cult','var(--blue)',60,6,'$280k'],
+        ['Solicitation','sol','var(--amber)',80,2,'$95k'],['Stewardship','stew','var(--purple)',70,7,'$486k'],
+        ['Closed-won FY26','won','var(--green)',100,12,'$486k',true] ],
+        metrics:[['Conversion rate (cult → won)','62%','green'],['Avg cycle time','71 days'],['Avg gift size','$16,200'],['Activities logged · 30d','42'],['Calls / visits ratio','2.1 : 1'],['Tasks closed on time','94%','green'],['Top campaign','Cathedral Capital ($310k)']] },
+      'Bridget McCarthy':{ portfolio:15, stages:[
+        ['Identification','id','#94A3B8',35,4,'$60k'],['Cultivation','cult','var(--blue)',55,5,'$210k'],
+        ['Solicitation','sol','var(--amber)',85,3,'$120k'],['Stewardship','stew','var(--purple)',50,3,'$180k'],
+        ['Closed-won FY26','won','var(--green)',90,9,'$324k',true] ],
+        metrics:[['Conversion rate (cult → won)','48%','green'],['Avg cycle time','88 days'],['Avg gift size','$14,700'],['Activities logged · 30d','35'],['Calls / visits ratio','1.6 : 1'],['Tasks closed on time','88%','green'],['Top campaign','Annual Appeal ($140k)']] },
+      'Julia Kelleher':{ portfolio:22, stages:[
+        ['Identification','id','#94A3B8',45,6,'$70k'],['Cultivation','cult','var(--blue)',65,8,'$150k'],
+        ['Solicitation','sol','var(--amber)',70,4,'$95k'],['Stewardship','stew','var(--purple)',45,4,'$120k'],
+        ['Closed-won FY26','won','var(--green)',78,7,'$198k',true] ],
+        metrics:[['Conversion rate (cult → won)','40%','amber'],['Avg cycle time','94 days','amber'],['Avg gift size','$12,300'],['Activities logged · 30d','28'],['Calls / visits ratio','1.2 : 1'],['Tasks closed on time','82%'],['Top campaign','Bishop’s Gala ($88k)']] }
+    };
+    var selected='Sarah Reynolds';
+    var rows=[].slice.call(lb.querySelectorAll('.lb-row'));
+    rows.forEach(function(r){ r.style.cursor='pointer'; var nm=((r.querySelector('.nm')||{}).textContent||'').trim(); r.setAttribute('data-officer',nm); r.setAttribute('title','View '+nm+'’s breakdown'); r.addEventListener('click',function(){ select(nm); }); });
+    if(!document.getElementById('sp-css')){ var s=document.createElement('style'); s.id='sp-css'; s.textContent='.lb-row.sp-sel{background:var(--blue-pale,#EFF6FF);box-shadow:inset 3px 0 0 var(--blue)}.lb-row:hover{background:#F8FAFF}'; document.head.appendChild(s); }
+
+    function fn(nm){ return (nm||'').split(' ')[0]; }
+    function select(nm){ selected=nm; rows.forEach(function(r){ r.classList.toggle('sp-sel', r.getAttribute('data-officer')===nm); }); renderDetail(nm); }
+    function renderDetail(nm){
+      var d=DETAIL[nm], st=document.getElementById('sp-stage-title'), sb=document.getElementById('sp-stage-body'),
+          mt=document.getElementById('sp-metrics-title'), mb=document.getElementById('sp-metrics-body');
+      if(!d){
+        if(st) st.textContent=fn(nm)+' · no active major-gift pipeline';
+        if(sb) sb.innerHTML='<div style="text-align:center;padding:30px 10px;color:var(--text-3);font-size:13px">'+(nm==='Daniel Cho'?'Daniel is data-entry only — no solicitation portfolio. Credited with $98k of gift-entry this year.':'Unattributed gifts (online, walk-in, roster) with no assigned officer — $94k across 819 gifts.')+'</div>';
+        if(mt) mt.textContent=fn(nm)+' · summary';
+        if(mb) mb.innerHTML='<div class="mini-stat"><span class="l">Raised (credited)</span><span class="v">$'+META[nm].raised+'k</span></div><div class="mini-stat"><span class="l">Assigned prospects</span><span class="v">—</span></div>';
+        return;
+      }
+      if(st) st.textContent=fn(nm)+'’s pipeline by stage · '+d.portfolio+' prospects';
+      if(sb) sb.innerHTML=d.stages.map(function(s){ return '<div class="stage-row"><span class="stage '+s[1]+'"><span class="pip"></span>'+s[0]+'</span><div class="bar"><div class="bar-f" style="width:'+s[3]+'%;background:'+s[2]+'"></div></div><span class="v">'+s[4]+'</span><span class="v"'+(s[6]?' style="color:var(--green)"':'')+'>'+s[5]+'</span></div>'; }).join('');
+      if(mt) mt.textContent=fn(nm)+'’s metrics';
+      if(mb) mb.innerHTML=d.metrics.map(function(m){ return '<div class="mini-stat"><span class="l">'+m[0]+'</span><span class="v"'+(m[2]?' style="color:var(--'+m[2]+')"':'')+'>'+m[1]+'</span></div>'; }).join('');
+    }
+
+    var sortSel=document.getElementById('sp-sort');
+    if(sortSel) sortSel.addEventListener('change',function(){
+      var key={'By raised $':'raised','By closed count':'closed','By portfolio size':'portfolio','By conversion rate':'conversion'}[this.value]||'raised';
+      rows.slice().sort(function(a,b){ return (META[b.getAttribute('data-officer')][key]||0)-(META[a.getAttribute('data-officer')][key]||0); })
+        .forEach(function(r,i){ lb.appendChild(r); var rk=r.querySelector('.rank'); if(rk) rk.textContent=(i+1); r.classList.toggle('first',i===0); });
+    });
+
+    var camp=document.getElementById('sp-campaign'), tf=document.getElementById('sp-timeframe'), sub=document.querySelector('.page-sub');
+    function applyFilter(){ var c=camp?camp.value:'All campaigns', t=(tf?tf.value:'').replace(/\s*\(.*\)/,''); if(sub) sub.textContent='Per-officer portfolio, asks, conversion. '+(c==='All campaigns'?'All campaigns':c)+' · '+t+'.'; }
+    if(camp) camp.addEventListener('change',applyFilter);
+    if(tf) tf.addEventListener('change',applyFilter);
+
+    var op=document.getElementById('sp-open-pipeline');
+    if(op) op.addEventListener('click',function(){ window.location='atlas-pipeline.html?officer='+encodeURIComponent(selected); });
+
+    select('Sarah Reynolds');
+  }
+  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+
 <style id="atlas-rescue-css">
   #atlas-rescue-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background:#0F172A; color:white; padding:12px 18px; border-radius:10px; box-shadow:0 8px 24px rgba(15,23,42,.20); font-size:13px; font-family:'DM Sans',sans-serif; z-index:100010; display:flex; align-items:center; gap:10px; opacity:0; transition:opacity .2s,transform .2s; pointer-events:none; max-width: 480px; }
   #atlas-rescue-toast.show { opacity:1; transform:translateX(-50%); pointer-events:auto; }

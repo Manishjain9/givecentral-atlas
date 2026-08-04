@@ -2473,25 +2473,25 @@ body {
   function openMenu(x,y,t,row){
     closeMenus();
     var m=document.createElement('div'); m.className='tplmenu';
+    var isSystem = /\bSystem\b/.test(((row.querySelector('.tag')||{}).textContent||'')) || /pub\s*1771|tax receipt/i.test(t.nm);
     var items=[
       ['Preview','preview','<circle cx="7" cy="7" r="2"/><path d="M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z"/>'],
       ['Open / edit in builder','edit','<path d="M2 10.5L9.5 3l1.5 1.5L3.5 12H2z"/>'],
       ['sep'],
       ['Duplicate','dup','<rect x="3" y="3" width="7" height="7" rx="1"/><path d="M5.5 3V2a1 1 0 011-1h5a1 1 0 011 1v5a1 1 0 01-1 1h-1"/>'],
-      ['Rename','rename','<path d="M2 10.5L9.5 3l1.5 1.5L3.5 12H2z"/>'],
-      ['Set as default','default','<path d="M7 1.5l1.6 3.3 3.6.5-2.6 2.5.6 3.6L7 9.7 3.8 11.4l.6-3.6L1.8 5.3l3.6-.5z"/>'],
-      ['Share with team','share','<circle cx="4" cy="7" r="1.5"/><circle cx="10" cy="3.5" r="1.5"/><circle cx="10" cy="10.5" r="1.5"/><path d="M5.3 6.3l3.4-2M5.3 7.7l3.4 2"/>'],
-      ['Move to folder','folder','<path d="M1.5 3.5h4l1 1.5h6v6h-11z"/>'],
-      ['sep'],
-      (metaFor(t.nm).archived ? ['Restore','restore','<path d="M2 7a5 5 0 1 1 1.5 3.5M2 10.5V7h3.5"/>'] : ['Archive','archive','<rect x="1.5" y="2.5" width="11" height="3" rx="1"/><path d="M2.5 5.5v6h9v-6M5.5 8h3"/>','danger']),
-      ['Delete','delete','<path d="M2 3.5h10M5 3.5V2h4v1.5M3.5 3.5l.5 9h6l.5-9"/>','danger']
+      ['Set as default','default','<path d="M7 1.5l1.6 3.3 3.6.5-2.6 2.5.6 3.6L7 9.7 3.8 11.4l.6-3.6L1.8 5.3l3.6-.5z"/>']
     ];
+    // Rename / Archive / Delete apply only to your own templates — preset (system) templates are locked
+    if(!isSystem){
+      items.push(['sep']);
+      items.push(['Rename','rename','<path d="M2 10.5L9.5 3l1.5 1.5L3.5 12H2z"/>']);
+      items.push(metaFor(t.nm).archived ? ['Restore','restore','<path d="M2 7a5 5 0 1 1 1.5 3.5M2 10.5V7h3.5"/>'] : ['Archive','archive','<rect x="1.5" y="2.5" width="11" height="3" rx="1"/><path d="M2.5 5.5v6h9v-6M5.5 8h3"/>','danger']);
+      items.push(['Delete','delete','<path d="M2 3.5h10M5 3.5V2h4v1.5M3.5 3.5l.5 9h6l.5-9"/>','danger']);
+    }
     m.innerHTML=items.map(function(it){ return it[0]==='sep'?'<div class="sep"></div>':'<div class="it'+(it[3]?' '+it[3]:'')+'" data-a="'+it[1]+'"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">'+it[2]+'</svg>'+it[0]+'</div>'; }).join('');
     document.body.appendChild(m);
     m.style.left=Math.min(x, window.innerWidth-224)+'px'; m.style.top=Math.min(y, window.innerHeight-380)+'px';
-    var isSystem = /\bSystem\b/.test(((row.querySelector('.tag')||{}).textContent||'')) || /pub\s*1771|tax receipt/i.test(t.nm);
     m.addEventListener('click',function(e){ var it=e.target.closest('.it'); if(!it)return; var a=it.dataset.a; closeMenus();
-      if(isSystem && (a==='rename'||a==='delete'||a==='archive')){ toast('“'+t.nm+'” is a system template — it’s locked to stay compliant and can’t be '+(a==='rename'?'renamed':a==='delete'?'deleted':'archived')+'.'); return; }
       if(a==='preview') openPreview(t);
       else if(a==='edit') window.location='atlas-email-builder.html?mode=template&tpl='+encodeURIComponent(t.nm);
       else if(a==='dup'){ var c=row.cloneNode(true); var b=c.querySelector('.tpl-default-badge'); if(b)b.remove(); c.querySelector('.ttl').textContent=t.nm+' (copy)'; row.parentNode.insertBefore(c,row.nextSibling); toast('“'+t.nm+'” duplicated'); }
@@ -2500,8 +2500,6 @@ body {
       else if(a==='archive'){ tplArchive(row, t.nm); }
       else if(a==='restore'){ tplRestore(row, t.nm); }
       else if(a==='default'){ try{ localStorage.setItem('atlas_default_template', t.nm); }catch(_){}; renderTplView(); toast('“'+t.nm+'” set as the default template'); }
-      else if(a==='share'){ shareModal(row, t.nm); }
-      else if(a==='folder'){ moveToFolderModal(row, t.nm); }
       else toast('Done'); });
     _tplOutside=function(ev){ if(!m.contains(ev.target)) closeMenus(); };
     setTimeout(function(){ document.addEventListener('click',_tplOutside); },10);
@@ -2533,8 +2531,6 @@ body {
     [].forEach.call(ttl.querySelectorAll('.tpl-badge'),function(b){b.remove();});
     function badge(txt,bg,fg,bd){ var s=document.createElement('span'); s.className='tpl-badge'; s.style.cssText='display:inline-block;margin-left:6px;font-size:10px;font-weight:700;border-radius:20px;padding:1px 8px;vertical-align:middle;background:'+bg+';color:'+fg+(bd?';border:1px solid '+bd:''); s.textContent=txt; ttl.appendChild(s); }
     if(dflt&&dflt===name) badge('★ Default','#EFF6FF','#1D4ED8','#BFDBFE');
-    if(meta.folder) badge('📁 '+meta.folder,'#F1F5F9','#475569');
-    if(meta.shared&&meta.shared.scope&&meta.shared.scope!=='me') badge(meta.shared.scope==='org'?'🌐 Org':'👥 Team','#ECFDF5','#15803D');
   }
   function renderTplFilters(){
     var bar=document.getElementById('tpl-filters'), host=document.getElementById('templates-list'); if(!bar||!host) return;
@@ -2543,12 +2539,9 @@ body {
     var arch=rows.filter(function(r){return metaFor(tplName(r)).archived;}).length;
     function chip(key,label,count){ var on=TPL_FILTER===key; return '<button class="tpl-fchip" data-f="'+encodeURIComponent(key)+'" style="border:1px solid '+(on?'#2563EB':'var(--border)')+';background:'+(on?'#EFF6FF':'#fff')+';color:'+(on?'#1D4ED8':'var(--text-2)')+';border-radius:20px;padding:5px 12px;font:600 12px \'DM Sans\';cursor:pointer">'+label+(count!=null?' <span style="opacity:.55">'+count+'</span>':'')+'</button>'; }
     var html=chip('all','All',active);
-    folders.forEach(function(f){ var c=rows.filter(function(r){var m=metaFor(tplName(r));return !m.archived&&m.folder===f;}).length; html+=chip(f,'📁 '+f,c); });
     html+=chip('archived','Archived',arch);
-    html+='<button id="tpl-newfolder" style="border:1px dashed var(--border);background:#fff;color:var(--text-3);border-radius:20px;padding:5px 12px;font:600 12px \'DM Sans\';cursor:pointer">+ New folder</button>';
     bar.innerHTML=html;
     bar.querySelectorAll('.tpl-fchip').forEach(function(b){ b.addEventListener('click',function(){ TPL_FILTER=decodeURIComponent(b.dataset.f); TPL_PAGE=1; renderTplView(); }); });
-    var nf=document.getElementById('tpl-newfolder'); if(nf) nf.addEventListener('click', newFolderModal);
   }
   function renderTplView(){
     var host=document.getElementById('templates-list'); if(!host) return;

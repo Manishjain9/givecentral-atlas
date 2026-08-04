@@ -781,11 +781,11 @@ body {
       <!-- Trend chart -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title">12-month trend · forecast vs. actual</span>
-          <span class="card-action">View 24-month →</span>
+          <span class="card-title" id="trend-title">12-month trend · forecast vs. actual</span>
+          <span class="card-action" id="trend-toggle" style="cursor:pointer">View 24-month →</span>
         </div>
         <div class="card-body">
-          <div class="trend-bars">
+          <div class="trend-bars" id="trend-bars">
             <div class="trend-bar actual" style="height:42%"></div>
             <div class="trend-bar actual" style="height:55%"></div>
             <div class="trend-bar actual" style="height:48%"></div>
@@ -799,7 +799,7 @@ body {
             <div class="trend-bar future" style="height:65%"></div>
             <div class="trend-bar future" style="height:72%"></div>
           </div>
-          <div class="trend-axis">
+          <div class="trend-axis" id="trend-axis">
             <span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span>
             <span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span>
           </div>
@@ -942,10 +942,10 @@ body {
       <div class="card">
         <div class="card-header"><span class="card-title">Quick actions</span></div>
         <div class="card-body" style="display:flex;flex-direction:column;gap:8px">
-          <a class="btn btn-ghost" href="atlas-pipeline.html">Open Pipeline Kanban</a>
-          <a class="btn btn-ghost" href="atlas-portfolio-assign.html">Rebalance portfolios</a>
-          <a class="btn btn-ghost" href="atlas-segment-builder.html">Build cultivation list</a>
-          <a class="btn btn-ghost" href="atlas-email-compose.html">Send weekly recap to leadership</a>
+          <button class="btn btn-ghost" id="fc-export" style="justify-content:flex-start;text-align:left"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1.5v7M4 6l3 3 3-3M2 11.5h10"/></svg> Export forecast (CSV)</button>
+          <a class="btn btn-ghost" href="atlas-pipeline.html" style="justify-content:flex-start;text-align:left"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="3.5" height="11" rx="1"/><rect x="5.5" y="1.5" width="3.5" height="11" rx="1"/><rect x="10" y="1.5" width="2.5" height="11" rx="1"/></svg> Open pipeline board</a>
+          <a class="btn btn-ghost" href="atlas-portfolio-assign.html" style="justify-content:flex-start;text-align:left"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2.5 5h9M2.5 5L4.7 9h-4.4zM11.5 5L13.7 9h-4.4z"/></svg> Rebalance portfolios</a>
+          <a class="btn btn-ghost" href="atlas-report-queue-scheduler.html" style="justify-content:flex-start;text-align:left"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7.5" r="5"/><path d="M7 5v2.5l1.7 1M7 1v1.5"/></svg> Schedule forecast report</a>
         </div>
       </div>
 
@@ -956,6 +956,53 @@ body {
 </div>
 
 </div>
+
+<!-- Forecast trend 12/24-month toggle + Quick actions -->
+<script id="forecast-trend">
+(function(){
+  function boot(){
+    var bars=document.getElementById('trend-bars'), axis=document.getElementById('trend-axis'),
+        title=document.getElementById('trend-title'), tog=document.getElementById('trend-toggle');
+    if(bars && tog){
+      var MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var OLD=[30,34,28,40,36,45,38,50,44,52,47,58];
+      var LAST=[{h:42,k:'actual'},{h:55,k:'actual'},{h:48,k:'actual'},{h:62,k:'actual'},{h:51,k:'actual'},{h:74,k:'actual'},{h:64,k:'actual'},{h:82,k:'actual'},{h:78,k:'actual'},{h:88,k:'forecast'},{h:65,k:'future'},{h:72,k:'future'}];
+      var months=12;
+      function labels(n){ var out=[]; for(var k=0;k<n;k++){ var d=new Date(2026,4-(n-1)+k,1); out.push(MN[d.getMonth()]+(n>12?(" ’"+String(d.getFullYear()).slice(-2)):'')); } return out; }
+      function render(){
+        var data = months===24 ? OLD.map(function(h){return {h:h,k:'actual'};}).concat(LAST) : LAST;
+        bars.style.gridTemplateColumns='repeat('+months+',1fr)';
+        bars.style.gap = months===24 ? '3px' : '6px';
+        bars.innerHTML = data.map(function(b){ return '<div class="trend-bar '+b.k+'" style="height:'+b.h+'%"></div>'; }).join('');
+        if(axis){ axis.style.gridTemplateColumns='repeat('+months+',1fr)'; axis.style.fontSize = months===24 ? '8.5px' : '10px';
+          axis.innerHTML = labels(months).map(function(l){ return '<span>'+l+'</span>'; }).join(''); }
+        if(title) title.textContent = months+'-month trend · forecast vs. actual';
+        tog.textContent = months===24 ? 'View 12-month →' : 'View 24-month →';
+      }
+      tog.addEventListener('click', function(){ months = months===24?12:24; render(); });
+      render();
+    }
+    // Export forecast → real CSV built from the stage-forecast rows
+    var xb=document.getElementById('fc-export');
+    if(xb){ xb.addEventListener('click', function(){
+      var rows=[['Stage','Prospects','Close rate','Expected value']];
+      document.querySelectorAll('.stage-fc').forEach(function(r){
+        var stage=((r.querySelector('.stage-pill')||{}).textContent||'').trim();
+        var count=((r.querySelector('.count')||{}).textContent||'').replace(/[^0-9]/g,'');
+        var conv=((r.querySelector('.conv b')||{}).textContent||'').trim();
+        var exp=((r.querySelector('.expected')||{}).textContent||'').trim();
+        if(stage) rows.push([stage,count,conv,exp]);
+      });
+      var esc=function(v){ v=(''+v).replace(/"/g,'""'); return /[",\n]/.test(v)?'"'+v+'"':v; };
+      var csv=rows.map(function(r){ return r.map(esc).join(','); }).join('\n');
+      var blob=new Blob([csv],{type:'text/csv'}), url=URL.createObjectURL(blob);
+      var a=document.createElement('a'); a.href=url; a.download='pipeline-forecast-'+(new Date().toISOString().slice(0,10))+'.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(url); },1500);
+      var t=document.getElementById('atlas-rescue-toast'); if(t){ (t.querySelector('.msg')||t).textContent='Forecast exported · CSV downloaded'; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); },2500); }
+    }); }
+  }
+  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
 
 <!-- ════════════════════════════════════════════════════════
      Atlas Dead-CTA Rescue · v1

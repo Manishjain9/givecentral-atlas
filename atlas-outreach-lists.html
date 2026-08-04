@@ -117,6 +117,9 @@ a { color:inherit; text-decoration:none; }
 .lists-table tr:last-child td { border-bottom:none; }
 .lt-name { font-weight:600; color:var(--text); }
 .lt-desc { font-size:11.5px; color:var(--text-3); margin-top:2px; line-height:1.4; }
+.ld-mrow { cursor:pointer; }
+.ld-mrow:hover { background:#F8FAFF; }
+.ld-mrow:hover .lt-name { color:var(--blue); }
 .lt-members { font-weight:600; color:var(--text); font-variant-numeric:tabular-nums; }
 .lt-status-pill { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:99px; font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
 .status-active { background:var(--green-light); color:var(--green); }
@@ -704,8 +707,6 @@ function drEditSettings(){
     '<div style="padding:18px 22px 6px"><div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)">List settings</div><h3 style="font-family:\'DM Serif Display\',serif;font-size:19px;color:var(--navy);margin:3px 0 0">Edit “'+drCurrent.name+'”</h3></div>'+
     '<div style="padding:14px 22px">'+
       '<label style="display:block;font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:5px">List name</label><input id="drs-name" value="'+drCurrent.name.replace(/"/g,'&quot;')+'" style="width:100%;border:1px solid var(--border);border-radius:9px;padding:9px 12px;font:400 13.5px DM Sans">'+
-      '<label style="display:block;font-size:12px;font-weight:600;color:var(--text-2);margin:12px 0 5px">Type</label><select id="drs-type" style="width:100%;border:1px solid var(--border);border-radius:9px;padding:9px 12px;font:400 13.5px DM Sans"><option value="dynamic"'+(drCurrent.type==='dynamic'?' selected':'')+'>Dynamic · auto-updates from criteria</option><option value="manual"'+(drCurrent.type!=='dynamic'?' selected':'')+'>Manual · you add contacts</option></select>'+
-      '<label style="display:block;font-size:12px;font-weight:600;color:var(--text-2);margin:12px 0 5px">Status</label><select id="drs-status" style="width:100%;border:1px solid var(--border);border-radius:9px;padding:9px 12px;font:400 13.5px DM Sans"><option'+(drCurrent.status==='active'?' selected':'')+'>active</option><option'+(drCurrent.status==='paused'?' selected':'')+'>paused</option><option'+(drCurrent.status==='draft'?' selected':'')+'>draft</option></select>'+
     '</div>'+
     '<div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--border)"><button class="btn btn-ghost" onclick="document.getElementById(\'dr-settings-ov\').remove()">Cancel</button><button class="btn btn-blue" onclick="drSaveSettings()">Save changes</button></div>'+
   '</div>';
@@ -715,10 +716,12 @@ function drEditSettings(){
 function drSaveSettings(){
   if(!drCurrent) return;
   var nm=document.getElementById('drs-name').value.trim()||drCurrent.name;
-  drCurrent.name=nm; drCurrent.type=document.getElementById('drs-type').value; drCurrent.status=document.getElementById('drs-status').value;
+  drCurrent.name=nm;
   document.getElementById('dr-settings-ov').remove();
-  document.getElementById('dr-title').textContent=nm;
-  renderLists(); toast('List settings saved · '+nm);
+  var dt=document.getElementById('dr-title'); if(dt) dt.textContent=nm;
+  renderLists();
+  if(typeof LD!=='undefined' && LD.list===drCurrent) openListPage(drCurrent.id);
+  toast('List renamed · '+nm);
 }
 function drSendEmail(){
   if(!drCurrent){ window.location='atlas-email-campaign.html'; return; }
@@ -837,8 +840,9 @@ function ldShell(list){
       '</div>'+
       '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
         '<button class="btn btn-blue" onclick="ldSend()"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M1 6h9M6 2l4 4-4 4"/></svg> Send email</button>'+
-        '<button class="btn btn-ghost" onclick="ldEdit()">Edit settings</button>'+
-        '<button class="btn btn-ghost" onclick="ldAdd()">Add members</button>'+
+        (list.type==='dynamic'
+          ? '<button class="btn btn-ghost" onclick="ldEditCriteria()">Edit criteria</button>'
+          : '<button class="btn btn-ghost" onclick="ldAdd()">Add members</button>')+
         '<button class="btn btn-ghost" onclick="ldExport()">Export CSV</button>'+
         '<button class="btn btn-ghost" onclick="ldMore(event)">⋯</button>'+
       '</div>'+
@@ -850,7 +854,7 @@ function ldShell(list){
       '<div class="kpi"><div class="lbl">Last send</div><div class="val" style="font-size:16px">'+(list.status==='draft'?'—':list.lastActivity)+'</div><div class="meta">'+(list.status==='draft'?'no sends yet':'via Communications')+'</div></div>'+
     '</div>'+
     '<div style="display:flex;gap:4px;border-bottom:1px solid var(--border);margin-top:14px">'+
-      ['members|Members','membership|Membership','activity|Activity'].map(function(t){ var p=t.split('|'); return '<button class="ld-tab" data-t="'+p[0]+'" onclick="ldSetTab(\''+p[0]+'\')" style="border:none;background:none;padding:11px 16px;font:600 13px \'DM Sans\';color:var(--text-3);border-bottom:2px solid transparent;cursor:pointer">'+p[1]+'</button>'; }).join('')+
+      ['members|Members','activity|Activity'].map(function(t){ var p=t.split('|'); return '<button class="ld-tab" data-t="'+p[0]+'" onclick="ldSetTab(\''+p[0]+'\')" style="border:none;background:none;padding:11px 16px;font:600 13px \'DM Sans\';color:var(--text-3);border-bottom:2px solid transparent;cursor:pointer">'+p[1]+'</button>'; }).join('')+
     '</div>'+
     '<div id="ld-pane" style="padding-top:16px"></div>'+
   '</div>';
@@ -865,32 +869,24 @@ function ldRenderTab(){
     var size=10, maxP=Math.max(1,Math.ceil(f.length/size)); if(LD.mpage>maxP)LD.mpage=maxP; var start=(LD.mpage-1)*size, rows=f.slice(start,start+size);
     var selN=Object.keys(LD.sel).length;
     pane.innerHTML=
+      (list.type==='dynamic'
+        ? '<div style="display:flex;align-items:center;gap:10px;background:var(--purple-light);border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--purple);font-weight:700;white-space:nowrap">⚡ Auto-updating</span><span style="font-size:12.5px;color:var(--text-2);flex:1">Membership is recalculated from saved criteria · last '+list.lastActivity+' · '+list.members.toLocaleString()+' currently match</span><button class="btn btn-ghost" onclick="ldEditCriteria()" style="padding:5px 11px;font-size:12px;white-space:nowrap">Edit criteria</button></div>'
+        : '')+
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="flex:1;display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 11px;max-width:280px"><svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="ld-mq" placeholder="Search members…" value="'+escv(LD.mq)+'" style="border:none;background:none;outline:none;font:400 12.5px \'DM Sans\';flex:1"></div><span style="font-size:12px;color:var(--text-3)">'+f.length.toLocaleString()+' of '+list.members.toLocaleString()+'</span></div>'+
       (selN?'<div style="display:flex;align-items:center;gap:10px;background:var(--navy);color:#fff;border-radius:9px;padding:9px 14px;margin-bottom:10px;font:600 12.5px \'DM Sans\'"><span>'+selN+' selected</span><span style="flex:1"></span><button class="ld-bulk" data-b="addlist" style="border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:7px;padding:5px 11px;font:600 12px \'DM Sans\';cursor:pointer">Add to list</button><button class="ld-bulk" data-b="export" style="border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:7px;padding:5px 11px;font:600 12px \'DM Sans\';cursor:pointer">Export</button><button class="ld-bulk" data-b="suppress" style="border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:7px;padding:5px 11px;font:600 12px \'DM Sans\';cursor:pointer">Suppress</button><button class="ld-bulk" data-b="remove" style="border:1px solid #FCA5A5;background:none;color:#FCA5A5;border-radius:7px;padding:5px 11px;font:600 12px \'DM Sans\';cursor:pointer">Remove</button><button class="ld-bulk" data-b="clear" style="border:none;background:none;color:#fff;cursor:pointer;font:600 12px \'DM Sans\'">Clear</button></div>':'')+
       '<table class="lists-table"><thead><tr><th style="width:30px"></th><th>Member</th><th>Segment tag</th><th>Last gift</th><th>Status</th><th>Joined</th></tr></thead><tbody>'+
-      (rows.length? rows.map(function(m){ var key=m.e; return '<tr><td><input type="checkbox" class="ld-ck" data-k="'+escv(key)+'" '+(LD.sel[key]?'checked':'')+'></td><td><div class="lt-name">'+m.n+'</div><div class="lt-desc">'+m.e+'</div></td><td><span style="font-size:12px;color:var(--text-2)">'+m.tag+'</span></td><td>'+m.gift+'</td><td>'+stPill(m.st)+'</td><td><span class="lt-date">'+m.joined+'</span></td></tr>'; }).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:30px">No members match.</td></tr>')+
+      (rows.length? rows.map(function(m){ var key=m.e; return '<tr class="ld-mrow" data-n="'+escv(m.n)+'" data-e="'+escv(m.e)+'" title="View '+escv(m.n)+'’s donor profile"><td><input type="checkbox" class="ld-ck" data-k="'+escv(key)+'" '+(LD.sel[key]?'checked':'')+'></td><td><div class="lt-name">'+m.n+'</div><div class="lt-desc">'+m.e+'</div></td><td><span style="font-size:12px;color:var(--text-2)">'+m.tag+'</span></td><td>'+m.gift+'</td><td>'+stPill(m.st)+'</td><td><span class="lt-date">'+m.joined+'</span></td></tr>'; }).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:30px">No members match.</td></tr>')+
       '</tbody></table>'+
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 2px;font-size:12px;color:var(--text-3)"><span>Showing '+(f.length?start+1:0)+'–'+Math.min(start+size,f.length)+' of '+f.length.toLocaleString()+(list.members>all.length?' · first '+all.length+' loaded (server-paginated)':'')+'</span><span style="display:flex;gap:8px"><button class="btn btn-ghost" id="ldm-prev" '+(LD.mpage<=1?'disabled':'')+'>‹ Prev</button><button class="btn btn-ghost" id="ldm-next" '+(LD.mpage>=maxP?'disabled':'')+'>Next ›</button></span></div>';
     var qi=pane.querySelector('#ld-mq'); if(qi) qi.addEventListener('input',function(){ LD.mq=this.value; LD.mpage=1; ldRenderTab(); var n=document.getElementById('ld-mq'); if(n){n.focus();try{n.setSelectionRange(n.value.length,n.value.length);}catch(_){}} });
     pane.querySelectorAll('.ld-ck').forEach(function(ck){ ck.addEventListener('change',function(){ var k=ck.dataset.k; if(ck.checked)LD.sel[k]=1; else delete LD.sel[k]; ldRenderTab(); }); });
+    // Click a member row → open that donor's profile (ignore clicks on the select checkbox)
+    pane.querySelectorAll('.ld-mrow').forEach(function(tr){ tr.addEventListener('click',function(e){ if(e.target.closest('input,label')) return; var nm=tr.getAttribute('data-n'), em=tr.getAttribute('data-e'); window.location='atlas-donor-360.html?from=list&list='+encodeURIComponent(LD.list.name)+'&name='+encodeURIComponent(nm)+'&email='+encodeURIComponent(em); }); });
     var pv=pane.querySelector('#ldm-prev'); if(pv) pv.addEventListener('click',function(){ if(LD.mpage>1){LD.mpage--;ldRenderTab();} });
     var nx=pane.querySelector('#ldm-next'); if(nx) nx.addEventListener('click',function(){ if(LD.mpage<maxP){LD.mpage++;ldRenderTab();} });
-    pane.querySelectorAll('.ld-bulk').forEach(function(b){ b.addEventListener('click',function(){ var a=b.dataset.b, n=Object.keys(LD.sel).length; if(a==='clear'){LD.sel={};ldRenderTab();return;} toast(({addlist:n+' members — pick a list to add to',export:'Exporting '+n+' members to CSV',suppress:n+' members suppressed · added to DNC',remove:n+' members removed from this list'})[a]); if(a!=='addlist'){LD.sel={};} ldRenderTab(); }); });
-  } else if(LD.tab==='membership'){
-    if(list.type==='dynamic'){
-      pane.innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;max-width:620px">'+
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font-weight:700;color:var(--text)">⚡ Dynamic membership rules</div><button class="btn btn-ghost" onclick="toast(\'Opening the segment builder…\')">Edit criteria</button></div>'+
-        '<p style="font-size:12.5px;color:var(--text-3);margin-bottom:14px">Members are recalculated automatically whenever a donor matches (or stops matching) these rules.</p>'+
-        ['Gave a gift in the last 18 months','Deanery is “East” or “Diocese-wide”','Email status is subscribed','Excludes: hard-bounced, DNC'].map(function(c,i){ return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border)"><span style="font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-pale);border-radius:6px;padding:2px 7px">'+(i===0?'IF':'AND')+'</span><span style="font-size:13px;color:var(--text-2)">'+c+'</span></div>'; }).join('')+
-        '<div style="margin-top:14px;font-size:12px;color:var(--text-3)">Last recalculated '+list.lastActivity+' · '+list.members.toLocaleString()+' members currently match.</div>'+
-      '</div>';
-    } else {
-      pane.innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;max-width:620px">'+
-        '<div style="font-weight:700;color:var(--text);margin-bottom:8px">Manual list</div>'+
-        '<p style="font-size:12.5px;color:var(--text-3);margin-bottom:14px">Members are added by hand or imported. This list has '+list.members.toLocaleString()+' members.</p>'+
-        '<div style="display:flex;gap:8px"><button class="btn btn-blue" onclick="ldAdd()">Add members</button><button class="btn btn-ghost" onclick="openCsvWizard()">Import CSV</button></div>'+
-      '</div>';
-    }
+    pane.querySelectorAll('.ld-bulk').forEach(function(b){ b.addEventListener('click',function(){ var a=b.dataset.b, n=Object.keys(LD.sel).length; if(a==='clear'){LD.sel={};ldRenderTab();return;}
+      if(a==='export'){ var sel=ldMembers(list).filter(function(m){ return LD.sel[m.e]; }); ldCSV(sel, (list.name||'list').replace(/[^\w]+/g,'-').toLowerCase()+'-selected.csv'); toast('Exported '+n+' members → CSV','success'); LD.sel={}; ldRenderTab(); return; }
+      toast(({addlist:n+' members — pick a list to add to',suppress:n+' members suppressed · added to DNC',remove:n+' members removed from this list'})[a]); if(a!=='addlist'){LD.sel={};} ldRenderTab(); }); });
   } else {
     var acts=ldActivity(list);
     pane.innerHTML = acts.length ?
@@ -915,16 +911,25 @@ function showIndex(){ var h=document.getElementById('list-detail'); if(h){h.styl
 window.showIndex=showIndex;
 function ldSend(){ toast('Starting email to '+LD.list.name+'…'); setTimeout(function(){ window.location='atlas-email-campaign.html?listName='+encodeURIComponent(LD.list.name)+'&listCount='+(LD.list.members||0); },200); }
 function ldEdit(){ drCurrent=LD.list; drEditSettings(); }
-function ldAdd(){ if(LD.list.type==='dynamic'){ toast('Dynamic list — edit the criteria to change who’s included'); ldSetTab('membership'); } else { openCsvWizard(); } }
-function ldExport(){ toast('Exporting '+LD.list.members.toLocaleString()+' members to CSV'); }
+function ldEditCriteria(){ toast('Opening the segment builder…','success'); setTimeout(function(){ window.location='atlas-segment-builder.html?list='+encodeURIComponent(LD.list.name); },220); }
+function ldAdd(){ if(LD.list.type==='dynamic'){ ldEditCriteria(); } else { openCsvWizard(); } }
+function ldCSV(members, fname){
+  var head=['Name','Email','Segment tag','Last gift','Status','Joined'];
+  var esc=function(v){ v=(''+(v==null?'':v)).replace(/"/g,'""'); return /[",\n]/.test(v)?'"'+v+'"':v; };
+  var lines=[head.join(',')].concat(members.map(function(m){ return [esc(m.n),esc(m.e),esc(m.tag),esc(m.gift),esc(m.st),esc(m.joined)].join(','); }));
+  var blob=new Blob([lines.join('\n')],{type:'text/csv'}), url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download=fname; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(url); },1500);
+}
+function ldExport(){ var ms=ldMembers(LD.list); ldCSV(ms, (LD.list.name||'list').replace(/[^\w]+/g,'-').toLowerCase()+'-members.csv'); toast('Exported '+ms.length.toLocaleString()+' members → CSV','success'); }
 function ldMore(ev){
   var old=document.getElementById('ld-more'); if(old){old.remove();return;}
   var m=document.createElement('div'); m.id='ld-more'; m.style.cssText='position:fixed;z-index:400;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 34px rgba(15,23,42,.18);padding:6px;min-width:170px;font-family:DM Sans,sans-serif';
-  m.innerHTML=[['Duplicate','dup'],['Archive','arch'],['Delete','del']].map(function(it){ return '<button data-a="'+it[1]+'" style="display:block;width:100%;text-align:left;border:none;background:none;padding:8px 11px;border-radius:7px;font:500 13px \'DM Sans\';color:'+(it[1]==='del'?'var(--rose)':'var(--text-2)')+';cursor:pointer">'+it[0]+'</button>'; }).join('');
+  m.innerHTML=[['Rename & settings','edit'],['Duplicate','dup'],['Archive','arch'],['Delete','del']].map(function(it){ return '<button data-a="'+it[1]+'" style="display:block;width:100%;text-align:left;border:none;background:none;padding:8px 11px;border-radius:7px;font:500 13px \'DM Sans\';color:'+(it[1]==='del'?'var(--rose)':'var(--text-2)')+';cursor:pointer">'+it[0]+'</button>'; }).join('');
   document.body.appendChild(m); var r=ev.currentTarget.getBoundingClientRect(); m.style.top=(r.bottom+4)+'px'; m.style.left=Math.max(8,r.right-m.offsetWidth)+'px';
   m.querySelectorAll('button').forEach(function(b){ b.onmouseenter=function(){b.style.background='var(--blue-pale)';}; b.onmouseleave=function(){b.style.background='none';}; });
   m.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; var a=b.dataset.a; m.remove(); var list=LD.list;
-    if(a==='dup'){ var copy=Object.assign({},list,{id:'L'+(LISTS.length+1)+'-'+Math.floor(Math.random()*9999),name:list.name+' (copy)',status:'draft',engagement:0,lastActivity:'Just now'}); LISTS.unshift(copy); renderLists(); toast('Duplicated · '+copy.name,'success'); }
+    if(a==='edit'){ drCurrent=list; drEditSettings(); }
+    else if(a==='dup'){ var copy=Object.assign({},list,{id:'dup-'+Date.now(),name:list.name+' (copy)',status:'draft',engagement:0,ctr:0,lastActivity:'Just now'}); if(copy.sampleMembers&&copy.sampleMembers.slice) copy.sampleMembers=copy.sampleMembers.slice(); LISTS.unshift(copy); renderLists(); toast('Duplicated · '+copy.name+' — '+copy.members.toLocaleString()+' members copied','success'); openListPage(copy.id); }
     else if(a==='arch'){ atlasConfirm({icon:'warn',title:'Archive this list?',message:'It will be hidden from active views but can be restored.',confirmText:'Archive',onConfirm:function(){ list.status='archived'; renderLists(); showIndex(); toast('List archived · '+list.name); }}); }
     else if(a==='del'){ atlasConfirm({icon:'danger',danger:true,title:'Delete this list?',message:'Donors stay in your database — only “'+list.name+'” is removed.',confirmText:'Delete list',onConfirm:function(){ var i=LISTS.indexOf(list); if(i>-1)LISTS.splice(i,1); renderLists(); showIndex(); toast('List deleted · '+list.name); }}); }
   });
@@ -938,7 +943,7 @@ function showKebab(id, ev){
   var old=document.getElementById('lk-menu'); if(old) old.remove();
   var m=document.createElement('div'); m.id='lk-menu';
   m.style.cssText='position:fixed;z-index:400;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 34px rgba(15,23,42,.18);padding:6px;min-width:186px;font-family:DM Sans,sans-serif';
-  var items=[['Open list','open'],['Send email','send'],['Duplicate','dup'],['Edit settings','edit'],['Export members','export'],['sep'],['Delete list','del']];
+  var items=[['Open list','open'],['Send email','send'],['Duplicate','dup'],['Export members','export'],['sep'],['Delete list','del']];
   m.innerHTML=items.map(function(it){ if(it[0]==='sep') return '<div style="height:1px;background:var(--border);margin:5px 4px"></div>'; return '<button data-a="'+it[1]+'" style="display:block;width:100%;text-align:left;border:none;background:none;padding:8px 11px;border-radius:7px;font:500 13px \'DM Sans\';color:'+(it[1]==='del'?'var(--rose)':'var(--text-2)')+';cursor:pointer">'+it[0]+'</button>'; }).join('');
   document.body.appendChild(m);
   var btn=(ev&&(ev.currentTarget||ev.target)); var r=btn?btn.getBoundingClientRect():{bottom:80,top:60,left:window.innerWidth-220};
