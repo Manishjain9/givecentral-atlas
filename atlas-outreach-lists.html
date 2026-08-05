@@ -80,7 +80,7 @@ a { color:inherit; text-decoration:none; }
 .btn-ghost:hover { background:var(--surface); }
 .btn-blue { background:var(--blue); color:white; }
 .btn-blue:hover { background:#1D4ED8; }
-.ph-desc { font-size:13px; color:var(--text-3); margin-top:7px; line-height:1.55; max-width:680px; }
+.ph-desc { font-size:13px; color:var(--text-3); margin-top:7px; line-height:1.55; max-width:none; }
 
 /* ══ Views chip strip ══ */
 .views-strip { padding:14px 28px 0; display:flex; gap:7px; align-items:center; flex-wrap:wrap; background:white; }
@@ -329,6 +329,13 @@ a { color:inherit; text-decoration:none; }
 <div id="index-view">
 <!-- Page header -->
 <div class="page-head">
+  <div style="display:flex;align-items:center;gap:7px;font-size:13px;margin-bottom:10px">
+    <a href="atlas-dashboard.html" style="color:var(--blue);font-weight:600;text-decoration:none">Atlas</a>
+    <svg viewBox="0 0 10 10" width="9" height="9" fill="none" stroke="#CBD5E1" stroke-width="1.6"><path d="M3.5 2l3 3-3 3"/></svg>
+    <a href="atlas-communications.html#lists" style="color:var(--blue);font-weight:600;text-decoration:none">Communications</a>
+    <svg viewBox="0 0 10 10" width="9" height="9" fill="none" stroke="#CBD5E1" stroke-width="1.6"><path d="M3.5 2l3 3-3 3"/></svg>
+    <span style="color:var(--text);font-weight:500">Outreach lists</span>
+  </div>
   <div class="ph-title-row">
     <h1 class="ph-title">Outreach lists</h1>
     <span class="ph-count" id="lists-count">8 lists · 1,502 unique donors reached</span>
@@ -337,7 +344,7 @@ a { color:inherit; text-decoration:none; }
         <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v7M3 5l3 3 3-3"/><path d="M1.5 10.5h9"/></svg>
         Import CSV
       </button>
-      <button class="btn btn-blue" onclick="openNewListModal()">
+      <button class="btn btn-blue" onclick="olNewList()">
         <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
         New list
       </button>
@@ -767,6 +774,95 @@ function openNewListModal(){
   document.getElementById('new-list-modal').classList.add('show');
   setTimeout(() => document.getElementById('nl-name').focus(), 100);
 }
+/* ─── New "Add a new list / segment" flow (card-based · empty · dynamic · bulk) ─── */
+var OL_HIST={'Any giving history':1,'Gave in the last 12 months':.62,'Gave in the last 24 months':.80,'Lapsed — no gift in 12 months':.30,'New donors — first gift in 90 days':.12,'Recurring donors':.22,'Never given (prospects)':.35};
+var OL_AMT={'Any gift amount':1,'$1+':.95,'$100+':.60,'$1,000+':.30,'$10,000+':.08,'$25,000+':.03};
+var OL_PARISHES=["St. Mary's Cathedral","St. Anthony's","Holy Trinity","Sacred Heart","St. Michael's","Blessed Trinity","Our Lady of Angels","St. Patrick's"];
+var OL_TAGS=['Board member','Volunteer','Major prospect','Legacy society','Event attendee','Parish leader','Recurring donor','Young professional'];
+function olFmt(n){ return (n||0).toLocaleString(); }
+function olNewList(){
+  if(!document.getElementById('olnl-css')){ var cs=document.createElement('style'); cs.id='olnl-css';
+    cs.textContent='#olnl-ov{position:fixed;inset:0;background:rgba(14,30,53,.45);z-index:100090;display:none;align-items:center;justify-content:center;padding:22px;font-family:"DM Sans",sans-serif}#olnl-ov.show{display:flex}'+
+      '#olnl-ov .cnl-card{background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:92vh;overflow:auto;box-shadow:0 24px 64px rgba(14,30,53,.3)}'+
+      '#olnl-ov .cnl-hd{padding:22px 24px 6px}#olnl-ov .cnl-hd h3{font-family:"DM Serif Display",serif;font-size:22px;color:#0E1E35;margin:0}#olnl-ov .cnl-hd p{font-size:12.5px;color:#94A3B8;margin:6px 0 0}'+
+      '#olnl-ov .cnl-bd{padding:16px 24px}#olnl-ov .cnl-lbl{display:block;font-size:12.5px;font-weight:700;color:#0E1E35;margin:16px 0 7px}#olnl-ov .cnl-bd>.cnl-lbl:first-child{margin-top:0}#olnl-ov .cnl-lbl .req{color:#E11D48}#olnl-ov .cnl-lbl .opt{color:#94A3B8;font-weight:400}'+
+      '#olnl-ov .cnl-fld{width:100%;border:1px solid #E2E8F0;border-radius:10px;padding:11px 13px;font:400 14px "DM Sans",sans-serif;box-sizing:border-box;background:#fff}#olnl-ov .cnl-fld:focus{outline:none;border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.1)}'+
+      '#olnl-ov .cnl-ft{padding:16px 24px 20px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid #F1F5F9}'+
+      '#olnl-ov .cnl-btn{font:600 13px "DM Sans",sans-serif;padding:10px 18px;border-radius:10px;border:1px solid #E2E8F0;background:#fff;color:#334155;cursor:pointer}#olnl-ov .cnl-btn.primary{background:#2563EB;border-color:#2563EB;color:#fff}#olnl-ov .cnl-btn.primary:disabled{background:#93C5FD;border-color:#93C5FD;cursor:not-allowed}'+
+      '.cnl-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.cnl-mode{border:1.5px solid #E2E8F0;border-radius:12px;padding:16px 8px;text-align:center;cursor:pointer;background:#fff;font-family:inherit}.cnl-mode:hover{border-color:#93C5FD}.cnl-mode.on{border-color:#2563EB;background:#EFF6FF}.cnl-mode .ic{font-size:22px;line-height:1}.cnl-mode .t{font:700 14.5px "DM Sans",sans-serif;color:#0E1E35;margin-top:8px}.cnl-mode.on .t{color:#2563EB}.cnl-mode .s{font-size:11.5px;color:#64748B;margin-top:3px;line-height:1.35}'+
+      '.cnl-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cnl-match{margin-top:16px;display:flex;align-items:center;gap:14px;background:#F0FDF4;border:1px solid #86EFAC;border-radius:11px;padding:14px 16px}.cnl-match .n{font:700 27px "DM Sans",sans-serif;color:#15803D;line-height:1}.cnl-match .tx{font-size:12.5px;color:#166534;line-height:1.4}.cnl-match .tx b{display:block;font-size:14px;color:#14532D}'+
+      '.cnl-note,.cnl-info{margin-top:12px;background:#EFF6FF;border:1px solid #DBEAFE;border-radius:11px;padding:13px 15px;font-size:12.5px;color:#1D4ED8;line-height:1.5}.cnl-tabs{display:flex;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden}.cnl-tab{flex:1;border:none;background:#F8FAFC;padding:12px;font:600 13px "DM Sans",sans-serif;color:#64748B;cursor:pointer;border-bottom:2px solid transparent}.cnl-tab.on{background:#fff;color:#2563EB;border-bottom-color:#2563EB}'+
+      '#olnl-ov .cnl-drop{border:1.5px dashed #CBD5E1;border-radius:12px;padding:34px 18px;text-align:center;color:#64748B;margin-top:14px;cursor:pointer}#olnl-ov .cnl-drop.over{border-color:#2563EB;background:#EFF6FF}.cnl-drop .em{font-size:26px}.cnl-drop .hd{font:700 14.5px "DM Sans",sans-serif;color:#0E1E35;margin-top:8px}.cnl-drop .sub{font-size:12px;color:#94A3B8;margin-top:5px}.cnl-tip{font-size:11.5px;color:#94A3B8;margin:7px 0 0}.cnl-detect{margin-top:12px;font-size:12.5px;color:#334155;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px}';
+    document.head.appendChild(cs); }
+  var ov=document.getElementById('olnl-ov');
+  if(!ov){ ov=document.createElement('div'); ov.id='olnl-ov'; document.body.appendChild(ov); ov.addEventListener('click',function(e){ if(e.target===ov) ov.classList.remove('show'); }); }
+  var detected=0, mode='empty';
+  ov.innerHTML='<div class="cnl-card"><div class="cnl-hd"><h3>Add a new list / segment</h3><p>Create a list to send to. Bulk upload handles files up to ~5,000,000 rows.</p></div>'+
+    '<div class="cnl-bd">'+
+      '<label class="cnl-lbl">List name <span class="req">*</span></label><input class="cnl-fld" id="olnl-name" placeholder="e.g. FY26 Cathedral leadership">'+
+      '<label class="cnl-lbl">How to build it</label>'+
+      '<div class="cnl-cards" id="olnl-mode">'+
+        '<button type="button" class="cnl-mode on" data-m="empty"><div class="ic">📋</div><div class="t">Start empty</div><div class="s">Add contacts manually later</div></button>'+
+        '<button type="button" class="cnl-mode" data-m="dynamic"><div class="ic">⚡</div><div class="t">Dynamic</div><div class="s">Auto-updates from donor criteria</div></button>'+
+        '<button type="button" class="cnl-mode" data-m="bulk"><div class="ic">📤</div><div class="t">Bulk upload</div><div class="s">CSV file or paste emails</div></button>'+
+      '</div>'+
+      '<div id="olnl-empty"><label class="cnl-lbl">Estimated size <span class="opt">(optional)</span></label><input class="cnl-fld" id="olnl-size" type="number" min="0" value="0"><p class="cnl-tip">Helps with planning. You can add contacts after creating the list.</p><div class="cnl-info">ℹ️ An empty manual list will be created. Add contacts from the Donors page, Tags &amp; Segments, or by importing later.</div></div>'+
+      '<div id="olnl-dyn" style="display:none">'+
+        '<label class="cnl-lbl">Giving activity</label>'+
+        '<div class="cnl-2"><select class="cnl-fld" id="olnl-hist">'+Object.keys(OL_HIST).map(function(k){return '<option>'+k+'</option>';}).join('')+'</select>'+
+          '<select class="cnl-fld" id="olnl-amt">'+Object.keys(OL_AMT).map(function(k){return '<option>'+k+'</option>';}).join('')+'</select></div>'+
+        '<label class="cnl-lbl">Parish or entity <span class="opt">(optional)</span></label>'+
+        '<select class="cnl-fld" id="olnl-parish"><option>All parishes &amp; entities</option>'+OL_PARISHES.map(function(p){return '<option>'+p+'</option>';}).join('')+'</select>'+
+        '<label class="cnl-lbl">Tag <span class="opt">(optional)</span></label>'+
+        '<select class="cnl-fld" id="olnl-tag"><option>Any tag</option>'+OL_TAGS.map(function(t){return '<option>'+t+'</option>';}).join('')+'</select>'+
+        '<div class="cnl-match" id="olnl-match"></div>'+
+        '<div class="cnl-note">⚡ This list <b>updates automatically</b> — re-evaluated nightly and before every send. Donors who no longer match are removed.</div>'+
+      '</div>'+
+      '<div id="olnl-bulk" style="display:none">'+
+        '<label class="cnl-lbl">Upload method</label>'+
+        '<div class="cnl-tabs" id="olnl-tabs"><button type="button" class="cnl-tab on" data-t="csv">📄 CSV file</button><button type="button" class="cnl-tab" data-t="paste">✂️ Paste emails</button></div>'+
+        '<div id="olnl-csv"><div class="cnl-drop" id="olnl-drop"><div class="em">📁</div><div class="hd">Drop your CSV here, or click to browse</div><div class="sub">Supports .csv · up to ~5,000,000 rows · max 500 MB</div><input type="file" id="olnl-file" accept=".csv" style="display:none"></div></div>'+
+        '<div id="olnl-paste-w" style="display:none"><label class="cnl-lbl">Paste email addresses <span class="req">*</span></label><textarea class="cnl-fld" id="olnl-paste" rows="5" placeholder="One per line, or comma-separated:&#10;james.obrien@cathedral.org&#10;margaret.sullivan@diocese.org"></textarea><p class="cnl-tip">Tip: paste up to 50,000 addresses. For larger lists use CSV upload.</p></div>'+
+        '<div id="olnl-detect" class="cnl-detect" style="display:none"></div>'+
+        '<div class="cnl-info">ℹ️ Uploaded contacts are <b>matched against existing Atlas donors</b> by email. Unmatched addresses are added as contacts without a donor record. Suppressed emails are excluded at send time.</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="cnl-ft"><button class="cnl-btn" id="olnl-cancel">Cancel</button><button class="cnl-btn primary" id="olnl-go" disabled>Create &amp; open</button></div></div>';
+  ov.classList.add('show');
+  var $=function(id){ return document.getElementById(id); };
+  function updateGo(){ var nm=($('olnl-name').value||'').trim(); $('olnl-go').disabled = !(nm && (mode!=='bulk' || detected>0)); }
+  $('olnl-name').addEventListener('input', updateGo);
+  setTimeout(function(){ $('olnl-name').focus(); }, 30);
+  $('olnl-mode').addEventListener('click', function(e){ var b=e.target.closest('.cnl-mode'); if(!b) return; mode=b.dataset.m;
+    $('olnl-mode').querySelectorAll('.cnl-mode').forEach(function(x){ x.classList.toggle('on', x===b); });
+    $('olnl-empty').style.display=mode==='empty'?'block':'none'; $('olnl-dyn').style.display=mode==='dynamic'?'block':'none'; $('olnl-bulk').style.display=mode==='bulk'?'block':'none';
+    if(mode==='dynamic') dynRecalc(); updateGo(); });
+  function dynEstimate(){ var h=OL_HIST[$('olnl-hist').value]||1, a=OL_AMT[$('olnl-amt').value]||1; var pf=($('olnl-parish').value==='All parishes & entities')?1:.16; var tf=($('olnl-tag').value==='Any tag')?1:.2; return Math.max(0,Math.round(4512*h*a*pf*tf)); }
+  function dynSummary(){ var parts=[]; var hv=$('olnl-hist').value, av=$('olnl-amt').value, pv=$('olnl-parish').value, tv=$('olnl-tag').value; if(hv!=='Any giving history')parts.push(hv); if(av!=='Any gift amount')parts.push(av); if(pv!=='All parishes & entities')parts.push(pv); if(tv!=='Any tag')parts.push(tv); return parts.length?('Dynamic · '+parts.slice(0,2).join(' · ')+(parts.length>2?' +'+(parts.length-2):'')):'Dynamic · all active donors'; }
+  function dynRecalc(){ var el=$('olnl-match'); if(el) el.innerHTML='<div class="n">'+olFmt(dynEstimate())+'</div><div class="tx"><b>donors match your criteria</b>Refreshes nightly · suppressed contacts excluded at send</div>'; }
+  ['olnl-hist','olnl-amt','olnl-parish','olnl-tag'].forEach(function(id){ var el=$(id); if(el) el.addEventListener('change', dynRecalc); }); dynRecalc();
+  function showDetect(n, srcTxt){ detected=n; var el=$('olnl-detect'); if(n>0){ var dupes=Math.round(n*0.02), add=n-dupes; el.style.display='block'; el.innerHTML='<b>'+olFmt(n)+'</b> addresses '+srcTxt+' · ~'+olFmt(dupes)+' duplicates removed · <b>'+olFmt(add)+'</b> will be added'; } else el.style.display='none'; updateGo(); }
+  $('olnl-tabs').addEventListener('click', function(e){ var b=e.target.closest('.cnl-tab'); if(!b) return; var t=b.dataset.t; $('olnl-tabs').querySelectorAll('.cnl-tab').forEach(function(x){x.classList.toggle('on',x===b);}); $('olnl-csv').style.display=t==='csv'?'block':'none'; $('olnl-paste-w').style.display=t==='paste'?'block':'none'; });
+  var drop=$('olnl-drop');
+  drop.addEventListener('click', function(){ $('olnl-file').click(); });
+  drop.addEventListener('dragover', function(e){ e.preventDefault(); drop.classList.add('over'); });
+  drop.addEventListener('dragleave', function(){ drop.classList.remove('over'); });
+  drop.addEventListener('drop', function(e){ e.preventDefault(); drop.classList.remove('over'); var f=e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) showDetect(Math.max(1,Math.round(f.size/24)), 'in “'+f.name+'”'); });
+  $('olnl-file').addEventListener('change', function(){ var f=this.files&&this.files[0]; if(f) showDetect(Math.max(1,Math.round(f.size/24)), 'in “'+f.name+'”'); });
+  $('olnl-paste').addEventListener('input', function(){ var em=(this.value||'').split(/[\s,;]+/).filter(function(x){return /@/.test(x);}); showDetect(em.length,'pasted'); });
+  $('olnl-cancel').addEventListener('click', function(){ ov.classList.remove('show'); });
+  $('olnl-go').addEventListener('click', function(){
+    var nm=($('olnl-name').value||'').trim(); if(!nm){ $('olnl-name').focus(); return; }
+    var count, desc, type;
+    if(mode==='bulk'){ if(!detected){ toast('Add a file or paste addresses first'); return; } count=detected; type='manual'; desc='Imported contacts'; }
+    else if(mode==='dynamic'){ count=dynEstimate(); type='dynamic'; desc=dynSummary(); }
+    else { count=Math.max(0,parseInt($('olnl-size').value||'0',10)||0); type='manual'; desc='Manual list'; }
+    var newList={ id:'ol-'+Date.now(), name:nm, desc:desc, members:count, type:type, status:'draft', engagement:0, owner:'Sarah Reynolds', ownerAv:'SR', avBg:'var(--blue)', lastActivity:'Just now', updated:'2026-05-04', activity:'List created', sampleMembers:[] };
+    LISTS.unshift(newList); ov.classList.remove('show'); renderLists();
+    toast('“'+nm+'” created'+(count?' · '+olFmt(count)+' contacts':'')+' and added','success');
+    openListPage(newList.id);
+  });
+}
 function closeNewListModal(){
   document.getElementById('new-list-modal').classList.remove('show');
 }
@@ -798,6 +894,8 @@ function createList(){
 
 /* ─── Dedicated single-list workspace ─── */
 var LD={ list:null, tab:'members', mpage:1, mq:'', sel:{} };
+// Captured once at load: true = deep-linked to a specific list (e.g. from Communications); false = browsing the standalone landing page
+var OL_ENTRY_LIST = /[?&]list=/.test(location.search);
 function ldRnd(s){ var x=Math.sin(s*91.7+13.3)*43758.5453; return x-Math.floor(x); }
 function ldMembers(list){
   var FN=['Margaret','Thomas','James','Patricia','Michael','Susan','Anne','John','Elena','Catherine','Bridget','Sean','Kathleen','Robert','Laura','Nora','Liam','Aoife','Declan','Colleen','David','Maria','Peter','Grace'];
@@ -828,7 +926,9 @@ function ldShell(list){
     '<div style="display:flex;align-items:center;gap:7px;font-size:13px;flex-wrap:wrap">'+
       '<a href="atlas-communications.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--blue);font-weight:600;text-decoration:none"><svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg>Communications</a>'+
       '<span style="color:#CBD5E1">/</span>'+
-      '<a href="#" onclick="showIndex();return false" style="color:var(--blue);font-weight:600;text-decoration:none">Outreach lists</a>'+
+      (OL_ENTRY_LIST
+        ? '<a href="atlas-communications.html#lists" style="color:var(--blue);font-weight:600;text-decoration:none">Outreach lists</a>'
+        : '<a href="#" onclick="showIndex();return false" style="color:var(--blue);font-weight:600;text-decoration:none">Outreach lists</a>')+
       '<span style="color:#CBD5E1">/</span>'+
       '<span style="color:var(--text);font-weight:500">'+list.name+'</span>'+
     '</div>'+
