@@ -151,6 +151,12 @@
     .col-id    .stage-count  { background: var(--blue-light); color: var(--id-text); }
     .col-id    .stage-value  { background: var(--blue-light); color: var(--id-text); }
 
+    .col-qual  .stage-header { background:#F0FDFA; }
+    .col-qual  .stage-name   { color:#0F766E; }
+    .col-qual  .stage-dot    { background:#14B8A6; }
+    .col-qual  .stage-count  { background:#99F6E4; color:#0F766E; }
+    .col-qual  .stage-value  { background:#99F6E4; color:#0F766E; }
+
     .col-cul   .stage-header { background: var(--cul-bg);   }
     .col-cul   .stage-name   { color: var(--cul-text); }
     .col-cul   .stage-dot    { background: var(--cul-accent);}
@@ -989,6 +995,72 @@ body {
               <div class="pc-footer">
                 <div class="pc-officer"><div class="pc-officer-avatar" style="background:var(--blue)">SR</div>Sarah Reynolds</div>
                 <div class="pc-days days-fresh">New</div>
+              </div>
+            </div>
+
+          </div>
+          <button class="add-card-btn">
+            <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6.5 2v9M2 6.5h9"/></svg>
+            Add prospect
+          </button>
+        </div>
+
+        <!-- QUALIFICATION -->
+        <div class="stage-col col-qual">
+          <div class="stage-header">
+            <div class="stage-dot"></div>
+            <div class="stage-name">Qualification</div>
+            <div class="stage-count">2</div>
+            <div class="stage-value">$180k</div>
+          </div>
+          <div class="cards-area">
+
+            <div class="prospect-card" style="animation-delay:.05s" onclick="openDrawer('obrien')">
+              <div class="pc-top">
+                <div class="pc-avatar" style="background:#CCFBF1;color:#0F766E">RM</div>
+                <div class="pc-info">
+                  <div class="pc-name">Robert Morrison</div>
+                  <div class="pc-org">St. Mary's Cathedral</div>
+                </div>
+                <div class="pc-ask">$50k</div>
+              </div>
+              <div class="pc-tags">
+                <span class="pc-tag tag-major">Major prospect</span>
+                <span class="pc-tag tag-parish">Wealth-screen flagged</span>
+              </div>
+              <div class="pc-meta">
+                <span class="pc-meta-item">
+                  <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="5" cy="3" r="2"/><path d="M1 9c0-1.7 1.3-3 3-3"/><path d="M9 6v3M7.5 7.5h3"/></svg>
+                  Discovery call booked May 9
+                </span>
+              </div>
+              <div class="pc-footer">
+                <div class="pc-officer"><div class="pc-officer-avatar" style="background:var(--blue)">SR</div>Sarah Reynolds</div>
+                <div class="pc-days days-fresh">6d in stage</div>
+              </div>
+            </div>
+
+            <div class="prospect-card" style="animation-delay:.08s" onclick="openDrawer('obrien')">
+              <div class="pc-top">
+                <div class="pc-avatar" style="background:#CCFBF1;color:#0F766E">GF</div>
+                <div class="pc-info">
+                  <div class="pc-name">Gerald &amp; Anne Fitzgerald</div>
+                  <div class="pc-org">Holy Trinity</div>
+                </div>
+                <div class="pc-ask">$25k</div>
+              </div>
+              <div class="pc-tags">
+                <span class="pc-tag tag-recurring">Existing donor</span>
+              </div>
+              <div class="pc-meta">
+                <span class="pc-meta-item">
+                  <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M5 3v2.5l1.5 1.5"/></svg>
+                  Verifying giving vehicle · DAF
+                </span>
+              </div>
+              <div class="pc-footer">
+                <div class="pc-officer"><div class="pc-officer-avatar" style="background:var(--purple)">JK</div>Julia Kelleher</div>
+                <div class="pc-days days-fresh">11d in stage</div>
               </div>
             </div>
 
@@ -4776,7 +4848,7 @@ body {
 (function(){
   function pm(s){ s=(s||'').replace(/[^0-9.kKmM]/g,''); var n=parseFloat(s)||0; if(/m/i.test(s))n*=1e6; else if(/k/i.test(s))n*=1e3; return n; }
   function fmt(n){ if(n>=1e6) return '$'+(n/1e6).toFixed(n%1e6===0?0:1)+'M'; if(n>=1e3) return '$'+Math.round(n/1e3)+'k'; return '$'+Math.round(n); }
-  var PROB={'col-id':0.10,'col-cul':0.25,'col-sol':0.55,'col-stew':0.90,'col-close':1.00};
+  var PROB={'col-id':0.10,'col-qual':0.18,'col-cul':0.25,'col-sol':0.55,'col-stew':0.90,'col-close':1.00};
   function enrich(){
     var totalW=0;
     document.querySelectorAll('.stage-col').forEach(function(col){
@@ -4805,7 +4877,7 @@ body {
     // 1) One-line description under each stage header
     var HINTS = {
       'identification':'Confirm capacity + affinity before an officer invests time. Entry point for new names.',
-      'qualification':'A discovery call verifies interest and giving vehicle.',
+      'qualification':'A discovery call confirms real capacity, genuine interest, and giving vehicle — deciding whether this name is worth an officer’s cultivation time.',
       'cultivation':'Build the relationship toward a specific ask — visits, tours, engagement.',
       'solicitation':'The ask is on the table or imminent.',
       'stewardship':'Gift closed — thank, report impact, and set up the next ask.',
