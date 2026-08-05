@@ -695,6 +695,7 @@ body {
     <div class="tab"         data-tab="templates" onclick="switchCommsTab('templates', this)">Templates <span class="ct">12</span></div>
     <div class="tab"         data-tab="lists"     onclick="switchCommsTab('lists', this)">Outreach lists <span class="ct">112</span></div>
     <div class="tab"         data-tab="suppressed" onclick="switchCommsTab('suppressed', this)">Suppressed <span class="ct" id="tab-ct-suppressed">284</span></div>
+    <div class="tab"         data-tab="archived" onclick="switchCommsTab('archived', this)">Archived <span class="ct" id="tab-ct-archived">0</span></div>
   </div>
 
   <!-- ═══ TAB PANES ═══ -->
@@ -919,6 +920,11 @@ body {
     <div id="supp-mount"></div>
   </div>
 
+  <!-- ─── ARCHIVED pane ─── -->
+  <div class="tab-pane" data-pane="archived" style="display:none">
+    <div id="archived-mount"></div>
+  </div>
+
   </div><!-- /#comms-tab-panes -->
 
 </div>
@@ -941,6 +947,7 @@ body {
     });
     // Update URL hash so deep-links (e.g. ?tab=drafts or #drafts) survive
     try { history.replaceState(null, '', '#' + name); } catch(_) {}
+    if (name === 'archived' && window.__renderArchived) window.__renderArchived();
   };
 
   /* ── Honor a #tab hash on load (e.g. atlas-communications.html#drafts) ── */
@@ -1667,7 +1674,7 @@ body {
   .sa-pgbtn:disabled { opacity:.4; cursor:default; }
   .sa-empty { text-align:center; padding:32px; color:var(--text-3); font-size:13px; }
   /* kebab menu */
-  .sa-kmenu { position:fixed; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 12px 32px rgba(15,23,42,.18); padding:6px; min-width:190px; z-index:100060; font-family:'DM Sans',sans-serif; }
+  .sa-kmenu { position:fixed; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 12px 32px rgba(15,23,42,.18); padding:6px; min-width:190px; max-height:calc(100vh - 24px); overflow-y:auto; z-index:100060; font-family:'DM Sans',sans-serif; }
   .sa-kmenu .it { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:7px; font-size:12.5px; color:var(--text-2); cursor:pointer; }
   .sa-kmenu .it:hover { background:var(--blue-pale,#EFF6FF); }
   .sa-kmenu .it.danger { color:#B91C1C; }
@@ -1799,6 +1806,7 @@ body {
     function filtered(){
       var q=S.search.trim().toLowerCase();
       return MSGS.filter(function(m){
+        if(m.archived) return false;
         if(!inRange(m)) return false;
         if(S.attn && !m.attention) return false;
         if(S.types.length && S.types.indexOf(m.type.k)===-1) return false;
@@ -2207,18 +2215,77 @@ body {
         ov.querySelector('#rs-done').onclick=close;
       };
     }
+    // Duplicate a sent email → saved as a new editable Draft (visible in the Drafts tab)
+    function dupSentEmail(m){
+      var e=function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+      var ov=document.getElementById('sa-dup-ov');
+      if(!ov){ ov=document.createElement('div'); ov.id='sa-dup-ov'; ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100096;display:flex;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif'; document.body.appendChild(ov); ov.addEventListener('click',function(ev){ if(ev.target===ov) ov.style.display='none'; }); }
+      var name=(m.subject||'Untitled')+' (copy)';
+      ov.innerHTML='<div style="background:#fff;border-radius:15px;max-width:460px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">'+
+        '<div style="padding:18px 22px 6px"><div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748B">Duplicate email</div><h3 style="font-family:\'DM Serif Display\',serif;font-size:19px;color:#0E1E35;margin:3px 0 0">Copy this email to a new draft</h3></div>'+
+        '<div style="padding:12px 22px 4px">'+
+          '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:9px;padding:11px 13px;margin-bottom:14px"><div style="font-size:12.5px;font-weight:600;color:#0F172A">'+e(m.subject)+'</div><div style="font-size:11.5px;color:#64748B;margin-top:2px">'+(m.isBlast?fmtNum(m.recipients)+' recipients':(e(m.recipientName)||'1 recipient'))+' · '+e(m.campaign)+'</div></div>'+
+          '<label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:5px">Name the copy</label>'+
+          '<input id="sa-dup-name" value="'+e(name)+'" style="width:100%;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px;font:400 13.5px DM Sans">'+
+          '<p style="font-size:11.5px;color:#94A3B8;margin-top:8px">The copy is saved as a <b>Draft</b> with the same content — edit and resend it whenever you like.</p>'+
+        '</div>'+
+        '<div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 22px;border-top:1px solid #E2E8F0;margin-top:8px"><button id="sa-dup-cancel" style="border:1px solid #E2E8F0;background:#fff;color:#334155;padding:9px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Cancel</button><button id="sa-dup-go" style="border:none;background:#2563EB;color:#fff;padding:9px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Create draft</button></div>'+
+      '</div>';
+      ov.style.display='flex';
+      var inp=ov.querySelector('#sa-dup-name'); setTimeout(function(){ try{ inp.focus(); inp.select(); }catch(_){} },30);
+      ov.querySelector('#sa-dup-cancel').onclick=function(){ ov.style.display='none'; };
+      ov.querySelector('#sa-dup-go').onclick=function(){
+        var nn=(inp.value||name).trim();
+        try{ var raw=JSON.parse(localStorage.getItem('atlas-email-drafts')||'[]'); raw.unshift({ id:'dup-'+Date.now(), subject:nn, preview:'Duplicated from a sent email — edit and resend.', recipients:[m.isBlast?(fmtNum(m.recipients)+' recipients'):(m.recipientName||'1 recipient')], lastEdited:new Date().toISOString() }); localStorage.setItem('atlas-email-drafts', JSON.stringify(raw)); }catch(_){}
+        if(window.__atlasRenderDrafts) window.__atlasRenderDrafts();
+        ov.style.display='none';
+        toast('Copied to Drafts · “'+nn+'”');
+        var dt=document.querySelector('#comms-tabs .tab[data-tab="drafts"]'); if(window.switchCommsTab&&dt) window.switchCommsTab('drafts',dt);
+      };
+    }
+    // Archive a sent message → hidden from the list, viewable via the Archived filter
+    function archiveSent(m){
+      var restoring=!!m.archived;
+      m.archived=!m.archived; render(); if(window.__renderArchived) window.__renderArchived();
+      if(window.commsUndoToast) window.commsUndoToast((restoring?'Restored from archive':'Message archived')+' · “'+(m.subject||'')+'”', function(){ m.archived=restoring; render(); if(window.__renderArchived) window.__renderArchived(); });
+      else toast(restoring?'Restored from archive':'Message archived · see the Archived tab');
+    }
+    // ── Archived tab renderer (dedicated pane) ──
+    function renderArchived(){
+      var host=document.getElementById('archived-mount'); if(!host) return;
+      var arch=MSGS.filter(function(m){ return m.archived; });
+      var tc=document.getElementById('tab-ct-archived'); if(tc) tc.textContent=arch.length;
+      if(!arch.length){ host.innerHTML='<div style="text-align:center;padding:48px 20px;color:var(--text-3)"><div style="font-size:30px;margin-bottom:8px">🗄</div><div style="font-weight:600;color:var(--text)">Nothing archived</div><div style="font-size:13px;margin-top:4px">Archive a message from the Sent tab’s ⋯ menu to move it out of the main list. It stays here for reference and can be restored anytime.</div></div>'; return; }
+      host.innerHTML='<div class="section-h" style="margin-bottom:12px"><span>Archived messages · '+arch.length+'</span><span class="line"></span></div>'+
+        '<div class="sa-list">'+
+        '<div class="sa-head sa-grid"><span></span><span></span><span>Message</span><span>Recipient</span><span>Performance</span><span>Type</span><span></span></div>'+
+        arch.map(function(m){ return rowHTML(m); }).join('')+
+        '</div>'+
+        '<div id="arch-note" style="font-size:11.5px;color:var(--text-3);margin-top:12px;padding:0 4px">Use the ⋯ menu on any row to <b>Restore</b> it back to Sent.</div>';
+      // wire row interactions (kebab / open) within the archived pane
+      var listEl=host.querySelector('.sa-list');
+      listEl.addEventListener('click', function(e){
+        var kb=e.target.closest('.sa-kebab'); if(kb){ e.stopPropagation(); openKebab(kb, msgById(kb.closest('.sa-row').dataset.id)); return; }
+        var rr=e.target.closest('.sa-row'); if(rr){ gotoDetail(msgById(rr.dataset.id)); }
+      });
+    }
+    window.__renderArchived=renderArchived;
     function openKebab(btn,m){
       document.querySelectorAll('.sa-kmenu').forEach(function(x){x.remove();});
       var menu=document.createElement('div'); menu.className='sa-kmenu';
       var items = m.isBlast
-        ? [['View message','view'],['View all recipients','recips'],['Export CSV','export'],['sep'],['Resend to all','resendall'],['Resend to non-openers','resend'],['Suppress bounces','suppress','danger']]
-        : [['View message','view'],['View donor profile','donor'],['Resend','resend'],['Export','export'],['sep'],['Suppress recipient','suppress','danger']];
+        ? [['View message','view'],['View all recipients','recips'],['Duplicate → new draft','dup'],['Export CSV','export'],['sep'],['Resend to all','resendall'],['Resend to non-openers','resend'],[m.archived?'Restore from archive':'Archive','archive'],['Suppress bounces','suppress','danger']]
+        : [['View message','view'],['View donor profile','donor'],['Duplicate → new draft','dup'],['Resend','resend'],['Export','export'],['sep'],[m.archived?'Restore from archive':'Archive','archive'],['Suppress recipient','suppress','danger']];
       menu.innerHTML=items.map(function(it){ return it[0]==='sep' ? '<div class="sep"></div>' : '<div class="it'+(it[2]?' '+it[2]:'')+'" data-a="'+it[1]+'">'+it[0]+'</div>'; }).join('');
-      document.body.appendChild(menu);
-      var r=btn.getBoundingClientRect(); menu.style.top=(r.bottom+4)+'px'; menu.style.left=Math.min(r.left, window.innerWidth-206)+'px';
+      menu.style.visibility='hidden'; document.body.appendChild(menu);
+      var r=btn.getBoundingClientRect(); var mh=menu.offsetHeight||280;
+      var top=r.bottom+4; if(top+mh > window.innerHeight-8) top=Math.max(8, r.top-mh-4);   // flip up when no room below
+      menu.style.top=top+'px'; menu.style.left=Math.min(r.left, window.innerWidth-206)+'px'; menu.style.visibility='';
       menu.addEventListener('click', function(e){ var it=e.target.closest('.it'); if(!it)return; var a=it.dataset.a; menu.remove();
         if(a==='view') gotoDetail(m);
         else if(a==='recips') gotoDetail(m,'recipients');
+        else if(a==='dup') dupSentEmail(m);
+        else if(a==='archive') archiveSent(m);
         else if(a==='resend') commsResend(m,'nonopeners');
         else if(a==='resendall') commsResend(m,'all');
         else if(a==='suppress') gotoDetail(m,'suppress');
@@ -2252,6 +2319,7 @@ body {
     };
 
     render();
+    renderArchived();
   }
   if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
 })();
