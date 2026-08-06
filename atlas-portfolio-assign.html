@@ -706,17 +706,13 @@ body {
         <span class="ct">42 prospects</span>
         <div class="actions">
           <button class="btn-mini" onclick="selectAllProspects(this)">Select all</button>
-          <button class="btn-mini">Filter</button>
+          <button class="btn-mini" onclick="poolFilter(this)">Filter</button>
           <button class="btn-mini primary" onclick="acceptAllSuggestions()">Apply AI suggestions</button>
         </div>
       </div>
 
       <div class="filter-bar">
-        <span class="chip applied">Capacity: $25k+ <span style="margin-left:4px">×</span></span>
-        <span class="chip applied">Stage: Identification + Qualification <span style="margin-left:4px">×</span></span>
-        <span class="chip">Region</span>
-        <span class="chip">Parish</span>
-        <span class="chip">Interest</span>
+        <div id="pool-chips" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>
         <div class="right">Sorted by capacity ↓</div>
       </div>
 
@@ -888,8 +884,8 @@ body {
         <span class="h">Officer portfolios</span>
         <span class="ct">3 officers</span>
         <div class="actions">
-          <button class="btn-mini">Set targets</button>
-          <a class="btn-mini" href="atlas-invite-user.html">+ Add officer</a>
+          <button class="btn-mini" onclick="openTargets()">Set targets</button>
+          <a class="btn-mini" href="atlas-invite-user.html" onclick="openInvitePanel();return false">+ Add officer</a>
         </div>
       </div>
 
@@ -914,7 +910,7 @@ body {
             <div class="ico">G</div>
             <div><b>Guru AI suggests:</b> 14 of the 42 unassigned prospects · primarily Albany-based capital prospects ($25k+). Match score 0.91 based on Sarah's track record with Cathedral capital donors.</div>
           </div>
-          <button class="assign-btn" onclick="autoAssign('SR', 14)">Auto-assign 14 to Sarah →</button>
+          <button class="assign-btn" onclick="openAutoAssign('SR','Sarah Reynolds',14)">Auto-assign 14 to Sarah →</button>
         </div>
 
         <!-- Bridget McCarthy -->
@@ -931,7 +927,7 @@ body {
             <div class="ico">G</div>
             <div><b>Guru AI suggests:</b> 13 of the 42 unassigned · mid-range ($10–25k) + LYBUNT recovery prospects · Schenectady &amp; outer parishes. Match score 0.88.</div>
           </div>
-          <button class="assign-btn" onclick="autoAssign('BM', 13)">Auto-assign 13 to Bridget →</button>
+          <button class="assign-btn" onclick="openAutoAssign('BM','Bridget McCarthy',13)">Auto-assign 13 to Bridget →</button>
         </div>
 
         <!-- Julia Kelleher -->
@@ -948,11 +944,11 @@ body {
             <div class="ico">G</div>
             <div><b>Guru AI suggests:</b> 15 of the 42 unassigned · foundations, corporate, and planned-giving prospects. Best fit for Julia's grant-writing background. Match score 0.92.</div>
           </div>
-          <button class="assign-btn" onclick="autoAssign('JK', 15)">Auto-assign 15 to Julia →</button>
+          <button class="assign-btn" onclick="openAutoAssign('JK','Julia Kelleher',15)">Auto-assign 15 to Julia →</button>
         </div>
 
         <div style="background:var(--surface);border:1px dashed var(--border);border-radius:10px;padding:14px;text-align:center;font-size:12.5px;color:var(--text-3);margin-top:6px">
-          Want to expand capacity? <a href="atlas-invite-user.html" style="color:var(--blue);font-weight:500">Invite another gift officer →</a>
+          Want to expand capacity? <a href="atlas-invite-user.html" onclick="openInvitePanel();return false" style="color:var(--blue);font-weight:500">Invite another gift officer →</a>
         </div>
 
       </div>
@@ -967,7 +963,7 @@ body {
     </div>
     <div class="right">
       <button class="btn btn-ghost" onclick="resetAssignments()">Reset</button>
-      <button class="btn btn-ghost" onclick="alert('Saved as draft')">Save as draft</button>
+      <button class="btn btn-ghost" onclick="saveDraft()">Save as draft</button>
       <button class="btn btn-primary" onclick="commitAssignments()">
         <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M2 7l3 3 7-7"/></svg>
         Commit assignments &amp; notify officers
@@ -1009,39 +1005,347 @@ body {
     selected.forEach(function(r){ r.style.display = 'none'; });
     updateBulkBar();
     updateCommit();
-    alert(selected.length + ' prospects assigned to ' + target);
+    var nm={SR:'Sarah',BM:'Bridget',JK:'Julia'}[target]||target;
+    toast(selected.length + ' prospect' + (selected.length===1?'':'s') + ' assigned to ' + nm + ' — review the commit bar below');
   };
-  window.autoAssign = function(officer, count){
-    var matches = document.querySelectorAll('#pool .prospect-row[data-suggest="'+officer+'"]');
-    var n = 0;
-    matches.forEach(function(r){
-      if (n < count) { r.style.display = 'none'; n++; }
+  // officer metadata for the confirmation modals ported from the attached page
+  var META = {
+    SR:{name:'Sarah Reynolds', initials:'SR', color:'#BE185D', score:'0.91', detail:'Primarily Albany-based capital prospects ($25k+). Match score 0.91 based on track record with Cathedral capital donors.'},
+    BM:{name:'Bridget McCarthy', initials:'BM', color:'#7C3AED', score:'0.88', detail:'Annual and stewardship donors across parishes. Match score 0.88 based on renewal and mid-level giving history.'},
+    JK:{name:'Julia Kelleher', initials:'JK', color:'#2563EB', score:'0.90', detail:'Foundations and organizational prospects. Match score 0.90 based on grant and trust relationships.'}
+  };
+  function rowData(r){
+    return { name:((r.querySelector('.nm')||{}).textContent||'Prospect'),
+             stage:((r.querySelector('.stage')||{}).textContent||'').trim(),
+             ask:((r.querySelector('.ask')||{}).textContent||'').trim(),
+             sug:r.getAttribute('data-suggest')||'' };
+  }
+  function doAutoAssign(officer, count){
+    var n=0;
+    document.querySelectorAll('#pool .prospect-row[data-suggest="'+officer+'"]').forEach(function(r){
+      if(n<count && r.style.display!=='none'){ r.style.display='none'; n++; }
     });
-    assigned[officer] = (assigned[officer] || 0) + n;
-    updateCommit();
-  };
+    assigned[officer]=(assigned[officer]||0)+n; updateBulkBar(); updateCommit(); return n;
+  }
+  window.autoAssign = function(officer, count){ doAutoAssign(officer, count); }; // legacy direct call
   function updateCommit(){
     var total = (assigned.SR||0) + (assigned.BM||0) + (assigned.JK||0);
     var off = ['SR','BM','JK'].filter(function(k){ return assigned[k] > 0; }).length;
     document.getElementById('pending-count').textContent = total;
     document.getElementById('pending-officers').textContent = off + ' officer' + (off===1?'':'s');
   }
-  window.acceptAllSuggestions = function(){
-    autoAssign('SR', 14); autoAssign('BM', 13); autoAssign('JK', 15);
-    alert('Accepted all 42 Guru AI suggestions. Review the commit bar at the bottom.');
-  };
   window.resetAssignments = function(){
-    document.querySelectorAll('#pool .prospect-row').forEach(function(r){ r.style.display=''; r.classList.remove('on'); r.querySelector('.cb').textContent=''; });
+    document.querySelectorAll('#pool .prospect-row').forEach(function(r){ r.style.display=''; r.classList.remove('on'); var cb=r.querySelector('.cb'); if(cb) cb.textContent=''; });
     assigned = {SR:0, BM:0, JK:0};
-    updateBulkBar();
-    updateCommit();
+    updateBulkBar(); updateCommit(); toast('Assignments cleared');
   };
-  window.commitAssignments = function(){
+
+  // === Auto-assign confirmation (functionality from attached) ===
+  window.openAutoAssign = function(officer, name, count){
+    var m = META[officer] || {name:name, initials:officer, color:'#475569', score:'—', detail:''};
+    var rows=[]; document.querySelectorAll('#pool .prospect-row[data-suggest="'+officer+'"]').forEach(function(r){ if(r.style.display!=='none' && rows.length<count) rows.push(rowData(r)); });
+    var listHTML = rows.length
+      ? rows.map(function(p){ return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid #F1F5F9"><div style="flex:1;font-size:12.5px;font-weight:600;color:#334155">'+p.name+'</div><span style="font-size:11px;color:#64748B">'+p.stage+'</span><span style="font-size:12px;font-weight:700;color:#0E1E35;min-width:52px;text-align:right">'+p.ask+'</span></div>'; }).join('')
+      : '<div style="padding:14px;font-size:12.5px;color:#64748B">All Guru-matched prospects for '+m.name+' are already assigned.</div>';
+    var ov = mkOverlay('aa-ov');
+    ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:480px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">'
+      + '<div style="display:flex;align-items:center;gap:11px;padding:18px 22px 6px"><div style="width:38px;height:38px;border-radius:50%;background:'+m.color+';color:#fff;display:flex;align-items:center;justify-content:center;font:700 13px DM Sans">'+m.initials+'</div><div><div style="font-weight:600;font-size:16px;color:#0E1E35">Auto-assign to '+m.name+'</div><div style="font-size:12px;color:#64748B">'+count+' prospects · match score '+m.score+'</div></div></div>'
+      + '<div style="padding:8px 22px 0"><div style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:9px;padding:11px 13px;margin-bottom:14px"><div style="font-size:13px;font-weight:600;color:#1D4ED8;margin-bottom:3px">Assigning '+count+' prospects to '+m.name+'</div><div style="font-size:12px;color:#3B82F6;line-height:1.5">'+m.detail+'</div></div>'
+      + '<div style="font-size:10.5px;font-weight:700;color:#94A3B8;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Prospects being assigned</div><div style="max-height:200px;overflow-y:auto;border:1px solid #E2E8F0;border-radius:9px">'+listHTML+'</div>'
+      + '<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 12px;margin-top:12px"><p style="font-size:12px;color:#991B1B;margin:0"><b>This action is irreversible.</b> Assignments are written to the audit log and '+m.name+' is notified by email.</p></div></div>'
+      + '<div style="display:flex;gap:10px;justify-content:flex-end;padding:16px 22px"><button id="aa-cancel" style="border:1px solid #E2E8F0;background:#fff;color:#334155;padding:9px 17px;border-radius:10px;font:600 13px DM Sans;cursor:pointer">Cancel</button><button id="aa-go" style="border:none;background:#2563EB;color:#fff;padding:9px 17px;border-radius:10px;font:600 13px DM Sans;cursor:pointer">Confirm — assign '+count+' prospects</button></div>'
+      + '</div>';
+    ov.querySelector('#aa-cancel').onclick=function(){ ov.remove(); };
+    ov.querySelector('#aa-go').onclick=function(){ var n=doAutoAssign(officer,count); ov.remove(); toast(n+' prospect'+(n===1?'':'s')+' assigned to '+m.name+' — review the commit bar below'); };
+  };
+
+  // === Apply AI suggestions preview (functionality from attached) ===
+  window.acceptAllSuggestions = function(){ openAISuggestions(); };
+  window.openAISuggestions = function(){
+    var AV={SR:'#6366f1',BM:'#8b5cf6',JK:'#22c55e'};
+    var FIRST={SR:'Sarah',BM:'Bridget',JK:'Julia'}, ABBR={SR:'Sarah R.',BM:'Bridget M.',JK:'Julia K.'};
+    var PILL={Cultivation:['#dbeafe','#1d4ed8'],Solicitation:['#fef3c7','#92400e'],Identification:['#ede9fe','#6d28d9'],Qualification:['#dcfce7','#15803d'],Stewardship:['#dbeafe','#1d4ed8']};
+    var DATA=[
+      {name:"Margaret O'Brien",sub:"Indiv. · St. Mary's Cathedral · LAI A/A/A",stage:'Cultivation',ask:'$50k+',off:'SR'},
+      {name:'Robert & Susan Lin',sub:'HH · St. Catherine of Siena · LAI A/A/B',stage:'Solicitation',ask:'$100k',off:'SR'},
+      {name:'Patrick & Catherine Reilly',sub:"HH · St. Joseph's · LAI B/A/B",stage:'Cultivation',ask:'$25k',off:'BM'},
+      {name:'Diocesan Foundation',sub:'Org · Foundation · LAI A/A/A',stage:'Solicitation',ask:'$250k',off:'JK'},
+      {name:'Anthony Riccardi',sub:'Indiv. · stock-friendly donor · LAI B/A/A',stage:'Cultivation',ask:'$30k',off:'SR'},
+      {name:'Kelleher Trust',sub:'Org · Foundation · LAI A/A/B',stage:'Cultivation',ask:'$75k',off:'JK'},
+      {name:'Fitzgerald Family',sub:"HH · St. Joseph's · LAI A/B/A",stage:'Cultivation',ask:'$50k',off:'SR'},
+      {name:'Sullivan Family Foundation',sub:'Org · Foundation · LAI A/A/A',stage:'Qualification',ask:'$150k',off:'JK'},
+      {name:'Mary Doherty',sub:'Indiv. · LYBUNT major donor · LAI B/B/A',stage:'Identification',ask:'$15k',off:'BM'},
+      {name:'Thomas & Linda Walsh',sub:'HH · St. Catherine · LAI B/A/B',stage:'Cultivation',ask:'$40k',off:'SR'},
+      {name:"Bishop's Heritage Circle",sub:'Org · Foundation · LAI A/A/A',stage:'Cultivation',ask:'$200k',off:'JK'},
+      {name:'Gillian & Mark Devlin',sub:'HH · St. Anthony · LAI B/B/B',stage:'Identification',ask:'$10k',off:'BM'}
+    ];
+    DATA.forEach(function(p){ p.override=p.off; });
+    var SUG={SR:14,BM:13,JK:15};
+    var ov = mkOverlay('ai-ov');
+    function av(code,sz){ return '<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:'+AV[code]+';color:#fff;display:inline-flex;align-items:center;justify-content:center;font:700 '+((sz*0.42)|0)+'px DM Sans;flex-shrink:0">'+code+'</div>'; }
+    function pill(st){ var c=PILL[st]||['#dbeafe','#1d4ed8']; return '<span style="display:inline-flex;align-items:center;padding:3px 9px;border-radius:12px;font-size:10.5px;font-weight:500;background:'+c[0]+';color:'+c[1]+'">'+st+'</span>'; }
+    function tbody(filter){ return DATA.map(function(p,idx){ if(filter!=='all' && p.override!==filter) return '';
+      var opts=['SR','BM','JK'].map(function(k){ return '<option value="'+k+'"'+(p.override===k?' selected':'')+'>'+ABBR[k]+'</option>'; }).join('');
+      return '<tr style="border-bottom:1px solid #f1f5f9"><td style="padding:11px 12px;font-size:12px;color:#94A3B8;vertical-align:middle">'+(idx+1)+'</td>'
+        + '<td style="padding:11px 12px;vertical-align:middle"><div style="font-size:13px;font-weight:500;color:#1e293b">'+p.name+'</div><div style="font-size:11px;color:#64748b;margin-top:1px">'+p.sub+'</div></td>'
+        + '<td style="padding:11px 12px;vertical-align:middle">'+pill(p.stage)+'</td>'
+        + '<td style="padding:11px 12px;font-size:13px;font-weight:600;color:#1e293b;vertical-align:middle">'+p.ask+'</td>'
+        + '<td style="padding:11px 12px;vertical-align:middle"><div style="display:flex;align-items:center;gap:7px">'+av(p.off,22)+'<span style="font-size:12.5px;color:#1e293b">'+FIRST[p.off]+'</span></div></td>'
+        + '<td style="padding:8px 12px;vertical-align:middle"><select data-i="'+idx+'" class="ai-ov" style="min-width:118px;border:1px solid #e2e8f0;border-radius:7px;padding:6px 9px;font:400 12px DM Sans;background:#fff;cursor:pointer">'+opts+'</select></td></tr>'; }).join(''); }
+    function sumHTML(){ return ['SR','BM','JK'].map(function(k){ return '<div style="text-align:center"><div style="font-size:22px;font-weight:700;color:#0369a1;line-height:1.1">'+SUG[k]+'</div><div style="font-size:11px;color:#0369a1;margin-top:2px">→ '+META[k].name+'</div></div>'; }).join(''); }
+    function render(){ var f=ov.querySelector('#ai-filter').value; ov.querySelector('#ai-tbody').innerHTML=tbody(f);
+      ov.querySelectorAll('.ai-ov').forEach(function(s){ s.onchange=function(){ DATA[+s.dataset.i].override=s.value; render(); }; }); }
+    ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:860px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:20px 24px 14px;border-bottom:1px solid #e2e8f0"><div><div style="font-weight:600;font-size:16px;color:#1e293b">Review AI assignment suggestions</div><div style="font-size:12px;color:#64748b;margin-top:2px">42 prospects · 100% covered · override any assignment before confirming</div></div><button id="ai-x" style="border:none;background:none;cursor:pointer;color:#64748b;font-size:22px;line-height:1;padding:0 4px">×</button></div>'
+      + '<div style="padding:12px 24px;background:#f0f9ff;border-bottom:1px solid #bae6fd;display:flex;gap:24px;align-items:center"><div style="display:flex;gap:24px">'+sumHTML()+'</div><div style="flex:1"></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:#64748b">Filter:</span><select id="ai-filter" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 9px;font:400 12px DM Sans;background:#fff"><option value="all">All officers</option><option value="SR">Sarah Reynolds</option><option value="BM">Bridget McCarthy</option><option value="JK">Julia Kelleher</option></select></div></div>'
+      + '<div style="overflow-y:auto;flex:1"><table style="width:100%;border-collapse:collapse"><thead style="position:sticky;top:0;background:#fff;z-index:1"><tr>'
+      + ['#','Prospect','Stage','Ask','AI suggests','Override'].map(function(h){ return '<th style="text-align:left;padding:10px 12px;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em;border-bottom:1.5px solid #e2e8f0">'+h+'</th>'; }).join('')
+      + '</tr></thead><tbody id="ai-tbody"></tbody></table></div>'
+      + '<div style="display:flex;gap:10px;align-items:center;padding:14px 24px;border-top:1px solid #e2e8f0"><span style="font-size:12px;color:#64748b;margin-right:auto">42 assignments ready · All will be written to the audit log</span><button id="ai-cancel" style="border:1.5px solid #e2e8f0;background:#fff;color:#1e293b;padding:8px 16px;border-radius:7px;font:500 13px DM Sans;cursor:pointer">Cancel</button><button id="ai-go" style="border:none;background:#3b82f6;color:#fff;padding:8px 16px;border-radius:7px;font:500 13px DM Sans;cursor:pointer;display:inline-flex;align-items:center;gap:6px"><svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="#fff" stroke-width="2" stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>Confirm all 42 assignments</button></div>'
+      + '</div>';
+    render();
+    ov.querySelector('#ai-filter').onchange=render;
+    ov.querySelector('#ai-x').onclick=function(){ ov.remove(); };
+    ov.querySelector('#ai-cancel').onclick=function(){ ov.remove(); };
+    ov.querySelector('#ai-go').onclick=function(){
+      var counts={SR:0,BM:0,JK:0};
+      DATA.forEach(function(p){ counts[p.override]=(counts[p.override]||0)+1;
+        document.querySelectorAll('#pool .prospect-row').forEach(function(r){ var nm=(r.querySelector('.nm')||{}).textContent||''; if(nm.trim()===p.name) r.style.display='none'; });
+      });
+      document.querySelectorAll('#pool .prospect-row').forEach(function(r){ var nm=(r.querySelector('.nm')||{}).textContent||''; if(/more unassigned/i.test(nm)) r.style.display='none'; });
+      assigned.SR=(assigned.SR||0)+counts.SR; assigned.BM=(assigned.BM||0)+counts.BM; assigned.JK=(assigned.JK||0)+counts.JK;
+      updateBulkBar(); updateCommit(); ov.remove(); toast('42 AI assignments staged — review & commit below');
+    };
+  };
+
+  // === Commit confirmation + success (functionality from attached) ===
+  window.commitAssignments = function(){ openCommitConfirm(); };
+  window.openCommitConfirm = function(){
     var total = (assigned.SR||0) + (assigned.BM||0) + (assigned.JK||0);
-    if (total === 0) { alert('Pick or auto-suggest prospects first.'); return; }
-    alert(total + ' prospects assigned · 3 officers notified via email · audit log #AU-2026-1894 created');
-    window.location = 'atlas-solicitor-performance.html';
+    if (total === 0) { toast('Pick or auto-suggest prospects first'); return; }
+    var off = ['SR','BM','JK'].filter(function(k){ return assigned[k] > 0; });
+    var breakdown = off.map(function(k){ var m=META[k]; return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F1F5F9"><div style="width:28px;height:28px;border-radius:50%;background:'+m.color+';color:#fff;display:flex;align-items:center;justify-content:center;font:700 10px DM Sans">'+m.initials+'</div><div style="flex:1;font-size:13px;color:#334155">'+m.name+'</div><div style="font-size:13px;font-weight:700;color:#0E1E35">+'+assigned[k]+' prospects</div></div>'; }).join('');
+    var ov = mkOverlay('cc-ov');
+    ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:460px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">'
+      + '<div style="padding:18px 22px 4px"><div style="font-weight:600;font-size:16px;color:#0E1E35">Commit all pending assignments</div><div style="font-size:12px;color:#64748B;margin-top:2px">'+total+' assignments · '+off.length+' officer'+(off.length===1?'':'s')+' affected</div></div>'
+      + '<div style="padding:12px 22px"><div style="margin-bottom:12px">'+breakdown+'</div><div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:12px 14px"><p style="font-size:13px;color:#991B1B;margin:0 0 6px;font-weight:600">This cannot be undone.</p><ul style="font-size:12px;color:#7F1D1D;margin:0;padding-left:16px;line-height:1.7"><li>All assignments are written to the audit log</li><li>Each officer receives an email listing their new prospects</li><li>Prospects are removed from the unassigned pool immediately</li></ul></div></div>'
+      + '<div style="display:flex;gap:10px;justify-content:flex-end;padding:16px 22px;border-top:1px solid #EEF1F5"><button id="cc-cancel" style="border:1px solid #E2E8F0;background:#fff;color:#334155;padding:9px 17px;border-radius:10px;font:600 13px DM Sans;cursor:pointer">Cancel</button><button id="cc-go" style="border:none;background:#15803D;color:#fff;padding:9px 17px;border-radius:10px;font:600 13px DM Sans;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Commit &amp; notify officers</button></div>'
+      + '</div>';
+    ov.querySelector('#cc-cancel').onclick=function(){ ov.remove(); };
+    ov.querySelector('#cc-go').onclick=function(){ ov.remove(); executeCommit(total, off.length); };
   };
+  function executeCommit(total, offCount){
+    assigned = {SR:0, BM:0, JK:0}; updateBulkBar(); updateCommit();
+    var ov = mkOverlay('commit-ov');
+    ov.innerHTML = '<div style="background:#fff;border-radius:16px;max-width:430px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">'
+      + '<div style="padding:26px 26px 8px;text-align:center">'
+      + '<div style="width:52px;height:52px;border-radius:50%;background:#DCFCE7;display:flex;align-items:center;justify-content:center;margin:0 auto 14px"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#15803D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>'
+      + '<h3 style="font-family:\'DM Serif Display\',serif;font-size:21px;color:#0E1E35;margin:0">Assignments committed</h3>'
+      + '<p style="font-size:13px;color:#475569;margin:8px 0 0;line-height:1.5"><b>'+total+' prospects</b> assigned across <b>'+offCount+' officer'+(offCount===1?'':'s')+'</b>. Officers notified by email · audit log <b>#AU-2026-1894</b> created.</p>'
+      + '</div>'
+      + '<div style="display:flex;gap:10px;justify-content:center;padding:18px 26px 24px">'
+      + '<button id="ci-stay" style="border:1px solid #E2E8F0;background:#fff;color:#334155;padding:10px 18px;border-radius:10px;font:600 13px DM Sans;cursor:pointer">Stay here</button>'
+      + '<button id="ci-go" style="border:none;background:#2563EB;color:#fff;padding:10px 18px;border-radius:10px;font:600 13px DM Sans;cursor:pointer">View performance →</button>'
+      + '</div></div>';
+    ov.querySelector('#ci-stay').onclick = function(){ ov.remove(); };
+    ov.querySelector('#ci-go').onclick = function(){ window.location = 'atlas-solicitor-performance.html'; };
+  }
+  window.saveDraft = function(){ toast('Rebalance draft saved — pick up where you left off anytime'); };
+
+  // --- shared helpers ---
+  function toast(msg){
+    var t = document.getElementById('pa-toast');
+    if(!t){ t = document.createElement('div'); t.id='pa-toast';
+      t.style.cssText='position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(8px);background:#0E1E35;color:#fff;padding:12px 20px;border-radius:11px;font:500 13px/1.4 DM Sans,sans-serif;box-shadow:0 12px 32px rgba(15,23,42,.28);z-index:400;opacity:0;transition:opacity .2s,transform .2s;max-width:min(92vw,460px);text-align:center';
+      document.body.appendChild(t); }
+    t.textContent = msg;
+    requestAnimationFrame(function(){ t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; });
+    clearTimeout(t._h); t._h = setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(8px)'; }, 3200);
+  }
+  function mkOverlay(id){
+    var ex=document.getElementById(id); if(ex) ex.remove();
+    var ov=document.createElement('div'); ov.id=id;
+    ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:350;display:flex;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+    return ov;
+  }
+
+  // --- Shared filter state + chips (fully functional) ---
+  // Chips reflect ACTUALLY-applied filters. Nothing is applied on load, so the
+  // full pool shows and only the facet chips (Region/Parish/Interest) appear.
+  // Applied chips (Capacity/Stage/Region) appear + update whenever the user Applies.
+  var FILTERS = { minCap:0, stages:[], regions:[] };
+  function capLabel(v){ return v>=1000 ? '$'+(v/1000)+'k+' : '$'+v; }
+  function applyPoolFilters(){
+    var shown=0;
+    document.querySelectorAll('#pool .prospect-row').forEach(function(r){
+      var txt=((r.querySelector('.ask')||{}).textContent||''); var a=parseFloat(txt.replace(/[^0-9.]/g,''))||0; if(/m/i.test(txt))a*=1e6; else if(/k/i.test(txt))a*=1000;
+      var st=((r.querySelector('.stage')||{}).textContent||'').trim();
+      var geo=((r.querySelector('.geo')||{}).textContent||'').trim();
+      var okCap=a>=FILTERS.minCap;
+      var okStage=!FILTERS.stages.length || FILTERS.stages.indexOf(st)>=0 || st==='Various';
+      var okRegion=!FILTERS.regions.length || FILTERS.regions.indexOf(geo)>=0 || geo==='Diocese-wide';
+      var show=okCap&&okStage&&okRegion; r.style.display=show?'':'none'; if(show)shown++;
+    });
+    var ct=document.querySelector('.panel-head .ct'); if(ct) ct.textContent=shown+' prospect'+(shown===1?'':'s');
+  }
+  window.renderFilterChips = function(){
+    var box=document.getElementById('pool-chips'); if(!box) return;
+    var html='';
+    if(FILTERS.minCap>0) html+='<span class="chip applied" data-chip="cap" title="Remove" style="cursor:pointer">Capacity: '+capLabel(FILTERS.minCap)+' <span style="margin-left:4px">×</span></span>';
+    if(FILTERS.stages.length) html+='<span class="chip applied" data-chip="stage" title="Remove" style="cursor:pointer">Stage: '+FILTERS.stages.join(' + ')+' <span style="margin-left:4px">×</span></span>';
+    if(FILTERS.regions.length) html+='<span class="chip applied" data-chip="region" title="Remove" style="cursor:pointer">Region: '+FILTERS.regions.join(', ')+' <span style="margin-left:4px">×</span></span>';
+    if(!FILTERS.regions.length) html+='<span class="chip" data-open="1" style="cursor:pointer">Region</span>';
+    html+='<span class="chip" data-open="1" style="cursor:pointer">Parish</span>';
+    html+='<span class="chip" data-open="1" style="cursor:pointer">Interest</span>';
+    box.innerHTML=html;
+    box.querySelectorAll('[data-chip]').forEach(function(ch){ ch.onclick=function(){
+      var t=ch.getAttribute('data-chip');
+      if(t==='cap') FILTERS.minCap=0; else if(t==='stage') FILTERS.stages=[]; else if(t==='region') FILTERS.regions=[];
+      FILTER_APPLIED=true; renderFilterChips(); applyPoolFilters(); toast('Filter removed — pool updated');
+    }; });
+    box.querySelectorAll('[data-open]').forEach(function(ch){ ch.onclick=function(){ openFilterPanel(); }; });
+  };
+
+  // --- Filter the unassigned pool (slide-in panel, matches attached) ---
+  window.poolFilter = function(){ openFilterPanel(); };
+  window.openFilterPanel = function(){
+    var ex=document.getElementById('pa-filter'); if(ex) ex.remove();
+    var eb=document.getElementById('pa-filter-bd'); if(eb) eb.remove();
+    var backdrop=document.createElement('div'); backdrop.id='pa-filter-bd';
+    backdrop.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:9000';
+    var panel=document.createElement('div'); panel.id='pa-filter';
+    panel.style.cssText='position:fixed;top:0;left:220px;bottom:0;width:340px;background:#fff;z-index:9001;box-shadow:4px 0 24px rgba(0,0,0,.14);display:flex;flex-direction:column;font-family:DM Sans,sans-serif;transform:translateX(-120%);transition:transform .25s ease';
+    function apill(t){ return '<span style="margin-left:auto;display:inline-flex;align-items:center;padding:3px 9px;border-radius:12px;font-size:10px;font-weight:500;background:#dbeafe;color:#1d4ed8">'+t+'</span>'; }
+    function radio(v,label){ var on=FILTERS.minCap===v; return '<label style="display:flex;align-items:center;gap:9px;padding:7px 0;cursor:pointer;font-size:13.5px;color:#1e293b"><input type="radio" name="pa-cap" value="'+v+'"'+(on?' checked':'')+' style="accent-color:#3b82f6;width:16px;height:16px">'+label+(on&&v>0?apill('Active'):'')+'</label>'; }
+    function check(label,grp){ var on=(grp==='stage'?FILTERS.stages:grp==='region'?FILTERS.regions:[]).indexOf(label)>=0; return '<label style="display:flex;align-items:center;gap:9px;padding:7px 0;cursor:pointer;font-size:13.5px;color:#1e293b"><input type="checkbox" data-grp="'+grp+'" value="'+label+'"'+(on?' checked':'')+' style="accent-color:#3b82f6;width:16px;height:16px">'+label+(on?apill('Active'):'')+'</label>'; }
+    function sec(title,inner){ return '<div style="margin-bottom:20px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:6px">'+title+'</div>'+inner+'</div>'; }
+    panel.innerHTML='<div style="padding:16px 20px;border-bottom:1px solid #e2e8f0;display:flex;align-items:flex-start;justify-content:space-between"><div><div style="font-weight:600;font-size:15px;color:#1e293b">Filter unassigned pool</div><div style="font-size:11.5px;color:#64748b;margin-top:2px">Narrow prospects before assigning</div></div><button id="pa-fx" style="border:none;background:none;cursor:pointer;color:#64748b;font-size:20px;line-height:1">×</button></div>'
+      + '<div style="flex:1;overflow-y:auto;padding:16px 20px">'
+      + sec('Minimum ask amount', radio(0,'Any amount')+radio(10000,'$10k+')+radio(25000,'$25k+')+radio(50000,'$50k+')+radio(100000,'$100k+'))
+      + sec('Stage', check('Identification','stage')+check('Qualification','stage')+check('Cultivation','stage')+check('Solicitation','stage')+check('Stewardship','stage'))
+      + sec('Region', check('Albany NY','region')+check('Schenectady NY','region')+check('Loudonville NY','region')+check('Saratoga Springs','region')+check('Diocese-wide','region'))
+      + sec('Parish', '<select style="width:100%;border:1px solid #e2e8f0;border-radius:7px;padding:8px 10px;font:400 13px DM Sans;background:#fff"><option>All parishes</option><option>St. Mary\'s Cathedral</option><option>St. Catherine of Siena</option><option>St. Joseph\'s</option><option>St. Anthony</option></select>')
+      + sec('Interest / tag', check('Capital campaigns','tag')+check('Planned giving','tag')+check('Foundations','tag')+check('Stock-friendly','tag')+check('LYBUNT recovery','tag'))
+      + '</div>'
+      + '<div style="padding:12px 20px;border-top:1px solid #e2e8f0;display:flex;gap:8px"><button id="pa-fclear" style="flex:1;border:1.5px solid #e2e8f0;background:#fff;color:#1e293b;padding:9px;border-radius:7px;font:500 13px DM Sans;cursor:pointer">Clear all</button><button id="pa-fapply" style="flex:2;border:none;background:#3b82f6;color:#fff;padding:9px;border-radius:7px;font:500 13px DM Sans;cursor:pointer">Apply filters</button></div>';
+    document.body.appendChild(backdrop); document.body.appendChild(panel);
+    requestAnimationFrame(function(){ panel.style.transform='translateX(0)'; });
+    function close(){ panel.style.transform='translateX(-120%)'; if(backdrop.parentNode) backdrop.remove(); setTimeout(function(){ if(panel.parentNode) panel.remove(); },250); }
+    backdrop.onclick=close; panel.querySelector('#pa-fx').onclick=close;
+    panel.querySelector('#pa-fclear').onclick=function(){
+      FILTERS={ minCap:0, stages:[], regions:[] }; FILTER_APPLIED=true;
+      document.querySelectorAll('#pool .prospect-row').forEach(function(r){ r.style.display=''; });
+      var ct=document.querySelector('.panel-head .ct'); if(ct) ct.textContent=document.querySelectorAll('#pool .prospect-row').length+' prospects';
+      renderFilterChips(); close(); toast('Filters cleared');
+    };
+    panel.querySelector('#pa-fapply').onclick=function(){
+      var rc=panel.querySelector('input[name=pa-cap]:checked'); FILTERS.minCap=rc?+rc.value:0;
+      FILTERS.stages=[].map.call(panel.querySelectorAll('input[data-grp=stage]:checked'),function(c){return c.value;});
+      FILTERS.regions=[].map.call(panel.querySelectorAll('input[data-grp=region]:checked'),function(c){return c.value;});
+      FILTER_APPLIED=true; renderFilterChips(); applyPoolFilters();
+      close(); toast('Filters applied — pool updated');
+    };
+  };
+
+  // --- Invite a new user (right-side panel, opens on the portfolio screen) ---
+  window.openInvitePanel = function(){
+    var ex=document.getElementById('pa-invite'); if(ex) ex.remove();
+    var eb=document.getElementById('pa-invite-bd'); if(eb) eb.remove();
+    var bd=document.createElement('div'); bd.id='pa-invite-bd'; bd.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:9000';
+    var panel=document.createElement('div'); panel.id='pa-invite';
+    panel.style.cssText='position:fixed;top:0;right:0;bottom:0;width:min(640px,96vw);background:#fff;z-index:9001;box-shadow:-6px 0 28px rgba(0,0,0,.18);display:flex;flex-direction:column;font-family:DM Sans,sans-serif;transform:translateX(100%);transition:transform .25s ease';
+    var step=1;
+    var data={first:'Jamie',last:'Morrison',email:'jamie.morrison@diocese.org',title:'Gift Officer',role:'Gift Officer',auth:'Microsoft 365 SSO (recommended)',twofa:'Required (Atlas policy)'};
+    function dot(n,label){ var done=step>n, cur=step===n;
+      var circ=done?'<div style="width:24px;height:24px;border-radius:50%;background:#15803d;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px DM Sans">✓</div>'
+        : '<div style="width:24px;height:24px;border-radius:50%;background:'+(cur?'#2563eb':'#e2e8f0')+';color:'+(cur?'#fff':'#94a3b8')+';display:flex;align-items:center;justify-content:center;font:700 12px DM Sans">'+n+'</div>';
+      return '<div style="display:flex;align-items:center;gap:7px">'+circ+'<span style="font-size:13px;font-weight:'+(cur?'600':'500')+';color:'+(cur?'#1e293b':'#94a3b8')+'">'+label+'</span></div>'; }
+    function stepper(){ return '<div style="display:flex;align-items:center;gap:14px;padding:14px 26px;border-bottom:1px solid #e2e8f0">'+dot(1,'Identity')+'<div style="flex:0 0 24px;height:1px;background:#e2e8f0"></div>'+dot(2,'Role & scope')+'<div style="flex:0 0 24px;height:1px;background:#e2e8f0"></div>'+dot(3,'Review & send')+'</div>'; }
+    function field(label,id,val,req,ph){ return '<div style="flex:1;min-width:0"><label style="display:block;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#64748b;margin-bottom:5px">'+label+(req?' <span style="color:#dc2626">*</span>':'')+'</label><input id="'+id+'" value="'+(val||'')+'" placeholder="'+(ph||'')+'" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:9px 11px;font:400 13px DM Sans;color:#1e293b"></div>'; }
+    function sel(label,id,opts,val){ return '<div style="flex:1;min-width:0"><label style="display:block;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#64748b;margin-bottom:5px">'+label+'</label><select id="'+id+'" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:9px 11px;font:400 13px DM Sans;color:#1e293b;background:#fff">'+opts.map(function(o){return '<option'+(o===val?' selected':'')+'>'+o+'</option>';}).join('')+'</select></div>'; }
+    function body(){
+      if(step===1){ return '<div style="font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#64748b;margin-bottom:10px">Who are you inviting?</div>'
+        + '<div style="display:flex;gap:16px;margin-bottom:16px">'+field('First name','iv-first',data.first,true)+field('Last name','iv-last',data.last,true)+'</div>'
+        + '<div style="display:flex;gap:16px;margin-bottom:22px">'+field('Work email','iv-email',data.email,true)+field('Title (shown on profile)','iv-title',data.title,false)+'</div>'
+        + '<div style="font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#64748b;margin:0 0 10px;padding-top:8px;border-top:1px solid #f1f5f9">Sign-in method</div>'
+        + '<div style="display:flex;gap:16px;margin-bottom:18px">'+sel('Authentication','iv-auth',['Microsoft 365 SSO (recommended)','Google Workspace SSO','Email + password'],data.auth)+sel('Two-factor','iv-2fa',['Required (Atlas policy)','Optional','Disabled'],data.twofa)+'</div>'
+        + '<div style="display:flex;gap:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px"><div style="width:26px;height:26px;border-radius:6px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font:700 13px DM Sans;flex-shrink:0">i</div><div style="font-size:12.5px;color:#1e3a8a;line-height:1.5"><b>Domain check passed.</b> diocese.org is verified for SSO. '+data.first+' will sign in with their existing M365 credentials — no new password needed.</div></div>'; }
+      if(step===2){ var roles=[['Admin','Full access · manage users, settings, all records'],['Manager','Manage campaigns, donors, reports for assigned entities'],['Gift Officer','Own a prospect portfolio · log moves · limited settings'],['Read-only','View dashboards and reports · no edits']];
+        return '<div style="font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#64748b;margin-bottom:10px">Role</div>'
+        + roles.map(function(r){ var on=data.role===r[0]; return '<label style="display:flex;gap:11px;align-items:flex-start;border:1.5px solid '+(on?'#2563eb':'#e2e8f0')+';background:'+(on?'#eff6ff':'#fff')+';border-radius:10px;padding:12px 14px;margin-bottom:9px;cursor:pointer"><input type="radio" name="iv-role" value="'+r[0]+'"'+(on?' checked':'')+' style="accent-color:#2563eb;margin-top:2px"><div><div style="font-size:13.5px;font-weight:600;color:#1e293b">'+r[0]+'</div><div style="font-size:12px;color:#64748b;margin-top:2px">'+r[1]+'</div></div></label>'; }).join('')
+        + '<div style="font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#64748b;margin:16px 0 10px">Scope — entities</div>'
+        + ['All diocesan entities','St. Mary\'s Cathedral','St. Joseph\'s','St. Catherine of Siena','Foundations & trusts'].map(function(s,i){ return '<label style="display:flex;align-items:center;gap:9px;padding:6px 0;font-size:13px;color:#1e293b;cursor:pointer"><input type="checkbox"'+(i===0?' checked':'')+' style="accent-color:#2563eb;width:15px;height:15px">'+s+'</label>'; }).join(''); }
+      // step 3
+      return '<div style="font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#64748b;margin-bottom:12px">Review &amp; send</div>'
+        + [['Name',data.first+' '+data.last],['Work email',data.email],['Title',data.title||'—'],['Role',data.role],['Authentication',data.auth],['Two-factor',data.twofa],['Scope','All diocesan entities']].map(function(r){ return '<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9"><span style="font-size:12.5px;color:#64748b">'+r[0]+'</span><span style="font-size:13px;font-weight:600;color:#1e293b;text-align:right">'+r[1]+'</span></div>'; }).join('')
+        + '<div style="display:flex;gap:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin-top:16px"><div style="width:26px;height:26px;border-radius:50%;background:#15803d;color:#fff;display:flex;align-items:center;justify-content:center;font:700 13px DM Sans;flex-shrink:0">✓</div><div style="font-size:12.5px;color:#166534;line-height:1.5">A magic-link invite will be emailed to <b>'+data.email+'</b>. It expires in 7 days. You can revoke it anytime from Users &amp; roles.</div></div>'; }
+    function foot(){
+      var right = step<3
+        ? '<button id="iv-next" style="border:none;background:#2563eb;color:#fff;padding:10px 18px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Next: '+(step===1?'Role &amp; scope':'Review &amp; send')+' →</button>'
+        : '<button id="iv-send" style="border:none;background:#2563eb;color:#fff;padding:10px 18px;border-radius:9px;font:600 13px DM Sans;cursor:pointer;display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>Send invite</button>';
+      var back = step>1 ? '<button id="iv-back" style="border:1.5px solid #e2e8f0;background:#fff;color:#1e293b;padding:10px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">← Back</button>' : '';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:14px 26px;border-top:1px solid #e2e8f0"><div style="display:flex;align-items:center;gap:8px;margin-right:auto"><div style="width:22px;height:22px;border-radius:50%;background:#15803d;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px DM Sans">✓</div><span style="font-size:12px;color:#64748b">Draft saved · just now</span></div>'+back+right+'</div>'; }
+    function bindInputs(){
+      var m={ 'iv-first':'first','iv-last':'last','iv-email':'email','iv-title':'title','iv-auth':'auth','iv-2fa':'twofa' };
+      Object.keys(m).forEach(function(id){ var el=panel.querySelector('#'+id); if(el) el.oninput=el.onchange=function(){ data[m[id]]=el.value; }; });
+      panel.querySelectorAll('input[name=iv-role]').forEach(function(r){ r.onchange=function(){ data.role=r.value; render(); }; });
+    }
+    function render(){
+      panel.innerHTML='<div style="padding:18px 26px 14px;border-bottom:1px solid #e2e8f0;display:flex;align-items:flex-start;justify-content:space-between"><div><div style="font-family:\'DM Serif Display\',serif;font-size:20px;color:#0E1E35">Invite a new user</div><div style="font-size:12px;color:#64748b;margin-top:2px">A magic-link invite will be emailed · expires in 7 days</div></div><button id="iv-x" style="border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;color:#64748b;font-size:16px;line-height:1;width:30px;height:30px;border-radius:8px">×</button></div>'
+        + stepper()
+        + '<div style="flex:1;overflow-y:auto;padding:22px 26px">'+body()+'</div>'
+        + foot();
+      panel.querySelector('#iv-x').onclick=close;
+      var nx=panel.querySelector('#iv-next'); if(nx) nx.onclick=function(){ if(step===1){ data.first=(panel.querySelector('#iv-first')||{}).value||data.first; data.last=(panel.querySelector('#iv-last')||{}).value||data.last; data.email=(panel.querySelector('#iv-email')||{}).value||data.email; } step++; render(); };
+      var bk=panel.querySelector('#iv-back'); if(bk) bk.onclick=function(){ step--; render(); };
+      var sd=panel.querySelector('#iv-send'); if(sd) sd.onclick=function(){ close(); toast('Invite sent to '+data.email+' — expires in 7 days'); };
+      bindInputs();
+    }
+    document.body.appendChild(bd); document.body.appendChild(panel);
+    render();
+    requestAnimationFrame(function(){ panel.style.transform='translateX(0)'; });
+    function close(){ panel.style.transform='translateX(100%)'; if(bd.parentNode) bd.remove(); setTimeout(function(){ if(panel.parentNode) panel.remove(); },250); }
+    bd.onclick=close;
+  };
+
+  // --- Set officer capacity targets (matches attached) ---
+  window.openTargets = function(){
+    var AV={SR:'#6366f1',BM:'#8b5cf6',JK:'#22c55e'};
+    var OFF=[
+      {c:'SR',name:'Sarah Reynolds',role:'Dev Director · currently 18 active',min:100,max:130},
+      {c:'BM',name:'Bridget McCarthy',role:'Dev Director · currently 15 active',min:100,max:130},
+      {c:'JK',name:'Julia Kelleher',role:'Officer · currently 22 active · ramping up',min:80,max:110}
+    ];
+    var ov=mkOverlay('tg-ov');
+    function row(o){ return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f1f5f9">'
+      + '<div style="width:34px;height:34px;border-radius:50%;background:'+AV[o.c]+';color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px DM Sans;flex-shrink:0">'+o.c+'</div>'
+      + '<div style="flex:1"><div style="font-weight:500;font-size:13px;color:#1e293b">'+o.name+'</div><div style="font-size:11px;color:#64748b">'+o.role+'</div></div>'
+      + '<div style="display:flex;align-items:center;gap:6px"><label style="font-size:11px;color:#64748b">Min</label><input class="tg-min" data-off="'+o.c+'" type="number" value="'+o.min+'" min="10" max="300" style="width:64px;border:1.5px solid #e2e8f0;border-radius:6px;padding:6px 8px;font:400 13px DM Sans;text-align:center"><span style="font-size:11px;color:#64748b">–</span><label style="font-size:11px;color:#64748b">Max</label><input class="tg-max" data-off="'+o.c+'" type="number" value="'+o.max+'" min="10" max="300" style="width:64px;border:1.5px solid #e2e8f0;border-radius:6px;padding:6px 8px;font:400 13px DM Sans;text-align:center"></div></div>'; }
+    ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:540px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:20px 24px 16px;border-bottom:1px solid #e2e8f0"><div><div style="font-weight:600;font-size:16px;color:#1e293b">Set officer capacity targets</div><div style="font-size:12px;color:#64748b;margin-top:2px">Recommended range: 100–150 prospects per officer</div></div><button id="tg-x" style="border:none;background:none;cursor:pointer;color:#64748b;font-size:20px;line-height:1">×</button></div>'
+      + '<div style="padding:18px 24px"><p style="font-size:12px;color:#64748b;margin:0 0 12px">Targets affect how capacity bars and Guru AI slot recommendations are calculated. Changes take effect immediately after saving.</p>'
+      + OFF.map(row).join('')
+      + '<div style="background:#fefce8;border:1px solid #fde68a;border-radius:7px;padding:10px 12px;margin-top:14px"><p style="font-size:12px;color:#92400e;margin:0">⚠️ Targets are used for Guru AI capacity scoring. Lowering a target may reduce how many AI suggestions are assigned to that officer.</p></div></div>'
+      + '<div style="display:flex;gap:10px;justify-content:flex-end;padding:16px 24px;border-top:1px solid #e2e8f0"><button id="tg-cancel" style="border:1.5px solid #e2e8f0;background:#fff;color:#1e293b;padding:8px 16px;border-radius:7px;font:500 13px DM Sans;cursor:pointer">Cancel</button><button id="tg-save" style="border:none;background:#3b82f6;color:#fff;padding:8px 16px;border-radius:7px;font:500 13px DM Sans;cursor:pointer">Save targets</button></div>'
+      + '</div>';
+    ov.querySelector('#tg-x').onclick=function(){ ov.remove(); };
+    ov.querySelector('#tg-cancel').onclick=function(){ ov.remove(); };
+    ov.querySelector('#tg-save').onclick=function(){
+      OFF.forEach(function(o){
+        var mn=ov.querySelector('.tg-min[data-off="'+o.c+'"]').value, mx=ov.querySelector('.tg-max[data-off="'+o.c+'"]').value;
+        var card=document.querySelector('.officer-card[data-officer="'+o.c+'"]');
+        if(card){ var meta=card.querySelector('.load-meta span:last-child'); if(meta) meta.textContent=meta.textContent.replace(/target\s*[\d–\-]+/, 'target '+mn+'–'+mx); }
+      });
+      var chip=document.querySelectorAll('.panel')[1].querySelector('.filter-bar .chip.applied');
+      if(chip) chip.textContent='Target: per-officer (custom)';
+      ov.remove(); toast('Capacity targets saved');
+    };
+  };
+
+  // boot: render the filter chips
+  renderFilterChips();
 })();
 </script>
 
