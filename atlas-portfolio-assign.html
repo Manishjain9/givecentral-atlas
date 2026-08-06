@@ -321,7 +321,7 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .prospect-row .ask { font-weight:600; color:var(--text); font-variant-numeric:tabular-nums; }
 .prospect-row .geo { font-size:11px; color:var(--text-3); }
 
-.bulk-bar { background:var(--navy); color:white; padding:11px 22px; display:flex; align-items:center; gap:12px; font-size:12.5px; border-top:1px solid var(--navy-3); }
+.bulk-bar { position:fixed; left:220px; right:0; bottom:60px; z-index:69; background:var(--navy); color:white; padding:11px 22px; display:flex; align-items:center; gap:12px; font-size:12.5px; box-shadow:0 -6px 22px rgba(15,23,42,.16); }
 .bulk-bar .ct { background:var(--blue); padding:2px 9px; border-radius:6px; font-weight:600; font-size:11.5px; }
 .bulk-bar select { background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); color:white; padding:5px 28px 5px 10px; border-radius:7px; font-size:12px; font-family:'DM Sans',sans-serif; appearance:none; }
 .bulk-bar select option { color:var(--text); }
@@ -355,7 +355,8 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .assign-btn { width:100%; padding:7px; border-radius:7px; font-size:11.5px; font-weight:600; cursor:pointer; background:white; border:1px solid var(--border); color:var(--text-2); margin-top:6px; }
 .assign-btn:hover { background:var(--blue-pale); border-color:var(--blue); color:var(--blue); }
 
-.commit-bar { position:sticky; bottom:0; background:white; border:1px solid var(--border); border-radius:14px; padding:14px 22px; margin-top:18px; display:flex; align-items:center; gap:12px; box-shadow:0 -4px 20px rgba(15,23,42,.06); }
+.commit-bar { position:fixed; left:220px; right:0; bottom:0; background:white; border-top:1px solid var(--border); padding:12px 22px; display:flex; align-items:center; gap:12px; box-shadow:0 -6px 22px rgba(15,23,42,.10); z-index:70; }
+body { padding-bottom:88px !important; }  /* clear the fixed commit bar */
 .commit-bar .left { font-size:12.5px; color:var(--text-3); }
 .commit-bar .left b { color:var(--text); font-weight:600; }
 .commit-bar .right { margin-left:auto; display:flex; gap:8px; }
@@ -713,7 +714,7 @@ body {
 
       <div class="filter-bar">
         <div id="pool-chips" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>
-        <div class="right">Sorted by capacity ↓</div>
+        <div class="right" id="pool-sort" style="cursor:pointer;user-select:none" title="Change sort">Sorted by <b id="pool-sort-label" style="color:var(--text-2);font-weight:600">capacity (high→low)</b> <span id="pool-sort-arrow">↓</span></div>
       </div>
 
       <div class="pool-list" id="pool">
@@ -960,6 +961,7 @@ body {
   <div class="commit-bar">
     <div class="left">
       <b id="pending-count">0</b> pending assignments · <b id="pending-officers">0 officers</b> affected
+      <span id="draft-status" style="display:none;margin-left:12px;padding-left:12px;border-left:1px solid var(--border)"></span>
     </div>
     <div class="right">
       <button class="btn btn-ghost" onclick="resetAssignments()">Reset</button>
@@ -976,6 +978,9 @@ body {
 <script>
 (function(){
   var assigned = {SR: 0, BM: 0, JK: 0};
+  var STAGED = {};                                  // prospect name -> officer code (staged, not yet committed)
+  var DRAFT_KEY = 'atlas-portfolio-draft';          // localStorage key for a saved rebalance draft
+  function nmeOf(r){ return ((r.querySelector('.nm')||{}).textContent||'').trim(); }
   window.selectAllProspects = function(btn){
     var rows = document.querySelectorAll('#pool .prospect-row');
     var anyOff = false;
@@ -1002,7 +1007,7 @@ body {
     var target = document.getElementById('bulk-target').value;
     var selected = document.querySelectorAll('#pool .prospect-row.on');
     assigned[target] = (assigned[target] || 0) + selected.length;
-    selected.forEach(function(r){ r.style.display = 'none'; });
+    selected.forEach(function(r){ r.style.display = 'none'; STAGED[nmeOf(r)]=target; });
     updateBulkBar();
     updateCommit();
     var nm={SR:'Sarah',BM:'Bridget',JK:'Julia'}[target]||target;
@@ -1023,7 +1028,7 @@ body {
   function doAutoAssign(officer, count){
     var n=0;
     document.querySelectorAll('#pool .prospect-row[data-suggest="'+officer+'"]').forEach(function(r){
-      if(n<count && r.style.display!=='none'){ r.style.display='none'; n++; }
+      if(n<count && r.style.display!=='none'){ r.style.display='none'; STAGED[nmeOf(r)]=officer; n++; }
     });
     assigned[officer]=(assigned[officer]||0)+n; updateBulkBar(); updateCommit(); return n;
   }
@@ -1036,8 +1041,9 @@ body {
   }
   window.resetAssignments = function(){
     document.querySelectorAll('#pool .prospect-row').forEach(function(r){ r.style.display=''; r.classList.remove('on'); var cb=r.querySelector('.cb'); if(cb) cb.textContent=''; });
-    assigned = {SR:0, BM:0, JK:0};
-    updateBulkBar(); updateCommit(); toast('Assignments cleared');
+    assigned = {SR:0, BM:0, JK:0}; STAGED = {};
+    try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
+    updateBulkBar(); updateCommit(); updateDraftStatus(); if(typeof applyPoolFilters==='function') applyPoolFilters(); toast('Assignments cleared · draft discarded');
   };
 
   // === Auto-assign confirmation (functionality from attached) ===
@@ -1110,9 +1116,9 @@ body {
     ov.querySelector('#ai-go').onclick=function(){
       var counts={SR:0,BM:0,JK:0};
       DATA.forEach(function(p){ counts[p.override]=(counts[p.override]||0)+1;
-        document.querySelectorAll('#pool .prospect-row').forEach(function(r){ var nm=(r.querySelector('.nm')||{}).textContent||''; if(nm.trim()===p.name) r.style.display='none'; });
+        document.querySelectorAll('#pool .prospect-row').forEach(function(r){ var nm=(r.querySelector('.nm')||{}).textContent||''; if(nm.trim()===p.name){ r.style.display='none'; STAGED[nm.trim()]=p.override; } });
       });
-      document.querySelectorAll('#pool .prospect-row').forEach(function(r){ var nm=(r.querySelector('.nm')||{}).textContent||''; if(/more unassigned/i.test(nm)) r.style.display='none'; });
+      document.querySelectorAll('#pool .prospect-row').forEach(function(r){ var nm=(r.querySelector('.nm')||{}).textContent||''; if(/more unassigned/i.test(nm)){ r.style.display='none'; STAGED[nm.trim()]='SR'; } });
       assigned.SR=(assigned.SR||0)+counts.SR; assigned.BM=(assigned.BM||0)+counts.BM; assigned.JK=(assigned.JK||0)+counts.JK;
       updateBulkBar(); updateCommit(); ov.remove(); toast('42 AI assignments staged — review & commit below');
     };
@@ -1135,7 +1141,9 @@ body {
     ov.querySelector('#cc-go').onclick=function(){ ov.remove(); executeCommit(total, off.length); };
   };
   function executeCommit(total, offCount){
-    assigned = {SR:0, BM:0, JK:0}; updateBulkBar(); updateCommit();
+    assigned = {SR:0, BM:0, JK:0}; STAGED = {};
+    try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}   // committed work is no longer a draft
+    updateBulkBar(); updateCommit(); updateDraftStatus();
     var ov = mkOverlay('commit-ov');
     ov.innerHTML = '<div style="background:#fff;border-radius:16px;max-width:430px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">'
       + '<div style="padding:26px 26px 8px;text-align:center">'
@@ -1150,7 +1158,39 @@ body {
     ov.querySelector('#ci-stay').onclick = function(){ ov.remove(); };
     ov.querySelector('#ci-go').onclick = function(){ window.location = 'atlas-solicitor-performance.html'; };
   }
-  window.saveDraft = function(){ toast('Rebalance draft saved — pick up where you left off anytime'); };
+  function fmtAgo(ts){ if(!ts) return ''; var s=Math.round((Date.now()-ts)/1000); if(s<45) return 'just now'; var m=Math.round(s/60); if(m<60) return m+'m ago'; var h=Math.round(m/60); return h+'h ago'; }
+  window.updateDraftStatus = function(){
+    var el=document.getElementById('draft-status'); if(!el) return;
+    var raw=null; try{ raw=localStorage.getItem(DRAFT_KEY); }catch(e){}
+    if(!raw){ el.style.display='none'; el.innerHTML=''; return; }
+    var d={}; try{ d=JSON.parse(raw)||{}; }catch(e){}
+    var n=Object.keys(d.staged||{}).length;
+    el.style.display='inline';
+    el.innerHTML='<span style="color:#15803D;font-weight:600">✓ Draft saved</span> · '+n+' staged · '+fmtAgo(d.savedAt)+' · <span id="draft-discard" style="color:#BE185D;cursor:pointer;font-weight:600">Discard</span>';
+    var dc=el.querySelector('#draft-discard'); if(dc) dc.onclick=function(){ resetAssignments(); };
+  };
+  window.saveDraft = function(){
+    var n=Object.keys(STAGED).length;
+    try{
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ staged:STAGED, assigned:assigned, savedAt:Date.now() }));
+      updateDraftStatus();
+      toast(n? ('Draft saved — '+n+' staged assignment'+(n===1?'':'s')+' will be restored when you return') : 'Draft saved — no assignments staged yet');
+    }catch(e){ toast('Draft saved for this session'); }
+  };
+  function restoreDraft(){
+    try{
+      var raw=localStorage.getItem(DRAFT_KEY); if(!raw) return;
+      var d=JSON.parse(raw); if(!d || !d.staged) return;
+      STAGED=d.staged; assigned={SR:0,BM:0,JK:0};
+      Object.keys(STAGED).forEach(function(nm){
+        var off=STAGED[nm]; if(assigned[off]!=null) assigned[off]++;
+        document.querySelectorAll('#pool .prospect-row').forEach(function(r){ if(nmeOf(r)===nm) r.style.display='none'; });
+      });
+      updateBulkBar(); updateCommit(); updateDraftStatus();
+      var n=Object.keys(STAGED).length;
+      if(n) toast('Draft restored — '+n+' staged assignment'+(n===1?'':'s')+' · commit or reset when ready');
+    }catch(e){}
+  }
 
   // --- shared helpers ---
   function toast(msg){
@@ -1180,6 +1220,7 @@ body {
   function applyPoolFilters(){
     var shown=0;
     document.querySelectorAll('#pool .prospect-row').forEach(function(r){
+      if(STAGED[nmeOf(r)]){ r.style.display='none'; return; } // staged/assigned rows stay out of the pool
       var txt=((r.querySelector('.ask')||{}).textContent||''); var a=parseFloat(txt.replace(/[^0-9.]/g,''))||0; if(/m/i.test(txt))a*=1e6; else if(/k/i.test(txt))a*=1000;
       var st=((r.querySelector('.stage')||{}).textContent||'').trim();
       var geo=((r.querySelector('.geo')||{}).textContent||'').trim();
@@ -1192,20 +1233,55 @@ body {
   }
   window.renderFilterChips = function(){
     var box=document.getElementById('pool-chips'); if(!box) return;
+    // Only ACTIVE applied filters get a chip. The facets themselves live in the
+    // Filter panel (the "Filter" button), so no placeholder chips are needed here.
     var html='';
-    if(FILTERS.minCap>0) html+='<span class="chip applied" data-chip="cap" title="Remove" style="cursor:pointer">Capacity: '+capLabel(FILTERS.minCap)+' <span style="margin-left:4px">×</span></span>';
-    if(FILTERS.stages.length) html+='<span class="chip applied" data-chip="stage" title="Remove" style="cursor:pointer">Stage: '+FILTERS.stages.join(' + ')+' <span style="margin-left:4px">×</span></span>';
-    if(FILTERS.regions.length) html+='<span class="chip applied" data-chip="region" title="Remove" style="cursor:pointer">Region: '+FILTERS.regions.join(', ')+' <span style="margin-left:4px">×</span></span>';
-    if(!FILTERS.regions.length) html+='<span class="chip" data-open="1" style="cursor:pointer">Region</span>';
-    html+='<span class="chip" data-open="1" style="cursor:pointer">Parish</span>';
-    html+='<span class="chip" data-open="1" style="cursor:pointer">Interest</span>';
+    if(FILTERS.minCap>0) html+='<span class="chip applied" data-chip="cap" title="Remove filter" style="cursor:pointer">Capacity: '+capLabel(FILTERS.minCap)+' <span style="margin-left:4px">×</span></span>';
+    if(FILTERS.stages.length) html+='<span class="chip applied" data-chip="stage" title="Remove filter" style="cursor:pointer">Stage: '+FILTERS.stages.join(' + ')+' <span style="margin-left:4px">×</span></span>';
+    if(FILTERS.regions.length) html+='<span class="chip applied" data-chip="region" title="Remove filter" style="cursor:pointer">Region: '+FILTERS.regions.join(', ')+' <span style="margin-left:4px">×</span></span>';
+    if(!html) html='<span style="font-size:11.5px;color:var(--text-3)">No filters applied · <span id="pool-openfilter" style="color:var(--blue);cursor:pointer;font-weight:600">Filter</span></span>';
     box.innerHTML=html;
     box.querySelectorAll('[data-chip]').forEach(function(ch){ ch.onclick=function(){
       var t=ch.getAttribute('data-chip');
       if(t==='cap') FILTERS.minCap=0; else if(t==='stage') FILTERS.stages=[]; else if(t==='region') FILTERS.regions=[];
-      FILTER_APPLIED=true; renderFilterChips(); applyPoolFilters(); toast('Filter removed — pool updated');
+      renderFilterChips(); applyPoolFilters(); toast('Filter removed — pool updated');
     }; });
-    box.querySelectorAll('[data-open]').forEach(function(ch){ ch.onclick=function(){ openFilterPanel(); }; });
+    var of=box.querySelector('#pool-openfilter'); if(of) of.onclick=function(){ openFilterPanel(); };
+  };
+
+  // --- Sort the unassigned pool (fully functional) ---
+  var SORT_MODE='cap-desc';
+  function askVal(r){ var t=((r.querySelector('.ask')||{}).textContent||''); var a=parseFloat(t.replace(/[^0-9.]/g,''))||0; if(/m/i.test(t))a*=1e6; else if(/k/i.test(t))a*=1000; return a; }
+  var SORT_LABELS={ 'cap-desc':'capacity (high→low)','cap-asc':'capacity (low→high)','name':'name (A→Z)','stage':'stage' };
+  window.sortPool = function(mode){
+    SORT_MODE=mode;
+    var pool=document.getElementById('pool'); if(!pool) return;
+    var rows=[].slice.call(pool.querySelectorAll('.prospect-row'));
+    var agg=rows.filter(function(r){ return /more unassigned/i.test((r.querySelector('.nm')||{}).textContent||''); });
+    var main=rows.filter(function(r){ return agg.indexOf(r)<0; });
+    main.sort(function(a,b){
+      if(mode==='cap-desc') return askVal(b)-askVal(a);
+      if(mode==='cap-asc')  return askVal(a)-askVal(b);
+      if(mode==='name')     return ((a.querySelector('.nm')||{}).textContent||'').trim().localeCompare(((b.querySelector('.nm')||{}).textContent||'').trim());
+      if(mode==='stage')    return ((a.querySelector('.stage')||{}).textContent||'').trim().localeCompare(((b.querySelector('.stage')||{}).textContent||'').trim());
+      return 0;
+    });
+    main.concat(agg).forEach(function(r){ pool.appendChild(r); }); // aggregate row stays pinned last
+    var lbl=document.getElementById('pool-sort-label'); if(lbl) lbl.textContent=SORT_LABELS[mode]||mode;
+    var arw=document.getElementById('pool-sort-arrow'); if(arw) arw.textContent=(mode==='cap-asc'?'↑':'↓');
+  };
+  window.openSortMenu = function(anchor){
+    var ex=document.getElementById('pool-sort-menu'); if(ex){ ex.remove(); return; }
+    var menu=document.createElement('div'); menu.id='pool-sort-menu';
+    menu.style.cssText='position:absolute;z-index:9002;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 14px 36px rgba(15,23,42,.16);padding:6px;min-width:200px;font-family:DM Sans,sans-serif';
+    menu.innerHTML=[['cap-desc','Capacity (high → low)'],['cap-asc','Capacity (low → high)'],['name','Name (A → Z)'],['stage','Stage']]
+      .map(function(o){ var on=SORT_MODE===o[0]; return '<div class="ps-opt" data-m="'+o[0]+'" style="padding:8px 10px;border-radius:7px;cursor:pointer;font-size:12.5px;color:#334155;display:flex;align-items:center;justify-content:space-between;'+(on?'background:#eff6ff;font-weight:600':'')+'">'+o[1]+(on?' <span style="color:#2563eb">✓</span>':'')+'</div>'; }).join('');
+    document.body.appendChild(menu);
+    var r=anchor.getBoundingClientRect();
+    menu.style.top=(r.bottom+window.scrollY+6)+'px';
+    menu.style.left=Math.max(8,(r.right+window.scrollX-menu.offsetWidth))+'px';
+    menu.querySelectorAll('.ps-opt').forEach(function(o){ o.onclick=function(){ sortPool(o.getAttribute('data-m')); menu.remove(); toast('Sorted by '+(SORT_LABELS[o.getAttribute('data-m')]||'')); }; });
+    setTimeout(function(){ document.addEventListener('click', function cl(e){ if(!menu.contains(e.target) && e.target!==anchor && !anchor.contains(e.target)){ menu.remove(); document.removeEventListener('click',cl); } }); },10);
   };
 
   // --- Filter the unassigned pool (slide-in panel, matches attached) ---
@@ -1235,7 +1311,7 @@ body {
     function close(){ panel.style.transform='translateX(-120%)'; if(backdrop.parentNode) backdrop.remove(); setTimeout(function(){ if(panel.parentNode) panel.remove(); },250); }
     backdrop.onclick=close; panel.querySelector('#pa-fx').onclick=close;
     panel.querySelector('#pa-fclear').onclick=function(){
-      FILTERS={ minCap:0, stages:[], regions:[] }; FILTER_APPLIED=true;
+      FILTERS={ minCap:0, stages:[], regions:[] };
       document.querySelectorAll('#pool .prospect-row').forEach(function(r){ r.style.display=''; });
       var ct=document.querySelector('.panel-head .ct'); if(ct) ct.textContent=document.querySelectorAll('#pool .prospect-row').length+' prospects';
       renderFilterChips(); close(); toast('Filters cleared');
@@ -1244,7 +1320,7 @@ body {
       var rc=panel.querySelector('input[name=pa-cap]:checked'); FILTERS.minCap=rc?+rc.value:0;
       FILTERS.stages=[].map.call(panel.querySelectorAll('input[data-grp=stage]:checked'),function(c){return c.value;});
       FILTERS.regions=[].map.call(panel.querySelectorAll('input[data-grp=region]:checked'),function(c){return c.value;});
-      FILTER_APPLIED=true; renderFilterChips(); applyPoolFilters();
+      renderFilterChips(); applyPoolFilters();
       close(); toast('Filters applied — pool updated');
     };
   };
@@ -1344,8 +1420,13 @@ body {
     };
   };
 
-  // boot: render the filter chips
+  // boot: restore any saved draft, render chips, wire sort control, apply initial sort
+  restoreDraft();
+  updateDraftStatus();
   renderFilterChips();
+  var sortEl=document.getElementById('pool-sort');
+  if(sortEl) sortEl.addEventListener('click', function(){ openSortMenu(sortEl); });
+  sortPool('cap-desc');
 })();
 </script>
 
