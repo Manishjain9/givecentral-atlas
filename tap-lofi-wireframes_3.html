@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral TAP — Ticket Events · Low-Fi Wireframes</title>
+<style>
+  :root{
+    --ink:#222; --mut:#8a8a8a; --line:#cfcfcf; --line2:#e2e2e2;
+    --fill:#eeeeee; --fill2:#f6f6f6; --dark:#2f2f2f; --note:#1663c7;
+    --warn:#8a5a00; --warnbg:#fdf3df; --stop:#8a2020; --stopbg:#fbe9e9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#dcdcdc;color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;font-size:14px;line-height:1.4}
+  .wrap{max-width:1400px;margin:0 auto;padding:28px 20px 80px}
+  header.top{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px 24px;margin-bottom:22px}
+  header.top h1{margin:0 0 6px;font-size:22px;letter-spacing:-.2px}
+  header.top p{margin:4px 0;color:#444;max-width:900px}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px;font-size:12.5px;color:#555}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .sw{width:26px;height:14px;border-radius:3px;border:1px solid var(--line)}
+  .sw.box{background:var(--fill)}
+  .sw.btn{background:var(--dark);border-color:var(--dark)}
+  .sw.txt{background:linear-gradient(var(--line),var(--line));background-size:100% 3px;background-repeat:no-repeat;background-position:center;background-color:#fff}
+  .sw.ann{background:var(--note)}
+
+  section.band{margin:34px 0 8px}
+  section.band h2{font-size:15px;text-transform:uppercase;letter-spacing:1.2px;color:#3a3a3a;
+    border-bottom:2px solid #bbb;padding-bottom:8px;margin:0 0 4px}
+  section.band .sub{color:#666;font-size:13px;margin:8px 0 0}
+
+  .grid{display:flex;flex-wrap:wrap;gap:26px;padding-top:18px}
+  .unit{width:300px}
+  .cap{font-weight:600;margin:0 0 3px;font-size:13.5px}
+  .cap small{display:block;font-weight:400;color:#777;font-size:11.5px;margin-top:2px}
+
+  /* phone frame */
+  .frame{width:300px;height:600px;background:#fff;border:2px solid #333;border-radius:26px;
+    overflow:hidden;position:relative;box-shadow:0 6px 18px rgba(0,0,0,.18);display:flex;flex-direction:column}
+  .sb{height:24px;background:#fff;display:flex;align-items:center;justify-content:space-between;
+    padding:0 16px;font-size:10px;color:#999;flex:0 0 auto;border-bottom:1px solid var(--line2)}
+  .sb b{font-weight:600;color:#666}
+  .appbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line2)}
+  .burger{width:16px;height:12px;display:flex;flex-direction:column;justify-content:space-between}
+  .burger i{height:2px;background:#666;border-radius:2px}
+  .logo{flex:1;text-align:center;font-weight:700;color:#666;letter-spacing:.3px;font-size:12px}
+  .ava{width:20px;height:20px;border-radius:50%;background:var(--fill);border:1px solid var(--line)}
+  .body{flex:1 1 auto;overflow:hidden;position:relative;padding:12px}
+  .body.scroll{overflow-y:auto}
+
+  /* reader pill */
+  .rpill{display:flex;align-items:center;gap:7px;background:#eef4ff;border:1px solid #cddcff;
+    color:#2f5fb0;border-radius:999px;padding:5px 10px;font-size:11px;margin-bottom:10px}
+  .dot{width:7px;height:7px;border-radius:50%;background:#3a8a3a}
+  .rpill.off{background:#f3f3f3;border-color:var(--line);color:#888}
+  .rpill.off .dot{background:#bbb}
+
+  /* generic pieces */
+  .h{font-weight:700;font-size:15px;margin:2px 0 10px}
+  .h.big{font-size:17px}
+  .txt{height:8px;background:var(--fill);border-radius:3px;margin:6px 0}
+  .txt.w40{width:40%}.txt.w55{width:55%}.txt.w70{width:70%}.txt.w85{width:85%}.txt.w30{width:30%}
+  .lbl{font-size:11px;color:#777;margin:10px 0 4px}
+  .img{background:var(--fill);border:1px dashed var(--line);border-radius:8px;
+    display:flex;align-items:center;justify-content:center;color:#aaa;font-size:11px;position:relative}
+  .img::after{content:"IMG";}
+  .chips{display:flex;gap:7px;margin-bottom:12px}
+  .chip{font-size:11px;padding:4px 11px;border-radius:999px;border:1px solid var(--line);color:#777;background:#fff}
+  .chip.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+  .search{border:1px solid var(--line);border-radius:999px;padding:7px 12px;color:#aaa;font-size:12px;margin-bottom:12px}
+
+  .card{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:11px;background:#fff}
+  .card .row{display:flex;gap:10px}
+  .thumb{width:52px;height:52px;border-radius:7px;background:var(--fill);border:1px dashed var(--line);
+    flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:9px}
+  .card .meta{flex:1;min-width:0}
+  .card .tt{font-weight:600;font-size:13px;margin:0 0 3px}
+  .card .mn{font-size:11px;color:#888;margin:2px 0}
+  .tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:999px;margin-top:5px;border:1px solid}
+  .tag.tk{background:#eef4ff;border-color:#cddcff;color:#2f5fb0}
+  .tag.dn{background:#eef6ee;border-color:#cfe6cf;color:#3a7a3a}
+  .tag.so{background:var(--stopbg);border-color:#e6c3c3;color:var(--stop)}
+
+  .btn{background:var(--dark);color:#fff;border:none;border-radius:8px;padding:11px;width:100%;
+    font-weight:600;font-size:13px;text-align:center}
+  .btn.sm{width:auto;padding:8px 16px}
+  .ghost{background:#fff;color:#555;border:1px solid var(--line)}
+  .link{color:var(--note);font-size:12px;text-align:center;margin-top:10px}
+
+  /* sticky footer inside frame */
+  .footer{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line2);
+    padding:10px 12px;box-shadow:0 -4px 10px rgba(0,0,0,.05)}
+  .sumbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px}
+  .sumbar .tot{font-weight:700;font-size:15px}
+  .sumbar .cnt{color:#888}
+
+  /* ticket type row + stepper */
+  .trow{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px;display:flex;
+    align-items:center;gap:10px}
+  .trow .ti{flex:1;min-width:0}
+  .trow .tn{font-weight:600;font-size:13px}
+  .trow .tp{font-size:12px;color:#555;margin-top:2px}
+  .trow .tsub{font-size:10.5px;color:#999;margin-top:3px}
+  .stepper{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:0 0 auto}
+  .stepper b{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--fill2);font-size:16px;color:#444}
+  .stepper b.dis{color:#c7c7c7}
+  .stepper span{width:34px;text-align:center;font-weight:600;font-size:13px}
+  .trow.dis{opacity:.55}
+  .trow.dis .stepper{display:none}
+  .lowchip{display:inline-block;font-size:10px;color:var(--warn);background:var(--warnbg);border:1px solid #eddcb0;
+    border-radius:999px;padding:1px 7px;margin-top:4px}
+
+  /* bottom sheet */
+  .dim{position:absolute;inset:0;background:rgba(0,0,0,.35)}
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:16px 16px 0 0;
+    padding:14px 14px 12px;box-shadow:0 -6px 20px rgba(0,0,0,.2)}
+  .grab{width:38px;height:4px;background:var(--line);border-radius:3px;margin:0 auto 12px}
+  .li{display:flex;justify-content:space-between;font-size:12.5px;padding:7px 0;border-bottom:1px dashed var(--line2)}
+  .li .q{color:#666}
+  .li.tot{border-bottom:none;font-weight:700;font-size:15px;padding-top:10px}
+  .li.faint{color:#888}
+  .addon{display:flex;justify-content:space-between;align-items:center;border:1px dashed var(--line);
+    border-radius:8px;padding:8px 10px;margin:10px 0;font-size:12px;color:#666}
+
+  /* card form / payment */
+  .field{border:1px solid var(--line);border-radius:8px;padding:9px 10px;color:#aaa;font-size:12px;margin-bottom:9px}
+  .two{display:flex;gap:9px}.two .field{flex:1}
+  .wallet{background:#111;color:#fff;border-radius:8px;padding:11px;text-align:center;font-weight:600;font-size:13px;margin-bottom:10px}
+  .oor{display:flex;align-items:center;gap:8px;color:#aaa;font-size:11px;margin:4px 0 10px}
+  .oor::before,.oor::after{content:"";flex:1;height:1px;background:var(--line2)}
+  .secure{display:flex;align-items:center;justify-content:center;gap:6px;color:#8a8a8a;font-size:11px;margin-top:10px}
+
+  /* centered terminal screens */
+  .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:24px;gap:12px}
+  .bigcirc{width:74px;height:74px;border-radius:50%;border:3px solid var(--line);display:flex;align-items:center;
+    justify-content:center;color:#999;font-size:28px}
+  .bigcirc.ok{border-color:#3a8a3a;color:#3a8a3a}
+  .bigcirc.err{border-color:var(--stop);color:var(--stop)}
+  .spin{width:56px;height:56px;border-radius:50%;border:4px solid var(--fill);border-top-color:#888}
+  .kmsg{font-weight:700;font-size:16px}
+  .ksub{color:#888;font-size:12px;max-width:200px}
+  .cardart{width:120px;height:74px;border-radius:9px;background:var(--fill);border:1px dashed var(--line);
+    position:relative;margin:4px 0}
+  .cardart .mag{position:absolute;top:14px;left:0;right:0;height:14px;background:#e0e0e0}
+
+  .banner{border-radius:8px;padding:10px;font-size:12px;margin-bottom:11px;border:1px solid}
+  .banner.warn{background:var(--warnbg);border-color:#eddcb0;color:var(--warn)}
+  .banner.stop{background:var(--stopbg);border-color:#e6c3c3;color:var(--stop)}
+
+  /* skeleton */
+  .sk{border:1px solid var(--line2);border-radius:10px;padding:10px;margin-bottom:11px;display:flex;gap:10px}
+  .sk .t{width:52px;height:52px;border-radius:7px;background:var(--fill)}
+  .sk .l{flex:1}
+  .sk .l .b{height:10px;background:var(--fill);border-radius:3px;margin:5px 0}
+
+  /* annotations */
+  .notes{margin:12px 0 0;padding:0;list-style:none;font-size:12px;color:#39506e}
+  .notes li{position:relative;padding-left:26px;margin:6px 0;line-height:1.35}
+  .notes li b.n{position:absolute;left:0;top:0;width:18px;height:18px;border-radius:50%;background:var(--note);
+    color:#fff;font-size:10.5px;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:30px;color:#999;gap:10px}
+  .empty .ic{width:56px;height:56px;border-radius:12px;border:2px dashed var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>GiveCentral TAP — Ticket Events</h1>
+    <p><strong>Low-fidelity wireframes.</strong> Layout, hierarchy, and flow only — no color, type, or final copy. Grayscale on purpose so the conversation stays on structure. Each frame is a phone screen; numbered blue callouts under it describe behavior and interaction.</p>
+    <p style="font-size:12.5px;color:#666"><strong>Assumptions:</strong> reader-operated is the primary path (both branches drawn) · multi-ticket-type selector shown (single-price = collapsed version) · no held-inventory timers at this fidelity.</p>
+    <div class="legend">
+      <span><i class="sw box"></i> placeholder / container</span>
+      <span><i class="sw txt"></i> text block (real labels used where they aid reading)</span>
+      <span><i class="sw btn"></i> primary action</span>
+      <span><i class="sw ann"></i> interaction note</span>
+    </div>
+  </header>
+
+  <!-- ============ BAND 1: DISCOVERY ============ -->
+  <section class="band">
+    <h2>1 · Discovery — Event List</h2>
+    <p class="sub">Ticket events must be legible against donation events, and the reader status has to stop covering content (screen 4 today).</p>
+  </section>
+  <div class="grid">
+
+    <!-- F1 Event list -->
+    <div class="unit">
+      <p class="cap">1.1 Event List — default<small>ticket + donation events coexist</small></p>
+      <div class="frame">
+        <div class="sb"><b>9:41</b><span>▮▮▮ ◄ ▰</span></div>
+        <div class="appbar"><div class="burger"><i></i><i></i><i></i></div><div class="logo">giveCentral TAP</div><div class="ava"></div></div>
+        <div class="body scroll">
+          <div class="rpill"><span class="dot"></span> Reader connected · AMP6788</div>
+          <div class="h">Select an event</div>
+          <div class="search">🔍 Search for an event…</div>
+          <div class="chips"><span class="chip on">All</span><span class="chip">Tickets</span><span class="chip">Normal Event</span></div>
+
+          <div class="card"><div class="row">
+            <div class="thumb">IMG</div>
+            <div class="meta"><p class="tt">Spring Gala Dinner</p><p class="mn">Sat, May 9 · Parish Hall</p><span class="tag tk">Tickets · from $100</span></div>
+          </div></div>
+
+          <div class="card"><div class="row">
+            <div class="thumb">IMG</div>
+            <div class="meta"><p class="tt">Hurricane Relief Fund</p><p class="mn">Ongoing</p><span class="tag dn">Normal Event</span></div>
+          </div></div>
+
+          <div class="card"><div class="row">
+            <div class="thumb">IMG</div>
+            <div class="meta"><p class="tt">Convocation Sponsorship</p><p class="mn">Fri, Jun 6 · Downtown</p><span class="tag tk">Tickets · from $50</span></div>
+          </div></div>
+
+          <div class="card"><div class="row">
+            <div class="thumb">IMG</div>
+            <div class="meta"><p class="tt">Convocation Sponsorship</p><p class="mn">Sun, Jun 8 · Towson</p><span class="tag tk">Tickets · from $50</span></div>
+          </div></div>
+        </div>
+      </div>
+      <ul class="notes">
+        <li><b class="n">1</b>Reader status is a persistent header pill, not a floating toast — never overlaps a row.</li>
+        <li><b class="n">2</b>Type chip + "from $X" makes ticket vs donation legible at a glance.</li>
+        <li><b class="n">3</b>Date + venue disambiguate duplicate event names.</li>
+        <li><b class="n">4</b>Whole card is the tap target; filter chips scope the list.</li>
+      </ul>
+    </div>
+
+    <!-- F1b empty -->
+    <div class="unit">
+      <p class="cap">1.2 Event List — empty / no results<small>search returns nothing</small></p>
+      <div class="frame">
+        <div class="sb"><b>9:41</b><span>▮▮▮ ◄ ▰</span></div>
+        <div class="appbar"><div class="burger"><i></i><i></i><i></i></div><div class="logo">giveCentral TAP</div><div class="ava"></div></div>
+        <div class="body">
+          <div class="rpill"><span class="dot"></span> Reader connected · AMP6788</div>
+          <div class="search">🔍 “galla”</div>
+          <div class="chips"><span class="chip on">All</span><span class="chip">Tickets</span><span class="chip">Normal Event</span></div>
+          <div class="empty" style="top:150px;bottom:0">
+            <div class="ic"></div>
+            <div style="font-weight:600;color:#666">No events match “galla”</div>
+            <div style="font-size:12px">Check spelling or clear the search.</div>
+            <button class="btn ghost sm">Clear search</button>
+          </div>
+        </div>
+      </div>
+      <ul class="notes">
+        <li><b class="n">1</b>Empty state names the query and gives one recovery action.</li>
+        <li><b class="n">2</b>Reader pill + chips persist so context isn't lost.</li>
+      </ul>
+    </div>
+
+    <!-- F1c loading -->
+    <div class="unit">
+      <p class="cap">1.3 Event List — loading<small>skeleton, not a spinner</small></p>
+      <div class="frame">
+        <div class="sb"><b>9:41</b><span>▮▮▮ ◄ ▰</span></div>
+        <div class="appbar"><div class="burger"><i></i><i></i><i></i></div><div class="logo">giveCentral TAP</div><div class="ava"></div></div>
+        <div class="body">
+          <div class="rpill off"><span class="dot"></span> Connecting reader…</div>
+          <div class="search">🔍 Search for an event…</div>
+          <div class="sk"><div class="t"></div><div class="l"><div class="b" style="width:80%"></div><div class="b" style="width:55%"></div><div class="b" style="width:35%"></div></div></div>
+          <div class="sk"><div class="t"></div><div class="l"><div class="b" style="width:70%"></div><div class="b" style="width:50%"></div><div class="b" style="width:40%"></div></div></div>
+          <div class="sk"><div class="t"></div><div class="l"><div class="b" style="width:85%"></div><div class="b" style="width:45%"></div><div class="b" style="width:30%"></div></div></div>
+        </div>
+      </div>
+      <ul class="notes">
+        <li><b class="n">1</b>Skeleton cards mirror final layout so the shift on load is minimal.</li>
+        <li><b class="n">2</b>Reader pill shows a "connecting" state until AMP pairs.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ============ BAND 2: DETAIL & SELECT ============ -->
+  <section class="band">
+    <h2>2 · Detail &amp; Selection</h2>
+    <p class="sub">The core of the ticket experience — the selection screen is where quantity, price, and limits all live.</p>
+  </section>
+  <div class="grid">
+
+    <!-- F2 details -->
+    <div class="unit">
+      <p class="cap">2.1 Event Details<small>decide, then start selecting</small></p>
+      <div class="frame">
+        <div class="sb"><b>9:41</b><span>▮▮▮ ◄ ▰</span></div>
+        <div class="appbar"><div class="burger"><i></i><i></i><i></i></div><div class="logo">‹ Spring Gala Dinner</div><div class="ava"></div></div>
+        <div class="body scroll" style="padding-bottom:70px">
+          <div class="img" style="height:120px;margin-bottom:12px"></div>
+          <div class="h big">Spring Gala Dinner</div>
+          <p class="mn" style="color:#777">📅 Sat, May 9 · 6:30 PM</p>
+          <p class="mn" style="color:#777">📍 Parish Hall, Baltimore</p>
+          <div class="txt w85"></div><div class="txt w70"></div><div class="txt w40"></div>
+          <div class="lbl" style="margin-top:14px">TICKETS</div>
+          <div class="trow"><div class="ti"><div class="tn">General Admission</div><div class="tp">$100</div></div><div style="color:#bbb;font-size:18px">›</div></div>
+          <div class="trow"><div class="ti"><div class="tn">VIP Table</div><div class="tp">$250</div><div class="lowchip">Only 5 left</div></div><div style="color:#bbb;font-size:18px">›</div></div>
+        </div>
+        <div class="footer"><button class="btn">Select tickets</button></div>
+      </div>
+      <ul class="notes">
+        <li><b class="n">1</b>Hero → title → date/venue → description → ticket preview: top-down priority.</li>
+        <li><b class="n">2</b>Sticky footer CTA is always in thumb reach while scrolling.</li>
+        <li><b class="n">3</b>Low-stock hint appears here too, seeding urgency early.</li>
+      </ul>
+    </div>
+
+    <!-- F3 selection -->
+    <div class="unit">
+      <p class="cap">2.2 Ticket Selection<small>steppers + live sticky total</small></p>
+      <div class="frame">
+        <div class="sb"><b>9:41</b><span>▮▮▮ ◄ ▰</span></div>
+        <div class="appbar"><div class="burger"><i></i><i></i><i></i></div><div class="logo">‹ Select tickets</div><div class="ava"></div></div>
+        <div class="body scroll" style="padding-bottom:96px">
+          <div class="h">Choose your tickets</div>
+          <div class="trow">
+            <div class="ti"><div class="tn">General Admission</div><div class="tp">$100 each</div><div class="tsub">Subtotal $200</div></div>
+            <div class="stepper"><b>–</b><span>2</span><b>+</b></div>
+          </div>
+          <div class="trow">
+            <div class="ti"><div class="tn">VIP Table</div><div class="tp">$250 each</div><div class="lowchip">Only 5 left · max 4</div></div>
+            <div class="stepper"><b>–</b><span>0</span><b>+</b></div>
+          </div>
+          <div class="trow">
+            <div class="ti"><div class="tn">Student</div><div class="tp">$40 each</div><div class="tsub">Max 2 per order</div></div>
+            <div class="stepper"><b>–</b><span>0</span><b>+</b></div>
+          </div>
+        </div>
+        <div class="footer">
+          <div class="sumbar"><span class="cnt">2 tickets</span><span class="tot">$200.00</span></div>
+          <button class="btn">Review order</button>
+        </div>
+      </div>
+      <ul class="notes">
+        <li><b class="n">1</b>Stepper per type; each row shows its own live subtotal.</li>
+        <li><b class="n">2</b>Sticky summary bar updates count + total on every tap (count-up + haptic).</li>
+        <li><b class="n">3</b>Limits shown inline; <code>+</code> disables at max-per-order or remaining stock.</li>
+        <li><b class="n">4</b>Single-price event = just the first row, no keyboard ever needed.</li>
+      </ul>
+    </div>
+
+    <!-- F3b states -->
+    <div class="unit">
+      <p class="cap">2.3 Selection — stock states<small>sold out · low stock · disabled +</small></p>
+      <div class="frame">
+        <div class="sb"><b>9:41</b><span>▮▮▮ ◄ ▰</span></div>
+        <div class="appbar"><div class="burger"><i></i><i></i><i></i></div><div class="logo">‹ Select tickets</div><div class="ava"></div></div>
+        <div class="body scroll" style="padding-bottom:96px">
+          <div class="h">Choose your tickets</div>
+          <div class="trow">
+            <div class="ti"><div class="tn">General Admission</div><div class="tp">$100 each</div><div class="lowchip">Only 2 left</div></div>
+            <div class="stepper"><b>–</b><span>2</span><b class="dis">+</b></div>
+          </div>
+          <div class="trow dis">
+            <div class="ti"><div class="tn">VIP Table</div><div class="tp">$250 each</div><div class="tsub">Sold out</div></div>
+            <span class="tag so">Sold out</span>
+          </div>
+          <div class="trow dis" style="opacity:.7">
+            <div class="ti"><div class="tn">Student</div><div class="tp">$40 each</div><div class="tsub">Sold out — join waitlist</div></div>
+            <button class="btn ghost sm" style="font-size:11px;padding:6px 10px">Waitlist</button>
+          </div>
+        </div>
+        <div class="footer">
+          <div class="sumbar"><span class="cnt">2 tickets</span><span class="tot">$200.00</span></div>
+          <button class="btn">Review order</button>
+        </div>
+      </div>
+      <ul class="notes">
+        <li><b class="n">1</b>Stock cap reached → <code>+</code> greys out with "Only 2 left."</li>
+        <li><b class="n">2</b>Sold-out types stay visible (scarcity signal), stepper hidden.</li>
+        <li><b class="n">3</b>Optional waitlist CTA replaces the stepper per type.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ============ BAND 3: REVIEW & PAY ============ -->
+  <section class="band">
+    <h2>3 · Review &amp; Pay</h2>
+    <p class="sub">Review is a bottom sheet so event context stays behind it. Payment branch is detected, not chosen.</p>
+  </section>
+  <div class="grid">
+
+    <!-- F4 review sheet -->
+    <div class="unit">
+      <p class="cap">3.1 Order Review — bottom sheet<small>over the dimmed selection screen</small></p>
+      <div class="frame">
+        <div class="sb"><b>9:41</b><span>▮▮▮ ◄ ▰</span></div>
+        <div class="appbar"><div class="burger"><i></i><i></i><i></i></div><div class="logo">‹ Select tickets</div><div class="ava"></div></div>
+        <div class="body"><div class="txt w70"></div><div class="txt w40"></div><div class="txt w55"></div></div>
+        <div class="dim"></div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <div class="h" style="margin-bottom:6px">Review order</div>
+          <div class="li"><span class="q">2 × General Admission</span><span>$200.00</span></div>
+          <div class="li"><span class="q">1 × VIP Table</span><span>$250.00</span></div>
+          <div class="li faint"><span class="q">Processing fee</span><span>$13.95</span></div>
+          <div class="addon"><span>＋ Add a donation</span><span style="color:var(--note)">Add ›</span></div>
+          <div class="li tot"><span>Total</span><span>$463.95</span></div>
+          <button class="btn" style="margin-top:10px">Charge $463.95</button>
+          <div class="link">Enter card manually instead</div>
+        </div>
+      </div>
+      <ul class="notes">
+        <li><b class="n">1</b>Itemized lines + fees shown separately (transparency = trust).</li>
+        <li><b class="n">2</b>Optional donation add-on lives right in the summary.</li>
+        <li><b class="n">3</b>CTA carries amount + method: "Charge $X" (reader) vs "Pay $X" (manual).</li>
+        <li><b class="n">4</b>Swipe-down to dismiss and edit; "manually" link is the branch escape hatch.</li>
+      </ul>
+    </div>
+
+    <!-- F5A reader pay -->
+    <div class="unit">
+      <p class="cap">3.2 Pay — reader connected (Flow A)<small>swipe / tap card</small></p>
+      <div class="frame">
+        <div class="sb"><b>9:41</b><span>▮▮▮ ◄ ▰</span></div>
+        <div class="appbar"><div class="burger"><i></i><i></i><i></i></div><div class="logo">‹ Payment</div><div class="ava"></div></div>
+        <div class="center">
+          <div class="rpill"><span class="dot"></span> AMP6788 ready</div>
+          <div class="cardart"><div class="mag"></div></div>
+          <div class="kmsg">Swipe or tap card</div>
+          <div class="ksub">Charging <b>$463.95</b> for Spring Gala Dinner</div>
+          <div class="link">Enter card manually instead</div>
+        </div>
+      </div>
+      <ul class="notes">
+        <li><b class="n">1</b>Minimal screen — one instruction, the amount, reader confirmation.</li>
+        <li><b class="n">2</b>No form to fill; volunteer just presents the reader.</li>
+        <li><b class="n">3</b>Manual fallback always one tap away if the reader fails.</li>
+      </ul>
+    </div>
+
+    <!-- F5B manual pay -->
+    <div class="unit">
+      <p class="cap">3.3 Pay — manual entry (Flow B)<small>wallet first, card fallback</small></p>
+      <div class="frame">
+        <div class="sb"><b>9:41</b><span>▮▮▮ ◄ ▰</span></div>
+        <div class="appbar"><div class="burger"><i></i><i></i><i></i></div><div class="logo">‹ Payment</div><div class="ava"></div></div>
+        <div class="body scroll" style="padding-bottom:74px">
+          <div class="wallet"> Pay</div>
+          <div class="oor">or pay with card</div>
+          <div class="lbl">Card number</div><div class="field">1234 1234 1234 1234  ▢visa</div>
+          <div class="two"><div><div class="lbl">Expiry</div><div class="field">MM / YY</div></div><div><div class="lbl">CVV</div><div class="field">•••</div></div></div>
+          <div class="two"><div><div class="lbl">ZIP</div><div class="field">12345</div></div><div><div class="lbl">Name</div><div class="field">Card holder</div></div></div>
+          <div class="lbl">Email (for receipt)</div><div class="field">name@email.com</div>
+        </div>
+        <div class="footer"><button class="btn">Pay $463.95</button><div class="secure">🔒 Secured · PCI compliant</div></div>
+      </div>
+      <ul class="notes">
+        <li><b class="n">1</b>Apple / Google Pay at the very top — the shortest path.</li>
+        <li><b class="n">2</b><code>MM / YY</code> fixes the ambiguous "24 / 02"; brand auto-detects.</li>
+        <li><b class="n">3</b>Numeric keypad, auto-advance; labels above fields (not placeholder-only).</li>
+        <li><b class="n">4</b>Security mark + amount-bearing CTA build trust at the decisive moment.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ============ BAND 4: TERMINAL & EDGE ============ -->
+  <section class="band">
+    <h2>4 · Processing, Success &amp; Edge States</h2>
+    <p class="sub">The end of both flows, plus the failure states that must be designed up front, not later.</p>
+  </section>
+  <div class="grid">
+
+    <!-- F6 processing -->
+    <div class="unit">
+      <p class="cap">4.1 Processing<small>reassure, block interruption</small></p>
+      <div class="frame">
+        <div class="sb"><b>9:41</b><span>▮▮▮ ◄ ▰</span></div>
+        <div class="appbar"><div class="burger" style="opacity:.3"><i></i><i></i><i></i></div><div class="logo">Payment</div><div class="ava" style="opacity:.3"></div></div>
+        <div class="center">
+          <div class="spin"></div>
+          <div class="kmsg">Processing…</div>
+          <div class="ksub">Contacting your bank. Please don't remove the card or close the app.</div>
+        </div>
+      </div>
+      <ul class="notes">
+        <li><b class="n">1</b>No back button; gestures disabled — can't interrupt a charge.</li>
+        <li><b class="n">2</b>Idempotency key behind this so a retry never double-charges.</li>
+      </ul>
+    </div>
+
+    <!-- F7A success reader -->
+    <div class="unit">
+      <p class="cap">4.2 Success — reader (Flow A)<small>optimized for the next sale</small></p>
+      <div class="frame">
+        <div class="sb"><b>9:41</b><span>▮▮▮ ◄ ▰</span></div>
+        <div class="appbar"><div class="burger"><i></i><i></i><i></i></div><div class="logo">giveCentral TAP</div><div class="ava"></div></div>
+        <div class="center">
+          <div class="bigcirc ok">✓</div>
+          <div class="kmsg">$463.95 charged</div>
+          <div class="ksub">Spring Gala Dinner · 3 tickets · Order #A1042</div>
+          <button class="btn" style="width:200px">New sale</button>
+          <button class="btn ghost sm" style="width:200px">Email / text receipt</button>
+          <div class="link">Auto-returning to sale in 5s…</div>
+        </div>
+      </div>
+      <ul class="notes">
+        <li><b class="n">1</b>Primary action is "New sale" — the volunteer's next move.</li>
+        <li><b class="n">2</b>Auto-resets to keep the line moving; receipt is optional/after.</li>
+        <li><b class="n">3</b>Order # + count = proof without extra taps.</li>
+      </ul>
+    </div>
+
+    <!-- F7B success self -->
+    <div class="unit">
+      <p class="cap">4.3 Success — self-service (Flow B)<small>proof + keepsake</small></p>
+      <div class="frame">
+        <div class="sb"><b>9:41</b><span>▮▮▮ ◄ ▰</span></div>
+        <div class="appbar"><div class="burger"><i></i><i></i><i></i></div><div class="logo">giveCentral TAP</div><div class="ava"></div></div>
+        <div class="center">
+          <div class="bigcirc ok">✓</div>
+          <div class="kmsg">You're going! 🎟️</div>
+          <div class="ksub">Spring Gala Dinner · Sat May 9 · 3 tickets · Order #A1042</div>
+          <button class="btn" style="width:210px"> Add to Apple Wallet</button>
+          <button class="btn ghost sm" style="width:210px">Add to calendar</button>
+          <div class="link">Receipt sent to name@email.com</div>
+        </div>
+      </div>
+      <ul class="notes">
+        <li><b class="n">1</b>Feels like a ticket, not a donation thank-you.</li>
+        <li><b class="n">2</b>Wallet pass = attendance boost + retention.</li>
+        <li><b class="n">3</b>Receipt auto-sent to the email captured at pay.</li>
+      </ul>
+    </div>
+
+    <!-- F8 decline -->
+    <div class="unit">
+      <p class="cap">4.4 Edge — decline / network / disconnect<small>recover, never dead-end</small></p>
+      <div class="frame">
+        <div class="sb"><b>9:41</b><span>▮▮▮ ◄ ▰</span></div>
+        <div class="appbar"><div class="burger"><i></i><i></i><i></i></div><div class="logo">‹ Payment</div><div class="ava"></div></div>
+        <div class="body">
+          <div class="banner stop">⚠ Card declined. No charge was made — try another card or Apple Pay.</div>
+          <div class="banner warn">📶 Connection lost during payment. We're confirming — you won't be charged twice.</div>
+          <div class="banner warn">🔌 Reader AMP6788 disconnected. Switched to manual entry; your cart is saved.</div>
+          <div class="li tot" style="margin-top:6px"><span>Cart total</span><span>$463.95</span></div>
+          <button class="btn" style="margin-top:12px">Try again</button>
+          <button class="btn ghost sm" style="width:100%;margin-top:9px">Use a different method</button>
+        </div>
+      </div>
+      <ul class="notes">
+        <li><b class="n">1</b>Every failure states the cause + the recovery + "no double charge."</li>
+        <li><b class="n">2</b>Cart is always preserved across failures and reader drops.</li>
+        <li><b class="n">3</b>Also covers: inventory-dropped-mid-flow → re-validate at charge.</li>
+      </ul>
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>
