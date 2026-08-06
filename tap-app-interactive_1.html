@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral TAP — Interactive Buyer Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#16336B;--blue:#2F6AE0;--blue-deep:#1B4DA0;--or1:#F7962F;--or2:#EE5A24;
+    --orange:linear-gradient(135deg,#F7962F,#EE5A24);--banner1:#E9F1FC;--banner2:#D6E8FB;
+    --toast1:#2F55C4;--toast2:#4185E6;--card:#F3F6FA;--line:#E4E9F0;--line2:#EEF2F7;
+    --ink:#1C2A3E;--mut:#8994A6;--ok:#2E9E5B;--okbg:#E9F7EF;--warn:#B4711A;--warnbg:#FDF3E2;--stop:#C0392B;--stopbg:#FBEBEA;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#E7EBF1;color:var(--ink);
+    font-family:'Poppins',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  .page{max-width:760px;margin:0 auto;padding:26px 18px 70px;text-align:center}
+  h1{color:var(--navy);font-size:20px;margin:0 0 6px}
+  .lead{color:#4a5566;font-size:13.5px;margin:0 auto 18px;max-width:620px}
+  .stage{display:inline-block}
+  .frame{width:340px;height:700px;background:#fff;border:9px solid #1a2438;border-radius:42px;overflow:hidden;
+    position:relative;box-shadow:0 20px 46px rgba(20,30,55,.3);display:flex;flex-direction:column;text-align:left}
+  .sb{height:30px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:11px;color:#1c2a3e;font-weight:600;flex:0 0 auto}
+  .appbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:8px 16px 12px;border-bottom:1px solid var(--line2)}
+  .burger{width:18px;height:13px;display:flex;flex-direction:column;justify-content:space-between}
+  .burger i{height:2.5px;background:#33405a;border-radius:2px}
+  .logo{flex:1;text-align:center;font-weight:700;font-size:15px;color:var(--navy)}
+  .logo b{color:var(--blue)}.logo .tap{color:var(--blue);font-style:italic;font-size:11px}
+  .ava{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#c7d6ee,#93aede)}
+  .back{color:var(--blue);font-weight:600;font-size:18px;cursor:pointer;width:22px}
+  .body{flex:1 1 auto;overflow-y:auto;position:relative;padding:14px 16px}
+  .body::-webkit-scrollbar{width:0}
+
+  .banner{background:linear-gradient(120deg,var(--banner1),var(--banner2));border-radius:14px;padding:14px 16px;color:var(--navy);font-size:13.5px;font-weight:500;margin-bottom:14px}
+  .banner b{color:var(--blue)}
+  .rpill{display:inline-flex;align-items:center;gap:7px;background:#eaf1fd;border:1px solid #d3e2fb;color:var(--blue-deep);border-radius:999px;padding:5px 12px;font-size:11px;font-weight:600;margin-bottom:12px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+  .rpill.off{background:#f2f4f8;border-color:var(--line);color:#96a0af}.rpill.off .dot{background:#c4ccd6}
+  .h{font-weight:700;font-size:16px;margin:2px 0 12px}.h.lg{font-size:19px}
+  .sec{font-size:11px;font-weight:600;letter-spacing:.6px;color:var(--mut);text-transform:uppercase;margin:14px 0 8px}
+  .search{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:999px;padding:10px 15px;color:#9aa4b2;font-size:13px;margin-bottom:14px}
+  .chips{display:flex;gap:8px;margin-bottom:14px}
+  .chip{font-size:12px;font-weight:600;padding:6px 14px;border-radius:999px;border:1.5px solid var(--line);color:#7a8494;background:#fff;cursor:pointer}
+  .chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .ecard{background:var(--card);border-radius:14px;padding:11px;margin-bottom:12px;display:flex;gap:11px;align-items:center;border:1px solid #eef2f7;cursor:pointer}
+  .thumb{width:56px;height:56px;border-radius:11px;flex:0 0 auto;background:linear-gradient(135deg,#dbe7fb,#c3d6f4);display:flex;align-items:center;justify-content:center;color:#7d9bd0;font-size:15px}
+  .ecard .tt{font-weight:600;font-size:13.5px;line-height:1.3}
+  .ecard .mn{font-size:11px;color:var(--mut);margin-top:3px}
+  .badge{display:inline-block;font-size:10px;font-weight:600;padding:3px 9px;border-radius:999px;margin-top:6px}
+  .badge.tk{background:#eaf1fd;color:var(--blue-deep)}.badge.ne{background:var(--okbg);color:var(--ok)}
+
+  .btn{background:var(--orange);color:#fff;border:none;border-radius:999px;padding:13px;width:100%;font-weight:600;font-size:14px;text-align:center;font-family:inherit;box-shadow:0 6px 14px rgba(238,90,36,.28);cursor:pointer}
+  .btn:disabled{opacity:.45;box-shadow:none;cursor:not-allowed}
+  .btn.sm{width:auto;padding:9px 18px;font-size:12.5px;box-shadow:none}
+  .btn.ghost{background:#fff;color:var(--blue);border:1.5px solid #cfe0f7;box-shadow:none}
+  .btn.navy{background:var(--navy);box-shadow:0 6px 14px rgba(22,51,107,.22)}
+  .link{color:var(--blue);font-size:12.5px;text-align:center;margin-top:12px;font-weight:500;cursor:pointer}
+  .footer{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line2);padding:12px 16px 16px;box-shadow:0 -6px 18px rgba(20,30,55,.06)}
+  .sumbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .sumbar .cnt{color:var(--mut);font-size:12px}.sumbar .tot{font-weight:700;font-size:18px;color:var(--navy)}
+  .img{background:linear-gradient(135deg,#dbe7fb,#c3d6f4);border-radius:14px;display:flex;align-items:center;justify-content:center;color:#7d9bd0;font-size:13px;font-weight:600}
+
+  .trow{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:13px;margin-bottom:11px;display:flex;align-items:center;gap:11px}
+  .trow.pick{border-color:#f9c39a;background:#fffaf5}
+  .trow .ti{flex:1;min-width:0}.trow .tn{font-weight:600;font-size:13.5px}
+  .trow .tp{font-size:12px;color:#66717f;margin-top:2px}.trow .tsub{font-size:11px;color:var(--or2);font-weight:600;margin-top:4px}
+  .stepper{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;flex:0 0 auto}
+  .stepper b{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:#f4f7fb;font-size:18px;color:var(--navy);cursor:pointer;user-select:none}
+  .stepper b.dis{color:#c8cfd8;background:#fafbfc;cursor:not-allowed}
+  .stepper span{width:34px;text-align:center;font-weight:700;font-size:14px}
+  .trow.dis{opacity:.6}.trow.dis .stepper{display:none}
+  .lowchip{display:inline-block;font-size:10.5px;font-weight:600;color:var(--warn);background:var(--warnbg);border-radius:999px;padding:2px 9px;margin-top:5px}
+  .sotag{font-size:11px;font-weight:600;color:var(--stop);background:var(--stopbg);border-radius:999px;padding:3px 11px}
+
+  .li{display:flex;justify-content:space-between;font-size:13px;padding:9px 0;border-bottom:1px solid var(--line2)}
+  .li .q{color:#5a6675}.li.faint{color:var(--mut)}.li.tot{border-bottom:none;font-weight:700;font-size:17px;color:var(--navy);padding-top:12px}
+  .addon{display:flex;justify-content:space-between;align-items:center;border:1.5px dashed #cfe0f7;border-radius:12px;padding:11px 13px;margin:12px 0;font-size:12.5px;color:var(--blue-deep);font-weight:600;background:#f6faff;cursor:pointer}
+  .addon.on{background:#eaf1fd;border-style:solid}
+  .field{border:1.5px solid var(--line);border-radius:11px;padding:12px 13px;color:var(--ink);font-size:13px;margin-bottom:11px;width:100%;font-family:inherit}
+  .field::placeholder{color:#a2acb9}
+  .lbl{font-size:11.5px;color:#66717f;font-weight:500;margin-bottom:6px}
+  .two{display:flex;gap:11px}.two>div{flex:1}
+  .wallet{background:#111;color:#fff;border-radius:12px;padding:13px;text-align:center;font-weight:600;font-size:13.5px;margin-bottom:12px;cursor:pointer}
+  .oor{display:flex;align-items:center;gap:10px;color:#a2acb9;font-size:11px;margin:6px 0 12px}
+  .oor::before,.oor::after{content:"";flex:1;height:1px;background:var(--line2)}
+  .secure{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--mut);font-size:11px;margin-top:12px}
+  .opt{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:10px}
+  .opt.on{border-color:var(--blue);background:#f6faff}
+  .opt .rd{width:18px;height:18px;border-radius:50%;border:2px solid var(--line)}
+  .opt.on .rd{border-color:var(--blue);box-shadow:inset 0 0 0 4px var(--blue)}
+  .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;gap:14px}
+  .circ{width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px}
+  .circ.ok{background:var(--okbg);color:var(--ok)}
+  .spin{width:60px;height:60px;border-radius:50%;border:5px solid #eef1f6;border-top-color:var(--blue);animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .kmsg{font-weight:700;font-size:18px;color:var(--navy)}.ksub{color:#66717f;font-size:12.5px;max-width:220px}
+  .cardart{width:130px;height:82px;border-radius:12px;background:linear-gradient(135deg,#3a5a9e,#243f74);position:relative;margin:2px 0}
+  .cardart .mag{position:absolute;top:16px;left:0;right:0;height:16px;background:rgba(255,255,255,.18)}
+  .alert{border-radius:12px;padding:11px 13px;font-size:12px;margin-bottom:11px;font-weight:500;line-height:1.4}
+  .alert.stop{background:var(--stopbg);color:var(--stop)}
+  .toastmsg{position:absolute;left:16px;right:16px;bottom:16px;background:linear-gradient(120deg,var(--toast1),var(--toast2));color:#fff;border-radius:12px;padding:11px 14px;font-size:12.5px;font-weight:600;box-shadow:0 8px 18px rgba(47,85,196,.3);text-align:center}
+
+  .demo{margin:16px auto 0;max-width:340px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-align:left;box-shadow:0 4px 14px rgba(20,30,55,.06)}
+  .demo h4{margin:0 0 8px;font-size:12px;color:var(--navy);text-transform:uppercase;letter-spacing:.6px}
+  .demo .drow{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:12.5px;color:#4a5566}
+  .tog{width:42px;height:24px;border-radius:999px;background:#c7ccd4;position:relative;cursor:pointer;flex:0 0 auto}
+  .tog.on{background:var(--ok)}
+  .tog::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.15s}
+  .tog.on::after{left:21px}
+  .hintbar{font-size:11.5px;color:#7a8494;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>GiveCentral TAP — Interactive Buyer Flow</h1>
+  <p class="lead">A working click-through of the mobile ticket purchase. Tap an event, use the steppers, and go all the way to a receipt. Every feature here (ticket types, limits, sold-out, waitlist, parish, attendee info, donation add-on, both payment paths) is driven by settings an admin controls — see the companion admin prototype.</p>
+  <div class="stage"><div class="frame" id="frame"></div></div>
+  <div class="demo">
+    <h4>Demo controls</h4>
+    <div class="drow"><span>Card reader connected (AMP6788)</span><div class="tog on" id="togReader"></div></div>
+    <div class="drow"><span>Simulate card decline</span><div class="tog" id="togDecline"></div></div>
+    <div class="hintbar">Reader ON → “Charge” + swipe screen. Reader OFF → manual card entry. Decline ON → the next payment fails into the recovery screen.</div>
+  </div>
+</div>
+
+<script>
+const money = n => '$' + n.toFixed(2);
+const EVENT = {
+  id:'gala', name:'Spring Gala Dinner', when:'Sat, May 9 · 6:30 PM', venue:'Parish Hall, Baltimore',
+  desc:'An evening of dinner and community to support the parish outreach fund.',
+  types:[
+    {id:'ga', name:'General Admission', price:100, total:50, sold:0,  min:1, max:8, low:10, waitlist:false},
+    {id:'vip',name:'VIP Table (seats 8)',price:250, total:10, sold:6,  min:1, max:4, low:5,  waitlist:true, desc:'Seats 8 + wine'},
+    {id:'stu',name:'Student',            price:40,  total:20, sold:20, min:1, max:2, low:5,  waitlist:true}
+  ],
+  settings:{
+    feePayer:'buyer', confirmationEmail:true, digitalTicket:true,
+    donation:{enabled:true, suggested:25, label:'Parish Outreach'},
+    soldOut:'waitlist',
+    collectAttendee:'perTicket',
+    attendeeFields:[
+      {label:'Attendee full name', type:'text', required:true, show:true},
+      {label:'Meal choice', type:'select', options:['Chicken','Fish','Vegetarian'], required:true, show:true}
+    ],
+    requireParish:true, parishes:['St. Mary','St. Ignatius','St. Peter Claver','Cathedral of Mary Our Queen'],
+    requireDesignation:false
+  }
+};
+const OTHER = [
+  {id:'relief', name:'Hurricane Helene & Milton Relief Fund', type:'normal', when:'Ongoing'},
+  {id:'conv', name:'Convocation Sponsorship', type:'ticket', when:'Fri, Jun 6 · Downtown', from:50, placeholder:true}
+];
+
+const S = { screen:'list', cart:{}, reader:true, decline:false, coverFee:true, donate:false,
+            parish:null, filter:'All', orderNo:1041, last:null };
+
+const remaining = t => t.total - t.sold;
+const soldOut = t => remaining(t) <= 0;
+const lowStock = t => !soldOut(t) && remaining(t) <= t.low;
+const cartQty = id => S.cart[id] || 0;
+const maxAdd = t => Math.min(t.max, remaining(t));
+const ticketCount = () => Object.values(S.cart).reduce((a,b)=>a+b,0);
+const subtotal = () => EVENT.types.reduce((s,t)=>s + cartQty(t.id)*t.price, 0);
+const rawFee = () => subtotal()>0 ? Math.round((subtotal()*0.029+0.30)*100)/100 : 0;
+function feeApplied(){ const fp=EVENT.settings.feePayer; if(fp==='org')return 0; if(fp==='add')return rawFee(); return S.coverFee?rawFee():0; }
+const donationAmt = () => (EVENT.settings.donation.enabled && S.donate) ? EVENT.settings.donation.suggested : 0;
+const total = () => subtotal() + feeApplied() + donationAmt();
+const needAttribution = () => EVENT.settings.requireParish || EVENT.settings.requireDesignation;
+const needAttendee = () => EVENT.settings.collectAttendee && EVENT.settings.attendeeFields.some(f=>f.show);
+
+const bar = (title,back) => `<div class="appbar">${back?'<span class="back" data-a="back">‹</span>':'<div class="burger"><i></i><i></i><i></i></div>'}<div class="logo">${title||'<b>give</b>Central <span class="tap">TAP</span>'}</div><div class="ava"></div></div>`;
+const status = `<div class="sb"><span>16:04</span><span>▮▮▮ 📶 🔋</span></div>`;
+
+function screenList(){
+  const rows = [ {...EVENT, type:'ticket', when:EVENT.when, from:Math.min(...EVENT.types.map(t=>t.price))}, ...OTHER ]
+    .filter(e => S.filter==='All' || (S.filter==='Tickets'?e.type==='ticket':e.type==='normal'))
+    .map(e=>`<div class="ecard" data-a="open" data-id="${e.id}">
+      <div class="thumb">${e.type==='ticket'?'🎟️':'🤍'}</div>
+      <div style="flex:1"><div class="tt">${e.name}</div><div class="mn">${e.when}</div>
+        <span class="badge ${e.type==='ticket'?'tk':'ne'}">${e.type==='ticket'?('Tickets · from '+money(e.from)) : 'Normal Event'}</span></div>
+    </div>`).join('');
+  return status + bar() + `<div class="body">
+    <div class="rpill ${S.reader?'':'off'}"><span class="dot"></span> ${S.reader?'Reader connected · AMP6788':'No reader — manual entry'}</div>
+    <div class="banner">Welcome to <b>Archdiocese of Baltimore</b></div>
+    <div class="h">Select an event</div>
+    <div class="search">Search for an event… <span style="margin-left:auto">🔍</span></div>
+    <div class="chips">${['All','Tickets','Normal Event'].map(c=>`<span class="chip ${S.filter===c||(c==='Normal Event'&&S.filter==='Normal')?'on':''}" data-a="filter" data-f="${c==='Normal Event'?'Normal':c}">${c}</span>`).join('')}</div>
+    ${rows}</div>`;
+}
+
+function screenDetails(){
+  const preview = EVENT.types.map(t=>`<div class="trow"><div class="ti"><div class="tn">${t.name}</div><div class="tp">${money(t.price)}</div>${soldOut(t)?'<span class="sotag">Sold out</span>':(lowStock(t)?`<span class="lowchip">Only ${remaining(t)} left</span>`:'')}</div><span style="color:#c3ccd8;font-size:20px">›</span></div>`).join('');
+  return status + bar(null,true) + `<div class="body" style="padding-bottom:88px">
+    <div class="img" style="height:130px;margin-bottom:14px">EVENT IMAGE</div>
+    <div class="h lg">${EVENT.name}</div>
+    <div class="mn" style="color:#66717f;font-size:12.5px">📅 ${EVENT.when}</div>
+    <div class="mn" style="color:#66717f;font-size:12.5px;margin-top:3px">📍 ${EVENT.venue}</div>
+    <p style="color:#66717f;font-size:12.5px;margin:12px 0">${EVENT.desc}</p>
+    <div class="sec">Tickets</div>${preview}
+  </div><div class="footer"><button class="btn" data-a="toSelect">Select tickets</button></div>`;
+}
+
+function screenSelect(){
+  const rows = EVENT.types.map(t=>{
+    if(soldOut(t)) return `<div class="trow dis"><div class="ti"><div class="tn">${t.name}</div><div class="tp">${money(t.price)} each</div>${t.waitlist&&EVENT.settings.soldOut==='waitlist'?'<div class="tp" style="color:#96a0af">Sold out</div>':''}</div>${t.waitlist&&EVENT.settings.soldOut==='waitlist'?'<button class="btn ghost sm" data-a="waitlist">Waitlist</button>':'<span class="sotag">Sold out</span>'}</div>`;
+    const q=cartQty(t.id), plusDis = q>=maxAdd(t);
+    return `<div class="trow ${q>0?'pick':''}"><div class="ti"><div class="tn">${t.name}</div><div class="tp">${money(t.price)} each</div>
+      ${q>0?`<div class="tsub">Subtotal ${money(q*t.price)}</div>`:(lowStock(t)?`<span class="lowchip">Only ${remaining(t)} left</span>`:`<div class="tp" style="color:#96a0af">Max ${t.max} per order</div>`)}</div>
+      <div class="stepper"><b data-a="minus" data-id="${t.id}">–</b><span>${q}</span><b class="${plusDis?'dis':''}" data-a="plus" data-id="${t.id}">+</b></div></div>`;
+  }).join('');
+  return status + bar('Select tickets',true) + `<div class="body" style="padding-bottom:120px"><div class="h">Choose your tickets</div>${rows}</div>
+    <div class="footer"><div class="sumbar"><span class="cnt">${ticketCount()} ticket${ticketCount()===1?'':'s'}</span><span class="tot">${money(subtotal())}</span></div>
+    <button class="btn" data-a="afterSelect" ${ticketCount()===0?'disabled':''}>Review order</button></div>`;
+}
+
+function screenAttribution(){
+  const parishes = EVENT.settings.requireParish ? `<div class="sec">Select your parish *</div>` +
+    EVENT.settings.parishes.map(p=>`<div class="opt ${S.parish===p?'on':''}" data-a="parish" data-p="${p}"><span class="rd"></span>${p}</div>`).join('') : '';
+  return status + bar('Your details',true) + `<div class="body" style="padding-bottom:88px"><div class="h">A few details</div>${parishes}</div>
+    <div class="footer"><button class="btn" data-a="afterAttribution" ${EVENT.settings.requireParish&&!S.parish?'disabled':''}>Continue</button></div>`;
+}
+
+function screenAttendee(){
+  const per = EVENT.settings.collectAttendee==='perTicket';
+  const count = per ? ticketCount() : 1;
+  let blocks='';
+  for(let i=0;i<count;i++){
+    blocks += `<div style="border:1.5px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px">
+      <div class="sec" style="margin-top:0">${per?('Attendee '+(i+1)):'Order contact'}</div>` +
+      EVENT.settings.attendeeFields.filter(f=>f.show).map(f=>{
+        if(f.type==='select') return `<div class="lbl">${f.label}${f.required?' *':''}</div><select class="field">${['Select…',...f.options].map(o=>`<option>${o}</option>`).join('')}</select>`;
+        return `<div class="lbl">${f.label}${f.required?' *':''}</div><input class="field" placeholder="${f.label}">`;
+      }).join('') + `</div>`;
+  }
+  return status + bar('Attendee info',true) + `<div class="body" style="padding-bottom:88px"><div class="h">Who's attending?</div>${blocks}</div>
+    <div class="footer"><button class="btn" data-a="toReview">Continue</button></div>`;
+}
+
+function screenReview(){
+  const lines = EVENT.types.filter(t=>cartQty(t.id)>0).map(t=>`<div class="li"><span class="q">${cartQty(t.id)} × ${t.name}</span><span>${money(cartQty(t.id)*t.price)}</span></div>`).join('');
+  const feeLine = EVENT.settings.feePayer==='org' ? '' :
+    `<div class="li faint"><span class="q">Processing fee${EVENT.settings.feePayer==='buyer'?' <span data-a="feeToggle" style="color:var(--blue);cursor:pointer">('+(S.coverFee?'covering ✓':'add')+')</span>':''}</span><span>${money(feeApplied())}</span></div>`;
+  const don = EVENT.settings.donation.enabled ? `<div class="addon ${S.donate?'on':''}" data-a="donToggle"><span>＋ Add a ${money(EVENT.settings.donation.suggested)} donation · ${EVENT.settings.donation.label}</span><span>${S.donate?'Added ✓':'Add ›'}</span></div>` : '';
+  const cta = S.reader ? 'Charge '+money(total()) : 'Pay '+money(total());
+  return status + bar('Review',true) + `<div class="body" style="padding-bottom:120px">
+    <div class="h">Review order</div>${lines}${feeLine}${don}
+    <div class="li tot"><span>Total</span><span>${money(total())}</span></div></div>
+    <div class="footer"><button class="btn" data-a="pay">${cta}</button>${S.reader?'<div class="link" data-a="forceManual">Enter card manually instead</div>':''}</div>`;
+}
+
+function screenPayReader(){
+  return status + bar('Payment',true) + `<div class="center">
+    <div class="rpill"><span class="dot"></span> AMP6788 ready</div>
+    <div class="cardart"><div class="mag"></div></div>
+    <div class="kmsg">Swipe or tap card</div>
+    <div class="ksub">Charging <b style="color:var(--navy)">${money(total())}</b> for ${EVENT.name}</div>
+    <button class="btn sm" style="width:200px" data-a="doPay">Simulate swipe</button>
+    <div class="link" data-a="forceManual">Enter card manually instead</div></div>`;
+}
+
+function screenPayManual(){
+  return status + bar('Payment',true) + `<div class="body" style="padding-bottom:96px">
+    <div class="wallet" data-a="doPay"> Pay ${money(total())}</div>
+    <div class="oor">or pay with card</div>
+    <div class="lbl">Card number</div><input class="field" placeholder="1234 1234 1234 1234">
+    <div class="two"><div><div class="lbl">Expiry</div><input class="field" placeholder="MM / YY"></div><div><div class="lbl">CVV</div><input class="field" placeholder="•••"></div></div>
+    <div class="two"><div><div class="lbl">ZIP</div><input class="field" placeholder="12345"></div><div><div class="lbl">Name on card</div><input class="field" placeholder="Card holder"></div></div>
+    <div class="lbl">Email (for receipt)</div><input class="field" placeholder="name@email.com">
+  </div><div class="footer"><button class="btn" data-a="doPay">Pay ${money(total())}</button><div class="secure">🔒 Secured · PCI compliant</div></div>`;
+}
+
+function screenProcessing(){ return status + bar('Payment') + `<div class="center"><div class="spin"></div><div class="kmsg">Processing…</div><div class="ksub">Contacting your bank. Please don't remove the card or close the app.</div></div>`; }
+
+function screenSuccess(){
+  const o = S.last;
+  if(S.reader) return status + bar() + `<div class="center"><div class="circ ok">✓</div><div class="kmsg">${money(o.total)} charged</div>
+    <div class="ksub">${EVENT.name} · ${o.count} ticket${o.count===1?'':'s'} · Order #${o.no}</div>
+    <button class="btn" style="width:210px" data-a="newSale">New sale</button>
+    <button class="btn ghost sm" style="width:210px" data-a="newSale">Email / text receipt</button></div>`;
+  return status + bar() + `<div class="center"><div class="circ ok">🎟️</div><div class="kmsg">You're going!</div>
+    <div class="ksub">${EVENT.name} · ${EVENT.when.split(' · ')[0]} · ${o.count} ticket${o.count===1?'':'s'} · #${o.no}</div>
+    <button class="btn navy" style="width:220px" data-a="newSale"> Add to Apple Wallet</button>
+    <button class="btn ghost sm" style="width:220px" data-a="newSale">Done</button>
+    ${EVENT.settings.confirmationEmail?'<div class="link">Receipt sent to name@email.com</div>':''}</div>`;
+}
+
+function screenEdge(){
+  return status + bar('Payment',true) + `<div class="body">
+    <div class="alert stop">⚠ Card declined. No charge was made — try another card or Apple Pay.</div>
+    <div class="li tot" style="margin-top:6px"><span>Cart total</span><span>${money(total())}</span></div>
+    <button class="btn" style="margin-top:14px" data-a="retryPay">Try again</button>
+    <button class="btn ghost sm" style="width:100%;margin-top:10px" data-a="forceManual">Use a different method</button></div>`;
+}
+
+const SCREENS = {list:screenList,details:screenDetails,select:screenSelect,attribution:screenAttribution,attendee:screenAttendee,review:screenReview,payReader:screenPayReader,payManual:screenPayManual,processing:screenProcessing,success:screenSuccess,edge:screenEdge};
+let toast=null;
+function render(){ document.getElementById('frame').innerHTML = SCREENS[S.screen]() + (toast?`<div class="toastmsg">${toast}</div>`:''); }
+function showToast(m){ toast=m; render(); setTimeout(()=>{toast=null;render();},1800); }
+
+document.getElementById('frame').addEventListener('click', e=>{
+  const el = e.target.closest('[data-a]'); if(!el) return;
+  const a = el.dataset.a;
+  if(a==='back'){ back(); }
+  else if(a==='filter'){ S.filter=el.dataset.f; render(); }
+  else if(a==='open'){ if(el.dataset.id==='gala'){ S.screen='details'; render(); } else showToast('Demo placeholder — the wired flow is Spring Gala Dinner'); }
+  else if(a==='toSelect'){ S.screen='select'; render(); }
+  else if(a==='plus'){ const t=EVENT.types.find(x=>x.id===el.dataset.id); if(cartQty(t.id)<maxAdd(t)){ S.cart[t.id]=cartQty(t.id)+1; render(); } }
+  else if(a==='minus'){ const id=el.dataset.id; if(cartQty(id)>0){ S.cart[id]=cartQty(id)-1; if(S.cart[id]===0) delete S.cart[id]; render(); } }
+  else if(a==='waitlist'){ showToast('Added to waitlist — we will email if a spot opens'); }
+  else if(a==='afterSelect'){ S.screen = needAttribution()?'attribution':(needAttendee()?'attendee':'review'); render(); }
+  else if(a==='parish'){ S.parish=el.dataset.p; render(); }
+  else if(a==='afterAttribution'){ S.screen = needAttendee()?'attendee':'review'; render(); }
+  else if(a==='toReview'){ S.screen='review'; render(); }
+  else if(a==='feeToggle'){ S.coverFee=!S.coverFee; render(); }
+  else if(a==='donToggle'){ S.donate=!S.donate; render(); }
+  else if(a==='pay'){ S.screen = S.reader?'payReader':'payManual'; render(); }
+  else if(a==='forceManual'){ S.screen='payManual'; render(); }
+  else if(a==='doPay'){ S.screen='processing'; render(); setTimeout(()=>{ if(S.decline){ S.screen='edge'; render(); } else { commit(); } },1400); }
+  else if(a==='retryPay'){ S.screen = S.reader?'payReader':'payManual'; render(); }
+  else if(a==='newSale'){ resetSale(); }
+});
+
+function commit(){
+  const count=ticketCount(), tot=total();
+  EVENT.types.forEach(t=>{ if(cartQty(t.id)>0) t.sold += cartQty(t.id); });
+  S.orderNo++; S.last={no:'A'+S.orderNo, count, total:tot};
+  S.screen='success'; render();
+}
+function resetSale(){ S.cart={}; S.donate=false; S.coverFee=true; S.parish=null; S.screen='list'; render(); }
+function back(){
+  const flow={details:'list',select:'details',attribution:'select',attendee:(needAttribution()?'attribution':'select'),review:(needAttendee()?'attendee':(needAttribution()?'attribution':'select')),payReader:'review',payManual:'review',edge:'review'};
+  S.screen = flow[S.screen] || 'list'; render();
+}
+
+document.getElementById('togReader').addEventListener('click',function(){ S.reader=!S.reader; this.classList.toggle('on',S.reader); if(S.screen==='list'||S.screen==='review')render(); });
+document.getElementById('togDecline').addEventListener('click',function(){ S.decline=!S.decline; this.classList.toggle('on',S.decline); });
+
+render();
+</script>
+</body>
+</html>

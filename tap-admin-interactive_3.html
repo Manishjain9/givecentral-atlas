@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Admin — Interactive Ticket Setup</title>
+<style>
+  :root{
+    --sb:#2b3648;--sb2:#232d3c;--content:#eef0f3;--title:#5a6a80;--tabbg:#e7eaee;--tabtx:#55606f;
+    --tabon:#46566d;--under:#2c3a52;--label:#333a45;--req:#e2401c;--ib:#ccd2da;--ib2:#dfe4ea;
+    --orange:#f0a340;--blue:#4a90d9;--link:#3b8fd4;--green:#5cb85c;--ink:#2b333e;--mut:#8a93a0;
+    --ok:#2e9e5b;--okbg:#eaf6ef;--imp:#2f6ae0;--impbg:#eaf1fd;--line:#e6e9ee;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#dfe3e8;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:14px;line-height:1.45}
+  .page{max-width:1120px;margin:0 auto;padding:24px 18px 70px}
+  .intro{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:16px}
+  .intro h1{margin:0 0 6px;font-size:19px;color:var(--title)}
+  .intro p{margin:4px 0;color:#4a5566;font-size:13px}
+  .parity{display:inline-block;background:var(--impbg);color:var(--imp);border:1px solid #cfe0f7;border-radius:5px;padding:1px 7px;font-size:11px;font-weight:600}
+
+  .win{border:1px solid #c4ccd6;border-radius:9px;overflow:hidden;background:#fff;box-shadow:0 6px 18px rgba(30,40,60,.12)}
+  .adminrow{display:flex}
+  .rail{width:52px;background:var(--sb);flex:0 0 auto;padding:10px 0;display:flex;flex-direction:column;gap:4px;align-items:center}
+  .rail .ri{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#8a97a8;font-size:14px}
+  .rail .ri.on{background:var(--sb2);color:#fff}
+  .main{flex:1;min-width:0;background:var(--content)}
+  .tbar{background:var(--sb);height:40px;display:flex;align-items:center;gap:12px;padding:0 14px;color:#aeb8c6;font-size:11px}
+  .tbar .welc{margin-right:auto;color:#cdd5e0}.tbar .welc b{color:#fff}
+  .tbar .srch{background:#fff;border-radius:5px;width:150px;height:22px}
+  .crumb{font-size:12px;color:#8a93a0;padding:12px 18px 0}.crumb b{color:#5a6675}.crumb .a{color:var(--link)}
+  .titlebar{background:var(--title);color:#fff;font-size:16px;font-weight:600;padding:11px 18px;margin:12px 18px 0;border-radius:5px 5px 0 0}
+  .tabs{display:flex;flex-wrap:wrap;margin:0 18px;background:#fff;border-bottom:2px solid var(--under)}
+  .tab{padding:11px 13px;font-size:12px;color:var(--tabtx);background:var(--tabbg);border-right:1px solid #dde1e6;white-space:nowrap;display:flex;align-items:center;gap:5px;cursor:pointer}
+  .tab.on{background:var(--tabon);color:#fff;font-weight:600}
+  .tab .ck{color:var(--green)}.tab.on .ck{color:#bfe6c6}
+  .panel{background:#fff;margin:0 18px;padding:20px 22px;border:1px solid #e3e6ea;border-top:none;min-height:340px}
+  .foot{background:#fff;margin:0 18px 18px;border:1px solid #e3e6ea;border-top:1px solid #eef1f4;padding:14px 22px;display:flex;align-items:center;gap:10px;justify-content:center;position:relative}
+  .saved{position:absolute;left:22px;color:var(--ok);font-size:12px;font-weight:600}
+  .btn{border:none;border-radius:5px;padding:9px 18px;font-weight:600;font-size:13px;color:#fff;font-family:inherit;cursor:pointer}
+  .btn.prev{background:var(--orange)}.btn.next{background:var(--blue)}.btn.pub{background:var(--blue);padding:10px 26px}
+  .btn.grey{background:#fff;color:#5a6675;border:1px solid var(--ib)}
+
+  .frow{display:grid;grid-template-columns:190px 1fr 190px 1fr;gap:0 16px;align-items:center;border-bottom:1px solid #f0f2f5;padding:13px 0}
+  .frow.single{grid-template-columns:190px 1fr}
+  .frow .lb{text-align:right;font-weight:600;color:var(--label);font-size:13px}
+  .frow .lb .rq{color:var(--req);margin-left:2px}
+  .inp{border:1px solid var(--ib);border-radius:5px;padding:9px 11px;font-size:13px;color:var(--ink);background:#fff;font-family:inherit;width:100%}
+  .inp::placeholder{color:#9aa4b2}
+  .hint{font-size:11.5px;color:var(--mut);margin-top:4px}
+  .improw{background:var(--impbg);border-left:3px solid var(--imp);padding:8px 12px;font-size:11.5px;color:#2b3d5e;margin:10px 0;border-radius:0 5px 5px 0}
+  .improw b{color:var(--imp)}
+  .apptag{display:inline-block;background:var(--impbg);color:var(--imp);border-radius:4px;padding:0 6px;font-size:10px;font-weight:700;margin-left:6px}
+
+  .toggle{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:#4a5566}
+  .sw{width:38px;height:22px;border-radius:999px;background:#c7ccd4;position:relative;cursor:pointer}
+  .sw.on{background:var(--ok)}
+  .sw::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.15s}
+  .sw.on::after{left:19px}
+  .radio{display:inline-flex;gap:16px;font-size:13px;color:#4a5566;align-items:center;flex-wrap:wrap}
+  .radio span{cursor:pointer}
+  .radio i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ib);display:inline-block;vertical-align:-2px;margin-right:5px}
+  .radio i.on{border-color:var(--blue);box-shadow:inset 0 0 0 3px var(--blue)}
+  .chk{width:16px;height:16px;border:1.5px solid var(--ib);border-radius:3px;display:inline-block;vertical-align:-3px;cursor:pointer}
+  .chk.on{background:var(--blue);border-color:var(--blue)}
+  .accord{border:1px solid var(--ib2);border-radius:6px;margin:8px 0}
+  .accord .hd{display:flex;justify-content:space-between;padding:11px 14px;background:#f6f8fa;font-size:13px;font-weight:600;color:#5a6675}
+
+  .tt{border:1px solid var(--ib2);border-radius:8px;padding:16px;margin-bottom:14px;position:relative;background:#fcfdfe}
+  .tt .del{position:absolute;top:12px;right:14px;color:#c0392b;font-size:12px;cursor:pointer}
+  .tt .tth{font-weight:700;font-size:13px;color:var(--title);margin-bottom:12px}
+  .ttgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+  .ttgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 14px;margin-top:12px}
+  .fld{display:flex;flex-direction:column;gap:5px}
+  .fld .l{font-size:11.5px;color:#66717f;font-weight:600}.fld .l .rq{color:var(--req)}
+  .addtt{border:1.5px dashed #b9c8dd;border-radius:8px;padding:12px;text-align:center;color:var(--imp);font-weight:600;font-size:13px;background:#f6faff;cursor:pointer}
+  .revbox{background:var(--okbg);border:1px solid #cbe7d5;border-radius:8px;padding:12px 14px;margin-top:14px;font-size:12.5px;color:#2c6b45}
+  .revbox b{font-size:15px}
+  .setblk{border:1px solid var(--ib2);border-radius:8px;padding:6px 14px;margin-top:12px}
+  .setrow{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f2f5;font-size:13px;color:#3f4a58}
+  .setrow:last-child{border-bottom:none}
+  .setrow .rt{display:flex;align-items:center;gap:10px}
+  .cropbox{width:210px;height:170px;background:#8f9aa8;margin:0 auto;display:flex;align-items:center;justify-content:center}
+  .cropbox .inner{width:120px;height:120px;background:#fff}
+  .gal{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-top:10px}
+  .gal .g{aspect-ratio:1;border:1px solid var(--ib2);border-radius:4px;background:linear-gradient(135deg,#dbe7fb,#c3d6f4)}
+  .galhead{background:var(--title);color:#fff;font-size:12.5px;font-weight:600;padding:8px 12px;border-radius:4px;margin-top:16px}
+  .afrow{display:grid;grid-template-columns:22px 1.4fr 1fr 84px 74px 24px;gap:12px;align-items:end;margin-bottom:10px}
+  .pub{position:relative}
+  .pubok{text-align:center;padding:36px 24px}
+  .bigok{width:64px;height:64px;border-radius:50%;background:var(--okbg);color:var(--ok);font-size:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+  .linkbox{display:flex;gap:10px;max-width:420px;margin:14px auto 0}
+  .qr{width:96px;height:96px;border:1px solid var(--ib);border-radius:8px;margin:16px auto 0;background:repeating-linear-gradient(45deg,#e4e4e4 0 6px,#fff 6px 12px)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="intro">
+    <h1>GiveCentral Admin — Interactive Ticket Setup</h1>
+    <p>Click the tabs or use Next/Previous. Add &amp; edit ticket types, flip every setting, then Publish. <span class="parity">→ app</span> marks a control that drives what the buyer sees in the companion TAP prototype — every end-user feature is manageable here.</p>
+  </div>
+  <div class="win" id="win"></div>
+</div>
+
+<script>
+const TABS=['Events','Details & Dates','Venue','Ticket Limits','Parishes','Designation','Event Image','Buyer-Page Labels','Attendee Info'];
+const A={
+  tab:0, published:false, acctOpen:false,
+  types:[
+    {name:'General Admission', price:100, total:50, min:1, max:8, low:10, waitlist:false},
+    {name:'VIP Table (seats 8)', price:250, total:10, min:1, max:4, low:5, waitlist:true}
+  ],
+  set:{ feePayer:'buyer', confirmationEmail:true, digitalTicket:true, adminSale:true, adminLow:true,
+        donationOn:true, donationAmt:25, donationLabel:'Parish Outreach', soldOut:'waitlist',
+        collect:'perTicket', requireParish:true, requireDesignation:false },
+  fields:[
+    {label:'Attendee full name', type:'Text', req:true, show:true},
+    {label:'Meal choice', type:'Dropdown', req:true, show:true}
+  ]
+};
+const money=n=>'$'+Number(n||0).toLocaleString(undefined,{minimumFractionDigits:0});
+function revenue(){ const gross=A.types.reduce((s,t)=>s+ (Number(t.price)||0)*(Number(t.total)||0),0); const fee=Math.round(gross*0.029); const cap=A.types.reduce((s,t)=>s+(Number(t.total)||0),0); return {gross,fee,net:gross-fee,cap}; }
+
+const railHTML=`<div class="rail"><div class="ri on">☰</div><div class="ri">🎁</div><div class="ri">📊</div><div class="ri">💳</div><div class="ri">📅</div><div class="ri">👥</div><div class="ri">⚙️</div></div>`;
+const topHTML=`<div class="tbar"><span class="welc">Welcome <b>GiveCentral Support</b></span><span class="srch"></span>🔍 ⚙</div>
+  <div class="crumb">Admin Panel &nbsp;🏠&nbsp; / &nbsp;<b>Event</b>&nbsp; / &nbsp;<span class="a">Add an Event</span></div>
+  <div class="titlebar">Add an Event</div>`;
+function tabsHTML(){ return `<div class="tabs">`+TABS.map((t,i)=>`<div class="tab ${i===A.tab?'on':''}" data-a="tab" data-i="${i}">${i<A.tab?'<span class="ck">✓</span>':''}${t}</div>`).join('')+`</div>`; }
+
+function tabContent(){
+  const s=A.set;
+  switch(A.tab){
+  case 0: return `
+    <div class="frow"><div class="lb">Event Name <span class="rq">*</span></div><input class="inp" value="Spring Gala Dinner"><div class="lb">Event Type <span class="rq">*</span></div><select class="inp"><option>Normal Event</option><option>Pledge Event</option><option>Crowdfunding</option><option selected>Ticket Event</option></select></div>
+    <div class="frow single"><div class="lb">Status</div><div><span class="radio">${rad('status','active',['draft','Draft'],['scheduled','Scheduled'],['active','Active'],['suspended','Suspended'],['ended','Ended'])}</span><div class="hint">Simplified from Active / Suspended / Invisible / Hidden.</div></div></div>
+    <div class="frow single"><div class="lb">Platform</div><div><span class="radio">${rad('plat','all',['web','Web only'],['mobile','Mobile only'],['all','All'])}</span></div></div>
+    <div class="frow single"><div class="lb">Event Description</div><textarea class="inp" style="height:64px">An evening of dinner and community…</textarea></div>
+    <div class="improw"><b>Removed for Ticket events:</b> "Auction" &amp; "Recurring Pledge" (other event types). Email toggles consolidated onto Ticket Limits.</div>
+    <div class="accord"><div class="hd" data-a="acct" style="cursor:pointer">Accounting &amp; integrations (optional) <span style="color:var(--imp)">${A.acctOpen?'▴ hide':'▾ show'}</span></div>${A.acctOpen?`<div style="padding:14px;border-top:1px solid #eef1f4">
+      <div class="frow"><div class="lb">GL Code</div><input class="inp"><div class="lb">Class</div><input class="inp"></div>
+      <div class="frow"><div class="lb">Database Ref. ID</div><input class="inp"><div class="lb">Event Activity (PDS)</div><input class="inp"></div>
+      <div class="frow"><div class="lb">Payment Activity (PDS)</div><input class="inp"><div class="lb">Program ID</div><input class="inp"></div>
+      <div class="frow single"><div class="lb">Reporting Category</div><input class="inp" style="max-width:280px" placeholder="Choose…"></div>
+      <div class="hint">Used to sync with your PDS / ledger — leave blank if unsure.</div></div>`:''}</div>`;
+  case 1: return `
+    <div style="font-weight:700;color:var(--title);font-size:13px;margin-bottom:6px">Event schedule</div>
+    <div class="frow"><div class="lb">Starts <span class="rq">*</span></div><input class="inp" value="2026-05-09 18:30"><div class="lb">Ends <span class="rq">*</span></div><input class="inp" value="2026-05-09 22:00"></div>
+    <div class="frow single"><div class="lb">Time zone <span class="rq">*</span></div><input class="inp" style="max-width:260px" value="America/New_York (ET)"></div>
+    <div style="font-weight:700;color:var(--title);font-size:13px;margin:16px 0 6px">Ticket sales window <span class="apptag">→ app</span></div>
+    <div class="frow"><div class="lb">Sales open</div><input class="inp" value="2026-04-01 09:00"><div class="lb">Sales close</div><input class="inp" value="2026-05-09 16:00"></div>
+    <div class="improw">Distinct sales window powers early-bird pricing and "sales end before doors." The app hides events outside this window.</div>
+    <div style="font-weight:700;color:var(--title);font-size:13px;margin:16px 0 6px">Payment routing</div>
+    <div class="frow"><div class="lb">Credit Card Account <span class="rq">*</span></div><input class="inp" placeholder="Choose account…"><div class="lb">ACH Account <span class="rq">*</span></div><input class="inp" placeholder="Choose account…"></div>`;
+  case 2: return `
+    <div class="frow single"><div class="lb">Event format <span class="apptag">→ app</span></div><div><span class="radio">${rad('fmt','person',['person','In person'],['virtual','Virtual / online'],['hybrid','Hybrid'])}</span></div></div>
+    <div class="frow"><div class="lb">Venue name</div><input class="inp" value="Parish Hall"><div class="lb">Capacity</div><input class="inp" value="Auto from ticket inventory" readonly></div>
+    <div class="frow"><div class="lb">Address (Line 1)</div><input class="inp" value="320 Cathedral St"><div class="lb">Address (Line 2)</div><input class="inp" placeholder="Suite / room"></div>
+    <div class="frow"><div class="lb">City</div><input class="inp" value="Baltimore"><div class="lb">State</div><input class="inp" value="MD"></div>
+    <div class="frow"><div class="lb">Zip</div><input class="inp" value="21201"><div class="lb">Map</div><input class="inp" value="📍 auto-geocoded" readonly></div>`;
+  case 3: return ticketTab();
+  case 4: return `
+    <div class="frow"><div class="lb">Parish label</div><input class="inp" value="Parish"><div class="lb">Category</div><input class="inp" placeholder="Choose category…"></div>
+    <div class="frow single"><div class="lb">Select parishes</div><input class="inp" placeholder="Search & select parishes…"></div>
+    <div class="frow single"><div class="lb">Require parish selection <span class="apptag">→ app</span></div><div class="rt"><div class="sw ${s.requireParish?'on':''}" data-a="tog" data-s="requireParish"></div> <span style="margin-left:8px;color:#8a93a0;font-size:12px">When on, the app asks the buyer to pick a parish.</span></div></div>
+    <div class="frow single"><div class="lb">Hide parish number (PGP)</div><div><span class="chk"></span></div></div>`;
+  case 5: return `
+    <div class="frow"><div class="lb">Designation label</div><input class="inp" value="Designation"><div class="lb">Select designation</div><input class="inp" placeholder="Choose…"></div>
+    <div class="frow single"><div class="lb">Require designation <span class="apptag">→ app</span></div><div class="rt"><div class="sw ${s.requireDesignation?'on':''}" data-a="tog" data-s="requireDesignation"></div> <span style="margin-left:8px;color:#8a93a0;font-size:12px">Adds a designation picker to the buyer flow.</span></div></div>`;
+  case 6: return `
+    <div class="cropbox"><div class="inner"></div></div>
+    <div style="display:flex;gap:10px;justify-content:center;align-items:center;margin-top:12px"><input class="inp" style="max-width:220px" placeholder="No file selected"><button class="btn next" style="padding:9px 14px">Browse</button><button class="btn prev" style="padding:9px 14px">Crop &amp; upload</button></div>
+    <div style="text-align:center;margin-top:10px"><input class="inp" style="max-width:360px;display:inline-block" placeholder="Alt text (accessibility + previews)"></div>
+    <div class="hint" style="text-align:center">Recommended: buyer page 1200×600, TAP app 800×800.</div>
+    <div class="galhead" style="display:flex;justify-content:space-between">Uploaded banners <span style="font-weight:500">🔍 search</span></div>
+    <div class="gal">${'<div class="g"></div>'.repeat(8)}</div>
+    <div class="galhead">Banner gallery</div><div class="gal">${'<div class="g"></div>'.repeat(8)}</div>`;
+  case 7: return `
+    <div class="improw">Renamed from "Personalized Giving Page Options". These are the buyer page's section labels <span class="apptag">→ app</span>. Per-type price labels live inside each ticket type.</div>
+    <div class="frow"><div class="lb">"Tickets" heading</div><input class="inp" value="Choose your tickets"><div class="lb">"Quantity" label</div><input class="inp" value="Quantity"></div>
+    <div class="frow"><div class="lb">"Total" label</div><input class="inp" value="Order total"><div class="lb">CTA button text</div><input class="inp" value="Continue to payment"></div>
+    <div class="frow single"><div class="lb">Language</div><input class="inp" style="max-width:220px" value="English (US)"></div>`;
+  case 8: return attendeeTab();
+  }
+}
+
+function ticketTab(){
+  const cards=A.types.map((t,i)=>`
+    <div class="tt"><span class="del" data-a="tt-del" data-i="${i}">✕ remove</span>
+      <div class="tth">Ticket type ${i+1}</div>
+      <div class="ttgrid">
+        <div class="fld"><span class="l">Name <span class="rq">*</span></span><input class="inp" data-tt="${i}" data-k="name" value="${t.name}"></div>
+        <div class="fld"><span class="l">Price <span class="rq">*</span></span><input class="inp" data-tt="${i}" data-k="price" value="${t.price}"></div>
+      </div>
+      <div class="ttgrid3">
+        <div class="fld"><span class="l">Total available <span class="rq">*</span></span><input class="inp" data-tt="${i}" data-k="total" value="${t.total}"></div>
+        <div class="fld"><span class="l">Min per order</span><input class="inp" data-tt="${i}" data-k="min" value="${t.min}"></div>
+        <div class="fld"><span class="l">Max per order</span><input class="inp" data-tt="${i}" data-k="max" value="${t.max}"></div>
+      </div>
+      <div class="ttgrid3">
+        <div class="fld"><span class="l">Low-stock threshold <span class="apptag">→ app</span></span><input class="inp" data-tt="${i}" data-k="low" value="${t.low}"></div>
+        <div class="fld"><span class="l">Waitlist when sold out <span class="apptag">→ app</span></span><div style="padding-top:4px"><div class="sw ${t.waitlist?'on':''}" data-a="tt-wl" data-i="${i}"></div></div></div>
+        <div class="fld"><span class="l">Sales window (optional)</span><input class="inp" placeholder="e.g. early-bird"></div>
+      </div>
+    </div>`).join('');
+  const r=revenue();
+  return `<div style="font-weight:700;color:var(--title);font-size:13px;margin-bottom:12px">Ticket types <span class="apptag">→ app</span></div>
+    ${cards}
+    <div class="addtt" data-a="tt-add">＋ Add ticket type · early-bird, student, sponsor, comp…</div>
+    <div class="revbox" id="rev">Projected gross: <b>${money(r.gross)}</b> · est. fees ${money(r.fee)} · <b>net ~${money(r.net)}</b> (${r.cap} tickets)</div>
+    <div style="font-weight:700;color:var(--title);font-size:13px;margin:18px 0 4px">Fees, tickets &amp; notifications <span class="apptag">→ app</span></div>
+    <div class="setblk">
+      <div class="setrow"><span>Who pays processing fee</span><span class="radio">${rad('feePayer',A.set.feePayer,['buyer','Offer buyer to cover'],['org','Org absorbs'],['add','Add to price'])}</span></div>
+      <div class="setrow"><span>Buyer confirmation email + receipt</span><div class="sw ${A.set.confirmationEmail?'on':''}" data-a="tog" data-s="confirmationEmail"></div></div>
+      <div class="setrow"><span>Digital ticket (QR) + Wallet + TAP check-in</span><div class="sw ${A.set.digitalTicket?'on':''}" data-a="tog" data-s="digitalTicket"></div></div>
+      <div class="setrow"><span>“Add a donation” add-on <span class="apptag">→ app</span></span><div class="rt"><div class="sw ${A.set.donationOn?'on':''}" data-a="tog" data-s="donationOn"></div> <input class="inp" style="width:70px" data-set="donationAmt" value="${A.set.donationAmt}"> <input class="inp" style="width:130px" data-set="donationLabel" value="${A.set.donationLabel}"></div></div>
+      <div class="setrow"><span>When sold out <span class="apptag">→ app</span></span><span class="radio">${rad('soldOut',A.set.soldOut,['hide','Hide'],['show','Show sold-out'],['waitlist','Open waitlist'])}</span></div>
+      <div class="setrow"><span>Admin alerts</span><div class="rt"><span class="chk ${A.set.adminSale?'on':''}" data-a="chk" data-s="adminSale"></span> Sales &nbsp; <span class="chk ${A.set.adminLow?'on':''}" data-a="chk" data-s="adminLow"></span> Low inventory</div></div>
+    </div>`;
+}
+
+function attendeeTab(){
+  const rows=A.fields.map((f,i)=>`<div class="afrow">
+    <div class="fld"><span class="l">⇅</span></div>
+    <div class="fld"><span class="l">Field label</span><input class="inp" data-af="${i}" data-k="label" value="${f.label}"></div>
+    <div class="fld"><span class="l">Type</span><input class="inp" data-af="${i}" data-k="type" value="${f.type}"></div>
+    <div class="fld"><span class="l">Required</span><span class="chk ${f.req?'on':''}" data-a="af-req" data-i="${i}"></span></div>
+    <div class="fld"><span class="l">Show</span><span class="chk ${f.show?'on':''}" data-a="af-show" data-i="${i}"></span></div>
+    <div class="fld"><span class="l">&nbsp;</span><span class="del" data-a="af-del" data-i="${i}" style="position:static;color:#c0392b;cursor:pointer">✕</span></div>
+  </div>`).join('');
+  return `<div class="frow single"><div class="lb">Collect info <span class="apptag">→ app</span></div><div><span class="radio">${rad('collect',A.set.collect,['perTicket','Per ticket (name each attendee)'],['perOrder','Once per order'])}</span><div class="hint">Per-ticket collects a name for every seat — e.g. all 8 of a VIP table.</div></div></div>
+    <div class="improw">Field types, reorder, required/show per field, unlimited fields — replaces the fixed "Designation1–5" slots.</div>
+    <div class="tt" style="background:#fff">${rows}</div>
+    <div class="addtt" data-a="af-add">＋ Add field</div>
+    <div class="revbox">✓ All required steps complete — ready to publish.</div>`;
+}
+
+function rad(name,cur,...opts){ return opts.map(o=>`<span data-a="set" data-s="${name}" data-v="${o[0]}"><i class="${cur===o[0]?'on':''}"></i>${o[1]}</span>`).join(''); }
+
+function footHTML(){
+  if(A.tab===8) return `<div class="foot"><span class="saved">✓ Draft saved</span><button class="btn prev" data-a="prev">➜ Previous</button><button class="btn grey">Preview buyer page</button><button class="btn pub" data-a="publish">Publish event</button></div>`;
+  return `<div class="foot"><span class="saved">✓ Draft saved</span>${A.tab>0?'<button class="btn prev" data-a="prev">➜ Previous</button>':''}<button class="btn next" data-a="next">Next ➜</button></div>`;
+}
+
+function render(){
+  if(A.published){ renderPublished(); return; }
+  document.getElementById('win').innerHTML =
+    `<div class="adminrow">${railHTML}<div class="main">${topHTML}${tabsHTML()}<div class="panel">${tabContent()}</div>${footHTML()}</div></div>`;
+}
+function renderPublished(){
+  const r=revenue();
+  document.getElementById('win').innerHTML=`<div class="adminrow">${railHTML}<div class="main">${topHTML}
+    <div class="panel pub"><div class="pubok"><div class="bigok">✓</div>
+      <div style="font-weight:700;color:var(--title);font-size:16px">Spring Gala Dinner is live</div>
+      <p style="color:#66717f;font-size:13px">${A.types.length} ticket type${A.types.length===1?'':'s'} · ${r.cap} tickets available · Web + Mobile</p>
+      <div class="linkbox"><input class="inp" value="give.org/e/spring-gala" readonly><button class="btn next">Copy link</button></div>
+      <div class="qr"></div><div class="hint">QR for printed materials &amp; the TAP app</div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:16px"><button class="btn grey">View buyer page</button><button class="btn grey" data-a="edit">Edit event</button></div>
+    </div></div></div></div>`;
+}
+
+const win=document.getElementById('win');
+win.addEventListener('click',e=>{
+  const el=e.target.closest('[data-a]'); if(!el) return;
+  const a=el.dataset.a;
+  if(a==='tab'){ A.tab=+el.dataset.i; render(); }
+  else if(a==='next'){ if(A.tab<8){A.tab++;render();} }
+  else if(a==='prev'){ if(A.tab>0){A.tab--;render();} }
+  else if(a==='publish'){ A.published=true; render(); }
+  else if(a==='edit'){ A.published=false; A.tab=3; render(); }
+  else if(a==='acct'){ A.acctOpen=!A.acctOpen; render(); }
+  else if(a==='tab'){}
+  else if(a==='tt-add'){ A.types.push({name:'New ticket',price:0,total:0,min:1,max:10,low:5,waitlist:false}); render(); }
+  else if(a==='tt-del'){ A.types.splice(+el.dataset.i,1); render(); }
+  else if(a==='tt-wl'){ A.types[+el.dataset.i].waitlist=!A.types[+el.dataset.i].waitlist; render(); }
+  else if(a==='tog'){ A.set[el.dataset.s]=!A.set[el.dataset.s]; render(); }
+  else if(a==='chk'){ A.set[el.dataset.s]=!A.set[el.dataset.s]; render(); }
+  else if(a==='set'){ A.set[el.dataset.s]=el.dataset.v; render(); }
+  else if(a==='af-add'){ A.fields.push({label:'New field',type:'Text',req:false,show:true}); render(); }
+  else if(a==='af-del'){ A.fields.splice(+el.dataset.i,1); render(); }
+  else if(a==='af-req'){ A.fields[+el.dataset.i].req=!A.fields[+el.dataset.i].req; render(); }
+  else if(a==='af-show'){ A.fields[+el.dataset.i].show=!A.fields[+el.dataset.i].show; render(); }
+});
+win.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset.tt!==undefined){ const i=+t.dataset.tt,k=t.dataset.k; A.types[i][k] = (k==='name')?t.value:(t.value===''?'':Number(t.value)); const rev=document.getElementById('rev'); if(rev){const r=revenue(); rev.innerHTML=`Projected gross: <b>${money(r.gross)}</b> · est. fees ${money(r.fee)} · <b>net ~${money(r.net)}</b> (${r.cap} tickets)`;} }
+  else if(t.dataset.af!==undefined){ A.fields[+t.dataset.af][t.dataset.k]=t.value; }
+  else if(t.dataset.set!==undefined){ A.set[t.dataset.set]=t.value; }
+});
+render();
+</script>
+</body>
+</html>
