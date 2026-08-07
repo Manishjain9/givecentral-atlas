@@ -698,6 +698,14 @@ body {
     <div class="kpi"><div class="l">Guru AI suggestions</div><div class="v" style="color:var(--purple)">42 / 42</div><div class="d">100% covered — review &amp; accept</div></div>
   </div>
 
+  <!-- Saved-draft banner (shown only when a draft exists) -->
+  <div id="draft-banner" style="display:none;align-items:center;gap:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:12px 18px;margin-bottom:16px">
+    <div style="width:30px;height:30px;border-radius:8px;background:#F59E0B;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">💾</div>
+    <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#92400E" id="draft-banner-title">Saved rebalance draft</div><div style="font-size:12px;color:#B45309" id="draft-banner-sub">Your staged assignments are saved.</div></div>
+    <button id="draft-banner-review" style="border:1px solid #FCD34D;background:#fff;color:#92400E;padding:7px 14px;border-radius:8px;font:600 12.5px DM Sans;cursor:pointer">Review &amp; commit ↓</button>
+    <button id="draft-banner-discard" style="border:none;background:none;color:#B45309;padding:7px 10px;border-radius:8px;font:600 12.5px DM Sans;cursor:pointer;text-decoration:underline">Discard</button>
+  </div>
+
   <div class="assign-grid">
 
     <!-- LEFT: Unassigned pool -->
@@ -1160,14 +1168,32 @@ body {
   }
   function fmtAgo(ts){ if(!ts) return ''; var s=Math.round((Date.now()-ts)/1000); if(s<45) return 'just now'; var m=Math.round(s/60); if(m<60) return m+'m ago'; var h=Math.round(m/60); return h+'h ago'; }
   window.updateDraftStatus = function(){
-    var el=document.getElementById('draft-status'); if(!el) return;
     var raw=null; try{ raw=localStorage.getItem(DRAFT_KEY); }catch(e){}
-    if(!raw){ el.style.display='none'; el.innerHTML=''; return; }
-    var d={}; try{ d=JSON.parse(raw)||{}; }catch(e){}
-    var n=Object.keys(d.staged||{}).length;
-    el.style.display='inline';
-    el.innerHTML='<span style="color:#15803D;font-weight:600">✓ Draft saved</span> · '+n+' staged · '+fmtAgo(d.savedAt)+' · <span id="draft-discard" style="color:#BE185D;cursor:pointer;font-weight:600">Discard</span>';
-    var dc=el.querySelector('#draft-discard'); if(dc) dc.onclick=function(){ resetAssignments(); };
+    var d={}; try{ d=raw?(JSON.parse(raw)||{}):{}; }catch(e){}
+    var n=raw?Object.keys(d.staged||{}).length:0;
+    // 1) inline chip inside the commit bar
+    var el=document.getElementById('draft-status');
+    if(el){
+      if(!raw){ el.style.display='none'; el.innerHTML=''; }
+      else {
+        el.style.display='inline';
+        el.innerHTML='<span style="color:#15803D;font-weight:600">✓ Draft saved</span> · '+n+' staged · '+fmtAgo(d.savedAt)+' · <span id="draft-discard" style="color:#BE185D;cursor:pointer;font-weight:600">Discard</span>';
+        var dc=el.querySelector('#draft-discard'); if(dc) dc.onclick=function(){ resetAssignments(); };
+      }
+    }
+    // 2) prominent banner near the top
+    var b=document.getElementById('draft-banner');
+    if(b){
+      if(!raw){ b.style.display='none'; }
+      else {
+        b.style.display='flex';
+        var t=b.querySelector('#draft-banner-title'), s=b.querySelector('#draft-banner-sub');
+        if(t) t.textContent='Saved rebalance draft · '+n+' staged assignment'+(n===1?'':'s');
+        if(s) s.textContent='Saved '+fmtAgo(d.savedAt)+'. Restored automatically — review and commit, or discard to start over.';
+        var rv=b.querySelector('#draft-banner-review'); if(rv) rv.onclick=function(){ var cb=document.querySelector('.commit-bar'); if(cb) cb.scrollIntoView({behavior:'smooth',block:'end'}); };
+        var dd=b.querySelector('#draft-banner-discard'); if(dd) dd.onclick=function(){ resetAssignments(); };
+      }
+    }
   };
   window.saveDraft = function(){
     var n=Object.keys(STAGED).length;
