@@ -2246,13 +2246,13 @@ body {
     <div class="av" style="background:#94A3B8">JM</div>
     <div class="body"><div class="t">Jamie Morrison</div><div class="d">jamie.morrison@diocese.org · Gift Officer · invited May 2 · 4 days left</div></div>
     <button class="tp-act" onclick="urToast('Invite resent · Jamie should receive the magic link in seconds')">Resend</button>
-    <button class="tp-act" onclick="urToast('Invitation revoked · removed from pending list')">Revoke</button>
+    <button class="tp-act" onclick="urRevokeInvite('Jamie Morrison','jamie.morrison@diocese.org', this.closest('.tp-row'))">Revoke</button>
   </div>
   <div class="tp-row">
     <div class="av" style="background:#94A3B8">EK</div>
     <div class="body"><div class="t">Emma Kowalski</div><div class="d">emma.k@diocese.org · Database Admin · invited Apr 28 · 1 day left</div></div>
     <button class="tp-act" onclick="urToast('Invite resent · 7-day expiry reset')">Resend</button>
-    <button class="tp-act" onclick="urToast('Invitation revoked · removed from pending list')">Revoke</button>
+    <button class="tp-act" onclick="urRevokeInvite('Emma Kowalski','emma.k@diocese.org', this.closest('.tp-row'))">Revoke</button>
   </div>
 </div>
 
@@ -2318,6 +2318,37 @@ body {
     window.__urToastT = setTimeout(function(){ t.classList.remove('show'); }, 2400);
   }
   window.urToast = toast;
+
+  // Keep the "Pending invites" counters in sync with the actual rows.
+  function syncPendingInviteCounts(){
+    var n = document.querySelectorAll('#ur-pane-invites .tp-row').length;
+    // tab badge
+    document.querySelectorAll('.tab').forEach(function(t){
+      if(/pending invites/i.test(t.textContent)){ var ct=t.querySelector('.ct'); if(ct) ct.textContent=n; }
+    });
+    // stat card (replace its leading number text node, keep the chip)
+    var card=document.getElementById('us-pending-invites');
+    if(card){ var v=card.querySelector('.v'); if(v){ var chip=v.querySelector('.urgent-chip');
+      v.childNodes.forEach(function(node){ if(node.nodeType===3) node.textContent=''; });
+      v.insertBefore(document.createTextNode(n+' '), v.firstChild);
+      if(n===0 && chip) chip.style.display='none';
+    } }
+  }
+  // Revoke a pending invitation — confirmation modal, then remove the row.
+  window.urRevokeInvite = function(name, email, rowEl){
+    var doConfirm = function(){
+      if(rowEl && rowEl.parentNode) rowEl.parentNode.removeChild(rowEl);
+      syncPendingInviteCounts();
+      toast('Invitation revoked · '+(name||'invite')+' removed from pending list · the magic-link no longer works');
+    };
+    if(window.atlasConfirm){
+      atlasConfirm({
+        title: 'Revoke '+(name||'this')+"'s invitation?",
+        message: 'The magic-link '+(email?('sent to '+email+' '):'')+'will stop working immediately and they won’t be able to join Atlas. You can re-invite them anytime.',
+        danger: true, confirmText: 'Revoke invitation', onConfirm: doConfirm
+      });
+    } else { doConfirm(); }
+  };
 
   function go(url){ window.location = url; }
 
@@ -2452,7 +2483,7 @@ body {
       ];
       if (isPending) {
         menu.push({ label: 'Resend invite', icon: 'M2 5l5 4 5-4M2 5v6h10V5l-5 4z', action: function(){ toast('Invite resent to ' + email); } });
-        menu.push({ label: 'Revoke invite', icon: 'M3 3l8 8M11 3l-8 8', action: function(){ toast('Invite revoked'); }, danger: true });
+        menu.push({ label: 'Revoke invite', icon: 'M3 3l8 8M11 3l-8 8', action: function(){ if(window.urRevokeInvite) urRevokeInvite(U.name, email); else toast('Invite revoked'); }, danger: true });
       } else {
         menu.push({ label: 'Reset password', icon: 'M3 7v3h6V7M4 7V5a2 2 0 014 0v2', action: function(){ if(window.URM) URM.reset(U); } });
         menu.push({ label: 'Send magic link', icon: 'M2 6h8l-3-3M2 6l3 3', action: function(){ if(window.URM) URM.magic(U); } });
