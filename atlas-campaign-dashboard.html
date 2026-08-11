@@ -1067,9 +1067,39 @@ function handleGuruQuery() {
   setTimeout(() => { inp.placeholder = 'Ask about any campaign…'; }, 1400);
 }
 
+// ── If we arrived here right after creating a campaign, inject it and open its drawer ──
+function parseGoalNum(g){
+  if(typeof g==='number') return g;
+  var s=String(g||'').replace(/[, $]/g,''); var m=parseFloat(s)||0;
+  if(/m/i.test(s)) m*=1e6; else if(/k/i.test(s)) m*=1e3;
+  return m||500000;
+}
+function injectNewCampaignIfAny(){
+  var wantOpen=/[?&]open=new/.test(location.search);
+  var raw=null; try{ raw=localStorage.getItem('atlas-new-campaign'); }catch(e){}
+  if(!wantOpen || !raw) return;
+  var nc={}; try{ nc=JSON.parse(raw)||{}; }catch(e){ return; }
+  var goalN=parseGoalNum(nc.goal);
+  var id=Math.max.apply(null, CAMPAIGNS.map(function(c){return c.id;}))+1;
+  CAMPAIGNS.unshift({
+    id:id, name:nc.name||'New campaign', type:nc.type||'Campaign',
+    raised:0, goal:goalN, pct:0, calPct:0, days:90,
+    status:"upcoming", statusLabel:"Just created",
+    iconBg:"#EAF6EE", iconStroke:"#15803D",
+    months:[0,0,0,0,0,0,0,0,0,0,0,0],
+    parishes:[], segs:{active:0,lybunt:0,recurring:0,new:0}, gifts:[],
+    pledgeOverdue:0, pledgeAmt:"$0", isNew:true
+  });
+  try{ localStorage.removeItem('atlas-new-campaign'); }catch(e){}
+  render();
+  openDrawer(id);
+  if(window.atlasToast) atlasToast('“'+(nc.name||'New campaign')+'” created — viewing details here. It’s now in your campaigns list.');
+}
+
 // Init
 renderTable();
-// Drawer stays closed on load — full-width view until a campaign is clicked.
+injectNewCampaignIfAny();
+// Drawer stays closed on load — full-width view until a campaign is clicked (unless we just created one).
 </script>
 
 

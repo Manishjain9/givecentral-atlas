@@ -1226,7 +1226,7 @@ body {
     <button class="btn btn-link" onclick="copyPublicLink()">Copy public link</button>
     <button class="btn btn-ghost" onclick="window.location='atlas-campaign-dashboard.html'">Go to Campaigns</button>
     <button class="btn btn-ghost" onclick="window.location.reload()">Create another</button>
-    <button class="btn btn-primary" onclick="window.location='atlas-campaign-detail.html'">View campaign</button>
+    <button class="btn btn-primary" onclick="window.location='atlas-campaign-dashboard.html?open=new'">View campaign</button>
   </div>
 </div></div>
 
@@ -2104,6 +2104,8 @@ body {
       document.getElementById('cr-next-list').innerHTML = next.map(function(s){
         return '<div class="ni"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 7l3 3 5-6"/></svg><span>'+s+'</span></div>';
       }).join('');
+      // Hand the new campaign to the dashboard so it can be viewed in the side drawer.
+      try { localStorage.setItem('atlas-new-campaign', JSON.stringify({ name:name, type:t.label, goal:goal, entity:entity, appeals:nApp, funds:nFund })); } catch(e){}
       ovOpen('created-ov');
     };
     // click-scrim to dismiss any overlay

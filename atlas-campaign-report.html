@@ -695,8 +695,8 @@ body {
     </div>
     <div class="flex gap-8">
       <select class="fld" style="width:auto" onchange="rescope(this)"><option>Full campaign (Jan–Jun 2026)</option><option>Last 30 days</option><option>Last 90 days</option><option>Year to date</option><option>Custom range…</option></select>
-      <button class="btn btn-ghost" onclick="atlasToast('PDF report generated · downloading now')">Export PDF</button>
-      <button class="btn btn-ghost" onclick="atlasToast('CSV exported · check downloads')">Export CSV</button>
+      <button class="btn btn-ghost" onclick="rpExportPDF()">Export PDF</button>
+      <button class="btn btn-ghost" onclick="rpExportCSV()">Export CSV</button>
       <button class="btn btn-primary" onclick="saveView()">Save as view</button>
     </div>
   </div>
@@ -773,11 +773,11 @@ body {
   <div class="card" style="margin-top:22px">
     <div class="card-body" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <span class="muted" style="font-size:12.5px">Report actions:</span>
-      <button class="btn btn-ghost" onclick="atlasToast('PDF report generated · downloading now')">Export PDF</button>
-      <button class="btn btn-ghost" onclick="atlasToast('CSV exported · check downloads')">Export CSV</button>
+      <button class="btn btn-ghost" onclick="rpExportPDF()">Export PDF</button>
+      <button class="btn btn-ghost" onclick="rpExportCSV()">Export CSV</button>
       <button class="btn btn-ghost" onclick="saveView()">Save as view</button>
-      <button class="btn btn-ghost" onclick="atlasToast('Recurring report scheduled · emailed to you every Monday 8 AM')">Schedule weekly</button>
-      <a class="btn btn-ghost" href="atlas-email-compose.html">Share with team</a>
+      <button class="btn btn-ghost" onclick="scheduleReport()">Schedule weekly</button>
+      <button class="btn btn-ghost" onclick="shareReport()">Share with team</button>
     </div>
   </div>
 
@@ -810,12 +810,19 @@ body {
       atlasToast('Report re-scoped to: '+t);
     };
     window.saveView=function(){
-      try{
-        var views=JSON.parse(localStorage.getItem('atlas-saved-views')||'[]');
-        views.push({name:'Cathedral Capital 2026 — Campaign report',type:'Campaign report',visibility:'Just me',when:Date.now()});
-        localStorage.setItem('atlas-saved-views',JSON.stringify(views));
-      }catch(e){}
-      atlasToast('Saved as view · find it under Reports → Saved by me');
+      atlasOpenModal({ title:'Save as view', sub:'Reuse this report layout & filters later', cta:'Save view',
+        fields:[
+          {id:'sv-name', label:'View name', type:'text', value:'Cathedral Capital 2026 — Campaign report'},
+          {id:'sv-vis', label:'Who can see it', type:'select', options:['Just me','My team','Everyone in org']}
+        ],
+        onSave:function(v){
+          if(!v['sv-name']){ atlasToast('Name the view first'); return false; }
+          try{ var views=JSON.parse(localStorage.getItem('atlas-saved-views')||'[]');
+            views.push({name:v['sv-name'],type:'Campaign report',visibility:v['sv-vis'],when:Date.now()});
+            localStorage.setItem('atlas-saved-views',JSON.stringify(views)); }catch(e){}
+          atlasToast('Saved as view · “'+v['sv-name']+'” ('+v['sv-vis']+') · under Reports → Saved by me');
+        }
+      });
     };
   })();
   </script>
@@ -987,6 +994,79 @@ body {
     toast._timer = setTimeout(function(){ toast.classList.remove('show'); }, 3200);
   }
   window.atlasToast = showToast;
+  window.goAfter = function(url,msg){ showToast(msg); setTimeout(function(){ window.location=url; }, 850); };
+  function checkboxRows(cls, items, checked){
+    return items.map(function(s){ return '<label style="display:flex;align-items:center;gap:9px;padding:5px 0;font-size:13px;color:#0F172A;cursor:pointer"><input type="checkbox" class="'+cls+'" value="'+s+'"'+(checked?' checked':'')+' style="accent-color:#2563EB;width:15px;height:15px">'+s+'</label>'; }).join('');
+  }
+  function subH(t){ return '<div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin:14px 0 6px">'+t+'</div>'; }
+  function downloadCSV(rows, fname){
+    var csv=rows.map(function(r){ return r.map(function(x){ return '"'+String(x).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+    var blob=new Blob([csv],{type:'text/csv'}); var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=fname; document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
+  }
+
+  // Export PDF — options modal, then browser Save-as-PDF
+  window.rpExportPDF = function(){
+    atlasOpenModal({ title:'Export as PDF', sub:'Choose what to include, then save as PDF', cta:'Download PDF',
+      rawBody: '<div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:6px">Include sections</div>'
+        + checkboxRows('rp-pdf-sec',['Financial summary','Campaign hierarchy','Year-over-year','Solicitor leaderboard','Gift size distribution'],true)
+        + subH('Orientation') + '<select id="rp-pdf-or" style="width:100%;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:DM Sans,sans-serif"><option>Portrait</option><option>Landscape</option></select>',
+      onSave:function(){
+        var n=document.querySelectorAll('.rp-pdf-sec:checked').length; if(!n){ showToast('Pick at least one section'); return false; }
+        showToast('Generating PDF · '+n+' section'+(n>1?'s':'')+' · use your browser’s Save as PDF');
+        setTimeout(function(){ window.print(); }, 350);
+      }
+    });
+  };
+
+  // Export CSV — pick sections, real file download
+  window.rpExportCSV = function(){
+    atlasOpenModal({ title:'Export as CSV', sub:'Pick the sections to include in the file', cta:'Download CSV',
+      rawBody: checkboxRows('rp-csv-sec',['Summary KPIs','Campaign hierarchy','Solicitor leaderboard','Gift size distribution'],true),
+      onSave:function(){
+        var secs=[].slice.call(document.querySelectorAll('.rp-csv-sec:checked')).map(function(c){return c.value;});
+        if(!secs.length){ showToast('Pick at least one section'); return false; }
+        var rows=[['Section','Metric','Value']];
+        if(secs.indexOf('Summary KPIs')>=0) rows.push(['Summary','Raised','$1,090,000'],['Summary','Goal','$1,600,000'],['Summary','Progress','68%'],['Summary','Donors','847'],['Summary','Avg gift','$1,287']);
+        if(secs.indexOf('Campaign hierarchy')>=0) rows.push(['Hierarchy','Appeals','2'],['Hierarchy','Funds','3']);
+        if(secs.indexOf('Solicitor leaderboard')>=0) rows.push(['Solicitor','Sarah Reynolds','$412,000'],['Solicitor','Bridget McCarthy','$318,500'],['Solicitor','Julia Kelleher','$205,900']);
+        if(secs.indexOf('Gift size distribution')>=0) rows.push(['Gift size','$100–$999','180 donors'],['Gift size','$1,000–$9,999','43 donors'],['Gift size','$10,000+','12 donors']);
+        downloadCSV(rows,'cathedral-capital-2026-report.csv');
+        showToast('CSV exported · '+secs.length+' section'+(secs.length>1?'s':'')+' · cathedral-capital-2026-report.csv');
+      }
+    });
+  };
+
+  // Schedule weekly — cadence + recipients
+  window.scheduleReport = function(){
+    atlasOpenModal({ title:'Schedule this report', sub:'Atlas emails it automatically on your cadence', cta:'Schedule report',
+      fields:[
+        {id:'sr-freq', label:'Frequency', type:'select', options:['Weekly','Daily','Every 2 weeks','Monthly']},
+        {id:'sr-day', label:'Day', type:'select', options:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']},
+        {id:'sr-time', label:'Time', type:'select', options:['8:00 AM','9:00 AM','12:00 PM','5:00 PM']},
+        {id:'sr-to', label:'Deliver to', type:'text', value:'you@diocese.org', placeholder:'comma-separated emails'}
+      ],
+      onSave:function(v){ if(!v['sr-to']){ showToast('Add at least one recipient'); return false; }
+        showToast('Report scheduled · '+v['sr-freq']+' · '+v['sr-day']+' at '+v['sr-time']+' → '+v['sr-to']);
+      }
+    });
+  };
+
+  // Share with team — recipients, note, copy link
+  window.shareReport = function(){
+    atlasOpenModal({ title:'Share with team', sub:'Send this report or copy a shareable link', cta:'Send report',
+      rawBody: '<div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:6px">Recipients</div>'
+        + checkboxRows('rp-share-to',['Sarah Reynolds','Bridget McCarthy','Julia Kelleher','Fr. Daniel · Development'],false)
+        + subH('Note (optional)') + '<input id="rp-share-note" type="text" placeholder="e.g. Q2 numbers for board review" style="width:100%;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:DM Sans,sans-serif;box-sizing:border-box">'
+        + '<button type="button" onclick="(navigator.clipboard&&navigator.clipboard.writeText(location.href));atlasToast(\'Shareable link copied to clipboard\')" style="margin-top:12px;padding:8px 12px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;font-size:12.5px;color:#1D4ED8;font-weight:600;cursor:pointer">🔗 Copy shareable link</button>',
+      onSave:function(){
+        var to=[].slice.call(document.querySelectorAll('.rp-share-to:checked')).map(function(c){return c.value;});
+        if(!to.length){ showToast('Pick at least one teammate (or use Copy link)'); return false; }
+        showToast('Report shared with '+to.length+' teammate'+(to.length>1?'s':'')+' · '+to.slice(0,2).join(', ')+(to.length>2?' +'+(to.length-2):''));
+      }
+    });
+  };
 
   // ── Click handler ──
   document.addEventListener('click', function(e){

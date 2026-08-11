@@ -757,10 +757,10 @@ body {
       <div class="card">
         <div class="card-header"><span class="card-title">Actions on this audience</span></div>
         <div class="card-body ol-actions">
-          <button class="btn btn-ghost" onclick="needSel()||atlasToast('Assigned '+selCount()+' donors to a solicitor for cultivation')">Assign to solicitor</button>
+          <button class="btn btn-ghost" onclick="needSel()||goAfter('atlas-portfolio-assign.html','Assigning '+selCount()+' donors to a solicitor · opening portfolio rebalance')">Assign to solicitor</button>
           <a class="btn btn-ghost" href="atlas-email-compose.html">Compose appeal email</a>
-          <button class="btn btn-ghost" onclick="needSel()||atlasToast('Follow-up tasks created for '+selCount()+' donors · due in 7 days')">Add follow-up tasks</button>
-          <button class="btn btn-ghost" onclick="needSel()||atlasToast(selCount()+' donors added to the prospect pipeline')">Add to pipeline</button>
+          <button class="btn btn-ghost" onclick="needSel()||goAfter('atlas-tasks.html','Follow-up tasks created for '+selCount()+' donors · opening Tasks')">Add follow-up tasks</button>
+          <button class="btn btn-ghost" onclick="needSel()||goAfter('atlas-pipeline.html',selCount()+' donors added to the prospect pipeline · opening Pipeline')">Add to pipeline</button>
         </div>
       </div>
     </div>
@@ -861,6 +861,8 @@ body {
     };
     window.selCount=function(){ return document.querySelectorAll('#ol-list .ol-cb:checked').length; };
     window.needSel=function(){ if(selCount()===0){ atlasToast('Select at least one donor in the preview first'); return true; } return false; };
+    // Toast, then follow through to the relevant page so the action has a destination.
+    window.goAfter=function(url,msg){ atlasToast(msg); setTimeout(function(){ window.location=url; }, 850); };
     window.toggleAll=function(cb){ document.querySelectorAll('#ol-list .ol-row').forEach(function(r){ if(r.style.display!=='none'){ var b=r.querySelector('.ol-cb'); b.checked=cb.checked; } }); olSel(); };
     window.filterPreview=function(q){ q=(q||'').toLowerCase(); var shown=0; document.querySelectorAll('#ol-list .ol-row').forEach(function(r){ var hit=r.textContent.toLowerCase().indexOf(q)!==-1; r.style.display=hit?'':'none'; if(hit)shown++; }); document.getElementById('ol-empty').style.display=shown?'none':'block'; };
     window.toggleChip=function(el){ el.classList.toggle('on'); recount(); };
