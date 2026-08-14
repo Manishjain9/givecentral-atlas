@@ -123,7 +123,10 @@ a{color:inherit;text-decoration:none;}
 .ts-meta{display:flex;flex-wrap:wrap;gap:6px;}
 .ts-chip{font-size:10.5px;font-weight:500;padding:3px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text-3);display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
 .ts-chip svg{width:10px;height:10px;flex-shrink:0;}
-.ts-chip.effect{background:var(--amber-light);border-color:#FCD9A8;color:var(--gold);max-width:100%;overflow:hidden;text-overflow:ellipsis;}
+.ts-chip.effect{max-width:100%;overflow:hidden;text-overflow:ellipsis;}
+.ts-chip.effect.warn{background:var(--amber-light);border-color:#FCD9A8;color:var(--gold);}
+.ts-chip.effect.info{background:var(--blue-light,#DBEAFE);border-color:#BFDBFE;color:var(--blue);}
+.ts-chip.effect.good{background:var(--green-light);border-color:#A7F3D0;color:var(--green);}
 .ts-chip.effect.label{background:var(--surface);border-color:var(--border);color:var(--text-3);}
 .ts-phase{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:5px;letter-spacing:.03em;}
 .ts-phase.P1{background:var(--green-light);color:var(--green);}
@@ -513,15 +516,27 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 function icoUser(){ return '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4" r="2.2"/><path d="M2 11c0-2.2 1.8-3.5 4-3.5s4 1.3 4 3.5"/></svg>'; }
 function icoEye(){ return '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1 6s2-3.5 5-3.5S11 6 11 6 9 9.5 6 9.5 1 6 1 6z"/><circle cx="6" cy="6" r="1.4"/></svg>'; }
 function icoWarn(){ return '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1.5L11 10.5H1L6 1.5zM6 5v2.5M6 9v.3"/></svg>'; }
+function icoBolt(){ return '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.8 1L2.5 6.6h3l-.8 4.4L9 5.2H5.7z"/></svg>'; }
+function icoCheck(){ return '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.3l2.3 2.3L9.6 3.5"/></svg>'; }
+// Classify what a tag's effect actually does, so we don't slap a warning triangle on benign automations.
+function effectKind(e){
+  if (isNoEffect(e)) return 'label';
+  var s=(e||'').toLowerCase();
+  if (/block|suppress|hidden|hide|exclud|prevent|reject|restrict|denied|not (appear|publish|visible)|replaced with|removed|red warning|amber warning|warning fires|warning banner|flag/.test(s)) return 'warn';
+  if (/enable|grant|allow|permit/.test(s)) return 'good';
+  return 'info';   // automations: triggers a task, appears in a report, etc.
+}
 
 function tagCard(it){
   const meta = TYPE_META[it.type] || {};
   const acc = meta.acc || 'blue';
+  const eKind = effectKind(it.effect);
   let effectChip;
-  if (isNoEffect(it.effect)) {
+  if (eKind === 'label') {
     effectChip = '<span class="ts-chip effect label">Label only</span>';
   } else {
-    effectChip = '<span class="ts-chip effect" title="'+esc(it.effect)+'">'+icoWarn()+esc(it.effect)+'</span>';
+    const eIco = eKind==='warn' ? icoWarn() : (eKind==='good' ? icoCheck() : icoBolt());
+    effectChip = '<span class="ts-chip effect '+eKind+'" title="'+esc(it.effect)+'">'+eIco+esc(it.effect)+'</span>';
   }
   // Top-right marker: fixed (Atlas Intelligence / Super-admin) or archived (staff)
   let topRight = meta.fixed

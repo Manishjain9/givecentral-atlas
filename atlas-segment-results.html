@@ -858,10 +858,48 @@ body {
     window.srFilter=function(q){ srQuery=(q||'').toLowerCase(); srPage=0; srRender(); };
     window.srGoPage=function(p){ srPage=p; srRender(); };
     srRender();
+    function srInputCss(){ return 'width:100%;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:DM Sans,sans-serif;box-sizing:border-box'; }
+    function srLbl(t){ return '<div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#64748b;margin-bottom:6px">'+t+'</div>'; }
+    function srApplyTagToSelected(t){
+      document.querySelectorAll('#sr-tbody .sr-cb:checked').forEach(function(cb){
+        var td=cb.closest('tr').querySelectorAll('td')[2]; if(!td) return;
+        if([].some.call(td.querySelectorAll('.tag'),function(x){return x.textContent.trim()===t;})) return;
+        var chip=document.createElement('span'); chip.className='tag grey'; chip.style.marginLeft='4px'; chip.textContent=t; td.appendChild(chip);
+      });
+    }
+    function srExportSelected(n){
+      var rows=[].slice.call(document.querySelectorAll('#sr-tbody .sr-cb:checked')).map(function(cb){ return cb.closest('tr'); });
+      var out=[['Donor','Tag','Last gift','Last amount','Lifetime','Officer']];
+      rows.forEach(function(r){ var t=r.querySelectorAll('td'); out.push([t[1].textContent.trim(),(t[2].textContent||'').trim(),t[3].textContent.trim(),t[4].textContent.trim(),t[5].textContent.trim(),t[6].textContent.trim()]); });
+      var csv=out.map(function(r){return r.map(function(x){return '"'+String(x).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+      var blob=new Blob([csv],{type:'text/csv'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='segment-selected-donors.csv'; document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+      if(window.atlasToast)atlasToast(n+' donor'+(n>1?'s':'')+' exported · segment-selected-donors.csv');
+    }
     window.srBulk=function(kind){
       var n=srCount(); if(!n){ if(window.atlasToast)atlasToast('Select at least one donor first'); return; }
-      var msg={outreach:n+' donors added to an outreach list',email:'Composing an email to '+n+' donors',tag:'Tag applied to '+n+' donors',export:n+' donors exported · CSV downloading'}[kind];
-      if(window.atlasToast)atlasToast(msg);
+      if(kind==='email'){
+        var ln='Segment · '+n+' donor'+(n>1?'s':'');
+        if(window.atlasToast)atlasToast('Composing to '+n+' selected donor'+(n>1?'s':'')+' · opening the email builder');
+        setTimeout(function(){ window.location='atlas-email-campaign.html?listName='+encodeURIComponent(ln)+'&listCount='+n; },850);
+        return;
+      }
+      if(kind==='export'){ srExportSelected(n); return; }
+      if(kind==='outreach'){
+        atlasOpenModal({ title:'Add to outreach list', sub:n+' selected donor'+(n>1?'s':'')+' will be added', cta:'Add '+n+' donor'+(n>1?'s':''),
+          rawBody: srLbl('Choose a list')
+            + '<select id="sr-list" onchange="document.getElementById(\'sr-list-new\').style.display=this.value===\'__new\'?\'block\':\'none\'" style="'+srInputCss()+'"><option>Major Gift Cultivation</option><option>Cathedral Capital segment</option><option>Annual Appeal 2026</option><option>Lapsed + LYBUNT</option><option value="__new">+ New list…</option></select>'
+            + '<input id="sr-list-new" placeholder="New list name…" style="display:none;margin-top:8px;'+srInputCss()+'">',
+          onSave:function(){ var s=document.getElementById('sr-list'); var name=s.value==='__new'?((document.getElementById('sr-list-new').value||'').trim()||'New list'):s.value; if(window.atlasToast)atlasToast(n+' donor'+(n>1?'s':'')+' added to “'+name+'”'); }
+        });
+        return;
+      }
+      if(kind==='tag'){
+        atlasOpenModal({ title:'Apply tag', sub:'Tag '+n+' selected donor'+(n>1?'s':''), cta:'Apply to '+n+' donor'+(n>1?'s':''),
+          fields:[{id:'sr-tag',label:'Tag',type:'select',options:['Major donor','Prospect','Board member','Volunteer','Event attendee','Cathedral Capital','Do not contact']}],
+          onSave:function(v){ var t=v['sr-tag']||'Tag'; srApplyTagToSelected(t); if(window.atlasToast)atlasToast('“'+t+'” applied to '+n+' donor'+(n>1?'s':'')); }
+        });
+        return;
+      }
     };
     window.runSegment=function(btn){
       if(btn.classList.contains('is-busy')) return;
