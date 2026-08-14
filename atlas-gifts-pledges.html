@@ -985,7 +985,7 @@ body {
       <div class="pb-fund-list" id="pb-fund-list"></div>
 
       <!-- Gifts within the batch -->
-      <div class="pb-section-title">Gifts in this batch <span style="font-weight:500;letter-spacing:0;text-transform:none;color:var(--text-3,#64748B);font-size:11px;margin-left:6px">first 5 shown</span></div>
+      <div class="pb-section-title">Gifts in this batch <span id="pb-gifts-note" style="font-weight:500;letter-spacing:0;text-transform:none;color:var(--text-3,#64748B);font-size:11px;margin-left:6px">first 5 shown</span></div>
       <div class="pb-gifts" id="pb-gifts"></div>
     </div>
 
@@ -999,7 +999,7 @@ body {
         Export to GL
       </button>
       <div class="pb-spacer"></div>
-      <button class="pb-btn primary" onclick="if(window.atlasToast)atlasToast('Opening all 14 gifts in this batch')">
+      <button class="pb-btn primary" id="pb-viewall" onclick="pbViewAllGifts()">
         View all gifts →
       </button>
     </div>
@@ -2035,8 +2035,30 @@ body {
           return '<div class="pb-gift"><div><div class="pb-gift-name">' + g.donor + '</div><div class="pb-gift-fund">' + g.fund + '</div></div><div class="pb-gift-type">' + g.type + '</div><div class="pb-gift-amt">' + fmtMoneyFull(g.amt) + '</div></div>';
         }).join('')
       : '<div style="padding:20px;text-align:center;color:var(--text-3);font-style:italic;font-size:12px">Click "View all gifts" below to see all ' + b.gifts + ' gifts in this batch</div>';
+    // remember which batch is open, and reset the "view all" state each time
+    window.__pbCurrent = b;
+    var _note = document.getElementById('pb-gifts-note'); if(_note) _note.textContent = 'first 5 shown';
+    var _va = document.getElementById('pb-viewall'); if(_va) _va.style.display = (b.gifts > b.gifts_sample.length) ? '' : 'none';
     document.getElementById('pb-drawer-scrim').classList.add('show');
     document.getElementById('pb-drawer').classList.add('show');
+  };
+  // Expand the drawer to list every gift in the batch (no separate posted-batch page).
+  window.pbViewAllGifts = function(){
+    var b = window.__pbCurrent; if(!b) return;
+    var all = b.gifts_sample.slice();
+    var FN=['Michael','Sarah','John','Patricia','Kevin','Anne','Thomas','Grace','Brian','Nora','Sean','Ruth','Paul','Helen','Mark','Ellen','Colm','Aoife','Declan','Maria'];
+    var LN=['Byrne','Kelly','Murphy','Walsh','Ryan','Doyle','Brennan','Nolan','Casey','Flynn','Healy','Quinn','Gallagher','Reilly'];
+    var funds = (b.funds && b.funds.length) ? b.funds.map(function(f){return f.name;}) : ['General Fund'];
+    var types = ['Check','Cash','Card','ACH','Stock'];
+    var avg = b.total / b.gifts, i = 0;
+    while(all.length < b.gifts){ var f=FN[i%FN.length], l=LN[(i*3)%LN.length];
+      all.push({ donor:f+' '+l, fund:funds[i%funds.length], type:types[i%types.length], amt:Math.max(25, Math.round(avg*(0.4+((i*7)%13)/10))) }); i++; }
+    document.getElementById('pb-gifts').innerHTML = all.map(function(g){
+      return '<div class="pb-gift"><div><div class="pb-gift-name">'+g.donor+'</div><div class="pb-gift-fund">'+g.fund+'</div></div><div class="pb-gift-type">'+g.type+'</div><div class="pb-gift-amt">'+fmtMoneyFull(g.amt)+'</div></div>';
+    }).join('');
+    var note = document.getElementById('pb-gifts-note'); if(note) note.textContent = 'all '+b.gifts+' shown';
+    var vb = document.getElementById('pb-viewall'); if(vb) vb.style.display = 'none';
+    if(window.atlasToast) atlasToast('Showing all '+b.gifts+' gifts in this batch');
   };
   window.closePostedDrawer = function(){
     var s = document.getElementById('pb-drawer-scrim'), d = document.getElementById('pb-drawer');

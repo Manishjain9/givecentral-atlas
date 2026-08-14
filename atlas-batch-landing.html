@@ -1039,6 +1039,12 @@ body {
     </div>
     <div class="bl-mb">
       <div class="bl-f full"><label>Template</label><select id="tpl-pick" onchange="renderTplCols()"><option data-cols="Donor · Date · Fund · Amount · Check # · Appeal">CMA Mail Response · 9 columns</option><option data-cols="Donor · Pledge amount · Schedule · Fund · Start date · Soft credits">Major Gift Pledge · 11 columns</option><option data-cols="Constituent · Txn date · Designation · Gross amount · Payment type · Txn ID">Online Giving Export · 8 columns</option></select></div>
+      <div class="bl-f full"><label>Batch type</label>
+        <div class="bl-seg" id="tpl-type" data-type="gift" style="display:flex;width:100%">
+          <button type="button" class="on" data-t="gift" style="flex:1" onclick="tplSetType('gift')">Gift batch</button>
+          <button type="button" data-t="pledge" style="flex:1" onclick="tplSetType('pledge')">Pledge batch</button>
+        </div>
+      </div>
       <div class="bl-f full"><label>Batch name</label><input id="tpl-name" type="text" placeholder="e.g., May CMA Mail Response"></div>
       <div class="bl-f full"><label>Folder / campaign</label><select id="tpl-folder" onchange="onFolderChange(this,'tpl-newfolder')"><option>2026 — CMA</option><option>2026 — Cathedral Capital</option><option>General Fund</option><option value="__new">+ Create new folder…</option></select></div>
       <div class="bl-f full" id="tpl-newfolder" style="display:none"><label>New folder name</label><input type="text" placeholder="e.g., 2026 — Spring Appeal"></div>
@@ -1166,8 +1172,9 @@ body {
   // ── Template modal ──
   window.openTemplate=function(){ document.getElementById('nb-menu').classList.remove('show'); renderTplCols(); document.getElementById('tpl-ov').classList.add('show'); };
   window.closeTemplate=function(){ document.getElementById('tpl-ov').classList.remove('show'); };
-  window.renderTplCols=function(){ var o=document.getElementById('tpl-pick').selectedOptions[0]; document.getElementById('tpl-cols').textContent=o.getAttribute('data-cols')||''; };
-  window.createFromTemplate=function(){ closeTemplate(); var t=document.getElementById('tpl-pick').value.split(' · ')[0]; var nm=(document.getElementById('tpl-name').value||t).trim(); go('atlas-batch-entry.html','Opening “'+nm+'” from '+t+' template'); };
+  window.tplSetType=function(t){ var seg=document.getElementById('tpl-type'); if(!seg) return; seg.setAttribute('data-type',t); seg.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-t')===t); }); };
+  window.renderTplCols=function(){ var pick=document.getElementById('tpl-pick'); var o=pick.options[pick.selectedIndex]; document.getElementById('tpl-cols').textContent=o.getAttribute('data-cols')||''; tplSetType(/pledge/i.test(o.textContent)?'pledge':'gift'); };
+  window.createFromTemplate=function(){ closeTemplate(); var t=document.getElementById('tpl-pick').value.split(' · ')[0]; var nm=(document.getElementById('tpl-name').value||t).trim(); var seg=document.getElementById('tpl-type'); var type=seg?seg.getAttribute('data-type'):'gift'; go('atlas-batch-entry.html?type='+type,'Opening “'+nm+'” as a '+(type==='pledge'?'pledge':'gift')+' batch from '+t+' template'); };
 
   // ── Bottom templates list → open clean batch directly (no popup) ──
   window.useTemplateDirect=function(name){ go('atlas-batch-entry.html','Opening clean batch · '+name+' template applied'); };
