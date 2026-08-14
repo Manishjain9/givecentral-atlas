@@ -332,8 +332,8 @@ a{color:inherit;text-decoration:none;}
       </div>
       <div class="field">
         <label>Category</label>
-        <input id="m-cat" list="m-cat-options" placeholder="Pick an existing category or type a new one…" autocomplete="off">
-        <datalist id="m-cat-options"></datalist>
+        <select id="m-cat-sel" onchange="onCatSelChange()"></select>
+        <input id="m-cat-new" placeholder="New category name…" maxlength="40" autocomplete="off" style="display:none;margin-top:8px">
       </div>
       <div class="field" id="m-sees-wrap">
         <label>Who can see</label>
@@ -735,26 +735,32 @@ function openModal(editId){
   // category suggestions come from the existing staff-label taxonomy
   const cats = [];
   DATA.forEach(d=>{ if(d.type==='Staff label' && cats.indexOf(d.category)===-1) cats.push(d.category); });
-  document.getElementById('m-cat-options').innerHTML = cats.sort().map(c=>'<option value="'+esc(c)+'"></option>').join('');
   document.getElementById('m-sees-wrap').style.display = seg ? 'none' : '';
   document.getElementById('modal-title').textContent = item ? 'Edit staff label' : (seg ? 'Create new segment' : 'Create new staff label');
   document.getElementById('m-save').textContent = item ? 'Save changes' : (seg ? 'Save segment' : 'Save label');
   document.getElementById('m-name').value = item ? item.name : '';
   document.getElementById('m-desc').value = item ? item.desc : '';
-  document.getElementById('m-cat').value  = item ? item.category
+  var curCat = item ? item.category
     : ((!seg && selKey && selKey.split('¦')[0]==='Staff label') ? selKey.split('¦')[1] : '');
+  var catSel = document.getElementById('m-cat-sel');
+  catSel.innerHTML = cats.sort().map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('') + '<option value="__new">+ New category…</option>';
+  if (curCat && cats.indexOf(curCat)===-1) catSel.insertAdjacentHTML('afterbegin','<option value="'+esc(curCat)+'">'+esc(curCat)+'</option>');
+  catSel.value = curCat || (catSel.options[0] ? catSel.options[0].value : '__new');
+  var catNew = document.getElementById('m-cat-new'); catNew.style.display='none'; catNew.value='';
   document.getElementById('m-sees').value = item ? item.sees : 'All staff';
   document.getElementById('modal').classList.add('show');
   setTimeout(()=>document.getElementById('m-name').focus(),80);
 }
 function closeModal(){ document.getElementById('modal').classList.remove('show'); editingId=null; }
+function onCatSelChange(){ var s=document.getElementById('m-cat-sel'); var n=document.getElementById('m-cat-new'); var isNew=s.value==='__new'; n.style.display=isNew?'':'none'; if(isNew) setTimeout(function(){n.focus();},30); }
 function saveItem(){
   const seg = tab==='segments';
   const nameEl = document.getElementById('m-name');
   const name = (nameEl.value||'').trim();
   if (!name){ nameEl.style.borderColor='var(--rose)'; nameEl.focus(); return; }
   nameEl.style.borderColor='';
-  const cat  = (document.getElementById('m-cat').value||'').trim();
+  const catSelEl = document.getElementById('m-cat-sel');
+  const cat  = ((catSelEl.value==='__new' ? (document.getElementById('m-cat-new').value||'') : catSelEl.value)||'').trim();
   const desc = (document.getElementById('m-desc').value||'').trim();
   const sees = document.getElementById('m-sees').value;
 
