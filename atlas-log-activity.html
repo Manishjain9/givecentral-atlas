@@ -833,8 +833,8 @@ Verbal: $30k over 3 years, first payment by June 30 if we can get the agreement 
         Auto-saving · all changes preserved
       </div>
       <button class="btn btn-ghost" onclick="window.location='atlas-donor-360.html'">Cancel</button>
-      <button class="btn btn-ghost" onclick="alert('Activity saved · ready to log another for Margaret')">Save &amp; log another</button>
-      <button class="btn btn-primary" onclick="atlasConfirm({icon:'success',title:'Activity logged',message:'follow-up task created for May 7',confirmText:'View donor',cancelText:'Stay here',onConfirm:function(){window.location='atlas-donor-360.html';}})">
+      <button class="btn btn-ghost" onclick="logAnother()">Save &amp; log another</button>
+      <button class="btn btn-primary" id="la-save" onclick="saveActivity()">
         Save activity &amp; create task
       </button>
     </div>
@@ -844,6 +844,66 @@ Verbal: $30k over 3 years, first payment by June 30 if we can get the agreement 
 </div>
 
 </div>
+
+<!-- Log-activity form interactivity -->
+<script>
+(function(){
+  function T(m){ if(window.atlasToast) atlasToast(m); }
+  // Activity type — single select
+  document.querySelectorAll('.act-types .act-pill').forEach(function(p){
+    p.addEventListener('click', function(){ document.querySelectorAll('.act-types .act-pill').forEach(function(x){x.classList.remove('on');}); p.classList.add('on'); });
+  });
+  // Outcome — single select
+  document.querySelectorAll('.outcome-row .outcome-chip').forEach(function(c){
+    c.addEventListener('click', function(){ document.querySelectorAll('.outcome-row .outcome-chip').forEach(function(x){x.classList.remove('on');}); c.classList.add('on'); });
+  });
+  // Remove a constituent / attendee chip
+  function wireX(x){ x.addEventListener('click', function(e){ e.stopPropagation(); var pill=x.closest('.donor-pill'); if(pill){ pill.remove(); T('Removed'); } }); }
+  document.querySelectorAll('.donor-pill .x').forEach(wireX);
+  // + add additional attendee
+  var addA=[].slice.call(document.querySelectorAll('.muted')).filter(function(s){ return /add additional attendee/i.test(s.textContent); })[0];
+  if(addA){ addA.style.cursor='pointer'; addA.style.color='var(--blue)'; addA.style.fontWeight='600';
+    addA.addEventListener('click', function(){
+      var name=(window.prompt('Add attendee name')||'').trim(); if(!name) return;
+      var pill=document.createElement('div'); pill.className='donor-pill'; pill.style.marginTop='6px';
+      pill.innerHTML='<span class="av" style="background:#64748B">'+(name[0]||'?').toUpperCase()+'</span> '+name+' <span style="color:var(--text-3);font-weight:400">· attendee</span> <span class="x">×</span>';
+      addA.parentNode.insertBefore(pill, addA);
+      wireX(pill.querySelector('.x')); T(name+' added as attendee');
+    });
+  }
+  // Follow-up toggle — enable/disable task fields + primary button label
+  var tog=document.querySelector('.followup-card .toggle');
+  if(tog){ tog.addEventListener('click', function(){
+    var off=tog.classList.toggle('off'); var card=tog.closest('.followup-card');
+    if(card) card.querySelectorAll('.fld').forEach(function(f){ f.disabled=off; f.style.opacity=off?'.5':''; });
+    var save=document.getElementById('la-save'); if(save) save.textContent = off ? 'Save activity' : 'Save activity & create task';
+    T(off?'Follow-up task off':'Follow-up task on');
+  }); }
+  // Attachments — real file picker
+  var az=document.querySelector('.attach-zone');
+  if(az){ var fi=document.createElement('input'); fi.type='file'; fi.multiple=true; fi.style.display='none'; document.body.appendChild(fi);
+    az.style.cursor='pointer'; az.addEventListener('click', function(){ fi.click(); });
+    fi.addEventListener('change', function(){ var n=fi.files.length; if(!n) return; var names=[].map.call(fi.files,function(f){return f.name;}); az.innerHTML='<strong style="color:var(--green);font-weight:600">✓ '+n+' file'+(n>1?'s':'')+' attached</strong> &nbsp;· '+names.slice(0,2).join(', ')+(n>2?' +'+(n-2):''); T(n+' file'+(n>1?'s':'')+' attached'); });
+  }
+  // Save & log another — reset the "what happened" fields, keep type/date/donor
+  window.logAnother=function(){
+    var subj=document.querySelector('input.fld[placeholder*="Short title"]'); if(subj) subj.value='';
+    var notes=document.querySelector('textarea.fld'); if(notes) notes.value='';
+    document.querySelectorAll('.outcome-row .outcome-chip').forEach(function(x){x.classList.remove('on');});
+    var body=document.querySelector('.drawer-body'); if(body) body.scrollTo({top:0,behavior:'smooth'});
+    if(subj) subj.focus();
+    T('Activity saved · ready to log another for Margaret');
+  };
+  // Save activity (+ optional task) — confirm reflects the follow-up toggle
+  window.saveActivity=function(){
+    var taskOn = tog && !tog.classList.contains('off');
+    var dueEl = document.querySelector('.followup-card input.fld[value*="2026"]');
+    atlasConfirm({ icon:'success', title:'Activity logged',
+      message: taskOn ? ('Follow-up task created'+(dueEl&&dueEl.value?(' · due '+dueEl.value):'')) : 'Added to Margaret’s timeline',
+      confirmText:'View donor', cancelText:'Stay here', onConfirm:function(){ window.location='atlas-donor-360.html'; } });
+  };
+})();
+</script>
 
 <!-- ════════════════════════════════════════════════════════
      Atlas Dead-CTA Rescue · v1
