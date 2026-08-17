@@ -542,7 +542,10 @@
     pane.querySelector('#rc-next').addEventListener('click', function(){ if(R.page<maxPage){R.page++;renderRecips();} });
     pane.querySelector('#rc-all').addEventListener('change', function(){ rows.forEach(function(x){ if(this.checked)R.sel[x.id]=1; else delete R.sel[x.id]; },this); renderRecips(); });
     pane.querySelectorAll('.rc-ck').forEach(function(ck){ ck.addEventListener('change', function(){ var id=ck.closest('tr').dataset.id; if(ck.checked)R.sel[id]=1; else delete R.sel[id]; renderRecips(); }); });
-    var bulk=pane.querySelector('#rc-bulk'); if(bulk) bulk.addEventListener('click', function(e){ var b=e.target.closest('.bb'); if(!b)return; var a=b.dataset.b; if(a==='clear'){R.sel={};renderRecips();return;} toast(({resend:'Resend queued to '+selN+' recipients',suppress:selN+' recipients suppressed · added to DNC',segment:selN+' recipients added to a segment',export:'Exporting '+selN+' recipients to CSV'})[a]); if(a!=='resend'){R.sel={};} renderRecips(); });
+    var bulk=pane.querySelector('#rc-bulk'); if(bulk) bulk.addEventListener('click', function(e){ var b=e.target.closest('.bb'); if(!b)return; var a=b.dataset.b;
+      if(a==='clear'){ R.sel={}; renderRecips(); return; }
+      var fn=window.__mdBulk && window.__mdBulk[a]; if(fn) fn();
+    });
   }
   function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
   function eventFor(st){ return ({delivered:'Delivered · 9:01 AM',opened:'Opened · 11:24 AM',clicked:'Clicked link · 11:26 AM',bounced:'Hard bounce · 9:00 AM',failed:'Send failed · 9:00 AM'})[st]||'—'; }
@@ -633,6 +636,54 @@
     ov.querySelector('#sp-cancel').addEventListener('click', closeOv);
     ov.querySelector('#sp-go').addEventListener('click', function(){ closeOv(); toast(M.bounced.toLocaleString()+' addresses suppressed · added to DNC list'); });
   }
+
+  // ── Recipient bulk actions (act on the selected recipients) ──
+  function selectedRecips(){ return POOL.filter(function(x){ return R.sel[x.id]; }); }
+  function bulkResend(){
+    var n=selectedRecips().length; if(!n){ toast('Select recipients first'); return; }
+    ov.innerHTML='<div class="m"><div class="mh2"><h3>Resend to '+n+' selected recipient'+(n>1?'s':'')+'</h3><p>'+M.subject+'</p></div>'+
+      '<div class="mb"><div class="callout">Resends “'+M.subject+'” to the <b>'+n+'</b> recipient'+(n>1?'s':'')+' you selected. Suppressed / bounced addresses are skipped automatically.</div>'+
+        '<label class="fl">Send</label>'+
+        '<div class="radio on" data-r="now"><input type="radio" name="brs" checked><div><div class="rt2">Send now</div><div class="rs">Goes out immediately</div></div></div>'+
+        '<div class="radio" data-r="sched"><input type="radio" name="brs"><div><div class="rt2">Schedule</div><div class="rs">Pick a better time window</div></div></div>'+
+        '<div id="brs-when" style="display:none"><label class="fl">When</label><div style="display:flex;gap:8px"><input class="fld" type="text" placeholder="yyyy-mm-dd" style="flex:1"><input class="fld" type="time" value="09:00" style="max-width:120px"></div></div>'+
+        '<label class="fl">Freshen the subject line (optional)</label><input class="fld" value="Reminder: '+M.subject+'"></div>'+
+      '<div class="mf"><button class="btn" id="brs-cancel">Cancel</button><button class="btn primary" id="brs-go">Resend to '+n+'</button></div></div>';
+    ov.classList.add('show');
+    ov.querySelectorAll('.radio').forEach(function(r){ r.addEventListener('click', function(){ ov.querySelectorAll('.radio').forEach(function(x){x.classList.remove('on');}); r.classList.add('on'); r.querySelector('input').checked=true; document.getElementById('brs-when').style.display=r.dataset.r==='sched'?'block':'none'; }); });
+    ov.querySelector('#brs-cancel').addEventListener('click', closeOv);
+    ov.querySelector('#brs-go').addEventListener('click', function(){ var sched=ov.querySelector('.radio.on').dataset.r==='sched'; R.sel={}; renderRecips(); resendDone(n, 'selected recipient'+(n>1?'s':''), sched); });
+  }
+  function bulkSuppress(){
+    var n=selectedRecips().length; if(!n){ toast('Select recipients first'); return; }
+    ov.innerHTML='<div class="m"><div class="mh2"><h3>Suppress '+n+' recipient'+(n>1?'s':'')+'</h3><p>Add to the diocese DNC list</p></div>'+
+      '<div class="mb"><div class="callout">The <b>'+n+'</b> selected recipient'+(n>1?'s':'')+' will be added to the Do-Not-Contact list. Future sends skip them automatically. Undo anytime from Communications → Suppressed.</div></div>'+
+      '<div class="mf"><button class="btn" id="bsp-cancel">Cancel</button><button class="btn danger" id="bsp-go">Suppress '+n+'</button></div></div>';
+    ov.classList.add('show');
+    ov.querySelector('#bsp-cancel').addEventListener('click', closeOv);
+    ov.querySelector('#bsp-go').addEventListener('click', function(){ closeOv(); R.sel={}; renderRecips(); toast(n+' recipient'+(n>1?'s':'')+' suppressed · added to DNC list'); });
+  }
+  function bulkSegment(){
+    var n=selectedRecips().length; if(!n){ toast('Select recipients first'); return; }
+    ov.innerHTML='<div class="m"><div class="mh2"><h3>Add '+n+' to a segment</h3><p>Reusable saved list</p></div>'+
+      '<div class="mb"><label class="fl">Choose a segment</label>'+
+        '<select class="fld" id="bsg-sel"><option>Major Gift Cultivation</option><option>Cathedral Capital segment</option><option>Lapsed + LYBUNT</option><option>Non-openers · re-engage</option><option value="__new">+ New segment…</option></select>'+
+        '<div id="bsg-new" style="display:none;margin-top:8px"><label class="fl">New segment name</label><input class="fld" id="bsg-name" placeholder="e.g. May recap · engaged"></div></div>'+
+      '<div class="mf"><button class="btn" id="bsg-cancel">Cancel</button><button class="btn primary" id="bsg-go">Add '+n+' to segment</button></div></div>';
+    ov.classList.add('show');
+    var bsel=document.getElementById('bsg-sel'); bsel.addEventListener('change', function(){ document.getElementById('bsg-new').style.display=bsel.value==='__new'?'block':'none'; });
+    ov.querySelector('#bsg-cancel').addEventListener('click', closeOv);
+    ov.querySelector('#bsg-go').addEventListener('click', function(){ var name=bsel.value==='__new'?((document.getElementById('bsg-name').value||'').trim()||'New segment'):bsel.value; closeOv(); R.sel={}; renderRecips(); toast(n+' recipient'+(n>1?'s':'')+' added to “'+name+'”'); });
+  }
+  function bulkExport(){
+    var list=selectedRecips(), n=list.length; if(!n){ toast('Select recipients first'); return; }
+    var out=[['Recipient','Email','Status','Last event']];
+    list.forEach(function(x){ out.push([x.n, x.e, cap(x.st), eventFor(x.st)]); });
+    var csv=out.map(function(r){ return r.map(function(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+    var blob=new Blob([csv],{type:'text/csv'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='message-recipients-selected.csv'; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
+    toast(n+' recipient'+(n>1?'s':'')+' exported · message-recipients-selected.csv');
+  }
+  window.__mdBulk = { resend:bulkResend, suppress:bulkSuppress, segment:bulkSegment, export:bulkExport };
 
   document.getElementById('a-resend').addEventListener('click', openResend);
   initCharts();
