@@ -422,6 +422,15 @@
     .due-ok   { color: var(--text-3); }
     .task-overdue .task-text { color: var(--rose); }
     .task-overdue .task-check { border-color: var(--rose); }
+    /* Completed state + undo */
+    .task-check { position: relative; }
+    .task-check.on { background: var(--blue); border-color: var(--blue) !important; }
+    .task-check.on::after { content: '✓'; color: #fff; font-size: 9px; font-weight: 700; line-height: 1; }
+    .task-item.completed .task-text { text-decoration: line-through; color: var(--text-3); }
+    .task-item.completed .task-due { opacity: .5; text-decoration: line-through; }
+    #d360-undo { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #0F172A; color: #fff; padding: 11px 16px; border-radius: 10px; box-shadow: 0 8px 24px rgba(15,23,42,.25); font: 500 13px/1.4 'DM Sans', sans-serif; z-index: 100050; display: flex; align-items: center; gap: 16px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+    #d360-undo.show { opacity: 1; pointer-events: auto; }
+    #d360-undo .u-btn { color: #93C5FD; font-weight: 700; cursor: pointer; }
 
     /* AI insight banner */
     .ai-banner {
@@ -1422,6 +1431,34 @@ body {
 
     </div><!-- /profile-wrap -->
   </div><!-- /main -->
+
+  <!-- Right-panel task complete + undo -->
+  <div id="d360-undo"><span class="u-msg"></span><span class="u-btn">Undo</span></div>
+  <script>
+  (function(){
+    var list = document.querySelector('.tasks-list'); if(!list) return;
+    var toast = document.getElementById('d360-undo');
+    var msgEl = toast.querySelector('.u-msg'), btnEl = toast.querySelector('.u-btn'), timer;
+    function showUndo(text, onUndo){
+      msgEl.textContent = text; toast.classList.add('show');
+      clearTimeout(timer); timer = setTimeout(function(){ toast.classList.remove('show'); }, 5000);
+      btnEl.onclick = function(){ onUndo && onUndo(); toast.classList.remove('show'); clearTimeout(timer); };
+    }
+    list.addEventListener('click', function(e){
+      var chk = e.target.closest('.task-check'); if(!chk) return;
+      var item = chk.closest('.task-item'); if(!item) return;
+      var completing = !item.classList.contains('completed');
+      item.classList.toggle('completed', completing);
+      chk.classList.toggle('on', completing);
+      if(completing){
+        var t = (item.querySelector('.task-text')||{}).textContent || 'Task';
+        showUndo('Task completed · ' + (t.length>34 ? t.slice(0,34)+'…' : t), function(){
+          item.classList.remove('completed'); chk.classList.remove('on');
+        });
+      }
+    });
+  })();
+  </script>
 
   <script>
     /* ═══════ Giving history — year-by-year data (drives chart + ledger + year-detail) ═══════ */
