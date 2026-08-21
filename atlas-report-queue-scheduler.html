@@ -1,354 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Atlas — Report Queue &amp; Scheduler</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --navy:  #0E1E35; --navy2: #152844;
-      --blue:  #2563EB; --bluel: #DBEAFE; --bluep: #EFF6FF;
-      --green: #15803D; --greenl: #DCFCE7;
-      --amber: #D97706; --amberl: #FEF3C7;
-      --rose:  #BE185D; --rosel:  #FCE7F3;
-      --purp:  #7C3AED; --purpl:  #EDE9FE;
-      --teal:  #0D9488; --teall:  #CCFBF1;
-      --text:  #0F172A; --text2: #334155; --text3: #64748B;
-      --border:#E2E8F0; --surf:   #F8FAFC;
-    }
-    html { font-size: 14px; -webkit-font-smoothing: antialiased; }
-    body { font-family: 'DM Sans', sans-serif; background: #F0F4F8; color: var(--text); padding: 20px 16px 64px; }
-    .wrap { max-width: 1100px; margin: 0 auto; }
-
-    /* ── PAGE HEADER ── */
-    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
-    .ph-left {}
-    .ph-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text); }
-    .ph-sub   { font-size: 12px; color: var(--text3); margin-top: 3px; }
-    .ph-btns  { display: flex; gap: 7px; }
-    .btn { padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .13s; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
-    .btn svg { width: 11px; height: 11px; }
-    .btn-ghost { background: white; border: 1px solid var(--border); color: var(--text2); }
-    .btn-ghost:hover { background: var(--surf); }
-    .btn-blue { background: var(--blue); color: white; border: none; }
-    .btn-blue:hover { background: #1D4ED8; }
-    .btn-green { background: var(--green); color: white; border: none; }
-    .btn-green:hover { background: #126e31; }
-
-    /* ── SHELL ── */
-    .shell { display: grid; grid-template-columns: 220px 1fr; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: white; min-height: 640px; }
-
-    /* ── SIDEBAR ── */
-    .sidebar { background: var(--surf); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-    .sb-top { padding: 14px 14px 12px; border-bottom: 1px solid var(--border); }
-    .sb-section-label { font-size: 9px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
-    .sb-new { width: 100%; padding: 7px; border-radius: 8px; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--bluep); color: var(--blue); border: 1px solid var(--bluel); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .12s; }
-    .sb-new:hover { background: var(--bluel); }
-    .sb-new svg { width: 11px; height: 11px; }
-
-    .folder-list { flex: 1; overflow-y: auto; padding: 8px; }
-    .folder-row  { display: flex; align-items: center; gap: 7px; padding: 6px 8px; border-radius: 7px; cursor: pointer; font-size: 12px; color: var(--text3); transition: background .1s; user-select: none; }
-    .folder-row:hover  { background: white; }
-    .folder-row.active { background: white; color: var(--text); font-weight: 600; }
-    .folder-row svg    { width: 13px; height: 13px; flex-shrink: 0; }
-    .folder-count { margin-left: auto; font-size: 10px; color: var(--text3); }
-    .folder-children { padding-left: 16px; }
-    .queue-row { display: flex; align-items: center; gap: 7px; padding: 5px 8px; border-radius: 7px; cursor: pointer; font-size: 11px; color: var(--text3); transition: background .1s; }
-    .queue-row:hover  { background: white; }
-    .queue-row.active { background: var(--bluep); color: var(--blue); }
-    .q-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-
-    /* ── MAIN AREA ── */
-    .main { display: flex; flex-direction: column; overflow: hidden; }
-    .topbar { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-    .tb-title { font-size: 15px; font-weight: 600; color: var(--text); flex: 1; }
-    .tb-sub   { font-size: 11px; color: var(--text3); }
-    .status-pill { font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 20px; }
-    .sp-draft   { background: var(--surf); color: var(--text3); border: 1px solid var(--border); }
-    .sp-running { background: var(--bluep); color: var(--blue); }
-    .sp-done    { background: var(--greenl); color: var(--green); }
-
-    .main-body { flex: 1; overflow-y: auto; padding: 18px 20px; display: flex; flex-direction: column; gap: 16px; }
-
-    .section-label { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-    .sl-badge { font-size: 10px; background: var(--surf); color: var(--text3); border: 1px solid var(--border); border-radius: 20px; padding: 1px 8px; font-weight: 500; text-transform: none; letter-spacing: 0; }
-
-    /* ── QUEUE ITEMS ── */
-    .queue-list { display: flex; flex-direction: column; gap: 6px; }
-    .q-item { display: flex; align-items: center; gap: 10px; padding: 10px 13px; background: white; border: 1px solid var(--border); border-radius: 9px; cursor: grab; transition: all .12s; }
-    .q-item:hover { border-color: #94A3B8; }
-    .q-item.running { border-color: var(--blue); background: var(--bluep); }
-    .q-item.done    { border-color: var(--green); background: var(--greenl); opacity: .75; }
-    .q-item.queued  { opacity: .6; }
-    .qi-drag { color: var(--text3); flex-shrink: 0; }
-    .qi-drag svg { width: 10px; height: 12px; }
-    .qi-num { width: 20px; height: 20px; border-radius: 50%; background: var(--surf); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: var(--text3); flex-shrink: 0; }
-    .q-item.running .qi-num { background: var(--bluep); border-color: var(--bluel); color: var(--blue); }
-    .q-item.done    .qi-num { background: var(--greenl); border-color: #BBF7D0; color: var(--green); }
-    .qi-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .qi-icon svg { width: 13px; height: 13px; }
-    .qi-body { flex: 1; min-width: 0; }
-    .qi-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .q-item.running .qi-name { color: var(--blue); }
-    .q-item.done    .qi-name { color: var(--green); }
-    .qi-meta { font-size: 11px; color: var(--text3); }
-    .qi-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; }
-    .qb-pending { background: var(--surf); color: var(--text3); border: 1px solid var(--border); }
-    .qb-running { background: var(--bluep); color: var(--blue); }
-    .qb-done    { background: var(--greenl); color: var(--green); }
-    .qb-queued  { background: var(--surf); color: var(--text3); }
-    .qi-remove { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--border); background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text3); transition: all .12s; }
-    .qi-remove:hover { background: var(--rosel); border-color: var(--rose); color: var(--rose); }
-    .qi-remove svg { width: 9px; height: 9px; }
-    .add-row { display: flex; align-items: center; gap: 7px; padding: 8px 12px; border: 1px dashed var(--border); border-radius: 8px; cursor: pointer; font-size: 12px; color: var(--text3); background: none; width: 100%; font-family: 'DM Sans', sans-serif; text-align: left; margin-top: 4px; transition: all .12s; }
-    .add-row:hover { border-color: var(--blue); color: var(--blue); background: var(--bluep); }
-    .add-row svg { width: 11px; height: 11px; }
-
-    /* ── TWO-PANEL ── */
-    .two-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media(max-width:700px) { .two-panel { grid-template-columns: 1fr; } .shell { grid-template-columns: 1fr; } }
-
-    .panel-card { background: white; border: 1px solid var(--border); border-radius: 11px; overflow: hidden; }
-    .pc-head { padding: 10px 14px; background: var(--surf); border-bottom: 1px solid var(--border); font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text3); display: flex; align-items: center; gap: 7px; }
-    .pc-head svg { width: 13px; height: 13px; }
-    .pc-body { padding: 12px 14px; }
-
-    /* Forms */
-    .form-row { margin-bottom: 10px; }
-    .form-row:last-child { margin-bottom: 0; }
-    .f-label { font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 4px; }
-    .f-input  { width: 100%; padding: 6px 9px; border: 1px solid var(--border); border-radius: 7px; font-size: 12px; color: var(--text); background: var(--surf); font-family: 'DM Sans', sans-serif; outline: none; }
-    .f-input:focus  { border-color: var(--blue); background: white; }
-    .f-select { width: 100%; padding: 6px 9px; border: 1px solid var(--border); border-radius: 7px; font-size: 12px; color: var(--text); background: var(--surf); font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; }
-    .f-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-
-    /* Toggles */
-    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: .5px solid var(--border); }
-    .toggle-row:last-child { border-bottom: none; }
-    .tr-label { font-size: 12px; color: var(--text); }
-    .tr-sub   { font-size: 11px; color: var(--text3); margin-top: 1px; }
-    .toggle { width: 34px; height: 18px; border-radius: 10px; border: none; cursor: pointer; position: relative; transition: background .15s; }
-    .toggle.on  { background: var(--blue); }
-    .toggle.off { background: #CBD5E1; }
-    .toggle-thumb { position: absolute; top: 2px; width: 14px; height: 14px; background: white; border-radius: 50%; transition: left .15s; }
-    .toggle.on  .toggle-thumb { left: 18px; }
-    .toggle.off .toggle-thumb { left: 2px; }
-
-    /* Recipients */
-    .recipient-row { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: .5px solid var(--border); font-size: 12px; }
-    .recipient-row:last-child { border-bottom: none; }
-    .r-av { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
-    .r-name { flex: 1; color: var(--text); font-weight: 500; }
-    .r-role { font-size: 11px; color: var(--text3); font-weight: 400; }
-    .r-scope { font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 20px; flex-shrink: 0; }
-
-    /* Progress bar */
-    .progress-wrap { margin-bottom: 14px; }
-    .progress-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 12px; color: var(--text2); }
-    .progress-track { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
-    .progress-fill  { height: 100%; border-radius: 3px; background: var(--blue); }
-
-    /* Output rows */
-    .output-row { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: .5px solid var(--border); font-size: 12px; }
-    .output-row:last-child { border-bottom: none; }
-    .o-icon { width: 24px; height: 24px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .o-icon svg { width: 11px; height: 11px; }
-    .o-name { flex: 1; color: var(--text); font-weight: 500; }
-    .o-meta { font-size: 11px; color: var(--text3); font-weight: 400; margin-top: 1px; }
-    .o-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; }
-
-    /* View switcher */
-    .view-switcher { display: flex; gap: 6px; margin-bottom: 16px; }
-    .vs-btn { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: white; color: var(--text3); font-family: 'DM Sans', sans-serif; transition: all .12s; }
-    .vs-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
-  </style>
-
-<style id="atlas-canon-sidebar-css">
-  /* Hide ONLY the top-level bespoke nav sidebar (direct-body child).
-     Inner feature sidebars (queue-lists, batch-folder rails) stay — they're
-     content, not navigation. */
-  body > aside.sidebar:not(.atlas-canon):not([id]) { display: none !important; }
-  /* Edge case: the original bespoke sidebar might exist deeper but be a system-
-     nav clone. Catch those too if they sit directly under <body>. */
-  body > aside.sidebar.atlas-canon ~ aside.sidebar { display: none !important; }
-
-  /* Shift page content to the right of the fixed sidebar */
-  body { padding-left: 220px !important; }
-
-  /* ── The canonical sidebar itself ── */
-  #atlas-canonical-sidebar.sidebar {
-    width: 220px !important;
-    background: #0E1E35 !important;
-    position: fixed !important;
-    top: 0 !important; left: 0 !important; bottom: 0 !important;
-    height: 100vh !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-    z-index: 9999 !important;
-    margin: 0 !important; padding: 0 !important;
-    font-family: 'DM Sans', sans-serif;
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas — Report Queue &amp; Scheduler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#0E1E35;--blue:#2563EB;--blue600:#1D4ED8;--bluel:#DBEAFE;--bluep:#EFF6FF;
+    --green:#15803D;--greenl:#DCFCE7;--amber:#B45309;--amberl:#FEF3C7;--rose:#BE185D;--rosel:#FCE7F3;
+    --purp:#7C3AED;--purpl:#EDE9FE;--teal:#0D9488;--teall:#CCFBF1;
+    --text:#0F172A;--text2:#334155;--text3:#64748B;--border:#E5EAF1;--border2:#D7DEE8;--surf:#F8FAFC;
+    --radius:14px;--sh-sm:0 1px 2px rgba(15,23,42,.05);--sh-md:0 8px 26px rgba(15,23,42,.10);--sh-lg:0 22px 52px rgba(15,23,42,.20);
+    --font:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--serif:'DM Serif Display',serif;
   }
+  html{font-size:14px;-webkit-font-smoothing:antialiased}
+  body{font-family:var(--font);background:#F0F4F8;color:var(--text);line-height:1.5}
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+  input,select{font-family:inherit}
+  ::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#c9d2df;border-radius:20px;border:2px solid #F0F4F8}
+  a{text-decoration:none;color:inherit}
 
-  /* Logo */
-  #atlas-canonical-sidebar .sidebar-logo {
-    padding: 18px 18px 14px !important;
-    display: flex !important; align-items: center !important; gap: 9px !important;
-    border-bottom: 1px solid rgba(255,255,255,.08) !important;
-    background: #0E1E35 !important;
-    flex-shrink: 0 !important;
-  }
-  #atlas-canonical-sidebar .logo-mark {
-    width: 52px !important; height: 40px !important;
-    background: transparent !important; border-radius: 0 !important;
-    display: flex !important; align-items: center !important; justify-content: center !important;
-    flex-shrink: 0 !important;
-  }
-  #atlas-canonical-sidebar .logo-mark svg { width: 52px !important; height: 40px !important; }
-  #atlas-canonical-sidebar .logo-text-wrap { display: flex !important; flex-direction: column !important; }
-  #atlas-canonical-sidebar .logo-name { font-family: 'DM Serif Display', serif !important; font-size: 20px !important; color: white !important; line-height: 1 !important; }
-  #atlas-canonical-sidebar .logo-sub  { font-size: 9px !important; font-weight: 600 !important; letter-spacing: .1em !important; text-transform: uppercase !important; color: rgba(255,255,255,.3) !important; margin-top: 3px !important; }
+  /* ── App sidebar — canonical Atlas chrome (matches Dashboard) ── */
+  .sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--navy);display:flex;flex-direction:column;z-index:40;overflow:hidden}
+  .sidebar-logo{padding:18px 18px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .logo-mark{width:52px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .logo-mark svg{width:52px;height:40px}
+  .logo-text-wrap{display:flex;flex-direction:column}
+  .logo-name{font-family:var(--serif);font-size:20px;color:#fff;line-height:1}
+  .logo-sub{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:3px}
+  .sidebar-search{margin:12px 12px 6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;gap:8px;padding:8px 12px}
+  .sidebar-search svg{width:13px;height:13px;color:rgba(255,255,255,.3);flex-shrink:0}
+  .sidebar-search input{background:none;border:none;outline:none;width:100%;font-size:12px;color:rgba(255,255,255,.6);font-family:var(--font);cursor:pointer}
+  .sidebar-search input::placeholder{color:rgba(255,255,255,.3)}
+  .sidebar-scroll{flex:1;overflow-y:auto;padding-bottom:6px}
+  .sidebar-scroll::-webkit-scrollbar{width:4px}.sidebar-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
+  .nav-group{padding:8px 8px 0}
+  .nav-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:0 10px;margin-bottom:4px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;transition:all .15s;margin-bottom:1px}
+  .nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
+  .nav-item.active{background:var(--blue);color:#fff}
+  .nav-item svg{width:14px;height:14px;flex-shrink:0}
+  .nav-badge{margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.6);border-radius:10px;padding:1px 7px;font-size:10px;font-weight:600}
+  .nav-item.active .nav-badge{background:rgba(255,255,255,.2);color:#fff}
+  .nav-badge.alert{background:#EF4444;color:#fff}
+  .sidebar-user{padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:9px}
+  .user-avatar{width:30px;height:30px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+  .user-name{font-size:12px;font-weight:500;color:rgba(255,255,255,.75)}
+  .user-role{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px}
 
-  /* Search */
-  #atlas-canonical-sidebar .sidebar-search {
-    margin: 12px 12px 6px !important;
-    background: rgba(255,255,255,.07) !important;
-    border: 1px solid rgba(255,255,255,.1) !important;
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
-    display: flex !important; align-items: center !important; gap: 8px !important;
-    flex-shrink: 0 !important;
-  }
-  #atlas-canonical-sidebar .sidebar-search svg {
-    width: 13px !important; height: 13px !important;
-    color: rgba(255,255,255,.3) !important; flex-shrink: 0 !important;
-  }
-  #atlas-canonical-sidebar .sidebar-search input {
-    background: none !important; border: none !important; outline: none !important;
-    width: 100% !important; font-size: 12px !important;
-    color: rgba(255,255,255,.6) !important; font-family: 'DM Sans', sans-serif !important;
-    cursor: pointer !important;
-  }
-  #atlas-canonical-sidebar .sidebar-search input::placeholder { color: rgba(255,255,255,.3) !important; }
+  /* ── Main ── */
+  .main{margin-left:220px;min-height:100vh;padding:22px 30px 70px}
+  .wrap{max-width:1200px;margin:0 auto}
+  .builder{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}
+  .builder>.sec{margin-bottom:0;height:100%;display:flex;flex-direction:column}
+  .builder>.sec .sec-body{flex:1}
+  .sec-wide{grid-column:1 / -1}
+  @media(max-width:980px){.builder{grid-template-columns:1fr}}
 
-  /* Scrollable middle */
-  #atlas-canonical-sidebar .sidebar-scroll {
-    flex: 1 1 auto !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    min-height: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
-  #atlas-canonical-sidebar .sidebar-scroll::-webkit-scrollbar { width: 4px; }
-  #atlas-canonical-sidebar .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-  #atlas-canonical-sidebar .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.10); border-radius: 4px; }
+  .head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+  .h-title{font-family:var(--serif);font-size:26px;color:var(--text);line-height:1.1}
+  .h-sub{font-size:13px;color:var(--text3);margin-top:4px}
+  .h-actions{display:flex;gap:8px;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;font-size:13px;font-weight:600;transition:.13s;white-space:nowrap}
+  .btn svg{width:14px;height:14px}
+  .btn-ghost{background:#fff;border:1px solid var(--border2);color:var(--text2)}.btn-ghost:hover{border-color:#94A3B8}
+  .btn-blue{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(37,99,235,.28)}.btn-blue:hover{background:var(--blue600)}
+  .btn-green{background:var(--green);color:#fff;box-shadow:0 3px 10px rgba(21,128,61,.25)}.btn-green:hover{filter:brightness(.95)}
 
-  /* Nav */
-  #atlas-canonical-sidebar .nav-group { padding: 8px 8px 0 !important; }
-  #atlas-canonical-sidebar .nav-label {
-    font-size: 9px !important; font-weight: 700 !important; letter-spacing: .1em !important;
-    text-transform: uppercase !important; color: rgba(255,255,255,.28) !important;
-    padding: 0 10px !important; margin-bottom: 4px !important;
-  }
-  #atlas-canonical-sidebar .nav-item {
-    display: flex !important; align-items: center !important; gap: 9px !important;
-    padding: 8px 10px !important; border-radius: 7px !important;
-    font-size: 12px !important; font-weight: 500 !important;
-    color: rgba(255,255,255,.55) !important; cursor: pointer !important;
-    transition: all .15s !important; margin-bottom: 1px !important;
-    text-decoration: none !important;
-  }
-  #atlas-canonical-sidebar .nav-item:hover { background: rgba(255,255,255,.07) !important; color: rgba(255,255,255,.85) !important; }
-  #atlas-canonical-sidebar .nav-item.active { background: #2563EB !important; color: white !important; }
-  #atlas-canonical-sidebar .nav-item svg { width: 14px !important; height: 14px !important; flex-shrink: 0 !important; }
-  #atlas-canonical-sidebar .nav-badge {
-    margin-left: auto !important; background: rgba(255,255,255,.12) !important;
-    color: rgba(255,255,255,.6) !important; border-radius: 10px !important;
-    padding: 1px 7px !important; font-size: 10px !important; font-weight: 600 !important;
-  }
-  #atlas-canonical-sidebar .nav-item.active .nav-badge { background: rgba(255,255,255,.2) !important; color: white !important; }
-  #atlas-canonical-sidebar .nav-badge.alert { background: #EF4444 !important; color: white !important; }
+  /* Queue bar with switcher */
+  .qbar{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:20px;box-shadow:var(--sh-sm)}
+  .qswitch{display:flex;align-items:center;gap:11px;cursor:pointer;padding:6px 10px 6px 6px;border-radius:11px;border:1px solid transparent;position:relative}
+  .qswitch:hover{background:var(--surf);border-color:var(--border)}
+  .qs-ic{width:40px;height:40px;border-radius:11px;background:var(--bluep);color:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .qs-ic svg{width:19px;height:19px}
+  .qs-name{font-size:15.5px;font-weight:700;line-height:1.2}
+  .qs-meta{font-size:11.5px;color:var(--text3);margin-top:1px}
+  .qs-chev{color:var(--text3)}
+  .status-pill{font-size:10.5px;font-weight:700;padding:3px 11px;border-radius:20px}
+  .sp-draft{background:var(--surf);color:var(--text3);border:1px solid var(--border)}
+  .sp-scheduled{background:var(--bluep);color:var(--blue)}
+  .sp-running{background:var(--bluep);color:var(--blue)}
+  .qbar .g{flex:1}
 
-  /* User block */
-  #atlas-canonical-sidebar .sidebar-user {
-    margin-top: auto !important; padding: 12px !important;
-    border-top: 1px solid rgba(255,255,255,.08) !important;
-    display: flex !important; align-items: center !important; gap: 9px !important;
-    background: #0E1E35 !important; flex-shrink: 0 !important;
-  }
-  #atlas-canonical-sidebar .user-avatar {
-    width: 30px !important; height: 30px !important; border-radius: 50% !important;
-    background: #2563EB !important; display: flex !important;
-    align-items: center !important; justify-content: center !important;
-    font-size: 11px !important; font-weight: 700 !important; color: white !important;
-    flex-shrink: 0 !important;
-  }
-  #atlas-canonical-sidebar .user-name { font-size: 12px !important; font-weight: 500 !important; color: rgba(255,255,255,.75) !important; }
-  #atlas-canonical-sidebar .user-role { font-size: 10px !important; color: rgba(255,255,255,.35) !important; margin-top: 1px !important; }
+  /* dropdown menu */
+  .menu{position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--sh-lg);padding:7px;min-width:300px;z-index:60;display:none}
+  .menu.open{display:block}
+  .menu-lbl{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:8px 10px 5px}
+  .menu-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px}
+  .menu-item:hover{background:var(--surf)}
+  .menu-item .mi-ic{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .menu-item .mi-ic svg{width:13px;height:13px}
+  .menu-item .mi-name{font-weight:600}.menu-item .mi-meta{font-size:11px;color:var(--text3)}
+  .menu-item .mi-check{margin-left:auto;color:var(--blue)}
+  .menu-div{height:1px;background:var(--border);margin:6px 4px}
+  .menu-new{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--blue)}
+  .menu-new:hover{background:var(--bluep)}
+
+  /* Section cards */
+  .sec{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--sh-sm);margin-bottom:16px;overflow:hidden}
+  .sec-head{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--border)}
+  .sec-num{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .sec-t{font-size:15px;font-weight:700}
+  .sec-d{font-size:12px;color:var(--text3);margin-top:1px}
+  .sec-body{padding:16px 18px}
+  .sec-head .g{flex:1}
+  .count-badge{font-size:11px;font-weight:600;color:var(--text3);background:var(--surf);border:1px solid var(--border);border-radius:20px;padding:2px 10px}
+
+  /* Report queue items */
+  .q-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;border:1px solid var(--border);border-radius:11px;margin-bottom:8px;transition:.12s}
+  .q-item:last-of-type{margin-bottom:0}
+  .q-item:hover{border-color:#B7C2D2;box-shadow:var(--sh-sm)}
+  .qi-drag{color:#C3CCD8;cursor:grab;flex-shrink:0}.qi-drag svg{width:11px;height:14px}
+  .qi-num{width:22px;height:22px;border-radius:50%;background:var(--surf);border:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .qi-ic{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .qi-ic svg{width:15px;height:15px}
+  .qi-body{flex:1;min-width:0}
+  .qi-name{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .qi-meta{font-size:11.5px;color:var(--text3);margin-top:1px}
+  .qi-x{width:26px;height:26px;border-radius:7px;border:1px solid var(--border);color:var(--text3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .qi-x:hover{background:var(--rosel);border-color:var(--rose);color:var(--rose)}
+  .qi-x svg{width:10px;height:10px}
+  .add-row{display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;border:1.5px dashed var(--border2);border-radius:10px;width:100%;font-size:12.5px;font-weight:600;color:var(--text3);margin-top:10px;transition:.13s}
+  .add-row:hover{border-color:var(--blue);color:var(--blue);background:var(--bluep)}
+  .add-row svg{width:13px;height:13px}
+
+  /* Schedule */
+  .f-label{font-size:11.5px;font-weight:600;color:var(--text2);margin-bottom:6px}
+  .f-input,.f-select{width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:9px;font-size:13px;color:var(--text);background:#fff;outline:none;transition:.13s}
+  .f-input:focus,.f-select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  .f-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:34px;cursor:pointer}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .fgroup{margin-bottom:14px}.fgroup:last-child{margin-bottom:0}
+  /* custom freq inline builder */
+  .custom-box{border:1.5px solid var(--bluel);background:var(--bluep);border-radius:11px;padding:13px;margin-top:10px;display:none}
+  .custom-box.show{display:block;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .cb-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--text2)}
+  .cb-mini{width:60px;padding:8px 10px;border:1.5px solid var(--border2);border-radius:8px;font-size:13px;text-align:center;background:#fff;outline:none}
+  .cb-sel{padding:8px 10px;border:1.5px solid var(--border2);border-radius:8px;font-size:13px;background:#fff;outline:none;cursor:pointer}
+  .daypills{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap}
+  .daypill{width:34px;height:34px;border-radius:9px;border:1.5px solid var(--border2);background:#fff;font-size:12px;font-weight:600;color:var(--text3);display:flex;align-items:center;justify-content:center}
+  .daypill.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .cb-summary{font-size:12px;color:var(--blue);font-weight:600;margin-top:11px;display:flex;align-items:center;gap:6px}
+
+  /* toggles */
+  .tog-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+  .tog-row:last-child{border-bottom:none}
+  .tr-t{font-size:13px;font-weight:500}.tr-s{font-size:11.5px;color:var(--text3);margin-top:1px}
+  .tog{width:38px;height:22px;border-radius:20px;position:relative;flex-shrink:0;transition:background .15s;margin-left:auto}
+  .tog.on{background:var(--blue)}.tog.off{background:#CBD5E1}
+  .tog::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
+  .tog.on::after{left:18px}
+  .adv-toggle{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--text3);margin-top:12px;cursor:pointer}
+  .adv-toggle svg{width:12px;height:12px;transition:transform .18s}
+  .adv-toggle.open svg{transform:rotate(90deg)}
+  .adv-box{display:none;margin-top:8px}.adv-box.show{display:block}
+
+  /* recipients */
+  .rec-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border);font-size:13px}
+  .rec-row:last-of-type{border-bottom:none}
+  .r-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+  .r-name{font-weight:600}.r-role{font-size:11.5px;color:var(--text3);font-weight:400}
+  .r-scope{margin-left:auto;font-size:10.5px;font-weight:600;padding:3px 10px;border-radius:20px;flex-shrink:0}
+  .r-x{width:26px;height:26px;border-radius:7px;border:1px solid var(--border);color:var(--text3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .r-x:hover{background:var(--rosel);border-color:var(--rose);color:var(--rose)}.r-x svg{width:10px;height:10px}
+
+  /* modal */
+  .scrim{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100;opacity:0;pointer-events:none;transition:.18s}
+  .scrim.show{opacity:1;pointer-events:auto}
+  .modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-48%) scale(.98);width:min(520px,94vw);max-height:88vh;background:#fff;border-radius:16px;box-shadow:var(--sh-lg);z-index:101;opacity:0;pointer-events:none;transition:.18s;display:flex;flex-direction:column;overflow:hidden}
+  .modal.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+  .m-head{padding:18px 22px;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;display:flex;align-items:flex-start;gap:12px}
+  .m-head h3{font-family:var(--serif);font-size:20px;font-weight:400}
+  .m-head .m-sub{font-size:12px;opacity:.85;margin-top:2px}
+  .m-x{margin-left:auto;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:#fff}
+  .m-x svg{width:13px;height:13px}
+  .m-body{padding:18px 22px;overflow-y:auto;flex:1}
+  .m-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;background:var(--surf)}
+  .m-foot .g{flex:1}
+
+  /* report picker */
+  .pick-search{display:flex;align-items:center;gap:8px;border:1.5px solid var(--border2);border-radius:9px;padding:9px 12px;margin-bottom:12px;color:var(--text3)}
+  .pick-search input{border:none;outline:none;width:100%;font-size:13px;color:var(--text)}
+  .pick-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:.12s}
+  .pick-item:hover{border-color:#93C5FD;background:var(--bluep)}
+  .pick-item.added{opacity:.5;pointer-events:none}
+  .pick-ic{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .pick-ic svg{width:15px;height:15px}
+  .pick-name{font-size:13.5px;font-weight:600}.pick-desc{font-size:11.5px;color:var(--text3)}
+  .pick-add{margin-left:auto;font-size:12px;font-weight:700;color:var(--blue);flex-shrink:0}
+
+  /* run overlay */
+  .run-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--sh-sm);margin-bottom:16px;overflow:hidden;display:none}
+  .run-card.show{display:block}
+  .progress-track{height:6px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:8px}
+  .progress-fill{height:100%;background:var(--blue);border-radius:4px;transition:width .4s}
+  .run-item{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+  .run-item:last-child{border-bottom:none}
+  .run-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700}
+
+  /* toast */
+  .toast{position:fixed;bottom:24px;left:calc(50% + 110px);transform:translateX(-50%) translateY(16px);background:var(--navy);color:#fff;padding:12px 18px;border-radius:11px;box-shadow:var(--sh-lg);font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;z-index:200;opacity:0;pointer-events:none;transition:.22s}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast .ti{width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .toast .ti svg{width:12px;height:12px}
+  @media(max-width:760px){.sidebar{display:none}.main{margin-left:0;padding:18px}.toast{left:50%}}
 </style>
-
-
-<style id="atlas-sidebar-logo-canon">
-  /* Atlas sidebar logo — canonical styling injected to guarantee
-     consistent stacking (Atlas above, By GiveCentral below) across every screen. */
-  .sidebar-logo {
-    display: flex !important;
-    align-items: center !important;
-    gap: 11px !important;
-    padding: 18px 18px 14px !important;
-    border-bottom: 1px solid rgba(255,255,255,.08) !important;
-  }
-  .sidebar-logo .logo-mark {
-    width: 52px !important;
-    height: 40px !important;
-    flex-shrink: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: transparent !important;
-    border-radius: 0 !important;
-  }
-  .sidebar-logo .logo-mark svg {
-    width: 52px !important;
-    height: 40px !important;
-  }
-  .sidebar-logo .logo-text-wrap {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 3px !important;
-  }
-  .sidebar-logo .logo-name {
-    font-family: 'DM Serif Display', serif !important;
-    font-size: 20px !important;
-    color: white !important;
-    line-height: 1 !important;
-    font-weight: 400 !important;
-    margin: 0 !important;
-  }
-  .sidebar-logo .logo-sub {
-    font-size: 9px !important;
-    font-weight: 600 !important;
-    letter-spacing: .1em !important;
-    text-transform: uppercase !important;
-    color: rgba(255,255,255,.35) !important;
-    margin: 0 !important;
-    line-height: 1 !important;
-  }
-</style>
-<style id="ur-nav-underline-fix">.nav-item,.nav-item:link,.nav-item:visited,.nav-item:hover,.nav-item:focus,.nav-item:active,.sidebar-item,.sidebar-item:hover{text-decoration:none}</style>
 </head>
 <body>
 
-<!-- ════ Atlas canonical sidebar (auto-injected) ════ -->
-<aside class="sidebar atlas-canon" id="atlas-canonical-sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-mark">
+<!-- ══ Atlas app nav ══ -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark" aria-label="Atlas by GiveCentral">
         <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
           <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
           <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
@@ -362,1393 +228,363 @@
           <circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
         </svg>
       </div>
-    <div class="logo-text-wrap">
-      <span class="logo-name">Atlas</span>
-      <span class="logo-sub">By GiveCentral</span>
+      <div class="logo-text-wrap"><span class="logo-name">Atlas</span><span class="logo-sub">By GiveCentral</span></div>
     </div>
-  </div>
 
-  <a href="atlas-search.html" style="display:block;text-decoration:none">
-    <div class="sidebar-search">
-      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
-      <input type="text" placeholder="Search donors, gifts…" readonly>
-    </div>
-  </a>
+    <a href="atlas-search.html" style="display:block;text-decoration:none">
+      <div class="sidebar-search">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+        <input type="text" placeholder="Search donors, gifts…" readonly>
+      </div>
+    </a>
 
-  <div class="sidebar-scroll">
+    <div class="sidebar-scroll">
 
     <div class="nav-group">
       <div class="nav-label">Main</div>
-      <a class="nav-item" href="atlas-dashboard.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>
-        Dashboard
-      </a>
-      <a class="nav-item" href="atlas-donors-list.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>
-        Donors
-        <span class="nav-badge">3,847</span>
-      </a>
-      <a class="nav-item" href="atlas-gifts-pledges.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>
-        Gifts &amp; pledges
-        <span class="nav-badge">142</span>
-      </a>
-      <a class="nav-item" href="atlas-campaign-dashboard.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>
-        Campaigns
-      </a>
+      <a class="nav-item" href="atlas-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>Dashboard</a>
+      <a class="nav-item" href="atlas-donors-list.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>Donors<span class="nav-badge">3,847</span></a>
+      <a class="nav-item" href="atlas-gifts-pledges.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>Gifts &amp; pledges<span class="nav-badge">142</span></a>
+      <a class="nav-item" href="atlas-campaign-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>Campaigns</a>
       <div class="nav-subwrap" style="margin:2px 0 4px 20px;border-left:1.5px solid rgba(255,255,255,.12)">
         <a class="nav-item" href="atlas-funds.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><ellipse cx="7" cy="3.5" rx="5" ry="2"/><path d="M2 3.5v7c0 1.1 2.2 2 5 2s5-.9 5-2v-7M2 7c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg>Funds</a>
         <a class="nav-item" href="atlas-appeals.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v5H6l-2.5 2v-2H2z"/></svg>Appeals</a>
       </div>
-      <a class="nav-item active" href="atlas-reports.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>
-        Reports
-      </a>
+      <a class="nav-item active" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>Reports</a>
     </div>
 
     <div class="nav-group" style="margin-top:8px">
       <div class="nav-label">Fundraising</div>
-      <a class="nav-item" href="atlas-pipeline.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
-        Prospect pipeline
-        <span class="nav-badge">28</span>
-      </a>
-      <a class="nav-item" href="atlas-tasks.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>
-        Tasks &amp; reminders
-        <span class="nav-badge alert">7</span>
-      </a>
-      <a class="nav-item" href="atlas-communications.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>
-        Communications
-      </a>
-      <a class="nav-item" href="atlas-events-dashboard.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>
-        Events
-      </a>
-      <a class="nav-item" href="atlas-volunteer-management.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
-        Volunteers
-      </a>
+      <a class="nav-item" href="atlas-pipeline.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>Prospect pipeline<span class="nav-badge">28</span></a>
+      <a class="nav-item" href="atlas-tasks.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>Tasks &amp; reminders<span class="nav-badge alert">7</span></a>
+      <a class="nav-item" href="atlas-communications.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>Communications</a>
+      <a class="nav-item" href="atlas-events-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>Events</a>
+      <a class="nav-item" href="atlas-volunteer-management.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Volunteers</a>
     </div>
 
     <div class="nav-group" style="margin-top:8px">
       <div class="nav-label">Intelligence</div>
-      <a class="nav-item" href="atlas-guru-ai.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>
-        Guru AI
-      </a>
+      <a class="nav-item" href="atlas-guru-ai.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>Guru AI</a>
+      <a class="nav-item" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>Analytics</a>
     </div>
 
     <div class="nav-group" style="margin-top:8px">
       <div class="nav-label">Admin</div>
-      <a class="nav-item" href="atlas-users-roles.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
-        Users &amp; roles
-      </a>
+      <a class="nav-item" href="atlas-users-roles.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Users &amp; roles</a>
       <a class="nav-item" href="atlas-tags.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/></svg>Tags &amp; Segment</a>
-      <a class="nav-item" href="atlas-integrations.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>
-        Integrations
-      </a>
+      <a class="nav-item" href="atlas-integrations.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>Integrations</a>
       <a class="nav-item" href="atlassmarttriggers.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.6 1.5L3 8h3.7l-.6 4.6L11 5.9H7.4z"/></svg>Smart Triggers</a>
-      <a class="nav-item" href="atlas-sync.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>
-        Sync
-      </a>
-      <a class="nav-item" href="atlas-location-manage.html">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>
-        Location portal
-      </a>
+      <a class="nav-item" href="atlas-sync.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>Sync</a>
+      <a class="nav-item" href="atlas-location-manage.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>Location portal</a>
     </div>
 
-  </div><!-- /.sidebar-scroll -->
+    </div><!-- /.sidebar-scroll -->
 
-  <div class="sidebar-user">
-    <div class="user-avatar">SR</div>
+    <div class="sidebar-user">
+      <div class="user-avatar">SR</div>
+      <div style="flex:1;min-width:0"><div class="user-name">Sarah Reynolds</div><div class="user-role">Development Director</div></div>
+    </div>
+  </aside>
+
+<!-- ══ Main ══ -->
+<main class="main"><div class="wrap">
+
+  <div class="head">
     <div>
-      <div class="user-name">Sarah Reynolds</div>
-      <div class="user-role">Development Director</div>
+      <div class="h-title">Report scheduler</div>
+      <div class="h-sub">Group reports into a queue, choose when it runs, and who receives it.</div>
     </div>
-  </div>
-</aside>
-
-<div class="wrap">
-
-  <div class="page-header">
-    <div class="ph-left">
-      <div class="ph-title">Report queue &amp; scheduler</div>
-      <div class="ph-sub">Queue reports to run in sequence · save to folders · schedule and email to recipients</div>
-    </div>
-    <div class="ph-btns">
-      <div class="view-switcher">
-        <button class="vs-btn active" id="vsb-build" onclick="setView('build',this)">Queue builder</button>
-        <button class="vs-btn" id="vsb-run"   onclick="setView('run',this)">Live run view</button>
-      </div>
-      <button class="btn btn-blue">
-        <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
-        New queue
-      </button>
+    <div class="h-actions">
+      <button class="btn btn-ghost" onclick="openNewQueue()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>New queue</button>
+      <button class="btn btn-green" onclick="runNow()"><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><path d="M3 2l7 4-7 4V2z"/></svg>Run now</button>
     </div>
   </div>
 
-  <div class="shell">
+  <!-- Queue switcher bar -->
+  <div class="qbar">
+    <div class="qswitch" id="qswitch" onclick="toggleQMenu(event)">
+      <div class="qs-ic"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h4l2 2h10v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg></div>
+      <div><div class="qs-name" id="qName">May 2026 parish package</div><div class="qs-meta" id="qMeta">Monthly parish reports · last run Apr 30</div></div>
+      <svg class="qs-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      <div class="menu" id="qMenu"></div>
+    </div>
+    <div class="g"></div>
+    <span class="status-pill sp-draft" id="qStatus">Draft</span>
+  </div>
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="sb-top">
-        <div class="sb-section-label">Report queues</div>
-        <button class="sb-new">
-          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
-          New queue
-        </button>
-      </div>
-      <div class="folder-list">
-        <!-- Monthly parish -->
-        <div>
-          <div class="folder-row active">
-            <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1 2.5h3l1.5 1.5H12a.7.7 0 01.7.7v6a.7.7 0 01-.7.7H1a.7.7 0 01-.7-.7V3.2A.7.7 0 011 2.5z"/></svg>
-            Monthly parish reports
-            <span class="folder-count">3</span>
-          </div>
-          <div class="folder-children">
-            <div class="queue-row active">
-              <div class="q-dot" style="background:var(--blue)"></div>
-              May 2026 package
-            </div>
-            <div class="queue-row">
-              <div class="q-dot" style="background:var(--green)"></div>
-              April 2026 package
-            </div>
-            <div class="queue-row">
-              <div class="q-dot" style="background:var(--green)"></div>
-              March 2026 archive
-            </div>
-          </div>
-        </div>
-        <!-- Campaign -->
-        <div style="margin-top:4px">
-          <div class="folder-row">
-            <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1 2.5h3l1.5 1.5H12a.7.7 0 01.7.7v6a.7.7 0 01-.7.7H1a.7.7 0 01-.7-.7V3.2A.7.7 0 011 2.5z"/></svg>
-            Campaign reports
-            <span class="folder-count">5</span>
-          </div>
-        </div>
-        <!-- Board -->
-        <div style="margin-top:4px">
-          <div class="folder-row">
-            <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1 2.5h3l1.5 1.5H12a.7.7 0 01.7.7v6a.7.7 0 01-.7.7H1a.7.7 0 01-.7-.7V3.2A.7.7 0 011 2.5z"/></svg>
-            Board &amp; finance
-            <span class="folder-count">4</span>
-          </div>
-        </div>
-        <!-- Officers -->
-        <div style="margin-top:4px">
-          <div class="folder-row">
-            <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1 2.5h3l1.5 1.5H12a.7.7 0 01.7.7v6a.7.7 0 01-.7.7H1a.7.7 0 01-.7-.7V3.2A.7.7 0 011 2.5z"/></svg>
-            Gift officer portfolios
-            <span class="folder-count">6</span>
-          </div>
-        </div>
-        <!-- Templates -->
-        <div style="margin-top:4px">
-          <div class="folder-row">
-            <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="1.5" width="10" height="10" rx="1.5"/><path d="M4 4h5M4 7h3"/></svg>
-            Templates
-            <span class="folder-count">8</span>
-          </div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- MAIN -->
-    <div class="main">
-
-      <!-- ── BUILD VIEW ── -->
-      <div id="view-build">
-        <div class="topbar">
-          <div>
-            <div class="tb-title">May 2026 parish progress package</div>
-            <div class="tb-sub">Monthly parish reports · last run Apr 30</div>
-          </div>
-          <span class="status-pill sp-draft">Draft</span>
-          <button class="btn btn-ghost">
-            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 1v7M3 5.5l3 3 3-3"/><path d="M1.5 10.5h9"/></svg>
-            Save to folder
-          </button>
-          <button class="btn btn-green" onclick="setView('run',document.getElementById('vsb-run'))">
-            <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M3 2l7 4-7 4V2z"/></svg>
-            Run queue
-          </button>
-        </div>
-
-        <div class="main-body">
-
-          <!-- Queue list -->
-          <div>
-            <div class="section-label">Report queue <span class="sl-badge">5 reports</span></div>
-            <div class="queue-list">
-
-              <div class="q-item">
-                <div class="qi-drag"><svg viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M1.5 3h7M1.5 7h7M1.5 11h7"/></svg></div>
-                <div class="qi-num">1</div>
-                <div class="qi-icon" style="background:var(--bluep)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="1.5" width="10" height="10" rx="1.5"/><path d="M4 5h5M4 7.5h3"/></svg></div>
-                <div class="qi-body">
-                  <div class="qi-name">Parish giving summary — May 2026</div>
-                  <div class="qi-meta">All parishes · YTD vs. prior year · fund breakdown</div>
-                </div>
-                <span class="qi-badge qb-pending">Pending</span>
-                <button class="qi-remove"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 1.5l6 6M7.5 1.5l-6 6"/></svg></button>
-              </div>
-
-              <div class="q-item">
-                <div class="qi-drag"><svg viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M1.5 3h7M1.5 7h7M1.5 11h7"/></svg></div>
-                <div class="qi-num">2</div>
-                <div class="qi-icon" style="background:var(--greenl)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--green)" stroke-width="1.3" stroke-linecap="round"><path d="M2 10l2.5-2.5 2 2 2.5-3 2.5 3"/><path d="M2 2v10h9"/></svg></div>
-                <div class="qi-body">
-                  <div class="qi-name">LYBUNT donor list by parish</div>
-                  <div class="qi-meta">Gave in 2025, not yet in 2026 · sorted by last gift amount</div>
-                </div>
-                <span class="qi-badge qb-pending">Pending</span>
-                <button class="qi-remove"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 1.5l6 6M7.5 1.5l-6 6"/></svg></button>
-              </div>
-
-              <div class="q-item">
-                <div class="qi-drag"><svg viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M1.5 3h7M1.5 7h7M1.5 11h7"/></svg></div>
-                <div class="qi-num">3</div>
-                <div class="qi-icon" style="background:var(--purpl)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--purp)" stroke-width="1.3" stroke-linecap="round"><circle cx="6.5" cy="5" r="3"/><path d="M1 12c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg></div>
-                <div class="qi-body">
-                  <div class="qi-name">New donor welcome report</div>
-                  <div class="qi-meta">First gifts received May 1–31 · all parishes</div>
-                </div>
-                <span class="qi-badge qb-pending">Pending</span>
-                <button class="qi-remove"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 1.5l6 6M7.5 1.5l-6 6"/></svg></button>
-              </div>
-
-              <div class="q-item">
-                <div class="qi-drag"><svg viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M1.5 3h7M1.5 7h7M1.5 11h7"/></svg></div>
-                <div class="qi-num">4</div>
-                <div class="qi-icon" style="background:var(--amberl)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--amber)" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 9.5l2.5-2.5 2 2 2.5-3 2.5 3"/><rect x="1.5" y="1.5" width="10" height="10" rx="1.5" stroke-dasharray="2 1.5"/></svg></div>
-                <div class="qi-body">
-                  <div class="qi-name">CMA progress vs. goal — parish breakdown</div>
-                  <div class="qi-meta">Per parish · % of goal · gap to target</div>
-                </div>
-                <span class="qi-badge qb-pending">Pending</span>
-                <button class="qi-remove"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 1.5l6 6M7.5 1.5l-6 6"/></svg></button>
-              </div>
-
-              <div class="q-item">
-                <div class="qi-drag"><svg viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M1.5 3h7M1.5 7h7M1.5 11h7"/></svg></div>
-                <div class="qi-num">5</div>
-                <div class="qi-icon" style="background:var(--rosel)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--rose)" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="3" width="10" height="8" rx="1.5"/><path d="M1.5 6.5h10M5 3V1.5M8 3V1.5"/></svg></div>
-                <div class="qi-body">
-                  <div class="qi-name">Pledge payment status</div>
-                  <div class="qi-meta">Outstanding pledges · overdue payments · next due dates</div>
-                </div>
-                <span class="qi-badge qb-pending">Pending</span>
-                <button class="qi-remove"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 1.5l6 6M7.5 1.5l-6 6"/></svg></button>
-              </div>
-
-            </div>
-            <button class="add-row">
-              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
-              Add report to queue
-            </button>
-          </div>
-
-          <!-- Schedule + Recipients -->
-          <div class="two-panel">
-
-            <div class="panel-card">
-              <div class="pc-head">
-                <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="5"/><path d="M6.5 4v3.5L8.5 9"/></svg>
-                Schedule &amp; delivery
-              </div>
-              <div class="pc-body">
-                <div class="form-row">
-                  <div class="f-label">Run frequency</div>
-                  <select class="f-select">
-                    <option>Monthly — 1st of each month</option>
-                    <option>Weekly — every Monday</option>
-                    <option>Quarterly</option>
-                    <option>Manual only</option>
-                    <option>Custom schedule…</option>
-                  </select>
-                </div>
-                <div class="f-row-2">
-                  <div>
-                    <div class="f-label">Run at</div>
-                    <input class="f-input" type="time" value="06:00">
-                  </div>
-                  <div>
-                    <div class="f-label">Timezone</div>
-                    <select class="f-select"><option>US/Eastern</option><option>US/Central</option><option>US/Mountain</option></select>
-                  </div>
-                </div>
-                <div style="margin-top:8px">
-                  <div class="f-label" style="margin-bottom:8px">Output options</div>
-                  <div class="toggle-row">
-                    <div><div class="tr-label">Save to folder</div><div class="tr-sub">Stores in Monthly parish reports</div></div>
-                    <button class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-thumb"></div></button>
-                  </div>
-                  <div class="toggle-row">
-                    <div><div class="tr-label">Email to recipients</div><div class="tr-sub">Sends PDF + summary to list</div></div>
-                    <button class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-thumb"></div></button>
-                  </div>
-                  <div class="toggle-row">
-                    <div><div class="tr-label">Scope reports by recipient</div><div class="tr-sub">Each pastor sees only their parish</div></div>
-                    <button class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-thumb"></div></button>
-                  </div>
-                  <div class="toggle-row">
-                    <div><div class="tr-label">Skip if no new data</div><div class="tr-sub">Don't run if no gifts since last run</div></div>
-                    <button class="toggle off" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-thumb"></div></button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="panel-card">
-              <div class="pc-head">
-                <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 3h10a.7.7 0 01.7.7v6.6a.7.7 0 01-.7.7H1.5a.7.7 0 01-.7-.7V3.7a.7.7 0 01.7-.7z"/><path d="M1.5 3.5l5 3.5 5-3.5"/></svg>
-                Email recipients
-              </div>
-              <div class="pc-body">
-                <div class="recipient-row">
-                  <div class="r-av" style="background:var(--bluep);color:var(--blue)">FM</div>
-                  <div class="r-name">Fr. Matthew Kelly<div class="r-role">Pastor — St. Michael's</div></div>
-                  <span class="r-scope" style="background:var(--bluep);color:var(--blue)">St. Michael's only</span>
-                </div>
-                <div class="recipient-row">
-                  <div class="r-av" style="background:var(--greenl);color:var(--green)">FP</div>
-                  <div class="r-name">Fr. Patrick Collins<div class="r-role">Pastor — Holy Cross</div></div>
-                  <span class="r-scope" style="background:var(--greenl);color:var(--green)">Holy Cross only</span>
-                </div>
-                <div class="recipient-row">
-                  <div class="r-av" style="background:var(--purpl);color:var(--purp)">FJ</div>
-                  <div class="r-name">Fr. Joseph Williams<div class="r-role">Pastor — St. Catherine's</div></div>
-                  <span class="r-scope" style="background:var(--purpl);color:var(--purp)">St. Catherine's only</span>
-                </div>
-                <div class="recipient-row">
-                  <div class="r-av" style="background:var(--amberl);color:var(--amber)">MD</div>
-                  <div class="r-name">Mike Donovan<div class="r-role">Development Director</div></div>
-                  <span class="r-scope" style="background:var(--amberl);color:var(--amber)">All parishes</span>
-                </div>
-                <div class="recipient-row">
-                  <div class="r-av" style="background:var(--rosel);color:var(--rose)">BS</div>
-                  <div class="r-name">Bishop [Name]<div class="r-role">Diocese</div></div>
-                  <span class="r-scope" style="background:var(--rosel);color:var(--rose)">Summary only</span>
-                </div>
-                <button class="add-row" style="margin-top:8px">
-                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
-                  Add recipient
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- ── RUN VIEW ── -->
-      <div id="view-run" style="display:none;flex-direction:column;height:100%">
-        <div class="topbar">
-          <div>
-            <div class="tb-title">May 2026 parish progress package</div>
-            <div class="tb-sub">Running now · started 6:00 AM · 3 of 5 complete</div>
-          </div>
-          <span class="status-pill sp-running">Running</span>
-          <button class="btn btn-ghost" onclick="setView('build',document.getElementById('vsb-build'))">← Back to queue</button>
-        </div>
-
-        <div class="main-body">
-
-          <div>
-            <div class="section-label">Queue progress <span class="sl-badge">3 / 5 complete</span></div>
-            <div class="progress-wrap">
-              <div class="progress-label">
-                <span style="font-size:11px;color:var(--text3)">Running report 4 of 5…</span>
-                <span style="font-size:11px;font-weight:600;color:var(--blue)">60%</span>
-              </div>
-              <div class="progress-track"><div class="progress-fill" style="width:60%"></div></div>
-            </div>
-            <div class="queue-list">
-
-              <div class="q-item done">
-                <div class="qi-drag"><svg viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M1.5 3h7M1.5 7h7M1.5 11h7"/></svg></div>
-                <div class="qi-num">1</div>
-                <div class="qi-icon" style="background:var(--greenl)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M2 7l3 3 6-6"/></svg></div>
-                <div class="qi-body">
-                  <div class="qi-name">Parish giving summary — May 2026</div>
-                  <div class="qi-meta">Completed · 0.8s · 12 parishes · 847 gifts</div>
-                </div>
-                <span class="qi-badge qb-done">Done</span>
-              </div>
-
-              <div class="q-item done">
-                <div class="qi-drag"><svg viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M1.5 3h7M1.5 7h7M1.5 11h7"/></svg></div>
-                <div class="qi-num">2</div>
-                <div class="qi-icon" style="background:var(--greenl)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M2 7l3 3 6-6"/></svg></div>
-                <div class="qi-body">
-                  <div class="qi-name">LYBUNT donor list by parish</div>
-                  <div class="qi-meta">Completed · 1.2s · 384 donors flagged</div>
-                </div>
-                <span class="qi-badge qb-done">Done</span>
-              </div>
-
-              <div class="q-item done">
-                <div class="qi-drag"><svg viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M1.5 3h7M1.5 7h7M1.5 11h7"/></svg></div>
-                <div class="qi-num">3</div>
-                <div class="qi-icon" style="background:var(--greenl)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M2 7l3 3 6-6"/></svg></div>
-                <div class="qi-body">
-                  <div class="qi-name">New donor welcome report</div>
-                  <div class="qi-meta">Completed · 0.6s · 47 first-time donors</div>
-                </div>
-                <span class="qi-badge qb-done">Done</span>
-              </div>
-
-              <div class="q-item running">
-                <div class="qi-drag"><svg viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M1.5 3h7M1.5 7h7M1.5 11h7"/></svg></div>
-                <div class="qi-num">4</div>
-                <div class="qi-icon" style="background:var(--bluep)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.3" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M6.5 4v3l1.5 1.5"/></svg></div>
-                <div class="qi-body">
-                  <div class="qi-name">CMA progress vs. goal — parish breakdown</div>
-                  <div class="qi-meta">Running… querying 12 parish records</div>
-                </div>
-                <span class="qi-badge qb-running">Running</span>
-              </div>
-
-              <div class="q-item queued">
-                <div class="qi-drag"><svg viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M1.5 3h7M1.5 7h7M1.5 11h7"/></svg></div>
-                <div class="qi-num">5</div>
-                <div class="qi-icon" style="background:var(--surf)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--text3)" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="3" width="10" height="8" rx="1.5"/><path d="M1.5 6.5h10M5 3V1.5M8 3V1.5"/></svg></div>
-                <div class="qi-body">
-                  <div class="qi-name">Pledge payment status</div>
-                  <div class="qi-meta">Waiting in queue</div>
-                </div>
-                <span class="qi-badge qb-queued">Queued</span>
-              </div>
-
-            </div>
-          </div>
-
-          <div class="two-panel">
-
-            <div class="panel-card">
-              <div class="pc-head">
-                <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M2 10.5h9M2 7.5h6M2 4.5h9M2 1.5h5"/></svg>
-                Output files
-              </div>
-              <div class="pc-body" style="padding:8px 14px">
-                <div class="output-row">
-                  <div class="o-icon" style="background:var(--rosel)"><svg viewBox="0 0 11 11" fill="none" stroke="var(--rose)" stroke-width="1.3" stroke-linecap="round"><rect x="1" y="1" width="9" height="9" rx="1.2"/><path d="M3.5 5h4M3.5 7h3"/></svg></div>
-                  <div class="o-name">Parish giving summary.pdf<div class="o-meta">284 KB · saved to folder</div></div>
-                  <span class="o-badge" style="background:var(--greenl);color:var(--green)">Saved</span>
-                </div>
-                <div class="output-row">
-                  <div class="o-icon" style="background:var(--rosel)"><svg viewBox="0 0 11 11" fill="none" stroke="var(--rose)" stroke-width="1.3" stroke-linecap="round"><rect x="1" y="1" width="9" height="9" rx="1.2"/><path d="M3.5 5h4M3.5 7h3"/></svg></div>
-                  <div class="o-name">LYBUNT donors by parish.pdf<div class="o-meta">142 KB · saved to folder</div></div>
-                  <span class="o-badge" style="background:var(--greenl);color:var(--green)">Saved</span>
-                </div>
-                <div class="output-row">
-                  <div class="o-icon" style="background:var(--greenl)"><svg viewBox="0 0 11 11" fill="none" stroke="var(--green)" stroke-width="1.3" stroke-linecap="round"><rect x="1" y="1" width="9" height="9" rx="1.2"/><path d="M3.5 5h4M3.5 7h3"/></svg></div>
-                  <div class="o-name">New donor welcome report.pdf<div class="o-meta">89 KB · saved to folder</div></div>
-                  <span class="o-badge" style="background:var(--greenl);color:var(--green)">Saved</span>
-                </div>
-                <div class="output-row">
-                  <div class="o-icon" style="background:var(--bluep)"><svg viewBox="0 0 11 11" fill="none" stroke="var(--blue)" stroke-width="1.3" stroke-linecap="round"><rect x="1" y="1" width="9" height="9" rx="1.2"/><path d="M3.5 5h4M3.5 7h2.5" stroke-dasharray="1.5 1"/></svg></div>
-                  <div class="o-name">CMA progress report.pdf<div class="o-meta">Generating…</div></div>
-                  <span class="o-badge" style="background:var(--bluep);color:var(--blue)">Running</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="panel-card">
-              <div class="pc-head">
-                <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 3h10a.7.7 0 01.7.7v6.6a.7.7 0 01-.7.7H1.5a.7.7 0 01-.7-.7V3.7a.7.7 0 01.7-.7z"/><path d="M1.5 3.5l5 3.5 5-3.5"/></svg>
-                Email delivery status
-              </div>
-              <div class="pc-body" style="padding:8px 14px">
-                <div class="output-row">
-                  <div class="r-av" style="width:24px;height:24px;background:var(--bluep);color:var(--blue)">FM</div>
-                  <div class="o-name">Fr. Matthew Kelly<div class="o-meta">St. Michael's scoped report · queued</div></div>
-                  <span class="o-badge" style="background:var(--surf);color:var(--text3);border:1px solid var(--border)">Queued</span>
-                </div>
-                <div class="output-row">
-                  <div class="r-av" style="width:24px;height:24px;background:var(--greenl);color:var(--green)">FP</div>
-                  <div class="o-name">Fr. Patrick Collins<div class="o-meta">Holy Cross scoped report · queued</div></div>
-                  <span class="o-badge" style="background:var(--surf);color:var(--text3);border:1px solid var(--border)">Queued</span>
-                </div>
-                <div class="output-row">
-                  <div class="r-av" style="width:24px;height:24px;background:var(--amberl);color:var(--amber)">MD</div>
-                  <div class="o-name">Mike Donovan<div class="o-meta">Full diocese package · queued</div></div>
-                  <span class="o-badge" style="background:var(--surf);color:var(--text3);border:1px solid var(--border)">Queued</span>
-                </div>
-                <div class="output-row">
-                  <div class="r-av" style="width:24px;height:24px;background:var(--rosel);color:var(--rose)">BS</div>
-                  <div class="o-name">Bishop [Name]<div class="o-meta">Executive summary only · queued</div></div>
-                  <span class="o-badge" style="background:var(--surf);color:var(--text3);border:1px solid var(--border)">Queued</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
+  <!-- Run progress (hidden until Run now) -->
+  <div class="run-card" id="runCard">
+    <div class="sec-head"><div class="sec-t">Running queue…</div><div class="g"></div><span class="status-pill sp-running" id="runPct">0%</span></div>
+    <div class="sec-body">
+      <div class="progress-track"><div class="progress-fill" id="runFill" style="width:0%"></div></div>
+      <div id="runList" style="margin-top:12px"></div>
     </div>
   </div>
 
+  <div class="builder">
+  <!-- 1 · Reports -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">1</div>
+      <div><div class="sec-t">Reports in this queue</div><div class="sec-d">They run top to bottom, in order.</div></div>
+      <div class="g"></div>
+      <span class="count-badge" id="repCount">5 reports</span>
+    </div>
+    <div class="sec-body">
+      <div id="repList"></div>
+      <button class="add-row" onclick="openAddReport()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>Add a report to this queue</button>
+    </div>
+  </div>
+
+  <!-- 2 · Schedule -->
+  <div class="sec">
+    <div class="sec-head"><div class="sec-num">2</div><div><div class="sec-t">When it runs</div><div class="sec-d">Set the schedule and how the output is delivered.</div></div></div>
+    <div class="sec-body">
+      <div class="fgroup">
+        <div class="f-label">Run frequency</div>
+        <select class="f-select" id="freq" onchange="onFreqChange()">
+          <option value="monthly">Monthly — 1st of each month</option>
+          <option value="weekly">Weekly — every Monday</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="manual">Manual only — I'll run it myself</option>
+          <option value="custom">Custom…</option>
+        </select>
+        <!-- custom builder -->
+        <div class="custom-box" id="customBox">
+          <div class="cb-row">
+            Every <input class="cb-mini" id="cbEvery" type="number" min="1" value="2" oninput="updateCustom()">
+            <select class="cb-sel" id="cbUnit" onchange="updateCustom()"><option value="weeks">weeks</option><option value="days">days</option><option value="months">months</option></select>
+          </div>
+          <div id="cbDaysWrap">
+            <div class="f-label" style="margin:12px 0 0">On these days</div>
+            <div class="daypills" id="dayPills">
+              <div class="daypill on" data-d="Mo">Mo</div><div class="daypill" data-d="Tu">Tu</div><div class="daypill" data-d="We">We</div><div class="daypill" data-d="Th">Th</div><div class="daypill" data-d="Fr">Fr</div><div class="daypill" data-d="Sa">Sa</div><div class="daypill" data-d="Su">Su</div>
+            </div>
+          </div>
+          <div class="cb-summary" id="cbSummary"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.2L9 8.5"/></svg><span>Runs every 2 weeks on Monday</span></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="fgroup"><div class="f-label">Run at</div><input class="f-input" type="time" value="06:00"></div>
+        <div class="fgroup"><div class="f-label">Timezone</div><select class="f-select"><option>US/Eastern</option><option>US/Central</option><option>US/Mountain</option><option>US/Pacific</option></select></div>
+      </div>
+      <div class="f-label" style="margin-top:4px">Delivery</div>
+      <div class="tog-row"><div><div class="tr-t">Save to folder</div><div class="tr-s">Stores the PDFs in this queue's folder</div></div><button class="tog on" onclick="tog(this)"></button></div>
+      <div class="tog-row"><div><div class="tr-t">Email to recipients</div><div class="tr-s">Sends the report package to the list below</div></div><button class="tog on" onclick="tog(this)"></button></div>
+      <div class="adv-toggle" id="advToggle" onclick="toggleAdv()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg>Advanced options</div>
+      <div class="adv-box" id="advBox">
+        <div class="tog-row"><div><div class="tr-t">Scope reports by recipient</div><div class="tr-s">Each pastor sees only their own parish</div></div><button class="tog on" onclick="tog(this)"></button></div>
+        <div class="tog-row"><div><div class="tr-t">Skip if there's no new data</div><div class="tr-s">Don't run when nothing has changed since last time</div></div><button class="tog off" onclick="tog(this)"></button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 · Recipients -->
+  <div class="sec sec-wide">
+    <div class="sec-head"><div class="sec-num">3</div><div><div class="sec-t">Who gets it</div><div class="sec-d">People who'll receive the report by email.</div></div><div class="g"></div><span class="count-badge" id="recCount">5 people</span></div>
+    <div class="sec-body">
+      <div id="recList"></div>
+      <button class="add-row" onclick="openAddRecipient()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>Add a recipient</button>
+    </div>
+  </div>
+  </div><!-- /builder -->
+
+</div></main>
+
+<!-- modal + toast infra -->
+<div class="scrim" id="scrim" onclick="closeModal()"></div>
+<div class="modal" id="modal">
+  <div class="m-head"><div id="mHeadTxt"><h3>Title</h3><div class="m-sub">sub</div></div><button class="m-x" onclick="closeModal()"><svg viewBox="0 0 14 14" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>
+  <div class="m-body" id="mBody"></div>
+  <div class="m-foot" id="mFoot"></div>
 </div>
+<div class="toast" id="toast"><span class="ti"><svg viewBox="0 0 14 14" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M2 7.5l3.5 3.5L12 4"/></svg></span><span id="toastMsg"></span></div>
 
 <script>
-function setView(v, btn) {
-  document.getElementById('view-build').style.display = v === 'build' ? 'flex' : 'none';
-  document.getElementById('view-build').style.flexDirection = 'column';
-  document.getElementById('view-run').style.display  = v === 'run'   ? 'flex' : 'none';
-  document.querySelectorAll('.vs-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+const C={blue:['#EFF6FF','#2563EB'],green:['#DCFCE7','#15803D'],purp:['#EDE9FE','#7C3AED'],amber:['#FEF3C7','#B45309'],rose:['#FCE7F3','#BE185D'],teal:['#CCFBF1','#0D9488']};
+const RICON={
+  doc:'<rect x="1.5" y="1.5" width="10" height="10" rx="1.5"/><path d="M4 5h5M4 7.5h3"/>',
+  chart:'<path d="M2 10l2.5-2.5 2 2 2.5-3 2.5 3"/><path d="M2 2v10h9"/>',
+  people:'<circle cx="6.5" cy="5" r="3"/><path d="M1 12c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/>',
+  goal:'<path d="M1.5 9.5l2.5-2.5 2 2 2.5-3 2.5 3"/><rect x="1.5" y="1.5" width="10" height="10" rx="1.5" stroke-dasharray="2 1.5"/>',
+  cal:'<rect x="1.5" y="3" width="10" height="8" rx="1.5"/><path d="M1.5 6.5h10M5 3V1.5M8 3V1.5"/>',
+  fund:'<ellipse cx="6.5" cy="3.5" rx="5" ry="2"/><path d="M1.5 3.5v6c0 1.1 2.2 2 5 2s5-.9 5-2v-6"/>'
+};
+// Report library for the picker
+const LIB=[
+  {id:'giving',   name:'Parish giving summary',        desc:'Totals by parish · YTD vs prior year',      color:'blue',  icon:'doc'},
+  {id:'lybunt',   name:'LYBUNT donor list',            desc:'Gave last year, not yet this year',         color:'green', icon:'chart'},
+  {id:'newdonor', name:'New donor welcome report',     desc:'First-time gifts received this period',     color:'purp',  icon:'people'},
+  {id:'cma',      name:'CMA progress vs. goal',        desc:'Per parish · % of goal · gap to target',    color:'amber', icon:'goal'},
+  {id:'pledge',   name:'Pledge payment status',        desc:'Outstanding pledges · overdue payments',    color:'rose',  icon:'cal'},
+  {id:'fund',     name:'Fund breakdown',               desc:'Gifts by fund / GL code',                   color:'teal',  icon:'fund'},
+  {id:'lapsed',   name:'Lapsed donors',                desc:'No gift in 13–24 months',                   color:'blue',  icon:'people'},
+  {id:'topgifts', name:'Top gifts this period',        desc:'Largest gifts, sorted by amount',           color:'green', icon:'chart'},
+];
+// Queues (switchable)
+const QUEUES={
+  may:{name:'May 2026 parish package', folder:'Monthly parish reports', meta:'Monthly parish reports · last run Apr 30', status:'Draft', statusClass:'sp-draft',
+    reports:['giving','lybunt','newdonor','cma','pledge'],
+    recipients:[
+      {n:'Fr. Matthew Kelly', r:"Pastor — St. Michael's", c:"St. Michael's only", col:'blue'},
+      {n:'Fr. Patrick Collins', r:'Pastor — Holy Cross', c:'Holy Cross only', col:'green'},
+      {n:'Fr. Joseph Williams', r:"Pastor — St. Catherine's", c:"St. Catherine's only", col:'purp'},
+      {n:'Mike Donovan', r:'Development Director', c:'All parishes', col:'amber'},
+      {n:'Bishop', r:'Diocese', c:'Summary only', col:'rose'},
+    ]},
+  campaign:{name:'Q2 campaign board pack', folder:'Board & finance', meta:'Board & finance · runs monthly', status:'Scheduled', statusClass:'sp-scheduled',
+    reports:['cma','fund','topgifts'],
+    recipients:[
+      {n:'Mike Donovan', r:'Development Director', c:'All parishes', col:'amber'},
+      {n:'Finance Committee', r:'Board', c:'Full package', col:'blue'},
+    ]},
+};
+const FOLDERS=[
+  {name:'Monthly parish reports', qids:['may']},
+  {name:'Board & finance', qids:['campaign']},
+];
+let current='may';
+
+const $=id=>document.getElementById(id);
+function render(){
+  const q=QUEUES[current];
+  $('qName').textContent=q.name; $('qMeta').textContent=q.meta;
+  const st=$('qStatus'); st.textContent=q.status; st.className='status-pill '+q.statusClass;
+  // reports
+  $('repCount').textContent=q.reports.length+' report'+(q.reports.length!=1?'s':'');
+  $('repList').innerHTML=q.reports.map((rid,i)=>{
+    const r=LIB.find(x=>x.id===rid); const [bg,fg]=C[r.color];
+    return `<div class="q-item"><div class="qi-drag"><svg viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 3h7M1.5 7h7M1.5 11h7"/></svg></div>
+      <div class="qi-num">${i+1}</div>
+      <div class="qi-ic" style="background:${bg}"><svg viewBox="0 0 13 13" fill="none" stroke="${fg}" stroke-width="1.3" stroke-linecap="round">${RICON[r.icon]}</svg></div>
+      <div class="qi-body"><div class="qi-name">${r.name}</div><div class="qi-meta">${r.desc}</div></div>
+      <button class="qi-x" onclick="removeReport('${rid}')"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1.5 1.5l6 6M7.5 1.5l-6 6"/></svg></button></div>`;
+  }).join('') || `<div style="text-align:center;color:var(--text3);padding:24px;font-size:13px">No reports yet — add one below.</div>`;
+  // recipients
+  $('recCount').textContent=q.recipients.length+' '+(q.recipients.length!=1?'people':'person');
+  $('recList').innerHTML=q.recipients.map((p,i)=>{
+    const [bg,fg]=C[p.col]||C.blue; const initials=p.n.split(' ').filter(w=>!/^(Fr\.|Bishop)$/.test(w)).map(w=>w[0]).slice(0,2).join('')||p.n.slice(0,2);
+    return `<div class="rec-row"><div class="r-av" style="background:${bg};color:${fg}">${initials.toUpperCase()}</div>
+      <div><div class="r-name">${p.n}</div><div class="r-role">${p.r}</div></div>
+      <span class="r-scope" style="background:${bg};color:${fg}">${p.c}</span>
+      <button class="r-x" onclick="removeRecipient(${i})"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1.5 1.5l6 6M7.5 1.5l-6 6"/></svg></button></div>`;
+  }).join('') || `<div style="text-align:center;color:var(--text3);padding:24px;font-size:13px">No recipients yet.</div>`;
 }
-setView('build', document.getElementById('vsb-build'));
+function removeReport(rid){const q=QUEUES[current];q.reports=q.reports.filter(x=>x!==rid);render();toast('Report removed from queue');}
+function removeRecipient(i){const q=QUEUES[current];q.recipients.splice(i,1);render();toast('Recipient removed');}
+function tog(b){b.classList.toggle('on');b.classList.toggle('off');}
+
+/* ── queue switcher menu ── */
+function toggleQMenu(e){e.stopPropagation();const m=$('qMenu');if(m.classList.contains('open')){m.classList.remove('open');return;}
+  m.innerHTML=FOLDERS.map(f=>`<div class="menu-lbl">${f.name}</div>`+f.qids.map(qid=>{const q=QUEUES[qid];const cur=qid===current;
+    return `<div class="menu-item" onclick="switchQueue('${qid}')"><div class="mi-ic" style="background:var(--bluep);color:var(--blue)"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3.5h3l1.5 1.5H12v6H1.5z"/></svg></div><div><div class="mi-name">${q.name}</div><div class="mi-meta">${q.reports.length} reports · ${q.status}</div></div>${cur?'<span class="mi-check"><svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 7.5l3.5 3.5L12 4"/></svg></span>':''}</div>`;}).join('')).join('')
+    +`<div class="menu-div"></div><div class="menu-new" onclick="openNewQueue()"><svg width="13" height="13" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>New queue…</div>`;
+  m.classList.add('open');
+}
+function switchQueue(qid){current=qid;$('qMenu').classList.remove('open');render();toast('Switched to '+QUEUES[qid].name);}
+document.addEventListener('click',()=>{const m=$('qMenu');if(m)m.classList.remove('open');});
+
+/* ── frequency ── */
+function onFreqChange(){const v=$('freq').value;$('customBox').classList.toggle('show',v==='custom');if(v==='custom')updateCustom();}
+$('dayPills')&&$('dayPills').addEventListener('click',e=>{const p=e.target.closest('.daypill');if(p){p.classList.toggle('on');updateCustom();}});
+function updateCustom(){
+  const n=$('cbEvery').value||1, unit=$('cbUnit').value;
+  $('cbDaysWrap').style.display=unit==='months'?'none':'';
+  let s=`Runs every ${n>1?n+' ':''}${n>1?unit:unit.replace(/s$/,'')}`;
+  if(unit!=='months'){const days=[...document.querySelectorAll('.daypill.on')].map(d=>d.dataset.d);s+= days.length?' on '+days.join(', '):'';}
+  $('cbSummary').querySelector('span').textContent=s;
+}
+function toggleAdv(){$('advToggle').classList.toggle('open');$('advBox').classList.toggle('show');}
+
+/* ── modal helpers ── */
+function openModal(title,sub,bodyHTML,footHTML){$('mHeadTxt').innerHTML=`<h3>${title}</h3><div class="m-sub">${sub}</div>`;$('mBody').innerHTML=bodyHTML;$('mFoot').innerHTML=footHTML;$('scrim').classList.add('show');$('modal').classList.add('show');}
+function closeModal(){$('scrim').classList.remove('show');$('modal').classList.remove('show');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+/* ── Add report picker ── */
+function openAddReport(){
+  const q=QUEUES[current];
+  const rows=LIB.map(r=>{const [bg,fg]=C[r.color];const added=q.reports.includes(r.id);
+    return `<div class="pick-item ${added?'added':''}" data-id="${r.id}" onclick="addReport('${r.id}',this)"><div class="pick-ic" style="background:${bg}"><svg viewBox="0 0 13 13" fill="none" stroke="${fg}" stroke-width="1.3" stroke-linecap="round">${RICON[r.icon]}</svg></div><div><div class="pick-name">${r.name}</div><div class="pick-desc">${r.desc}</div></div><span class="pick-add">${added?'Added ✓':'+ Add'}</span></div>`;}).join('');
+  openModal('Add a report','Pick from your standard reports · click to add to the queue',
+    `<div class="pick-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="pickSearch" placeholder="Search reports…" oninput="filterPick()"></div><div id="pickList">${rows}</div>`,
+    `<div class="g"></div><button class="btn btn-blue" onclick="closeModal()">Done</button>`);
+}
+function filterPick(){const q=$('pickSearch').value.toLowerCase();document.querySelectorAll('#pickList .pick-item').forEach(it=>{const r=LIB.find(x=>x.id===it.dataset.id);it.style.display=(r.name+' '+r.desc).toLowerCase().includes(q)?'':'none';});}
+function addReport(id,el){const q=QUEUES[current];if(!q.reports.includes(id))q.reports.push(id);el.classList.add('added');el.querySelector('.pick-add').textContent='Added ✓';render();toast(LIB.find(x=>x.id===id).name+' added');}
+
+/* ── Add recipient ── */
+function openAddRecipient(){
+  openModal('Add a recipient','They\'ll receive this report package by email',
+    `<div class="fgroup"><div class="f-label">Full name</div><input class="f-input" id="arName" placeholder="e.g. Fr. Thomas Ryan"></div>
+     <div class="fgroup"><div class="f-label">Email address</div><input class="f-input" id="arEmail" type="email" placeholder="name@diocese.org"></div>
+     <div class="fgroup"><div class="f-label">Role / title <span style="color:var(--text3);font-weight:400">(optional)</span></div><input class="f-input" id="arRole" placeholder="e.g. Pastor — St. Anne's"></div>
+     <div class="fgroup"><div class="f-label">What they receive</div>
+       <select class="f-select" id="arScope"><option>Full package — all parishes</option><option>Their parish only</option><option>Executive summary only</option></select>
+       <div style="font-size:11.5px;color:var(--text3);margin-top:6px">Choose "Their parish only" so each pastor sees just their own data.</div>
+     </div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><div class="g"></div><button class="btn btn-blue" onclick="saveRecipient()">Add recipient</button>`);
+  setTimeout(()=>$('arName')&&$('arName').focus(),120);
+}
+function saveRecipient(){
+  const name=$('arName').value.trim(), email=$('arEmail').value.trim();
+  if(!name){toast('Please enter a name');return;}
+  if(!email||!/.+@.+\..+/.test(email)){toast('Please enter a valid email');return;}
+  const scopeSel=$('arScope').value; const scopeShort=scopeSel.includes('parish only')?'Their parish':scopeSel.includes('summary')?'Summary only':'Full package';
+  const cols=['blue','green','purp','amber','rose','teal']; const col=cols[QUEUES[current].recipients.length%cols.length];
+  QUEUES[current].recipients.push({n:name,r:$('arRole').value.trim()||email,c:scopeShort,col});
+  closeModal();render();toast(name+' added as a recipient');
+}
+
+/* ── New queue ── */
+function openNewQueue(){
+  $('qMenu').classList.remove('open');
+  openModal('New report queue','Give it a name and pick where it lives',
+    `<div class="fgroup"><div class="f-label">Queue name</div><input class="f-input" id="nqName" placeholder="e.g. June 2026 parish package"></div>
+     <div class="fgroup"><div class="f-label">Folder</div><select class="f-select" id="nqFolder" onchange="onNqFolderChange()">${FOLDERS.map(f=>`<option value="${f.name}">${f.name}</option>`).join('')}<option value="__new">+ Create new folder…</option></select><input class="f-input" id="nqNewFolder" placeholder="New folder name" style="display:none;margin-top:8px" onkeydown="if(event.key==='Enter')saveNewQueue()"></div>
+     <div class="fgroup"><div class="f-label">Start from</div><select class="f-select" id="nqTemplate"><option>Empty queue</option><option>Copy of "May 2026 parish package"</option><option>Standard monthly template (5 reports)</option></select></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><div class="g"></div><button class="btn btn-blue" onclick="saveNewQueue()">Create queue</button>`);
+  setTimeout(()=>$('nqName')&&$('nqName').focus(),120);
+}
+function onNqFolderChange(){
+  const s=$('nqFolder'), nf=$('nqNewFolder'); const isNew=s.value==='__new';
+  nf.style.display=isNew?'':'none'; if(isNew)setTimeout(()=>nf&&nf.focus(),50);
+}
+function saveNewQueue(){
+  const name=$('nqName').value.trim(); if(!name){toast('Name the queue first');return;}
+  let folder=$('nqFolder').value;
+  if(folder==='__new'){ folder=($('nqNewFolder').value||'').trim(); if(!folder){toast('Name the new folder');$('nqNewFolder').focus();return;} }
+  const tmpl=$('nqTemplate').value; let reports=[];
+  if(tmpl.includes('Copy')) reports=[...QUEUES.may.reports];
+  else if(tmpl.includes('Standard')) reports=['giving','lybunt','newdonor','cma','pledge'];
+  const id='q'+Date.now();
+  QUEUES[id]={name,folder,meta:folder+' · new',status:'Draft',statusClass:'sp-draft',reports,recipients:[]};
+  let f=FOLDERS.find(f=>f.name===folder);
+  if(f){f.qids.push(id);} else {FOLDERS.push({name:folder,qids:[id]}); toast('Folder "'+folder+'" created');}
+  current=id; closeModal(); render(); setTimeout(()=>toast('Queue "'+name+'" created'),120);
+}
+
+/* ── Run now ── */
+function runNow(){
+  const q=QUEUES[current]; if(!q.reports.length){toast('Add at least one report first');return;}
+  const card=$('runCard'); card.classList.add('show'); card.scrollIntoView({behavior:'smooth',block:'center'});
+  $('runList').innerHTML=q.reports.map((rid,i)=>{const r=LIB.find(x=>x.id===rid);
+    return `<div class="run-item" id="run-${i}"><div class="run-dot" style="background:var(--surf);border:1px solid var(--border);color:var(--text3)">${i+1}</div><div style="flex:1">${r.name}</div><span style="font-size:11.5px;color:var(--text3)" id="runs-${i}">Queued</span></div>`;}).join('');
+  let i=0; const total=q.reports.length;
+  function step(){
+    if(i>0){const p=$('run-'+(i-1));p.querySelector('.run-dot').style.cssText='background:var(--greenl);color:var(--green)';p.querySelector('.run-dot').innerHTML='<svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 7.5l3.5 3.5L12 4"/></svg>';$('runs-'+(i-1)).textContent='Done';$('runs-'+(i-1)).style.color='var(--green)';}
+    if(i>=total){$('runFill').style.width='100%';$('runPct').textContent='Complete';$('runPct').className='status-pill sp-done';$('runPct').style.cssText='background:var(--greenl);color:var(--green)';toast('Queue complete · '+total+' reports generated');
+      const st=$('qStatus'); return;}
+    const cur=$('run-'+i);cur.querySelector('.run-dot').style.cssText='background:var(--bluep);color:var(--blue)';$('runs-'+i).textContent='Running…';$('runs-'+i).style.color='var(--blue)';
+    $('runFill').style.width=Math.round((i/total)*100)+'%';$('runPct').textContent=Math.round((i/total)*100)+'%';
+    i++; setTimeout(step,700);
+  }
+  $('runPct').className='status-pill sp-running'; step();
+}
+
+/* ── toast ── */
+let tT;function toast(m){$('toastMsg').textContent=m;$('toast').classList.add('show');clearTimeout(tT);tT=setTimeout(()=>$('toast').classList.remove('show'),2600);}
+
+render();
 </script>
-<!-- ════════════════════════════════════════════════════════
-     Atlas Dead-CTA Rescue · v1
-     Single click-delegation script that catches button/anchor
-     clicks whose text matches an entry in ACTIONS. Fires a toast,
-     navigates, opens a modal, or toggles a state as appropriate.
-     Safe to load on every page — no-ops when the text isn't in
-     ACTIONS, leaving page-native handlers and the wire-script alone.
-     ════════════════════════════════════════════════════════ -->
-<style id="atlas-rescue-css">
-  #atlas-rescue-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background:#0F172A; color:white; padding:12px 18px; border-radius:10px; box-shadow:0 8px 24px rgba(15,23,42,.20); font-size:13px; font-family:'DM Sans',sans-serif; z-index:100010; display:flex; align-items:center; gap:10px; opacity:0; transition:opacity .2s,transform .2s; pointer-events:none; max-width: 480px; }
-  #atlas-rescue-toast.show { opacity:1; transform:translateX(-50%); pointer-events:auto; }
-  #atlas-rescue-toast .ico { width:22px; height:22px; border-radius:50%; background:#15803D; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0; }
-  #atlas-rescue-toast .msg { line-height:1.4; }
-</style>
-<div id="atlas-rescue-toast"><span class="ico">✓</span><span class="msg"></span></div>
-<script id="atlas-rescue">
-(function(){
-  if (window.__atlasRescue) return; window.__atlasRescue = true;
-
-  // ── Text → Action lookup table ──
-  // Match is case-insensitive, EXACT trimmed text equality (to avoid false positives like "Export" matching "Export forecast")
-  var ACTIONS = {
-    'save to folder':                 { type:'toast', msg:'Saved to folder · available in Saved queues' },
-    'add report to queue':            { type:'toast', msg:'Report picker · pick from Standard Reports below' },
-    'add recipient':                  { type:'toast', msg:'Recipient added · enter email in the next field' },
-
-    'import csv':                  { type:'toast', msg:'CSV import started · drop or pick a file in the next step' },
-    'save draft':                  { type:'toast', msg:'Draft saved · resume anytime from Batches → Drafts' },
-    'csv file':                    { type:'toast', msg:'CSV import selected · choose file…' },
-    'excel':                       { type:'toast', msg:'Excel import selected · choose .xlsx file…' },
-    'pdf scan':                    { type:'toast', msg:'PDF OCR scan · drop a check image or pledge form' },
-    'gifts & pledges':             { type:'route', dest:'atlas-gifts-pledges.html' },
-    'tribute report':              { type:'route', dest:'atlas-tribute-report.html' },
-    'tribute & in honor of':       { type:'route', dest:'atlas-tribute-report.html' },
-    'pledge report':               { type:'route', dest:'atlas-pledge-reports.html' },
-    'pledge reports':              { type:'route', dest:'atlas-pledge-reports.html' },
-    'capital campaign pledge report': { type:'route', dest:'atlas-pledge-reports.html' },
-    'report queue':                { type:'route', dest:'atlas-report-queue-scheduler.html' },
-    'queue & schedule':            { type:'route', dest:'atlas-report-queue-scheduler.html' },
-    'queue scheduler':             { type:'route', dest:'atlas-report-queue-scheduler.html' },
-    'schedule queue':              { type:'route', dest:'atlas-report-queue-scheduler.html' },
-    'schedule delivery':           { type:'route', dest:'atlas-report-queue-scheduler.html' },
-    'send notifications':          { type:'toast', msg:'Tribute notifications queued · 38 recipients' },
-    'export':                      { type:'toast', msg:'Export ready · CSV downloaded' },
-    'email report':                { type:'toast', msg:'Report emailed · delivered to recipients' },
-    'new queue':                   { type:'route', dest:'atlas-report-queue-scheduler.html' },
-
-    // Generic exports / downloads → simulated toast
-    'export':                      { type:'toast', msg:'Export ready · CSV downloaded to your device' },
-    'export csv':                  { type:'toast', msg:'CSV exported · check your downloads' },
-    'export pdf':                  { type:'toast', msg:'PDF generated · downloading now' },
-    'export all':                  { type:'toast', msg:'Bulk export queued · ready in ~60 seconds' },
-    'export list':                 { type:'toast', msg:'List exported as CSV · check downloads' },
-    'export roster':               { type:'toast', msg:'Roster exported · CSV ready' },
-    'export forecast':             { type:'toast', msg:'Forecast exported · CSV downloaded' },
-    'export profile':              { type:'toast', msg:'Profile export queued · ready in 30 seconds' },
-    'export exception report':     { type:'toast', msg:'Exception report exported · CSV ready' },
-    'download csv':                { type:'toast', msg:'CSV downloaded' },
-    'download pdf':                { type:'toast', msg:'PDF downloaded' },
-    'download report':             { type:'toast', msg:'Report downloaded · PDF ready' },
-    'pdf report':                  { type:'toast', msg:'PDF report generated · downloading now' },
-
-    // Email / send actions
-    'email to donor':              { type:'toast', msg:'Receipt emailed · delivered to donor inbox' },
-    'email statement':             { type:'toast', msg:'Statement emailed · donor will receive shortly' },
-    'email':                       { type:'route', dest:'atlas-email-compose.html' },
-    'schedule send':               { type:'toast', msg:'Scheduled · will send tomorrow at 9 AM' },
-    'schedule a recurring report': { type:'toast', msg:'Recurring report set up · weekly Monday 8 AM' },
-    'promote':                     { type:'toast', msg:'Promotion drafted · review before scheduling send' },
-
-    // Sync & duplicate management
-    'force re-sync now':           { type:'toast', msg:'Sync started · this may take 60 seconds' },
-    're-scan now':                 { type:'toast', msg:'Duplicate scan started · ETA 30 seconds' },
-    'mark not duplicate':          { type:'toast', msg:'Marked as separate records · removed from queue' },
-    'keep both as separate':       { type:'toast', msg:'Records kept separate · removed from queue' },
-    'apply recommendations':       { type:'toast', msg:'Recommendations applied · 3 fields merged' },
-    "save as decision (don't merge yet)": { type:'toast', msg:'Decision saved · Atlas will re-surface in 14 days' },
-    'snooze':                      { type:'toast', msg:'Snoozed 7 days · we\'ll re-surface next week' },
-
-    // Notifications
-    'mark all as read':            { type:'special', fn:'markAllRead' },
-    'clear cleared':               { type:'toast', msg:'Cleared notifications removed' },
-
-    // Bulk actions
-    'add to outreach list':        { type:'toast', msg:'23 donors added to outreach list' },
-    'add task':                    { type:'route', dest:'atlas-task-modal.html' },
-    'tag':                         { type:'toast', msg:'Tag "Q2 outreach" applied to 23 donors' },
-    'dismiss':                     { type:'toast', msg:'Dismissed' },
-
-    // Direct routes to existing pages
-    'record payment':              { type:'route', dest:'atlas-pledge-payment.html' },
-    'add custom payment':          { type:'route', dest:'atlas-pledge-payment.html' },
-    'sign in to atlas →':          { type:'route', dest:'atlas-dashboard.html' },
-    'sign in to atlas':            { type:'route', dest:'atlas-dashboard.html' },
-    'sign in with password':       { type:'route', dest:'atlas-dashboard.html' },
-    'email me a sign-in link':     { type:'toast', msg:'Magic-link emailed · check your inbox' },
-    'new event':                   { type:'special', fn:'newEvent' },
-    'event page':                  { type:'route', dest:'atlas-gala-management.html' },
-    'view audit log':              { type:'special', fn:'auditLog' },
-    'view configuration':          { type:'route', dest:'atlas-sync.html' },
-    'edit configuration':          { type:'route', dest:'atlas-sync.html' },
-    'view full donor profile':     { type:'route', dest:'atlas-donor-360.html' },
-    'log a note after the call':   { type:'route', dest:'atlas-log-activity.html' },
-    'flag an issue with this brief': { type:'toast', msg:'Issue flagged · DBA team will review' },
-    'brief history':               { type:'toast', msg:'Showing last 12 briefs for this donor' },
-    'review overdue pledges →':    { type:'route', dest:'atlas-pledges-list.html' },
-    'review mapping →':            { type:'route', dest:'atlas-sync.html' },
-    'view in docusign':            { type:'toast', msg:'Opening DocuSign · external app' },
-    'view envelope':               { type:'toast', msg:'Envelope detail · opening in DocuSign' },
-    'view voided':                 { type:'toast', msg:'Voided envelopes · 2 records' },
-    'view posted batch':           { type:'route', dest:'atlas-gifts-pledges.html' },
-    'fix errors inline':           { type:'toast', msg:'Error-fix mode · click any flagged row to correct it' },
-    'post all 14 (including warnings)': { type:'toast', msg:'14 gifts posted · receipts queued' },
-    'assign to supervisor':        { type:'toast', msg:'Batch reassigned to supervisor for review' },
-
-    // Donor-portal recurring-gift actions
-    'pause':                       { type:'special', fn:'togglePause' },
-    'resume':                      { type:'special', fn:'togglePause' },
-    'resume now':                  { type:'special', fn:'togglePause' },
-    'extend pause':                { type:'toast', msg:'Pause extended · resumes in 60 days' },
-    'cancel this gift':            { type:'toast', msg:'Recurring gift cancelled · final receipt will be sent' },
-    'cancel permanently':          { type:'toast', msg:'Cancelled permanently · thank you for your support' },
-    'change amount':               { type:'toast', msg:'Opening amount editor · current: $50/month' },
-    'update card':                 { type:'toast', msg:'Card update form · current: Visa ending 4242' },
-    'change designation':          { type:'toast', msg:'Designation picker · current: Annual Fund' },
-    'pay now':                     { type:'route', dest:'atlas-donate-onetime.html' },
-    'receipt':                     { type:'route', dest:'atlas-receipt-preview.html' },
-
-    // Reports
-    'build a custom report':       { type:'special', fn:'buildReport' },
-    'save as view':                { type:'toast', msg:'Saved as view · access from Reports → Saved' },
-
-    // Add / config
-    'add location':                { type:'route', dest:'atlas-location-manage.html' },
-    'add another seat':            { type:'toast', msg:'Seat added · capacity now 32' },
-    'connect →':                   { type:'toast', msg:'OAuth flow starting · approve in popup' },
-    'disconnect':                  { type:'toast', msg:'Integration disconnected · sync paused' },
-    'screening history':           { type:'toast', msg:'Showing last 90 days of screenings' },
-
-    // Editor / filter / paginate
-    'filter':                      { type:'toast', msg:'Filter panel · pick fields below' },
-    'filter view':                 { type:'toast', msg:'Filter view · pick fields below' },
-    'set targets':                 { type:'toast', msg:'Target editor · set per-officer goals' },
-    'settings':                    { type:'toast', msg:'Settings panel' },
-    'discard changes':             { type:'toast', msg:'Changes discarded · restored from saved' },
-    'add another seat':            { type:'toast', msg:'Seat row added · fill in attendee details' },
-
-    // Donate confirmation share buttons
-    'share on x':                  { type:'toast', msg:'Sharing to X · opening compose window' },
-    'share on facebook':           { type:'toast', msg:'Sharing to Facebook · opening dialog' },
-    'share on linkedin':           { type:'toast', msg:'Sharing to LinkedIn · opening dialog' },
-    'copy link':                   { type:'special', fn:'copyLink' },
-
-    // Guru AI
-    'query history':               { type:'toast', msg:'Showing last 30 queries' },
-    'saved queries':               { type:'toast', msg:'Showing saved queries · 8 saved' },
-
-    // Component library — keep dead (intentional demos)
-  };
-
-  // ── Toast helper ──
-  var toast = document.getElementById('atlas-rescue-toast');
-  function showToast(msg){
-    if (!toast) return;
-    toast.querySelector('.msg').textContent = msg;
-    toast.classList.add('show');
-    clearTimeout(toast._timer);
-    toast._timer = setTimeout(function(){ toast.classList.remove('show'); }, 3200);
-  }
-  window.atlasToast = showToast;
-
-  // ── Click handler ──
-  document.addEventListener('click', function(e){
-    var el = e.target.closest('button, a');
-    if (!el) return;
-    // Skip if it has an existing href/onclick that isn't '#' or empty
-    var href = el.getAttribute('href');
-    if (href && href !== '#' && !el.dataset.atlasRescue) return;
-    var onc = el.getAttribute('onclick');
-    if (onc && onc.trim()) return;
-    // Skip if the click already had its default prevented by something earlier
-    if (e.defaultPrevented) return;
-
-    var txt = (el.textContent || '').trim().toLowerCase().replace(/\s+/g,' ');
-    if (!txt || txt.length > 80) return;
-
-    var act = ACTIONS[txt];
-    if (!act) {
-      // Try fuzzy: strip trailing arrows / counts / parens
-      var stripped = txt.replace(/\s*[→←]\s*$/,'').replace(/\s+\d+(\.\d+)?$/,'').replace(/\s*\(.*\)\s*$/,'').trim();
-      act = ACTIONS[stripped];
-    }
-    if (!act) return;
-
-    // Skip if a more specific page handler is going to fire (heuristic: button has an id that's referenced by scripts)
-    if (el.id) { /* not used currently */ }
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (act.type === 'toast') {
-      showToast(act.msg);
-    } else if (act.type === 'route') {
-      showToast('Opening · ' + act.dest.replace('atlas-','').replace('.html','').replace(/-/g,' '));
-      setTimeout(function(){ window.location = act.dest; }, 250);
-    } else if (act.type === 'special') {
-      try { (RESCUE_SPECIALS[act.fn] || function(){})(el, e); }
-      catch(err){ console.error('rescue special failed', err); }
-    }
-  });
-
-  // ── Special handlers ──
-  var RESCUE_SPECIALS = {
-    markAllRead: function(){
-      // Find unread notification items and clear their unread state
-      var marks = document.querySelectorAll('.unread, .nf-row.unread, .notif-unread, [data-unread="true"]');
-      marks.forEach(function(n){ n.classList.remove('unread'); });
-      // Update badge counts
-      document.querySelectorAll('.unread-count, .nav-badge, .nf-count').forEach(function(b){ b.textContent = '0'; });
-      showToast('All notifications marked as read · 14 cleared');
-    },
-
-    togglePause: function(btn){
-      // Find the closest card-like ancestor and toggle paused state
-      var card = btn.closest('.gift-card, .rec-row, .recurring-card, .rg-row, [data-recurring], article, .card');
-      if (card) {
-        var paused = card.classList.toggle('paused');
-        if (paused) card.classList.remove('active');
-        else card.classList.add('active');
-        showToast(paused ? 'Recurring gift paused · resume anytime' : 'Recurring gift resumed · charges resume on next cycle');
-        // Update the button label if it says Pause/Resume
-        var curText = btn.textContent.trim().toLowerCase();
-        if (/pause/i.test(curText)) btn.textContent = 'Resume';
-        else if (/resume/i.test(curText)) btn.textContent = 'Pause';
-      } else {
-        showToast(btn.textContent.trim() + ' · status toggled');
-      }
-    },
-
-    copyLink: function(){
-      try { navigator.clipboard.writeText(window.location.href); } catch(_){}
-      showToast('Link copied to clipboard');
-    },
-
-    newEvent: function(){
-      // Open a slim event-creation modal
-      openSimpleModal({
-        title: 'Create new event',
-        sub: 'Quick-start · fill the basics, refine in the gala module',
-        fields: [
-          { id:'ne-name',  label:'Event name *',  type:'text',   placeholder:'e.g. Bishop\'s Annual Gala 2026' },
-          { id:'ne-type',  label:'Type',          type:'select', options:['Gala / dinner','Retreat','Cultivation lunch','Donor reception','Volunteer drive','Capital tour'] },
-          { id:'ne-date',  label:'Event date *',  type:'date',   value: new Date().toISOString().slice(0,10) },
-          { id:'ne-goal',  label:'Fundraising goal', type:'text', placeholder:'$50,000' },
-          { id:'ne-venue', label:'Venue',         type:'text',   placeholder:'e.g. Albany Capital Center' }
-        ],
-        cta: 'Create event →',
-        onSave: function(vals){
-          if (!vals['ne-name']) { alert('Name the event before saving.'); return false; }
-          showToast('Event created · "' + vals['ne-name'] + '" · opening gala management');
-          setTimeout(function(){ window.location = 'atlas-gala-management.html'; }, 600);
-          return true;
-        }
-      });
-    },
-
-    auditLog: function(){
-      // Open a slim audit-log modal showing the last 6 entries
-      var entries = [
-        { who:'Sarah Reynolds', what:'Created role "Custom · Region Coordinator"',     when:'12 min ago', tag:'role' },
-        { who:'Sarah Reynolds', what:'Invited jamie.morrison@diocese.org as Gift Officer', when:'Today, 9:14 AM', tag:'invite' },
-        { who:'Daniel Cho',     what:'Updated donor preferences for 24 records',         when:'Yesterday, 4:22 PM', tag:'data' },
-        { who:'System',         what:'Daily duplicate scan · 3 candidates surfaced',     when:'Yesterday, 6:00 AM', tag:'system' },
-        { who:'Bridget McCarthy', what:'Resigned consent for 1 donor (do-not-contact)',  when:'2 days ago',         tag:'consent' },
-        { who:'Sarah Reynolds', what:'Posted batch BX-2026-014 · 23 gifts · $87,400',    when:'3 days ago',         tag:'gift' }
-      ];
-      var html = '<div style="max-height:420px;overflow:auto">';
-      html += entries.map(function(e){
-        var col = {role:'#7C3AED', invite:'#2563EB', data:'#0D9488', system:'#64748B', consent:'#BE185D', gift:'#15803D'}[e.tag] || '#64748B';
-        return '<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #F1F5F9">' +
-                 '<div style="width:8px;height:8px;border-radius:50%;background:' + col + ';margin-top:6px;flex-shrink:0"></div>' +
-                 '<div style="flex:1">' +
-                   '<div style="font-size:13px;color:#0F172A">' + e.what + '</div>' +
-                   '<div style="font-size:11.5px;color:#64748B;margin-top:2px"><strong>' + e.who + '</strong> · ' + e.when + '</div>' +
-                 '</div>' +
-               '</div>';
-      }).join('');
-      html += '</div>';
-      openSimpleModal({
-        title: 'Audit log',
-        sub: 'Immutable 7-year record · all data + access changes',
-        rawBody: html,
-        cta: 'Export full log →',
-        onSave: function(){
-          showToast('Audit log export queued · CSV ready in 60s');
-          return true;
-        }
-      });
-    },
-
-    buildReport: function(){
-      // Open the Build-a-Custom-Report 4-step slide-over drawer
-      var existing = document.getElementById('rpt-drawer');
-      if (existing) { existing.remove(); document.getElementById('rpt-scrim').remove(); }
-      var scrim = document.createElement('div');
-      scrim.id = 'rpt-scrim';
-      scrim.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100020;opacity:0;transition:opacity .18s';
-      document.body.appendChild(scrim);
-      var drawer = document.createElement('aside');
-      drawer.id = 'rpt-drawer';
-      drawer.style.cssText = 'position:fixed;top:0;right:0;height:100vh;width:min(580px,94vw);background:white;z-index:100021;box-shadow:-16px 0 40px rgba(15,23,42,.18);transform:translateX(100%);transition:transform .22s cubic-bezier(.22,.61,.36,1);display:flex;flex-direction:column;font-family:DM Sans,sans-serif';
-      drawer.innerHTML =
-        '<style>' +
-          '#rpt-drawer .rh{padding:18px 22px 14px;background:linear-gradient(135deg,#0F172A,#2563EB);color:white;display:flex;align-items:flex-start;gap:12px}' +
-          '#rpt-drawer .rh h3{margin:0;font-family:DM Serif Display,serif;font-size:20px;font-weight:400}' +
-          '#rpt-drawer .rh .sub{font-size:12px;opacity:.86;margin-top:3px}' +
-          '#rpt-drawer .rx{margin-left:auto;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;cursor:pointer}' +
-          '#rpt-drawer .stepper{padding:14px 22px;display:flex;gap:10px;border-bottom:1px solid #F1F5F9;background:#FAFAFA}' +
-          '#rpt-drawer .stepper .st{flex:1;font-size:11px;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px}' +
-          '#rpt-drawer .stepper .st .dot{width:22px;height:22px;border-radius:50%;background:#E2E8F0;color:#64748B;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700}' +
-          '#rpt-drawer .stepper .st.cur .dot{background:#2563EB;color:white}' +
-          '#rpt-drawer .stepper .st.done .dot{background:#15803D;color:white}' +
-          '#rpt-drawer .body{padding:20px 22px;overflow:auto;flex:1}' +
-          '#rpt-drawer .sec{margin-bottom:16px}' +
-          '#rpt-drawer .lbl{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:8px}' +
-          '#rpt-drawer .fld{width:100%;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:DM Sans,sans-serif;color:#0F172A;box-sizing:border-box;outline:none}' +
-          '#rpt-drawer .fld:focus{border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.10)}' +
-          '#rpt-drawer .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}' +
-          '#rpt-drawer .ds{padding:14px 16px;border:1.5px solid #E2E8F0;border-radius:10px;cursor:pointer;transition:all .15s;background:white}' +
-          '#rpt-drawer .ds:hover{border-color:#93C5FD;background:#F0F9FF}' +
-          '#rpt-drawer .ds.sel{border-color:#2563EB;background:#EFF6FF;box-shadow:0 0 0 2px rgba(37,99,235,.10)}' +
-          '#rpt-drawer .ds .ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px;margin-bottom:7px}' +
-          '#rpt-drawer .ds .nm{font-size:13.5px;font-weight:600;color:#0F172A;margin-bottom:3px}' +
-          '#rpt-drawer .ds .dz{font-size:11px;color:#64748B;line-height:1.45}' +
-          '#rpt-drawer .cols{display:flex;flex-wrap:wrap;gap:6px}' +
-          '#rpt-drawer .col-chip{padding:6px 11px;border:1.5px solid #E2E8F0;border-radius:99px;font-size:12px;color:#475569;cursor:pointer;background:white;transition:all .12s;user-select:none}' +
-          '#rpt-drawer .col-chip:hover{border-color:#93C5FD}' +
-          '#rpt-drawer .col-chip.on{background:#2563EB;border-color:#2563EB;color:white;font-weight:600}' +
-          '#rpt-drawer .viz{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}' +
-          '#rpt-drawer .viz .vz{padding:14px 8px;border:1.5px solid #E2E8F0;border-radius:9px;text-align:center;cursor:pointer;font-size:11px;font-weight:600;color:#475569;transition:all .12s;background:white}' +
-          '#rpt-drawer .viz .vz:hover{border-color:#93C5FD}' +
-          '#rpt-drawer .viz .vz.sel{border-color:#2563EB;background:#EFF6FF;color:#2563EB}' +
-          '#rpt-drawer .viz .vz svg{width:26px;height:26px;margin-bottom:6px}' +
-          '#rpt-drawer .foot{padding:14px 22px;border-top:1px solid #F1F5F9;display:flex;gap:10px;background:#FAFAFA;align-items:center}' +
-          '#rpt-drawer .foot .l{font-size:11.5px;color:#64748B;display:flex;gap:6px;align-items:center}' +
-          '#rpt-drawer .btn-back{padding:8px 14px;background:white;border:1.5px solid #E2E8F0;border-radius:8px;font-size:12.5px;color:#475569;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:500}' +
-          '#rpt-drawer .btn-next{padding:8px 16px;background:linear-gradient(135deg,#2563EB,#1E40AF);color:white;border:none;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;margin-left:auto;box-shadow:0 4px 12px rgba(37,99,235,.25)}' +
-          '#rpt-drawer .pane{display:none}' +
-          '#rpt-drawer .pane.on{display:block;animation:fadeUp .22s ease}' +
-          '@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}' +
-        '</style>' +
-        '<div class="rh">' +
-          '<div style="width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.20);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M3 14l3-4 3 2 5-7"/><rect x="2" y="2" width="14" height="14" rx="1.5"/></svg></div>' +
-          '<div><h3>Build a custom report</h3><div class="sub">4 steps · save, schedule, or export as CSV / PDF</div></div>' +
-          '<div class="rx" id="rpt-x"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg></div>' +
-        '</div>' +
-        '<div class="stepper">' +
-          '<div class="st cur" data-i="1"><div class="dot">1</div>Dataset</div>' +
-          '<div class="st" data-i="2"><div class="dot">2</div>Columns</div>' +
-          '<div class="st" data-i="3"><div class="dot">3</div>Filters</div>' +
-          '<div class="st" data-i="4"><div class="dot">4</div>Save</div>' +
-        '</div>' +
-        '<div class="body">' +
-          '<div class="pane on" data-i="1">' +
-            '<div class="lbl">Pick a dataset</div>' +
-            '<div class="grid">' +
-              '<div class="ds sel" data-ds="gifts"><div class="ico" style="background:#2563EB">$</div><div class="nm">Gifts</div><div class="dz">All gifts, including pledge payments and recurring · 142,830 records</div></div>' +
-              '<div class="ds" data-ds="donors"><div class="ico" style="background:#7C3AED">P</div><div class="nm">Constituents</div><div class="dz">Individuals, households, organizations · 3,847 records</div></div>' +
-              '<div class="ds" data-ds="pledges"><div class="ico" style="background:#15803D">✓</div><div class="nm">Pledges</div><div class="dz">Pledge schedules + payment status · 218 active</div></div>' +
-              '<div class="ds" data-ds="campaigns"><div class="ico" style="background:#F59E0B">C</div><div class="nm">Campaigns</div><div class="dz">Goal vs. actual · appeal mix · 8 active</div></div>' +
-              '<div class="ds" data-ds="events"><div class="ico" style="background:#BE185D">E</div><div class="nm">Events</div><div class="dz">Galas, retreats · attendance + revenue · 14 records</div></div>' +
-              '<div class="ds" data-ds="custom"><div class="ico" style="background:#0D9488">✕</div><div class="nm">SQL · custom</div><div class="dz">Write your own query · advanced users only</div></div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="pane" data-i="2">' +
-            '<div class="lbl">Pick columns <span style="font-weight:400;text-transform:none;color:#64748B;font-size:11px;margin-left:6px">click to toggle · drag in Phase 2 to reorder</span></div>' +
-            '<div class="cols" id="rpt-cols">' +
-              '<div class="col-chip on">Gift ID</div>' +
-              '<div class="col-chip on">Donor name</div>' +
-              '<div class="col-chip on">Amount</div>' +
-              '<div class="col-chip on">Gift date</div>' +
-              '<div class="col-chip">Campaign</div>' +
-              '<div class="col-chip">Appeal</div>' +
-              '<div class="col-chip">Fund / GL code</div>' +
-              '<div class="col-chip">Payment method</div>' +
-              '<div class="col-chip">Designation</div>' +
-              '<div class="col-chip">Soft credits</div>' +
-              '<div class="col-chip">Receipt #</div>' +
-              '<div class="col-chip">Officer</div>' +
-              '<div class="col-chip">Donor email</div>' +
-              '<div class="col-chip">Lifetime giving</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="pane" data-i="3">' +
-            '<div class="lbl">Date range</div>' +
-            '<div class="grid"><select class="fld"><option>This fiscal year (Jul 2025 – Jun 2026)</option><option>Last fiscal year</option><option>Last 30 days</option><option>Custom range</option></select><input class="fld" type="date" value="2025-07-01"></div>' +
-            '<div class="lbl" style="margin-top:14px">Filter by</div>' +
-            '<div class="grid">' +
-              '<div><select class="fld"><option>Campaign: All campaigns</option><option>Cathedral Capital 2026</option><option>Annual Appeal</option><option>Bishop\'s Gala</option></select></div>' +
-              '<div><select class="fld"><option>Fund: All funds</option><option>Cathedral Restoration</option><option>General Operating</option><option>Scholarship</option></select></div>' +
-              '<div><select class="fld"><option>Amount: Any</option><option>$1,000+</option><option>$10,000+</option><option>$50,000+</option></select></div>' +
-              '<div><select class="fld"><option>Status: All</option><option>Posted only</option><option>Pending</option><option>Voided excluded</option></select></div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="pane" data-i="4">' +
-            '<div class="lbl">Visualization</div>' +
-            '<div class="viz">' +
-              '<div class="vz sel"><svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 10h18M9 5v14"/></svg>Table</div>' +
-              '<div class="vz"><svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linejoin="round"><path d="M3 19l5-7 4 3 6-9 3 5" stroke-linecap="round"/></svg>Line</div>' +
-              '<div class="vz"><svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="14" width="3" height="6"/><rect x="9" y="9" width="3" height="11"/><rect x="15" y="5" width="3" height="15"/></svg>Bar</div>' +
-              '<div class="vz"><svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l7 4" stroke-linecap="round"/></svg>Pie</div>' +
-            '</div>' +
-            '<div class="lbl" style="margin-top:18px">Report name <span style="color:#BE185D">*</span></div>' +
-            '<input class="fld" id="rpt-name" placeholder="e.g. Q2 Gift Officer performance">' +
-            '<div class="lbl" style="margin-top:14px">Schedule <span style="font-weight:400;text-transform:none;color:#64748B;font-size:11px;margin-left:6px">optional</span></div>' +
-            '<select class="fld" id="rpt-sched"><option>Don\'t schedule — run on demand</option><option>Daily · 7 AM</option><option>Weekly · Monday 8 AM</option><option>Monthly · 1st of month</option></select>' +
-          '</div>' +
-        '</div>' +
-        '<div class="foot">' +
-          '<div class="l"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="#15803D" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg>Auto-saved</div>' +
-          '<button class="btn-back" id="rpt-back" style="display:none">← Back</button>' +
-          '<button class="btn-next" id="rpt-next">Next: Columns →</button>' +
-        '</div>';
-      document.body.appendChild(drawer);
-
-      // Animate in
-      requestAnimationFrame(function(){ scrim.style.opacity = 1; drawer.style.transform = 'none'; });
-
-      // Step machine
-      var step = 1;
-      function show(n){
-        step = n;
-        drawer.querySelectorAll('.pane').forEach(function(p){ p.classList.toggle('on', +p.dataset.i === n); });
-        drawer.querySelectorAll('.st').forEach(function(s){
-          s.classList.remove('cur','done');
-          var i = +s.dataset.i;
-          if (i === n) s.classList.add('cur');
-          else if (i < n) s.classList.add('done');
-        });
-        drawer.querySelector('#rpt-back').style.display = n > 1 ? '' : 'none';
-        var next = drawer.querySelector('#rpt-next');
-        if (n === 1) next.textContent = 'Next: Columns →';
-        else if (n === 2) next.textContent = 'Next: Filters →';
-        else if (n === 3) next.textContent = 'Next: Save →';
-        else if (n === 4) next.textContent = 'Save report ✓';
-      }
-      drawer.querySelectorAll('.ds').forEach(function(d){
-        d.addEventListener('click', function(){
-          drawer.querySelectorAll('.ds').forEach(function(x){ x.classList.remove('sel'); });
-          d.classList.add('sel');
-        });
-      });
-      drawer.querySelectorAll('.col-chip').forEach(function(c){
-        c.addEventListener('click', function(){ c.classList.toggle('on'); });
-      });
-      drawer.querySelectorAll('.vz').forEach(function(v){
-        v.addEventListener('click', function(){
-          drawer.querySelectorAll('.vz').forEach(function(x){ x.classList.remove('sel'); });
-          v.classList.add('sel');
-        });
-      });
-      drawer.querySelector('#rpt-next').addEventListener('click', function(){
-        if (step < 4) show(step + 1);
-        else {
-          var nameFld = drawer.querySelector('#rpt-name');
-          var name = nameFld ? nameFld.value.trim() : '';
-          if (!name) { alert('Name your report before saving.'); nameFld && nameFld.focus(); return; }
-          closeDrawer();
-          showToast('Saved · "' + name + '" appears in Reports → Saved views');
-        }
-      });
-      drawer.querySelector('#rpt-back').addEventListener('click', function(){ if (step > 1) show(step - 1); });
-      function closeDrawer(){
-        scrim.style.opacity = 0;
-        drawer.style.transform = 'translateX(100%)';
-        setTimeout(function(){ scrim.remove(); drawer.remove(); }, 240);
-      }
-      drawer.querySelector('#rpt-x').addEventListener('click', closeDrawer);
-      scrim.addEventListener('click', closeDrawer);
-    }
-  };
-
-  // ── Simple modal builder (used by newEvent, auditLog) ──
-  function openSimpleModal(opts){
-    var sc = document.createElement('div');
-    sc.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100022;opacity:0;transition:opacity .15s';
-    var md = document.createElement('div');
-    md.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.97);width:min(520px,92vw);max-height:88vh;background:white;border-radius:14px;box-shadow:0 24px 64px rgba(15,23,42,.30);z-index:100023;opacity:0;transition:opacity .15s,transform .15s;font-family:DM Sans,sans-serif;overflow:hidden;display:flex;flex-direction:column';
-    var fldsHtml = '';
-    if (opts.fields) {
-      fldsHtml = opts.fields.map(function(f){
-        if (f.type === 'select') return '<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:6px">' + f.label + '</div><select id="' + f.id + '" style="width:100%;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:DM Sans,sans-serif;color:#0F172A;outline:none;box-sizing:border-box">' + f.options.map(function(o){ return '<option>' + o + '</option>'; }).join('') + '</select></div>';
-        return '<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:6px">' + f.label + '</div><input id="' + f.id + '" type="' + (f.type || 'text') + '" ' + (f.value ? 'value="' + f.value + '"' : '') + ' placeholder="' + (f.placeholder || '') + '" style="width:100%;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:DM Sans,sans-serif;color:#0F172A;outline:none;box-sizing:border-box"></div>';
-      }).join('');
-    }
-    md.innerHTML =
-      '<div style="padding:18px 22px 14px;background:linear-gradient(135deg,#1E3A8A,#2563EB);color:white;display:flex;align-items:flex-start;gap:12px">' +
-        '<div><div style="font-family:DM Serif Display,serif;font-size:20px">' + opts.title + '</div><div style="font-size:12px;opacity:.86;margin-top:3px">' + (opts.sub || '') + '</div></div>' +
-        '<div id="sm-x" style="margin-left:auto;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;cursor:pointer">×</div>' +
-      '</div>' +
-      '<div style="padding:18px 22px;overflow:auto;flex:1">' + (opts.rawBody || fldsHtml) + '</div>' +
-      '<div style="padding:14px 22px;border-top:1px solid #F1F5F9;display:flex;gap:10px;background:#FAFAFA">' +
-        '<button id="sm-cancel" style="padding:8px 14px;background:white;border:1.5px solid #E2E8F0;border-radius:8px;font-size:12.5px;color:#475569;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:500">Cancel</button>' +
-        '<button id="sm-save" style="padding:8px 16px;background:linear-gradient(135deg,#2563EB,#1E40AF);color:white;border:none;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;margin-left:auto">' + (opts.cta || 'Save') + '</button>' +
-      '</div>';
-    document.body.appendChild(sc);
-    document.body.appendChild(md);
-    requestAnimationFrame(function(){ sc.style.opacity = 1; md.style.opacity = 1; md.style.transform = 'translate(-50%,-50%) scale(1)'; });
-    function close(){ sc.style.opacity = 0; md.style.opacity = 0; md.style.transform = 'translate(-50%,-50%) scale(.97)'; setTimeout(function(){ sc.remove(); md.remove(); }, 180); }
-    md.querySelector('#sm-x').addEventListener('click', close);
-    md.querySelector('#sm-cancel').addEventListener('click', close);
-    sc.addEventListener('click', close);
-    md.querySelector('#sm-save').addEventListener('click', function(){
-      var vals = {};
-      if (opts.fields) opts.fields.forEach(function(f){ var el = md.querySelector('#' + f.id); if (el) vals[f.id] = el.value.trim(); });
-      var ok = opts.onSave ? opts.onSave(vals) : true;
-      if (ok !== false) close();
-    });
-  }
-  window.atlasOpenModal = openSimpleModal;
-})();
-</script>
-<!-- end Atlas Dead-CTA Rescue -->
-
-
-<!-- ════ Atlas-themed dialog (replaces native alert/confirm) — auto-injected ════ -->
-<style>
-  #ax-ov{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);z-index:2147483000;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',-apple-system,sans-serif}
-  #ax-ov.show{display:flex}
-  #ax-ov .ax-box{background:#fff;border-radius:16px;width:100%;max-width:430px;box-shadow:0 24px 64px rgba(15,23,42,.30);overflow:hidden;animation:axUp .18s ease}
-  @keyframes axUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-  #ax-ov .ax-bd{display:flex;gap:14px;padding:22px 22px 8px}
-  #ax-ov .ax-ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  #ax-ov .ax-ic svg{width:21px;height:21px}
-  #ax-ov .ax-tt{font-size:17px;font-weight:700;color:#0F172A;margin:1px 0 5px}
-  #ax-ov .ax-msg{font-size:13.5px;color:#475569;line-height:1.55;margin:0}
-  #ax-ov .ax-ft{display:flex;justify-content:flex-end;gap:9px;padding:16px 22px 20px}
-  #ax-ov .ax-btn{font-family:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:9px 16px;cursor:pointer;border:1px solid transparent}
-  #ax-ov .ax-ghost{background:#fff;border-color:#E2E8F0;color:#334155}
-  #ax-ov .ax-ghost:hover{background:#F8FAFC;border-color:#94A3B8}
-  #ax-ov .ax-primary{background:#2563EB;color:#fff}
-  #ax-ov .ax-primary:hover{background:#1D4ED8}
-  #ax-ov .ax-danger{background:#BE185D;color:#fff}
-  #ax-ov .ax-danger:hover{background:#9D174D}
-  #ax-ov .ax-gold{background:#B45309;color:#fff}
-  #ax-ov .ax-gold:hover{background:#92400E}
-</style>
-<div id="ax-ov"><div class="ax-box">
-  <div class="ax-bd"><div class="ax-ic" id="ax-ic"></div><div><h3 class="ax-tt" id="ax-tt"></h3><p class="ax-msg" id="ax-msg"></p></div></div>
-  <div class="ax-ft" id="ax-ft"></div>
-</div></div>
-<script>
-(function(){
-  if(window.__axInit) return; window.__axInit=true;
-  var ICONS={
-    danger:['#FCE7F3','#BE185D','<path d="M2.5 4.5h16v3.5h-16zM4 8v9.5a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V8M8 11.5h5"/>'],
-    warn:['#FEF3C7','#D97706','<path d="M10 7.5v4M10 14.3v.2"/><path d="M8.6 3.4 2.6 14a1.6 1.6 0 0 0 1.4 2.4h12A1.6 1.6 0 0 0 17.4 14L11.4 3.4a1.6 1.6 0 0 0-2.8 0Z"/>'],
-    info:['#EFF6FF','#2563EB','<circle cx="10" cy="10" r="7.5"/><path d="M10 9.3v4.2M10 6.4v.2"/>'],
-    success:['#DCFCE7','#15803D','<circle cx="10" cy="10" r="7.5"/><path d="M6.5 10.2l2.2 2.2 4.8-4.8"/>'],
-    docusign:['#FBF4E8','#B45309','<rect x="3" y="2.5" width="14" height="15" rx="2"/><path d="M6 7h8M6 10h5M6 13l1.4 1.4L10.5 11.3"/>']
-  };
-  function el(id){ return document.getElementById(id); }
-  function close(){ var o=el('ax-ov'); if(o) o.classList.remove('show'); }
-  window.axClose=close;
-  function dialog(o){
-    var ov=el('ax-ov'); if(!ov) return; var ic=ICONS[o.icon]||ICONS[o.danger?'danger':'info'];
-    el('ax-ic').style.background=ic[0]; el('ax-ic').style.color=ic[1];
-    el('ax-ic').innerHTML='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+ic[2]+'</svg>';
-    el('ax-tt').textContent=o.title||''; el('ax-tt').style.display=o.title?'':'none'; el('ax-msg').innerHTML=o.message||'';
-    var ft=el('ax-ft'); ft.innerHTML='';
-    if(!o.alert){ var c=document.createElement('button'); c.className='ax-btn ax-ghost'; c.textContent=o.cancelText||'Cancel'; c.onclick=function(){ close(); if(o.onCancel)o.onCancel(); }; ft.appendChild(c); }
-    var ok=document.createElement('button'); ok.className='ax-btn '+(o.btn==='gold'?'ax-gold':(o.danger?'ax-danger':'ax-primary')); ok.textContent=o.confirmText||(o.alert?'Got it':'OK');
-    ok.onclick=function(){ close(); if(o.onConfirm)o.onConfirm(); }; ft.appendChild(ok);
-    ov.classList.add('show'); setTimeout(function(){ try{ok.focus();}catch(e){} },40);
-  }
-  window.atlasConfirm=function(o){ dialog(o||{}); };
-  window.atlasAlert=function(title,message,o){ o=o||{}; dialog({title:title,message:message,alert:true,icon:o.icon||'info',btn:o.btn,confirmText:o.confirmText||'Got it',onConfirm:o.onConfirm}); };
-  // theme all native alert() calls automatically
-  window.alert=function(m){ atlasAlert('Atlas', String(m==null?'':m)); };
-  var ov=el('ax-ov'); if(ov) ov.addEventListener('click',function(e){ if(e.target===this) close(); });
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
-})();
-</script>
-
-<!-- ATLAS-DATEPICKER v1 : reusable click-to-open calendar for text date fields -->
-<style id="atlas-datepicker-css">
-.adp-pop{position:absolute;z-index:2147483000;width:266px;background:#fff;border:1px solid var(--border,#E2E8F0);border-radius:12px;
-  box-shadow:0 12px 34px rgba(15,23,42,.18);padding:12px;font-family:'DM Sans',system-ui,sans-serif;color:var(--text-1,#0F172A);
-  opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .12s ease,transform .12s ease;}
-.adp-pop.open{opacity:1;transform:translateY(0);pointer-events:auto;}
-.adp-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.adp-nav{width:28px;height:28px;border:none;background:transparent;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;
-  color:var(--text-2,#334155);display:flex;align-items:center;justify-content:center;}
-.adp-nav:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
-.adp-title{font-size:13.5px;font-weight:600;letter-spacing:.01em;cursor:pointer;padding:4px 8px;border-radius:8px;}
-.adp-title:hover{background:var(--surface,#F8FAFC);}
-.adp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-.adp-dow{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3,#64748B);
-  text-align:center;padding:4px 0;}
-.adp-day{border:none;background:transparent;border-radius:8px;height:32px;font-size:12.5px;cursor:pointer;color:var(--text-1,#0F172A);
-  font-family:inherit;}
-.adp-day:hover{background:var(--blue-pale,#EFF6FF);}
-.adp-day.mut{color:#CBD5E1;}
-.adp-day.today{box-shadow:inset 0 0 0 1px var(--blue,#2563EB);color:var(--blue,#2563EB);font-weight:600;}
-.adp-day.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
-.adp-cell{border:none;background:transparent;border-radius:8px;height:34px;font-size:12.5px;cursor:pointer;color:var(--text-2,#334155);
-  font-family:inherit;}
-.adp-cell:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
-.adp-cell.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
-.adp-ft{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border,#E2E8F0);}
-.adp-ft button{border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:4px 6px;border-radius:6px;}
-.adp-today-b{color:var(--blue,#2563EB);} .adp-today-b:hover{background:var(--blue-pale,#EFF6FF);}
-.adp-clear-b{color:var(--text-3,#64748B);} .adp-clear-b:hover{background:var(--surface,#F8FAFC);}
-.adp-mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
-</style>
-<script id="atlas-datepicker-js">
-(function(){
-  if (window.__atlasDP) return; window.__atlasDP = true;
-  var MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
-  var DATE_PH=/\b(m{1,2}\s*[\/\-.]\s*d{1,2}\s*[\/\-.]\s*y{2,4}|y{4}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*d{1,2}|d{1,2}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*y{2,4})\b/i;
-  var WORD_DATE=/\bdate\b/i;
-
-  function looksDate(inp){
-    if(!inp||inp.tagName!=='INPUT') return false;
-    var t=(inp.getAttribute('type')||'text').toLowerCase();
-    if(t!=='text'&&t!=='') return false;              // leave native date/other inputs alone
-    if(inp.getAttribute('data-adp')==='off') return false;
-    if(inp.getAttribute('list')) return false;         // autocomplete fields
-    var ph=inp.getAttribute('placeholder')||'';
-    if(DATE_PH.test(ph)) return true;
-    if(WORD_DATE.test(ph)) return true;
-    // label / aria signal (whole word "date")
-    var lab=inp.getAttribute('aria-label')||'';
-    if(WORD_DATE.test(lab)) return true;
-    // native label association (for=/wrapping label)
-    try{ if(inp.labels){ for(var i=0;i<inp.labels.length;i++){ if(WORD_DATE.test(inp.labels[i].textContent||'')) return true; } } }catch(e){}
-    var isLbl=function(el){ return el && el.matches && el.matches('label,.lbl,.field-label,.form-label'); };
-    // immediate preceding sibling labels (no climbing to broad ancestors)
-    var sib=inp.previousElementSibling, guard=0;
-    while(sib && guard<3){ if(isLbl(sib) && WORD_DATE.test(sib.textContent||'')) return true; sib=sib.previousElementSibling; guard++; }
-    // direct label children of the input's own wrapper only
-    var par=inp.parentElement;
-    if(par){ var kids=par.children; for(var j=0;j<kids.length;j++){ var k=kids[j]; if(k!==inp && isLbl(k) && WORD_DATE.test(k.textContent||'')) return true; } }
-    return false;
-  }
-
-  // ---- format detection & output ----
-  function fmtOf(inp){
-    var ph=(inp.getAttribute('placeholder')||'').toLowerCase();
-    var v=(inp.value||'').trim();
-    if(/y{4}\s*[\/\-.]\s*m/.test(ph)||/^\d{4}-\d{1,2}-\d{1,2}$/.test(v)) return 'iso';
-    if(/d{1,2}\s*[\/\-.]\s*m/.test(ph)) return 'dmy';
-    if(/[a-z]{3,}\s+\d{1,2},?\s+\d{4}/i.test(v)) return 'long';
-    return 'mdy';
-  }
-  function pad(n){return (n<10?'0':'')+n;}
-  function toStr(d,fmt){
-    var y=d.getFullYear(),m=d.getMonth()+1,day=d.getDate();
-    if(fmt==='iso') return y+'-'+pad(m)+'-'+pad(day);
-    if(fmt==='dmy') return pad(day)+'/'+pad(m)+'/'+y;
-    if(fmt==='long') return MON[m-1]+' '+day+', '+y;
-    return pad(m)+'/'+pad(day)+'/'+y;
-  }
-  function parse(v){
-    v=(v||'').trim(); if(!v) return null;
-    var m;
-    if(m=v.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/)) return new Date(+m[1],+m[2]-1,+m[3]);
-    if(m=v.match(/^([a-z]{3,})\s+(\d{1,2}),?\s+(\d{4})$/i)){var mi=MON.findIndex(function(x){return x.toLowerCase().indexOf(m[1].toLowerCase())===0;});if(mi>=0)return new Date(+m[3],mi,+m[2]);}
-    if(m=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/)){var y=+m[3];if(y<100)y+=2000;return new Date(y,+m[1]-1,+m[2]);}
-    var d=new Date(v); return isNaN(d)?null:d;
-  }
-
-  // ---- single shared popover ----
-  var pop,active,view,mode='days';
-  function build(){
-    pop=document.createElement('div');pop.className='adp-pop';pop.setAttribute('role','dialog');
-    document.body.appendChild(pop);
-    pop.addEventListener('mousedown',function(e){e.preventDefault();}); // keep field focus
-  }
-  function close(){ if(pop) pop.classList.remove('open'); active=null; mode='days'; }
-  function open(inp){
-    if(!pop) build();
-    active=inp; mode='days';
-    view=parse(inp.value)||new Date();
-    render(); position(); pop.classList.add('open');
-  }
-  function position(){
-    var r=active.getBoundingClientRect(), sx=window.pageXOffset, sy=window.pageYOffset;
-    pop.style.visibility='hidden'; pop.classList.add('open');
-    var ph=pop.offsetHeight, pw=pop.offsetWidth;
-    pop.classList.remove('open'); pop.style.visibility='';
-    var top=r.bottom+sy+6, left=r.left+sx;
-    if(r.bottom+ph+6>window.innerHeight && r.top-ph-6>0) top=r.top+sy-ph-6;
-    left=Math.min(left, sx+window.innerWidth-pw-8); left=Math.max(left,sx+8);
-    pop.style.top=top+'px'; pop.style.left=left+'px';
-  }
-  function commit(d){
-    var fmt=fmtOf(active);
-    active.value=toStr(d,fmt);
-    active.dispatchEvent(new Event('input',{bubbles:true}));
-    active.dispatchEvent(new Event('change',{bubbles:true}));
-    close();
-  }
-  function render(){
-    if(mode==='months'){renderMonths();return;}
-    if(mode==='years'){renderYears();return;}
-    var y=view.getFullYear(), mo=view.getMonth();
-    var sel=parse(active.value), today=new Date();
-    var first=new Date(y,mo,1), start=first.getDay(), dim=new Date(y,mo+1,0).getDate(), pdim=new Date(y,mo,0).getDate();
-    var h='<div class="adp-hd"><button class="adp-nav" data-a="pm">&#8249;</button>'+
-      '<div class="adp-title" data-a="mode">'+MON[mo]+' '+y+'</div>'+
-      '<button class="adp-nav" data-a="nm">&#8250;</button></div><div class="adp-grid">';
-    for(var i=0;i<7;i++) h+='<div class="adp-dow">'+DOW[i]+'</div>';
-    for(var c=0;c<42;c++){
-      var dn,cls='adp-day',dt;
-      if(c<start){dn=pdim-start+1+c;cls+=' mut';dt=new Date(y,mo-1,dn);}
-      else if(c-start+1<=dim){dn=c-start+1;dt=new Date(y,mo,dn);}
-      else{dn=c-start+1-dim;cls+=' mut';dt=new Date(y,mo+1,dn);}
-      if(dt.getFullYear()===today.getFullYear()&&dt.getMonth()===today.getMonth()&&dt.getDate()===today.getDate())cls+=' today';
-      if(sel&&dt.getFullYear()===sel.getFullYear()&&dt.getMonth()===sel.getMonth()&&dt.getDate()===sel.getDate())cls+=' sel';
-      h+='<button class="'+cls+'" data-d="'+dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate()+'">'+dn+'</button>';
-      if(c>=start+dim-1 && (c+1)%7===0) break;
-    }
-    h+='</div><div class="adp-ft"><button class="adp-today-b" data-a="today">Today</button><button class="adp-clear-b" data-a="clear">Clear</button></div>';
-    pop.innerHTML=h;
-  }
-  function renderMonths(){
-    var y=view.getFullYear();
-    var h='<div class="adp-hd"><button class="adp-nav" data-a="py">&#8249;</button>'+
-      '<div class="adp-title" data-a="years">'+y+'</div><button class="adp-nav" data-a="ny">&#8250;</button></div><div class="adp-mgrid">';
-    for(var i=0;i<12;i++) h+='<button class="adp-cell'+(i===view.getMonth()?' sel':'')+'" data-m="'+i+'">'+MONS[i]+'</button>';
-    h+='</div>'; pop.innerHTML=h;
-  }
-  function renderYears(){
-    var base=view.getFullYear()-6;
-    var h='<div class="adp-hd"><button class="adp-nav" data-a="pyr">&#8249;</button>'+
-      '<div class="adp-title">'+base+' – '+(base+11)+'</div><button class="adp-nav" data-a="nyr">&#8250;</button></div><div class="adp-mgrid">';
-    for(var i=0;i<12;i++){var yr=base+i;h+='<button class="adp-cell'+(yr===view.getFullYear()?' sel':'')+'" data-y="'+yr+'">'+yr+'</button>';}
-    h+='</div>'; pop.innerHTML=h;
-  }
-
-  document.addEventListener('click',function(e){
-    if(!pop) return;
-    var t=e.target;
-    if(pop.contains(t)){
-      var a=t.getAttribute('data-a'), d=t.getAttribute('data-d'), mm=t.getAttribute('data-m'), yy=t.getAttribute('data-y');
-      if(d){var p=d.split('-');commit(new Date(+p[0],+p[1]-1,+p[2]));return;}
-      if(mm!=null){view=new Date(view.getFullYear(),+mm,1);mode='days';render();return;}
-      if(yy!=null){view=new Date(+yy,view.getMonth(),1);mode='months';render();return;}
-      if(a==='pm'){view=new Date(view.getFullYear(),view.getMonth()-1,1);render();}
-      else if(a==='nm'){view=new Date(view.getFullYear(),view.getMonth()+1,1);render();}
-      else if(a==='mode'){mode='months';render();}
-      else if(a==='years'){mode='years';render();}
-      else if(a==='py'){view=new Date(view.getFullYear()-1,view.getMonth(),1);render();}
-      else if(a==='ny'){view=new Date(view.getFullYear()+1,view.getMonth(),1);render();}
-      else if(a==='pyr'){view=new Date(view.getFullYear()-12,view.getMonth(),1);render();}
-      else if(a==='nyr'){view=new Date(view.getFullYear()+12,view.getMonth(),1);render();}
-      else if(a==='today'){commit(new Date());}
-      else if(a==='clear'){active.value='';active.dispatchEvent(new Event('input',{bubbles:true}));active.dispatchEvent(new Event('change',{bubbles:true}));close();}
-      return;
-    }
-    if(active && t===active) return;
-    close();
-  },true);
-
-  document.addEventListener('focusin',function(e){ if(looksDate(e.target)) open(e.target); });
-  document.addEventListener('click',function(e){ if(looksDate(e.target) && active!==e.target) open(e.target); });
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
-  window.addEventListener('resize',function(){ if(active&&pop&&pop.classList.contains('open')) position(); });
-  window.addEventListener('scroll',function(){ if(active&&pop&&pop.classList.contains('open')) position(); },true);
-
-  window.__atlasLooksDate=looksDate; // exposed for tests
-})();
-</script>
-<!-- /ATLAS-DATEPICKER -->
-<!-- ATLAS-NAVCOLLAPSE v1 : expandable/collapsible Campaigns submenu (Appeals / Funds) -->
-<style id="atlas-navcollapse-css">
-.nav-caret{ margin-left:auto; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px;
-  border-radius:5px; opacity:.55; transition:transform .18s ease, opacity .15s, background .15s; flex-shrink:0; }
-.nav-caret:hover{ opacity:1; background:rgba(255,255,255,.12); }
-.nav-caret svg{ width:9px; height:9px; }
-.nav-item.nav-open .nav-caret{ transform:rotate(90deg); }
-.nav-item .nav-badge + .nav-caret{ margin-left:8px; }
-.nav-subwrap{ overflow:hidden; }
-</style>
-<script id="atlas-navcollapse-js">
-(function(){
-  if (window.__atlasNavCollapse) return; window.__atlasNavCollapse = true;
-  var CARET = '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 2l3 3-3 3"/></svg>';
-
-  function setup(link){
-    // collect submenu: a following .nav-subwrap, or loose Appeals/Funds nav-items (portal)
-    var wrap=null, subs=[], next=link.nextElementSibling;
-    if(next && next.classList && next.classList.contains('nav-subwrap')) wrap=next;
-    else {
-      var n=next;
-      while(n && n.classList && n.classList.contains('nav-item') && /atlas-(appeals|funds)\.html$/.test(n.getAttribute('href')||'')){ subs.push(n); n=n.nextElementSibling; }
-    }
-    if(!wrap && !subs.length) return;
-
-    var childActive = wrap ? !!wrap.querySelector('.nav-item.active') : subs.some(function(s){return s.classList.contains('active');});
-    var expanded = link.classList.contains('active') || childActive;
-
-    if(!link.querySelector('.nav-caret')){
-      var car=document.createElement('span'); car.className='nav-caret'; car.setAttribute('aria-label','Toggle submenu'); car.innerHTML=CARET;
-      link.appendChild(car);
-    }
-    var caret=link.querySelector('.nav-caret');
-    function apply(){
-      if(wrap) wrap.style.display = expanded?'':'none';
-      else subs.forEach(function(s){ s.style.display = expanded?'':'none'; });
-      link.classList.toggle('nav-open', expanded);
-      link.setAttribute('aria-expanded', expanded?'true':'false');
-    }
-    apply();
-    caret.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); expanded=!expanded; apply(); });
-  }
-
-  function scan(){
-    var links=document.querySelectorAll('.nav-item[href="atlas-campaign-dashboard.html"]:not([data-navcol])');
-    for(var i=0;i<links.length;i++){ links[i].setAttribute('data-navcol','1'); setup(links[i]); }
-  }
-  function boot(){
-    scan();
-    // portal renders its sidebar via JS — watch for it to appear
-    var host=document.querySelector('.sidebar, #nav') || document.body;
-    try{
-      var mo=new MutationObserver(function(){ scan(); });
-      mo.observe(host, {childList:true, subtree:true});
-      setTimeout(function(){ mo.disconnect(); }, 4000);
-    }catch(e){}
-    var tries=0, t=setInterval(function(){ scan(); if(++tries>12) clearInterval(t); }, 120);
-  }
-  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
-})();
-</script>
-<!-- /ATLAS-NAVCOLLAPSE -->
-</body>
-</html>
+</body></html>
