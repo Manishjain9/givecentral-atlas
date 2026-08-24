@@ -2623,14 +2623,24 @@ body {
     function badge(txt,bg,fg,bd){ var s=document.createElement('span'); s.className='tpl-badge'; s.style.cssText='display:inline-block;margin-left:6px;font-size:10px;font-weight:700;border-radius:20px;padding:1px 8px;vertical-align:middle;background:'+bg+';color:'+fg+(bd?';border:1px solid '+bd:''); s.textContent=txt; ttl.appendChild(s); }
     if(dflt&&dflt===name) badge('★ Default','#EFF6FF','#1D4ED8','#BFDBFE');
   }
+  function tplIsSystem(row){
+    var tag=(row.querySelector('.tag')||{}).textContent||'';
+    if(/system/i.test(tag)) return true;
+    var metric=(row.querySelector('.metric')||{}).textContent||'';
+    if(/\bsystem\b/i.test(metric)) return true;
+    var meta=(row.querySelector('.meta')||{}).textContent||'';
+    return /auto[- ]|triggered|auto-sent|auto-attached/i.test(meta);
+  }
+  window.__tplIsSystem=tplIsSystem;
   function renderTplFilters(){
     var bar=document.getElementById('tpl-filters'), host=document.getElementById('templates-list'); if(!bar||!host) return;
     var meta=tplMeta(), rows=[].slice.call(host.querySelectorAll('.cm-row')), folders=tplFolders();
-    var active=rows.filter(function(r){return !metaFor(tplName(r)).archived;}).length;
+    var actRows=rows.filter(function(r){return !metaFor(tplName(r)).archived;});
+    var active=actRows.length;
+    var sysN=actRows.filter(tplIsSystem).length, cusN=active-sysN;
     var arch=rows.filter(function(r){return metaFor(tplName(r)).archived;}).length;
     function chip(key,label,count){ var on=TPL_FILTER===key; return '<button class="tpl-fchip" data-f="'+encodeURIComponent(key)+'" style="border:1px solid '+(on?'#2563EB':'var(--border)')+';background:'+(on?'#EFF6FF':'#fff')+';color:'+(on?'#1D4ED8':'var(--text-2)')+';border-radius:20px;padding:5px 12px;font:600 12px \'DM Sans\';cursor:pointer">'+label+(count!=null?' <span style="opacity:.55">'+count+'</span>':'')+'</button>'; }
-    var html=chip('all','All',active);
-    html+=chip('archived','Archived',arch);
+    var html=chip('all','All',active)+chip('system','System',sysN)+chip('custom','My templates',cusN)+chip('archived','Archived',arch);
     bar.innerHTML=html;
     bar.querySelectorAll('.tpl-fchip').forEach(function(b){ b.addEventListener('click',function(){ TPL_FILTER=decodeURIComponent(b.dataset.f); TPL_PAGE=1; renderTplView(); }); });
   }
@@ -2642,6 +2652,8 @@ body {
     var visible=rows.filter(function(r){ var m=metaFor(tplName(r));
       if(TPL_FILTER==='archived') return !!m.archived;
       if(m.archived) return false;
+      if(TPL_FILTER==='system') return tplIsSystem(r);
+      if(TPL_FILTER==='custom') return !tplIsSystem(r);
       if(TPL_FILTER!=='all' && (m.folder||'')!==TPL_FILTER) return false;
       if(q && r.textContent.toLowerCase().indexOf(q)===-1) return false;
       return true; });

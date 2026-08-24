@@ -295,18 +295,18 @@
     }
   })();
   var TEMPLATES=[
-    {id:'thankyou',nm:'Major-donor thank-you',sub:'Used 142 times · Last edited Apr 28 by Sarah R.',emoji:'💚',bg:'#DBEAFE',used:142,edited:20},
-    {id:'receipt',nm:'Tax receipt · Pub 1771',sub:'Used 2,840 times · Auto-attached to gifts',emoji:'🧾',bg:'#FEF3C7',used:2840,edited:2},
-    {id:'welcome',nm:'First-time donor welcome (touch 1 of 5)',sub:'Used 412 times · Triggered on first gift',emoji:'👋',bg:'#EDE9FE',used:412,edited:8},
-    {id:'pledge',nm:'Pledge installment reminder',sub:'Used 348 times · Auto-sent 7 days before due',emoji:'📅',bg:'#DCFCE7',used:348,edited:5},
-    {id:'lapsed',nm:'Lapsed donor re-engagement',sub:'Used 8 times · Quarterly',emoji:'💌',bg:'#FCE7F3',used:8,edited:40},
-    {id:'event',nm:'Event invitation · annual gala',sub:'Used 14 times · Last edited Feb 12',emoji:'🎉',bg:'#DBEAFE',used:14,edited:60},
-    {id:'soft',nm:'Soft-credit acknowledgement (no tax)',sub:'Used 67 times · DAF & matching gifts',emoji:'📋',bg:'#FEF3C7',used:67,edited:15},
-    {id:'midpoint',nm:'Campaign mid-point update',sub:'Used 23 times · Campaign milestones',emoji:'📊',bg:'#EDE9FE',used:23,edited:30},
-    {id:'cultivation',nm:'Major gift cultivation letter',sub:'Used 31 times · Personalized outreach',emoji:'⭐',bg:'#DBEAFE',used:31,edited:12},
-    {id:'matching',nm:'Matching gift notification',sub:'Used 5 times · Auto on match confirmation',emoji:'🎁',bg:'#DCFCE7',used:5,edited:22},
-    {id:'memorial',nm:'In-memoriam tribute acknowledgement',sub:'Used 12 times · Memorial gifts',emoji:'🕊️',bg:'#FCE7F3',used:12,edited:18},
-    {id:'yearend',nm:'Year-end giving summary',sub:'Used 189 times · January batch',emoji:'📆',bg:'#DCFCE7',used:189,edited:10}
+    {id:'thankyou',nm:'Major-donor thank-you',sub:'Used 142 times · Last edited Apr 28 by Sarah R.',emoji:'💚',bg:'#DBEAFE',used:142,edited:20,info:'Warm personal thank-you for a major gift. Send after a $1,000+ gift. Merge fields: {{first_name}}, {{gift_amount}}, {{fund_name}}.'},
+    {id:'receipt',nm:'Tax receipt · Pub 1771',sub:'Used 2,840 times · Auto-attached to gifts',emoji:'🧾',bg:'#FEF3C7',used:2840,edited:2,info:'IRS Pub 1771-compliant tax receipt. System template — auto-attached to every gift; contents are locked to stay compliant.'},
+    {id:'welcome',nm:'First-time donor welcome (touch 1 of 5)',sub:'Used 412 times · Triggered on first gift',emoji:'👋',bg:'#EDE9FE',used:412,edited:8,info:'First email of the 5-touch new-donor welcome series. Auto-triggers on a donor’s first gift.'},
+    {id:'pledge',nm:'Pledge installment reminder',sub:'Used 348 times · Auto-sent 7 days before due',emoji:'📅',bg:'#DCFCE7',used:348,edited:5,info:'Reminder sent automatically 7 days before a pledge installment is due. Merge fields: {{amount}}, {{due_date}}.'},
+    {id:'lapsed',nm:'Lapsed donor re-engagement',sub:'Used 8 times · Quarterly',emoji:'💌',bg:'#FCE7F3',used:8,edited:40,info:'Win-back email for donors who haven’t given in 12+ months. Best sent quarterly to a LYBUNT/SYBUNT segment.'},
+    {id:'event',nm:'Event invitation · annual gala',sub:'Used 14 times · Last edited Feb 12',emoji:'🎉',bg:'#DBEAFE',used:14,edited:60,info:'Event invitation with RSVP button, for the gala or similar events. Merge fields: {{event_name}}, {{event_date}}.'},
+    {id:'soft',nm:'Soft-credit acknowledgement (no tax)',sub:'Used 67 times · DAF & matching gifts',emoji:'📋',bg:'#FEF3C7',used:67,edited:15,info:'Acknowledges DAF, matching, and soft-credit gifts. Contains no tax language — the donor was already receipted elsewhere.'},
+    {id:'midpoint',nm:'Campaign mid-point update',sub:'Used 23 times · Campaign milestones',emoji:'📊',bg:'#EDE9FE',used:23,edited:30,info:'Progress update sent at a campaign milestone (e.g. 50% of goal) to build momentum.'},
+    {id:'cultivation',nm:'Major gift cultivation letter',sub:'Used 31 times · Personalized outreach',emoji:'⭐',bg:'#DBEAFE',used:31,edited:12,info:'Personalized 1:1 cultivation letter for major-gift prospects. Intended for individual sends, not bulk blasts.'},
+    {id:'matching',nm:'Matching gift notification',sub:'Used 5 times · Auto on match confirmation',emoji:'🎁',bg:'#DCFCE7',used:5,edited:22,info:'Notifies a donor when their employer match is confirmed. Auto-sent on match confirmation.'},
+    {id:'memorial',nm:'In-memoriam tribute acknowledgement',sub:'Used 12 times · Memorial gifts',emoji:'🕊️',bg:'#FCE7F3',used:12,edited:18,info:'Acknowledges in-memoriam / tribute gifts and can notify the honoree’s family. Merge: {{honoree_name}}.'},
+    {id:'yearend',nm:'Year-end giving summary',sub:'Used 189 times · January batch',emoji:'📆',bg:'#DCFCE7',used:189,edited:10,info:'Annual giving summary for tax season — sent as a January batch. Merge fields: {{ytd_total}}, {{gift_count}}.'}
   ];
 
   // Sample donor directory for the "search specific people" picker
@@ -451,23 +451,50 @@
     return '<b>Test '+c.pct+'%</b> ('+fmt(c.test)+' recipients) — A vs B on '+(S.ab.variable==='from'?'from name':'subject line')+'. '+
       (S.ab.autoSend?('Winner by '+abMetricLabel()+' after '+S.ab.windowH+'h auto-sends to the remaining <b>'+fmt(c.winner)+'</b>.'):('You’ll pick the winner manually after '+S.ab.windowH+'h; the remaining <b>'+fmt(c.winner)+'</b> wait.'));
   }
+  function tplArchivedSet(){ try{ var m=JSON.parse(localStorage.getItem('atlas_tpl_meta')||'{}'); var s={}; Object.keys(m).forEach(function(k){ if(m[k]&&m[k].archived) s[k]=1; }); return s; }catch(_){ return {}; } }
+  function tplIsSys(t){ return /auto|triggered|system/i.test(t.sub||''); }
   function stepTemplate(){
     var q=(S.tplQuery||'').toLowerCase();
-    var list=TEMPLATES.filter(function(t){ return !q || (t.nm+' '+t.sub).toLowerCase().indexOf(q)!==-1; });
+    var arch=tplArchivedSet();
+    var base=TEMPLATES.filter(function(t){ return !arch[t.nm]; });          // full saved set, minus archived
+    var kind=S.tplKind||'all';
+    var list=base.filter(function(t){
+      if(kind==='system' && !tplIsSys(t)) return false;
+      if(kind==='custom' && tplIsSys(t)) return false;
+      return !q || (t.nm+' '+t.sub).toLowerCase().indexOf(q)!==-1;
+    });
     if(S.tplSort==='used') list=list.slice().sort(function(a,b){return b.used-a.used;});
     else if(S.tplSort==='name') list=list.slice().sort(function(a,b){return a.nm.localeCompare(b.nm);});
     else if(S.tplSort==='edited') list=list.slice().sort(function(a,b){return a.edited-b.edited;});
     var blankOn=S.template==='blank';
-    return '<div class="wrap wide"><h2 class="step-h">Choose a template</h2><p class="step-sub">Start blank or from a reusable template — it loads straight into the builder.</p>'+
+    var sysN=base.filter(tplIsSys).length, cusN=base.length-sysN;
+    function kchip(k,label,c){ var on=kind===k; return '<button type="button" class="tplk-chip" data-k="'+k+'" style="border:1px solid '+(on?'#2563EB':'var(--border)')+';background:'+(on?'#EFF6FF':'#fff')+';color:'+(on?'#1D4ED8':'var(--text-2)')+';border-radius:20px;padding:5px 12px;font:600 12px \'DM Sans\';cursor:pointer">'+label+' <span style="opacity:.55">'+c+'</span></button>'; }
+    return '<div class="wrap wide"><h2 class="step-h">Choose a template</h2><p class="step-sub">Start blank or from any saved template — it loads straight into the builder. Tap the ⓘ on a card to see what it’s for.</p>'+
       (S.resumeFrom==='draft'?'<div class="persona" style="background:#FFFBEB;border-color:#FDE68A;margin-bottom:14px">📝 <div><b>Resumed draft.</b> This draft was built from <b>'+esc(S.resumeTpl||'a blank layout')+'</b> — it’s pre-selected below (marked ✓). Pick a different template to start over.</div></div>':'')+
       '<div class="tpl-bar">'+
         '<div class="tpl-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="tpl-q" placeholder="Search templates…" value="'+esc(S.tplQuery)+'"></div>'+
         '<select class="fld" id="tpl-sort" style="max-width:190px"><option value="used"'+(S.tplSort==='used'?' selected':'')+'>Sort: Most used</option><option value="name"'+(S.tplSort==='name'?' selected':'')+'>Sort: Name A–Z</option><option value="edited"'+(S.tplSort==='edited'?' selected':'')+'>Sort: Recently edited</option></select>'+
       '</div>'+
+      '<div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:0 0 14px">'+kchip('all','All',base.length)+kchip('system','System',sysN)+kchip('custom','My templates',cusN)+'<span style="margin-left:auto;font-size:12px;color:var(--text-3)">Showing '+list.length+' of '+base.length+' saved templates</span></div>'+
       '<div class="tplc-grid">'+
         '<div class="tplc blank'+(blankOn?' on':'')+'" data-t="blank">'+(blankOn?'<span class="tplc-chk">✓</span>':'')+'<div class="tplc-th" style="background:#EFF6FF;color:#2563EB;font-size:28px">＋</div><div class="tplc-nm">Start from blank</div><div class="tplc-sub">Build your own layout</div></div>'+
-        (list.length? list.map(function(t){ var on=S.template===t.id; return '<div class="tplc'+(on?' on':'')+'" data-t="'+t.id+'">'+(on?'<span class="tplc-chk">✓</span>':'')+'<div class="tplc-th" style="background:'+t.bg+'">'+t.emoji+'</div><div class="tplc-nm">'+t.nm+'</div><div class="tplc-sub">'+t.sub+'</div></div>'; }).join('') : '<div class="tpl-empty" style="grid-column:1/-1">No templates match “'+esc(S.tplQuery)+'”.</div>') +
+        (list.length? list.map(function(t){ var on=S.template===t.id; return '<div class="tplc'+(on?' on':'')+'" data-t="'+t.id+'">'+
+          '<button type="button" class="tplc-info" data-info="'+t.id+'" title="What is this template?" style="position:absolute;top:9px;left:9px;width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:#fff;color:#64748B;font:700 12px Georgia,serif;font-style:italic;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;z-index:2">i</button>'+
+          (tplIsSys(t)?'<span style="position:absolute;top:10px;left:38px;font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#B45309;background:#FEF3C7;border-radius:20px;padding:1px 7px">System</span>':'')+
+          (on?'<span class="tplc-chk">✓</span>':'')+'<div class="tplc-th" style="background:'+t.bg+'">'+t.emoji+'</div><div class="tplc-nm">'+t.nm+'</div><div class="tplc-sub">'+t.sub+'</div></div>'; }).join('') : '<div class="tpl-empty" style="grid-column:1/-1">No templates match “'+esc(S.tplQuery)+'”.</div>') +
       '</div></div>';
+  }
+  function showTplInfo(anchor, id){
+    var ex=document.getElementById('tpl-info-pop'); if(ex) ex.remove();
+    var t=TEMPLATES.filter(function(x){return x.id===id;})[0]; if(!t) return;
+    var pop=document.createElement('div'); pop.id='tpl-info-pop';
+    pop.style.cssText='position:absolute;z-index:100050;max-width:280px;background:#0F172A;color:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 16px 40px rgba(15,23,42,.3);font:400 12.5px/1.5 "DM Sans"';
+    pop.innerHTML='<div style="font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:7px"><span>'+t.emoji+'</span><span>'+esc(t.nm)+'</span>'+(tplIsSys(t)?'<span style="font-size:9px;font-weight:700;text-transform:uppercase;background:#B45309;border-radius:20px;padding:1px 7px;margin-left:auto">System</span>':'')+'</div><div style="opacity:.92">'+esc(t.info||t.sub)+'</div>';
+    document.body.appendChild(pop);
+    var r=anchor.getBoundingClientRect();
+    var left=r.left+window.scrollX; if(left+290>window.scrollX+window.innerWidth) left=window.scrollX+window.innerWidth-300;
+    pop.style.top=(r.bottom+window.scrollY+8)+'px'; pop.style.left=Math.max(8,left)+'px';
+    setTimeout(function(){ document.addEventListener('click',function h(ev){ if(!pop.contains(ev.target)){ pop.remove(); document.removeEventListener('click',h); } }); },0);
   }
   function stepDesign(){
     return '<div class="wrap wide"><h2 class="step-h">Design your email</h2><p class="step-sub">Drag blocks to build the layout. Add personalization with merge fields.</p>'+
@@ -729,7 +756,9 @@
       var pq=$('ppl-q'); if(pq) pq.addEventListener('input', function(){ S.pplQuery=this.value; var pos=this.selectionStart; render(); var n=$('ppl-q'); if(n){ n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){}} });
       var pr=$('ppl-results'); if(pr) pr.addEventListener('click', function(e){ var row=e.target.closest('.ppl-row'); if(!row) return; var em=row.dataset.e; if(em && S.manualEmails.indexOf(em)===-1){ S.manualEmails.push(em); toast('Added '+em); } render(); });
     } else if(k==='template'){
-      body_.querySelectorAll('.tplc').forEach(function(el){ el.addEventListener('click',function(){ S.template=el.dataset.t; render(); var t=TEMPLATES.filter(function(x){return x.id===S.template;})[0]; toast((t?t.nm:'Blank')+' selected'); }); });
+      body_.querySelectorAll('.tplc').forEach(function(el){ el.addEventListener('click',function(e){ if(e.target.closest('.tplc-info')) return; S.template=el.dataset.t; render(); var t=TEMPLATES.filter(function(x){return x.id===S.template;})[0]; toast((t?t.nm:'Blank')+' selected'); }); });
+      body_.querySelectorAll('.tplk-chip').forEach(function(b){ b.addEventListener('click',function(){ S.tplKind=b.dataset.k; render(); }); });
+      body_.querySelectorAll('.tplc-info').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); showTplInfo(b, b.dataset.info); }); });
       var tq=$('tpl-q'); if(tq){ tq.addEventListener('input',function(){ S.tplQuery=this.value; var pos=this.selectionStart; render(); var n=$('tpl-q'); if(n){ n.focus(); try{n.setSelectionRange(pos,pos);}catch(_){}}}); }
       var ts=$('tpl-sort'); if(ts) ts.addEventListener('change',function(){ S.tplSort=this.value; render(); });
     } else if(k==='design'){
