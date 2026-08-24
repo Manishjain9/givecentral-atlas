@@ -223,10 +223,17 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 
 .btn {
   font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-  padding: 9px 16px; border-radius: 8px; cursor: pointer;
+  padding: 9px 14px; border-radius: 8px; cursor: pointer; white-space: nowrap;
   display: inline-flex; align-items: center; gap: 6px;
   border: 1px solid transparent; transition: background .15s, border-color .15s, color .15s;
 }
+/* Export split-button dropdown */
+.exp-wrap { position: relative; }
+.exp-menu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 60; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 16px 40px rgba(15,23,42,.16); padding:6px; min-width:170px; display:none; }
+.exp-menu.open { display:block; }
+.exp-menu button { display:flex; align-items:center; gap:9px; width:100%; text-align:left; background:none; border:none; padding:9px 10px; border-radius:7px; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text-2); cursor:pointer; white-space:nowrap; }
+.exp-menu button:hover { background: var(--surface); }
+.exp-menu button svg { width:13px; height:13px; color:var(--text-3); }
 .btn svg { width: 13px; height: 13px; }
 .btn-primary { background: var(--blue); color: white; box-shadow: 0 1px 4px rgba(37,99,235,.25); }
 .btn-primary:hover { background: #1D4ED8; }
@@ -653,13 +660,21 @@ body {
     <div>
       <div class="crumb"><a href="atlas-dashboard.html">Atlas</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <a href="atlas-reports.html">Reports</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <span>Gifts by date range</span></div>
       <div class="page-title">Gifts by date range</div>
-      <div class="page-sub">Apr 1 – May 4, 2026 · 142 gifts · $284,650 total · refreshed 8 minutes ago</div>
+      <div class="page-sub">Apr 1 – May 4, 2026 · 142 gifts · $284,650 total · <a href="#" onclick="openRunHistory(event);return false" style="color:var(--blue);font-weight:600">last run May 4, 9:02 AM by Sarah Reynolds</a></div>
     </div>
-    <div class="flex gap-8">
-      <button class="btn btn-ghost"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.5M7 9v.5"/></svg> Schedule send</button>
-      <button class="btn btn-ghost"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1.5v8M3.5 6.5L7 9.5l3.5-3M2 12h10"/></svg> Export CSV</button>
-      <button class="btn btn-ghost"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2" width="8" height="10" rx="1"/><path d="M5 5h4M5 7h4M5 9h2"/></svg> Export PDF</button>
-      <button class="btn btn-primary"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M7 2l1 3 3 .5L9 8l.5 3L7 9.5 4.5 11l.5-3L3 5.5 6 5z"/></svg> Save as view</button>
+    <div class="flex gap-10" style="position:relative">
+      <button class="btn btn-ghost" onclick="openRunHistory(event)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 3.5V7l2.5 1.5"/><circle cx="7" cy="7" r="5.5"/></svg> Run history</button>
+      <button class="btn btn-ghost" onclick="openColsMenu(event)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="1.5" width="11" height="11" rx="1.5"/><path d="M5.5 1.5v11M9 1.5v11"/></svg> Columns</button>
+      <button class="btn btn-ghost" onclick="openScheduleSend()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.5M7 9v.5"/></svg> Schedule send</button>
+      <div class="exp-wrap">
+        <button class="btn btn-ghost" onclick="toggleExport(event)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1.5v8M3.5 6.5L7 9.5l3.5-3M2 12h10"/></svg> Export <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="width:11px;height:11px;margin-left:1px"><path d="M3 4.5l3 3 3-3"/></svg></button>
+        <div class="exp-menu" id="expMenu">
+          <button onclick="doExport('CSV')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1.5v8M3.5 6.5L7 9.5l3.5-3M2 12h10"/></svg> Export as CSV</button>
+          <button onclick="doExport('Excel')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="10" height="10" rx="1"/><path d="M5 5l4 4M9 5l-4 4"/></svg> Export as Excel</button>
+          <button onclick="doExport('PDF')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2" width="8" height="10" rx="1"/><path d="M5 5h4M5 7h4M5 9h2"/></svg> Export as PDF</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveViewCols()"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M7 2l1 3 3 .5L9 8l.5 3L7 9.5 4.5 11l.5-3L3 5.5 6 5z"/></svg> Save as view</button>
     </div>
   </div>
 
@@ -711,7 +726,7 @@ body {
   </div>
 
   <!-- Data table -->
-  <div class="dt-card">
+  <div class="dt-card" id="dtCard">
     <div class="dt-head">
       <div>Donor</div>
       <div>Date</div>
@@ -1626,5 +1641,139 @@ body {
 })();
 </script>
 <!-- /ATLAS-NAVCOLLAPSE -->
+
+<!-- ATLAS-VIEWER-CONTROLS : column show/hide + run history -->
+<script>
+(function(){
+  var card=document.getElementById('dtCard'); if(!card) return;
+  var head=card.querySelector('.dt-head');
+  var rows=[].slice.call(card.querySelectorAll('.dt-row'));
+  // Column model — 6 core (from web) + finance optionals
+  var COLS=[
+    {key:'donor',   label:'Donor',        w:'200px', on:true,  core:true},
+    {key:'date',    label:'Date',         w:'110px', on:true,  core:true},
+    {key:'desig',   label:'Designation',  w:'1fr',   on:true,  core:true},
+    {key:'type',    label:'Type',         w:'90px',  on:true,  core:true},
+    {key:'receipt', label:'Receipt',      w:'90px',  on:true,  core:true},
+    {key:'amount',  label:'Amount',       w:'100px', on:true,  core:true, right:true},
+    {key:'fund',    label:'Fund',         w:'150px', on:false},
+    {key:'gl',      label:'GL code',      w:'90px',  on:false},
+    {key:'entity',  label:'Legal entity', w:'150px', on:false},
+    {key:'batch',   label:'Batch #',      w:'110px', on:false}
+  ];
+  // Derive per-row values for optional finance columns from existing content
+  function rowData(row,i){
+    var desig=(row.children[2]&&row.children[2].textContent||'').trim();
+    var fund=desig.split('·')[0].trim()||'General Fund';
+    var glMap={'Cathedral Restoration':'4150','Annual Fund':'4100','Ministry Retreat':'5300','Outreach':'5310'};
+    var gl=glMap[fund]||('4'+(100+i*10));
+    return {fund:fund, gl:'GL '+gl, entity:'Diocese of Albany', batch:'BX-2026-0'+(14-i)};
+  }
+  function apply(){
+    // clear injected optional cells
+    [].slice.call(card.querySelectorAll('.col-inj')).forEach(function(n){n.remove();});
+    // core visibility (first 6 DOM children map 1:1 to core cols in order)
+    COLS.forEach(function(c,ci){ if(!c.core) return;
+      var hc=head.children[ci]; if(hc) hc.style.display=c.on?'':'none';
+      rows.forEach(function(r){ if(r.children[ci]) r.children[ci].style.display=c.on?'':'none'; });
+    });
+    // append optional columns that are on
+    COLS.forEach(function(c){ if(c.core||!c.on) return;
+      var h=document.createElement('div'); h.className='col-inj'; h.textContent=c.label; if(c.right)h.style.textAlign='right'; head.appendChild(h);
+      rows.forEach(function(r,i){ var d=document.createElement('div'); d.className='col-inj'; var val=rowData(r,i)[c.key]; d.textContent=val; d.style.color='var(--text-2)'; r.appendChild(d); });
+    });
+    // rebuild grid-template-columns for visible DOM order: visible core (in order) then optional on
+    var tpl=[]; COLS.forEach(function(c){ if(c.core&&c.on) tpl.push(c.w); });
+    COLS.forEach(function(c){ if(!c.core&&c.on) tpl.push(c.w); });
+    var t=tpl.join(' ');
+    head.style.gridTemplateColumns=t; rows.forEach(function(r){r.style.gridTemplateColumns=t;});
+  }
+  // ── Columns menu ──
+  var menu;
+  window.openColsMenu=function(ev){ ev&&ev.stopPropagation();
+    if(menu){menu.remove();menu=null;return;}
+    menu=document.createElement('div');
+    menu.style.cssText='position:absolute;z-index:80;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 22px 52px rgba(15,23,42,.2);padding:10px;min-width:230px;font-size:13px';
+    var html='<div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);padding:4px 6px 8px">Shown columns</div>';
+    COLS.forEach(function(c,ci){
+      html+='<label style="display:flex;align-items:center;gap:9px;padding:7px 6px;border-radius:7px;cursor:pointer" onmouseover="this.style.background=\'var(--surface)\'" onmouseout="this.style.background=\'\'">'
+        +'<input type="checkbox" data-ci="'+ci+'" '+(c.on?'checked':'')+' style="width:15px;height:15px;accent-color:var(--blue)">'
+        +'<span>'+c.label+(c.core?'':' <span style="color:var(--text-3);font-size:11px">· finance</span>')+'</span></label>';
+    });
+    html+='<div style="border-top:1px solid var(--border);margin:8px 4px 6px"></div>'
+      +'<div style="font-size:11px;color:var(--text-3);padding:2px 6px 8px">Add GL code, Legal entity, Batch # or Fund, then <b>Save as view</b> to keep it.</div>';
+    menu.innerHTML=html;
+    var _flexC=document.querySelector('.page-head .flex'); var _bC=[].slice.call(_flexC.querySelectorAll('.btn')).find(function(b){return /Columns/.test(b.textContent);})||_flexC.children[1];
+    _flexC.appendChild(menu); menu.style.top=(_bC.offsetTop+_bC.offsetHeight+6)+'px'; menu.style.left=_bC.offsetLeft+'px';
+    menu.querySelectorAll('input[type=checkbox]').forEach(function(cb){
+      cb.addEventListener('change',function(){ COLS[+cb.dataset.ci].on=cb.checked; apply(); });
+    });
+  };
+  // ── Run history panel ──
+  var rh;
+  var HIST=[
+    {when:'May 4, 2026 · 9:02 AM', who:'Sarah Reynolds', rows:'142 rows', st:'Success', on:true},
+    {when:'Apr 30, 2026 · 6:00 AM', who:'Auto · scheduler', rows:'138 rows', st:'Success', on:true},
+    {when:'Apr 23, 2026 · 6:00 AM', who:'Auto · scheduler', rows:'131 rows', st:'Success', on:true},
+    {when:'Apr 16, 2026 · 6:00 AM', who:'Auto · scheduler', rows:'0 rows', st:'No new data', on:false}
+  ];
+  window.openRunHistory=function(ev){ ev&&ev.stopPropagation();
+    if(rh){rh.remove();rh=null;return;}
+    rh=document.createElement('div');
+    rh.style.cssText='position:absolute;z-index:80;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 22px 52px rgba(15,23,42,.2);padding:12px;min-width:320px;font-size:13px';
+    var html='<div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);padding:2px 4px 10px">Run history</div>';
+    HIST.forEach(function(h){
+      var col=h.st==='Success'?'var(--green)':'var(--text-3)';
+      var bg=h.st==='Success'?'var(--green-light,#DCFCE7)':'#F1F5F9';
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border-soft)">'
+        +'<div style="flex:1"><div style="font-weight:600">'+h.when+'</div><div style="font-size:11.5px;color:var(--text-3)">'+h.who+' · '+h.rows+'</div></div>'
+        +'<span style="font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+bg+';color:'+col+'">'+h.st+'</span></div>';
+    });
+    html+='<div style="padding:9px 4px 2px"><a href="#" onclick="return false" style="color:var(--blue);font-weight:600;font-size:12px">Export full run log →</a></div>';
+    rh.innerHTML=html;
+    var _flexR=document.querySelector('.page-head .flex'); var _bR=[].slice.call(_flexR.querySelectorAll('.btn')).find(function(b){return /Run history/.test(b.textContent);})||_flexR.children[0];
+    _flexR.appendChild(rh); rh.style.top=(_bR.offsetTop+_bR.offsetHeight+6)+'px'; rh.style.left=_bR.offsetLeft+'px';
+  };
+  // ── Save as view (persists column selection) ──
+  window.saveViewCols=function(){
+    var shown=COLS.filter(function(c){return c.on;}).map(function(c){return c.label;});
+    try{localStorage.setItem('atlas-report-view-cols',JSON.stringify(COLS.map(function(c){return {key:c.key,on:c.on};})));}catch(e){}
+    if(window.showToast) showToast('View saved · '+shown.length+' columns ('+shown.join(', ')+')');
+    else alert('View saved · columns: '+shown.join(', '));
+  };
+  // restore saved selection
+  try{var s=JSON.parse(localStorage.getItem('atlas-report-view-cols')||'null'); if(s){s.forEach(function(x){var c=COLS.find(function(k){return k.key===x.key;}); if(c)c.on=x.on;});}}catch(e){}
+  // close popovers on outside click
+  document.addEventListener('click',function(e){
+    if(menu && !menu.contains(e.target) && !/Columns/.test(e.target.textContent||'')){menu.remove();menu=null;}
+    if(rh && !rh.contains(e.target) && !/Run history|last run/.test(e.target.textContent||'')){rh.remove();rh=null;}
+  });
+  apply();
+})();
+</script>
+<script>
+window.toggleExport=function(ev){ ev&&ev.stopPropagation(); var m=document.getElementById('expMenu'); if(m) m.classList.toggle('open'); };
+window.doExport=function(fmt){ var m=document.getElementById('expMenu'); if(m) m.classList.remove('open'); if(window.showToast) showToast(fmt+' export ready · download starting'); };
+document.addEventListener('click',function(e){ var m=document.getElementById('expMenu'); if(m && m.classList.contains('open') && !e.target.closest('.exp-wrap')) m.classList.remove('open'); });
+window.openScheduleSend=function(){
+  if(!window.atlasOpenModal){ if(window.showToast)showToast('Schedule send'); return; }
+  window.atlasOpenModal({
+    title:'Schedule send', sub:'Gifts by date range · email this report on a schedule',
+    fields:[
+      {id:'ss-freq', label:'Frequency', type:'select', options:['Once — now','Daily','Weekly — Monday','Monthly — 1st','Quarterly']},
+      {id:'ss-time', label:'Send at', type:'time', value:'06:00'},
+      {id:'ss-format', label:'Format', type:'select', options:['PDF','CSV','Excel']},
+      {id:'ss-to', label:'Recipients', type:'text', placeholder:'name@diocese.org, …', value:'finance@diocese.org'}
+    ],
+    cta:'Schedule',
+    onSave:function(v){
+      if(!v['ss-to']){ if(window.showToast)showToast('Add at least one recipient'); return false; }
+      var f=v['ss-freq']||'Weekly';
+      if(window.showToast) showToast(f.indexOf('Once')===0 ? 'Report sent to '+v['ss-to'] : 'Scheduled · '+f+' at '+(v['ss-time']||'6:00')+' → '+v['ss-to']);
+      return true;
+    }
+  });
+};
+</script>
 </body>
 </html>

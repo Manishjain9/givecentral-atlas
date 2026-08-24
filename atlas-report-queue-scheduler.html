@@ -296,6 +296,7 @@
     </div>
     <div class="h-actions">
       <button class="btn btn-ghost" onclick="openNewQueue()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>New queue</button>
+      <button class="btn btn-ghost" onclick="previewRun()" title="Dry-run the first report only — no delivery"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="6" r="2"/><path d="M1 6s2-3.5 5-3.5S11 6 11 6s-2 3.5-5 3.5S1 6 1 6z"/></svg>Preview first report</button>
       <button class="btn btn-green" onclick="runNow()"><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><path d="M3 2l7 4-7 4V2z"/></svg>Run now</button>
     </div>
   </div>
@@ -309,15 +310,28 @@
       <div class="menu" id="qMenu"></div>
     </div>
     <div class="g"></div>
-    <span class="status-pill sp-draft" id="qStatus">Draft</span>
+    <span class="status-pill sp-draft" id="qStatus" title="Draft: this queue will not fire until activated. Scheduled: runs automatically on its schedule." style="cursor:help">Draft</span>
+    <button class="btn btn-blue" id="activateBtn" onclick="activateQueue()" style="padding:7px 13px;font-size:12px">Activate</button>
+  </div>
+  <div id="statusLegend" style="font-size:11.5px;color:var(--text3);margin:-12px 0 18px 2px;display:flex;gap:14px;align-items:center">
+    <span><span class="status-pill sp-draft" style="padding:1px 8px">Draft</span> won't fire until activated</span>
+    <span><span class="status-pill sp-scheduled" style="padding:1px 8px">Scheduled</span> runs automatically</span>
   </div>
 
   <!-- Run progress (hidden until Run now) -->
   <div class="run-card" id="runCard">
-    <div class="sec-head"><div class="sec-t">Running queue…</div><div class="g"></div><span class="status-pill sp-running" id="runPct">0%</span></div>
+    <div class="sec-head"><div class="sec-t" id="runTitle">Running queue…</div><div class="g"></div><span class="status-pill sp-running" id="runPct">0%</span></div>
     <div class="sec-body">
       <div class="progress-track"><div class="progress-fill" id="runFill" style="width:0%"></div></div>
       <div id="runList" style="margin-top:12px"></div>
+      <div id="runNext" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:9px">Next steps</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost" onclick="toast('Opening latest outputs folder')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3.5h3l1.5 1.5H11v5H1.5z"/></svg>View outputs</button>
+          <button class="btn btn-ghost" onclick="document.querySelector('.sec .f-select').scrollIntoView({behavior:'smooth',block:'center'});toast('Set a schedule below to run this automatically')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="9" height="8" rx="1.2"/><path d="M1.5 5h9M4 1.5v2M8 1.5v2"/></svg>Schedule it</button>
+          <button class="btn btn-blue" id="runNextActivate" onclick="activateQueue()"><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round"><path d="M2 6.5l2.5 2.5L10 3"/></svg>Activate queue</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -371,6 +385,7 @@
       <div class="f-label" style="margin-top:4px">Delivery</div>
       <div class="tog-row"><div><div class="tr-t">Save to folder</div><div class="tr-s">Stores the PDFs in this queue's folder</div></div><button class="tog on" onclick="tog(this)"></button></div>
       <div class="tog-row"><div><div class="tr-t">Email to recipients</div><div class="tr-s">Sends the report package to the list below</div></div><button class="tog on" onclick="tog(this)"></button></div>
+      <div class="tog-row"><div><div class="tr-t">Failure alerts</div><div class="tr-s">Notify admin if the queue misses its window or returns an error</div></div><button class="tog on" onclick="tog(this)"></button></div>
       <div class="adv-toggle" id="advToggle" onclick="toggleAdv()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg>Advanced options</div>
       <div class="adv-box" id="advBox">
         <div class="tog-row"><div><div class="tr-t">Scope reports by recipient</div><div class="tr-s">Each pastor sees only their own parish</div></div><button class="tog on" onclick="tog(this)"></button></div>
@@ -450,6 +465,7 @@ function render(){
   const q=QUEUES[current];
   $('qName').textContent=q.name; $('qMeta').textContent=q.meta;
   const st=$('qStatus'); st.textContent=q.status; st.className='status-pill '+q.statusClass;
+  const ab=$('activateBtn'); if(ab) ab.style.display=(q.status==='Draft')?'':'none';
   // reports
   $('repCount').textContent=q.reports.length+' report'+(q.reports.length!=1?'s':'');
   $('repList').innerHTML=q.reports.map((rid,i)=>{
@@ -564,17 +580,28 @@ function saveNewQueue(){
   current=id; closeModal(); render(); setTimeout(()=>toast('Queue "'+name+'" created'),120);
 }
 
-/* ── Run now ── */
-function runNow(){
+/* ── Run now / Preview / Activate ── */
+function previewRun(){ runNow(true); }
+function activateQueue(){
+  const q=QUEUES[current]; q.status='Scheduled'; q.statusClass='sp-scheduled';
+  render(); const rn=$('runNext'); if(rn) rn.style.display='none';
+  toast('Queue activated · will run on its schedule');
+}
+function runNow(previewOnly){
   const q=QUEUES[current]; if(!q.reports.length){toast('Add at least one report first');return;}
+  const ids = previewOnly ? q.reports.slice(0,1) : q.reports;
   const card=$('runCard'); card.classList.add('show'); card.scrollIntoView({behavior:'smooth',block:'center'});
-  $('runList').innerHTML=q.reports.map((rid,i)=>{const r=LIB.find(x=>x.id===rid);
+  $('runTitle').textContent = previewOnly ? 'Preview — first report only (dry run · no delivery)' : 'Running queue…';
+  $('runNext').style.display='none';
+  $('runList').innerHTML=ids.map((rid,i)=>{const r=LIB.find(x=>x.id===rid);
     return `<div class="run-item" id="run-${i}"><div class="run-dot" style="background:var(--surf);border:1px solid var(--border);color:var(--text3)">${i+1}</div><div style="flex:1">${r.name}</div><span style="font-size:11.5px;color:var(--text3)" id="runs-${i}">Queued</span></div>`;}).join('');
-  let i=0; const total=q.reports.length;
+  let i=0; const total=ids.length;
   function step(){
     if(i>0){const p=$('run-'+(i-1));p.querySelector('.run-dot').style.cssText='background:var(--greenl);color:var(--green)';p.querySelector('.run-dot').innerHTML='<svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 7.5l3.5 3.5L12 4"/></svg>';$('runs-'+(i-1)).textContent='Done';$('runs-'+(i-1)).style.color='var(--green)';}
-    if(i>=total){$('runFill').style.width='100%';$('runPct').textContent='Complete';$('runPct').className='status-pill sp-done';$('runPct').style.cssText='background:var(--greenl);color:var(--green)';toast('Queue complete · '+total+' reports generated');
-      const st=$('qStatus'); return;}
+    if(i>=total){$('runFill').style.width='100%';$('runPct').textContent=previewOnly?'Preview ready':'Complete';$('runPct').className='status-pill sp-done';$('runPct').style.cssText='background:var(--greenl);color:var(--green)';
+      if(previewOnly){toast('Preview ready · '+total+' report generated (not delivered)');}
+      else{toast('Queue complete · '+total+' reports generated'); $('runNext').style.display='block'; const rna=$('runNextActivate'); if(rna) rna.style.display=(q.status==='Draft')?'':'none';}
+      return;}
     const cur=$('run-'+i);cur.querySelector('.run-dot').style.cssText='background:var(--bluep);color:var(--blue)';$('runs-'+i).textContent='Running…';$('runs-'+i).style.color='var(--blue)';
     $('runFill').style.width=Math.round((i/total)*100)+'%';$('runPct').textContent=Math.round((i/total)*100)+'%';
     i++; setTimeout(step,700);

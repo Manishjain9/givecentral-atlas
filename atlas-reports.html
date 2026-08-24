@@ -232,6 +232,16 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .btn-primary:hover { background: #1D4ED8; }
 .btn-ghost   { background: white; border-color: var(--border); color: var(--text-2); }
 .btn-ghost:hover { background: var(--surface); border-color: #94A3B8; }
+.btn-secondary { background: var(--blue-pale,#EFF6FF); border-color: #BFDBFE; color: var(--blue); font-weight:600; }
+.btn-secondary:hover { background: #DBEAFE; border-color: #93C5FD; }
+/* Reports search */
+.rep-search { display:flex; align-items:center; gap:9px; background:white; border:1.5px solid var(--border); border-radius:10px; padding:9px 13px; margin-bottom:18px; box-shadow:var(--sh-sm,0 1px 2px rgba(15,23,42,.05)); }
+.rep-search svg { width:15px; height:15px; color:var(--text-3); flex-shrink:0; }
+.rep-search input { border:none; outline:none; width:100%; font-size:13.5px; color:var(--text); font-family:'DM Sans',sans-serif; background:none; }
+.rep-search input::placeholder { color:var(--text-3); }
+.rep-search .clr { color:var(--text-3); cursor:pointer; font-size:12px; display:none; }
+.r-section.rep-hide, .new-section.rep-hide { display:none; }
+.rep-noresult { display:none; text-align:center; padding:40px 0; color:var(--text-3); font-size:14px; }
 .btn-rose    { background: var(--rose); color: white; }
 .btn-rose:hover { background: #9D174D; }
 .btn-link    { background: none; color: var(--blue); padding: 6px 8px; }
@@ -653,9 +663,7 @@ body {
       <div class="page-sub">Pre-built standard reports and saved views your team uses every week.</div>
     </div>
     <div class="flex gap-8">
-      <a class="btn btn-ghost" href="#saved" onclick="if(window.sbmShow){sbmShow();return false;}"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2l1.4 4.2L13 6.6l-3.4 2.8.9 4.4L7 11.6 3.5 13.8l.9-4.4L1 6.6l4.6-.4z"/></svg> Saved views</a>
-      <a class="btn btn-ghost" href="atlas-report-queue-scheduler.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 8.5h5"/></svg> Queue &amp; schedule</a>
-      <button class="btn btn-ghost"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.5M7 9v.5"/></svg> Schedule a recurring report</button>
+      <a class="btn btn-secondary" href="atlas-report-queue-scheduler.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 8.5h5"/></svg> Queue &amp; schedule</a>
       <button class="btn btn-primary"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg> Build a custom report</button>
     </div>
   </div>
@@ -710,6 +718,14 @@ body {
     </aside>
 
     <main>
+
+      <!-- Report search -->
+      <div class="rep-search">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+        <input type="text" id="repSearch" placeholder="Search reports by name or description…" oninput="filterReports()">
+        <span class="clr" id="repClr" onclick="document.getElementById('repSearch').value='';filterReports();">Clear</span>
+      </div>
+      <div class="rep-noresult" id="repNoResult">No reports match your search.</div>
 
       <!-- ════ JUST ADDED · featured new reports ════ -->
       <style>
@@ -970,6 +986,34 @@ body {
       </div>
     </a>
 
+    <a class="r-card" href="atlas-report-detail.html">
+      <div class="head">
+        <div class="ico green"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg></div>
+        <div class="nm">LYBUNT / SYBUNT analysis</div>
+        <div class="right"><span class="tag green">New</span></div>
+      </div>
+      <div class="desc">Year-over-year donor retention — who gave last year (LYBUNT) or some prior year (SYBUNT) but not yet this year.</div>
+      <div class="meta">
+        <span>Last run: <strong style="color:var(--text-2)">Today, 7:20 AM</strong></span>
+        <span class="dot"></span>
+        <span>On-demand</span>
+      </div>
+    </a>
+
+    <a class="r-card" href="atlas-report-detail.html">
+      <div class="head">
+        <div class="ico purple"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3l2 1"/></svg></div>
+        <div class="nm">Bishop dashboard — multi-entity</div>
+        <div class="right"><span class="tag green">New</span></div>
+      </div>
+      <div class="desc">Consolidated giving across Diocese, Catholic Charities, Foundation, and Scholarship entities.</div>
+      <div class="meta">
+        <span>Last run: <strong style="color:var(--text-2)">Today, 6:00 AM</strong></span>
+        <span class="dot"></span>
+        <span>Daily 6 AM</span>
+      </div>
+    </a>
+
         </div>
       </div>
 
@@ -985,42 +1029,6 @@ body {
         </div>
         <div class="r-grid" id="sbm-grid"></div>
         <div class="sbm-empty" id="sbm-empty" style="display:none">No saved views yet. Open a report, set your filters, and choose <b>Save as view</b>.</div>
-      </div>
-
-      <!-- Phase 2 / Phase 3 placeholders -->
-      <div class="r-section">
-        <h3>Coming soon</h3>
-        <p class="desc">Phase 2 reports — designs done, in development.</p>
-        <div class="r-grid">
-          
-    <a class="r-card" href="atlas-report-detail.html">
-      <div class="head">
-        <div class="ico grey"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="opacity:.6"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg></div>
-        <div class="nm">LYBUNT / SYBUNT analysis</div>
-        <div class="right"><span class="tag grey">Phase 2</span></div>
-      </div>
-      <div class="desc">Year-over-year donor retention dashboard. Phase 2.</div>
-      <div class="meta">
-        <span>Last run: <strong style="color:var(--text-2)">—</strong></span>
-        <span class="dot"></span>
-        <span>Phase 2 (Aug 2026)</span>
-      </div>
-    </a>
-          
-    <a class="r-card" href="atlas-report-detail.html">
-      <div class="head">
-        <div class="ico grey"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="opacity:.6"><circle cx="7" cy="7" r="5.5"/></svg></div>
-        <div class="nm">Bishop dashboard — multi-entity</div>
-        <div class="right"><span class="tag grey">Phase 2</span></div>
-      </div>
-      <div class="desc">Consolidated giving across Diocese, Catholic Charities, Foundation, Scholarship.</div>
-      <div class="meta">
-        <span>Last run: <strong style="color:var(--text-2)">—</strong></span>
-        <span class="dot"></span>
-        <span>Phase 2 (Aug 2026)</span>
-      </div>
-    </a>
-        </div>
       </div>
 
     </main>
@@ -2109,5 +2117,34 @@ body {
 })();
 </script>
 <!-- /ATLAS-NAVCOLLAPSE -->
+
+<!-- ATLAS-REPORT-SEARCH -->
+<script>
+window.filterReports=function(){
+  var q=(document.getElementById('repSearch').value||'').trim().toLowerCase();
+  document.getElementById('repClr').style.display=q?'inline':'none';
+  var cards=[].slice.call(document.querySelectorAll('.r-card'));
+  var anyGlobal=false;
+  cards.forEach(function(c){
+    var nm=(c.querySelector('.nm')||{}).textContent||'';
+    var ds=(c.querySelector('.desc')||{}).textContent||'';
+    var tags=[].slice.call(c.querySelectorAll('.tag')).map(function(t){return t.textContent;}).join(' ');
+    var hit=!q || (nm+' '+ds+' '+tags).toLowerCase().indexOf(q)!==-1;
+    c.style.display=hit?'':'none'; if(hit)anyGlobal=true;
+  });
+  // hide sections with no visible cards
+  [].slice.call(document.querySelectorAll('.r-section, .new-section')).forEach(function(sec){
+    var vis=[].slice.call(sec.querySelectorAll('.r-card')).some(function(c){return c.style.display!=='none';});
+    sec.classList.toggle('rep-hide', q && !vis);
+  });
+  document.getElementById('repNoResult').style.display=(q && !anyGlobal)?'block':'none';
+};
+// Make "Saved by me" in the sidebar open the Saved-views manager (moved off the toolbar)
+(function(){
+  var rows=[].slice.call(document.querySelectorAll('.cat-rail .cat-row'));
+  var sb=rows.find(function(r){return /Saved by me/.test(r.textContent);});
+  if(sb){ sb.style.cursor='pointer'; sb.addEventListener('click',function(){ if(window.sbmShow) sbmShow(); }); }
+})();
+</script>
 </body>
 </html>
