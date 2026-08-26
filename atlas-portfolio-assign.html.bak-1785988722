@@ -1,0 +1,1970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Atlas — Portfolio rebalance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:        #0E1E35;
+  --navy-2:      #152844;
+  --navy-3:      #1E3A5F;
+  --blue:        #2563EB;
+  --blue-mid:    #3B82F6;
+  --blue-light:  #DBEAFE;
+  --blue-pale:   #EFF6FF;
+  --teal:        #0D9488;
+  --teal-light:  #CCFBF1;
+  --green:       #15803D;
+  --green-light: #DCFCE7;
+  --amber:       #D97706;
+  --amber-light: #FEF3C7;
+  --rose:        #BE185D;
+  --rose-light:  #FCE7F3;
+  --purple:      #7C3AED;
+  --purple-light:#EDE9FE;
+  --gold:        #B45309;
+  --text:        #0F172A;
+  --text-2:      #334155;
+  --text-3:      #64748B;
+  --border:      #E2E8F0;
+  --border-soft: #EDF2F7;
+  --surface:     #F8FAFC;
+  --white:       #FFFFFF;
+  --sidebar-w:   220px;
+  --shadow-sm:   0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.05);
+  --shadow-md:   0 4px 16px rgba(15,23,42,.06), 0 2px 4px rgba(15,23,42,.04);
+}
+
+html { font-size: 14px; -webkit-font-smoothing: antialiased; }
+body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+
+/* ══ SIDEBAR ══ */
+.sidebar {
+  width: var(--sidebar-w); background: var(--navy);
+  min-height: 100vh; display: flex; flex-direction: column;
+  flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 18px 18px 14px; display: flex; align-items: center; gap: 11px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.logo-mark {
+      width: 52px; height: 40px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border-radius: 0;
+    }
+.logo-mark svg { width: 52px; height: 40px; }
+.logo-text-wrap { display: flex; flex-direction: column; }
+.logo-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: white; line-height: 1; }
+.logo-sub  { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-top: 3px; }
+
+.sidebar-search {
+  margin: 12px 12px 6px; background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1); border-radius: 8px;
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  cursor: pointer;
+}
+.sidebar-search svg { width: 13px; height: 13px; color: rgba(255,255,255,.3); flex-shrink: 0; }
+.sidebar-search input {
+  background: none; border: none; outline: none; width: 100%;
+  font-size: 12px; color: rgba(255,255,255,.6); font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+}
+.sidebar-search input::placeholder { color: rgba(255,255,255,.3); }
+
+.nav-group { padding: 8px 8px 0; }
+.nav-label { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.28); padding: 0 10px; margin-bottom: 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px; padding: 8px 10px;
+  border-radius: 7px; font-size: 12px; font-weight: 500;
+  color: rgba(255,255,255,.55); cursor: pointer; transition: all .15s; margin-bottom: 1px;
+}
+.nav-item:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.85); }
+.nav-item.active { background: var(--blue); color: white; }
+.nav-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto; background: rgba(255,255,255,.12); color: rgba(255,255,255,.6);
+  border-radius: 10px; padding: 1px 7px; font-size: 10px; font-weight: 600;
+}
+.nav-item.active .nav-badge { background: rgba(255,255,255,.2); color: white; }
+.nav-badge.alert { background: #EF4444; color: white; }
+
+.sidebar-user {
+  margin-top: auto; padding: 12px; border-top: 1px solid rgba(255,255,255,.08);
+  display: flex; align-items: center; gap: 9px;
+  cursor: pointer; transition: background .15s;
+}
+.sidebar-user:hover { background: rgba(255,255,255,.04); }
+.user-avatar {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.user-name { font-size: 12px; font-weight: 500; color: rgba(255,255,255,.75); }
+.user-role { font-size: 10px; color: rgba(255,255,255,.35); margin-top: 1px; }
+
+/* ══ MAIN ══ */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.topbar {
+  background: white; border-bottom: 1px solid var(--border);
+  padding: 0 24px; height: 52px;
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.topbar-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.topbar-date { font-size: 12px; color: var(--text-3); }
+.topbar-search {
+  flex: 1;
+  max-width: 460px; margin: 0 18px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  display: flex; align-items: center; gap: 8px; padding: 7px 12px;
+  cursor: text;
+}
+.topbar-search svg { width: 13px; height: 13px; color: var(--text-3); }
+.topbar-search input { background: none; border: none; outline: none; width: 100%; font-size: 12.5px; color: var(--text); font-family: 'DM Sans', sans-serif; }
+.topbar-search input::placeholder { color: var(--text-3); }
+.topbar-search kbd {
+  margin-left: auto; font-size: 10.5px; font-family: 'DM Sans';
+  background: white; border: 1px solid var(--border); border-radius: 4px;
+  padding: 1px 6px; color: var(--text-3);
+}
+.topbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.tb-btn {
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+  padding: 7px 13px; border-radius: 8px; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.tb-btn svg { width: 12px; height: 12px; }
+.tb-ghost   { background: none; border: 1px solid var(--border); color: var(--text-2); }
+.tb-ghost:hover { background: var(--surface); border-color: #94A3B8; }
+.tb-primary { background: var(--blue); border: none; color: white; box-shadow: 0 1px 4px rgba(37,99,235,.3); }
+.tb-primary:hover { background: #1D4ED8; }
+.tb-notif {
+  width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
+  background: none; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative; transition: background .15s;
+}
+.tb-notif:hover { background: var(--surface); }
+.tb-notif svg { width: 15px; height: 15px; color: var(--text-2); }
+.notif-dot {
+  position: absolute; top: 7px; right: 7px;
+  width: 7px; height: 7px; background: #EF4444; border-radius: 50%;
+  border: 2px solid white;
+}
+
+.dash { padding: 24px; overflow-y: auto; }
+
+/* ══ Common Cards & helpers (used across screens) ══ */
+.card {
+  background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+}
+.card-header {
+  padding: 14px 18px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.card-title { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+.card-action { font-size: 11px; font-weight: 500; color: var(--blue); cursor: pointer; display: flex; align-items: center; gap: 3px; }
+.card-action:hover { color: #1D4ED8; }
+.card-action svg { width: 10px; height: 10px; }
+.card-body { padding: 14px 18px 18px; }
+
+/* ══ Page header (titles + crumb + actions) ══ */
+.page-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  margin-bottom: 20px;
+}
+.crumb { font-size: 12px; color: var(--text-3); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.crumb a { color: var(--blue); }
+.crumb a:hover { text-decoration: underline; }
+.crumb svg { width: 10px; height: 10px; }
+.page-title {
+  font-family: 'DM Serif Display', serif; font-size: 28px; letter-spacing: -.02em;
+  color: var(--text); line-height: 1.1;
+}
+.page-sub { color: var(--text-3); font-size: 13px; margin-top: 4px; }
+
+/* ══ Tags & badges (shared) ══ */
+.tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10.5px; font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.tag.blue  { background: var(--blue-light);  color: var(--blue); }
+.tag.green { background: var(--green-light); color: var(--green); }
+.tag.amber { background: var(--amber-light); color: var(--amber); }
+.tag.rose  { background: var(--rose-light);  color: var(--rose); }
+.tag.purple{ background: var(--purple-light);color: var(--purple); }
+.tag.grey  { background: var(--surface);     color: var(--text-3); border: 1px solid var(--border); }
+.tag.gold  { background: #FEF3C7;            color: var(--gold); }
+
+/* ══ Inputs ══ */
+.lbl { display: block; font-size: 11px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+.lbl .req { color: var(--rose); margin-left: 2px; }
+.fld {
+  width: 100%; font-size: 13px; font-family: 'DM Sans', sans-serif;
+  padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: white; color: var(--text); transition: border-color .15s, box-shadow .15s;
+}
+.fld:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.10); }
+.fld[disabled] { background: var(--surface); color: var(--text-3); }
+.fld::placeholder { color: #94A3B8; }
+textarea.fld { min-height: 90px; resize: vertical; line-height: 1.5; }
+select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M3 5l3 3 3-3z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+
+.btn {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+  padding: 9px 16px; border-radius: 8px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid transparent; transition: background .15s, border-color .15s, color .15s;
+}
+.btn svg { width: 13px; height: 13px; }
+.btn-primary { background: var(--blue); color: white; box-shadow: 0 1px 4px rgba(37,99,235,.25); }
+.btn-primary:hover { background: #1D4ED8; }
+.btn-ghost   { background: white; border-color: var(--border); color: var(--text-2); }
+.btn-ghost:hover { background: var(--surface); border-color: #94A3B8; }
+.btn-rose    { background: var(--rose); color: white; }
+.btn-rose:hover { background: #9D174D; }
+.btn-link    { background: none; color: var(--blue); padding: 6px 8px; }
+.btn-link:hover { color: #1D4ED8; }
+
+/* helpful utilities */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.gap-4 { gap: 4px; } .gap-6 { gap: 6px; } .gap-8 { gap: 8px; } .gap-10 { gap: 10px; } .gap-12 { gap: 12px; } .gap-16 { gap: 16px; } .gap-20 { gap: 20px; }
+.grow { flex: 1; }
+.muted { color: var(--text-3); }
+.mono  { font-variant-numeric: tabular-nums; }
+.mt-4 { margin-top: 4px; } .mt-8 { margin-top: 8px; } .mt-12 { margin-top: 12px; } .mt-16 { margin-top: 16px; } .mt-24 { margin-top: 24px; }
+.mb-4 { margin-bottom: 4px; } .mb-8 { margin-bottom: 8px; } .mb-12 { margin-bottom: 12px; } .mb-16 { margin-bottom: 16px; } .mb-24 { margin-bottom: 24px; }
+
+/* Slide-over drawer (used on log-activity, task-modal screens) */
+.scrim { position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 30; }
+.drawer {
+  position: fixed; right: 0; top: 0; bottom: 0; width: 560px; max-width: 100vw;
+  background: white; box-shadow: -16px 0 40px rgba(15,23,42,.10); z-index: 31;
+  display: flex; flex-direction: column;
+}
+.drawer-head {
+  padding: 18px 22px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  flex-shrink: 0;
+}
+.drawer-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); letter-spacing: -.01em; }
+.drawer-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.drawer-x {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); background: white; cursor: pointer;
+}
+.drawer-x:hover { background: var(--surface); }
+.drawer-x svg { width: 13px; height: 13px; color: var(--text-2); }
+.drawer-body { flex: 1; overflow-y: auto; padding: 22px; }
+.drawer-foot {
+  padding: 14px 22px; border-top: 1px solid var(--border);
+  background: var(--surface); display: flex; align-items: center; gap: 8px; justify-content: flex-end;
+  flex-shrink: 0;
+}
+.drawer-foot .left { margin-right: auto; font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+
+
+.kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+.kpi { background:white; border:1px solid var(--border); border-radius:12px; padding:16px 18px; }
+.kpi .l { font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); margin-bottom:8px; }
+.kpi .v { font-family:'DM Serif Display',serif; font-size:24px; line-height:1; color:var(--navy); }
+.kpi .v.green { color:var(--green); }
+.kpi .v.amber { color:var(--amber); }
+.kpi .d { font-size:11.5px; color:var(--text-3); margin-top:6px; }
+
+.assign-grid { display:grid; grid-template-columns: 1fr 1fr; gap:22px; align-items:start; }
+
+.panel { background:white; border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+.panel-head { padding:16px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+.panel-head .h { font-family:'DM Serif Display',serif; font-size:18px; color:var(--navy); }
+.panel-head .ct { font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; background:var(--surface); border:1px solid var(--border); color:var(--text-3); }
+.panel-head .actions { margin-left:auto; display:flex; gap:6px; }
+.panel-head .actions .btn-mini { padding:6px 11px; font-size:11.5px; border-radius:7px; cursor:pointer; background:white; border:1px solid var(--border); color:var(--text-2); }
+.panel-head .actions .btn-mini.primary { background:var(--blue); color:white; border-color:var(--blue); font-weight:600; }
+.panel-head .actions .btn-mini:hover { border-color:var(--blue); color:var(--blue); }
+.panel-head .actions .btn-mini.primary:hover { background:#1D4ED8; }
+
+.filter-bar { padding:10px 22px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.filter-bar .chip { font-size:11.5px; padding:4px 10px; border-radius:8px; background:white; border:1px dashed var(--border); color:var(--text-2); cursor:pointer; }
+.filter-bar .chip.applied { background:var(--blue-pale); border:1px solid var(--blue-light); color:var(--blue); font-weight:600; }
+.filter-bar .right { margin-left:auto; font-size:11.5px; color:var(--text-3); }
+
+.pool-list { max-height:680px; overflow-y:auto; }
+.prospect-row { display:grid; grid-template-columns: 22px 1fr 80px 100px 80px; gap:10px; align-items:center; padding:11px 22px; border-bottom:1px solid var(--border-soft); cursor:pointer; transition:background .12s; font-size:12.5px; }
+.prospect-row:hover { background:var(--blue-pale); }
+.prospect-row.on { background:var(--blue-pale); }
+.prospect-row:last-child { border-bottom:none; }
+.prospect-row .cb { width:16px; height:16px; border:1.5px solid var(--border); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:11px; color:white; flex-shrink:0; }
+.prospect-row.on .cb { background:var(--blue); border-color:var(--blue); }
+.prospect-row .name { display:flex; align-items:center; gap:9px; min-width:0; }
+.prospect-row .av { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:10.5px; font-weight:700; flex-shrink:0; }
+.prospect-row .nm-text .nm { font-weight:500; color:var(--text); }
+.prospect-row .nm-text .sub { font-size:11px; color:var(--text-3); margin-top:1px; }
+.prospect-row .stage { font-size:10.5px; padding:2px 7px; border-radius:99px; font-weight:600; text-align:center; }
+.prospect-row .stage.id { background:#F1F5F9; color:#475569; }
+.prospect-row .stage.qual { background:var(--teal-light); color:var(--teal); }
+.prospect-row .stage.cult { background:var(--blue-light); color:var(--blue); }
+.prospect-row .stage.solicit { background:var(--amber-light); color:var(--amber); }
+.prospect-row .ask { font-weight:600; color:var(--text); font-variant-numeric:tabular-nums; }
+.prospect-row .geo { font-size:11px; color:var(--text-3); }
+
+.bulk-bar { background:var(--navy); color:white; padding:11px 22px; display:flex; align-items:center; gap:12px; font-size:12.5px; border-top:1px solid var(--navy-3); }
+.bulk-bar .ct { background:var(--blue); padding:2px 9px; border-radius:6px; font-weight:600; font-size:11.5px; }
+.bulk-bar select { background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); color:white; padding:5px 28px 5px 10px; border-radius:7px; font-size:12px; font-family:'DM Sans',sans-serif; appearance:none; }
+.bulk-bar select option { color:var(--text); }
+.bulk-bar .right { margin-left:auto; display:flex; gap:6px; }
+.bulk-bar button { font-size:11.5px; padding:6px 12px; border-radius:7px; cursor:pointer; background:var(--blue); color:white; border:1px solid var(--blue); font-weight:600; }
+
+/* Officer portfolios */
+.officer-card { background:var(--surface); border:1px solid var(--border); border-radius:11px; padding:14px 18px; margin-bottom:10px; cursor:pointer; transition:all .12s; }
+.officer-card:hover { border-color:var(--blue); }
+.officer-card.target-drop { border-color:var(--blue); background:var(--blue-pale); border-style:dashed; }
+
+.officer-card .top { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.officer-card .top .av { width:38px; height:38px; border-radius:50%; color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0; }
+.officer-card .top .nm-text .nm { font-weight:600; font-size:14px; color:var(--navy); }
+.officer-card .top .nm-text .role { font-size:11.5px; color:var(--text-3); margin-top:2px; }
+.officer-card .top .right { margin-left:auto; text-align:right; font-size:11.5px; color:var(--text-3); }
+.officer-card .top .right b { color:var(--text); font-size:13px; font-weight:600; display:block; }
+
+.load-bar { height:6px; background:white; border-radius:99px; overflow:hidden; margin-bottom:8px; border:1px solid var(--border); }
+.load-bar-f { height:100%; border-radius:99px; }
+.load-bar-f.under { background:var(--amber); }
+.load-bar-f.ok { background:var(--green); }
+.load-bar-f.over { background:var(--rose); }
+
+.load-meta { display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-3); margin-bottom:8px; }
+
+.suggestion-card { background:linear-gradient(135deg, #EDE9FE, #FAF5FF); border:1px solid var(--purple-light); border-radius:9px; padding:10px 12px; font-size:11.5px; color:var(--purple); display:flex; gap:9px; align-items:flex-start; margin-top:8px; }
+.suggestion-card .ico { width:22px; height:22px; border-radius:6px; background:var(--purple); color:white; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:700; font-size:11px; }
+.suggestion-card b { color:#4C1D95; }
+
+.assign-btn { width:100%; padding:7px; border-radius:7px; font-size:11.5px; font-weight:600; cursor:pointer; background:white; border:1px solid var(--border); color:var(--text-2); margin-top:6px; }
+.assign-btn:hover { background:var(--blue-pale); border-color:var(--blue); color:var(--blue); }
+
+.commit-bar { position:sticky; bottom:0; background:white; border:1px solid var(--border); border-radius:14px; padding:14px 22px; margin-top:18px; display:flex; align-items:center; gap:12px; box-shadow:0 -4px 20px rgba(15,23,42,.06); }
+.commit-bar .left { font-size:12.5px; color:var(--text-3); }
+.commit-bar .left b { color:var(--text); font-weight:600; }
+.commit-bar .right { margin-left:auto; display:flex; gap:8px; }
+
+</style>
+
+
+<style id="atlas-sidebar-fix">
+/* Minimal sidebar fix — keeps the CEO's per-page .main / .content
+   layouts untouched. We ONLY:
+     1. Pin the sidebar to the viewport with position:fixed
+     2. Reserve a 220px gutter on the body via padding-left
+     3. Normalize the sidebar's internal flex layout (logo + search top,
+        nav scrolls middle, user block bottom)
+     4. Force SVG icon sizes in the sidebar (some screens lost them) */
+
+html, body { overflow-x: hidden !important; }
+body {
+  padding-left: 220px !important;
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
+}
+*, *::before, *::after { box-sizing: border-box; }
+
+.sidebar {
+  width: 220px !important;
+  background: var(--navy, #0E1E35) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  overflow: hidden !important;          /* sidebar itself does NOT scroll */
+  display: flex !important;
+  flex-direction: column !important;
+  flex-shrink: 0 !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Logo + search are direct flex children that never scroll */
+.sidebar > .sidebar-logo,
+.sidebar > a > .sidebar-search,
+.sidebar > .sidebar-search,
+.sidebar-logo,
+.sidebar-search {
+  position: static !important;
+  flex-shrink: 0 !important;
+  background: var(--navy, #0E1E35) !important;
+  z-index: 2;
+}
+
+/* Fix oversized search icon — explicit 13×13 wins over any inheriting style */
+.sidebar-search {
+  margin: 12px 12px 6px !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.sidebar-search svg {
+  width: 13px !important;
+  height: 13px !important;
+  flex-shrink: 0 !important;
+  color: rgba(255,255,255,.4) !important;
+}
+.sidebar-search input {
+  font-size: 12px !important;
+  height: auto !important;
+  background: none !important;
+  border: none !important;
+  outline: none !important;
+  width: 100% !important;
+}
+/* Logo mark sizing — same fix prevents the brand SVG from ballooning */
+.sidebar-logo .logo-mark {
+  width: 52px !important;
+  height: 40px !important;
+  flex-shrink: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+.sidebar-logo .logo-mark svg {
+  width: 52px !important;
+  height: 40px !important;
+}
+
+/* The MIDDLE area is the only scrollable child */
+.sidebar-scroll {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 0 !important;        /* critical: lets flex item shrink */
+  display: flex !important;
+  flex-direction: column !important;
+}
+.sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.10); border-radius: 4px; }
+.sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.18); }
+
+/* User block sits at the bottom of the sidebar, never scrolls */
+.sidebar-user {
+  position: static !important;
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+  background: var(--navy, #0E1E35) !important;
+}
+
+/* .main is intentionally NOT overridden — each page keeps its own layout. */
+</style>
+
+<style id="atlas-sidebar-logo-canon">
+  /* Atlas sidebar logo — canonical styling injected to guarantee
+     consistent stacking (Atlas above, By GiveCentral below) across every screen. */
+  .sidebar-logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: 11px !important;
+    padding: 18px 18px 14px !important;
+    border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  }
+  .sidebar-logo .logo-mark {
+    width: 52px !important;
+    height: 40px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+  }
+  .sidebar-logo .logo-mark svg {
+    width: 52px !important;
+    height: 40px !important;
+  }
+  .sidebar-logo .logo-text-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 3px !important;
+  }
+  .sidebar-logo .logo-name {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 20px !important;
+    color: white !important;
+    line-height: 1 !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+  }
+  .sidebar-logo .logo-sub {
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    letter-spacing: .1em !important;
+    text-transform: uppercase !important;
+    color: rgba(255,255,255,.35) !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+  }
+</style>
+<style id="ur-nav-underline-fix">.nav-item,.nav-item:link,.nav-item:visited,.nav-item:hover,.nav-item:focus,.nav-item:active,.sidebar-item,.sidebar-item:hover{text-decoration:none}</style>
+</head>
+<body>
+
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
+          <circle cx="22" cy="92" r="4" fill="white"/>
+          <circle cx="58" cy="58" r="5" fill="white"/>
+          <circle cx="98" cy="38" r="5.5" fill="white"/>
+          <circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
+          <circle cx="138" cy="24" r="7" fill="#C8A04A"/>
+          <circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="logo-text-wrap">
+        <span class="logo-name">Atlas</span>
+        <span class="logo-sub">By GiveCentral</span>
+      </div>
+    </div>
+
+    <a href="atlas-search.html" style="display:block;text-decoration:none">
+      <div class="sidebar-search">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+        <input type="text" placeholder="Search donors, gifts…" readonly>
+      </div>
+    </a>
+
+    <div class="sidebar-scroll">
+
+    <div class="nav-group">
+      <div class="nav-label">Main</div>
+      <a class="nav-item" href="atlas-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="atlas-donors-list.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>
+        Donors
+        <span class="nav-badge">3,847</span>
+      </a>
+      <a class="nav-item" href="atlas-gifts-pledges.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>
+        Gifts &amp; pledges
+        <span class="nav-badge">142</span>
+      </a>
+      <a class="nav-item" href="atlas-campaign-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>
+        Campaigns
+      </a>
+      <div class="nav-subwrap" style="margin:2px 0 4px 20px;border-left:1.5px solid rgba(255,255,255,.12)">
+        <a class="nav-item" href="atlas-funds.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><ellipse cx="7" cy="3.5" rx="5" ry="2"/><path d="M2 3.5v7c0 1.1 2.2 2 5 2s5-.9 5-2v-7M2 7c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg>Funds</a>
+        <a class="nav-item" href="atlas-appeals.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v5H6l-2.5 2v-2H2z"/></svg>Appeals</a>
+      </div>
+      <a class="nav-item" href="atlas-reports.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>
+        Reports
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Fundraising</div>
+      <a class="nav-item" href="atlas-pipeline.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
+        Prospect pipeline
+        <span class="nav-badge">28</span>
+      </a>
+      <a class="nav-item" href="atlas-tasks.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>
+        Tasks &amp; reminders
+        <span class="nav-badge alert">7</span>
+      </a>
+      <a class="nav-item" href="atlas-communications.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>
+        Communications
+      </a>
+      <a class="nav-item" href="atlas-events-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>
+        Events
+      </a>
+      <a class="nav-item" href="atlas-volunteer-management.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
+        Volunteers
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Intelligence</div>
+      <a class="nav-item" href="atlas-guru-ai.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>
+        Guru AI
+      </a>
+      <a class="nav-item" href="atlas-reports.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>
+        Analytics
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Admin</div>
+      <a class="nav-item" href="atlas-users-roles.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
+        Users &amp; roles
+      </a>
+      <a class="nav-item" href="atlas-tags.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/></svg>Tags &amp; Segment</a>
+      <a class="nav-item" href="atlas-integrations.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>
+        Integrations
+      </a>
+      <a class="nav-item" href="atlassmarttriggers.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.6 1.5L3 8h3.7l-.6 4.6L11 5.9H7.4z"/></svg>Smart Triggers</a>
+      <a class="nav-item" href="atlas-sync.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>
+        Sync
+      </a>
+      <a class="nav-item" href="atlas-location-manage.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>
+        Location portal
+      </a>
+    </div>
+
+    </div><!-- /.sidebar-scroll -->
+
+    <div class="sidebar-user">
+      <div class="user-avatar">SR</div>
+      <div>
+        <div class="user-name">Sarah Reynolds</div>
+        <div class="user-role">Development Director</div>
+      </div>
+    </div>
+  </aside>
+
+<div class="main">
+
+<div class="topbar">
+  <span class="topbar-title">Portfolio rebalance</span>
+  <span class="topbar-date">Monday, May 4, 2026</span>
+  <a href="atlas-search.html" class="topbar-search">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+    <input type="text" placeholder="Search donors, gifts, campaigns…" readonly style="cursor:pointer">
+    <kbd>⌘K</kbd>
+  </a>
+  <div class="topbar-right">
+    
+    <a href="atlas-guided-tour.html" class="tb-notif" title="Take the tour" style="position:relative">
+      <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><path d="M7.5 4v.5M6.5 7c0-1 .5-1.5 1-1.5s1 .5 1 1-.5 1-1 1.5v.5M7.5 11v.5"/></svg>
+    </a>
+    <a href="atlas-notifications.html" class="tb-notif" title="Notifications">
+      <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.5 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5zM6 13a1.5 1.5 0 003 0"/></svg>
+      <div class="notif-dot"></div>
+    </a>
+  </div>
+</div>
+
+<div class="dash">
+
+  <div class="page-head">
+    <div>
+      <div class="crumb"><a href="atlas-dashboard.html">Atlas</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <a href="atlas-pipeline.html">Pipeline</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <span>Portfolio rebalance</span></div>
+      <div class="page-title">Portfolio rebalance</div>
+      <div class="page-sub">Bulk-assign unassigned prospects to your gift officers. Guru AI suggests assignments based on capacity, geography, and current load.</div>
+    </div>
+    <div class="flex gap-8">
+      <a class="btn btn-ghost" href="atlas-solicitor-performance.html">View current performance →</a>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="l">Unassigned prospects</div><div class="v amber">42</div><div class="d">$1.86M total pipeline value · avg ask $44k</div></div>
+    <div class="kpi"><div class="l">Active gift officers</div><div class="v">3</div><div class="d">Sarah · Bridget · Julia</div></div>
+    <div class="kpi"><div class="l">Capacity remaining</div><div class="v green">95</div><div class="d">Total open slots · target 100–150/officer</div></div>
+    <div class="kpi"><div class="l">Guru AI suggestions</div><div class="v" style="color:var(--purple)">42 / 42</div><div class="d">100% covered — review &amp; accept</div></div>
+  </div>
+
+  <div class="assign-grid">
+
+    <!-- LEFT: Unassigned pool -->
+    <div class="panel">
+      <div class="panel-head">
+        <span class="h">Unassigned pool</span>
+        <span class="ct">42 prospects</span>
+        <div class="actions">
+          <button class="btn-mini" onclick="selectAllProspects(this)">Select all</button>
+          <button class="btn-mini" onclick="poolFilter(this)">Filter</button>
+          <button class="btn-mini primary" onclick="acceptAllSuggestions()">Apply AI suggestions</button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <span class="chip applied">Capacity: $25k+ <span style="margin-left:4px">×</span></span>
+        <span class="chip applied">Stage: Identification + Qualification <span style="margin-left:4px">×</span></span>
+        <span class="chip">Region</span>
+        <span class="chip">Parish</span>
+        <span class="chip">Interest</span>
+        <div class="right">Sorted by capacity ↓</div>
+      </div>
+
+      <div class="pool-list" id="pool">
+
+        <div class="prospect-row" data-suggest="SR">
+          <span class="cb"></span>
+          <div class="name">
+            <div class="av" style="background:var(--rose)">M</div>
+            <div class="nm-text"><div class="nm">Margaret O'Brien</div><div class="sub">Indiv. · St. Mary's Cathedral · LAI: A/A/A</div></div>
+          </div>
+          <span class="stage cult">Cultivation</span>
+          <span class="ask">$50k+</span>
+          <span class="geo">Albany NY</span>
+        </div>
+
+        <div class="prospect-row" data-suggest="SR">
+          <span class="cb"></span>
+          <div class="name">
+            <div class="av" style="background:var(--purple)">R</div>
+            <div class="nm-text"><div class="nm">Robert &amp; Susan Lin</div><div class="sub">HH · St. Catherine of Siena · LAI: A/A/B</div></div>
+          </div>
+          <span class="stage solicit">Solicitation</span>
+          <span class="ask">$100k</span>
+          <span class="geo">Albany NY</span>
+        </div>
+
+        <div class="prospect-row" data-suggest="BM">
+          <span class="cb"></span>
+          <div class="name">
+            <div class="av" style="background:var(--blue)">P</div>
+            <div class="nm-text"><div class="nm">Patrick &amp; Catherine Reilly</div><div class="sub">HH · St. Joseph's · LAI: B/A/B</div></div>
+          </div>
+          <span class="stage cult">Cultivation</span>
+          <span class="ask">$25k</span>
+          <span class="geo">Loudonville NY</span>
+        </div>
+
+        <div class="prospect-row" data-suggest="JK">
+          <span class="cb"></span>
+          <div class="name">
+            <div class="av" style="background:var(--amber)">D</div>
+            <div class="nm-text"><div class="nm">Diocesan Foundation</div><div class="sub">Org · Foundation · LAI: A/A/A</div></div>
+          </div>
+          <span class="stage solicit">Solicitation</span>
+          <span class="ask">$250k</span>
+          <span class="geo">Albany NY</span>
+        </div>
+
+        <div class="prospect-row" data-suggest="JK">
+          <span class="cb"></span>
+          <div class="name">
+            <div class="av" style="background:var(--green)">A</div>
+            <div class="nm-text"><div class="nm">Anthony Riccardi</div><div class="sub">Indiv. · stock-friendly donor · LAI: B/A/A</div></div>
+          </div>
+          <span class="stage cult">Cultivation</span>
+          <span class="ask">$30k</span>
+          <span class="geo">Albany NY</span>
+        </div>
+
+        <div class="prospect-row" data-suggest="BM">
+          <span class="cb"></span>
+          <div class="name">
+            <div class="av" style="background:var(--teal)">K</div>
+            <div class="nm-text"><div class="nm">Kelleher Trust</div><div class="sub">Org · Foundation · LAI: A/A/B</div></div>
+          </div>
+          <span class="stage cult">Cultivation</span>
+          <span class="ask">$75k</span>
+          <span class="geo">Saratoga Springs</span>
+        </div>
+
+        <div class="prospect-row" data-suggest="SR">
+          <span class="cb"></span>
+          <div class="name">
+            <div class="av" style="background:var(--rose)">F</div>
+            <div class="nm-text"><div class="nm">Fitzgerald Family</div><div class="sub">HH · St. Joseph's · LAI: A/B/A</div></div>
+          </div>
+          <span class="stage cult">Cultivation</span>
+          <span class="ask">$50k</span>
+          <span class="geo">Albany NY</span>
+        </div>
+
+        <div class="prospect-row" data-suggest="JK">
+          <span class="cb"></span>
+          <div class="name">
+            <div class="av" style="background:var(--purple)">S</div>
+            <div class="nm-text"><div class="nm">Sullivan Family Foundation</div><div class="sub">Org · Foundation · LAI: A/A/A</div></div>
+          </div>
+          <span class="stage qual">Qualification</span>
+          <span class="ask">$150k</span>
+          <span class="geo">Albany NY</span>
+        </div>
+
+        <div class="prospect-row" data-suggest="BM">
+          <span class="cb"></span>
+          <div class="name">
+            <div class="av" style="background:var(--blue)">M</div>
+            <div class="nm-text"><div class="nm">Mary Doherty</div><div class="sub">Indiv. · LYBUNT major donor · LAI: B/B/A</div></div>
+          </div>
+          <span class="stage id">Identification</span>
+          <span class="ask">$15k</span>
+          <span class="geo">Schenectady NY</span>
+        </div>
+
+        <div class="prospect-row" data-suggest="SR">
+          <span class="cb"></span>
+          <div class="name">
+            <div class="av" style="background:var(--amber)">T</div>
+            <div class="nm-text"><div class="nm">Thomas &amp; Linda Walsh</div><div class="sub">HH · St. Catherine · LAI: B/A/B</div></div>
+          </div>
+          <span class="stage cult">Cultivation</span>
+          <span class="ask">$40k</span>
+          <span class="geo">Albany NY</span>
+        </div>
+
+        <div class="prospect-row" data-suggest="JK">
+          <span class="cb"></span>
+          <div class="name">
+            <div class="av" style="background:var(--green)">B</div>
+            <div class="nm-text"><div class="nm">Bishop's Heritage Circle</div><div class="sub">Org · Foundation · planned giving · LAI: A/A/A</div></div>
+          </div>
+          <span class="stage cult">Cultivation</span>
+          <span class="ask">$200k</span>
+          <span class="geo">Albany NY</span>
+        </div>
+
+        <div class="prospect-row" data-suggest="BM">
+          <span class="cb"></span>
+          <div class="name">
+            <div class="av" style="background:var(--rose)">G</div>
+            <div class="nm-text"><div class="nm">Gillian &amp; Mark Devlin</div><div class="sub">HH · St. Anthony · LAI: B/B/B</div></div>
+          </div>
+          <span class="stage id">Identification</span>
+          <span class="ask">$10k</span>
+          <span class="geo">Schenectady NY</span>
+        </div>
+
+        <div class="prospect-row" data-suggest="SR">
+          <span class="cb"></span>
+          <div class="name">
+            <div class="av" style="background:#475569">+30</div>
+            <div class="nm-text"><div class="nm">30 more unassigned prospects</div><div class="sub">Capacity range $1k–$25k · review in batches</div></div>
+          </div>
+          <span class="stage id">Various</span>
+          <span class="ask">$1k+</span>
+          <span class="geo">Diocese-wide</span>
+        </div>
+
+      </div>
+
+      <div class="bulk-bar" id="bulk-bar" style="display:none">
+        <span class="ct" id="sel-count">0 selected</span>
+        <span>Bulk-assign to:</span>
+        <select id="bulk-target">
+          <option value="SR">Sarah Reynolds (Dev Director)</option>
+          <option value="BM">Bridget McCarthy (Dev Director)</option>
+          <option value="JK">Julia Kelleher (Officer)</option>
+        </select>
+        <div class="right">
+          <button onclick="bulkAssign()">Assign selected →</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Officer portfolios -->
+    <div class="panel">
+      <div class="panel-head">
+        <span class="h">Officer portfolios</span>
+        <span class="ct">3 officers</span>
+        <div class="actions">
+          <button class="btn-mini" onclick="openTargets()">Set targets</button>
+          <a class="btn-mini" href="atlas-invite-user.html">+ Add officer</a>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <span class="chip applied">Target: 100–150 prospects/officer</span>
+        <div class="right">Pre-balance · Tap card to focus the pool</div>
+      </div>
+
+      <div style="padding:14px 22px">
+
+        <!-- Sarah Reynolds -->
+        <div class="officer-card target-drop" data-officer="SR">
+          <div class="top">
+            <div class="av" style="background:var(--rose)">SR</div>
+            <div class="nm-text"><div class="nm">Sarah Reynolds</div><div class="role">Dev Director · capacity expert · all entities</div></div>
+            <div class="right"><b>18 / 130</b>active prospects</div>
+          </div>
+          <div class="load-bar"><div class="load-bar-f under" style="width:14%"></div></div>
+          <div class="load-meta"><span>14% loaded</span><span>112 slots open · target 100–150</span></div>
+
+          <div class="suggestion-card">
+            <div class="ico">G</div>
+            <div><b>Guru AI suggests:</b> 14 of the 42 unassigned prospects · primarily Albany-based capital prospects ($25k+). Match score 0.91 based on Sarah's track record with Cathedral capital donors.</div>
+          </div>
+          <button class="assign-btn" onclick="autoAssign('SR', 14)">Auto-assign 14 to Sarah →</button>
+        </div>
+
+        <!-- Bridget McCarthy -->
+        <div class="officer-card" data-officer="BM">
+          <div class="top">
+            <div class="av" style="background:var(--purple)">BM</div>
+            <div class="nm-text"><div class="nm">Bridget McCarthy</div><div class="role">Dev Director · annual + stewardship · all entities</div></div>
+            <div class="right"><b>15 / 130</b>active prospects</div>
+          </div>
+          <div class="load-bar"><div class="load-bar-f under" style="width:12%"></div></div>
+          <div class="load-meta"><span>12% loaded</span><span>115 slots open · target 100–150</span></div>
+
+          <div class="suggestion-card">
+            <div class="ico">G</div>
+            <div><b>Guru AI suggests:</b> 13 of the 42 unassigned · mid-range ($10–25k) + LYBUNT recovery prospects · Schenectady &amp; outer parishes. Match score 0.88.</div>
+          </div>
+          <button class="assign-btn" onclick="autoAssign('BM', 13)">Auto-assign 13 to Bridget →</button>
+        </div>
+
+        <!-- Julia Kelleher -->
+        <div class="officer-card" data-officer="JK">
+          <div class="top">
+            <div class="av" style="background:var(--green)">JK</div>
+            <div class="nm-text"><div class="nm">Julia Kelleher</div><div class="role">Officer · Diocese + Foundation · 22 prospects</div></div>
+            <div class="right"><b>22 / 130</b>active prospects</div>
+          </div>
+          <div class="load-bar"><div class="load-bar-f ok" style="width:17%"></div></div>
+          <div class="load-meta"><span>17% loaded · ramping up</span><span>108 slots open</span></div>
+
+          <div class="suggestion-card">
+            <div class="ico">G</div>
+            <div><b>Guru AI suggests:</b> 15 of the 42 unassigned · foundations, corporate, and planned-giving prospects. Best fit for Julia's grant-writing background. Match score 0.92.</div>
+          </div>
+          <button class="assign-btn" onclick="autoAssign('JK', 15)">Auto-assign 15 to Julia →</button>
+        </div>
+
+        <div style="background:var(--surface);border:1px dashed var(--border);border-radius:10px;padding:14px;text-align:center;font-size:12.5px;color:var(--text-3);margin-top:6px">
+          Want to expand capacity? <a href="atlas-invite-user.html" style="color:var(--blue);font-weight:500">Invite another gift officer →</a>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Commit bar -->
+  <div class="commit-bar">
+    <div class="left">
+      <b id="pending-count">0</b> pending assignments · <b id="pending-officers">0 officers</b> affected
+    </div>
+    <div class="right">
+      <button class="btn btn-ghost" onclick="resetAssignments()">Reset</button>
+      <button class="btn btn-ghost" onclick="saveDraft()">Save as draft</button>
+      <button class="btn btn-primary" onclick="commitAssignments()">
+        <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M2 7l3 3 7-7"/></svg>
+        Commit assignments &amp; notify officers
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var assigned = {SR: 0, BM: 0, JK: 0};
+  window.selectAllProspects = function(btn){
+    var rows = document.querySelectorAll('#pool .prospect-row');
+    var anyOff = false;
+    rows.forEach(function(r){ if (!r.classList.contains('on')) anyOff = true; });
+    rows.forEach(function(r){
+      if (anyOff) { r.classList.add('on'); r.querySelector('.cb').textContent='✓'; }
+      else { r.classList.remove('on'); r.querySelector('.cb').textContent=''; }
+    });
+    updateBulkBar();
+  };
+  function updateBulkBar(){
+    var n = document.querySelectorAll('#pool .prospect-row.on').length;
+    document.getElementById('sel-count').textContent = n + ' selected';
+    document.getElementById('bulk-bar').style.display = n > 0 ? 'flex' : 'none';
+  }
+  document.querySelectorAll('#pool .prospect-row').forEach(function(r){
+    r.addEventListener('click', function(){
+      r.classList.toggle('on');
+      r.querySelector('.cb').textContent = r.classList.contains('on') ? '✓' : '';
+      updateBulkBar();
+    });
+  });
+  window.bulkAssign = function(){
+    var target = document.getElementById('bulk-target').value;
+    var selected = document.querySelectorAll('#pool .prospect-row.on');
+    assigned[target] = (assigned[target] || 0) + selected.length;
+    selected.forEach(function(r){ r.style.display = 'none'; });
+    updateBulkBar();
+    updateCommit();
+    var nm={SR:'Sarah',BM:'Bridget',JK:'Julia'}[target]||target;
+    toast(selected.length + ' prospect' + (selected.length===1?'':'s') + ' assigned to ' + nm + ' — review the commit bar below');
+  };
+  window.autoAssign = function(officer, count){
+    var matches = document.querySelectorAll('#pool .prospect-row[data-suggest="'+officer+'"]');
+    var n = 0;
+    matches.forEach(function(r){
+      if (n < count) { r.style.display = 'none'; n++; }
+    });
+    assigned[officer] = (assigned[officer] || 0) + n;
+    updateCommit();
+  };
+  function updateCommit(){
+    var total = (assigned.SR||0) + (assigned.BM||0) + (assigned.JK||0);
+    var off = ['SR','BM','JK'].filter(function(k){ return assigned[k] > 0; }).length;
+    document.getElementById('pending-count').textContent = total;
+    document.getElementById('pending-officers').textContent = off + ' officer' + (off===1?'':'s');
+  }
+  window.acceptAllSuggestions = function(){
+    autoAssign('SR', 14); autoAssign('BM', 13); autoAssign('JK', 15);
+    toast('Accepted all 42 Guru AI suggestions — review the commit bar at the bottom');
+  };
+  window.resetAssignments = function(){
+    document.querySelectorAll('#pool .prospect-row').forEach(function(r){ r.style.display=''; r.classList.remove('on'); r.querySelector('.cb').textContent=''; });
+    assigned = {SR:0, BM:0, JK:0};
+    updateBulkBar();
+    updateCommit();
+  };
+  window.commitAssignments = function(){
+    var total = (assigned.SR||0) + (assigned.BM||0) + (assigned.JK||0);
+    if (total === 0) { toast('Pick or auto-suggest prospects first'); return; }
+    var off = ['SR','BM','JK'].filter(function(k){ return assigned[k] > 0; }).length;
+    var ov = mkOverlay('commit-ov');
+    ov.innerHTML = '<div style="background:#fff;border-radius:16px;max-width:430px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">'
+      + '<div style="padding:26px 26px 8px;text-align:center">'
+      + '<div style="width:52px;height:52px;border-radius:50%;background:#DCFCE7;display:flex;align-items:center;justify-content:center;margin:0 auto 14px"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#15803D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>'
+      + '<h3 style="font-family:\'DM Serif Display\',serif;font-size:21px;color:#0E1E35;margin:0">Assignments committed</h3>'
+      + '<p style="font-size:13px;color:#475569;margin:8px 0 0;line-height:1.5"><b>'+total+' prospects</b> assigned across <b>'+off+' officer'+(off===1?'':'s')+'</b>. Officers notified by email · audit log <b>#AU-2026-1894</b> created.</p>'
+      + '</div>'
+      + '<div style="display:flex;gap:10px;justify-content:center;padding:18px 26px 24px">'
+      + '<button id="ci-stay" style="border:1px solid #E2E8F0;background:#fff;color:#334155;padding:10px 18px;border-radius:10px;font:600 13px DM Sans;cursor:pointer">Stay here</button>'
+      + '<button id="ci-go" style="border:none;background:#2563EB;color:#fff;padding:10px 18px;border-radius:10px;font:600 13px DM Sans;cursor:pointer">View performance →</button>'
+      + '</div></div>';
+    ov.querySelector('#ci-stay').onclick = function(){ ov.remove(); };
+    ov.querySelector('#ci-go').onclick = function(){ window.location = 'atlas-solicitor-performance.html'; };
+  };
+  window.saveDraft = function(){ toast('Rebalance draft saved — pick up where you left off anytime'); };
+
+  // --- shared helpers ---
+  function toast(msg){
+    var t = document.getElementById('pa-toast');
+    if(!t){ t = document.createElement('div'); t.id='pa-toast';
+      t.style.cssText='position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(8px);background:#0E1E35;color:#fff;padding:12px 20px;border-radius:11px;font:500 13px/1.4 DM Sans,sans-serif;box-shadow:0 12px 32px rgba(15,23,42,.28);z-index:400;opacity:0;transition:opacity .2s,transform .2s;max-width:min(92vw,460px);text-align:center';
+      document.body.appendChild(t); }
+    t.textContent = msg;
+    requestAnimationFrame(function(){ t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; });
+    clearTimeout(t._h); t._h = setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(8px)'; }, 3200);
+  }
+  function mkOverlay(id){
+    var ex=document.getElementById(id); if(ex) ex.remove();
+    var ov=document.createElement('div'); ov.id=id;
+    ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:350;display:flex;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+    return ov;
+  }
+
+  // --- Filter the unassigned pool ---
+  window.poolFilter = function(btn){
+    var ex=document.getElementById('pf-pop'); if(ex){ ex.remove(); return; }
+    var minCap=0, offFilter='';
+    var pop=document.createElement('div'); pop.id='pf-pop';
+    pop.style.cssText='position:absolute;z-index:360;background:#fff;border:1px solid #E2E8F0;border-radius:11px;box-shadow:0 14px 36px rgba(15,23,42,.18);padding:7px;min-width:212px;font-family:DM Sans,sans-serif';
+    function sect(t){ return '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94A3B8;padding:6px 9px 3px">'+t+'</div>'; }
+    pop.innerHTML = sect('Minimum capacity')
+      + [['All capacities',0],['$10k+',10000],['$25k+',25000],['$50k+',50000],['$100k+',100000]].map(function(o){ return '<div class="pf-opt'+(o[1]===0?' on':'')+'" data-min="'+o[1]+'" style="padding:8px 10px;border-radius:8px;cursor:pointer;font-size:12.5px;color:#334155">'+o[0]+'</div>'; }).join('')
+      + '<div style="height:1px;background:#EEF1F5;margin:6px 3px"></div>'
+      + sect('Suggested officer')
+      + [['All officers',''],['Sarah',' SR'.trim()],['Bridget','BM'],['Julia','JK']].map(function(o){ return '<div class="pf-off'+(o[1]===''?' on':'')+'" data-off="'+o[1]+'" style="padding:8px 10px;border-radius:8px;cursor:pointer;font-size:12.5px;color:#334155">'+o[0]+'</div>'; }).join('');
+    document.body.appendChild(pop);
+    var r=btn.getBoundingClientRect();
+    pop.style.top=(r.bottom+window.scrollY+5)+'px';
+    pop.style.left=Math.max(8,(r.right+window.scrollX-pop.offsetWidth))+'px';
+    function apply(){
+      var shown=0;
+      document.querySelectorAll('#pool .prospect-row').forEach(function(row){
+        var askEl=row.querySelector('.ask'); var txt=askEl?askEl.textContent:''; var a=parseFloat(txt.replace(/[^0-9.]/g,''))||0;
+        if(/m/i.test(txt)) a*=1e6; else if(/k/i.test(txt)) a*=1000;
+        var okCap=a>=minCap; var okOff=!offFilter || row.getAttribute('data-suggest')===offFilter;
+        var show=okCap&&okOff; row.style.display=show?'':'none'; if(show) shown++;
+      });
+      var ct=document.querySelector('.panel-head .ct'); if(ct) ct.textContent=shown+' prospect'+(shown===1?'':'s');
+    }
+    pop.querySelectorAll('.pf-opt').forEach(function(o){ o.addEventListener('click',function(){ minCap=+o.dataset.min; pop.querySelectorAll('.pf-opt').forEach(function(x){x.style.background='';}); o.style.background='#EFF6FF'; apply(); }); });
+    pop.querySelectorAll('.pf-off').forEach(function(o){ o.addEventListener('click',function(){ offFilter=o.dataset.off; pop.querySelectorAll('.pf-off').forEach(function(x){x.style.background='';}); o.style.background='#EFF6FF'; apply(); }); });
+    pop.querySelector('.pf-opt.on').style.background='#EFF6FF'; pop.querySelector('.pf-off.on').style.background='#EFF6FF';
+    setTimeout(function(){ document.addEventListener('click', function cl(e){ if(!pop.contains(e.target) && e.target!==btn){ pop.remove(); document.removeEventListener('click',cl); } }); },10);
+  };
+
+  // --- Set per-officer portfolio targets ---
+  window.openTargets = function(){
+    var offs=[['SR','Sarah Reynolds'],['BM','Bridget McCarthy'],['JK','Julia Kelleher']];
+    var ov=mkOverlay('tg-ov');
+    ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">'
+      + '<div style="padding:20px 24px 4px"><h3 style="font-family:\'DM Serif Display\',serif;font-size:20px;color:#0E1E35;margin:0">Set portfolio targets</h3><p style="font-size:12.5px;color:#64748B;margin:6px 0 0;line-height:1.5">Target active-prospect range per officer. Load bars and open-slot counts use these numbers.</p></div>'
+      + '<div style="padding:14px 24px">'+offs.map(function(o){ return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:11px"><div style="flex:1;font-size:13.5px;font-weight:600;color:#334155">'+o[1]+'</div><input class="tg-min" data-off="'+o[0]+'" type="number" min="0" value="100" style="width:72px;border:1px solid #E2E8F0;border-radius:9px;padding:8px 10px;font:400 13px DM Sans;text-align:center"><span style="color:#94A3B8">–</span><input class="tg-max" data-off="'+o[0]+'" type="number" min="0" value="150" style="width:72px;border:1px solid #E2E8F0;border-radius:9px;padding:8px 10px;font:400 13px DM Sans;text-align:center"></div>'; }).join('')+'</div>'
+      + '<div style="display:flex;gap:10px;justify-content:flex-end;padding:16px 24px;border-top:1px solid #EEF1F5"><button id="tg-cancel" style="border:1px solid #E2E8F0;background:#fff;color:#334155;padding:9px 17px;border-radius:10px;font:600 13px DM Sans;cursor:pointer">Cancel</button><button id="tg-save" style="border:none;background:#2563EB;color:#fff;padding:9px 17px;border-radius:10px;font:600 13px DM Sans;cursor:pointer">Save targets</button></div>'
+      + '</div>';
+    ov.querySelector('#tg-cancel').onclick=function(){ ov.remove(); };
+    ov.querySelector('#tg-save').onclick=function(){
+      offs.forEach(function(o){
+        var mn=ov.querySelector('.tg-min[data-off="'+o[0]+'"]').value, mx=ov.querySelector('.tg-max[data-off="'+o[0]+'"]').value;
+        var card=document.querySelector('.officer-card[data-officer="'+o[0]+'"]');
+        if(card){ var meta=card.querySelector('.load-meta span:last-child'); if(meta) meta.textContent=meta.textContent.replace(/target\s*[\d–\-]+/, 'target '+mn+'–'+mx); }
+      });
+      var chip=document.querySelectorAll('.panel')[1].querySelector('.filter-bar .chip.applied');
+      if(chip) chip.textContent='Target: per-officer (custom)';
+      ov.remove(); toast('Portfolio targets updated');
+    };
+  };
+})();
+</script>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     Atlas Dead-CTA Rescue · v1
+     Single click-delegation script that catches button/anchor
+     clicks whose text matches an entry in ACTIONS. Fires a toast,
+     navigates, opens a modal, or toggles a state as appropriate.
+     Safe to load on every page — no-ops when the text isn't in
+     ACTIONS, leaving page-native handlers and the wire-script alone.
+     ════════════════════════════════════════════════════════ -->
+<style id="atlas-rescue-css">
+  #atlas-rescue-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background:#0F172A; color:white; padding:12px 18px; border-radius:10px; box-shadow:0 8px 24px rgba(15,23,42,.20); font-size:13px; font-family:'DM Sans',sans-serif; z-index:100010; display:flex; align-items:center; gap:10px; opacity:0; transition:opacity .2s,transform .2s; pointer-events:none; max-width: 480px; }
+  #atlas-rescue-toast.show { opacity:1; transform:translateX(-50%); pointer-events:auto; }
+  #atlas-rescue-toast .ico { width:22px; height:22px; border-radius:50%; background:#15803D; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0; }
+  #atlas-rescue-toast .msg { line-height:1.4; }
+</style>
+<div id="atlas-rescue-toast"><span class="ico">✓</span><span class="msg"></span></div>
+<script id="atlas-rescue">
+(function(){
+  if (window.__atlasRescue) return; window.__atlasRescue = true;
+
+  // ── Text → Action lookup table ──
+  // Match is case-insensitive, EXACT trimmed text equality (to avoid false positives like "Export" matching "Export forecast")
+  var ACTIONS = {
+    // Late additions (final dead-end sweep)
+    'import csv':                  { type:'toast', msg:'CSV import started · drop or pick a file in the next step' },
+    'save draft':                  { type:'toast', msg:'Draft saved · resume anytime from Batches → Drafts' },
+    'csv file':                    { type:'toast', msg:'CSV import selected · choose file…' },
+    'excel':                       { type:'toast', msg:'Excel import selected · choose .xlsx file…' },
+    'pdf scan':                    { type:'toast', msg:'PDF OCR scan · drop a check image or pledge form' },
+    'make seasonal':               { type:'toast', msg:'Address marked seasonal · winter mail will route here' },
+    'remove':                      { type:'toast', msg:'Removed' },
+    'update':                      { type:'toast', msg:'Saved · changes synced to the donor record' },
+    'csv':                         { type:'toast', msg:'CSV exported · check downloads' },
+    'report':                      { type:'toast', msg:'Report generated · opening in a new tab' },
+    'open all notification preferences': { type:'route', dest:'atlas-notifications.html' },
+    'write off pledge':            { type:'toast', msg:'Pledge written off · audit entry created · DBA approval required' },
+    'already accepted →':          { type:'toast', msg:'Prospect already in pipeline · jumping to their card' },
+    'gifts & pledges':             { type:'route', dest:'atlas-gifts-pledges.html' },
+    'gifts &amp; pledges':         { type:'route', dest:'atlas-gifts-pledges.html' },
+    'edit →':                      { type:'toast', msg:'Step jump · returning to previous step to edit' },
+
+    // Generic exports / downloads → simulated toast
+    'export':                      { type:'toast', msg:'Export ready · CSV downloaded to your device' },
+    'export csv':                  { type:'toast', msg:'CSV exported · check your downloads' },
+    'export pdf':                  { type:'toast', msg:'PDF generated · downloading now' },
+    'export all':                  { type:'toast', msg:'Bulk export queued · ready in ~60 seconds' },
+    'export list':                 { type:'toast', msg:'List exported as CSV · check downloads' },
+    'export roster':               { type:'toast', msg:'Roster exported · CSV ready' },
+    'export forecast':             { type:'toast', msg:'Forecast exported · CSV downloaded' },
+    'export profile':              { type:'toast', msg:'Profile export queued · ready in 30 seconds' },
+    'export exception report':     { type:'toast', msg:'Exception report exported · CSV ready' },
+    'download csv':                { type:'toast', msg:'CSV downloaded' },
+    'download pdf':                { type:'toast', msg:'PDF downloaded' },
+    'download report':             { type:'toast', msg:'Report downloaded · PDF ready' },
+    'pdf report':                  { type:'toast', msg:'PDF report generated · downloading now' },
+
+    // Email / send actions
+    'email to donor':              { type:'toast', msg:'Receipt emailed · delivered to donor inbox' },
+    'email statement':             { type:'toast', msg:'Statement emailed · donor will receive shortly' },
+    'email':                       { type:'route', dest:'atlas-email-compose.html' },
+    'schedule send':               { type:'toast', msg:'Scheduled · will send tomorrow at 9 AM' },
+    'schedule a recurring report': { type:'toast', msg:'Recurring report set up · weekly Monday 8 AM' },
+    'promote':                     { type:'toast', msg:'Promotion drafted · review before scheduling send' },
+
+    // Sync & duplicate management
+    'force re-sync now':           { type:'toast', msg:'Sync started · this may take 60 seconds' },
+    're-scan now':                 { type:'toast', msg:'Duplicate scan started · ETA 30 seconds' },
+    'mark not duplicate':          { type:'toast', msg:'Marked as separate records · removed from queue' },
+    'keep both as separate':       { type:'toast', msg:'Records kept separate · removed from queue' },
+    'apply recommendations':       { type:'toast', msg:'Recommendations applied · 3 fields merged' },
+    "save as decision (don't merge yet)": { type:'toast', msg:'Decision saved · Atlas will re-surface in 14 days' },
+    'snooze':                      { type:'toast', msg:'Snoozed 7 days · we\'ll re-surface next week' },
+
+    // Notifications
+    'mark all as read':            { type:'special', fn:'markAllRead' },
+    'clear cleared':               { type:'toast', msg:'Cleared notifications removed' },
+
+    // Bulk actions
+    'add to outreach list':        { type:'toast', msg:'23 donors added to outreach list' },
+    'add task':                    { type:'route', dest:'atlas-task-modal.html' },
+    'tag':                         { type:'toast', msg:'Tag "Q2 outreach" applied to 23 donors' },
+    'dismiss':                     { type:'toast', msg:'Dismissed' },
+
+    // Direct routes to existing pages
+    'record payment':              { type:'route', dest:'atlas-pledge-payment.html' },
+    'add custom payment':          { type:'route', dest:'atlas-pledge-payment.html' },
+    'sign in to atlas →':          { type:'route', dest:'atlas-dashboard.html' },
+    'sign in to atlas':            { type:'route', dest:'atlas-dashboard.html' },
+    'sign in with password':       { type:'route', dest:'atlas-dashboard.html' },
+    'email me a sign-in link':     { type:'toast', msg:'Magic-link emailed · check your inbox' },
+    'new event':                   { type:'special', fn:'newEvent' },
+    'event page':                  { type:'route', dest:'atlas-gala-management.html' },
+    'view audit log':              { type:'special', fn:'auditLog' },
+    'view configuration':          { type:'route', dest:'atlas-sync.html' },
+    'edit configuration':          { type:'route', dest:'atlas-sync.html' },
+    'view full donor profile':     { type:'route', dest:'atlas-donor-360.html' },
+    'log a note after the call':   { type:'route', dest:'atlas-log-activity.html' },
+    'flag an issue with this brief': { type:'toast', msg:'Issue flagged · DBA team will review' },
+    'brief history':               { type:'toast', msg:'Showing last 12 briefs for this donor' },
+    'review overdue pledges →':    { type:'route', dest:'atlas-pledges-list.html' },
+    'review mapping →':            { type:'route', dest:'atlas-sync.html' },
+    'view in docusign':            { type:'toast', msg:'Opening DocuSign · external app' },
+    'view envelope':               { type:'toast', msg:'Envelope detail · opening in DocuSign' },
+    'view voided':                 { type:'toast', msg:'Voided envelopes · 2 records' },
+    'view posted batch':           { type:'route', dest:'atlas-gifts-pledges.html' },
+    'fix errors inline':           { type:'toast', msg:'Error-fix mode · click any flagged row to correct it' },
+    'post all 14 (including warnings)': { type:'toast', msg:'14 gifts posted · receipts queued' },
+    'assign to supervisor':        { type:'toast', msg:'Batch reassigned to supervisor for review' },
+
+    // Donor-portal recurring-gift actions
+    'pause':                       { type:'special', fn:'togglePause' },
+    'resume':                      { type:'special', fn:'togglePause' },
+    'resume now':                  { type:'special', fn:'togglePause' },
+    'extend pause':                { type:'toast', msg:'Pause extended · resumes in 60 days' },
+    'cancel this gift':            { type:'toast', msg:'Recurring gift cancelled · final receipt will be sent' },
+    'cancel permanently':          { type:'toast', msg:'Cancelled permanently · thank you for your support' },
+    'change amount':               { type:'toast', msg:'Opening amount editor · current: $50/month' },
+    'update card':                 { type:'toast', msg:'Card update form · current: Visa ending 4242' },
+    'change designation':          { type:'toast', msg:'Designation picker · current: Annual Fund' },
+    'pay now':                     { type:'route', dest:'atlas-donate-onetime.html' },
+    'receipt':                     { type:'route', dest:'atlas-receipt-preview.html' },
+
+    // Reports
+    'build a custom report':       { type:'special', fn:'buildReport' },
+    'save as view':                { type:'toast', msg:'Saved as view · access from Reports → Saved' },
+
+    // Add / config
+    'add location':                { type:'route', dest:'atlas-location-manage.html' },
+    'add another seat':            { type:'toast', msg:'Seat added · capacity now 32' },
+    'connect →':                   { type:'toast', msg:'OAuth flow starting · approve in popup' },
+    'disconnect':                  { type:'toast', msg:'Integration disconnected · sync paused' },
+    'screening history':           { type:'toast', msg:'Showing last 90 days of screenings' },
+
+    // Editor / filter / paginate
+    'filter':                      { type:'toast', msg:'Filter panel · pick fields below' },
+    'filter view':                 { type:'toast', msg:'Filter view · pick fields below' },
+    'set targets':                 { type:'toast', msg:'Target editor · set per-officer goals' },
+    'settings':                    { type:'toast', msg:'Settings panel' },
+    'discard changes':             { type:'toast', msg:'Changes discarded · restored from saved' },
+    'add another seat':            { type:'toast', msg:'Seat row added · fill in attendee details' },
+
+    // Donate confirmation share buttons
+    'share on x':                  { type:'toast', msg:'Sharing to X · opening compose window' },
+    'share on facebook':           { type:'toast', msg:'Sharing to Facebook · opening dialog' },
+    'share on linkedin':           { type:'toast', msg:'Sharing to LinkedIn · opening dialog' },
+    'copy link':                   { type:'special', fn:'copyLink' },
+
+    // Guru AI
+    'query history':               { type:'toast', msg:'Showing last 30 queries' },
+    'saved queries':               { type:'toast', msg:'Showing saved queries · 8 saved' },
+
+    // Component library — keep dead (intentional demos)
+  };
+
+  // ── Toast helper ──
+  var toast = document.getElementById('atlas-rescue-toast');
+  function showToast(msg){
+    if (!toast) return;
+    toast.querySelector('.msg').textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(function(){ toast.classList.remove('show'); }, 3200);
+  }
+  window.atlasToast = showToast;
+
+  // ── Click handler ──
+  document.addEventListener('click', function(e){
+    var el = e.target.closest('button, a');
+    if (!el) return;
+    // Skip if it has an existing href/onclick that isn't '#' or empty
+    var href = el.getAttribute('href');
+    if (href && href !== '#' && !el.dataset.atlasRescue) return;
+    var onc = el.getAttribute('onclick');
+    if (onc && onc.trim()) return;
+    // Skip if the click already had its default prevented by something earlier
+    if (e.defaultPrevented) return;
+
+    var txt = (el.textContent || '').trim().toLowerCase().replace(/\s+/g,' ');
+    if (!txt || txt.length > 80) return;
+
+    var act = ACTIONS[txt];
+    if (!act) {
+      // Try fuzzy: strip trailing arrows / counts / parens
+      var stripped = txt.replace(/\s*[→←]\s*$/,'').replace(/\s+\d+(\.\d+)?$/,'').replace(/\s*\(.*\)\s*$/,'').trim();
+      act = ACTIONS[stripped];
+    }
+    if (!act) return;
+
+    // Skip if a more specific page handler is going to fire (heuristic: button has an id that's referenced by scripts)
+    if (el.id) { /* not used currently */ }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (act.type === 'toast') {
+      showToast(act.msg);
+    } else if (act.type === 'route') {
+      showToast('Opening · ' + act.dest.replace('atlas-','').replace('.html','').replace(/-/g,' '));
+      setTimeout(function(){ window.location = act.dest; }, 250);
+    } else if (act.type === 'special') {
+      try { (RESCUE_SPECIALS[act.fn] || function(){})(el, e); }
+      catch(err){ console.error('rescue special failed', err); }
+    }
+  });
+
+  // ── Special handlers ──
+  var RESCUE_SPECIALS = {
+    markAllRead: function(){
+      // Find unread notification items and clear their unread state
+      var marks = document.querySelectorAll('.unread, .nf-row.unread, .notif-unread, [data-unread="true"]');
+      marks.forEach(function(n){ n.classList.remove('unread'); });
+      // Update badge counts
+      document.querySelectorAll('.unread-count, .nav-badge, .nf-count').forEach(function(b){ b.textContent = '0'; });
+      showToast('All notifications marked as read · 14 cleared');
+    },
+
+    togglePause: function(btn){
+      // Find the closest card-like ancestor and toggle paused state
+      var card = btn.closest('.gift-card, .rec-row, .recurring-card, .rg-row, [data-recurring], article, .card');
+      if (card) {
+        var paused = card.classList.toggle('paused');
+        if (paused) card.classList.remove('active');
+        else card.classList.add('active');
+        showToast(paused ? 'Recurring gift paused · resume anytime' : 'Recurring gift resumed · charges resume on next cycle');
+        // Update the button label if it says Pause/Resume
+        var curText = btn.textContent.trim().toLowerCase();
+        if (/pause/i.test(curText)) btn.textContent = 'Resume';
+        else if (/resume/i.test(curText)) btn.textContent = 'Pause';
+      } else {
+        showToast(btn.textContent.trim() + ' · status toggled');
+      }
+    },
+
+    copyLink: function(){
+      try { navigator.clipboard.writeText(window.location.href); } catch(_){}
+      showToast('Link copied to clipboard');
+    },
+
+    newEvent: function(){
+      // Open a slim event-creation modal
+      openSimpleModal({
+        title: 'Create new event',
+        sub: 'Quick-start · fill the basics, refine in the gala module',
+        fields: [
+          { id:'ne-name',  label:'Event name *',  type:'text',   placeholder:'e.g. Bishop\'s Annual Gala 2026' },
+          { id:'ne-type',  label:'Type',          type:'select', options:['Gala / dinner','Retreat','Cultivation lunch','Donor reception','Volunteer drive','Capital tour'] },
+          { id:'ne-date',  label:'Event date *',  type:'date',   value: new Date().toISOString().slice(0,10) },
+          { id:'ne-goal',  label:'Fundraising goal', type:'text', placeholder:'$50,000' },
+          { id:'ne-venue', label:'Venue',         type:'text',   placeholder:'e.g. Albany Capital Center' }
+        ],
+        cta: 'Create event →',
+        onSave: function(vals){
+          if (!vals['ne-name']) { alert('Name the event before saving.'); return false; }
+          showToast('Event created · "' + vals['ne-name'] + '" · opening gala management');
+          setTimeout(function(){ window.location = 'atlas-gala-management.html'; }, 600);
+          return true;
+        }
+      });
+    },
+
+    auditLog: function(){
+      // Open a slim audit-log modal showing the last 6 entries
+      var entries = [
+        { who:'Sarah Reynolds', what:'Created role "Custom · Region Coordinator"',     when:'12 min ago', tag:'role' },
+        { who:'Sarah Reynolds', what:'Invited jamie.morrison@diocese.org as Gift Officer', when:'Today, 9:14 AM', tag:'invite' },
+        { who:'Daniel Cho',     what:'Updated donor preferences for 24 records',         when:'Yesterday, 4:22 PM', tag:'data' },
+        { who:'System',         what:'Daily duplicate scan · 3 candidates surfaced',     when:'Yesterday, 6:00 AM', tag:'system' },
+        { who:'Bridget McCarthy', what:'Resigned consent for 1 donor (do-not-contact)',  when:'2 days ago',         tag:'consent' },
+        { who:'Sarah Reynolds', what:'Posted batch BX-2026-014 · 23 gifts · $87,400',    when:'3 days ago',         tag:'gift' }
+      ];
+      var html = '<div style="max-height:420px;overflow:auto">';
+      html += entries.map(function(e){
+        var col = {role:'#7C3AED', invite:'#2563EB', data:'#0D9488', system:'#64748B', consent:'#BE185D', gift:'#15803D'}[e.tag] || '#64748B';
+        return '<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #F1F5F9">' +
+                 '<div style="width:8px;height:8px;border-radius:50%;background:' + col + ';margin-top:6px;flex-shrink:0"></div>' +
+                 '<div style="flex:1">' +
+                   '<div style="font-size:13px;color:#0F172A">' + e.what + '</div>' +
+                   '<div style="font-size:11.5px;color:#64748B;margin-top:2px"><strong>' + e.who + '</strong> · ' + e.when + '</div>' +
+                 '</div>' +
+               '</div>';
+      }).join('');
+      html += '</div>';
+      openSimpleModal({
+        title: 'Audit log',
+        sub: 'Immutable 7-year record · all data + access changes',
+        rawBody: html,
+        cta: 'Export full log →',
+        onSave: function(){
+          showToast('Audit log export queued · CSV ready in 60s');
+          return true;
+        }
+      });
+    },
+
+    buildReport: function(){
+      // Open the Build-a-Custom-Report 4-step slide-over drawer
+      var existing = document.getElementById('rpt-drawer');
+      if (existing) { existing.remove(); document.getElementById('rpt-scrim').remove(); }
+      var scrim = document.createElement('div');
+      scrim.id = 'rpt-scrim';
+      scrim.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100020;opacity:0;transition:opacity .18s';
+      document.body.appendChild(scrim);
+      var drawer = document.createElement('aside');
+      drawer.id = 'rpt-drawer';
+      drawer.style.cssText = 'position:fixed;top:0;right:0;height:100vh;width:min(580px,94vw);background:white;z-index:100021;box-shadow:-16px 0 40px rgba(15,23,42,.18);transform:translateX(100%);transition:transform .22s cubic-bezier(.22,.61,.36,1);display:flex;flex-direction:column;font-family:DM Sans,sans-serif';
+      drawer.innerHTML =
+        '<style>' +
+          '#rpt-drawer .rh{padding:18px 22px 14px;background:linear-gradient(135deg,#0F172A,#2563EB);color:white;display:flex;align-items:flex-start;gap:12px}' +
+          '#rpt-drawer .rh h3{margin:0;font-family:DM Serif Display,serif;font-size:20px;font-weight:400}' +
+          '#rpt-drawer .rh .sub{font-size:12px;opacity:.86;margin-top:3px}' +
+          '#rpt-drawer .rx{margin-left:auto;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;cursor:pointer}' +
+          '#rpt-drawer .stepper{padding:14px 22px;display:flex;gap:10px;border-bottom:1px solid #F1F5F9;background:#FAFAFA}' +
+          '#rpt-drawer .stepper .st{flex:1;font-size:11px;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px}' +
+          '#rpt-drawer .stepper .st .dot{width:22px;height:22px;border-radius:50%;background:#E2E8F0;color:#64748B;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700}' +
+          '#rpt-drawer .stepper .st.cur .dot{background:#2563EB;color:white}' +
+          '#rpt-drawer .stepper .st.done .dot{background:#15803D;color:white}' +
+          '#rpt-drawer .body{padding:20px 22px;overflow:auto;flex:1}' +
+          '#rpt-drawer .sec{margin-bottom:16px}' +
+          '#rpt-drawer .lbl{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:8px}' +
+          '#rpt-drawer .fld{width:100%;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:DM Sans,sans-serif;color:#0F172A;box-sizing:border-box;outline:none}' +
+          '#rpt-drawer .fld:focus{border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.10)}' +
+          '#rpt-drawer .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}' +
+          '#rpt-drawer .ds{padding:14px 16px;border:1.5px solid #E2E8F0;border-radius:10px;cursor:pointer;transition:all .15s;background:white}' +
+          '#rpt-drawer .ds:hover{border-color:#93C5FD;background:#F0F9FF}' +
+          '#rpt-drawer .ds.sel{border-color:#2563EB;background:#EFF6FF;box-shadow:0 0 0 2px rgba(37,99,235,.10)}' +
+          '#rpt-drawer .ds .ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px;margin-bottom:7px}' +
+          '#rpt-drawer .ds .nm{font-size:13.5px;font-weight:600;color:#0F172A;margin-bottom:3px}' +
+          '#rpt-drawer .ds .dz{font-size:11px;color:#64748B;line-height:1.45}' +
+          '#rpt-drawer .cols{display:flex;flex-wrap:wrap;gap:6px}' +
+          '#rpt-drawer .col-chip{padding:6px 11px;border:1.5px solid #E2E8F0;border-radius:99px;font-size:12px;color:#475569;cursor:pointer;background:white;transition:all .12s;user-select:none}' +
+          '#rpt-drawer .col-chip:hover{border-color:#93C5FD}' +
+          '#rpt-drawer .col-chip.on{background:#2563EB;border-color:#2563EB;color:white;font-weight:600}' +
+          '#rpt-drawer .viz{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}' +
+          '#rpt-drawer .viz .vz{padding:14px 8px;border:1.5px solid #E2E8F0;border-radius:9px;text-align:center;cursor:pointer;font-size:11px;font-weight:600;color:#475569;transition:all .12s;background:white}' +
+          '#rpt-drawer .viz .vz:hover{border-color:#93C5FD}' +
+          '#rpt-drawer .viz .vz.sel{border-color:#2563EB;background:#EFF6FF;color:#2563EB}' +
+          '#rpt-drawer .viz .vz svg{width:26px;height:26px;margin-bottom:6px}' +
+          '#rpt-drawer .foot{padding:14px 22px;border-top:1px solid #F1F5F9;display:flex;gap:10px;background:#FAFAFA;align-items:center}' +
+          '#rpt-drawer .foot .l{font-size:11.5px;color:#64748B;display:flex;gap:6px;align-items:center}' +
+          '#rpt-drawer .btn-back{padding:8px 14px;background:white;border:1.5px solid #E2E8F0;border-radius:8px;font-size:12.5px;color:#475569;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:500}' +
+          '#rpt-drawer .btn-next{padding:8px 16px;background:linear-gradient(135deg,#2563EB,#1E40AF);color:white;border:none;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;margin-left:auto;box-shadow:0 4px 12px rgba(37,99,235,.25)}' +
+          '#rpt-drawer .pane{display:none}' +
+          '#rpt-drawer .pane.on{display:block;animation:fadeUp .22s ease}' +
+          '@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}' +
+        '</style>' +
+        '<div class="rh">' +
+          '<div style="width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.20);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M3 14l3-4 3 2 5-7"/><rect x="2" y="2" width="14" height="14" rx="1.5"/></svg></div>' +
+          '<div><h3>Build a custom report</h3><div class="sub">4 steps · save, schedule, or export as CSV / PDF</div></div>' +
+          '<div class="rx" id="rpt-x"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg></div>' +
+        '</div>' +
+        '<div class="stepper">' +
+          '<div class="st cur" data-i="1"><div class="dot">1</div>Dataset</div>' +
+          '<div class="st" data-i="2"><div class="dot">2</div>Columns</div>' +
+          '<div class="st" data-i="3"><div class="dot">3</div>Filters</div>' +
+          '<div class="st" data-i="4"><div class="dot">4</div>Save</div>' +
+        '</div>' +
+        '<div class="body">' +
+          '<div class="pane on" data-i="1">' +
+            '<div class="lbl">Pick a dataset</div>' +
+            '<div class="grid">' +
+              '<div class="ds sel" data-ds="gifts"><div class="ico" style="background:#2563EB">$</div><div class="nm">Gifts</div><div class="dz">All gifts, including pledge payments and recurring · 142,830 records</div></div>' +
+              '<div class="ds" data-ds="donors"><div class="ico" style="background:#7C3AED">P</div><div class="nm">Constituents</div><div class="dz">Individuals, households, organizations · 3,847 records</div></div>' +
+              '<div class="ds" data-ds="pledges"><div class="ico" style="background:#15803D">✓</div><div class="nm">Pledges</div><div class="dz">Pledge schedules + payment status · 218 active</div></div>' +
+              '<div class="ds" data-ds="campaigns"><div class="ico" style="background:#F59E0B">C</div><div class="nm">Campaigns</div><div class="dz">Goal vs. actual · appeal mix · 8 active</div></div>' +
+              '<div class="ds" data-ds="events"><div class="ico" style="background:#BE185D">E</div><div class="nm">Events</div><div class="dz">Galas, retreats · attendance + revenue · 14 records</div></div>' +
+              '<div class="ds" data-ds="custom"><div class="ico" style="background:#0D9488">✕</div><div class="nm">SQL · custom</div><div class="dz">Write your own query · advanced users only</div></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="pane" data-i="2">' +
+            '<div class="lbl">Pick columns <span style="font-weight:400;text-transform:none;color:#64748B;font-size:11px;margin-left:6px">click to toggle · drag in Phase 2 to reorder</span></div>' +
+            '<div class="cols" id="rpt-cols">' +
+              '<div class="col-chip on">Gift ID</div>' +
+              '<div class="col-chip on">Donor name</div>' +
+              '<div class="col-chip on">Amount</div>' +
+              '<div class="col-chip on">Gift date</div>' +
+              '<div class="col-chip">Campaign</div>' +
+              '<div class="col-chip">Appeal</div>' +
+              '<div class="col-chip">Fund / GL code</div>' +
+              '<div class="col-chip">Payment method</div>' +
+              '<div class="col-chip">Designation</div>' +
+              '<div class="col-chip">Soft credits</div>' +
+              '<div class="col-chip">Receipt #</div>' +
+              '<div class="col-chip">Officer</div>' +
+              '<div class="col-chip">Donor email</div>' +
+              '<div class="col-chip">Lifetime giving</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="pane" data-i="3">' +
+            '<div class="lbl">Date range</div>' +
+            '<div class="grid"><select class="fld"><option>This fiscal year (Jul 2025 – Jun 2026)</option><option>Last fiscal year</option><option>Last 30 days</option><option>Custom range</option></select><input class="fld" type="date" value="2025-07-01"></div>' +
+            '<div class="lbl" style="margin-top:14px">Filter by</div>' +
+            '<div class="grid">' +
+              '<div><select class="fld"><option>Campaign: All campaigns</option><option>Cathedral Capital 2026</option><option>Annual Appeal</option><option>Bishop\'s Gala</option></select></div>' +
+              '<div><select class="fld"><option>Fund: All funds</option><option>Cathedral Restoration</option><option>General Operating</option><option>Scholarship</option></select></div>' +
+              '<div><select class="fld"><option>Amount: Any</option><option>$1,000+</option><option>$10,000+</option><option>$50,000+</option></select></div>' +
+              '<div><select class="fld"><option>Status: All</option><option>Posted only</option><option>Pending</option><option>Voided excluded</option></select></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="pane" data-i="4">' +
+            '<div class="lbl">Visualization</div>' +
+            '<div class="viz">' +
+              '<div class="vz sel"><svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 10h18M9 5v14"/></svg>Table</div>' +
+              '<div class="vz"><svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linejoin="round"><path d="M3 19l5-7 4 3 6-9 3 5" stroke-linecap="round"/></svg>Line</div>' +
+              '<div class="vz"><svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="14" width="3" height="6"/><rect x="9" y="9" width="3" height="11"/><rect x="15" y="5" width="3" height="15"/></svg>Bar</div>' +
+              '<div class="vz"><svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l7 4" stroke-linecap="round"/></svg>Pie</div>' +
+            '</div>' +
+            '<div class="lbl" style="margin-top:18px">Report name <span style="color:#BE185D">*</span></div>' +
+            '<input class="fld" id="rpt-name" placeholder="e.g. Q2 Gift Officer performance">' +
+            '<div class="lbl" style="margin-top:14px">Schedule <span style="font-weight:400;text-transform:none;color:#64748B;font-size:11px;margin-left:6px">optional</span></div>' +
+            '<select class="fld" id="rpt-sched"><option>Don\'t schedule — run on demand</option><option>Daily · 7 AM</option><option>Weekly · Monday 8 AM</option><option>Monthly · 1st of month</option></select>' +
+          '</div>' +
+        '</div>' +
+        '<div class="foot">' +
+          '<div class="l"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="#15803D" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M5 7l1.5 1.5L9 6"/></svg>Auto-saved</div>' +
+          '<button class="btn-back" id="rpt-back" style="display:none">← Back</button>' +
+          '<button class="btn-next" id="rpt-next">Next: Columns →</button>' +
+        '</div>';
+      document.body.appendChild(drawer);
+
+      // Animate in
+      requestAnimationFrame(function(){ scrim.style.opacity = 1; drawer.style.transform = 'none'; });
+
+      // Step machine
+      var step = 1;
+      function show(n){
+        step = n;
+        drawer.querySelectorAll('.pane').forEach(function(p){ p.classList.toggle('on', +p.dataset.i === n); });
+        drawer.querySelectorAll('.st').forEach(function(s){
+          s.classList.remove('cur','done');
+          var i = +s.dataset.i;
+          if (i === n) s.classList.add('cur');
+          else if (i < n) s.classList.add('done');
+        });
+        drawer.querySelector('#rpt-back').style.display = n > 1 ? '' : 'none';
+        var next = drawer.querySelector('#rpt-next');
+        if (n === 1) next.textContent = 'Next: Columns →';
+        else if (n === 2) next.textContent = 'Next: Filters →';
+        else if (n === 3) next.textContent = 'Next: Save →';
+        else if (n === 4) next.textContent = 'Save report ✓';
+      }
+      drawer.querySelectorAll('.ds').forEach(function(d){
+        d.addEventListener('click', function(){
+          drawer.querySelectorAll('.ds').forEach(function(x){ x.classList.remove('sel'); });
+          d.classList.add('sel');
+        });
+      });
+      drawer.querySelectorAll('.col-chip').forEach(function(c){
+        c.addEventListener('click', function(){ c.classList.toggle('on'); });
+      });
+      drawer.querySelectorAll('.vz').forEach(function(v){
+        v.addEventListener('click', function(){
+          drawer.querySelectorAll('.vz').forEach(function(x){ x.classList.remove('sel'); });
+          v.classList.add('sel');
+        });
+      });
+      drawer.querySelector('#rpt-next').addEventListener('click', function(){
+        if (step < 4) show(step + 1);
+        else {
+          var nameFld = drawer.querySelector('#rpt-name');
+          var name = nameFld ? nameFld.value.trim() : '';
+          if (!name) { alert('Name your report before saving.'); nameFld && nameFld.focus(); return; }
+          closeDrawer();
+          showToast('Saved · "' + name + '" appears in Reports → Saved views');
+        }
+      });
+      drawer.querySelector('#rpt-back').addEventListener('click', function(){ if (step > 1) show(step - 1); });
+      function closeDrawer(){
+        scrim.style.opacity = 0;
+        drawer.style.transform = 'translateX(100%)';
+        setTimeout(function(){ scrim.remove(); drawer.remove(); }, 240);
+      }
+      drawer.querySelector('#rpt-x').addEventListener('click', closeDrawer);
+      scrim.addEventListener('click', closeDrawer);
+    }
+  };
+
+  // ── Simple modal builder (used by newEvent, auditLog) ──
+  function openSimpleModal(opts){
+    var sc = document.createElement('div');
+    sc.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100022;opacity:0;transition:opacity .15s';
+    var md = document.createElement('div');
+    md.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.97);width:min(520px,92vw);max-height:88vh;background:white;border-radius:14px;box-shadow:0 24px 64px rgba(15,23,42,.30);z-index:100023;opacity:0;transition:opacity .15s,transform .15s;font-family:DM Sans,sans-serif;overflow:hidden;display:flex;flex-direction:column';
+    var fldsHtml = '';
+    if (opts.fields) {
+      fldsHtml = opts.fields.map(function(f){
+        if (f.type === 'select') return '<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:6px">' + f.label + '</div><select id="' + f.id + '" style="width:100%;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:DM Sans,sans-serif;color:#0F172A;outline:none;box-sizing:border-box">' + f.options.map(function(o){ return '<option>' + o + '</option>'; }).join('') + '</select></div>';
+        return '<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:6px">' + f.label + '</div><input id="' + f.id + '" type="' + (f.type || 'text') + '" ' + (f.value ? 'value="' + f.value + '"' : '') + ' placeholder="' + (f.placeholder || '') + '" style="width:100%;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:DM Sans,sans-serif;color:#0F172A;outline:none;box-sizing:border-box"></div>';
+      }).join('');
+    }
+    md.innerHTML =
+      '<div style="padding:18px 22px 14px;background:linear-gradient(135deg,#1E3A8A,#2563EB);color:white;display:flex;align-items:flex-start;gap:12px">' +
+        '<div><div style="font-family:DM Serif Display,serif;font-size:20px">' + opts.title + '</div><div style="font-size:12px;opacity:.86;margin-top:3px">' + (opts.sub || '') + '</div></div>' +
+        '<div id="sm-x" style="margin-left:auto;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;cursor:pointer">×</div>' +
+      '</div>' +
+      '<div style="padding:18px 22px;overflow:auto;flex:1">' + (opts.rawBody || fldsHtml) + '</div>' +
+      '<div style="padding:14px 22px;border-top:1px solid #F1F5F9;display:flex;gap:10px;background:#FAFAFA">' +
+        '<button id="sm-cancel" style="padding:8px 14px;background:white;border:1.5px solid #E2E8F0;border-radius:8px;font-size:12.5px;color:#475569;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:500">Cancel</button>' +
+        '<button id="sm-save" style="padding:8px 16px;background:linear-gradient(135deg,#2563EB,#1E40AF);color:white;border:none;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;margin-left:auto">' + (opts.cta || 'Save') + '</button>' +
+      '</div>';
+    document.body.appendChild(sc);
+    document.body.appendChild(md);
+    requestAnimationFrame(function(){ sc.style.opacity = 1; md.style.opacity = 1; md.style.transform = 'translate(-50%,-50%) scale(1)'; });
+    function close(){ sc.style.opacity = 0; md.style.opacity = 0; md.style.transform = 'translate(-50%,-50%) scale(.97)'; setTimeout(function(){ sc.remove(); md.remove(); }, 180); }
+    md.querySelector('#sm-x').addEventListener('click', close);
+    md.querySelector('#sm-cancel').addEventListener('click', close);
+    sc.addEventListener('click', close);
+    md.querySelector('#sm-save').addEventListener('click', function(){
+      var vals = {};
+      if (opts.fields) opts.fields.forEach(function(f){ var el = md.querySelector('#' + f.id); if (el) vals[f.id] = el.value.trim(); });
+      var ok = opts.onSave ? opts.onSave(vals) : true;
+      if (ok !== false) close();
+    });
+  }
+  window.atlasOpenModal = openSimpleModal;
+})();
+</script>
+<!-- end Atlas Dead-CTA Rescue -->
+
+
+<!-- ════ Atlas-themed dialog (replaces native alert/confirm) — auto-injected ════ -->
+<style>
+  #ax-ov{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);z-index:2147483000;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',-apple-system,sans-serif}
+  #ax-ov.show{display:flex}
+  #ax-ov .ax-box{background:#fff;border-radius:16px;width:100%;max-width:430px;box-shadow:0 24px 64px rgba(15,23,42,.30);overflow:hidden;animation:axUp .18s ease}
+  @keyframes axUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  #ax-ov .ax-bd{display:flex;gap:14px;padding:22px 22px 8px}
+  #ax-ov .ax-ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  #ax-ov .ax-ic svg{width:21px;height:21px}
+  #ax-ov .ax-tt{font-size:17px;font-weight:700;color:#0F172A;margin:1px 0 5px}
+  #ax-ov .ax-msg{font-size:13.5px;color:#475569;line-height:1.55;margin:0}
+  #ax-ov .ax-ft{display:flex;justify-content:flex-end;gap:9px;padding:16px 22px 20px}
+  #ax-ov .ax-btn{font-family:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:9px 16px;cursor:pointer;border:1px solid transparent}
+  #ax-ov .ax-ghost{background:#fff;border-color:#E2E8F0;color:#334155}
+  #ax-ov .ax-ghost:hover{background:#F8FAFC;border-color:#94A3B8}
+  #ax-ov .ax-primary{background:#2563EB;color:#fff}
+  #ax-ov .ax-primary:hover{background:#1D4ED8}
+  #ax-ov .ax-danger{background:#BE185D;color:#fff}
+  #ax-ov .ax-danger:hover{background:#9D174D}
+  #ax-ov .ax-gold{background:#B45309;color:#fff}
+  #ax-ov .ax-gold:hover{background:#92400E}
+</style>
+<div id="ax-ov"><div class="ax-box">
+  <div class="ax-bd"><div class="ax-ic" id="ax-ic"></div><div><h3 class="ax-tt" id="ax-tt"></h3><p class="ax-msg" id="ax-msg"></p></div></div>
+  <div class="ax-ft" id="ax-ft"></div>
+</div></div>
+<script>
+(function(){
+  if(window.__axInit) return; window.__axInit=true;
+  var ICONS={
+    danger:['#FCE7F3','#BE185D','<path d="M2.5 4.5h16v3.5h-16zM4 8v9.5a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V8M8 11.5h5"/>'],
+    warn:['#FEF3C7','#D97706','<path d="M10 7.5v4M10 14.3v.2"/><path d="M8.6 3.4 2.6 14a1.6 1.6 0 0 0 1.4 2.4h12A1.6 1.6 0 0 0 17.4 14L11.4 3.4a1.6 1.6 0 0 0-2.8 0Z"/>'],
+    info:['#EFF6FF','#2563EB','<circle cx="10" cy="10" r="7.5"/><path d="M10 9.3v4.2M10 6.4v.2"/>'],
+    success:['#DCFCE7','#15803D','<circle cx="10" cy="10" r="7.5"/><path d="M6.5 10.2l2.2 2.2 4.8-4.8"/>'],
+    docusign:['#FBF4E8','#B45309','<rect x="3" y="2.5" width="14" height="15" rx="2"/><path d="M6 7h8M6 10h5M6 13l1.4 1.4L10.5 11.3"/>']
+  };
+  function el(id){ return document.getElementById(id); }
+  function close(){ var o=el('ax-ov'); if(o) o.classList.remove('show'); }
+  window.axClose=close;
+  function dialog(o){
+    var ov=el('ax-ov'); if(!ov) return; var ic=ICONS[o.icon]||ICONS[o.danger?'danger':'info'];
+    el('ax-ic').style.background=ic[0]; el('ax-ic').style.color=ic[1];
+    el('ax-ic').innerHTML='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+ic[2]+'</svg>';
+    el('ax-tt').textContent=o.title||''; el('ax-tt').style.display=o.title?'':'none'; el('ax-msg').innerHTML=o.message||'';
+    var ft=el('ax-ft'); ft.innerHTML='';
+    if(!o.alert){ var c=document.createElement('button'); c.className='ax-btn ax-ghost'; c.textContent=o.cancelText||'Cancel'; c.onclick=function(){ close(); if(o.onCancel)o.onCancel(); }; ft.appendChild(c); }
+    var ok=document.createElement('button'); ok.className='ax-btn '+(o.btn==='gold'?'ax-gold':(o.danger?'ax-danger':'ax-primary')); ok.textContent=o.confirmText||(o.alert?'Got it':'OK');
+    ok.onclick=function(){ close(); if(o.onConfirm)o.onConfirm(); }; ft.appendChild(ok);
+    ov.classList.add('show'); setTimeout(function(){ try{ok.focus();}catch(e){} },40);
+  }
+  window.atlasConfirm=function(o){ dialog(o||{}); };
+  window.atlasAlert=function(title,message,o){ o=o||{}; dialog({title:title,message:message,alert:true,icon:o.icon||'info',btn:o.btn,confirmText:o.confirmText||'Got it',onConfirm:o.onConfirm}); };
+  // theme all native alert() calls automatically
+  window.alert=function(m){ atlasAlert('Atlas', String(m==null?'':m)); };
+  var ov=el('ax-ov'); if(ov) ov.addEventListener('click',function(e){ if(e.target===this) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
+</script>
+
+<!-- ATLAS-DATEPICKER v1 : reusable click-to-open calendar for text date fields -->
+<style id="atlas-datepicker-css">
+.adp-pop{position:absolute;z-index:2147483000;width:266px;background:#fff;border:1px solid var(--border,#E2E8F0);border-radius:12px;
+  box-shadow:0 12px 34px rgba(15,23,42,.18);padding:12px;font-family:'DM Sans',system-ui,sans-serif;color:var(--text-1,#0F172A);
+  opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .12s ease,transform .12s ease;}
+.adp-pop.open{opacity:1;transform:translateY(0);pointer-events:auto;}
+.adp-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.adp-nav{width:28px;height:28px;border:none;background:transparent;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;
+  color:var(--text-2,#334155);display:flex;align-items:center;justify-content:center;}
+.adp-nav:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
+.adp-title{font-size:13.5px;font-weight:600;letter-spacing:.01em;cursor:pointer;padding:4px 8px;border-radius:8px;}
+.adp-title:hover{background:var(--surface,#F8FAFC);}
+.adp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.adp-dow{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3,#64748B);
+  text-align:center;padding:4px 0;}
+.adp-day{border:none;background:transparent;border-radius:8px;height:32px;font-size:12.5px;cursor:pointer;color:var(--text-1,#0F172A);
+  font-family:inherit;}
+.adp-day:hover{background:var(--blue-pale,#EFF6FF);}
+.adp-day.mut{color:#CBD5E1;}
+.adp-day.today{box-shadow:inset 0 0 0 1px var(--blue,#2563EB);color:var(--blue,#2563EB);font-weight:600;}
+.adp-day.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
+.adp-cell{border:none;background:transparent;border-radius:8px;height:34px;font-size:12.5px;cursor:pointer;color:var(--text-2,#334155);
+  font-family:inherit;}
+.adp-cell:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
+.adp-cell.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
+.adp-ft{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border,#E2E8F0);}
+.adp-ft button{border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:4px 6px;border-radius:6px;}
+.adp-today-b{color:var(--blue,#2563EB);} .adp-today-b:hover{background:var(--blue-pale,#EFF6FF);}
+.adp-clear-b{color:var(--text-3,#64748B);} .adp-clear-b:hover{background:var(--surface,#F8FAFC);}
+.adp-mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+</style>
+<script id="atlas-datepicker-js">
+(function(){
+  if (window.__atlasDP) return; window.__atlasDP = true;
+  var MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  var DATE_PH=/\b(m{1,2}\s*[\/\-.]\s*d{1,2}\s*[\/\-.]\s*y{2,4}|y{4}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*d{1,2}|d{1,2}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*y{2,4})\b/i;
+  var WORD_DATE=/\bdate\b/i;
+
+  function looksDate(inp){
+    if(!inp||inp.tagName!=='INPUT') return false;
+    var t=(inp.getAttribute('type')||'text').toLowerCase();
+    if(t!=='text'&&t!=='') return false;              // leave native date/other inputs alone
+    if(inp.getAttribute('data-adp')==='off') return false;
+    if(inp.getAttribute('list')) return false;         // autocomplete fields
+    var ph=inp.getAttribute('placeholder')||'';
+    if(DATE_PH.test(ph)) return true;
+    if(WORD_DATE.test(ph)) return true;
+    // label / aria signal (whole word "date")
+    var lab=inp.getAttribute('aria-label')||'';
+    if(WORD_DATE.test(lab)) return true;
+    // native label association (for=/wrapping label)
+    try{ if(inp.labels){ for(var i=0;i<inp.labels.length;i++){ if(WORD_DATE.test(inp.labels[i].textContent||'')) return true; } } }catch(e){}
+    var isLbl=function(el){ return el && el.matches && el.matches('label,.lbl,.field-label,.form-label'); };
+    // immediate preceding sibling labels (no climbing to broad ancestors)
+    var sib=inp.previousElementSibling, guard=0;
+    while(sib && guard<3){ if(isLbl(sib) && WORD_DATE.test(sib.textContent||'')) return true; sib=sib.previousElementSibling; guard++; }
+    // direct label children of the input's own wrapper only
+    var par=inp.parentElement;
+    if(par){ var kids=par.children; for(var j=0;j<kids.length;j++){ var k=kids[j]; if(k!==inp && isLbl(k) && WORD_DATE.test(k.textContent||'')) return true; } }
+    return false;
+  }
+
+  // ---- format detection & output ----
+  function fmtOf(inp){
+    var ph=(inp.getAttribute('placeholder')||'').toLowerCase();
+    var v=(inp.value||'').trim();
+    if(/y{4}\s*[\/\-.]\s*m/.test(ph)||/^\d{4}-\d{1,2}-\d{1,2}$/.test(v)) return 'iso';
+    if(/d{1,2}\s*[\/\-.]\s*m/.test(ph)) return 'dmy';
+    if(/[a-z]{3,}\s+\d{1,2},?\s+\d{4}/i.test(v)) return 'long';
+    return 'mdy';
+  }
+  function pad(n){return (n<10?'0':'')+n;}
+  function toStr(d,fmt){
+    var y=d.getFullYear(),m=d.getMonth()+1,day=d.getDate();
+    if(fmt==='iso') return y+'-'+pad(m)+'-'+pad(day);
+    if(fmt==='dmy') return pad(day)+'/'+pad(m)+'/'+y;
+    if(fmt==='long') return MON[m-1]+' '+day+', '+y;
+    return pad(m)+'/'+pad(day)+'/'+y;
+  }
+  function parse(v){
+    v=(v||'').trim(); if(!v) return null;
+    var m;
+    if(m=v.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/)) return new Date(+m[1],+m[2]-1,+m[3]);
+    if(m=v.match(/^([a-z]{3,})\s+(\d{1,2}),?\s+(\d{4})$/i)){var mi=MON.findIndex(function(x){return x.toLowerCase().indexOf(m[1].toLowerCase())===0;});if(mi>=0)return new Date(+m[3],mi,+m[2]);}
+    if(m=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/)){var y=+m[3];if(y<100)y+=2000;return new Date(y,+m[1]-1,+m[2]);}
+    var d=new Date(v); return isNaN(d)?null:d;
+  }
+
+  // ---- single shared popover ----
+  var pop,active,view,mode='days';
+  function build(){
+    pop=document.createElement('div');pop.className='adp-pop';pop.setAttribute('role','dialog');
+    document.body.appendChild(pop);
+    pop.addEventListener('mousedown',function(e){e.preventDefault();}); // keep field focus
+  }
+  function close(){ if(pop) pop.classList.remove('open'); active=null; mode='days'; }
+  function open(inp){
+    if(!pop) build();
+    active=inp; mode='days';
+    view=parse(inp.value)||new Date();
+    render(); position(); pop.classList.add('open');
+  }
+  function position(){
+    var r=active.getBoundingClientRect(), sx=window.pageXOffset, sy=window.pageYOffset;
+    pop.style.visibility='hidden'; pop.classList.add('open');
+    var ph=pop.offsetHeight, pw=pop.offsetWidth;
+    pop.classList.remove('open'); pop.style.visibility='';
+    var top=r.bottom+sy+6, left=r.left+sx;
+    if(r.bottom+ph+6>window.innerHeight && r.top-ph-6>0) top=r.top+sy-ph-6;
+    left=Math.min(left, sx+window.innerWidth-pw-8); left=Math.max(left,sx+8);
+    pop.style.top=top+'px'; pop.style.left=left+'px';
+  }
+  function commit(d){
+    var fmt=fmtOf(active);
+    active.value=toStr(d,fmt);
+    active.dispatchEvent(new Event('input',{bubbles:true}));
+    active.dispatchEvent(new Event('change',{bubbles:true}));
+    close();
+  }
+  function render(){
+    if(mode==='months'){renderMonths();return;}
+    if(mode==='years'){renderYears();return;}
+    var y=view.getFullYear(), mo=view.getMonth();
+    var sel=parse(active.value), today=new Date();
+    var first=new Date(y,mo,1), start=first.getDay(), dim=new Date(y,mo+1,0).getDate(), pdim=new Date(y,mo,0).getDate();
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="pm">&#8249;</button>'+
+      '<div class="adp-title" data-a="mode">'+MON[mo]+' '+y+'</div>'+
+      '<button class="adp-nav" data-a="nm">&#8250;</button></div><div class="adp-grid">';
+    for(var i=0;i<7;i++) h+='<div class="adp-dow">'+DOW[i]+'</div>';
+    for(var c=0;c<42;c++){
+      var dn,cls='adp-day',dt;
+      if(c<start){dn=pdim-start+1+c;cls+=' mut';dt=new Date(y,mo-1,dn);}
+      else if(c-start+1<=dim){dn=c-start+1;dt=new Date(y,mo,dn);}
+      else{dn=c-start+1-dim;cls+=' mut';dt=new Date(y,mo+1,dn);}
+      if(dt.getFullYear()===today.getFullYear()&&dt.getMonth()===today.getMonth()&&dt.getDate()===today.getDate())cls+=' today';
+      if(sel&&dt.getFullYear()===sel.getFullYear()&&dt.getMonth()===sel.getMonth()&&dt.getDate()===sel.getDate())cls+=' sel';
+      h+='<button class="'+cls+'" data-d="'+dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate()+'">'+dn+'</button>';
+      if(c>=start+dim-1 && (c+1)%7===0) break;
+    }
+    h+='</div><div class="adp-ft"><button class="adp-today-b" data-a="today">Today</button><button class="adp-clear-b" data-a="clear">Clear</button></div>';
+    pop.innerHTML=h;
+  }
+  function renderMonths(){
+    var y=view.getFullYear();
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="py">&#8249;</button>'+
+      '<div class="adp-title" data-a="years">'+y+'</div><button class="adp-nav" data-a="ny">&#8250;</button></div><div class="adp-mgrid">';
+    for(var i=0;i<12;i++) h+='<button class="adp-cell'+(i===view.getMonth()?' sel':'')+'" data-m="'+i+'">'+MONS[i]+'</button>';
+    h+='</div>'; pop.innerHTML=h;
+  }
+  function renderYears(){
+    var base=view.getFullYear()-6;
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="pyr">&#8249;</button>'+
+      '<div class="adp-title">'+base+' – '+(base+11)+'</div><button class="adp-nav" data-a="nyr">&#8250;</button></div><div class="adp-mgrid">';
+    for(var i=0;i<12;i++){var yr=base+i;h+='<button class="adp-cell'+(yr===view.getFullYear()?' sel':'')+'" data-y="'+yr+'">'+yr+'</button>';}
+    h+='</div>'; pop.innerHTML=h;
+  }
+
+  document.addEventListener('click',function(e){
+    if(!pop) return;
+    var t=e.target;
+    if(pop.contains(t)){
+      var a=t.getAttribute('data-a'), d=t.getAttribute('data-d'), mm=t.getAttribute('data-m'), yy=t.getAttribute('data-y');
+      if(d){var p=d.split('-');commit(new Date(+p[0],+p[1]-1,+p[2]));return;}
+      if(mm!=null){view=new Date(view.getFullYear(),+mm,1);mode='days';render();return;}
+      if(yy!=null){view=new Date(+yy,view.getMonth(),1);mode='months';render();return;}
+      if(a==='pm'){view=new Date(view.getFullYear(),view.getMonth()-1,1);render();}
+      else if(a==='nm'){view=new Date(view.getFullYear(),view.getMonth()+1,1);render();}
+      else if(a==='mode'){mode='months';render();}
+      else if(a==='years'){mode='years';render();}
+      else if(a==='py'){view=new Date(view.getFullYear()-1,view.getMonth(),1);render();}
+      else if(a==='ny'){view=new Date(view.getFullYear()+1,view.getMonth(),1);render();}
+      else if(a==='pyr'){view=new Date(view.getFullYear()-12,view.getMonth(),1);render();}
+      else if(a==='nyr'){view=new Date(view.getFullYear()+12,view.getMonth(),1);render();}
+      else if(a==='today'){commit(new Date());}
+      else if(a==='clear'){active.value='';active.dispatchEvent(new Event('input',{bubbles:true}));active.dispatchEvent(new Event('change',{bubbles:true}));close();}
+      return;
+    }
+    if(active && t===active) return;
+    close();
+  },true);
+
+  document.addEventListener('focusin',function(e){ if(looksDate(e.target)) open(e.target); });
+  document.addEventListener('click',function(e){ if(looksDate(e.target) && active!==e.target) open(e.target); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+  window.addEventListener('resize',function(){ if(active&&pop&&pop.classList.contains('open')) position(); });
+  window.addEventListener('scroll',function(){ if(active&&pop&&pop.classList.contains('open')) position(); },true);
+
+  window.__atlasLooksDate=looksDate; // exposed for tests
+})();
+</script>
+<!-- /ATLAS-DATEPICKER -->
+<!-- ATLAS-NAVCOLLAPSE v1 : expandable/collapsible Campaigns submenu (Appeals / Funds) -->
+<style id="atlas-navcollapse-css">
+.nav-caret{ margin-left:auto; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px;
+  border-radius:5px; opacity:.55; transition:transform .18s ease, opacity .15s, background .15s; flex-shrink:0; }
+.nav-caret:hover{ opacity:1; background:rgba(255,255,255,.12); }
+.nav-caret svg{ width:9px; height:9px; }
+.nav-item.nav-open .nav-caret{ transform:rotate(90deg); }
+.nav-item .nav-badge + .nav-caret{ margin-left:8px; }
+.nav-subwrap{ overflow:hidden; }
+</style>
+<script id="atlas-navcollapse-js">
+(function(){
+  if (window.__atlasNavCollapse) return; window.__atlasNavCollapse = true;
+  var CARET = '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 2l3 3-3 3"/></svg>';
+
+  function setup(link){
+    // collect submenu: a following .nav-subwrap, or loose Appeals/Funds nav-items (portal)
+    var wrap=null, subs=[], next=link.nextElementSibling;
+    if(next && next.classList && next.classList.contains('nav-subwrap')) wrap=next;
+    else {
+      var n=next;
+      while(n && n.classList && n.classList.contains('nav-item') && /atlas-(appeals|funds)\.html$/.test(n.getAttribute('href')||'')){ subs.push(n); n=n.nextElementSibling; }
+    }
+    if(!wrap && !subs.length) return;
+
+    var childActive = wrap ? !!wrap.querySelector('.nav-item.active') : subs.some(function(s){return s.classList.contains('active');});
+    var expanded = link.classList.contains('active') || childActive;
+
+    if(!link.querySelector('.nav-caret')){
+      var car=document.createElement('span'); car.className='nav-caret'; car.setAttribute('aria-label','Toggle submenu'); car.innerHTML=CARET;
+      link.appendChild(car);
+    }
+    var caret=link.querySelector('.nav-caret');
+    function apply(){
+      if(wrap) wrap.style.display = expanded?'':'none';
+      else subs.forEach(function(s){ s.style.display = expanded?'':'none'; });
+      link.classList.toggle('nav-open', expanded);
+      link.setAttribute('aria-expanded', expanded?'true':'false');
+    }
+    apply();
+    caret.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); expanded=!expanded; apply(); });
+  }
+
+  function scan(){
+    var links=document.querySelectorAll('.nav-item[href="atlas-campaign-dashboard.html"]:not([data-navcol])');
+    for(var i=0;i<links.length;i++){ links[i].setAttribute('data-navcol','1'); setup(links[i]); }
+  }
+  function boot(){
+    scan();
+    // portal renders its sidebar via JS — watch for it to appear
+    var host=document.querySelector('.sidebar, #nav') || document.body;
+    try{
+      var mo=new MutationObserver(function(){ scan(); });
+      mo.observe(host, {childList:true, subtree:true});
+      setTimeout(function(){ mo.disconnect(); }, 4000);
+    }catch(e){}
+    var tries=0, t=setInterval(function(){ scan(); if(++tries>12) clearInterval(t); }, 120);
+  }
+  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+<!-- /ATLAS-NAVCOLLAPSE -->
+</body>
+</html>
