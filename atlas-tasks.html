@@ -339,9 +339,11 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .tk-row .cb:hover { border-color:var(--blue); }
 .tk-row.overdue .cb { border-color:var(--rose); }
 .tk-row.today .cb { border-color:var(--amber); }
-.tk-row .body .ttl { font-size:13.5px; color:var(--text); font-weight:500; }
+.tk-row .body .ttl { font-size:13.5px; color:var(--text); font-weight:600; }
 .tk-row.overdue .body .ttl { color:var(--rose); }
-.tk-row .body .meta { font-size:11.5px; color:var(--text-3); margin-top:2px; display:flex; gap:8px; flex-wrap:wrap; }
+.tk-row .body .tk-desc { font-size:12px; color:var(--text-2); margin-top:3px; line-height:1.45; }
+.tk-row.done .body .tk-desc { text-decoration:line-through; color:var(--text-3); }
+.tk-row .body .meta { font-size:11.5px; color:var(--text-3); margin-top:4px; display:flex; gap:8px; flex-wrap:wrap; }
 .tk-row .body .meta .donor { color:var(--blue); font-weight:500; }
 .tk-row.done { grid-template-columns:22px 1fr 150px 90px 44px 86px; cursor:default; background:#fff; }
 .tk-row.done .body .ttl { text-decoration:line-through; color:var(--text-3); font-weight:500; }
@@ -944,6 +946,7 @@ body {
       <span class="cb"></span>
       <div class="body">
         <div class="ttl">Call Robert &amp; Susan Lin re: Cathedral pledge final terms</div>
+        <div class="tk-desc">Confirm the 5-year pledge terms and payment schedule before drafting the agreement — they asked about a Cathedral narthex naming opportunity.</div>
         <div class="meta">
           <span class="donor">Robert &amp; Susan Lin</span>
           <span>·</span>
@@ -963,6 +966,7 @@ body {
       <span class="cb"></span>
       <div class="body">
         <div class="ttl">Send acknowledgement letter — Schwab DAF $15k (soft credit Margaret O'Brien)</div>
+        <div class="tk-desc">DAF gift needs a no-tax acknowledgement; soft-credit Margaret O'Brien so it appears on her record. Use the soft-credit template.</div>
         <div class="meta">
           <span class="donor">Schwab Charitable (DAF)</span>
           <span>·</span>
@@ -980,6 +984,7 @@ body {
       <span class="cb"></span>
       <div class="body">
         <div class="ttl">Follow up: Eleanor Whitmore (LYBUNT) — second outreach attempt</div>
+        <div class="tk-desc">Gave last year but not yet this year. First email went unanswered — try a personal call or a re-engagement note.</div>
         <div class="meta">
           <span class="donor">Eleanor Whitmore</span>
           <span>·</span>
@@ -1005,6 +1010,7 @@ body {
       <span class="cb"></span>
       <div class="body">
         <div class="ttl">Send Cathedral pledge agreement to Margaret O'Brien</div>
+        <div class="tk-desc">Email the DocuSign pledge agreement for her $30k, 3-year Cathedral commitment and log the record once it's signed.</div>
         <div class="meta">
           <span class="donor">Margaret O'Brien</span>
           <span>·</span>
@@ -1024,6 +1030,7 @@ body {
       <span class="cb"></span>
       <div class="body">
         <div class="ttl">Thank-you call: Tessa Greene first-time gift ($50 Apple Pay)</div>
+        <div class="tk-desc">First-time donor — a quick thank-you call within 48 hours lifts second-gift retention. Welcome email already auto-sent.</div>
         <div class="meta">
           <span class="donor">Tessa Greene</span>
           <span>·</span>
@@ -1041,6 +1048,7 @@ body {
       <span class="cb"></span>
       <div class="body">
         <div class="ttl">Email Cathedral committee: April giving recap</div>
+        <div class="tk-desc">Send the committee April totals vs. goal plus the month's top gifts ahead of the next meeting.</div>
         <div class="meta">
           <span>Cathedral Capital Campaign</span>
           <span>·</span>
@@ -1058,6 +1066,7 @@ body {
       <span class="cb"></span>
       <div class="body">
         <div class="ttl">Visit: Fitzgerald Family — estate-bequest review</div>
+        <div class="tk-desc">In-person visit to review their planned estate bequest and confirm intentions; bring the planned-giving brochure.</div>
         <div class="meta">
           <span class="donor">Fitzgerald Family</span>
           <span>·</span>
@@ -1081,6 +1090,7 @@ body {
       <span class="cb"></span>
       <div class="body">
         <div class="ttl">Catherine Romano — welcome series email #2</div>
+        <div class="tk-desc">Second touch in the 5-part new-donor welcome series. No contact in 23 days — keep her engaged before the renewal window.</div>
         <div class="meta">
           <span class="donor">Catherine Romano</span>
           <span>·</span>
@@ -1098,6 +1108,7 @@ body {
       <span class="cb"></span>
       <div class="body">
         <div class="ttl">Pipeline review with Bridget — top 10 prospects</div>
+        <div class="tk-desc">Weekly pipeline hygiene: review stage movement on the top 10 prospects and reassign anything stalled.</div>
         <div class="meta">
           <span>Internal</span>
           <span>·</span>
@@ -4652,7 +4663,7 @@ body {
   function tkRow(o){
     return '<div class="tk-row '+(o.cls||'')+'" data-scope="'+o.scope+'">'
       +'<span class="cb"></span>'
-      +'<div class="body"><div class="ttl">'+o.ttl+'</div><div class="meta">'+(o.donor?'<span class="donor">'+o.donor+'</span><span>·</span>':'')+'<span>'+o.sub+'</span></div></div>'
+      +'<div class="body"><div class="ttl">'+o.ttl+'</div>'+(o.desc?'<div class="tk-desc">'+o.desc+'</div>':'')+'<div class="meta">'+(o.donor?'<span class="donor">'+o.donor+'</span><span>·</span>':'')+'<span>'+o.sub+'</span></div></div>'
       +'<div class="due"><div class="d">'+o.date+'</div>'+(o.badge?'<div class="badge '+o.badgeCls+'">'+o.badge+'</div>':'')+'</div>'
       +'<div class="pri-dot '+o.pri+'"><span class="d"></span>'+o.priLbl+'</div>'
       +'<span class="cat">'+o.cat+'</span>'
@@ -4674,8 +4685,8 @@ body {
     // 2) Delegated group — tasks I handed to teammates (distinct from Team)
     var delg='<div class="group-h"><span>Delegated · 2</span><span class="ct">handed to teammates</span><span class="line"></span></div>'
       +'<div class="tk-list">'
-      + tkRow({scope:'delegated',ttl:'Draft major-gift proposal — Hartwell Foundation',donor:'Hartwell Foundation',sub:'Delegated to Bridget McCarthy · you’re watching',date:'May 6',badge:'Due May 6',badgeCls:'soon',pri:'high',priLbl:'High',cat:'Solicitation',av:'BM',avColor:'var(--purple)'})
-      + tkRow({scope:'delegated',ttl:'Prepare gift agreement — Nguyen family pledge',donor:'Nguyen Family',sub:'Delegated to Daniel Cho · data entry',date:'May 7',badge:'Due May 7',badgeCls:'soon',pri:'med',priLbl:'Medium',cat:'Admin',av:'DC',avColor:'var(--blue)'})
+      + tkRow({scope:'delegated',ttl:'Draft major-gift proposal — Hartwell Foundation',desc:'Build the $250k Cathedral Capital proposal deck and cover letter; Bridget drafts, you review before it goes out.',donor:'Hartwell Foundation',sub:'Delegated to Bridget McCarthy · you’re watching',date:'May 6',badge:'Due May 6',badgeCls:'soon',pri:'high',priLbl:'High',cat:'Solicitation',av:'BM',avColor:'var(--purple)'})
+      + tkRow({scope:'delegated',ttl:'Prepare gift agreement — Nguyen family pledge',desc:'Enter the signed pledge into the batch and generate the DocuSign agreement for the family’s $40k, 4-year commitment.',donor:'Nguyen Family',sub:'Delegated to Daniel Cho · data entry',date:'May 7',badge:'Due May 7',badgeCls:'soon',pri:'med',priLbl:'Medium',cat:'Admin',av:'DC',avColor:'var(--blue)'})
       +'</div>';
     lv.insertAdjacentHTML('beforeend', delg);
     // 3) Completed view — 12 done today/this week (separate container)
