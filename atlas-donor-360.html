@@ -428,6 +428,19 @@
     .task-check.on::after { content: '✓'; color: #fff; font-size: 9px; font-weight: 700; line-height: 1; }
     .task-item.completed .task-text { text-decoration: line-through; color: var(--text-3); }
     .task-item.completed .task-due { opacity: .5; text-decoration: line-through; }
+    /* Snooze */
+    .task-snooze { margin-left: auto; flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 20px; background: #fff; color: var(--text-3); font: 600 11px 'DM Sans', sans-serif; cursor: pointer; transition: all .15s; }
+    .task-snooze:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-pale, #EFF6FF); }
+    .task-snooze svg { width: 12px; height: 12px; }
+    .task-item.completed .task-snooze { opacity: .4; pointer-events: none; }
+    .snooze-menu { position: absolute; z-index: 100060; background: #fff; border: 1px solid var(--border); border-radius: 9px; box-shadow: 0 12px 30px rgba(15,23,42,.16); padding: 5px; min-width: 168px; }
+    .snooze-menu .sm-hd { font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); padding: 6px 10px 4px; }
+    .snooze-menu button { display: block; width: 100%; text-align: left; background: none; border: none; padding: 8px 10px; border-radius: 6px; font: 500 12px 'DM Sans', sans-serif; color: var(--text-2); cursor: pointer; }
+    .snooze-menu button:hover { background: var(--surface); }
+    .snooze-menu .sm-date { display: flex; gap: 6px; padding: 6px; }
+    .snooze-menu .sm-date input { flex: 1; border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font: 500 12px 'DM Sans', sans-serif; color: var(--text); }
+    .snooze-menu .sm-date .sm-set { flex: 0 0 auto; background: var(--blue); color: #fff; border-radius: 6px; padding: 6px 12px; font-weight: 600; }
+    .snooze-menu .sm-date .sm-set:hover { background: #1D4ED8; }
     #d360-undo { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #0F172A; color: #fff; padding: 11px 16px; border-radius: 10px; box-shadow: 0 8px 24px rgba(15,23,42,.25); font: 500 13px/1.4 'DM Sans', sans-serif; z-index: 100050; display: flex; align-items: center; gap: 16px; opacity: 0; transition: opacity .2s; pointer-events: none; }
     #d360-undo.show { opacity: 1; pointer-events: auto; }
     #d360-undo .u-btn { color: #93C5FD; font-weight: 700; cursor: pointer; }
@@ -890,35 +903,35 @@ body {
                 <tr>
                   <td>Mar 15, 2026</td>
                   <td>Catholic Ministry Appeal</td>
-                  <td>Online gift</td>
+                  <td>Online gift<div style="font-size:10.5px;color:var(--text-3);margin-top:1px">Card · Visa ••4242</div></td>
                   <td style="font-weight:600;color:var(--text)">$2,500.00</td>
                   <td><span class="gift-status status-received"><span class="status-dot" style="background:var(--green)"></span>Received</span></td>
                 </tr>
                 <tr>
                   <td>Jan 3, 2026</td>
                   <td>CMA 2026 Pledge — installment 2</td>
-                  <td>Pledge payment</td>
+                  <td>Pledge payment<div style="font-size:10.5px;color:var(--text-3);margin-top:1px">Check #1042</div></td>
                   <td style="font-weight:600;color:var(--text)">$1,000.00</td>
                   <td><span class="gift-status status-received"><span class="status-dot" style="background:var(--green)"></span>Received</span></td>
                 </tr>
                 <tr>
                   <td>Nov 28, 2025</td>
                   <td>Giving Tuesday · St. Michael's</td>
-                  <td>Online gift</td>
+                  <td>Online gift<div style="font-size:10.5px;color:var(--text-3);margin-top:1px">Apple Pay</div></td>
                   <td style="font-weight:600;color:var(--text)">$500.00</td>
                   <td><span class="gift-status status-received"><span class="status-dot" style="background:var(--green)"></span>Received</span></td>
                 </tr>
                 <tr>
                   <td>Sep 10, 2025</td>
                   <td>CMA 2026 Pledge — installment 1</td>
-                  <td>Pledge payment</td>
+                  <td>Pledge payment<div style="font-size:10.5px;color:var(--text-3);margin-top:1px">Stock · 25 sh AAPL</div></td>
                   <td style="font-weight:600;color:var(--text)">$2,100.00</td>
                   <td><span class="gift-status status-received"><span class="status-dot" style="background:var(--green)"></span>Received</span></td>
                 </tr>
                 <tr>
                   <td>Jun 15, 2026</td>
                   <td>CMA 2026 Pledge — installment 3</td>
-                  <td>Pledge</td>
+                  <td>Pledge<div style="font-size:10.5px;color:var(--text-3);margin-top:1px">Scheduled · auto-pay</div></td>
                   <td style="font-weight:600;color:var(--amber)">$1,900.00</td>
                   <td><span class="gift-status status-pledge"><span class="status-dot" style="background:var(--amber)"></span>Pending</span></td>
                 </tr>
@@ -1457,6 +1470,21 @@ body {
         });
       }
     });
+    // Snooze — single "Snooze 2h" action per task
+    function fmtTime(d){ return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }
+    [].slice.call(list.querySelectorAll('.task-item')).forEach(function(item){
+      var btn = document.createElement('button'); btn.className='task-snooze'; btn.title='Snooze 2 hours';
+      btn.innerHTML='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="6.5" r="4.3"/><path d="M6 4.2v2.4l1.5 1M3.6 1.6L1.7 3.1M8.4 1.6L10.3 3.1"/></svg><span>Snooze 2h</span>';
+      item.appendChild(btn);
+      btn.addEventListener('click', function(e){ e.stopPropagation();
+        var due=item.querySelector('.task-due'); if(!due) return;
+        var prev=due.textContent, prevCls=due.className;
+        var t=new Date(); t.setHours(t.getHours()+2);
+        due.textContent='Snoozed · due '+fmtTime(t); due.className='task-due due-ok';
+        item.classList.remove('task-overdue');
+        showUndo('Snoozed 2 hours · until '+fmtTime(t), function(){ due.textContent=prev; due.className=prevCls; });
+      });
+    });
   })();
   </script>
 
@@ -1632,6 +1660,15 @@ body {
       { date:'Sep 14, 2021', year:2021, fund:"Catholic Ministry Appeal",   type:'Online gift',     amount:3000,  status:'Received' },
       { date:'May 2, 2021',  year:2021, fund:"St. Michael's Parish",       type:'Check',           amount:1500,  status:'Received' }
     ];
+    // Method-specific detail per gift (check #, stock detail, etc.) shown under the Type
+    (function(){ var chk=1042; GIFT_LEDGER.forEach(function(g){
+      if(g.type==='Check')            g.det='Check #'+(chk++);
+      else if(g.type==='Stock')       g.det='25 sh AAPL · $200.00/sh · Schwab';
+      else if(g.type==='Matching gift')g.det='Employer 1:1 match';
+      else if(g.type==='Online gift') g.det='Card · Visa ••4242';
+      else if(g.type==='Pledge payment')g.det='Pledge installment · ACH';
+      else if(g.type==='Pledge')      g.det='Scheduled · auto-pay';
+    }); })();
 
     function statusBadge(s){
       if (s === 'Received') return '<span class="gift-status status-received"><span class="status-dot" style="background:var(--green)"></span>Received</span>';
@@ -1653,15 +1690,15 @@ body {
       const tbody = document.getElementById('gifts-ledger-tbody');
       tbody.innerHTML = filtered.length === 0
         ? '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:24px;font-style:italic">No gifts match the current filters</td></tr>'
-        : filtered.map(g => `
-          <tr style="cursor:pointer" onclick="alert('Open gift detail for ${g.date} · ${g.fund}')">
+        : filtered.map(g => { var href='atlas-gift-entry.html?gift='+encodeURIComponent(g.date+' · '+g.fund); return `
+          <tr style="cursor:pointer" onclick="window.location='${href}'">
             <td>${g.date}</td>
             <td>${g.fund}</td>
-            <td>${g.type}</td>
+            <td>${g.type}${g.det?`<div style="font-size:10.5px;color:var(--text-3);margin-top:1px">${g.det}</div>`:''}</td>
             <td style="font-weight:600;color:${g.status === 'Pending' ? 'var(--amber)' : 'var(--text)'}">${fmtMoney(g.amount)}</td>
             <td>${statusBadge(g.status)}</td>
-            <td style="text-align:right;color:var(--text-3);font-size:11px">→</td>
-          </tr>`).join('');
+            <td style="text-align:right"><a href="${href}" onclick="event.stopPropagation()" title="Open gift detail" style="color:var(--blue);font-size:13px;font-weight:700;text-decoration:none">→</a></td>
+          </tr>`; }).join('');
       const total = filtered.reduce((s,g) => g.status !== 'Pending' ? s + g.amount : s, 0);
       document.getElementById('gifts-ledger-count').textContent = filtered.length + ' gift' + (filtered.length === 1 ? '' : 's');
       document.getElementById('gifts-totals-line').textContent = fmtMoney(total) + ' total';

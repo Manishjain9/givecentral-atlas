@@ -1407,7 +1407,7 @@
           <th class="col-n">#</th>
           <th class="col-donor">Donor</th>
           <th class="col-date">Start date</th>
-          <th class="col-fund">Fund / campaign</th>
+          <th class="col-fund">Fund</th>
           <th class="col-type">Pledge type</th>
           <th class="col-amt" style="text-align:right">Pledge amount</th>
           <th class="col-pay">Frequency</th>
@@ -1566,7 +1566,7 @@ let BATCH_ROWS = [
   { id:3,  donorId:2201, donor:"Kim, Patricia",       date:"06/01/2026",fund:"CMA Annual Fund",         type:"Annual",           amt:1200,  pay:"Quarterly",   ref:"4",  gl:"5002", note:""},
   { id:4,  donorId:null, donor:"Hennessy, R",         date:"06/15/2026",fund:"Cathedral Capital Fund", type:"Capital",          amt:10000, pay:"Annual",      ref:"5",  gl:"5001", note:""},
   { id:5,  donorId:3847, donor:"Harrington, David",   date:"06/01/2026",fund:"CMA Annual Fund",         type:"Matching",         amt:5000,  pay:"One-time",    ref:"1",  gl:"5003", note:"2:1 employer match"},
-  { id:6,  donorId:5501, donor:"Ramirez, Elena",      date:"06/01/2026",fund:"CMA Annual Fund",         type:"Monthly sustainer",amt:600,   pay:"Monthly",     ref:"12", gl:"5002", note:""},
+  { id:6,  donorId:5501, donor:"Ramirez, Elena",      date:"06/01/2026",fund:"CMA Annual Fund",         type:"Annual"           ,amt:600,   pay:"Monthly",     ref:"12", gl:"5002", note:""},
   { id:7,  donorId:6612, donor:"Grant, Michael",      date:"06/15/2026",fund:"CMA Annual Fund",         type:"Annual",           amt:2500,  pay:"Semi-annual", ref:"2",  gl:"5002", note:""},
   { id:8,  donorId:7721, donor:"Costello, Barbara",   date:"07/01/2026",fund:"Cathedral Capital Fund", type:"Estate / Bequest", amt:100000,pay:"One-time",    ref:"1",  gl:"5004", note:"Planned — estate intention"},
   { id:9,  donorId:4450, donor:"Mendez, Carlos",      date:"06/30/2026",fund:"Cathedral Capital Fund", type:"Capital",          amt:25000, pay:"Annual",      ref:"5",  gl:"5001", note:""},
@@ -1603,7 +1603,7 @@ const FOLDERS = [
 // ─────────────────────────────────────────────────────────────
 function runAccuracyEngine(rows) {
   const signals = [];
-  const PER_YEAR = { 'Monthly':12, 'Quarterly':4, 'Semi-annual':2, 'Annual':1, 'One-time':1 };
+  const PER_YEAR = { 'Monthly':12, 'Quarterly':4, 'Semi-annual':2, 'Annual':1, 'Annually':1, 'One-time':1 };
 
   rows.forEach((r, idx) => {
     const rowNum = idx + 1;
@@ -1877,14 +1877,14 @@ function renderBatch() {
         ${['CMA Annual Fund','Cathedral Capital Fund','General Fund','Marian Congress','Bishop Annual Fund'].map(f=>`<option ${f===r.fund?'selected':''}>${f}</option>`).join('')}
       </select></td>
       <td><select class="cs" onchange="rowEdited(${r.id},'type',this.value)">
-        ${['Capital','Annual','Estate / Bequest','Matching','Monthly sustainer'].map(t=>`<option ${t===r.type?'selected':''}>${t}</option>`).join('')}
+        ${['Capital','Annual','Estate / Bequest','Matching'].map(t=>`<option ${t===r.type?'selected':''}>${t}</option>`).join('')}
       </select></td>
       <td><input class="ci ci-amt" value="$${r.amt.toFixed(2)}" style="text-align:right"
         onchange="handleAmtChange(${r.id},this.value)"
         onblur="handleAmtChange(${r.id},this.value)"
         data-rid="${r.id}"></td>
       <td><select class="cs" onchange="rowEdited(${r.id},'pay',this.value)">
-        ${['Monthly','Quarterly','Semi-annual','Annual','One-time'].map(p=>`<option ${p===r.pay?'selected':''}>${p}</option>`).join('')}
+        ${(function(){var allow=['Monthly','Quarterly','Annually'];var cur=({'Annual':'Annually','Semi-annual':'Quarterly','One-time':'Annually'})[r.pay]||r.pay;if(allow.indexOf(cur)<0)cur='Annually';return allow.map(p=>`<option ${p===cur?'selected':''}>${p}</option>`).join('');})()}
       </select></td>
       <td><input class="ci" value="${r.ref}" placeholder="—" onchange="rowEdited(${r.id},'ref',this.value)"></td>
       <td><input class="ci" value="${r.gl}" placeholder="e.g. 5002" onchange="rowEdited(${r.id},'gl',this.value)" data-rid="${r.id}"></td>
@@ -2772,7 +2772,7 @@ function triggerImportPreview(){
 /* ════════════════════════════════════════════════════════════
    IMPORT WIZARD · Map columns → Review (validate + dedupe) → Import
    ════════════════════════════════════════════════════════════ */
-var ATLAS_FIELDS=[['donor','Donor name',true],['date','Start date',true],['fund','Fund · campaign',false],['type','Pledge type',false],['amount','Pledge amount',true],['pay','Frequency',false],['ref','Installments',false],['gl','GL code',false],['note','Note',false]];
+var ATLAS_FIELDS=[['donor','Donor name',true],['date','Start date',true],['fund','Fund',false],['type','Pledge type',false],['amount','Pledge amount',true],['pay','Frequency',false],['ref','Installments',false],['gl','GL code',false],['note','Note',false]];
 var IMP={};
 
 function parseCsvLine(line){
@@ -2796,7 +2796,7 @@ var DEMO_IMPORT={headers:['Donor','Start Date','Fund','Pledge Type','Pledge Amou
   ['','04/18/2026','General Fund','Annual','600.00','Monthly','12','5002','missing donor'],
   ['Brian Walsh','','CMA Annual Fund','Annual','1000.00','Monthly','10','5002','missing start date'],
   ['Kim, Patricia','04/19/2026','Cathedral Capital Fund','Capital','not a number','Quarterly','12','5002','bad amount'],
-  ['Thomas Sullivan','04/19/2026','CMA Annual Fund','Monthly sustainer','600.00','Monthly','12','5002','']
+  ['Thomas Sullivan','04/19/2026','CMA Annual Fund','Annual','600.00','Monthly','12','5002','']
 ]};
 function headerSig(h){return h.map(function(x){return x.toLowerCase().replace(/[^a-z]/g,'');}).join('|');}
 function autoMapCols(headers){
@@ -3144,7 +3144,7 @@ const MODALS = {
         <label class="form-label">Columns in this template</label>
         <span class="form-hint" style="display:block;margin-bottom:7px">Choose which columns the template starts with. Required columns are always included.</span>
         <div id="tpl-cols" style="display:flex;flex-direction:column;gap:5px;max-height:228px;overflow-y:auto;padding-right:2px">
-          ${[['Donor',1,1],['Start date',1,1],['Fund / campaign',0,1],['Pledge type',0,1],['Pledge amount',1,1],['Frequency',0,1],['Installments',0,1],['GL code',0,1],['Note',0,1],['Entity',0,0],['Solicitor',0,0],['End date',0,0]].map(co=>`
+          ${[['Donor',1,1],['Start date',1,1],['Campaign',0,1],['Appeal',0,0],['Fund',0,1],['Pledge type',0,1],['Pledge amount',1,1],['Frequency',0,1],['Installments',0,1],['GL code',0,1],['Note',0,1],['Entity',0,0],['Solicitor',0,0],['End date',0,0]].map(co=>`
             <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:var(--surf);border:1px solid var(--border);border-radius:7px">
               <svg viewBox="0 0 8 10" fill="none" stroke="var(--text3)" stroke-width="1.1" stroke-linecap="round" width="8" height="10"><path d="M1 2h6M1 5h6M1 8h6"/></svg>
               <span style="flex:1;font-size:12px;color:var(--text)">${co[0]}</span>
@@ -3237,14 +3237,14 @@ const MODALS = {
   'columns':{ icon:`<svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3.5h10M1.5 6.5h10M1.5 9.5h10"/></svg>`, iconBg:'var(--bluep)', title:'Column configuration',
     body:`<div style="font-size:12px;color:var(--text3);margin-bottom:10px">Drag to reorder. Changes apply to this batch only — save as template to reuse.</div>
       <div style="display:flex;flex-direction:column;gap:5px">
-        ${['Donor (required)','Start date (required)','Fund / campaign','Pledge type','Pledge amount (required)','Frequency','Installments','GL code','Note','Entity','Solicitor','End date'].map((c,i)=>`
+        ${[['Donor (required)',1],['Start date (required)',1],['Campaign',1],['Appeal',0],['Fund',1],['Pledge type',1],['Pledge amount (required)',1],['Frequency',1],['Installments',1],['GL code',1],['Note',1],['Entity',0],['Solicitor',0],['End date',0]].map(function(co){var c=co[0],sh=co[1];return `
           <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:var(--surf);border:1px solid var(--border);border-radius:7px;cursor:grab">
             <svg viewBox="0 0 8 10" fill="none" stroke="var(--text3)" stroke-width="1.1" stroke-linecap="round" width="8" height="10"><path d="M1 2h6M1 5h6M1 8h6"/></svg>
             <span style="flex:1;font-size:12px;color:var(--text)">${c}</span>
-            <div style="display:flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;border:1px solid var(--border);cursor:pointer;background:${i<9?'var(--bluep)':'var(--surf)'}">
-              <span style="font-size:10px;font-weight:600;color:${i<9?'var(--blue)':'var(--text3)'}">${i<9?'Shown':'Hidden'}</span>
+            <div style="display:flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;border:1px solid var(--border);cursor:pointer;background:${sh?'var(--bluep)':'var(--surf)'}">
+              <span style="font-size:10px;font-weight:600;color:${sh?'var(--blue)':'var(--text3)'}">${sh?'Shown':'Hidden'}</span>
             </div>
-          </div>`).join('')}
+          </div>`;}).join('')}
       </div>`,
     foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-blue" onclick="closeModal()">Apply</button>`
   },
