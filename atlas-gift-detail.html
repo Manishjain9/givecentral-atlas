@@ -253,59 +253,20 @@
   function digits(s){ return (String(s).match(/\d+/g)||['']).join('').slice(-4) || '1042'; }
   function paymentDetails(g){
     var s = (g.type + ' ' + g.method).toLowerCase();
+    // Payment details section is only shown for CHECK gifts.
     if (/check/.test(s)) {
       var num = (g.method.match(/#\s*([0-9]+)/) || [])[1] || digits(g.id);
       return { head:'Payment details · Check', rows:[
-        ['Payment method','Check'],
         ['Check number','#' + num],
-        ['Check date', g.date],
-        ['Deposit date', addDaysStr(g.date, 3)],
-        ['Deposited to','Operating account · Wells Fargo ••4210'],
-        ['Payor name','Same as donor'],
-        ['Clearing status', pending ? 'Awaiting clearance' : 'Cleared'] ] };
+        ['Check issue date', g.date],
+        ['Check post / deposit date', addDaysStr(g.date, 3)] ] };
     }
-    if (/card|visa|master|amex|apple pay/.test(s)) {
-      var last = (g.method.match(/(\d{4})/) || [])[1] || '4242';
-      return { head:'Payment details · Card', rows:[
-        ['Payment method','Credit / debit card'],
-        ['Card','Visa ••' + last],
-        ['Processor','Stripe (via GiveCentral)'],
-        ['Transaction ID','ch_1A' + digits(g.id) + 'Cz'],
-        ['Authorization','Approved · 6-digit auth'],
-        ['Charge date', g.date] ] };
-    }
-    if (/\bach\b|bank/.test(s)) {
-      return { head:'Payment details · ACH', rows:[
-        ['Payment method','Bank transfer (ACH)'],
-        ['Account','Checking ••' + digits(g.id)],
-        ['Routing prefix','021000021'],
-        ['Settlement status', pending ? 'Pending settlement (T+3)' : 'Settled'],
-        ['Settlement date', addDaysStr(g.date, 3)] ] };
-    }
-    if (/stock|securit|shares|aapl/.test(s)) {
-      return { head:'Payment details · Securities', rows:[
-        ['Payment method','Securities / stock'],
-        ['Security','25 sh AAPL'],
-        ['Brokerage','Charles Schwab'],
-        ['Received date', g.date],
-        ['FMV per share','$200.00'],
-        ['Liquidation','Sold same day · net proceeds posted'] ] };
-    }
-    if (/\bcash\b/.test(s)) {
-      return { head:'Payment details · Cash', rows:[
-        ['Payment method','Cash'],
-        ['Counted by','Two-person count · SR / DC'],
-        ['Deposit date', addDaysStr(g.date, 1)],
-        ['Deposited to','Parish safe → bank deposit'] ] };
-    }
-    return { head:'Payment details', rows:[
-      ['Payment method', g.method || g.type],
-      ['Processor','GiveCentral online'],
-      ['Transaction ID','gc_' + digits(g.id)],
-      ['Charge date', g.date] ] };
+    return null;
   }
   (function(){
     var pd = paymentDetails(g);
+    var card = document.getElementById('g-payhead').closest('.card');
+    if (!pd) { if (card) card.style.display = 'none'; return; }   // hide for non-check
     document.getElementById('g-payhead').textContent = pd.head;
     document.getElementById('g-paydetails').innerHTML = pd.rows.map(function(r){
       return '<div class="row"><span class="l">' + esc(r[0]) + '</span><span class="v">' + esc(r[1]) + '</span></div>';

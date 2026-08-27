@@ -1042,28 +1042,63 @@ function setPeriod(v){
 function fmtDay(d){ return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
 // Schedule delivery of this tribute report
 function openScheduleDelivery(){
-  if (!window.atlasOpenModal) { if(window.atlasToast) atlasToast('Delivery scheduled'); return; }
-  window.atlasOpenModal({
-    title: 'Schedule delivery',
-    sub: 'Auto-generate the Tribute & In Honor Of report and send it on a schedule',
-    fields: [
-      { id:'sd-freq',     label:'Frequency',        type:'select', options:['Once — send now','Weekly — Monday','Monthly — 1st of month','Quarterly','End of each month'] },
-      { id:'sd-time',     label:'Send at',          type:'time',   value:'08:00' },
-      { id:'sd-format',   label:'Format',           type:'select', options:['PDF','CSV','Excel','PDF + CSV'] },
-      { id:'sd-delivery', label:'Delivery method',  type:'select', options:['Email to recipients','Save to shared folder','Email + save to folder'] },
-      { id:'sd-scope',    label:'Report scope',     type:'select', options:['Current period ('+PERIOD.label.replace(' (YTD)','')+')','Year-to-date','Full previous year'] },
-      { id:'sd-to',       label:'Recipients',       type:'text',   value:'development@diocese.org', placeholder:'name@diocese.org, …' }
-    ],
-    cta: 'Schedule delivery',
-    onSave: function(v){
-      if (!v['sd-to']) { if(window.atlasToast) atlasToast('Add at least one recipient'); return false; }
-      var f = v['sd-freq'] || 'Weekly';
-      var msg = /^Once/.test(f)
-        ? ('Report sent · ' + v['sd-format'] + ' to ' + v['sd-to'])
-        : ('Scheduled · ' + f + ' at ' + (v['sd-time'] || '8:00') + ' · ' + v['sd-format'] + ' → ' + v['sd-to']);
-      if (window.atlasToast) atlasToast(msg);
-      return true;
-    }
+  var EMAILS = ['development@diocese.org'];
+  var lbl = 'font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:6px';
+  var inp = 'width:100%;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:DM Sans,sans-serif;color:#0F172A;outline:none;box-sizing:border-box';
+  var ex=document.getElementById('sd-scrim'); if(ex) ex.remove();
+  var sc=document.createElement('div'); sc.id='sd-scrim';
+  sc.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100060;display:flex;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif';
+  sc.innerHTML=
+    '<div style="background:#fff;border-radius:14px;width:min(540px,94vw);max-height:90vh;overflow:auto;box-shadow:0 24px 64px rgba(15,23,42,.3)">'
+    +'<div style="padding:18px 22px 14px;background:linear-gradient(135deg,#1E3A8A,#2563EB);color:#fff"><div style="font-family:\'DM Serif Display\',serif;font-size:20px">Schedule delivery</div><div style="font-size:12px;opacity:.86;margin-top:3px">Auto-generate the Tribute &amp; In Honor Of report and deliver it on a schedule</div></div>'
+    +'<div style="padding:18px 22px">'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:13px">'
+        +'<div><div style="'+lbl+'">Frequency</div><select id="sd-freq" style="'+inp+';cursor:pointer"><option>Once — send now</option><option selected>Weekly — Monday</option><option>Monthly — 1st of month</option><option>Quarterly</option><option>End of each month</option></select></div>'
+        +'<div><div style="'+lbl+'">Send at</div><input id="sd-time" type="time" value="08:00" style="'+inp+'"></div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:13px">'
+        +'<div><div style="'+lbl+'">Format</div><select id="sd-format" style="'+inp+';cursor:pointer"><option>PDF</option><option>CSV</option><option>Excel</option><option>PDF + CSV</option></select></div>'
+        +'<div><div style="'+lbl+'">Report scope</div><select id="sd-scope" style="'+inp+';cursor:pointer"><option>Current period ('+PERIOD.label.replace(' (YTD)','')+')</option><option>Year-to-date</option><option>Full previous year</option></select></div>'
+      +'</div>'
+      +'<div style="margin-bottom:13px"><div style="'+lbl+'">Delivery method</div><div style="'+inp+';background:#F8FAFC;color:#334155;font-weight:600;display:flex;align-items:center;gap:8px"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 4l5 3.5L12 4"/></svg>Email + save to folder</div></div>'
+      +'<div id="sd-email-wrap" style="margin-bottom:13px"><div style="'+lbl+'">Recipients <span style="color:#94A3B8;font-weight:400;text-transform:none;letter-spacing:0">· add multiple</span></div>'
+        +'<div id="sd-chips" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;border:1.5px solid #E2E8F0;border-radius:8px;padding:7px 8px;min-height:40px"><input id="sd-email-in" placeholder="Type an email, press Enter" style="flex:1;min-width:150px;border:none;outline:none;font:400 13px DM Sans;padding:3px 2px"></div>'
+        +'<div style="font-size:11px;color:#94A3B8;margin-top:5px">Press Enter or comma to add each address.</div></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 22px;border-top:1px solid #E2E8F0;background:#FAFAFA"><button id="sd-cancel" style="border:1.5px solid #E2E8F0;background:#fff;color:#334155;padding:9px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Cancel</button><button id="sd-save" style="border:none;background:linear-gradient(135deg,#2563EB,#1E40AF);color:#fff;padding:9px 18px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Schedule delivery</button></div>'
+    +'</div>';
+  document.body.appendChild(sc);
+  function close(){ sc.remove(); }
+  function renderChips(){
+    var wrap=sc.querySelector('#sd-chips'), input=sc.querySelector('#sd-email-in');
+    wrap.querySelectorAll('.sd-chip').forEach(function(c){c.remove();});
+    EMAILS.forEach(function(em,i){
+      var c=document.createElement('span'); c.className='sd-chip';
+      c.style.cssText='display:inline-flex;align-items:center;gap:6px;background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;border-radius:20px;padding:3px 8px 3px 10px;font-size:12px;font-weight:600';
+      c.innerHTML=em+' <span data-i="'+i+'" style="cursor:pointer;font-weight:700;opacity:.7">×</span>';
+      wrap.insertBefore(c, input);
+    });
+  }
+  function addEmail(v){ v=(v||'').trim().replace(/,$/,''); if(!v) return; if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ if(window.atlasToast)atlasToast('“'+v+'” is not a valid email'); return; } if(EMAILS.indexOf(v)===-1) EMAILS.push(v); renderChips(); }
+  var input=sc.querySelector('#sd-email-in');
+  input.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===','){ e.preventDefault(); addEmail(input.value); input.value=''; } else if(e.key==='Backspace'&&!input.value&&EMAILS.length){ EMAILS.pop(); renderChips(); } });
+  input.addEventListener('blur', function(){ if(input.value){ addEmail(input.value); input.value=''; } });
+  sc.querySelector('#sd-chips').addEventListener('click', function(e){ var x=e.target.closest('[data-i]'); if(x){ EMAILS.splice(+x.getAttribute('data-i'),1); renderChips(); } });
+  renderChips();
+  // Time field is only meaningful for recurring schedules — disable it for "send now"
+  var freqSel=sc.querySelector('#sd-freq'), timeIn=sc.querySelector('#sd-time');
+  function syncTime(){ var now=/^Once/.test(freqSel.value); timeIn.disabled=now; timeIn.style.opacity=now?'.5':'1'; timeIn.title=now?'Sends immediately':'Time the report is generated & sent'; }
+  freqSel.addEventListener('change', syncTime); syncTime();
+  sc.addEventListener('click', function(e){ if(e.target===sc) close(); });
+  sc.querySelector('#sd-cancel').addEventListener('click', close);
+  sc.querySelector('#sd-save').addEventListener('click', function(){
+    var freq=freqSel.value, fmt=sc.querySelector('#sd-format').value, time=timeIn.value||'08:00';
+    if(EMAILS.length===0){ if(window.atlasToast) atlasToast('Add at least one recipient'); return; }
+    function fmtTime(t){ var p=(t||'').split(':'); if(p.length<2) return t; var h=+p[0], m=p[1], ap=h>=12?'PM':'AM'; h=h%12||12; return h+':'+m+' '+ap; }
+    var dest = EMAILS.length + ' recipient' + (EMAILS.length!==1?'s':'') + ' + shared folder';
+    time = fmtTime(time);
+    close();
+    if(window.atlasToast) atlasToast(/^Once/.test(freq) ? ('Report sent · '+fmt+' → '+dest) : ('Scheduled · '+freq+' at '+time+' · '+fmt+' → '+dest));
   });
 }
 function openCustomRange(){

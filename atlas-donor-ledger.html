@@ -1217,9 +1217,7 @@ function openRowMenu(row, btn){
     (pending ? '<div class="mi" data-a="pay"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>Record payment</div>'
              : '<div class="mi" data-a="view"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>View gift record</div>')
     + '<div class="mi" data-a="receipt"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="3" y="1.5" width="8" height="11" rx="1"/><path d="M5 4.5h4M5 7h4M5 9.5h2"/></svg>'+(pending?'Preview receipt':'Reissue receipt')+'</div>'
-    + '<div class="mi" data-a="soft"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.3"/><path d="M1 12c0-2 1.6-3.3 4-3.3M9 5.5h3.5M11 4v3"/></svg>Add soft credit</div>'
-    + '<div class="msep"></div>'
-    + '<div class="mi danger" data-a="correct"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 019-3M12 7a5 5 0 01-9 3M9 1.5V4H11.5M5 12.5V10H2.5"/></svg>Correct / reverse</div>';
+    + '<div class="mi" data-a="soft"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.3"/><path d="M1 12c0-2 1.6-3.3 4-3.3M9 5.5h3.5M11 4v3"/></svg>Add soft credit</div>';
   menu.classList.add('show');
   var rct=btn.getBoundingClientRect(), mw=menu.offsetWidth;
   menu.style.left=Math.min(rct.right-mw, window.innerWidth-mw-8)+'px';
@@ -1242,9 +1240,59 @@ function rowMenuAct(a){
   var menu=document.getElementById('row-menu'); menu.classList.remove('show');
   if(a==='view'){ if(RM_ROW) window.location=giftDetailUrl(RM_ROW); else toast('Opening gift record'); }
   else if(a==='pay') window.location='atlas-pledge-payment.html';
-  else if(a==='receipt') window.location='atlas-receipt-preview.html';
+  else if(a==='receipt') openReceiptModal(RM_ROW);
   else if(a==='soft')    openSoftCreditModal(RM_ROW);
-  else if(a==='correct') window.location='atlas-gift-correction-center.html';
+}
+/* ── Receipt-only preview modal (exact Atlas tax receipt) ── */
+function openReceiptModal(row){
+  var g=function(sel){ var e=row&&row.querySelector(sel); return e?e.textContent.replace(/\s+/g,' ').trim():''; };
+  var donor=(window.YE_DONOR&&YE_DONOR.name)||'Donor', addr=(window.YE_DONOR&&YE_DONOR.addr)||'—';
+  var first=(donor.split(' ')[0])||donor;
+  var amt=g('.amt')||'$0.00', fund=g('.camp-name')||'General Fund', date=g('.date-cell')||'', batch=g('.batch-ref')||'';
+  var method=g('.type-badge')||'Gift';
+  var pending=row&&row.classList.contains('pending-row');
+  var rnum='R-'+ (batch.replace(/[^0-9]/g,'').replace(/^0+/,'')? batch.replace(/BX-?/i,'').trim() : (new Date().getFullYear()+'-0148'));
+  rnum='R-'+(batch.replace(/BX-?/i,'').trim() || '2026-0148');
+  var ex=document.getElementById('rc-scrim'); if(ex) ex.remove();
+  var sc=document.createElement('div'); sc.id='rc-scrim';
+  sc.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:100060;display:flex;align-items:center;justify-content:center;padding:24px;font-family:DM Sans,sans-serif';
+  sc.innerHTML=
+    '<div style="background:#fff;border-radius:14px;width:min(600px,95vw);max-height:92vh;overflow:auto;box-shadow:0 26px 70px rgba(15,23,42,.35)">'
+    // header bar
+    +'<div style="display:flex;align-items:center;gap:8px;padding:13px 20px;border-bottom:1px solid #E5EAF1;position:sticky;top:0;background:#fff;z-index:1"><div style="font-size:13px;font-weight:700;color:#0F172A">'+(pending?'Receipt preview':'Tax receipt')+'</div><button id="rc-x" style="margin-left:auto;width:28px;height:28px;border-radius:50%;border:none;background:#F1F5F9;color:#64748B;font-size:16px;cursor:pointer">×</button></div>'
+    // the paper
+    +'<div id="rc-paper" style="padding:36px 40px;color:#334155;font-size:13.5px;line-height:1.6">'
+      +'<div style="display:flex;align-items:flex-start;gap:12px;border-bottom:2px solid #0E1E35;padding-bottom:16px;margin-bottom:20px">'
+        +'<div style="width:40px;height:40px;border-radius:50%;background:#0E1E35;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.4"><circle cx="12" cy="12" r="10"/><path d="M8 12c1 3 4 5 4 5s3-2 4-5-2-5-4-5-5 2-4 5z" fill="#fff" fill-opacity=".9"/></svg></div>'
+        +'<div><div style="font-family:\'DM Serif Display\',serif;font-size:20px;color:#0F172A">Diocese of Albany</div><div style="font-size:11px;color:#64748B;margin-top:2px">40 N. Main Avenue · Albany, NY 12203<br>EIN: 14-•••2401 · Tax-exempt under IRC §501(c)(3)</div></div>'
+        +'<div style="margin-left:auto;text-align:right;font-size:11px;color:#64748B"><div style="font-weight:700;color:#0F172A;font-size:13px">Receipt #'+rnum+'</div><div>Issued '+(date||'May 12, 2026')+'</div></div>'
+      +'</div>'
+      +'<h2 style="font-family:\'DM Serif Display\',serif;font-size:22px;color:#0F172A;margin:0 0 14px">Thank you for your gift, '+first+'.</h2>'
+      +'<p style="margin:0 0 10px">Dear '+donor+',</p>'
+      +'<p style="margin:0 0 16px">The Diocese of Albany gratefully acknowledges your contribution on the date and in the amount listed below. Your generosity supports our mission and the communities we serve.</p>'
+      +'<div style="border:1px solid #E5EAF1;border-radius:10px;overflow:hidden;margin-bottom:18px">'
+        +'<div style="display:flex;justify-content:space-between;padding:11px 16px;font-size:13px"><span style="color:#64748B">Donor</span><span style="font-weight:600;color:#0F172A">'+donor+'</span></div>'
+        +'<div style="display:flex;justify-content:space-between;padding:11px 16px;font-size:13px;border-top:1px solid #EEF2F7"><span style="color:#64748B">Donor address</span><span style="font-weight:600;color:#0F172A">'+addr+'</span></div>'
+        +'<div style="display:flex;justify-content:space-between;padding:11px 16px;font-size:13px;border-top:1px solid #EEF2F7"><span style="color:#64748B">Date of gift</span><span style="font-weight:600;color:#0F172A">'+date+'</span></div>'
+        +'<div style="display:flex;justify-content:space-between;padding:11px 16px;font-size:13px;border-top:1px solid #EEF2F7"><span style="color:#64748B">Designation</span><span style="font-weight:600;color:#0F172A">'+fund+'</span></div>'
+        +'<div style="display:flex;justify-content:space-between;padding:11px 16px;font-size:13px;border-top:1px solid #EEF2F7"><span style="color:#64748B">Payment method</span><span style="font-weight:600;color:#0F172A">'+method+'</span></div>'
+        +'<div style="display:flex;justify-content:space-between;padding:12px 16px;font-size:13px;border-top:1px solid #EEF2F7;background:#F8FAFC"><span style="color:#64748B;font-weight:600">Total contribution</span><span style="font-weight:700;color:#0F172A;font-size:15px">'+amt+'</span></div>'
+      +'</div>'
+      +'<div style="background:#F8FAFC;border-left:3px solid #0E1E35;border-radius:6px;padding:12px 15px;font-size:12px;color:#475569;margin-bottom:20px"><strong style="color:#0F172A">IRS Pub 1771 disclosure:</strong> No goods or services were provided by the Diocese of Albany in exchange for this contribution. This receipt confirms your gift is tax-deductible to the full extent allowed by law. Please consult your tax advisor regarding deductibility.</div>'
+      +'<p style="margin:0 0 6px">With deep gratitude,</p>'
+      +'<p style="margin:0;font-family:\'DM Serif Display\',serif;font-size:18px;color:#0E1E35;font-style:italic">Bishop Edward H. Quinn</p>'
+      +'<p style="font-size:12px;color:#64748B;margin:2px 0 0">Bishop · Diocese of Albany</p>'
+      +'<div style="display:flex;justify-content:space-between;font-size:10.5px;color:#94A3B8;border-top:1px solid #E5EAF1;margin-top:22px;padding-top:12px"><span>Diocese of Albany · 501(c)(3) · EIN 14-•••2401</span><span>Generated by Atlas · receipt #'+rnum+'</span></div>'
+    +'</div>'
+    // actions
+    +'<div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 20px;border-top:1px solid #E5EAF1;background:#FAFAFA;position:sticky;bottom:0"><button id="rc-print" style="display:inline-flex;align-items:center;gap:7px;border:1.5px solid #D7DEE8;background:#fff;color:#334155;padding:9px 16px;border-radius:9px;font:600 13px DM Sans;cursor:pointer"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1.5v8M3.5 6.5L7 9.5l3.5-3M2 12h10"/></svg>Download PDF</button>'+(pending?'':'<button id="rc-email" style="border:none;background:#2563EB;color:#fff;padding:9px 18px;border-radius:9px;font:600 13px DM Sans;cursor:pointer">Email to donor</button>')+'</div>'
+    +'</div>';
+  document.body.appendChild(sc);
+  function close(){ sc.remove(); }
+  sc.addEventListener('click', function(e){ if(e.target===sc) close(); });
+  sc.querySelector('#rc-x').addEventListener('click', close);
+  sc.querySelector('#rc-print').addEventListener('click', function(){ window.print(); });
+  var em=sc.querySelector('#rc-email'); if(em) em.addEventListener('click', function(){ close(); toast('Receipt emailed to '+donor); });
 }
 /* ── Add soft credit modal ── */
 function openSoftCreditModal(row){
