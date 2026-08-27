@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas — Gift detail</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#0E1E35;--blue:#2563EB;--blue600:#1D4ED8;--bluep:#EFF6FF;--bluel:#DBEAFE;
+    --green:#15803D;--greenl:#DCFCE7;--amber:#B45309;--amberl:#FEF3C7;--rose:#BE185D;--rosel:#FCE7F3;--purple:#7C3AED;
+    --text:#0F172A;--text-2:#334155;--text-3:#64748B;--border:#E5EAF1;--border-2:#D7DEE8;--surface:#F8FAFC;
+    --sh-sm:0 1px 2px rgba(15,23,42,.05);--sh-md:0 8px 26px rgba(15,23,42,.10);
+    --font:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--serif:'DM Serif Display',serif;
+  }
+  html{font-size:14px;-webkit-font-smoothing:antialiased}
+  body{font-family:var(--font);background:#F0F4F8;color:var(--text);line-height:1.5}
+  a{text-decoration:none;color:inherit}button{font-family:inherit;cursor:pointer;border:none;background:none}
+
+  /* Sidebar (canonical Atlas chrome) */
+  .sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--navy);display:flex;flex-direction:column;z-index:40;overflow:hidden}
+  .sidebar-logo{padding:18px 18px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .logo-mark{width:52px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .logo-mark svg{width:52px;height:40px}
+  .logo-text-wrap{display:flex;flex-direction:column}
+  .logo-name{font-family:var(--serif);font-size:20px;color:#fff;line-height:1}
+  .logo-sub{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:3px}
+  .nav-badge.alert{background:#EF4444;color:#fff}
+  .sidebar-scroll::-webkit-scrollbar{width:4px}.sidebar-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
+  .sidebar-search{margin:12px 12px 6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;gap:8px;padding:8px 12px}
+  .sidebar-search svg{width:13px;height:13px;color:rgba(255,255,255,.3)}
+  .sidebar-search input{background:none;border:none;outline:none;width:100%;font-size:12px;color:rgba(255,255,255,.6);cursor:pointer}
+  .sidebar-scroll{flex:1;overflow-y:auto;padding-bottom:6px}
+  .nav-group{padding:8px 8px 0}
+  .nav-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:0 10px;margin-bottom:4px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);transition:all .15s;margin-bottom:1px}
+  .nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
+  .nav-item.active{background:var(--blue);color:#fff}
+  .nav-item svg{width:14px;height:14px;flex-shrink:0}
+  .nav-badge{margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.6);border-radius:10px;padding:1px 7px;font-size:10px;font-weight:600}
+  .sidebar-user{padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:9px}
+  .user-avatar{width:30px;height:30px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+  .user-name{font-size:12px;font-weight:500;color:rgba(255,255,255,.75)}
+  .user-role{font-size:10px;color:rgba(255,255,255,.35)}
+
+  .main{margin-left:220px;min-height:100vh;padding:24px 34px 70px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .crumb{font-size:12.5px;color:var(--text-3);display:flex;align-items:center;gap:7px;margin-bottom:14px}
+  .crumb a{color:var(--blue);font-weight:500}.crumb svg{width:9px;height:9px}
+
+  .head-card{background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:var(--sh-sm);padding:24px 26px;display:flex;align-items:flex-start;gap:22px;flex-wrap:wrap;margin-bottom:18px}
+  .amt{font-family:var(--serif);font-size:38px;line-height:1;color:var(--text)}
+  .amt.pending{color:var(--amber)}
+  .head-meta{font-size:13px;color:var(--text-3);margin-top:8px}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:20px}
+  .pill .dot{width:7px;height:7px;border-radius:50%}
+  .pill.received{background:var(--greenl);color:var(--green)}.pill.received .dot{background:var(--green)}
+  .pill.pending{background:var(--amberl);color:var(--amber)}.pill.pending .dot{background:var(--amber)}
+  .head-actions{margin-left:auto;display:flex;gap:9px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;font-size:13px;font-weight:600;white-space:nowrap;transition:.13s}
+  .btn svg{width:14px;height:14px}
+  .btn-ghost{background:#fff;border:1px solid var(--border-2);color:var(--text-2)}.btn-ghost:hover{border-color:#94A3B8}
+  .btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:var(--blue600)}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:820px){.grid{grid-template-columns:1fr}.main{margin-left:0;padding:18px}.sidebar{display:none}}
+  .card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--sh-sm);overflow:hidden}
+  .card-h{padding:14px 18px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
+  .card-b{padding:6px 18px 14px}
+  .row{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid var(--surface);font-size:13px}
+  .row:last-child{border-bottom:none}
+  .row .l{color:var(--text-3)}.row .v{color:var(--text);font-weight:600;text-align:right}
+  .sub{font-size:11px;color:var(--text-3);font-weight:400;margin-top:1px}
+  .tl{padding:11px 0;border-bottom:1px solid var(--surface);font-size:12.5px;display:flex;gap:10px}
+  .tl:last-child{border-bottom:none}
+  .tl .d{width:7px;height:7px;border-radius:50%;background:var(--blue);margin-top:5px;flex-shrink:0}
+  .tl .when{color:var(--text-3);font-size:11px;margin-top:2px}
+  .full{grid-column:1/-1}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark" aria-label="Atlas by GiveCentral">
+      <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+        <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
+        <circle cx="22" cy="92" r="4" fill="white"/>
+        <circle cx="58" cy="58" r="5" fill="white"/>
+        <circle cx="98" cy="38" r="5.5" fill="white"/>
+        <circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
+        <circle cx="138" cy="24" r="7" fill="#C8A04A"/>
+        <circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
+      </svg>
+    </div>
+    <div class="logo-text-wrap"><span class="logo-name">Atlas</span><span class="logo-sub">By GiveCentral</span></div>
+  </div>
+
+  <a href="atlas-search.html" style="display:block;text-decoration:none">
+    <div class="sidebar-search">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+      <input type="text" placeholder="Search donors, gifts…" readonly>
+    </div>
+  </a>
+
+  <div class="sidebar-scroll">
+    <div class="nav-group">
+      <div class="nav-label">Main</div>
+      <a class="nav-item" href="atlas-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>Dashboard</a>
+      <a class="nav-item" href="atlas-donors-list.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>Donors<span class="nav-badge">3,847</span></a>
+      <a class="nav-item active" href="atlas-gifts-pledges.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>Gifts &amp; pledges<span class="nav-badge">142</span></a>
+      <a class="nav-item" href="atlas-campaign-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>Campaigns</a>
+      <div class="nav-subwrap" style="margin:2px 0 4px 20px;border-left:1.5px solid rgba(255,255,255,.12)">
+        <a class="nav-item" href="atlas-funds.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><ellipse cx="7" cy="3.5" rx="5" ry="2"/><path d="M2 3.5v7c0 1.1 2.2 2 5 2s5-.9 5-2v-7M2 7c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg>Funds</a>
+        <a class="nav-item" href="atlas-appeals.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v5H6l-2.5 2v-2H2z"/></svg>Appeals</a>
+      </div>
+      <a class="nav-item" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>Reports</a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Fundraising</div>
+      <a class="nav-item" href="atlas-pipeline.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>Prospect pipeline<span class="nav-badge">28</span></a>
+      <a class="nav-item" href="atlas-tasks.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>Tasks &amp; reminders<span class="nav-badge alert">7</span></a>
+      <a class="nav-item" href="atlas-communications.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>Communications</a>
+      <a class="nav-item" href="atlas-events-dashboard.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>Events</a>
+      <a class="nav-item" href="atlas-volunteer-management.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Volunteers</a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Intelligence</div>
+      <a class="nav-item" href="atlas-guru-ai.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>Guru AI</a>
+      <a class="nav-item" href="atlas-reports.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>Analytics</a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Admin</div>
+      <a class="nav-item" href="atlas-users-roles.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>Users &amp; roles</a>
+      <a class="nav-item" href="atlas-tags.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/></svg>Tags &amp; Segment</a>
+      <a class="nav-item" href="atlas-integrations.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>Integrations</a>
+      <a class="nav-item" href="atlassmarttriggers.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.6 1.5L3 8h3.7l-.6 4.6L11 5.9H7.4z"/></svg>Smart Triggers</a>
+      <a class="nav-item" href="atlas-sync.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>Sync</a>
+      <a class="nav-item" href="atlas-location-manage.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>Location portal</a>
+    </div>
+  </div>
+
+  <div class="sidebar-user"><div class="user-avatar">SR</div><div style="flex:1;min-width:0"><div class="user-name">Sarah Reynolds</div><div class="user-role">Development Director</div></div></div>
+</aside>
+
+<main class="main"><div class="wrap">
+  <div class="crumb">
+    <a href="atlas-dashboard.html">Atlas</a>
+    <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg>
+    <a id="crumb-donor" href="atlas-donor-360.html">Donor 360</a>
+    <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg>
+    <span>Gift detail</span>
+  </div>
+
+  <div class="head-card">
+    <div>
+      <div class="amt" id="g-amt">$0.00</div>
+      <div class="head-meta"><span id="g-status-pill"></span> &nbsp;·&nbsp; <span id="g-date">—</span> &nbsp;·&nbsp; Gift ID <strong id="g-id">—</strong></div>
+    </div>
+    <div class="head-actions">
+      <a class="btn btn-ghost" id="g-back" href="atlas-donor-360.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg>Back to donor</a>
+      <a class="btn btn-ghost" id="g-edit" href="atlas-gift-entry.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 2.5l2.5 2.5-6 6H3v-2.5z"/></svg>Edit gift</a>
+      <button class="btn btn-blue" onclick="toast('Receipt re-sent to donor')"><svg viewBox="0 0 14 14" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><path d="M2 4l5 4 5-4M2 3.5h10v7H2z"/></svg>Resend receipt</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-h">Gift</div>
+      <div class="card-b">
+        <div class="row"><span class="l">Donor</span><span class="v"><a id="g-donor-link" href="atlas-donor-360.html" style="color:var(--blue)">—</a></span></div>
+        <div class="row"><span class="l">Campaign / fund</span><span class="v" id="g-fund">—</span></div>
+        <div class="row"><span class="l">Gift type</span><span class="v" id="g-type">—<div class="sub" id="g-method"></div></span></div>
+        <div class="row"><span class="l">Amount</span><span class="v" id="g-amt2">—</span></div>
+        <div class="row"><span class="l">Status</span><span class="v" id="g-status2">—</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h">Accounting</div>
+      <div class="card-b">
+        <div class="row"><span class="l">GL code</span><span class="v" id="g-gl">5001</span></div>
+        <div class="row"><span class="l">Legal entity</span><span class="v">Diocese of Albany</span></div>
+        <div class="row"><span class="l">Batch</span><span class="v">BX-2026-014</span></div>
+        <div class="row"><span class="l">Receipt #</span><span class="v" id="g-receipt">R-2026-0142</span></div>
+        <div class="row"><span class="l">Soft credits</span><span class="v">None</span></div>
+        <div class="row"><span class="l">Entered by</span><span class="v">Sarah Reynolds<div class="sub" id="g-entered">Auto-synced from GiveCentral</div></span></div>
+      </div>
+    </div>
+    <div class="card full">
+      <div class="card-h">Activity</div>
+      <div class="card-b" id="g-timeline"></div>
+    </div>
+  </div>
+</div></main>
+
+<div id="gd-toast" style="position:fixed;bottom:24px;left:calc(50% + 110px);transform:translateX(-50%) translateY(16px);background:var(--navy);color:#fff;padding:12px 18px;border-radius:11px;box-shadow:var(--sh-md);font-size:13px;font-weight:500;z-index:200;opacity:0;pointer-events:none;transition:.2s"></div>
+
+<script>
+  function qp(k){ try{ return new URLSearchParams(location.search).get(k)||''; }catch(e){ return ''; } }
+  function esc(s){ return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
+  // Params (with sensible fallbacks so the page always renders)
+  var g = {
+    donor:  qp('donor')  || "Margaret T. Sullivan",
+    date:   qp('date')   || "Mar 15, 2026",
+    fund:   qp('fund')   || "Catholic Ministry Appeal",
+    type:   qp('type')   || "Online gift",
+    method: qp('method') || "Card · Visa ••4242",
+    amount: qp('amount') || "$2,500.00",
+    status: qp('status') || "Received",
+    gl:     qp('gl')     || "5002",
+    id:     qp('id')     || "G-2026-1042"
+  };
+  var pending = /pending/i.test(g.status);
+  document.getElementById('g-amt').textContent = g.amount;
+  document.getElementById('g-amt').classList.toggle('pending', pending);
+  document.getElementById('g-amt2').textContent = g.amount;
+  document.getElementById('g-date').textContent = g.date;
+  document.getElementById('g-id').textContent = g.id;
+  document.getElementById('g-fund').textContent = g.fund;
+  document.getElementById('g-type').firstChild.textContent = g.type;
+  document.getElementById('g-method').textContent = g.method;
+  document.getElementById('g-gl').textContent = g.gl;
+  var donorLink = document.getElementById('g-donor-link'); donorLink.textContent = g.donor;
+  document.getElementById('crumb-donor').textContent = g.donor;
+  // Edit gift → open the entry form pre-filled for THIS gift
+  document.getElementById('g-edit').href = 'atlas-gift-entry.html?mode=edit'
+    + '&id='     + encodeURIComponent(g.id)
+    + '&donor='  + encodeURIComponent(g.donor)
+    + '&date='   + encodeURIComponent(g.date)
+    + '&fund='   + encodeURIComponent(g.fund)
+    + '&type='   + encodeURIComponent(g.type)
+    + '&method=' + encodeURIComponent(g.method)
+    + '&amount=' + encodeURIComponent(g.amount)
+    + '&status=' + encodeURIComponent(g.status)
+    + '&gl='     + encodeURIComponent(g.gl);
+  var pillHtml = '<span class="pill '+(pending?'pending':'received')+'"><span class="dot"></span>'+esc(g.status)+'</span>';
+  document.getElementById('g-status-pill').innerHTML = pillHtml;
+  document.getElementById('g-status2').innerHTML = pillHtml;
+  document.getElementById('g-receipt').textContent = pending ? 'Pending — not yet issued' : ('R-2026-0'+String(g.id).replace(/\D/g,'').slice(-3));
+  // Activity timeline
+  var tl = [
+    { t: g.type+' recorded — '+g.amount+' to '+g.fund, w: g.date+' · '+(/givecentral|online|apple/i.test(g.method)?'Auto-synced from GiveCentral':'Entered by Sarah Reynolds') },
+    pending
+      ? { t:'Scheduled — awaiting payment', w:'Receipt issues automatically once received' }
+      : { t:'Receipt issued', w:g.date+' · emailed to donor' }
+  ];
+  document.getElementById('g-timeline').innerHTML = tl.map(function(x){
+    return '<div class="tl"><div class="d"></div><div><div>'+esc(x.t)+'</div><div class="when">'+esc(x.w)+'</div></div></div>';
+  }).join('');
+  // toast
+  var tT; function toast(m){ var el=document.getElementById('gd-toast'); el.textContent=m; el.style.opacity=1; el.style.transform='translateX(-50%) translateY(0)'; clearTimeout(tT); tT=setTimeout(function(){ el.style.opacity=0; el.style.transform='translateX(-50%) translateY(16px)'; },2400); }
+</script>
+</body>
+</html>

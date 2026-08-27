@@ -891,7 +891,7 @@ body {
               <span class="section-title">Recent gifts</span>
               <span class="section-action" onclick="window.location='atlas-donor-ledger.html'">All gifts <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5h7M6 2.5l3 3-3 3"/></svg></span>
             </div>
-            <table class="gift-table">
+            <table class="gift-table" id="recent-gifts-table">
               <thead>
                 <tr>
                   <th>Date</th>
@@ -1443,6 +1443,10 @@ body {
               </div>
             </div>
           </div>
+          <a href="atlas-tasks.html?donor=Margaret%20T.%20Sullivan" class="tasks-viewmore" style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;padding:9px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:var(--blue);background:var(--surface)">
+            View all 24 tasks
+            <svg viewBox="0 0 11 11" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 5.5h7M6 2.5l3 3-3 3"/></svg>
+          </a>
         </div>
 
       </div><!-- /profile-side -->
@@ -1695,7 +1699,7 @@ body {
       const tbody = document.getElementById('gifts-ledger-tbody');
       tbody.innerHTML = filtered.length === 0
         ? '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:24px;font-style:italic">No gifts match the current filters</td></tr>'
-        : filtered.map(g => { var href='atlas-gift-entry.html?gift='+encodeURIComponent(g.date+' · '+g.fund); return `
+        : filtered.map(g => { var href='atlas-gift-detail.html?donor='+encodeURIComponent('Margaret T. Sullivan')+'&date='+encodeURIComponent(g.date)+'&fund='+encodeURIComponent(g.fund)+'&type='+encodeURIComponent(g.type)+'&method='+encodeURIComponent(g.det||'')+'&amount='+encodeURIComponent(fmtMoney(g.amount))+'&status='+encodeURIComponent(g.status); return `
           <tr style="cursor:pointer" onclick="window.location='${href}'">
             <td>${g.date}</td>
             <td>${g.fund}</td>
@@ -3435,6 +3439,38 @@ body {
     }
   }
   if(document.readyState!=='loading') apply(); else document.addEventListener('DOMContentLoaded', apply);
+})();
+</script>
+
+<!-- Recent gifts row → dedicated gift detail page -->
+<script>
+(function(){
+  var DONOR='Margaret T. Sullivan';
+  function cellText(td){ return ((td&&td.textContent)||'').trim(); }
+  function wire(){
+    var recent=document.getElementById('recent-gifts-table');
+    if(!recent) return;
+    recent.querySelectorAll('tbody tr').forEach(function(tr){
+      tr.style.cursor='pointer';
+      tr.addEventListener('click', function(e){
+        e.stopPropagation();
+        var td=tr.children; if(td.length<5) return;
+        var typeCell=td[2];
+        var type=((typeCell&&typeCell.firstChild?typeCell.firstChild.textContent:cellText(typeCell))||'').trim();
+        var mdiv=typeCell&&typeCell.querySelector?typeCell.querySelector('div'):null;
+        var method=mdiv?mdiv.textContent.trim():'';
+        var url='atlas-gift-detail.html?donor='+encodeURIComponent(DONOR)
+          +'&date='+encodeURIComponent(cellText(td[0]))
+          +'&fund='+encodeURIComponent(cellText(td[1]))
+          +'&type='+encodeURIComponent(type)
+          +'&method='+encodeURIComponent(method)
+          +'&amount='+encodeURIComponent(cellText(td[3]))
+          +'&status='+encodeURIComponent(cellText(td[4]));
+        window.location.href=url;
+      });
+    });
+  }
+  if(document.readyState!=='loading') wire(); else document.addEventListener('DOMContentLoaded', wire);
 })();
 </script>
 </body>

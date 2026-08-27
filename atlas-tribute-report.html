@@ -100,10 +100,12 @@
     .filter-row { padding: 9px 20px; border-bottom: 1px solid var(--border); display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
     .fp { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); background: white; color: var(--text3); transition: all .12s; }
     .fp:hover { border-color: #94A3B8; color: var(--text2); }
-    .fp.active { background: var(--navy); color: white; border-color: var(--navy); }
-    .fp.memorial.active  { background: var(--mauve); border-color: var(--mauve); }
-    .fp.honor.active     { background: var(--teal);  border-color: var(--teal); }
-    .fp.birthday.active  { background: var(--amber); border-color: var(--amber); }
+    .fp:focus, .fp:focus-visible, .fp:active { outline: none !important; box-shadow: none !important; }
+    .fp.active { background: #0E1E35 !important; color: #fff !important; border-color: #0E1E35 !important; box-shadow: none !important; }
+    .fp.memorial.active  { background: #7E5BBF !important; color: #fff !important; border-color: #7E5BBF !important; }
+    .fp.honor.active     { background: #0D9488 !important; color: #fff !important; border-color: #0D9488 !important; }
+    .fp.birthday.active  { background: #D97706 !important; color: #fff !important; border-color: #D97706 !important; }
+    .fp.active *, .fp.memorial.active *, .fp.honor.active *, .fp.birthday.active * { color: #fff !important; }
     .f-search { padding: 5px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 12px; font-family: 'DM Sans', sans-serif; outline: none; background: white; color: var(--text); }
     .f-search:focus { border-color: var(--mauve); }
     .f-select { padding: 5px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 12px; font-family: 'DM Sans', sans-serif; outline: none; background: white; color: var(--text); cursor: pointer; }
@@ -114,6 +116,10 @@
     .hon-table th { padding: 9px 16px; text-align: left; font-size: 9px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: rgba(255,255,255,.65); background: var(--navy); border-right: 1px solid rgba(255,255,255,.07); white-space: nowrap; }
     .hon-table th:last-child { border-right: none; }
     .hon-table td { padding: 0; border-bottom: .5px solid var(--border); vertical-align: top; }
+    .hon-table tbody tr:not(.detail-row) > td { vertical-align: middle; }
+    .hon-table th:first-child { padding-left: 26px; }
+    .hon-name-cell { padding-left: 26px !important; }
+    .donor-table th:first-child, .donor-table td:first-child { padding-left: 26px; }
     .hon-table tr:hover > td { background: #FAF9FF; }
     .hon-table tr.expanded > td { background: #F5F2FF; border-bottom: none; }
 
@@ -580,15 +586,15 @@
   <div class="chrome-sep"></div>
   <div class="chrome-path">Reports → Giving → <b>Tribute &amp; In Honor Of</b></div>
   <div class="chrome-right">
-    <button class="cbtn cbtn-ghost">
+    <button class="cbtn cbtn-ghost" onclick="exportTributeCSV()">
       <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 1v7M3 5.5l3 3 3-3"/><path d="M1.5 10.5h9"/></svg>
       Export CSV
     </button>
-    <button class="cbtn cbtn-ghost">
+    <button class="cbtn cbtn-ghost" onclick="window.print()">
       <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="1.5" width="9" height="9" rx="1.5"/><path d="M3.5 5h5M3.5 7h3"/></svg>
       PDF report
     </button>
-    <button class="cbtn cbtn-primary">Schedule delivery</button>
+    <button class="cbtn cbtn-primary" onclick="openScheduleDelivery()">Schedule delivery</button>
   </div>
 </div>
 
@@ -629,7 +635,7 @@
       <button class="vb-tab" id="vtab-summary"  onclick="setView('summary',this)">Summary &amp; analytics</button>
     </div>
     <div class="vb-right">
-      <select class="f-select">
+      <select class="f-select" onchange="setPeriod(this.value)">
         <option>Jan 1 – May 12, 2026 (YTD)</option>
         <option>May 2026</option>
         <option>April 2026</option>
@@ -637,11 +643,11 @@
         <option>Full year 2025</option>
         <option>Custom range…</option>
       </select>
-      <select class="f-select">
-        <option>All funds</option>
-        <option>CMA Annual Fund</option>
-        <option>Cathedral Capital</option>
-        <option>General Fund</option>
+      <select class="f-select" onchange="setFund(this.value)">
+        <option value="all">All funds</option>
+        <option value="CMA Annual Fund">CMA Annual Fund</option>
+        <option value="Cathedral Capital">Cathedral Capital</option>
+        <option value="General Fund">General Fund</option>
       </select>
     </div>
   </div>
@@ -655,10 +661,10 @@
           <div class="tb-title">Tribute gifts by honoree</div>
           <div class="tb-sub">47 honorees · 124 gifts · showing one row per honoree — expand to see individual donors</div>
         </div>
-        <button class="btn">
+        <button class="btn" onclick="exportTributeCSV()">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 1v7M3 5.5l3 3 3-3"/><path d="M1.5 10.5h9"/></svg>CSV
         </button>
-        <button class="btn btn-mauve">
+        <button class="btn btn-mauve" onclick="sendAllPending()">
           <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 3h9a.7.7 0 01.7.7v6a.7.7 0 01-.7.7h-9a.7.7 0 01-.7-.7V3.7a.7.7 0 01.7-.7z"/><path d="M1.5 3.5l4.5 3 4.5-3"/></svg>
           Send all pending notifications
         </button>
@@ -670,12 +676,12 @@
         <button class="fp birthday" onclick="filterType('birthday',this)">Birthday tribute (4)</button>
         <button class="fp"         onclick="filterType('occasion',this)">Special occasion (3)</button>
         <div style="flex:1"></div>
-        <input type="text" class="f-search" placeholder="Search honoree name…" style="width:200px">
-        <select class="f-select">
-          <option>All notification statuses</option>
-          <option>Notification pending</option>
-          <option>Notification sent</option>
-          <option>No notification needed</option>
+        <input type="text" class="f-search" placeholder="Search honoree name…" style="width:200px" oninput="honSearch(this.value)">
+        <select class="f-select" onchange="honStatus(this.value)">
+          <option value="all">All notification statuses</option>
+          <option value="pending">Notification pending</option>
+          <option value="sent">Notification sent</option>
+          <option value="none">No notification needed</option>
         </select>
       </div>
 
@@ -719,15 +725,15 @@
           <div class="tb-title">Tribute gifts by donor</div>
           <div class="tb-sub">124 tribute and memorial gifts · showing the donor who made each gift · hard credit only</div>
         </div>
-        <button class="btn btn-navy">PDF</button>
+        <button class="btn btn-navy" onclick="window.print()">PDF</button>
       </div>
       <div class="filter-row">
-        <button class="fp active">All (124)</button>
-        <button class="fp memorial">In memory of (78)</button>
-        <button class="fp honor">In honor of (32)</button>
-        <button class="fp birthday">Birthday (10)</button>
+        <button class="fp active" onclick="filterDonors('all',this)">All (124)</button>
+        <button class="fp memorial" onclick="filterDonors('memorial',this)">In memory of (78)</button>
+        <button class="fp honor" onclick="filterDonors('honor',this)">In honor of (32)</button>
+        <button class="fp birthday" onclick="filterDonors('birthday',this)">Birthday (10)</button>
         <div style="flex:1"></div>
-        <input type="text" class="f-search" placeholder="Search donor…" style="width:180px">
+        <input type="text" class="f-search" placeholder="Search donor…" style="width:180px" oninput="renderDonors(undefined, this.value)">
       </div>
       <div style="overflow-x:auto">
         <table class="donor-table">
@@ -767,8 +773,8 @@
           <div class="tb-title">Family notification letters</div>
           <div class="tb-sub">38 pending · 86 sent · letters are courtesy notifications only — no tax language</div>
         </div>
-        <button class="btn">Preview template</button>
-        <button class="btn btn-mauve">Send all 38 pending</button>
+        <button class="btn" onclick="atlasToast&&atlasToast('Template preview opened · courtesy notification (no tax language)')">Preview template</button>
+        <button class="btn btn-mauve" onclick="sendAllPending()">Send all 38 pending</button>
       </div>
       <div class="letter-shell">
         <div class="letter-list">
@@ -788,7 +794,7 @@
           <div class="tb-title">Tribute giving — summary &amp; analytics</div>
           <div class="tb-sub">Year-to-date · all funds · Diocese of St. Petersburg</div>
         </div>
-        <button class="btn btn-navy">PDF summary</button>
+        <button class="btn btn-navy" onclick="window.print()">PDF summary</button>
       </div>
 
       <div class="analytics-grid">
@@ -906,9 +912,38 @@ const LETTER_LIST = [
 
 let activeLetterIdx = 0;
 
+// ── Reporting period (date-range filter) ─────────────────────────────────────
+var MONTHS = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+var PERIOD = { start:new Date(2026,0,1), end:new Date(2026,4,12), label:'Jan 1 – May 12, 2026 (YTD)' };
+function periodBounds(label){
+  if (/^May 2026/.test(label))     return [new Date(2026,4,1),  new Date(2026,4,31)];
+  if (/^April 2026/.test(label))   return [new Date(2026,3,1),  new Date(2026,3,30)];
+  if (/^Q1 2026/.test(label))      return [new Date(2026,0,1),  new Date(2026,2,31)];
+  if (/Full year 2025/.test(label))return [new Date(2025,0,1),  new Date(2025,11,31)];
+  return [new Date(2026,0,1), new Date(2026,4,12)]; // YTD / default
+}
+function giftInPeriod(dateStr){ var d = new Date(dateStr); return isNaN(d) ? true : (d >= PERIOD.start && d <= PERIOD.end); }
+function honBounds(h){
+  var r = h.range || ''; var ym = r.match(/(20\d\d)/); var year = ym ? +ym[1] : 2026;
+  var mm = r.match(/[A-Z][a-z]{2}/g) || ['Jan'];
+  var m1 = MONTHS[mm[0]] != null ? MONTHS[mm[0]] : 0;
+  var m2 = (mm[1] != null && MONTHS[mm[1]] != null) ? MONTHS[mm[1]] : m1;
+  return [new Date(year,m1,1), new Date(year,m2+1,0)];
+}
+function honInPeriod(h){ var b = honBounds(h); return b[0] <= PERIOD.end && b[1] >= PERIOD.start; }
+
 // ── RENDER HONOREE TABLE ──────────────────────────────────────────────────────
+var HON = { type:'all', status:'all', q:'', fund:'all' };
 function renderHonorees(filter) {
-  const rows = filter === 'all' ? HONOREES : HONOREES.filter(h => h.type === filter);
+  if (filter !== undefined) HON.type = filter;
+  const q = (HON.q || '').toLowerCase();
+  const rows = HONOREES.filter(h =>
+    (HON.type === 'all'   || h.type === HON.type) &&
+    (HON.status === 'all' || h.notifStatus === HON.status) &&
+    (HON.fund === 'all'   || h.donors.some(d => d.fund === HON.fund)) &&
+    honInPeriod(h) &&
+    (!q || h.name.toLowerCase().indexOf(q) !== -1 || (h.family||'').toLowerCase().indexOf(q) !== -1)
+  );
   const typeLabels = { memorial:'In memory of', honor:'In honor of', birthday:'Birthday tribute', occasion:'Special occasion' };
   const typeClass  = { memorial:'hnt-memorial', honor:'hnt-honor', birthday:'hnt-birthday', occasion:'hnt-occasion' };
   document.getElementById('honoree-tbody').innerHTML = rows.map((h,i) => {
@@ -921,7 +956,6 @@ function renderHonorees(filter) {
     return `<tr id="hon-row-${h.id}" class="stagger" style="animation-delay:${i*0.04}s">
       <td class="hon-name-cell">
         <div class="hn-name">${h.name}</div>
-        <span class="hn-type ${typeClass[h.type]}">${typeLabels[h.type]}</span>
         <div class="hn-family">
           <svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="4.5" cy="3" r="2"/><path d="M1 8c0-1.9 1.6-3.5 3.5-3.5S8 6.1 8 8"/></svg>
           ${h.family}
@@ -970,7 +1004,86 @@ function renderHonorees(filter) {
         </div>
       </td>
     </tr>`;
-  }).join('');
+  }).join('') || '<tr><td colspan="9" style="text-align:center;padding:26px;color:var(--text3);font-style:italic">No honorees match these filters.</td></tr>';
+  // live footer totals
+  var hvs = document.querySelectorAll('#view-honoree .report-footer .rf-v');
+  if (hvs.length >= 5) {
+    var g = rows.reduce((s,h)=>s+h.gifts,0), t = rows.reduce((s,h)=>s+h.total,0), pd = rows.filter(h=>h.notifStatus==='pending').length;
+    hvs[0].textContent = rows.length; hvs[1].textContent = g; hvs[2].textContent = '$'+t.toLocaleString();
+    hvs[3].textContent = pd; hvs[4].textContent = '$'+(g?Math.round(t/g):0).toLocaleString();
+  }
+}
+function honSearch(v){ HON.q = v; renderHonorees(); }
+function honStatus(v){ HON.status = v; renderHonorees(); }
+// Fund filter applies to both the honoree and donor views
+function setFund(v){
+  HON.fund = v; renderHonorees();
+  if (typeof renderDonors === 'function') { window.__donorFund = v; renderDonors(); }
+  if (window.atlasToast) atlasToast(v === 'all' ? 'Showing all funds' : 'Filtered to ' + v);
+}
+// Reporting period selector — actually filters the data
+function applyPeriod(bounds, label){
+  PERIOD = { start:bounds[0], end:bounds[1], label:label };
+  renderHonorees();
+  if (typeof renderDonors === 'function') renderDonors();
+  // reflect the period on the notification-letter preview
+  document.querySelectorAll('.lgb-val').forEach(function(el){
+    if (el.previousElementSibling && /period/i.test(el.previousElementSibling.textContent)) el.textContent = label.replace(' (YTD)','');
+  });
+}
+function setPeriod(v){
+  if (/^Custom/.test(v)) { openCustomRange(); return; }
+  applyPeriod(periodBounds(v), v);
+  if (window.atlasToast) atlasToast('Showing period: ' + v);
+}
+function fmtDay(d){ return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+// Schedule delivery of this tribute report
+function openScheduleDelivery(){
+  if (!window.atlasOpenModal) { if(window.atlasToast) atlasToast('Delivery scheduled'); return; }
+  window.atlasOpenModal({
+    title: 'Schedule delivery',
+    sub: 'Auto-generate the Tribute & In Honor Of report and send it on a schedule',
+    fields: [
+      { id:'sd-freq',     label:'Frequency',        type:'select', options:['Once — send now','Weekly — Monday','Monthly — 1st of month','Quarterly','End of each month'] },
+      { id:'sd-time',     label:'Send at',          type:'time',   value:'08:00' },
+      { id:'sd-format',   label:'Format',           type:'select', options:['PDF','CSV','Excel','PDF + CSV'] },
+      { id:'sd-delivery', label:'Delivery method',  type:'select', options:['Email to recipients','Save to shared folder','Email + save to folder'] },
+      { id:'sd-scope',    label:'Report scope',     type:'select', options:['Current period ('+PERIOD.label.replace(' (YTD)','')+')','Year-to-date','Full previous year'] },
+      { id:'sd-to',       label:'Recipients',       type:'text',   value:'development@diocese.org', placeholder:'name@diocese.org, …' }
+    ],
+    cta: 'Schedule delivery',
+    onSave: function(v){
+      if (!v['sd-to']) { if(window.atlasToast) atlasToast('Add at least one recipient'); return false; }
+      var f = v['sd-freq'] || 'Weekly';
+      var msg = /^Once/.test(f)
+        ? ('Report sent · ' + v['sd-format'] + ' to ' + v['sd-to'])
+        : ('Scheduled · ' + f + ' at ' + (v['sd-time'] || '8:00') + ' · ' + v['sd-format'] + ' → ' + v['sd-to']);
+      if (window.atlasToast) atlasToast(msg);
+      return true;
+    }
+  });
+}
+function openCustomRange(){
+  if (!window.atlasOpenModal) return;
+  window.atlasOpenModal({
+    title: 'Custom date range',
+    sub: 'Show tribute gifts between two dates',
+    fields: [
+      { id:'cr-start', label:'Start date', type:'date', value:'2026-01-01' },
+      { id:'cr-end',   label:'End date',   type:'date', value:'2026-05-12' }
+    ],
+    cta: 'Apply range',
+    onSave: function(v){
+      var s = v['cr-start'], e = v['cr-end'];
+      if (!s || !e) { if(window.atlasToast) atlasToast('Enter both a start and end date'); return false; }
+      var sd = new Date(s + 'T00:00:00'), ed = new Date(e + 'T00:00:00');
+      if (isNaN(sd) || isNaN(ed)) { if(window.atlasToast) atlasToast('Please enter valid dates'); return false; }
+      if (sd > ed) { if(window.atlasToast) atlasToast('Start date must be before end date'); return false; }
+      applyPeriod([sd, ed], fmtDay(sd) + ' – ' + fmtDay(ed));
+      if (window.atlasToast) atlasToast('Custom range applied · ' + fmtDay(sd) + ' – ' + fmtDay(ed));
+      return true;
+    }
+  });
 }
 
 function toggleHonRow(id) {
@@ -982,10 +1095,21 @@ function toggleHonRow(id) {
 }
 
 // ── RENDER DONOR TABLE ────────────────────────────────────────────────────────
-function renderDonors() {
+let donorFilter = 'all', donorQuery = '';
+function renderDonors(filter, q) {
+  if (filter !== undefined) donorFilter = filter;
+  if (q !== undefined) donorQuery = q;
   const typeClass = { memorial:'tb-mem', honor:'tb-hon', birthday:'tb-bdy', occasion:'tb-occ' };
   const typeLabel = { memorial:'Memorial', honor:'In honor', birthday:'Birthday', occasion:'Occasion' };
-  document.getElementById('donor-tbody').innerHTML = DONOR_ROWS.map((r,i) => `
+  const qq = (donorQuery||'').toLowerCase();
+  const fundF = window.__donorFund || 'all';
+  const list = DONOR_ROWS.filter(r =>
+    (donorFilter === 'all' || r.type === donorFilter) &&
+    (fundF === 'all' || r.fund === fundF) &&
+    giftInPeriod(r.date) &&
+    (!qq || (r.donor + ' ' + r.honoree + ' ' + r.fund).toLowerCase().indexOf(qq) !== -1)
+  );
+  document.getElementById('donor-tbody').innerHTML = (list.length ? list : []).map((r,i) => `
     <tr class="stagger" style="animation-delay:${i*0.03}s">
       <td>
         <div style="font-size:13px;font-weight:600;color:var(--text)">${r.donor}</div>
@@ -1002,7 +1126,44 @@ function renderDonors() {
       <td><span class="notif-status ns-sent" style="font-size:10px">✓ To donor</span></td>
       <td style="font-size:12px;color:var(--mauve);font-weight:500">${r.soft}</td>
       <td style="font-size:11px;color:var(--text3)">Mike D.</td>
-    </tr>`).join('');
+    </tr>`).join('') || '<tr><td colspan="10" style="text-align:center;padding:26px;color:var(--text3);font-style:italic">No tribute gifts match this filter.</td></tr>';
+  // keep footer totals in sync
+  var dvs = document.querySelectorAll('#view-donor .report-footer .rf-v');
+  if (dvs.length >= 4) {
+    var t = list.reduce((s,r)=>s+r.amt,0);
+    dvs[0].textContent = list.length; dvs[1].textContent = '$'+t.toLocaleString();
+    dvs[2].textContent = '$'+(list.length?Math.round(t/list.length):0).toLocaleString(); dvs[3].textContent = list.length;
+  }
+}
+function filterDonors(f, btn){
+  document.querySelectorAll('#view-donor .filter-row .fp').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderDonors(f);
+}
+// Real CSV export of the tribute gifts
+function exportTributeCSV(){
+  var header = ['Donor','Type','In tribute to','Amount','Fund','Gift date','Payment','Soft credit to'];
+  var body = DONOR_ROWS.map(function(r){ return [r.donor, r.type, r.honoree, r.amt, r.fund, r.date, r.pay, r.soft]; });
+  var csv = [header].concat(body).map(function(row){
+    return row.map(function(c){ var s = String(c==null?'':c); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }).join(',');
+  }).join('\n');
+  try {
+    var blob = new Blob([csv], {type:'text/csv'}); var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href = url; a.download = 'tribute-gifts.csv';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  } catch(_){}
+  if (window.atlasToast) atlasToast('CSV exported · ' + DONOR_ROWS.length + ' tribute gifts downloaded');
+}
+// Send all pending family notifications — clears the queue and updates counts
+function sendAllPending(){
+  var sent = LETTER_LIST.length || 38;
+  LETTER_LIST.length = 0;
+  var li = document.getElementById('letter-list-items');
+  if (li) li.innerHTML = '<div style="padding:22px 14px;color:var(--text3);font-size:12.5px;text-align:center">✓ All pending notifications sent</div>';
+  document.querySelectorAll('.letter-list-head').forEach(function(h){ h.textContent = 'Pending notifications (0)'; });
+  document.querySelectorAll('#view-letter .tb-sub').forEach(function(s){ s.textContent = '0 pending · 124 sent · letters are courtesy notifications only — no tax language'; });
+  document.querySelectorAll('.btn-mauve').forEach(function(b){ if (/send all/i.test(b.textContent)) { b.textContent = 'All notifications sent'; b.disabled = true; b.style.opacity = '.6'; } });
+  if (window.atlasToast) atlasToast(sent + ' tribute notifications sent · families emailed');
 }
 
 // ── LETTER LIST + PREVIEW ─────────────────────────────────────────────────────
@@ -1030,8 +1191,11 @@ function selectLetter(honoreeId) {
   if (idx >= 0) selectLetterByIdx(idx);
 }
 
+var INCLUDE_DONORS = false;
 function renderLetterPreview(l) {
   const name = l.name.replace('&amp;','&');
+  const hon = HONOREES.find(h => h.name.replace('&amp;','&') === name);
+  const donorNames = hon ? hon.donors.filter(d => !/^others/i.test(d.name)).map(d => d.name).join(' · ') : '';
   document.getElementById('letter-preview-area').innerHTML = `
     <div class="lp-chrome">
       <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 3h9a.7.7 0 01.7.7v6a.7.7 0 01-.7.7h-9a.7.7 0 01-.7-.7V3.7a.7.7 0 01.7-.7z"/><path d="M1.5 3.5l4.5 3 4.5-3"/></svg>
@@ -1057,6 +1221,7 @@ function renderLetterPreview(l) {
         <div class="lgb-row"><span class="lgb-key">Fund designated</span><span class="lgb-val">As directed by each donor</span></div>
         <div class="lgb-row"><span class="lgb-key">Period of giving</span><span class="lgb-val">January – May 2026</span></div>
       </div>
+      ${INCLUDE_DONORS && donorNames ? `<div class="lp-gift-box" style="margin-top:14px;background:#F5F2FF"><div class="lgb-title">Donors who gave in ${name.split(' ').slice(-1)[0]}'s memory</div><div style="font-size:12.5px;color:var(--text2);line-height:1.7">${donorNames}</div></div>` : ''}
       <div class="lp-note">This letter is a courtesy notification. Tax receipts have been issued separately to each individual donor. This letter does not serve as a tax receipt and does not reflect any deductible contribution on your part.</div>
       <div class="lp-body">These gifts will support the mission of the Diocese and stand as a living memorial to ${name.split(' ').slice(-1)[0]}'s faith and generosity. We are grateful for the love and support of your family during this time.</div>
       <div class="lp-close">If you would like to know more about how these tribute gifts will be used, or if you wish to receive the names of the donors who have given in ${name.split(' ').slice(-1)[0]}'s memory, please contact our development office. We would be honored to share more with you.</div>
@@ -1068,14 +1233,40 @@ function renderLetterPreview(l) {
       <div class="lp-footer">Catholic Community Foundation · 1404 East Ninth Street · Cleveland, Ohio 44114 · (216) 696-6525 · catholiccommunity.org<br>This is a notification letter only. No tax deduction is claimed or implied. Tax receipts were issued to individual donors at the time of their gifts.</div>
     </div>
     <div class="lp-actions" style="margin-top:16px">
-      <button class="btn btn-mauve">
+      <button class="btn btn-mauve" onclick="sendLetterFlow(${l.id})">
         <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 3h9a.7.7 0 01.7.7v6a.7.7 0 01-.7.7h-9a.7.7 0 01-.7-.7V3.7a.7.7 0 01.7-.7z"/><path d="M1.5 3.5l4.5 3 4.5-3"/></svg>
         Send this letter
       </button>
-      <button class="btn btn-navy">Download PDF</button>
-      <button class="btn">Edit before sending</button>
-      <button class="btn">Include donor names</button>
+      <button class="btn btn-navy" onclick="window.print()">Download PDF</button>
+      <button class="btn" onclick="editLetterFlow(${l.id})">Edit before sending</button>
+      <button class="btn ${INCLUDE_DONORS?'btn-mauve':''}" onclick="toggleDonorNames()">${INCLUDE_DONORS?'Donor names included ✓':'Include donor names'}</button>
     </div>`;
+}
+// ── Notification-letter actions → use the Create-Email flow ──
+function letterCtx(id){
+  var l = LETTER_LIST.find(x => x.id === id) || LETTER_LIST[activeLetterIdx] || {};
+  var name = (l.name||'').replace('&amp;','&');
+  var email = (l.contact||'family').toLowerCase().replace(/\s/g,'.') + '@example.com';
+  return { name:name, family:l.family||'', to:email, subject:'A tribute gift has been made in memory of '+name };
+}
+function sendLetterFlow(id){
+  var c = letterCtx(id);
+  if (window.atlasToast) atlasToast('Opening email composer · tribute notification to ' + (c.family||'family'));
+  var url = 'atlas-email-campaign.html?resume=letter&tpl=' + encodeURIComponent('Tribute notification')
+    + '&to=' + encodeURIComponent(c.to) + '&subject=' + encodeURIComponent(c.subject);
+  setTimeout(function(){ window.location = url; }, 300);
+}
+function editLetterFlow(id){
+  var c = letterCtx(id);
+  if (window.atlasToast) atlasToast('Opening in the email builder to edit before sending');
+  var url = 'atlas-email-campaign.html?resume=letter&edit=1&tpl=' + encodeURIComponent('Tribute notification')
+    + '&to=' + encodeURIComponent(c.to) + '&subject=' + encodeURIComponent(c.subject);
+  setTimeout(function(){ window.location = url; }, 300);
+}
+function toggleDonorNames(){
+  INCLUDE_DONORS = !INCLUDE_DONORS;
+  renderLetterPreview(LETTER_LIST[activeLetterIdx]);
+  if (window.atlasToast) atlasToast(INCLUDE_DONORS ? 'Donor names added to the letter' : 'Donor names removed from the letter');
 }
 
 // ── TOP HONOREES MINI TABLE ───────────────────────────────────────────────────

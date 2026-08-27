@@ -2865,6 +2865,48 @@ body {
   if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
 })();
 </script>
+
+<!-- Edit mode: prefill the form from the gift passed via query params -->
+<script>
+(function(){
+  function qp(k){ try{ return new URLSearchParams(location.search).get(k); }catch(e){ return null; } }
+  if((qp('mode')||'')!=='edit') return;
+  function run(){
+    var donor=qp('donor')||'', date=qp('date')||'', fund=qp('fund')||'', type=qp('type')||'',
+        method=qp('method')||'', amount=qp('amount')||'', id=qp('id')||'';
+    // Title + breadcrumb
+    var pt=document.querySelector('.page-title'); if(pt) pt.textContent='Edit gift';
+    var sub=document.querySelector('.page-sub'); if(sub) sub.innerHTML='Editing gift <strong>'+(id||'')+'</strong> · changes apply on save.';
+    var crumb=document.querySelector('.crumb'); if(crumb){ var a=crumb.querySelector('a[href*="atlas-donor-360"]'); if(a&&donor) a.textContent=donor; var last=crumb.querySelector('span'); if(last) last.textContent='Edit gift'; }
+    // Donor
+    if(donor){
+      var di=document.querySelector('.donor-lookup-wrap input.fld'); if(di) di.value=donor;
+      var nm=document.querySelector('.donor-lookup-result .name'); if(nm) nm.textContent=donor;
+      var av=document.querySelector('.donor-lookup-result .av'); if(av) av.textContent=(donor.trim()[0]||'?').toUpperCase();
+    }
+    // Amount
+    var amt=document.getElementById('amt-fld'); if(amt&&amount) amt.value=amount;
+    // Gift date (second input in the step-3 row3)
+    if(amt&&date){ var row=amt.closest('.row3'); if(row){ var dcell=row.children[1]; var din=dcell&&dcell.querySelector('input'); if(din) din.value=date; } }
+    // Gift type → click the matching type pill (switches the detail panel)
+    var s=(type+' '+method).toLowerCase();
+    var t='cash';
+    if(/check/.test(s)) t='check';
+    else if(/stock|securit|shares|aapl/.test(s)) t='stock';
+    else if(/\bach\b|bank/.test(s)) t='ach';
+    else if(/matching/.test(s)) t='matching';
+    else if(/\bdaf\b/.test(s)) t='daf';
+    else if(/card|visa|master|amex|apple pay|online/.test(s)) t='cc';
+    var pill=document.querySelector('.type-pill[data-type="'+t+'"]');
+    if(pill) pill.click();
+    // Payment-method dropdown (best-effort for cash/check)
+    var meth=document.getElementById('meth-fld');
+    if(meth){ var want=/cashier/.test(s)?"Cashier's check":/check/.test(s)?'Personal check':/wire/.test(s)?'Wire transfer':null;
+      if(want){ [].forEach.call(meth.options,function(o){ if(o.textContent===want) meth.value=o.textContent; }); } }
+  }
+  if(document.readyState!=='loading') run(); else document.addEventListener('DOMContentLoaded', run);
+})();
+</script>
 <!-- /ATLAS-NAVCOLLAPSE -->
 </body>
 </html>
