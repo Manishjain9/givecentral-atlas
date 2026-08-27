@@ -774,7 +774,10 @@
           <div class="tb-sub">38 pending · 86 sent · letters are courtesy notifications only — no tax language</div>
         </div>
         <button class="btn" onclick="atlasToast&&atlasToast('Template preview opened · courtesy notification (no tax language)')">Preview template</button>
-        <button class="btn btn-mauve" onclick="sendAllPending()">Send all 38 pending</button>
+        <button class="btn btn-mauve" onclick="sendLetterFlow()"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 3h9a.7.7 0 01.7.7v6a.7.7 0 01-.7.7h-9a.7.7 0 01-.7-.7V3.7a.7.7 0 01.7-.7z"/><path d="M1.5 3.5l4.5 3 4.5-3"/></svg>Send this letter</button>
+        <button class="btn btn-navy" onclick="window.print()">Download PDF</button>
+        <button class="btn" onclick="editLetterFlow()">Edit before sending</button>
+        <button class="btn" id="tgl-donor-names" onclick="toggleDonorNames()">Include donor names</button>
       </div>
       <div class="letter-shell">
         <div class="letter-list">
@@ -1231,15 +1234,6 @@ function renderLetterPreview(l) {
         <div class="lp-sig-title">Development Associate<br>Catholic Community Foundation<br>(216) 696-6525 x1680 · knovicky@catholiccommunity.org</div>
       </div>
       <div class="lp-footer">Catholic Community Foundation · 1404 East Ninth Street · Cleveland, Ohio 44114 · (216) 696-6525 · catholiccommunity.org<br>This is a notification letter only. No tax deduction is claimed or implied. Tax receipts were issued to individual donors at the time of their gifts.</div>
-    </div>
-    <div class="lp-actions" style="margin-top:16px">
-      <button class="btn btn-mauve" onclick="sendLetterFlow(${l.id})">
-        <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 3h9a.7.7 0 01.7.7v6a.7.7 0 01-.7.7h-9a.7.7 0 01-.7-.7V3.7a.7.7 0 01.7-.7z"/><path d="M1.5 3.5l4.5 3 4.5-3"/></svg>
-        Send this letter
-      </button>
-      <button class="btn btn-navy" onclick="window.print()">Download PDF</button>
-      <button class="btn" onclick="editLetterFlow(${l.id})">Edit before sending</button>
-      <button class="btn ${INCLUDE_DONORS?'btn-mauve':''}" onclick="toggleDonorNames()">${INCLUDE_DONORS?'Donor names included ✓':'Include donor names'}</button>
     </div>`;
 }
 // ── Notification-letter actions → use the Create-Email flow ──
@@ -1266,6 +1260,8 @@ function editLetterFlow(id){
 function toggleDonorNames(){
   INCLUDE_DONORS = !INCLUDE_DONORS;
   renderLetterPreview(LETTER_LIST[activeLetterIdx]);
+  var b = document.getElementById('tgl-donor-names');
+  if (b) { b.textContent = INCLUDE_DONORS ? 'Donor names included ✓' : 'Include donor names'; b.classList.toggle('btn-mauve', INCLUDE_DONORS); }
   if (window.atlasToast) atlasToast(INCLUDE_DONORS ? 'Donor names added to the letter' : 'Donor names removed from the letter');
 }
 
