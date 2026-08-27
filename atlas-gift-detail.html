@@ -43,8 +43,18 @@
   .user-name{font-size:12px;font-weight:500;color:rgba(255,255,255,.75)}
   .user-role{font-size:10px;color:rgba(255,255,255,.35)}
 
-  .main{margin-left:220px;min-height:100vh;padding:24px 34px 70px}
-  .wrap{max-width:1000px;margin:0 auto}
+  .main{margin-left:220px;min-height:100vh;padding:0 0 70px}
+  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;background:#fff;border-bottom:1px solid var(--border);height:54px;padding:0 30px}
+  .topbar-title{font-size:14px;font-weight:600;color:var(--text)}
+  .topbar-sub{font-size:12.5px;color:var(--text-3)}
+  .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .tb-bell{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-3);position:relative}
+  .tb-bell:hover{background:var(--surface);color:var(--text-2)}
+  .tb-bell svg{width:16px;height:16px}
+  .tb-bell .dot{position:absolute;top:7px;right:8px;width:7px;height:7px;border-radius:50%;background:#DC2626;border:1.5px solid #fff}
+  .tb-btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border-radius:8px;border:1px solid var(--border-2);background:#fff;color:var(--text-2);font-size:12.5px;font-weight:600;cursor:pointer}
+  .tb-btn:hover{border-color:#94A3B8}
+  .wrap{max-width:1000px;margin:0 auto;padding:24px 34px 0}
   .crumb{font-size:12.5px;color:var(--text-3);display:flex;align-items:center;gap:7px;margin-bottom:14px}
   .crumb a{color:var(--blue);font-weight:500}.crumb svg{width:9px;height:9px}
 
@@ -149,7 +159,16 @@
   <div class="sidebar-user"><div class="user-avatar">SR</div><div style="flex:1;min-width:0"><div class="user-name">Sarah Reynolds</div><div class="user-role">Development Director</div></div></div>
 </aside>
 
-<main class="main"><div class="wrap">
+<main class="main">
+  <div class="topbar">
+    <span class="topbar-title">Gift detail</span>
+    <span class="topbar-sub" id="tb-donor"></span>
+    <div class="topbar-right">
+      <a class="tb-btn" href="atlas-donor-ledger.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h10M2 7h10M2 10h6"/></svg>All gifts</a>
+      <a class="tb-bell" href="atlas-notifications.html" title="Notifications"><svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.5 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5zM6 13a1.5 1.5 0 003 0"/></svg><span class="dot"></span></a>
+    </div>
+  </div>
+  <div class="wrap">
   <div class="crumb">
     <a href="atlas-dashboard.html">Atlas</a>
     <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg>
@@ -193,6 +212,10 @@
       </div>
     </div>
     <div class="card full">
+      <div class="card-h" id="g-payhead">Payment details</div>
+      <div class="card-b" id="g-paydetails" style="display:grid;grid-template-columns:1fr 1fr;gap:0 26px"></div>
+    </div>
+    <div class="card full">
       <div class="card-h">Activity</div>
       <div class="card-b" id="g-timeline"></div>
     </div>
@@ -225,9 +248,73 @@
   document.getElementById('g-fund').textContent = g.fund;
   document.getElementById('g-type').firstChild.textContent = g.type;
   document.getElementById('g-method').textContent = g.method;
+  // ── Method-specific payment details ──
+  function addDaysStr(dateStr, n){ var d = new Date(dateStr); if (isNaN(d)) return dateStr; d.setDate(d.getDate()+n); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+  function digits(s){ return (String(s).match(/\d+/g)||['']).join('').slice(-4) || '1042'; }
+  function paymentDetails(g){
+    var s = (g.type + ' ' + g.method).toLowerCase();
+    if (/check/.test(s)) {
+      var num = (g.method.match(/#\s*([0-9]+)/) || [])[1] || digits(g.id);
+      return { head:'Payment details · Check', rows:[
+        ['Payment method','Check'],
+        ['Check number','#' + num],
+        ['Check date', g.date],
+        ['Deposit date', addDaysStr(g.date, 3)],
+        ['Deposited to','Operating account · Wells Fargo ••4210'],
+        ['Payor name','Same as donor'],
+        ['Clearing status', pending ? 'Awaiting clearance' : 'Cleared'] ] };
+    }
+    if (/card|visa|master|amex|apple pay/.test(s)) {
+      var last = (g.method.match(/(\d{4})/) || [])[1] || '4242';
+      return { head:'Payment details · Card', rows:[
+        ['Payment method','Credit / debit card'],
+        ['Card','Visa ••' + last],
+        ['Processor','Stripe (via GiveCentral)'],
+        ['Transaction ID','ch_1A' + digits(g.id) + 'Cz'],
+        ['Authorization','Approved · 6-digit auth'],
+        ['Charge date', g.date] ] };
+    }
+    if (/\bach\b|bank/.test(s)) {
+      return { head:'Payment details · ACH', rows:[
+        ['Payment method','Bank transfer (ACH)'],
+        ['Account','Checking ••' + digits(g.id)],
+        ['Routing prefix','021000021'],
+        ['Settlement status', pending ? 'Pending settlement (T+3)' : 'Settled'],
+        ['Settlement date', addDaysStr(g.date, 3)] ] };
+    }
+    if (/stock|securit|shares|aapl/.test(s)) {
+      return { head:'Payment details · Securities', rows:[
+        ['Payment method','Securities / stock'],
+        ['Security','25 sh AAPL'],
+        ['Brokerage','Charles Schwab'],
+        ['Received date', g.date],
+        ['FMV per share','$200.00'],
+        ['Liquidation','Sold same day · net proceeds posted'] ] };
+    }
+    if (/\bcash\b/.test(s)) {
+      return { head:'Payment details · Cash', rows:[
+        ['Payment method','Cash'],
+        ['Counted by','Two-person count · SR / DC'],
+        ['Deposit date', addDaysStr(g.date, 1)],
+        ['Deposited to','Parish safe → bank deposit'] ] };
+    }
+    return { head:'Payment details', rows:[
+      ['Payment method', g.method || g.type],
+      ['Processor','GiveCentral online'],
+      ['Transaction ID','gc_' + digits(g.id)],
+      ['Charge date', g.date] ] };
+  }
+  (function(){
+    var pd = paymentDetails(g);
+    document.getElementById('g-payhead').textContent = pd.head;
+    document.getElementById('g-paydetails').innerHTML = pd.rows.map(function(r){
+      return '<div class="row"><span class="l">' + esc(r[0]) + '</span><span class="v">' + esc(r[1]) + '</span></div>';
+    }).join('');
+  })();
   document.getElementById('g-gl').textContent = g.gl;
   var donorLink = document.getElementById('g-donor-link'); donorLink.textContent = g.donor;
   document.getElementById('crumb-donor').textContent = g.donor;
+  var tbd = document.getElementById('tb-donor'); if (tbd) tbd.textContent = '· ' + g.donor + ' · ' + g.id;
   // Edit gift → open the entry form pre-filled for THIS gift
   document.getElementById('g-edit').href = 'atlas-gift-entry.html?mode=edit'
     + '&id='     + encodeURIComponent(g.id)
