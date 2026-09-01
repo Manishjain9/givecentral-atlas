@@ -62,6 +62,14 @@
   .lbl{display:block;font:600 12px 'DM Sans';color:var(--text-2);margin:14px 0 6px}
   .lbl:first-child{margin-top:0}
   .fld{width:100%;border:1px solid var(--border);border-radius:9px;padding:10px 12px;font:400 13px 'DM Sans'}
+  .cbx{position:relative}
+  .cbx-list{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:60;background:#fff;border:1px solid var(--border);border-radius:9px;box-shadow:0 12px 30px rgba(15,23,42,.14);padding:5px;max-height:210px;overflow:auto;display:none}
+  .cbx-list.show{display:block}
+  .cbx-item{padding:8px 10px;border-radius:7px;font:400 13px 'DM Sans';color:var(--text);cursor:pointer;display:flex;flex-direction:column;gap:1px}
+  .cbx-item:hover,.cbx-item.active{background:var(--surface,#F8FAFC)}
+  .cbx-item .nm{font-weight:600}
+  .cbx-item .em{font-size:11.5px;color:var(--text-3)}
+  .cbx-item .add{color:var(--blue,#2563EB);font-weight:600}
   .fld:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .hint{font-size:11.5px;color:var(--text-3);margin-top:5px}
@@ -383,8 +391,10 @@
       '<label class="lbl">Subject line</label><input class="fld" id="f-subject" placeholder="e.g. Help us finish the Cathedral, {{first_name}}" value="'+esc(S.subject)+'">'+
       '<p class="hint">Use merge fields like <code>{{first_name}}</code>. 41–50 characters tends to perform best.</p>'+
       '<label class="lbl">Preview text</label><input class="fld" id="f-preview" placeholder="The snippet shown after the subject in most inboxes" value="'+esc(S.preview)+'">'+
-      '<div class="row2" style="margin-top:14px"><div><label class="lbl">From</label><select class="fld" id="f-from"><option>Sarah Reynolds · sarah.reynolds@diocese.org</option><option>Bridget McCarthy · bridget@diocese.org</option><option>St. Mary\'s Cathedral · cathedral@diocese.org</option></select></div>'+
-      '<div><label class="lbl">Reply-to</label><select class="fld" id="f-reply"><option>Same as From</option><option>donations@diocese.org</option></select></div></div>'+
+      '<div class="row2" style="margin-top:14px">'+
+        '<div><label class="lbl">From</label><div class="cbx"><input class="fld" id="f-from" autocomplete="off" placeholder="Type a name or email…" value="'+esc(S.from)+'"><div class="cbx-list" id="f-from-list"></div></div></div>'+
+        '<div><label class="lbl">Reply-to</label><div class="cbx"><input class="fld" id="f-reply" autocomplete="off" placeholder="Same as From, or type an email…" value="'+esc(S.replyTo)+'"><div class="cbx-list" id="f-reply-list"></div></div></div>'+
+      '</div>'+
       '</div></div>';
   }
   function stepAudience(){
@@ -724,13 +734,73 @@
     p.style.cursor = block ? 'not-allowed' : 'pointer';
     p.setAttribute('aria-disabled', block ? 'true' : 'false');
   }
+  var FROM_LIST = [
+    'Sarah Reynolds · sarah.reynolds@diocese.org',
+    'Bridget McCarthy · bridget@diocese.org',
+    'St. Mary\'s Cathedral · cathedral@diocese.org',
+    'Fr. Michael Reilly · rector@diocese.org',
+    'Development Office · development@diocese.org',
+    'Diocese of Albany · info@diocese.org'
+  ];
+  var REPLY_LIST = [
+    'Same as From',
+    'donations@diocese.org',
+    'development@diocese.org',
+    'sarah.reynolds@diocese.org',
+    'bridget@diocese.org',
+    'noreply@diocese.org'
+  ];
+  function comboParse(s){
+    var p = String(s).split(' · ');
+    return p.length>1 ? {nm:p[0], em:p[1]} : {nm:'', em:p[0]};
+  }
+  function attachCombo(inputId, listId, options, onPick){
+    var inp = $(inputId), list = $(listId);
+    if(!inp || !list) return;
+    var active = -1;
+    function currentItems(){
+      var q = inp.value.trim().toLowerCase();
+      var hits = options.filter(function(o){ return o.toLowerCase().indexOf(q)!==-1; });
+      var exact = options.some(function(o){ return o.toLowerCase()===q; });
+      // offer a "use typed address" row when the text looks custom
+      if(q && !exact && /@/.test(q)) hits = hits.concat(['__CUSTOM__'+inp.value.trim()]);
+      return hits;
+    }
+    function render(){
+      var items = currentItems();
+      if(!items.length){ list.classList.remove('show'); list.innerHTML=''; return; }
+      list.innerHTML = items.map(function(o,i){
+        if(o.indexOf('__CUSTOM__')===0){ // custom typed address
+          return '<div class="cbx-item'+(i===active?' active':'')+'" data-v="'+esc(o.slice(10))+'"><span class="add">Use "'+esc(o.slice(10))+'"</span></div>';
+        }
+        var p = comboParse(o);
+        var main = p.nm ? '<span class="nm">'+esc(p.nm)+'</span><span class="em">'+esc(p.em)+'</span>' : '<span class="nm">'+esc(p.em)+'</span>';
+        return '<div class="cbx-item'+(i===active?' active':'')+'" data-v="'+esc(o)+'">'+main+'</div>';
+      }).join('');
+      list.classList.add('show');
+      list.querySelectorAll('.cbx-item').forEach(function(el){
+        el.addEventListener('mousedown', function(e){ e.preventDefault(); pick(el.dataset.v); });
+      });
+    }
+    function pick(v){ inp.value=v; onPick(v); list.classList.remove('show'); active=-1; }
+    inp.addEventListener('input', function(){ active=-1; onPick(inp.value); render(); });
+    inp.addEventListener('focus', render);
+    inp.addEventListener('keydown', function(e){
+      var items = list.querySelectorAll('.cbx-item');
+      if(e.key==='ArrowDown'){ e.preventDefault(); if(!list.classList.contains('show')){render();} active=Math.min(active+1,items.length-1); render(); }
+      else if(e.key==='ArrowUp'){ e.preventDefault(); active=Math.max(active-1,0); render(); }
+      else if(e.key==='Enter'){ if(list.classList.contains('show')&&active>-1&&items[active]){ e.preventDefault(); pick(items[active].dataset.v); } }
+      else if(e.key==='Escape'){ list.classList.remove('show'); }
+    });
+    inp.addEventListener('blur', function(){ setTimeout(function(){ list.classList.remove('show'); }, 120); });
+  }
   function wireStep(k){
     if(k==='details'){
       $('f-name').addEventListener('input',function(){S.name=this.value;flashSaved();});
       $('f-subject').addEventListener('input',function(){S.subject=this.value;flashSaved();});
       $('f-preview').addEventListener('input',function(){S.preview=this.value;});
-      $('f-from').addEventListener('change',function(){S.from=this.value;});
-      $('f-reply').addEventListener('change',function(){S.replyTo=this.value;});
+      attachCombo('f-from','f-from-list',FROM_LIST,function(v){S.from=v;});
+      attachCombo('f-reply','f-reply-list',REPLY_LIST,function(v){S.replyTo=v;});
     } else if(k==='audience'){
       body_.querySelectorAll('.aud').forEach(function(el){ el.addEventListener('click',function(){ var id=el.dataset.l; var i=S.lists.indexOf(id); if(i===-1)S.lists.push(id); else S.lists.splice(i,1); render(); }); });
       var ab=$('f-ab'); if(ab) ab.addEventListener('change',function(){S.ab.on=this.checked; render();});
