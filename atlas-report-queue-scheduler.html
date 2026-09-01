@@ -298,6 +298,7 @@
       <button class="btn btn-ghost" onclick="openNewQueue()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>New queue</button>
       <button class="btn btn-ghost" onclick="previewRun()" title="Dry-run the first report only — no delivery"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="6" r="2"/><path d="M1 6s2-3.5 5-3.5S11 6 11 6s-2 3.5-5 3.5S1 6 1 6z"/></svg>Preview first report</button>
       <button class="btn btn-green" onclick="runNow()"><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><path d="M3 2l7 4-7 4V2z"/></svg>Run now</button>
+      <button class="btn btn-blue" onclick="openScheduleReport()"><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="2.5" width="9" height="8" rx="1.2"/><path d="M1.5 5h9M4 1.5v2M8 1.5v2"/></svg>Schedule report</button>
     </div>
   </div>
 
@@ -607,6 +608,103 @@ function runNow(previewOnly){
     i++; setTimeout(step,700);
   }
   $('runPct').className='status-pill sp-running'; step();
+}
+
+/* ══ Schedule report — end-to-end wizard ══ */
+const SCH_BASE=new Date(2026,4,4); // May 4, 2026 — prototype "today"
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtD(d){return MON[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();}
+let SCH={freq:'monthly',every:2,time:'06:00',tz:'US/Eastern',folder:true,email:true,alerts:true};
+function schNextRun(){
+  const b=new Date(SCH_BASE);
+  if(SCH.freq==='monthly') return fmtD(new Date(b.getFullYear(), b.getMonth()+1, 1));
+  if(SCH.freq==='weekly'){ const d=new Date(b); const add=((8-d.getDay())%7)||7; d.setDate(d.getDate()+add); return fmtD(d); }
+  if(SCH.freq==='quarterly'){ const q=Math.floor(b.getMonth()/3)+1; return fmtD(new Date(b.getFullYear()+(q>3?1:0), (q%4)*3, 1)); }
+  const d=new Date(b); d.setDate(d.getDate()+SCH.every*7); return fmtD(d);
+}
+function schCadenceLabel(){
+  if(SCH.freq==='monthly') return 'Monthly · 1st of each month';
+  if(SCH.freq==='weekly')  return 'Weekly · every Monday';
+  if(SCH.freq==='quarterly') return 'Quarterly · 1st of the quarter';
+  return 'Every '+SCH.every+' week'+(SCH.every>1?'s':'');
+}
+function fmtTime12(t){ const [h,m]=t.split(':').map(Number); const ap=h<12?'AM':'PM'; const hh=(h%12)||12; return hh+':'+String(m).padStart(2,'0')+' '+ap; }
+function openScheduleReport(){
+  const q=QUEUES[current];
+  if(!q.reports.length){ toast('Add at least one report first'); return; }
+  // seed delivery defaults from current queue recipients
+  SCH.email = q.recipients.length>0;
+  schStep(1);
+}
+function schDot(n,cur){ return '<span style="width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;'+(n<=cur?'background:var(--blue);color:#fff':'background:var(--surf);color:var(--text3);border:1px solid var(--border)')+'">'+n+'</span>'; }
+function schStepper(cur){
+  return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">'
+    +schDot(1,cur)+'<span style="font-size:12px;font-weight:600;color:'+(cur>=1?'var(--text)':'var(--text3)')+'">Cadence</span>'
+    +'<span style="flex:1;height:1px;background:var(--border)"></span>'
+    +schDot(2,cur)+'<span style="font-size:12px;font-weight:600;color:'+(cur>=2?'var(--text)':'var(--text3)')+'">Delivery</span>'
+    +'<span style="flex:1;height:1px;background:var(--border)"></span>'
+    +schDot(3,cur)+'<span style="font-size:12px;font-weight:600;color:'+(cur>=3?'var(--text)':'var(--text3)')+'">Review</span>'
+  +'</div>';
+}
+function schStep(n){
+  const q=QUEUES[current];
+  if(n===1){
+    openModal('Schedule report','Set how often "'+q.name+'" runs on its own',
+      schStepper(1)
+      +'<div class="fgroup"><div class="f-label">Report package</div><div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--border);border-radius:10px;background:var(--surf)"><div class="qi-ic" style="background:var(--bluep)"><svg viewBox="0 0 13 13" fill="none" stroke="var(--blue)" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 3.5h3l1.5 1.5H12v6H1.5z"/></svg></div><div><div style="font-weight:700;font-size:13px">'+q.name+'</div><div style="font-size:11.5px;color:var(--text3)">'+q.reports.length+' report'+(q.reports.length!=1?'s':'')+' · runs top to bottom</div></div></div></div>'
+      +'<div class="fgroup"><div class="f-label">Run frequency</div><select class="f-select" id="schFreq" onchange="schOnFreq()">'
+        +'<option value="monthly">Monthly — 1st of each month</option>'
+        +'<option value="weekly">Weekly — every Monday</option>'
+        +'<option value="quarterly">Quarterly</option>'
+        +'<option value="custom">Custom — every N weeks</option>'
+      +'</select>'
+      +'<div id="schCustom" style="display:none;margin-top:10px;align-items:center;gap:8px"><span style="font-size:13px;color:var(--text2)">Every</span> <input class="cb-mini" id="schEvery" type="number" min="1" value="'+SCH.every+'" style="width:56px" oninput="schSync()"> <span style="font-size:13px;color:var(--text2)">weeks</span></div></div>'
+      +'<div class="grid2"><div class="fgroup"><div class="f-label">Run at</div><input class="f-input" type="time" id="schTime" value="'+SCH.time+'"></div>'
+      +'<div class="fgroup"><div class="f-label">Timezone</div><select class="f-select" id="schTz"><option>US/Eastern</option><option>US/Central</option><option>US/Mountain</option><option>US/Pacific</option></select></div></div>'
+      +'<div id="schNextHint" style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--blue);background:var(--bluep);border-radius:8px;padding:9px 12px;margin-top:4px"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.2L9 8.5"/></svg><span id="schNextTxt"></span></div>',
+      '<div class="g"></div><button class="btn btn-blue" onclick="schNext1()">Continue</button>');
+    $('schFreq').value=SCH.freq; $('schTz').value=SCH.tz; schOnFreq();
+  }
+  else if(n===2){
+    openModal('Schedule report','Where the output goes each time it runs',
+      schStepper(2)
+      +'<div class="f-label" style="margin-top:2px">Delivery</div>'
+      +'<div class="tog-row"><div><div class="tr-t">Save to folder</div><div class="tr-s">Store the PDFs in "'+q.folder+'"</div></div><button class="tog '+(SCH.folder?'on':'off')+'" onclick="tog(this)" data-k="folder"></button></div>'
+      +'<div class="tog-row"><div><div class="tr-t">Email to recipients</div><div class="tr-s">'+(q.recipients.length?('Send to the '+q.recipients.length+' recipient'+(q.recipients.length!=1?'s':'')+' on this queue'):'No recipients on this queue yet — add them in section 3')+'</div></div><button class="tog '+(SCH.email?'on':'off')+'" onclick="tog(this)" data-k="email"'+(q.recipients.length?'':' disabled style="opacity:.4;pointer-events:none"')+'></button></div>'
+      +'<div class="tog-row"><div><div class="tr-t">Failure alerts</div><div class="tr-s">Notify an admin if a run misses its window or errors</div></div><button class="tog '+(SCH.alerts?'on':'off')+'" onclick="tog(this)" data-k="alerts"></button></div>'
+      +(q.recipients.length?'<div style="margin-top:12px;font-size:11.5px;color:var(--text3)">Recipients: '+q.recipients.map(p=>p.n).join(', ')+'</div>':''),
+      '<button class="btn btn-ghost" onclick="schStep(1)">Back</button><div class="g"></div><button class="btn btn-blue" onclick="schNext2()">Review</button>');
+  }
+  else if(n===3){
+    const row=(l,v)=>'<div style="display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--text3)">'+l+'</span><span style="font-weight:600;text-align:right">'+v+'</span></div>';
+    const deliv=[SCH.folder?'Save to folder':null, SCH.email?'Email recipients':null, SCH.alerts?'Failure alerts':null].filter(Boolean).join(' · ')||'None';
+    openModal('Schedule report','Confirm and this queue starts running automatically',
+      schStepper(3)
+      +'<div style="border:1px solid var(--border);border-radius:12px;padding:4px 16px;margin-bottom:14px">'
+        +row('Report package', q.name+' ('+q.reports.length+')')
+        +row('Frequency', schCadenceLabel())
+        +row('Run at', fmtTime12(SCH.time)+' '+SCH.tz)
+        +row('First run', schNextRun())
+        +row('Delivery', deliv)
+        +'<div style="display:flex;justify-content:space-between;gap:16px;padding:10px 0;font-size:13px"><span style="color:var(--text3)">Recipients</span><span style="font-weight:600;text-align:right">'+(SCH.email?(q.recipients.length+' by email'):'Not emailed')+'</span></div>'
+      +'</div>'
+      +'<div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text2);background:var(--surf);border-radius:8px;padding:11px 13px"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--green)" stroke-width="1.6" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><path d="M2 7.5l3.5 3.5L12 4"/></svg><span>The queue status changes to <b>Scheduled</b> and the first package generates on <b>'+schNextRun()+'</b>. You can pause or edit it anytime.</span></div>',
+      '<button class="btn btn-ghost" onclick="schStep(2)">Back</button><div class="g"></div><button class="btn btn-blue" onclick="schConfirm()"><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" style="margin-right:2px"><path d="M2 6.5l2.5 2.5L10 3"/></svg>Schedule report</button>');
+  }
+}
+function schOnFreq(){ SCH.freq=$('schFreq').value; $('schCustom').style.display=SCH.freq==='custom'?'flex':'none'; schSync(); }
+function schSync(){ if($('schEvery')) SCH.every=Math.max(1,parseInt($('schEvery').value)||1); if($('schNextTxt')) $('schNextTxt').textContent='First run: '+schNextRun()+' · '+schCadenceLabel(); }
+function schNext1(){ SCH.freq=$('schFreq').value; SCH.time=$('schTime').value||'06:00'; SCH.tz=$('schTz').value; if($('schEvery')) SCH.every=Math.max(1,parseInt($('schEvery').value)||1); schStep(2); }
+function schNext2(){ document.querySelectorAll('#mBody .tog[data-k]').forEach(b=>{ SCH[b.dataset.k]=b.classList.contains('on'); }); schStep(3); }
+function schConfirm(){
+  const q=QUEUES[current];
+  q.status='Scheduled'; q.statusClass='sp-scheduled';
+  q.meta=q.folder+' · '+schCadenceLabel()+' · next run '+schNextRun();
+  // reflect cadence back into the inline schedule control
+  const fsel=$('freq'); if(fsel && ['monthly','weekly','quarterly'].includes(SCH.freq)){ fsel.value=SCH.freq; onFreqChange(); }
+  closeModal(); render();
+  const rn=$('runNext'); if(rn) rn.style.display='none';
+  setTimeout(()=>toast('Scheduled · "'+q.name+'" runs '+schCadenceLabel().split(' · ')[0].toLowerCase()+' · first run '+schNextRun()),120);
 }
 
 /* ── toast ── */
