@@ -410,6 +410,32 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .entry-card h3 .step { background:var(--blue); color:white; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; letter-spacing:0; }
 .row2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.row4 { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+/* Stock inline (ported from atlas-stock-gift) */
+.calc-card { background:linear-gradient(135deg, var(--green-light) 0%, #BBF7D0 100%); border:1px solid #86EFAC; border-radius:11px; padding:16px 18px; margin-top:10px; }
+.calc-row { display:flex; justify-content:space-between; padding:5px 0; font-size:13px; }
+.calc-row .l { color:#14532D; }
+.calc-row .v { font-weight:600; color:var(--text); font-variant-numeric:tabular-nums; }
+.calc-row.total { padding-top:10px; border-top:1px solid #86EFAC; margin-top:6px; }
+.note-card { background:#FFFBEB; border:1px solid #FBBF24; border-radius:11px; padding:14px 16px; margin-top:14px; display:flex; gap:12px; align-items:flex-start; }
+.note-card .ico { width:30px; height:30px; border-radius:8px; background:var(--amber); color:white; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:700; }
+.note-card .body { flex:1; font-size:12.5px; color:#78350F; line-height:1.5; }
+.note-card .body b { color:var(--amber); }
+.sec-drop{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:40;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 14px 34px rgba(15,23,42,.14);max-height:236px;overflow:auto;display:none}
+.sec-drop.show{display:block}
+.sec-item{display:flex;align-items:center;gap:14px;padding:9px 13px;cursor:pointer}
+.sec-item:hover,.sec-item.active{background:var(--surface)}
+.sec-item .tk{font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:12px;color:var(--navy);width:56px;flex-shrink:0}
+.sec-item .co{font-size:13px;color:var(--text);line-height:1.3}
+.sec-item .co small{display:block;color:var(--text-3);font-size:11px}
+.sec-item .searching{color:var(--text-3);font-size:12.5px}
+.lasttrade{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px 16px;margin-top:14px}
+.lasttrade .lt-l{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-2)}
+.lasttrade .lt-sub{font-size:11px;color:var(--text-3);margin-top:2px}
+.lasttrade .lt-sub b{font-family:ui-monospace,Menlo,monospace;color:var(--text-2)}
+.lasttrade .lt-price{margin-left:auto;font-size:17px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums}
+.stk-h{font-size:13px;font-weight:700;color:var(--navy);margin:18px 0 8px;padding-top:16px;border-top:1px solid var(--border)}
+.stk-h .muted{font-weight:400;font-size:11px;color:var(--text-3)}
 
 /* donor lookup */
 .donor-lookup-wrap { position:relative; }
@@ -994,7 +1020,7 @@ body {
           <div class="type-pill" data-type="check">Check</div>
           <div class="type-pill" data-type="cc">Credit card</div>
           <div class="type-pill" data-type="ach">ACH</div>
-          <div class="type-pill" data-type="stock">Stock <small style="display:block;font-size:9px;font-weight:500;margin-top:1px;opacity:.6">→ dedicated</small></div>
+          <div class="type-pill" data-type="stock">Stock</div>
           <div class="type-pill" data-type="inkind">In-kind</div>
           <div class="type-pill flagged" data-type="daf">DAF</div>
           <div class="type-pill flagged" data-type="matching">Matching</div>
@@ -1012,10 +1038,10 @@ body {
 
       <!-- Step 3: Amount + date (type-conditional fields) -->
       <div class="entry-card">
-        <h3><span class="step">3</span> Amount &amp; details <span class="muted" id="type-label-3" style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;margin-left:6px">— for cash gift</span></h3>
+        <h3><span class="step">3</span> <span id="step3-title">Amount &amp; details</span> <span class="muted" id="type-label-3" style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;margin-left:6px">— for cash gift</span></h3>
 
-        <!-- Common: amount + date (always shown) -->
-        <div class="row3">
+        <!-- Common: amount + date (always shown, hidden for stock) -->
+        <div class="row3" id="common-amount-row">
           <div>
             <span class="lbl">Amount<span class="req">*</span></span>
             <input class="fld" value="$10,000.00" style="font-size:18px;font-weight:600" id="amt-fld" oninput="if(window.recomputeSoft)recomputeSoft()">
@@ -1094,17 +1120,24 @@ body {
           </p>
         </div>
 
-        <!-- Stock — redirect -->
+        <!-- Stock — inline (behaves like atlas-stock-gift) -->
         <div data-type-fields="stock" class="type-fields" style="display:none;margin-top:14px">
-          <div style="background:linear-gradient(135deg,#EDE9FE,#FAF5FF);border:1px solid #C4B5FD;border-radius:11px;padding:18px 22px;display:flex;gap:14px;align-items:center">
-            <div style="width:42px;height:42px;border-radius:10px;background:var(--purple);color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg width="20" height="20" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 17l5-6 4 3 7-9"/><path d="M14 5h4v4"/></svg>
+          <div class="row2">
+            <div style="position:relative">
+              <span class="lbl">Ticker / CUSIP<span class="req">*</span></span>
+              <input class="fld" id="stk-ticker" autocomplete="off" placeholder="e.g. AAPL or 037833100" value="AAPL" style="font-family:monospace;font-weight:600">
+              <div class="sec-drop" id="stk-drop"></div>
             </div>
-            <div style="flex:1">
-              <div style="font-weight:600;font-size:14px;color:var(--navy)">Stock has its own dedicated screen</div>
-              <div style="font-size:12.5px;color:var(--text-2);margin-top:3px;line-height:1.5">IRS-compliant valuation needs shares × (high+low)/2 plus separate sale-proceeds tracking — that's enough fields to deserve its own form.</div>
+            <div>
+              <span class="lbl">Security name<span class="req">*</span></span>
+              <input class="fld" id="stk-name" placeholder="e.g. Apple Inc." value="Apple Inc." readonly>
             </div>
-            <a class="btn btn-primary" href="atlas-stock-gift.html">Open stock-gift form →</a>
+          </div>
+          <div class="lasttrade" id="stk-lasttrade" style="display:none"></div>
+          <div class="row3" style="margin-top:14px">
+            <div><span class="lbl">Number of shares<span class="req">*</span></span><input class="fld" id="stk-shares" value="100" style="font-size:18px;font-weight:600" oninput="stkCalc()"></div>
+            <div><span class="lbl">Trade date<span class="req">*</span></span><input class="fld" value="Apr 22, 2026"></div>
+            <div><span class="lbl">Date received in account</span><input class="fld" value="Apr 22, 2026"></div>
           </div>
         </div>
 
@@ -1261,9 +1294,38 @@ body {
 
       </div>
 
+      <!-- Stock-only: Valuation -->
+      <div class="entry-card stk-only" id="stk-card-valuation" style="display:none">
+        <h3><span class="step" id="step-val">4</span> Valuation — IRS-compliant <span class="muted" style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;margin-left:6px">FMV = shares × (high + low) / 2 per Pub 561</span></h3>
+        <div class="row3">
+          <div><span class="lbl">High of day<span class="req">*</span></span><input class="fld" id="stk-high" value="$185.20" oninput="stkCalc()" style="font-variant-numeric:tabular-nums"></div>
+          <div><span class="lbl">Low of day<span class="req">*</span></span><input class="fld" id="stk-low" value="$183.10" oninput="stkCalc()" style="font-variant-numeric:tabular-nums"></div>
+          <div><span class="lbl">Source</span><select class="fld"><option selected>NYSE close · Bloomberg</option><option>NASDAQ · WSJ</option><option>Manual</option></select></div>
+        </div>
+        <div class="calc-card" style="background:linear-gradient(135deg,#DBEAFE,#EFF6FF);border-color:#BFDBFE">
+          <div class="calc-row"><span class="l" style="color:var(--navy)">Average per share (FMV)</span><span class="v" id="stk-avg">$184.15</span></div>
+          <div class="calc-row total" style="border-top-color:#BFDBFE"><span class="l" style="color:var(--navy)">Calculated FMV · <span id="stk-sh2">100</span> shares</span><span class="v" id="stk-fmv" style="color:var(--navy)">$18,415.00</span></div>
+        </div>
+      </div>
+
+      <!-- Stock-only: Sale & accounting -->
+      <div class="entry-card stk-only" id="stk-card-sale" style="display:none">
+        <h3><span class="step" id="step-sale">5</span> Sale &amp; accounting <span class="muted" style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;margin-left:6px">stored separately for GL · variance from FMV = realized gain/loss</span></h3>
+        <div class="row4">
+          <div><span class="lbl">Sale date</span><input class="fld" value="Apr 23, 2026"></div>
+          <div><span class="lbl">Sale price / share</span><input class="fld" value="$184.00"></div>
+          <div><span class="lbl">Sale fees</span><input class="fld" value="$15.00"></div>
+          <div><span class="lbl">Net proceeds</span><input class="fld" value="$18,385.00" disabled style="font-weight:600;color:var(--navy)"></div>
+        </div>
+        <div class="note-card">
+          <div class="ico">!</div>
+          <div class="body"><b>Receipt rule:</b> Stock-gift receipt shows shares &amp; security received (e.g. "100 shares of Apple Inc.") — <strong>no dollar value</strong>. The donor uses their own FMV for tax purposes.</div>
+        </div>
+      </div>
+
       <!-- Step 4: Designation -->
       <div class="entry-card">
-        <h3><span class="step">4</span> Designation</h3>
+        <h3><span class="step" id="step-desig">4</span> Designation</h3>
         <div class="row2">
           <div>
             <span class="lbl">Campaign</span>
@@ -1309,7 +1371,7 @@ body {
 
       <!-- Step 5: Soft credits -->
       <div class="entry-card">
-        <h3><span class="step">5</span> Soft credits <span class="muted" style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;margin-left:6px">optional · attribute to other constituents</span></h3>
+        <h3><span class="step" id="step-soft">5</span> Soft credits <span class="muted" style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;margin-left:6px">optional · attribute to other constituents</span></h3>
         <span class="lbl">Soft-credit recipients</span>
         <div id="sc-list" style="margin-top:6px">
           <div class="soft-row">
@@ -1333,7 +1395,7 @@ body {
 
       <!-- Step 6: Notes -->
       <div class="entry-card">
-        <h3><span class="step">6</span> Notes &amp; tracking <span class="muted" style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;margin-left:6px">optional</span></h3>
+        <h3><span class="step" id="step-notes">6</span> Notes &amp; tracking <span class="muted" style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;margin-left:6px">optional</span></h3>
         <div class="row2">
           <div>
             <span class="lbl">Internal note</span>
@@ -1438,6 +1500,24 @@ body {
 
       // Update step-3 label
       if (typeLabel3) typeLabel3.textContent = '— for ' + (typeNames[t] || t);
+
+      // Stock behaves like the dedicated stock-gift form: no "Amount & details"
+      // dollar row — the amount is the calculated Pub-561 FMV. Card becomes "Security".
+      var isStock = (t === 'stock');
+      var amtRow = document.getElementById('common-amount-row');
+      if (amtRow) amtRow.style.display = isStock ? 'none' : '';
+      var s3title = document.getElementById('step3-title');
+      if (s3title) s3title.textContent = isStock ? 'Security' : 'Amount & details';
+      if (typeLabel3) typeLabel3.style.display = isStock ? 'none' : '';
+      // Stock shows Valuation & Sale as their own cards; renumber the following steps
+      var valCard = document.getElementById('stk-card-valuation'), saleCard = document.getElementById('stk-card-sale');
+      if (valCard) valCard.style.display = isStock ? '' : 'none';
+      if (saleCard) saleCard.style.display = isStock ? '' : 'none';
+      function setStep(id, n){ var e = document.getElementById(id); if (e) e.textContent = n; }
+      setStep('step-desig', isStock ? 6 : 4);
+      setStep('step-soft',  isStock ? 7 : 5);
+      setStep('step-notes', isStock ? 8 : 6);
+      if (isStock && window.stkCalc) setTimeout(window.stkCalc, 20);
 
       // Recurring carries its own "Payment method on file" field, so hide the
       // generic step-3 payment-method dropdown to avoid asking twice.
@@ -2905,6 +2985,75 @@ body {
       if(want){ [].forEach.call(meth.options,function(o){ if(o.textContent===want) meth.value=o.textContent; }); } }
   }
   if(document.readyState!=='loading') run(); else document.addEventListener('DOMContentLoaded', run);
+})();
+</script>
+<script>
+/* ── Inline stock gift: ticker autocomplete + Pub 561 FMV calc ── */
+(function(){
+  var SECS=[
+    {t:'AAPL',n:'Apple Inc.',ex:'NASDAQ',ty:'equity',p:227.15},
+    {t:'AMAT',n:'Applied Materials, Inc.',ex:'NASDAQ',ty:'equity',p:441.85},
+    {t:'APP',n:'AppLovin Corporation',ex:'NASDAQ',ty:'equity',p:412.90},
+    {t:'APLD',n:'Applied Digital Corporation',ex:'NASDAQ',ty:'equity',p:11.42},
+    {t:'AERG',n:'Applied Energetics, Inc.',ex:'OTCQB',ty:'equity',p:2.18},
+    {t:'SAIC',n:'Science Applications International Corporation',ex:'NASDAQ',ty:'equity',p:118.30},
+    {t:'MSFT',n:'Microsoft Corporation',ex:'NASDAQ',ty:'equity',p:508.40},
+    {t:'NVDA',n:'NVIDIA Corporation',ex:'NASDAQ',ty:'equity',p:176.90},
+    {t:'TSLA',n:'Tesla, Inc.',ex:'NASDAQ',ty:'equity',p:334.10},
+    {t:'BRK.B',n:'Berkshire Hathaway Inc. Class B',ex:'NYSE',ty:'equity',p:492.60},
+    {t:'JNJ',n:'Johnson & Johnson',ex:'NYSE',ty:'equity',p:168.25},
+    {t:'VTI',n:'Vanguard Total Stock Market ETF',ex:'NYSE Arca',ty:'ETF',p:298.70}
+  ];
+  var inp=document.getElementById('stk-ticker'), drop=document.getElementById('stk-drop'), nameFld=document.getElementById('stk-name'), lt=document.getElementById('stk-lasttrade');
+  function num(v){ return parseFloat(String(v).replace(/[^0-9.]/g,''))||0; }
+  function money(n){ return '$'+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  window.stkCalc=function(){
+    var sh=num((document.getElementById('stk-shares')||{}).value), hi=num((document.getElementById('stk-high')||{}).value), lo=num((document.getElementById('stk-low')||{}).value);
+    var avg=(hi+lo)/2, fmv=avg*sh;
+    var a=document.getElementById('stk-avg'); if(a) a.textContent=money(avg);
+    var f=document.getElementById('stk-fmv'); if(f) f.textContent=money(fmv);
+    var s2=document.getElementById('stk-sh2'); if(s2) s2.textContent=sh;
+    // sync the shared amount field so soft credits compute on FMV
+    var stockActive=document.querySelector('[data-type-fields="stock"]');
+    if(stockActive && stockActive.style.display!=='none'){
+      var amt=document.getElementById('amt-fld'); if(amt){ amt.value=money(fmv); if(window.recomputeSoft) recomputeSoft(); }
+    }
+  };
+  if(inp){
+    var searchTimer=null, active=-1, results=[];
+    function showLastTrade(s){
+      if(!s){ lt.style.display='none'; return; }
+      lt.style.display='flex';
+      lt.innerHTML='<div><div class="lt-l">Last trade <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3)">· reference only, not the Pub 561 valuation</span></div><div class="lt-sub"><b>'+s.t+'</b> · as of 2 Sept, 1:30 PM</div></div><div class="lt-price">US$'+s.p.toFixed(2)+'</div>';
+    }
+    function render(){
+      if(!results.length){ drop.innerHTML='<div class="sec-item"><span class="searching">No matches — enter ticker &amp; name manually.</span></div>'; drop.classList.add('show'); return; }
+      drop.innerHTML=results.map(function(s,i){ return '<div class="sec-item'+(i===active?' active':'')+'" data-i="'+i+'"><span class="tk">'+s.t+'</span><span class="co">'+s.n+'<small>'+s.ex+' · '+s.ty+'</small></span></div>'; }).join('');
+      drop.classList.add('show');
+    }
+    function search(q){ var ql=q.toLowerCase(); results=SECS.filter(function(s){ return s.t.toLowerCase().indexOf(ql)===0 || s.n.toLowerCase().indexOf(ql)!==-1; }).slice(0,8); active=-1; render(); }
+    function pick(s){ inp.value=s.t; nameFld.value=s.n; drop.classList.remove('show'); showLastTrade(s); }
+    inp.addEventListener('input', function(){
+      var q=this.value.trim(); lt.style.display='none'; clearTimeout(searchTimer);
+      if(q.length<2){ drop.classList.remove('show'); return; }
+      drop.innerHTML='<div class="sec-item"><span class="searching">Searching…</span></div>'; drop.classList.add('show');
+      searchTimer=setTimeout(function(){ search(q); }, 350);
+    });
+    inp.addEventListener('keydown', function(e){
+      if(!drop.classList.contains('show')||!results.length) return;
+      if(e.key==='ArrowDown'){ e.preventDefault(); active=Math.min(active+1,results.length-1); render(); }
+      else if(e.key==='ArrowUp'){ e.preventDefault(); active=Math.max(active-1,0); render(); }
+      else if(e.key==='Enter'){ if(active>-1){ e.preventDefault(); pick(results[active]); } }
+      else if(e.key==='Escape'){ drop.classList.remove('show'); }
+    });
+    drop.addEventListener('mousedown', function(e){ var it=e.target.closest('.sec-item'); if(it&&it.dataset.i!=null){ e.preventDefault(); pick(results[+it.dataset.i]); } });
+    inp.addEventListener('blur', function(){ setTimeout(function(){ drop.classList.remove('show'); }, 150); });
+    showLastTrade(SECS[0]);
+  }
+  // when Stock pill is chosen, sync FMV → amount
+  var stockPill=document.querySelector('.type-pill[data-type="stock"]');
+  if(stockPill) stockPill.addEventListener('click', function(){ setTimeout(window.stkCalc, 20); });
+  stkCalc();
 })();
 </script>
 <!-- /ATLAS-NAVCOLLAPSE -->

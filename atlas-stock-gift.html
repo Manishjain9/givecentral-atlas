@@ -324,6 +324,38 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .sum-actions .primary:hover { background:#1D4ED8; }
 .sum-actions .ghost { background:rgba(255,255,255,.07); color:white; border:1px solid rgba(255,255,255,.12); }
 
+/* Soft-credit editor (ported from gift-entry) */
+.soft-row{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:8px}
+.soft-row .sc-av{width:34px;height:34px;border-radius:50%;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.soft-row .sc-av-new{background:#EEF2F7;color:var(--text-3)}
+.soft-row .sc-nm,.soft-row .sc-name{flex:1;min-width:0;font-weight:600;color:var(--text);font-size:13.5px;display:flex;align-items:center}
+.soft-row .sc-pct{width:62px;text-align:center;padding:6px 8px;flex:none}
+.soft-row .sc-pctsign{color:var(--text-3);font-size:13px}
+.soft-row .sc-x{color:var(--text-3);cursor:pointer;font-size:20px;line-height:1;padding:0 2px}
+.soft-row .sc-x:hover{color:var(--rose)}
+.sc-status{border-radius:9px;padding:9px 13px;font-size:12.5px;font-weight:600;margin-top:2px}
+.sc-status.ok{background:var(--green-light);color:#166534}
+.sc-status.warn{background:var(--amber-light);color:#92400E}
+.sc-add{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--blue);background:var(--blue-pale);border:1px solid #DBEAFE;border-radius:8px;padding:7px 13px;cursor:pointer}
+.sc-add:hover{filter:brightness(.97)}
+.sc-even{font-size:12.5px;color:var(--text-3);cursor:pointer}
+.sc-even:hover{color:var(--blue);text-decoration:underline}
+
+/* Security ticker autocomplete */
+.sec-drop{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:40;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 14px 34px rgba(15,23,42,.14);max-height:236px;overflow:auto;display:none}
+.sec-drop.show{display:block}
+.sec-item{display:flex;align-items:center;gap:14px;padding:9px 13px;cursor:pointer}
+.sec-item:hover,.sec-item.active{background:var(--surface)}
+.sec-item .tk{font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:12px;color:var(--navy);width:56px;flex-shrink:0}
+.sec-item .co{font-size:13px;color:var(--text);line-height:1.3}
+.sec-item .co small{display:block;color:var(--text-3);font-size:11px}
+.sec-item .searching{color:var(--text-3);font-size:12.5px}
+.lasttrade{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px 16px;margin-top:14px}
+.lasttrade .lt-l{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-2)}
+.lasttrade .lt-sub{font-size:11px;color:var(--text-3);margin-top:2px}
+.lasttrade .lt-sub b{font-family:ui-monospace,Menlo,monospace;color:var(--text-2)}
+.lasttrade .lt-price{margin-left:auto;font-size:17px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums}
+
 </style>
 
 
@@ -680,15 +712,18 @@ body {
         <h3><span class="step">2</span> Security</h3>
 
         <div class="row2">
-          <div>
+          <div style="position:relative">
             <span class="lbl">Ticker / CUSIP<span class="req">*</span></span>
-            <input class="fld" value="AAPL" style="font-family:monospace;font-weight:600">
+            <input class="fld" id="secTicker" autocomplete="off" placeholder="e.g. AAPL or 037833100" value="AAPL" style="font-family:monospace;font-weight:600">
+            <div class="sec-drop" id="secDrop"></div>
           </div>
           <div>
-            <span class="lbl">Security name</span>
-            <input class="fld" value="Apple Inc." disabled>
+            <span class="lbl">Security name<span class="req">*</span></span>
+            <input class="fld" id="secName" placeholder="e.g. Apple Inc." value="Apple Inc." readonly>
           </div>
         </div>
+
+        <div class="lasttrade" id="lastTrade" style="display:none"></div>
 
         <div class="row3 mt-12" style="margin-top:12px">
           <div>
@@ -784,6 +819,52 @@ body {
           <div class="ico">!</div>
           <div class="body">
             <b>Receipt rule:</b> Stock-gift receipt will show "100 shares of Apple Inc., received Apr 22, 2026" — <strong>no dollar value</strong>. The donor uses their own FMV calculation for tax purposes.
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 6: Soft credits -->
+      <div class="entry-card">
+        <h3><span class="step">6</span> Soft credits <span class="muted" style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;margin-left:6px">optional · attribute to other constituents</span></h3>
+        <span class="lbl">Soft-credit recipients</span>
+        <div id="sc-list" style="margin-top:6px">
+          <div class="soft-row">
+            <div class="sc-av">PS</div>
+            <div class="sc-nm">Peter Smith <span style="margin-left:8px;font-size:10px;font-weight:600;color:var(--blue);background:var(--blue-pale);border-radius:20px;padding:2px 8px">spouse-linked</span></div>
+            <input class="sc-pct fld" value="100" oninput="recomputeSoft()">
+            <span class="sc-pctsign">%</span>
+            <span class="sc-x" onclick="removeRecipient(this)">×</span>
+          </div>
+        </div>
+        <div class="sc-status ok" id="sc-status">✓ 100% assigned — $18,415 total soft credited</div>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:10px">
+          <button class="sc-add" onclick="addRecipient()">+ Add recipient</button>
+          <span class="sc-even" onclick="distributeEvenly()">Distribute evenly</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px">
+          <div><span class="lbl">Solicitor (gift officer)</span><select class="fld"><option selected>Sarah Reynolds (you)</option><option>Bridget McCarthy</option></select></div>
+          <div><span class="lbl">Solicitation method</span><select class="fld"><option selected>In-person visit</option><option>Phone call</option><option>Email</option><option>Event</option><option>Mail</option></select></div>
+        </div>
+      </div>
+
+      <!-- Step 7: Notes & tracking -->
+      <div class="entry-card">
+        <h3><span class="step">7</span> Notes &amp; tracking <span class="muted" style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;margin-left:6px">optional</span></h3>
+        <div class="row2">
+          <div>
+            <span class="lbl">Internal note</span>
+            <textarea class="fld" placeholder="e.g. stock delivered in-kind via DTC; broker confirmation on file">Shares delivered in-kind via DTC on Apr 22. Broker confirmation from Fidelity on file. Donor plans a similar transfer of appreciated stock next December.</textarea>
+          </div>
+          <div>
+            <span class="lbl">Acknowledgement letter</span>
+            <select class="fld">
+              <option>Stock / non-cash gift (shares &amp; date, no value)</option>
+              <option>Cathedral capital — major donor (Sarah Reynolds)</option>
+              <option>Custom — pause and edit</option>
+              <option>Do not acknowledge</option>
+            </select>
+            <span class="lbl mt-12">Tribute / honorary?</span>
+            <input class="fld" placeholder="In honor of… (optional)">
           </div>
         </div>
       </div>
@@ -1657,5 +1738,100 @@ body {
 })();
 </script>
 <!-- /ATLAS-NAVCOLLAPSE -->
+<script>
+/* ── Security ticker autocomplete (Searching… → results → fill name + last trade) ── */
+(function(){
+  var SECS=[
+    {t:'AAPL',n:'Apple Inc.',ex:'NASDAQ',ty:'equity',p:227.15},
+    {t:'AMAT',n:'Applied Materials, Inc.',ex:'NASDAQ',ty:'equity',p:441.85},
+    {t:'APP',n:'AppLovin Corporation',ex:'NASDAQ',ty:'equity',p:412.90},
+    {t:'APLD',n:'Applied Digital Corporation',ex:'NASDAQ',ty:'equity',p:11.42},
+    {t:'AERG',n:'Applied Energetics, Inc.',ex:'OTCQB',ty:'equity',p:2.18},
+    {t:'SAIC',n:'Science Applications International Corporation',ex:'NASDAQ',ty:'equity',p:118.30},
+    {t:'MSFT',n:'Microsoft Corporation',ex:'NASDAQ',ty:'equity',p:508.40},
+    {t:'NVDA',n:'NVIDIA Corporation',ex:'NASDAQ',ty:'equity',p:176.90},
+    {t:'TSLA',n:'Tesla, Inc.',ex:'NASDAQ',ty:'equity',p:334.10},
+    {t:'BRK.B',n:'Berkshire Hathaway Inc. Class B',ex:'NYSE',ty:'equity',p:492.60},
+    {t:'JNJ',n:'Johnson & Johnson',ex:'NYSE',ty:'equity',p:168.25},
+    {t:'VTI',n:'Vanguard Total Stock Market ETF',ex:'NYSE Arca',ty:'ETF',p:298.70}
+  ];
+  var inp=document.getElementById('secTicker'), drop=document.getElementById('secDrop'), nameFld=document.getElementById('secName'), lt=document.getElementById('lastTrade');
+  if(inp){
+    var searchTimer=null, active=-1, results=[];
+    function showLastTrade(s){
+      if(!s){ lt.style.display='none'; return; }
+      lt.style.display='flex';
+      lt.innerHTML='<div><div class="lt-l">Last trade <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3)">· reference only, not the Pub 561 valuation</span></div><div class="lt-sub"><b>'+s.t+'</b> · as of 2 Sept, 1:30 PM</div></div><div class="lt-price">US$'+s.p.toFixed(2)+'</div>';
+    }
+    function render(){
+      if(!results.length){ drop.innerHTML='<div class="sec-item"><span class="searching">No matches — enter ticker &amp; name manually.</span></div>'; drop.classList.add('show'); return; }
+      drop.innerHTML=results.map(function(s,i){ return '<div class="sec-item'+(i===active?' active':'')+'" data-i="'+i+'"><span class="tk">'+s.t+'</span><span class="co">'+s.n+'<small>'+s.ex+' · '+s.ty+'</small></span></div>'; }).join('');
+      drop.classList.add('show');
+    }
+    function search(q){
+      var ql=q.toLowerCase();
+      results=SECS.filter(function(s){ return s.t.toLowerCase().indexOf(ql)===0 || s.n.toLowerCase().indexOf(ql)!==-1; }).slice(0,8);
+      active=-1; render();
+    }
+    function pick(s){ inp.value=s.t; nameFld.value=s.n; drop.classList.remove('show'); showLastTrade(s); }
+    inp.addEventListener('input', function(){
+      var q=this.value.trim(); lt.style.display='none'; clearTimeout(searchTimer);
+      if(q.length<2){ drop.classList.remove('show'); return; }
+      drop.innerHTML='<div class="sec-item"><span class="searching">Searching…</span></div>'; drop.classList.add('show');
+      searchTimer=setTimeout(function(){ search(q); }, 350);
+    });
+    inp.addEventListener('keydown', function(e){
+      if(!drop.classList.contains('show')||!results.length) return;
+      if(e.key==='ArrowDown'){ e.preventDefault(); active=Math.min(active+1,results.length-1); render(); }
+      else if(e.key==='ArrowUp'){ e.preventDefault(); active=Math.max(active-1,0); render(); }
+      else if(e.key==='Enter'){ if(active>-1){ e.preventDefault(); pick(results[active]); } }
+      else if(e.key==='Escape'){ drop.classList.remove('show'); }
+    });
+    drop.addEventListener('mousedown', function(e){ var it=e.target.closest('.sec-item'); if(it&&it.dataset.i!=null){ e.preventDefault(); pick(results[+it.dataset.i]); } });
+    inp.addEventListener('blur', function(){ setTimeout(function(){ drop.classList.remove('show'); }, 150); });
+    showLastTrade(SECS[0]); // default AAPL populated
+  }
+})();
+/* ── Soft-credit editor (ported from gift-entry, adapted to stock FMV) ── */
+(function(){
+  var STOCK_TOTAL = 18415; // calculated FMV for this stock gift
+  window.addRecipient = function(){
+    var row = document.createElement('div'); row.className = 'soft-row';
+    row.innerHTML = '<div class="sc-av sc-av-new">+</div>'
+      + '<input class="sc-name fld" placeholder="Search donor or type a name…" oninput="scNameInput(this)">'
+      + '<input class="sc-pct fld" value="0" oninput="recomputeSoft()"><span class="sc-pctsign">%</span>'
+      + '<span class="sc-x" onclick="removeRecipient(this)">×</span>';
+    document.getElementById('sc-list').appendChild(row); recomputeSoft();
+    var inp = row.querySelector('.sc-name'); if (inp) inp.focus();
+  };
+  window.scNameInput = function(el){
+    var av = el.closest('.soft-row').querySelector('.sc-av');
+    var v = (el.value || '').trim();
+    if (!v) { av.textContent = '+'; av.classList.add('sc-av-new'); return; }
+    var p = v.replace(/[.'’,]/g,'').split(/[\s&]+/).filter(Boolean);
+    av.textContent = (((p[0]||'')[0]||'') + ((p[1]||'')[0]||'')).toUpperCase() || '?';
+    av.classList.remove('sc-av-new');
+  };
+  window.removeRecipient = function(x){
+    if (document.querySelectorAll('#sc-list .soft-row').length <= 1) return;
+    x.closest('.soft-row').remove(); recomputeSoft();
+  };
+  window.distributeEvenly = function(){
+    var rows = document.querySelectorAll('#sc-list .soft-row'); var n = rows.length;
+    var base = Math.floor(100 / n), rem = 100 - base * n;
+    rows.forEach(function(r,i){ r.querySelector('.sc-pct').value = base + (i < rem ? 1 : 0); });
+    recomputeSoft();
+  };
+  window.recomputeSoft = function(){
+    var rows = document.querySelectorAll('#sc-list .soft-row'); var sum = 0;
+    rows.forEach(function(r){ sum += parseFloat(r.querySelector('.sc-pct').value) || 0; });
+    var credited = Math.round(STOCK_TOTAL * sum / 100);
+    var st = document.getElementById('sc-status'); if (!st) return;
+    if (Math.abs(sum - 100) < 0.01) { st.className = 'sc-status ok'; st.textContent = '✓ 100% assigned — $' + credited.toLocaleString() + ' total soft credited'; }
+    else if (sum > 100) { st.className = 'sc-status warn'; st.textContent = '⚠ ' + sum + '% assigned — ' + (sum - 100) + '% over-allocated'; }
+    else { st.className = 'sc-status warn'; st.textContent = '⚠ ' + sum + '% assigned — ' + (100 - sum) + '% unassigned'; }
+  };
+})();
+</script>
 </body>
 </html>
