@@ -1406,23 +1406,8 @@ body {
             '</div>' +
           '</div>' +
           '<div class="pane" data-i="2">' +
-            '<div class="lbl">Pick columns <span style="font-weight:400;text-transform:none;color:#64748B;font-size:11px;margin-left:6px">click to toggle · drag in Phase 2 to reorder</span></div>' +
-            '<div class="cols" id="rpt-cols">' +
-              '<div class="col-chip on">Gift ID</div>' +
-              '<div class="col-chip on">Donor name</div>' +
-              '<div class="col-chip on">Amount</div>' +
-              '<div class="col-chip on">Gift date</div>' +
-              '<div class="col-chip">Campaign</div>' +
-              '<div class="col-chip">Appeal</div>' +
-              '<div class="col-chip">Fund / GL code</div>' +
-              '<div class="col-chip">Payment method</div>' +
-              '<div class="col-chip">Designation</div>' +
-              '<div class="col-chip">Soft credits</div>' +
-              '<div class="col-chip">Receipt #</div>' +
-              '<div class="col-chip">Officer</div>' +
-              '<div class="col-chip">Donor email</div>' +
-              '<div class="col-chip">Lifetime giving</div>' +
-            '</div>' +
+            '<div class="lbl" id="rpt-cols-lbl">Pick columns <span style="font-weight:400;text-transform:none;color:#64748B;font-size:11px;margin-left:6px">click to toggle · drag in Phase 2 to reorder</span></div>' +
+            '<div class="cols" id="rpt-cols"></div>' +
           '</div>' +
           '<div class="pane" data-i="3">' +
             '<div class="lbl">Date range</div>' +
@@ -1477,14 +1462,54 @@ body {
         else if (n === 3) next.textContent = 'Next: Save →';
         else if (n === 4) next.textContent = 'Save report ✓';
       }
+      // ── Dataset → column sets (columns differ per dataset) ──
+      var COLSETS = {
+        gifts: { name:'Gifts', cols:[
+          ['Gift ID',1],['Donor name',1],['Amount',1],['Gift date',1],
+          ['Campaign',0],['Appeal',0],['Fund / GL code',0],['Payment method',0],['Designation',0],
+          ['Soft credits',0],['Receipt #',0],['Officer',0],['Donor email',0],['Lifetime giving',0] ] },
+        donors: { name:'Constituents', cols:[
+          ['Constituent ID',1],['Name',1],['Type',1],['Lifetime giving',1],
+          ['Email',0],['Phone',0],['Mailing address',0],['City / State',0],
+          ['Last gift date',0],['Last gift amount',0],['Gift count',0],['Assigned officer',0],
+          ['Membership status',0],['Tags / segments',0],['Deceased flag',0] ] },
+        pledges: { name:'Pledges', cols:[
+          ['Pledge ID',1],['Donor name',1],['Total pledged',1],['Balance remaining',1],
+          ['Installment amount',0],['Frequency',0],['Start date',0],['End date',0],['Next due date',0],
+          ['Payments made',0],['Campaign',0],['Fund',0],['Status',0],['Officer',0] ] },
+        campaigns: { name:'Campaigns', cols:[
+          ['Campaign',1],['Goal',1],['Raised',1],['% to goal',1],
+          ['Appeal',0],['Donor count',0],['Gift count',0],['Average gift',0],
+          ['Start date',0],['End date',0],['Status',0],['Officer',0] ] },
+        events: { name:'Events', cols:[
+          ['Event',1],['Event date',1],['Attendance',1],['Revenue',1],
+          ['Ticket sales',0],['Sponsorships',0],['Expenses',0],['Net revenue',0],
+          ['Registrations',0],['Table count',0],['Campaign',0],['Venue',0] ] },
+        custom: { name:'SQL · custom', sql:true }
+      };
+      var colsBox = drawer.querySelector('#rpt-cols');
+      var colsLbl = drawer.querySelector('#rpt-cols-lbl');
+      function renderCols(ds){
+        var set = COLSETS[ds] || COLSETS.gifts;
+        if (set.sql){
+          colsLbl.innerHTML = 'Query columns <span style="font-weight:400;text-transform:none;color:#64748B;font-size:11px;margin-left:6px">columns come from the SELECT in your SQL</span>';
+          colsBox.innerHTML = '<textarea class="fld" style="width:100%;height:140px;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;resize:vertical" placeholder="SELECT donor_name, amount, gift_date&#10;FROM gifts&#10;WHERE fiscal_year = 2026">SELECT donor_name, amount, gift_date\nFROM gifts\nWHERE fiscal_year = 2026</textarea>';
+          return;
+        }
+        colsLbl.innerHTML = 'Pick columns <span style="font-weight:400;text-transform:none;color:#64748B;font-size:11px;margin-left:6px">' + set.name + ' · click to toggle · drag in Phase 2 to reorder</span>';
+        colsBox.innerHTML = set.cols.map(function(c){ return '<div class="col-chip' + (c[1]?' on':'') + '">' + c[0] + '</div>'; }).join('');
+      }
+      renderCols('gifts');
       drawer.querySelectorAll('.ds').forEach(function(d){
         d.addEventListener('click', function(){
           drawer.querySelectorAll('.ds').forEach(function(x){ x.classList.remove('sel'); });
           d.classList.add('sel');
+          renderCols(d.dataset.ds);
         });
       });
-      drawer.querySelectorAll('.col-chip').forEach(function(c){
-        c.addEventListener('click', function(){ c.classList.toggle('on'); });
+      // delegated toggle (chips are re-rendered per dataset)
+      colsBox.addEventListener('click', function(e){
+        var c = e.target.closest('.col-chip'); if (c) c.classList.toggle('on');
       });
       drawer.querySelectorAll('.vz').forEach(function(v){
         v.addEventListener('click', function(){
