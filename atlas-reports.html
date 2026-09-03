@@ -1592,7 +1592,7 @@ body {
       renderCols('gifts');
       // delegated toggle (chips are re-rendered per dataset)
       colsBox.addEventListener('click', function(e){
-        var c = e.target.closest('.col-chip'); if (c) c.classList.toggle('on');
+        var c = e.target.closest('.col-chip'); if (c){ c.classList.toggle('on'); if(typeof refreshSortFields==='function') refreshSortFields(); }
       });
 
       // ══ Field catalog (categorized) per dataset ══
@@ -1743,36 +1743,36 @@ body {
       }
 
       // Curated, relevant sort fields per dataset (label, kind) — kind drives the direction wording
-      var SORTABLES={
-        gifts:[['Gift date','date'],['Amount','amount'],['Donor name','name'],['Campaign','text'],['Fund / GL code','text']],
-        donors:[['Name','name'],['Lifetime giving','amount'],['Last gift date','date'],['Gift count','count'],['Assigned officer','name']],
-        pledges:[['Donor name','name'],['Total pledged','amount'],['Balance','amount'],['% paid','percent'],['Next due','date']],
-        campaigns:[['Campaign','name'],['Raised','amount'],['% to goal','percent'],['Goal','amount'],['Start date','date']],
-        events:[['Date','date'],['Revenue','amount'],['Attendees','count'],['Capacity','count'],['Event','name']],
-        funds:[['Fund name','name'],['Raised','amount'],['Gifts','count'],['Donors','count'],['Goal','amount']],
-        appeals:[['Appeal name','name'],['Raised','amount'],['Number solicited','count'],['Gifts','count'],['Start date','date']],
-        advanced:[['Constituent name','name'],['Gift amount','amount'],['Gift date','date'],['Lifetime giving','amount']]
-      };
+      // Direction wording is inferred from the field, so ANY selected column can be a sort key
       var SORTDIRS={
         amount:['Highest first','Lowest first'],
         percent:['Highest first','Lowest first'],
         count:['Most first','Fewest first'],
         date:['Newest first','Oldest first'],
-        name:['A → Z','Z → A'],
         text:['A → Z','Z → A']
       };
-      var sortDs='gifts';
-      function sortKind(l){ var arr=SORTABLES[sortDs]||[]; for(var i=0;i<arr.length;i++){ if(arr[i][0]===l) return arr[i][1]; } return 'text'; }
-      function syncSortDir(){ var opts=SORTDIRS[sortKind(sortFieldSel.value)]||SORTDIRS.text; sortDirSel.innerHTML=opts.map(function(o){return '<option>'+o+'</option>';}).join(''); }
-      function populateSort(ds){
-        sortDs=ds; sortSpec=[]; sortListBox.innerHTML='';
-        var arr=SORTABLES[ds]||[];
-        sortFieldSel.innerHTML=arr.map(function(c){return '<option>'+c[0]+'</option>';}).join('');
-        syncSortDir();
+      function sortKind(l){
+        if(/%|\brate\b|to goal|fulfilled|\broi\b/i.test(l)) return 'percent';
+        if(/amount|giving|goal|raised|revenue|balance|net|cost|pledged|average|paid|price|proceeds/i.test(l)) return 'amount';
+        if(/\bdate\b|due|\bday\b/i.test(l)) return 'date';
+        if(/count|attendees|capacity|solicited|\bgifts\b|\bdonors\b|responses|payments|shares|registrations|seats/i.test(l)) return 'count';
+        return 'text';
       }
+      function syncSortDir(){ var opts=SORTDIRS[sortKind(sortFieldSel.value)]||SORTDIRS.text; sortDirSel.innerHTML=opts.map(function(o){return '<option>'+o+'</option>';}).join(''); }
+      function selectedColumns(){ return [].slice.call(drawer.querySelectorAll('#rpt-cols .col-chip.on')).map(function(c){return c.textContent;}); }
+      // Sort-by offers exactly the columns picked in Step 2 — rebuilds as you toggle columns
+      function refreshSortFields(){
+        var on=selectedColumns(), prev=sortFieldSel.value;
+        sortSpec=sortSpec.filter(function(s){return on.indexOf(s.l)!==-1;}); // drop sorts whose column was removed
+        sortFieldSel.innerHTML=on.map(function(c){return '<option'+(c===prev?' selected':'')+'>'+c+'</option>';}).join('');
+        sortAddBtn.disabled=!on.length; sortAddBtn.style.opacity=on.length?'1':'.5';
+        syncSortDir(); renderSort();
+      }
+      function populateSort(ds){ sortSpec=[]; sortListBox.innerHTML=''; refreshSortFields(); }
       sortFieldSel.addEventListener('change', syncSortDir);
       sortAddBtn.addEventListener('click', function(){
         var l=sortFieldSel.value, dir=sortDirSel.value;
+        if(!l){ showToast('Pick some columns first'); return; }
         if(sortSpec.filter(function(s){return s.l===l;}).length){ showToast(l+' is already a sort key'); return; }
         sortSpec.push({l:l,dir:dir}); renderSort();
       });
