@@ -85,8 +85,11 @@
   .qbar .g{flex:1}
 
   /* dropdown menu */
-  .menu{position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--sh-lg);padding:7px;min-width:300px;z-index:60;display:none}
+  .menu{position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--sh-lg);padding:7px;min-width:320px;z-index:60;display:none}
   .menu.open{display:block}
+  .qm-search{display:flex;align-items:center;gap:8px;border:1.5px solid var(--border);border-radius:9px;padding:8px 11px;margin:2px 2px 8px;color:var(--text3)}
+  .qm-search input{border:none;outline:none;width:100%;font-size:13px;color:var(--text);font-family:inherit}
+  #qmList{max-height:328px;overflow:auto}
   .menu-lbl{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:8px 10px 5px}
   .menu-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px}
   .menu-item:hover{background:var(--surf)}
@@ -191,6 +194,9 @@
   .pick-ic svg{width:15px;height:15px}
   .pick-name{font-size:13.5px;font-weight:600}.pick-desc{font-size:11.5px;color:var(--text3)}
   .pick-add{margin-left:auto;font-size:12px;font-weight:700;color:var(--blue);flex-shrink:0}
+  .pick-tab{font:600 12.5px 'DM Sans',sans-serif;padding:7px 14px;border:1.5px solid var(--border);background:#fff;color:var(--text2);border-radius:8px;cursor:pointer}
+  .pick-tab:hover{border-color:#94A3B8}
+  .pick-tab.on{background:var(--bluep);border-color:var(--blue);color:var(--blue)}
 
   /* run overlay */
   .run-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--sh-sm);margin-bottom:16px;overflow:hidden;display:none}
@@ -427,20 +433,30 @@ const RICON={
   fund:'<ellipse cx="6.5" cy="3.5" rx="5" ry="2"/><path d="M1.5 3.5v6c0 1.1 2.2 2 5 2s5-.9 5-2v-6"/>'
 };
 // Report library for the picker
+/* Sourced from the system's real report catalog (atlas-reports.html + report pages) */
 const LIB=[
-  {id:'giving',   name:'Parish giving summary',        desc:'Totals by parish · YTD vs prior year',      color:'blue',  icon:'doc'},
-  {id:'lybunt',   name:'LYBUNT donor list',            desc:'Gave last year, not yet this year',         color:'green', icon:'chart'},
-  {id:'newdonor', name:'New donor welcome report',     desc:'First-time gifts received this period',     color:'purp',  icon:'people'},
-  {id:'cma',      name:'CMA progress vs. goal',        desc:'Per parish · % of goal · gap to target',    color:'amber', icon:'goal'},
-  {id:'pledge',   name:'Pledge payment status',        desc:'Outstanding pledges · overdue payments',    color:'rose',  icon:'cal'},
-  {id:'fund',     name:'Fund breakdown',               desc:'Gifts by fund / GL code',                   color:'teal',  icon:'fund'},
-  {id:'lapsed',   name:'Lapsed donors',                desc:'No gift in 13–24 months',                   color:'blue',  icon:'people'},
-  {id:'topgifts', name:'Top gifts this period',        desc:'Largest gifts, sorted by amount',           color:'green', icon:'chart'},
+  {id:'giftsdate', name:'Gifts by date range',           desc:'Every gift in a chosen window — by donor, fund, appeal, or entity',        color:'blue',  icon:'doc',    url:'atlas-report-gifts-by-date.html'},
+  {id:'congiving', name:'Constituent giving summary',     desc:'Per-donor lifetime, this-year, and largest gift',                           color:'green', icon:'people', url:'atlas-report-constituent-giving.html'},
+  {id:'pledgebal', name:'Pledge balance report',          desc:'Open pledges · remaining balance, next instalment, lapse risk',            color:'rose',  icon:'cal',    url:'atlas-report-pledge-balance.html'},
+  {id:'receipt',   name:'Receipt issuance report',        desc:'Every receipt issued or pending · template family + IRS Pub 1771',         color:'teal',  icon:'doc',    url:'atlas-report-receipt-issuance.html'},
+  {id:'batch',     name:'Batch audit report',             desc:'Posted batches · totals, exception counts, posting user',                  color:'amber', icon:'chart',  url:'atlas-report-batch-audit.html'},
+  {id:'fund',      name:'Gifts by fund',                  desc:'Totals by Fund, Legal Entity, GL code · reconciles to QuickBooks',         color:'teal',  icon:'fund',   url:'atlas-report-gifts-by-fund.html'},
+  {id:'tribute',   name:'Tribute & In Honor Of',          desc:'Memorial, honor, and occasion gifts grouped by honoree',                   color:'purp',  icon:'people', url:'atlas-tribute-report.html'},
+  {id:'capital',   name:'Capital Campaign Pledge Report',  desc:'Multi-year pledge status · pledged vs. received vs. balance',              color:'blue',  icon:'goal',   url:'atlas-pledge-reports.html'},
+  {id:'lybunt',    name:'LYBUNT / SYBUNT analysis',        desc:'Year-over-year donor retention · gave last/prior year, not yet this year', color:'green', icon:'chart',  url:'atlas-report-lybunt.html'},
+  {id:'bishop',    name:'Bishop dashboard — multi-entity', desc:'Consolidated giving across Diocese, Charities, Foundation, Scholarship',   color:'amber', icon:'goal',   url:'atlas-report-bishop-dashboard.html'},
 ];
+/* "Saved by me" — the user's saved views from Reports → Saved by me */
+const SAVED=[
+  {id:'sv-major',   name:'Major donors $50k+',            desc:'Constituent giving · capacity $50k+ · sorted by lifetime', color:'purp',  icon:'people', url:'atlas-report-constituent-giving.html', saved:true},
+  {id:'sv-april',   name:'Constituent giving — April 2026', desc:'Constituent giving · sorted by lifetime',                color:'green', icon:'people', url:'atlas-report-constituent-giving.html', saved:true},
+  {id:'sv-fundytd', name:'Gifts by fund — YTD',            desc:'Gifts by fund · this fiscal year',                        color:'teal',  icon:'fund',   url:'atlas-report-gifts-by-fund.html', saved:true},
+];
+function findR(id){ return LIB.concat(SAVED).find(x=>x.id===id); }
 // Queues (switchable)
 const QUEUES={
   may:{name:'May 2026 parish package', folder:'Monthly parish reports', meta:'Monthly parish reports · last run Apr 30', status:'Draft', statusClass:'sp-draft',
-    reports:['giving','lybunt','newdonor','cma','pledge'],
+    reports:['congiving','fund','pledgebal','receipt','lybunt'],
     recipients:[
       {n:'Fr. Matthew Kelly', r:"Pastor — St. Michael's", c:"St. Michael's only", col:'blue'},
       {n:'Fr. Patrick Collins', r:'Pastor — Holy Cross', c:'Holy Cross only', col:'green'},
@@ -449,7 +465,7 @@ const QUEUES={
       {n:'Bishop', r:'Diocese', c:'Summary only', col:'rose'},
     ]},
   campaign:{name:'Q2 campaign board pack', folder:'Board & finance', meta:'Board & finance · runs monthly', status:'Scheduled', statusClass:'sp-scheduled',
-    reports:['cma','fund','topgifts'],
+    reports:['capital','fund','bishop'],
     recipients:[
       {n:'Mike Donovan', r:'Development Director', c:'All parishes', col:'amber'},
       {n:'Finance Committee', r:'Board', c:'Full package', col:'blue'},
@@ -470,11 +486,12 @@ function render(){
   // reports
   $('repCount').textContent=q.reports.length+' report'+(q.reports.length!=1?'s':'');
   $('repList').innerHTML=q.reports.map((rid,i)=>{
-    const r=LIB.find(x=>x.id===rid); const [bg,fg]=C[r.color];
+    const r=findR(rid); if(!r) return ''; const [bg,fg]=C[r.color];
     return `<div class="q-item"><div class="qi-drag"><svg viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 3h7M1.5 7h7M1.5 11h7"/></svg></div>
       <div class="qi-num">${i+1}</div>
       <div class="qi-ic" style="background:${bg}"><svg viewBox="0 0 13 13" fill="none" stroke="${fg}" stroke-width="1.3" stroke-linecap="round">${RICON[r.icon]}</svg></div>
-      <div class="qi-body"><div class="qi-name">${r.name}</div><div class="qi-meta">${r.desc}</div></div>
+      <div class="qi-body" style="cursor:pointer" onclick="window.location='${r.url}'" title="Open ${r.name}"><div class="qi-name">${r.name}</div><div class="qi-meta">${r.desc}</div></div>
+      <button class="qi-open" title="Open report" onclick="event.stopPropagation();window.location='${r.url}'" style="background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;margin-right:2px"><svg viewBox="0 0 12 12" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 2.5H9.5V7.5M9.5 2.5L5 7M8 9.5H3a1.5 1.5 0 01-1.5-1.5V3"/></svg></button>
       <button class="qi-x" onclick="removeReport('${rid}')"><svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1.5 1.5l6 6M7.5 1.5l-6 6"/></svg></button></div>`;
   }).join('') || `<div style="text-align:center;color:var(--text3);padding:24px;font-size:13px">No reports yet — add one below.</div>`;
   // recipients
@@ -493,13 +510,28 @@ function tog(b){b.classList.toggle('on');b.classList.toggle('off');}
 
 /* ── queue switcher menu ── */
 function toggleQMenu(e){e.stopPropagation();const m=$('qMenu');if(m.classList.contains('open')){m.classList.remove('open');return;}
-  m.innerHTML=FOLDERS.map(f=>`<div class="menu-lbl">${f.name}</div>`+f.qids.map(qid=>{const q=QUEUES[qid];const cur=qid===current;
-    return `<div class="menu-item" onclick="switchQueue('${qid}')"><div class="mi-ic" style="background:var(--bluep);color:var(--blue)"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3.5h3l1.5 1.5H12v6H1.5z"/></svg></div><div><div class="mi-name">${q.name}</div><div class="mi-meta">${q.reports.length} reports · ${q.status}</div></div>${cur?'<span class="mi-check"><svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 7.5l3.5 3.5L12 4"/></svg></span>':''}</div>`;}).join('')).join('')
-    +`<div class="menu-div"></div><div class="menu-new" onclick="openNewQueue()"><svg width="13" height="13" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>New queue…</div>`;
+  const total=Object.keys(QUEUES).length;
+  const list=FOLDERS.map(f=>`<div class="qm-folder" data-folder="${f.name.replace(/"/g,'&quot;')}"><div class="menu-lbl">${f.name}</div>`+f.qids.map(qid=>{const q=QUEUES[qid];const cur=qid===current;
+    return `<div class="menu-item" data-name="${(q.name+' '+f.name).replace(/"/g,'&quot;')}" onclick="switchQueue('${qid}')"><div class="mi-ic" style="background:var(--bluep);color:var(--blue)"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3.5h3l1.5 1.5H12v6H1.5z"/></svg></div><div><div class="mi-name">${q.name}</div><div class="mi-meta">${q.reports.length} reports · ${q.status}</div></div>${cur?'<span class="mi-check"><svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 7.5l3.5 3.5L12 4"/></svg></span>':''}</div>`;}).join('')+`</div>`).join('');
+  m.innerHTML=`<div class="qm-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="qmSearch" placeholder="Search ${total} queue${total!=1?'s':''}…" oninput="qMenuFilter()"></div><div id="qmList">${list}<div id="qmEmpty" style="display:none;text-align:center;color:var(--text3);font-size:12.5px;padding:18px">No queues match.</div></div><div class="menu-div"></div><div class="menu-new" onclick="openNewQueue()"><svg width="13" height="13" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>New queue…</div>`;
   m.classList.add('open');
+  setTimeout(function(){const s=$('qmSearch'); if(s) s.focus();},30);
+}
+function qMenuFilter(){
+  const q=($('qmSearch').value||'').toLowerCase(); let anyVisible=false;
+  document.querySelectorAll('#qmList .qm-folder').forEach(function(fol){
+    let any=false;
+    fol.querySelectorAll('.menu-item').forEach(function(it){
+      const hit=(it.dataset.name||'').toLowerCase().indexOf(q)!==-1;
+      it.style.display=hit?'':'none'; if(hit)any=true;
+    });
+    fol.style.display=any?'':'none'; if(any)anyVisible=true;
+  });
+  const empty=$('qmEmpty'); if(empty) empty.style.display=anyVisible?'none':'block';
 }
 function switchQueue(qid){current=qid;$('qMenu').classList.remove('open');render();toast('Switched to '+QUEUES[qid].name);}
 document.addEventListener('click',()=>{const m=$('qMenu');if(m)m.classList.remove('open');});
+(function(){const qm=$('qMenu'); if(qm) qm.addEventListener('click',function(e){e.stopPropagation();});})();
 
 /* ── frequency ── */
 function onFreqChange(){const v=$('freq').value;$('customBox').classList.toggle('show',v==='custom');if(v==='custom')updateCustom();}
@@ -518,17 +550,24 @@ function openModal(title,sub,bodyHTML,footHTML){$('mHeadTxt').innerHTML=`<h3>${t
 function closeModal(){$('scrim').classList.remove('show');$('modal').classList.remove('show');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
-/* ── Add report picker ── */
-function openAddReport(){
-  const q=QUEUES[current];
-  const rows=LIB.map(r=>{const [bg,fg]=C[r.color];const added=q.reports.includes(r.id);
+/* ── Add report picker (Standard reports · Saved by me) ── */
+let pickTab='standard';
+function pickRowsHTML(){
+  const q=QUEUES[current], src=(pickTab==='saved')?SAVED:LIB;
+  if(!src.length) return '<div style="text-align:center;color:var(--text3);padding:28px 16px;font-size:13px">No saved views yet. Open a report in <strong>Reports</strong>, set filters, and choose <strong>Save as view</strong>.</div>';
+  return src.map(r=>{const [bg,fg]=C[r.color];const added=q.reports.includes(r.id);
     return `<div class="pick-item ${added?'added':''}" data-id="${r.id}" onclick="addReport('${r.id}',this)"><div class="pick-ic" style="background:${bg}"><svg viewBox="0 0 13 13" fill="none" stroke="${fg}" stroke-width="1.3" stroke-linecap="round">${RICON[r.icon]}</svg></div><div><div class="pick-name">${r.name}</div><div class="pick-desc">${r.desc}</div></div><span class="pick-add">${added?'Added ✓':'+ Add'}</span></div>`;}).join('');
-  openModal('Add a report','Pick from your standard reports · click to add to the queue',
-    `<div class="pick-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="pickSearch" placeholder="Search reports…" oninput="filterPick()"></div><div id="pickList">${rows}</div>`,
+}
+function switchPickTab(t){ pickTab=t; document.querySelectorAll('#pickTabs .pick-tab').forEach(b=>b.classList.toggle('on', b.dataset.t===t)); $('pickList').innerHTML=pickRowsHTML(); if($('pickSearch').value) filterPick(); }
+function openAddReport(){
+  pickTab='standard';
+  const tabs=`<div id="pickTabs" style="display:flex;gap:6px;margin-bottom:12px"><button class="pick-tab on" data-t="standard" onclick="switchPickTab('standard')">Standard reports</button><button class="pick-tab" data-t="saved" onclick="switchPickTab('saved')">Saved by me <span style="opacity:.6;font-weight:600">${SAVED.length}</span></button></div>`;
+  openModal('Add a report','Add a standard report or one of your saved views to the queue',
+    tabs + `<div class="pick-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="pickSearch" placeholder="Search reports…" oninput="filterPick()"></div><div id="pickList">${pickRowsHTML()}</div>`,
     `<div class="g"></div><button class="btn btn-blue" onclick="closeModal()">Done</button>`);
 }
-function filterPick(){const q=$('pickSearch').value.toLowerCase();document.querySelectorAll('#pickList .pick-item').forEach(it=>{const r=LIB.find(x=>x.id===it.dataset.id);it.style.display=(r.name+' '+r.desc).toLowerCase().includes(q)?'':'none';});}
-function addReport(id,el){const q=QUEUES[current];if(!q.reports.includes(id))q.reports.push(id);el.classList.add('added');el.querySelector('.pick-add').textContent='Added ✓';render();toast(LIB.find(x=>x.id===id).name+' added');}
+function filterPick(){const q=$('pickSearch').value.toLowerCase();document.querySelectorAll('#pickList .pick-item').forEach(it=>{const r=findR(it.dataset.id);it.style.display=(r.name+' '+r.desc).toLowerCase().includes(q)?'':'none';});}
+function addReport(id,el){const q=QUEUES[current];if(!q.reports.includes(id))q.reports.push(id);el.classList.add('added');el.querySelector('.pick-add').textContent='Added ✓';render();toast(findR(id).name+' added');}
 
 /* ── Add recipient ── */
 function openAddRecipient(){
@@ -559,7 +598,7 @@ function openNewQueue(){
   openModal('New report queue','Give it a name and pick where it lives',
     `<div class="fgroup"><div class="f-label">Queue name</div><input class="f-input" id="nqName" placeholder="e.g. June 2026 parish package"></div>
      <div class="fgroup"><div class="f-label">Folder</div><select class="f-select" id="nqFolder" onchange="onNqFolderChange()">${FOLDERS.map(f=>`<option value="${f.name}">${f.name}</option>`).join('')}<option value="__new">+ Create new folder…</option></select><input class="f-input" id="nqNewFolder" placeholder="New folder name" style="display:none;margin-top:8px" onkeydown="if(event.key==='Enter')saveNewQueue()"></div>
-     <div class="fgroup"><div class="f-label">Start from</div><select class="f-select" id="nqTemplate"><option>Empty queue</option><option>Copy of "May 2026 parish package"</option><option>Standard monthly template (5 reports)</option></select></div>`,
+     <div class="fgroup"><div class="f-label">Start from</div><select class="f-select" id="nqTemplate"><option>Empty queue</option><option>Copy of "May 2026 parish package"</option></select></div>`,
     `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><div class="g"></div><button class="btn btn-blue" onclick="saveNewQueue()">Create queue</button>`);
   setTimeout(()=>$('nqName')&&$('nqName').focus(),120);
 }
@@ -573,7 +612,6 @@ function saveNewQueue(){
   if(folder==='__new'){ folder=($('nqNewFolder').value||'').trim(); if(!folder){toast('Name the new folder');$('nqNewFolder').focus();return;} }
   const tmpl=$('nqTemplate').value; let reports=[];
   if(tmpl.includes('Copy')) reports=[...QUEUES.may.reports];
-  else if(tmpl.includes('Standard')) reports=['giving','lybunt','newdonor','cma','pledge'];
   const id='q'+Date.now();
   QUEUES[id]={name,folder,meta:folder+' · new',status:'Draft',statusClass:'sp-draft',reports,recipients:[]};
   let f=FOLDERS.find(f=>f.name===folder);
@@ -594,7 +632,7 @@ function runNow(previewOnly){
   const card=$('runCard'); card.classList.add('show'); card.scrollIntoView({behavior:'smooth',block:'center'});
   $('runTitle').textContent = previewOnly ? 'Preview — first report only (dry run · no delivery)' : 'Running queue…';
   $('runNext').style.display='none';
-  $('runList').innerHTML=ids.map((rid,i)=>{const r=LIB.find(x=>x.id===rid);
+  $('runList').innerHTML=ids.map((rid,i)=>{const r=findR(rid);
     return `<div class="run-item" id="run-${i}"><div class="run-dot" style="background:var(--surf);border:1px solid var(--border);color:var(--text3)">${i+1}</div><div style="flex:1">${r.name}</div><span style="font-size:11.5px;color:var(--text3)" id="runs-${i}">Queued</span></div>`;}).join('');
   let i=0; const total=ids.length;
   function step(){

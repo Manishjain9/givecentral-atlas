@@ -699,13 +699,13 @@ body {
         </button>
         <button class="tb-btn tb-ghost" id="tb-schedule" onclick="openSchedule()">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="2" width="9" height="8" rx="1.2"/><path d="M1.5 5h9M4.5 2v2M7.5 2v2"/></svg>
-          Schedule
+          Schedule Task
         </button>
         <button class="tb-btn tb-primary" id="tb-primary" onclick="primaryAction()">
           <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
           <span id="tb-primary-label">Record gift</span>
         </button>
-        <button class="tb-notif" onclick="go('atlas-notifications.html')">
+        <button class="tb-notif" id="tb-bell">
           <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.5 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5zM6 13a1.5 1.5 0 003 0"/></svg>
           <div class="notif-dot"></div>
         </button>
@@ -2932,5 +2932,64 @@ body {
 })();
 </script>
 <!-- /ATLAS-NAVCOLLAPSE -->
+<script>
+/* ── Dashboard interactivity: task checkboxes, Guru AI actions, notification panel ── */
+(function(){
+  function toast(m){ if(window.showToast) showToast(m); }
+
+  // 1) Task checkboxes — delegated + capture so it works after any re-render
+  document.addEventListener('click', function(e){
+    var cb=e.target.closest('.task-check'); if(!cb) return;
+    e.stopPropagation();
+    var item=cb.closest('.task-item'), done=cb.classList.toggle('done');
+    if(done){
+      cb.style.background='var(--blue)'; cb.style.borderColor='var(--blue)';
+      cb.innerHTML='<svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M2 5l2 2 4-4"/></svg>';
+      if(item){ var t=item.querySelector('.task-text'); if(t) t.style.textDecoration='line-through'; item.style.transition='opacity .3s'; setTimeout(function(){ item.style.opacity='.45'; },220); }
+      toast('Task completed');
+    } else {
+      cb.style.background=''; cb.style.borderColor=''; cb.innerHTML='';
+      if(item){ var t2=item.querySelector('.task-text'); if(t2) t2.style.textDecoration=''; item.style.opacity=''; }
+    }
+  }, true);
+
+  // 2) Guru AI insight actions
+  var GURU_ROUTES=[[/donor profile/i,'atlas-donor-360.html'],[/donors/i,'atlas-donors-list.html'],[/campaign/i,'atlas-campaign-report.html']];
+  document.addEventListener('click', function(e){
+    var a=e.target.closest('.guru-insight-action'); if(!a) return;
+    e.preventDefault();
+    var txt=a.textContent||'', dest='atlas-guru-ai.html';
+    for(var i=0;i<GURU_ROUTES.length;i++){ if(GURU_ROUTES[i][0].test(txt)){ dest=GURU_ROUTES[i][1]; break; } }
+    toast('Opening · '+txt.replace(/[→\s]+$/,''));
+    setTimeout(function(){ window.location=dest; }, 220);
+  });
+  document.querySelectorAll('.guru-insight-action').forEach(function(a){ a.style.cursor='pointer'; });
+
+  // 3) Notification bell → overlay panel (capture stops the global navigate-to-notifications handler)
+  var bell=document.getElementById('tb-bell'), panel=null;
+  var NOTIFS=[
+    {t:'Pledge installment overdue', s:'Robert & Claire Hennessy · $3,500 · 1 day past due', c:'var(--rose)', d:'2m ago'},
+    {t:'Large gift received', s:'$25,000 from the O’Brien Family Foundation', c:'var(--green)', d:'1h ago'},
+    {t:'Receipt approval needed', s:'IRS Pub 1771 disclosure · $10,000 Fitzgerald gift', c:'var(--amber)', d:'3h ago'},
+    {t:'8 LYBUNT donors flagged', s:'Guru AI · gave last April, not yet this year', c:'var(--blue)', d:'today'},
+    {t:'Board report due', s:'Q1 stewardship report · before Friday meeting', c:'var(--text-3)', d:'today'}
+  ];
+  function closePanel(){ if(panel){ panel.remove(); panel=null; document.removeEventListener('click', outside, true); } }
+  function outside(e){ if(panel && !panel.contains(e.target) && !(e.target.closest && e.target.closest('#tb-bell'))) closePanel(); }
+  function openPanel(){
+    if(panel){ closePanel(); return; }
+    panel=document.createElement('div');
+    panel.style.cssText='position:fixed;top:58px;right:18px;width:344px;max-height:72vh;overflow:auto;background:#fff;border:1px solid var(--border,#E2E8F0);border-radius:14px;box-shadow:0 20px 50px rgba(15,23,42,.22);z-index:100060;font-family:inherit';
+    panel.innerHTML=
+      '<div style="display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid #EEF2F7"><span style="font-weight:700;font-size:14px;color:var(--navy,#0E1E35)">Notifications</span><span style="margin-left:8px;font-size:11px;font-weight:700;background:var(--rose,#BE185D);color:#fff;border-radius:20px;padding:1px 7px">'+NOTIFS.length+'</span></div>'
+      + NOTIFS.map(function(n){ return '<div class="np-item" style="display:flex;gap:10px;padding:11px 16px;border-bottom:1px solid #F5F7FA;cursor:pointer"><span style="width:8px;height:8px;border-radius:50%;background:'+n.c+';flex-shrink:0;margin-top:5px"></span><div style="flex:1"><div style="font-size:13px;font-weight:600;color:#0F172A">'+n.t+'</div><div style="font-size:11.5px;color:#64748B;margin-top:2px;line-height:1.4">'+n.s+'</div></div><span style="font-size:10.5px;color:#94A3B8;white-space:nowrap">'+n.d+'</span></div>'; }).join('')
+      + '<a href="atlas-notifications.html" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;font-size:12.5px;font-weight:600;color:var(--blue,#2563EB);text-decoration:none;border-top:1px solid #EEF2F7">View all notifications →</a>';
+    document.body.appendChild(panel);
+    panel.querySelectorAll('.np-item').forEach(function(it){ it.addEventListener('click', function(){ window.location='atlas-notifications.html'; }); });
+    setTimeout(function(){ document.addEventListener('click', outside, true); }, 0);
+  }
+  if(bell) bell.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); openPanel(); }, true);
+})();
+</script>
 </body>
 </html>

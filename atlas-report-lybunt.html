@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Atlas — LYBUNT / SYBUNT analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:        #0E1E35;
+  --navy-2:      #152844;
+  --navy-3:      #1E3A5F;
+  --blue:        #2563EB;
+  --blue-mid:    #3B82F6;
+  --blue-light:  #DBEAFE;
+  --blue-pale:   #EFF6FF;
+  --teal:        #0D9488;
+  --teal-light:  #CCFBF1;
+  --green:       #15803D;
+  --green-light: #DCFCE7;
+  --amber:       #D97706;
+  --amber-light: #FEF3C7;
+  --rose:        #BE185D;
+  --rose-light:  #FCE7F3;
+  --purple:      #7C3AED;
+  --purple-light:#EDE9FE;
+  --gold:        #B45309;
+  --text:        #0F172A;
+  --text-2:      #334155;
+  --text-3:      #64748B;
+  --border:      #E2E8F0;
+  --border-soft: #EDF2F7;
+  --surface:     #F8FAFC;
+  --white:       #FFFFFF;
+  --sidebar-w:   220px;
+  --shadow-sm:   0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.05);
+  --shadow-md:   0 4px 16px rgba(15,23,42,.06), 0 2px 4px rgba(15,23,42,.04);
+}
+
+html { font-size: 14px; -webkit-font-smoothing: antialiased; }
+body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+
+/* ══ SIDEBAR ══ */
+.sidebar {
+  width: var(--sidebar-w); background: var(--navy);
+  min-height: 100vh; display: flex; flex-direction: column;
+  flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 18px 18px 14px; display: flex; align-items: center; gap: 11px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.logo-mark {
+      width: 52px; height: 40px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border-radius: 0;
+    }
+.logo-mark svg { width: 52px; height: 40px; }
+.logo-text-wrap { display: flex; flex-direction: column; }
+.logo-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: white; line-height: 1; }
+.logo-sub  { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-top: 3px; }
+
+.sidebar-search {
+  margin: 12px 12px 6px; background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1); border-radius: 8px;
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  cursor: pointer;
+}
+.sidebar-search svg { width: 13px; height: 13px; color: rgba(255,255,255,.3); flex-shrink: 0; }
+.sidebar-search input {
+  background: none; border: none; outline: none; width: 100%;
+  font-size: 12px; color: rgba(255,255,255,.6); font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+}
+.sidebar-search input::placeholder { color: rgba(255,255,255,.3); }
+
+.nav-group { padding: 8px 8px 0; }
+.nav-label { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.28); padding: 0 10px; margin-bottom: 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px; padding: 8px 10px;
+  border-radius: 7px; font-size: 12px; font-weight: 500;
+  color: rgba(255,255,255,.55); cursor: pointer; transition: all .15s; margin-bottom: 1px;
+}
+.nav-item:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.85); }
+.nav-item.active { background: var(--blue); color: white; }
+.nav-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto; background: rgba(255,255,255,.12); color: rgba(255,255,255,.6);
+  border-radius: 10px; padding: 1px 7px; font-size: 10px; font-weight: 600;
+}
+.nav-item.active .nav-badge { background: rgba(255,255,255,.2); color: white; }
+.nav-badge.alert { background: #EF4444; color: white; }
+
+.sidebar-user {
+  margin-top: auto; padding: 12px; border-top: 1px solid rgba(255,255,255,.08);
+  display: flex; align-items: center; gap: 9px;
+  cursor: pointer; transition: background .15s;
+}
+.sidebar-user:hover { background: rgba(255,255,255,.04); }
+.user-avatar {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.user-name { font-size: 12px; font-weight: 500; color: rgba(255,255,255,.75); }
+.user-role { font-size: 10px; color: rgba(255,255,255,.35); margin-top: 1px; }
+
+/* ══ MAIN ══ */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.topbar {
+  background: white; border-bottom: 1px solid var(--border);
+  padding: 0 24px; height: 52px;
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.topbar-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.topbar-date { font-size: 12px; color: var(--text-3); }
+.topbar-search {
+  flex: 1;
+  max-width: 460px; margin: 0 18px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  display: flex; align-items: center; gap: 8px; padding: 7px 12px;
+  cursor: text;
+}
+.topbar-search svg { width: 13px; height: 13px; color: var(--text-3); }
+.topbar-search input { background: none; border: none; outline: none; width: 100%; font-size: 12.5px; color: var(--text); font-family: 'DM Sans', sans-serif; }
+.topbar-search input::placeholder { color: var(--text-3); }
+.topbar-search kbd {
+  margin-left: auto; font-size: 10.5px; font-family: 'DM Sans';
+  background: white; border: 1px solid var(--border); border-radius: 4px;
+  padding: 1px 6px; color: var(--text-3);
+}
+.topbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.tb-btn {
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+  padding: 7px 13px; border-radius: 8px; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.tb-btn svg { width: 12px; height: 12px; }
+.tb-ghost   { background: none; border: 1px solid var(--border); color: var(--text-2); }
+.tb-ghost:hover { background: var(--surface); border-color: #94A3B8; }
+.tb-primary { background: var(--blue); border: none; color: white; box-shadow: 0 1px 4px rgba(37,99,235,.3); }
+.tb-primary:hover { background: #1D4ED8; }
+.tb-notif {
+  width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
+  background: none; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative; transition: background .15s;
+}
+.tb-notif:hover { background: var(--surface); }
+.tb-notif svg { width: 15px; height: 15px; color: var(--text-2); }
+.notif-dot {
+  position: absolute; top: 7px; right: 7px;
+  width: 7px; height: 7px; background: #EF4444; border-radius: 50%;
+  border: 2px solid white;
+}
+
+.dash { padding: 24px; overflow-y: auto; }
+
+/* ══ Common Cards & helpers (used across screens) ══ */
+.card {
+  background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+}
+.card-header {
+  padding: 14px 18px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.card-title { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+.card-action { font-size: 11px; font-weight: 500; color: var(--blue); cursor: pointer; display: flex; align-items: center; gap: 3px; }
+.card-action:hover { color: #1D4ED8; }
+.card-action svg { width: 10px; height: 10px; }
+.card-body { padding: 14px 18px 18px; }
+
+/* ══ Page header (titles + crumb + actions) ══ */
+.page-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  margin-bottom: 20px;
+}
+.crumb { font-size: 12px; color: var(--text-3); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.crumb a { color: var(--blue); }
+.crumb a:hover { text-decoration: underline; }
+.crumb svg { width: 10px; height: 10px; }
+.page-title {
+  font-family: 'DM Serif Display', serif; font-size: 28px; letter-spacing: -.02em;
+  color: var(--text); line-height: 1.1;
+}
+.page-sub { color: var(--text-3); font-size: 13px; margin-top: 4px; }
+
+/* ══ Tags & badges (shared) ══ */
+.tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10.5px; font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.tag.blue  { background: var(--blue-light);  color: var(--blue); }
+.tag.green { background: var(--green-light); color: var(--green); }
+.tag.amber { background: var(--amber-light); color: var(--amber); }
+.tag.rose  { background: var(--rose-light);  color: var(--rose); }
+.tag.purple{ background: var(--purple-light);color: var(--purple); }
+.tag.grey  { background: var(--surface);     color: var(--text-3); border: 1px solid var(--border); }
+.tag.gold  { background: #FEF3C7;            color: var(--gold); }
+
+/* ══ Inputs ══ */
+.lbl { display: block; font-size: 11px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+.lbl .req { color: var(--rose); margin-left: 2px; }
+.fld {
+  width: 100%; font-size: 13px; font-family: 'DM Sans', sans-serif;
+  padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: white; color: var(--text); transition: border-color .15s, box-shadow .15s;
+}
+.fld:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.10); }
+.fld[disabled] { background: var(--surface); color: var(--text-3); }
+.fld::placeholder { color: #94A3B8; }
+textarea.fld { min-height: 90px; resize: vertical; line-height: 1.5; }
+select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M3 5l3 3 3-3z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+
+.btn {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+  padding: 9px 16px; border-radius: 8px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid transparent; transition: background .15s, border-color .15s, color .15s;
+}
+.btn svg { width: 13px; height: 13px; }
+.btn-primary { background: var(--blue); color: white; box-shadow: 0 1px 4px rgba(37,99,235,.25); }
+.btn-primary:hover { background: #1D4ED8; }
+.btn-ghost   { background: white; border-color: var(--border); color: var(--text-2); }
+.btn-ghost:hover { background: var(--surface); border-color: #94A3B8; }
+.btn-rose    { background: var(--rose); color: white; }
+.btn-rose:hover { background: #9D174D; }
+.btn-link    { background: none; color: var(--blue); padding: 6px 8px; }
+.btn-link:hover { color: #1D4ED8; }
+
+/* helpful utilities */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.gap-4 { gap: 4px; } .gap-6 { gap: 6px; } .gap-8 { gap: 8px; } .gap-10 { gap: 10px; } .gap-12 { gap: 12px; } .gap-16 { gap: 16px; } .gap-20 { gap: 20px; }
+.grow { flex: 1; }
+.muted { color: var(--text-3); }
+.mono  { font-variant-numeric: tabular-nums; }
+.mt-4 { margin-top: 4px; } .mt-8 { margin-top: 8px; } .mt-12 { margin-top: 12px; } .mt-16 { margin-top: 16px; } .mt-24 { margin-top: 24px; }
+.mb-4 { margin-bottom: 4px; } .mb-8 { margin-bottom: 8px; } .mb-12 { margin-bottom: 12px; } .mb-16 { margin-bottom: 16px; } .mb-24 { margin-bottom: 24px; }
+
+/* Slide-over drawer (used on log-activity, task-modal screens) */
+.scrim { position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 30; }
+.drawer {
+  position: fixed; right: 0; top: 0; bottom: 0; width: 560px; max-width: 100vw;
+  background: white; box-shadow: -16px 0 40px rgba(15,23,42,.10); z-index: 31;
+  display: flex; flex-direction: column;
+}
+.drawer-head {
+  padding: 18px 22px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  flex-shrink: 0;
+}
+.drawer-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); letter-spacing: -.01em; }
+.drawer-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.drawer-x {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); background: white; cursor: pointer;
+}
+.drawer-x:hover { background: var(--surface); }
+.drawer-x svg { width: 13px; height: 13px; color: var(--text-2); }
+.drawer-body { flex: 1; overflow-y: auto; padding: 22px; }
+.drawer-foot {
+  padding: 14px 22px; border-top: 1px solid var(--border);
+  background: var(--surface); display: flex; align-items: center; gap: 8px; justify-content: flex-end;
+  flex-shrink: 0;
+}
+.drawer-foot .left { margin-right: auto; font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+
+
+.rep-toolbar { display:flex; gap:8px; align-items:center; padding:14px 18px; background:white; border:1px solid var(--border); border-radius:12px; margin-bottom:14px; flex-wrap:wrap; }
+.filter-chip { font-size:12px; padding:6px 11px; border-radius:8px; cursor:pointer; background:white; border:1px dashed var(--border); color:var(--text-2); display:inline-flex; align-items:center; gap:6px; }
+.filter-chip svg { width:11px; height:11px; }
+.filter-chip:hover { border-color:#94A3B8; }
+.filter-chip.applied { background:var(--blue-pale); border:1px solid var(--blue-light); color:var(--blue); font-weight:600; }
+.filter-chip.applied .x { color:var(--blue); }
+.rep-toolbar .right { margin-left:auto; display:flex; gap:6px; align-items:center; }
+
+.kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:14px; }
+.kpi { background:white; border:1px solid var(--border); border-radius:12px; padding:16px 18px; }
+.kpi .l { font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); margin-bottom:8px; }
+.kpi .v { font-family:'DM Serif Display',serif; font-size:26px; line-height:1; color:var(--navy); }
+.kpi .delta { font-size:11.5px; margin-top:6px; color:var(--text-3); }
+.kpi .delta.up { color:var(--green); font-weight:600; }
+.kpi .delta.dn { color:var(--rose); font-weight:600; }
+
+.chart-card { background:white; border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+.chart-card h3 { font-family:'DM Serif Display',serif; font-size:18px; margin-bottom:4px; }
+.chart-card .sub { color:var(--text-3); font-size:12.5px; margin-bottom:18px; }
+
+.bars { display:grid; grid-template-columns:repeat(12,1fr); gap:8px; height:180px; align-items:end; padding:0 6px; }
+.bar { background:linear-gradient(to top, var(--blue), var(--blue-mid)); border-radius:5px 5px 0 0; position:relative; transition:transform .15s; }
+.bar:hover { transform:scaleY(1.02); }
+.bar .v { position:absolute; top:-20px; left:50%; transform:translateX(-50%); font-size:11px; color:var(--text-3); font-weight:500; white-space:nowrap; }
+.bar.lead { background:linear-gradient(to top, var(--green), #22C55E); }
+.bar.warn { background:linear-gradient(to top, var(--amber), #F59E0B); }
+.bar-axis { display:grid; grid-template-columns:repeat(12,1fr); gap:8px; padding:8px 6px 0; font-size:10.5px; color:var(--text-3); text-align:center; }
+
+.dt-card { background:white; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.dt-head, .dt-row { display:grid; grid-template-columns: 200px 110px 1fr 90px 90px 100px; gap:14px; align-items:center; padding:11px 18px; }
+.dt-head { background:var(--surface); border-bottom:1px solid var(--border); font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); }
+.dt-row { border-bottom:1px solid var(--border-soft); font-size:13px; cursor:pointer; }
+.dt-row:hover { background:var(--blue-pale); }
+.dt-row:last-child { border-bottom:none; }
+.dt-row .nm-text .nm { font-weight:500; color:var(--text); }
+.dt-row .nm-text .sub { font-size:11px; color:var(--text-3); margin-top:2px; }
+.dt-row .av { width:28px; height:28px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:700; color:white; margin-right:8px; }
+.dt-row .name { display:flex; align-items:center; }
+
+.pager { padding:10px 18px; display:flex; align-items:center; gap:14px; font-size:12px; color:var(--text-3); border-top:1px solid var(--border-soft); }
+.pager .nav { margin-left:auto; display:flex; gap:4px; }
+.pager .nav button { width:28px; height:28px; border-radius:6px; border:1px solid var(--border); background:white; cursor:pointer; font-size:12px; }
+.pager .nav button.cur { background:var(--blue); color:white; border-color:var(--blue); }
+
+.tag { display:inline-flex; align-items:center; font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:5px; }
+.tag.blue { background:var(--blue-light); color:var(--blue); }
+.tag.green { background:var(--green-light); color:var(--green); }
+.tag.amber { background:var(--amber-light); color:var(--amber); }
+.tag.rose { background:var(--rose-light); color:var(--rose); }
+
+</style>
+
+
+
+
+
+<style id="atlas-sidebar-fix">
+/* Minimal sidebar fix — keeps the CEO's per-page .main / .content
+   layouts untouched. We ONLY:
+     1. Pin the sidebar to the viewport with position:fixed
+     2. Reserve a 220px gutter on the body via padding-left
+     3. Normalize the sidebar's internal flex layout (logo + search top,
+        nav scrolls middle, user block bottom)
+     4. Force SVG icon sizes in the sidebar (some screens lost them) */
+
+html, body { overflow-x: hidden !important; }
+body {
+  padding-left: 220px !important;
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
+}
+*, *::before, *::after { box-sizing: border-box; }
+
+.sidebar {
+  width: 220px !important;
+  background: var(--navy, #0E1E35) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  overflow: hidden !important;          /* sidebar itself does NOT scroll */
+  display: flex !important;
+  flex-direction: column !important;
+  flex-shrink: 0 !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Logo + search are direct flex children that never scroll */
+.sidebar > .sidebar-logo,
+.sidebar > a > .sidebar-search,
+.sidebar > .sidebar-search,
+.sidebar-logo,
+.sidebar-search {
+  position: static !important;
+  flex-shrink: 0 !important;
+  background: var(--navy, #0E1E35) !important;
+  z-index: 2;
+}
+
+/* Fix oversized search icon — explicit 13×13 wins over any inheriting style */
+.sidebar-search {
+  margin: 12px 12px 6px !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.sidebar-search svg {
+  width: 13px !important;
+  height: 13px !important;
+  flex-shrink: 0 !important;
+  color: rgba(255,255,255,.4) !important;
+}
+.sidebar-search input {
+  font-size: 12px !important;
+  height: auto !important;
+  background: none !important;
+  border: none !important;
+  outline: none !important;
+  width: 100% !important;
+}
+/* Logo mark sizing — same fix prevents the brand SVG from ballooning */
+.sidebar-logo .logo-mark {
+  width: 52px !important;
+  height: 40px !important;
+  flex-shrink: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+.sidebar-logo .logo-mark svg {
+  width: 52px !important;
+  height: 40px !important;
+}
+
+/* The MIDDLE area is the only scrollable child */
+.sidebar-scroll {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 0 !important;        /* critical: lets flex item shrink */
+  display: flex !important;
+  flex-direction: column !important;
+}
+.sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.10); border-radius: 4px; }
+.sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.18); }
+
+/* User block sits at the bottom of the sidebar, never scrolls */
+.sidebar-user {
+  position: static !important;
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+  background: var(--navy, #0E1E35) !important;
+}
+
+/* .main is intentionally NOT overridden — each page keeps its own layout. */
+</style>
+
+<style id="atlas-sidebar-logo-canon">
+  /* Atlas sidebar logo — canonical styling injected to guarantee
+     consistent stacking (Atlas above, By GiveCentral below) across every screen. */
+  .sidebar-logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: 11px !important;
+    padding: 18px 18px 14px !important;
+    border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  }
+  .sidebar-logo .logo-mark {
+    width: 52px !important;
+    height: 40px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+  }
+  .sidebar-logo .logo-mark svg {
+    width: 52px !important;
+    height: 40px !important;
+  }
+  .sidebar-logo .logo-text-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 3px !important;
+  }
+  .sidebar-logo .logo-name {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 20px !important;
+    color: white !important;
+    line-height: 1 !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+  }
+  .sidebar-logo .logo-sub {
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    letter-spacing: .1em !important;
+    text-transform: uppercase !important;
+    color: rgba(255,255,255,.35) !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+  }
+</style>
+<style id="ur-nav-underline-fix">.nav-item,.nav-item:link,.nav-item:visited,.nav-item:hover,.nav-item:focus,.nav-item:active,.sidebar-item,.sidebar-item:hover{text-decoration:none}</style>
+</head>
+<body>
+
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="22" y1="92" x2="58" y2="58" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="58" y1="58" x2="98" y2="38" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="138" y2="24" stroke="rgba(200,160,74,.55)" stroke-width="1.4"/>
+          <line x1="98" y1="38" x2="110" y2="78" stroke="rgba(200,160,74,.45)" stroke-width="1.2"/>
+          <circle cx="22" cy="92" r="4" fill="white"/>
+          <circle cx="58" cy="58" r="5" fill="white"/>
+          <circle cx="98" cy="38" r="5.5" fill="white"/>
+          <circle cx="110" cy="78" r="3.5" fill="rgba(255,255,255,.65)"/>
+          <circle cx="138" cy="24" r="7" fill="#C8A04A"/>
+          <circle cx="138" cy="24" r="10" fill="none" stroke="rgba(200,160,74,.4)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="logo-text-wrap">
+        <span class="logo-name">Atlas</span>
+        <span class="logo-sub">By GiveCentral</span>
+      </div>
+    </div>
+
+    <a href="atlas-search.html" style="display:block;text-decoration:none">
+      <div class="sidebar-search">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+        <input type="text" placeholder="Search donors, gifts…" readonly>
+      </div>
+    </a>
+
+    <div class="sidebar-scroll">
+
+    <div class="nav-group">
+      <div class="nav-label">Main</div>
+      <a class="nav-item" href="atlas-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="atlas-donors-list.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>
+        Donors
+        <span class="nav-badge">3,847</span>
+      </a>
+      <a class="nav-item" href="atlas-gifts-pledges.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>
+        Gifts &amp; pledges
+        <span class="nav-badge">142</span>
+      </a>
+      <a class="nav-item" href="atlas-campaign-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>
+        Campaigns
+      </a>
+      <div class="nav-subwrap" style="margin:2px 0 4px 20px;border-left:1.5px solid rgba(255,255,255,.12)">
+        <a class="nav-item" href="atlas-funds.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><ellipse cx="7" cy="3.5" rx="5" ry="2"/><path d="M2 3.5v7c0 1.1 2.2 2 5 2s5-.9 5-2v-7M2 7c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg>Funds</a>
+        <a class="nav-item" href="atlas-appeals.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v5H6l-2.5 2v-2H2z"/></svg>Appeals</a>
+      </div>
+      <a class="nav-item active" href="atlas-reports.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>
+        Reports
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Fundraising</div>
+      <a class="nav-item" href="atlas-pipeline.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
+        Prospect pipeline
+        <span class="nav-badge">28</span>
+      </a>
+      <a class="nav-item" href="atlas-tasks.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>
+        Tasks &amp; reminders
+        <span class="nav-badge alert">7</span>
+      </a>
+      <a class="nav-item" href="atlas-communications.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>
+        Communications
+      </a>
+      <a class="nav-item" href="atlas-events-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>
+        Events
+      </a>
+      <a class="nav-item" href="atlas-volunteer-management.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
+        Volunteers
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Intelligence</div>
+      <a class="nav-item" href="atlas-guru-ai.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>
+        Guru AI
+      </a>
+      <a class="nav-item" href="atlas-reports.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>
+        Analytics
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Admin</div>
+      <a class="nav-item" href="atlas-users-roles.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
+        Users &amp; roles
+      </a>
+      <a class="nav-item" href="atlas-tags.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/></svg>Tags &amp; Segment</a>
+      <a class="nav-item" href="atlas-integrations.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>
+        Integrations
+      </a>
+      <a class="nav-item" href="atlassmarttriggers.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.6 1.5L3 8h3.7l-.6 4.6L11 5.9H7.4z"/></svg>Smart Triggers</a>
+      <a class="nav-item" href="atlas-sync.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>
+        Sync
+      </a>
+      <a class="nav-item" href="atlas-location-manage.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>
+        Location portal
+      </a>
+    </div>
+
+    </div><!-- /.sidebar-scroll -->
+
+    <div class="sidebar-user">
+      <div class="user-avatar">SR</div>
+      <div>
+        <div class="user-name">Sarah Reynolds</div>
+        <div class="user-role">Development Director</div>
+      </div>
+    </div>
+  </aside>
+
+<div class="main">
+
+<div class="topbar">
+  <span class="topbar-title">Report viewer</span>
+  <span class="topbar-date">Monday, May 4, 2026</span>
+  <a href="atlas-search.html" class="topbar-search">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+    <input type="text" placeholder="Search donors, gifts, campaigns…" readonly style="cursor:pointer">
+    <kbd>⌘K</kbd>
+  </a>
+  <div class="topbar-right">
+    
+    <a href="atlas-guided-tour.html" class="tb-notif" title="Take the tour" style="position:relative">
+      <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><path d="M7.5 4v.5M6.5 7c0-1 .5-1.5 1-1.5s1 .5 1 1-.5 1-1 1.5v.5M7.5 11v.5"/></svg>
+    </a>
+    <a href="atlas-notifications.html" class="tb-notif" title="Notifications">
+      <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.5 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5zM6 13a1.5 1.5 0 003 0"/></svg>
+      <div class="notif-dot"></div>
+    </a>
+  </div>
+</div>
+
+<div class="dash">
+<style>#rp-menu{position:fixed;z-index:2000;min-width:190px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 14px 40px rgba(15,23,42,.18);padding:6px;display:none;font-family:"DM Sans",sans-serif}#rp-menu.show{display:block}#rp-menu .mi{padding:8px 11px;font-size:13px;color:var(--text);border-radius:7px;cursor:pointer;white-space:nowrap;display:flex;justify-content:space-between;gap:14px}#rp-menu .mi:hover{background:var(--surface)}#rp-menu .mi.sel{color:var(--blue);font-weight:600}#rp-menu .mh{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);padding:6px 11px 4px}#rp-menu .msep{height:1px;background:var(--border-soft);margin:5px 4px}.dt-empty{padding:26px 18px;text-align:center;color:var(--text-3);font-size:13px}</style><style>.dt-head,.dt-row{grid-template-columns:1.7fr 118px 118px 118px 120px 1fr !important}</style><div class="page-head"><div><div class="crumb"><a href="atlas-dashboard.html">Atlas</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <a href="atlas-reports.html">Reports</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <span>LYBUNT / SYBUNT analysis</span></div><div class="page-title">LYBUNT / SYBUNT analysis</div><div class="page-sub">47 LYBUNT &middot; 112 SYBUNT &middot; $186,400 in lapsed giving to re-engage &middot; refreshed today</div></div><div class="flex gap-8"><button class="btn btn-ghost" onclick="rpToast('Scheduled &middot; weekly Monday 8 AM')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.5M7 9v.5"/></svg> Schedule send</button><button class="btn btn-ghost" onclick="rpToast('CSV exported &middot; check your downloads')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1.5v8M3.5 6.5L7 9.5l3.5-3M2 12h10"/></svg> Export CSV</button><button class="btn btn-ghost" onclick="rpToast('PDF generated &middot; downloading now')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2" width="8" height="10" rx="1"/><path d="M5 5h4M5 7h4M5 9h2"/></svg> Export PDF</button><button class="btn btn-primary" onclick="openSaveView()"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M7 2l1 3 3 .5L9 8l.5 3L7 9.5 4.5 11l.5-3L3 5.5 6 5z"/></svg> Save as view</button></div></div><div class="rep-toolbar"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="filter-chip applied">Segment: LYBUNT + SYBUNT <span class="x" onclick="this.closest('.filter-chip').remove();rpToast('Filter removed')">&times;</span></div><div class="filter-chip" onclick="rpToast('Assigned officer filter — pick a value')">Assigned officer</div><div class="filter-chip" onclick="rpToast('Giving band filter — pick a value')">Giving band</div></div><div class="right"><span style="font-size:12px;color:var(--text-3)">Group by</span><select class="fld" onchange="rpToast('Regrouped by '+this.value)" style="font-size:12px;padding:6px 28px 6px 10px;width:auto"><option>Segment</option><option>Last gift year</option><option>Assigned officer</option></select><span style="font-size:12px;color:var(--text-3);margin-left:8px">Sort</span><select class="fld" onchange="rpToast('Sorted &middot; '+this.value)" style="font-size:12px;padding:6px 28px 6px 10px;width:auto"><option>Last gift amount &darr;</option><option>Lifetime &darr;</option><option>Last gift date &darr;</option></select></div></div><div class="kpi-row"><div class="kpi"><div class="l">LYBUNT donors</div><div class="v">47</div><div class="delta ">gave last year, not yet this</div></div><div class="kpi"><div class="l">SYBUNT donors</div><div class="v">112</div><div class="delta ">gave a prior year, not this</div></div><div class="kpi"><div class="l">Lapsed value</div><div class="v">$186,400</div><div class="delta ">last-year gift total at risk</div></div><div class="kpi"><div class="l">Reactivated YTD</div><div class="v">18%</div><div class="delta up">29 donors returned</div></div></div><div class="chart-card"><h3>Lapsed value by last gift year</h3><p class="sub">The most re-engageable dollars sit with donors who lapsed most recently — prioritize FY2025 LYBUNT first.</p><div class="bars" style="grid-template-columns:repeat(5,1fr)"><div class="bar lead" style="height:100%"><span class="v">$62.4k</span></div><div class="bar " style="height:78%"><span class="v">$48.6k</span></div><div class="bar warn" style="height:52%"><span class="v">$32.5k</span></div><div class="bar " style="height:38%"><span class="v">$23.9k</span></div><div class="bar warn" style="height:30%"><span class="v">$19.0k</span></div></div><div class="bar-axis" style="grid-template-columns:repeat(5,1fr)"><span>FY2025 (LYBUNT)</span><span>FY2024</span><span>FY2023</span><span>FY2022</span><span>&le;FY2021</span></div></div><style>.lb-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}.lb-hd{display:grid;grid-template-columns:1fr 92px 96px;gap:10px;padding:9px 18px;background:var(--surface);border-bottom:1px solid var(--border);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)}.lb-rw{display:grid;grid-template-columns:1fr 92px 96px;gap:10px;padding:10px 18px;border-bottom:1px solid var(--border-soft);font-size:13px;align-items:center}.lb-rw:hover{background:var(--blue-pale)}.lb-rw .who{font-size:10.5px;color:var(--text-3);margin-top:2px}@media(max-width:1080px){.lb-grid{grid-template-columns:1fr}}</style><div class="lb-grid"><div class="dt-card" style="margin:0"><div style="display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)"><span class="tag amber" style="font-size:11px">LYBUNT</span><div style="font-weight:700;font-size:13px;color:var(--text)">47 donors</div><div style="font-size:11px;color:var(--text-3)">gave last year, not yet this</div><div style="margin-left:auto;text-align:right"><div style="font-weight:700;font-size:15px;color:var(--text)">$62,400</div><div style="font-size:10.5px;color:var(--text-3)">lapsed value</div></div></div><div class="lb-hd"><div>Donor</div><div style="text-align:right">Last gift</div><div style="text-align:right">Amount</div></div><div class="lb-rw"><div><div style="font-weight:500">Margaret Sullivan</div><div class="who">Sarah Reynolds</div></div><div style="text-align:right">Apr 12, 2025</div><div style="text-align:right;font-weight:600">$10,000</div></div><div class="lb-rw"><div><div style="font-weight:500">James &amp; Patricia O&rsquo;Brien</div><div class="who">Sarah Reynolds</div></div><div style="text-align:right">Mar 30, 2025</div><div style="text-align:right;font-weight:600">$7,500</div></div><div class="lb-rw"><div><div style="font-weight:500">Robert &amp; Claire Hennessy</div><div class="who">Bridget McCarthy</div></div><div style="text-align:right">Feb 18, 2025</div><div style="text-align:right;font-weight:600">$4,200</div></div><div class="lb-rw"><div><div style="font-weight:500">Thomas &amp; Lisa Kowalski</div><div class="who">Bridget McCarthy</div></div><div style="text-align:right">Jan 26, 2025</div><div style="text-align:right;font-weight:600">$2,500</div></div><div class="lb-rw" style="color:var(--text-3);cursor:pointer" onclick="rpToast('Opening all 47 LYBUNT donors')"><div>+ 43 more LYBUNT donors</div><div></div><div style="text-align:right">View all &rarr;</div></div><div style="display:flex;justify-content:space-between;padding:12px 18px;background:var(--surface);font-weight:700;font-size:13px"><span>Subtotal &middot; 47 donors</span><span>$62,400</span></div></div><div class="dt-card" style="margin:0"><div style="display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)"><span class="tag blue" style="font-size:11px">SYBUNT</span><div style="font-weight:700;font-size:13px;color:var(--text)">112 donors</div><div style="font-size:11px;color:var(--text-3)">gave a prior year, not this</div><div style="margin-left:auto;text-align:right"><div style="font-weight:700;font-size:15px;color:var(--text)">$124,000</div><div style="font-size:10.5px;color:var(--text-3)">lapsed value</div></div></div><div class="lb-hd"><div>Donor</div><div style="text-align:right">Last gift</div><div style="text-align:right">Amount</div></div><div class="lb-rw"><div><div style="font-weight:500">St. Michael&rsquo;s Parish</div><div class="who">Fr. Michael Reilly</div></div><div style="text-align:right">Nov 3, 2023</div><div style="text-align:right;font-weight:600">$50,000</div></div><div class="lb-rw"><div><div style="font-weight:500">Patricia O&rsquo;Brien</div><div class="who">Sarah Reynolds</div></div><div style="text-align:right">Jun 14, 2023</div><div style="text-align:right;font-weight:600">$5,000</div></div><div class="lb-rw"><div><div style="font-weight:500">Fitzgerald Family</div><div class="who">Unassigned</div></div><div style="text-align:right">Dec 20, 2022</div><div style="text-align:right;font-weight:600">$3,000</div></div><div class="lb-rw"><div><div style="font-weight:500">Diocese of St. Petersburg staff gift</div><div class="who">Bridget McCarthy</div></div><div style="text-align:right">May 9, 2022</div><div style="text-align:right;font-weight:600">$1,800</div></div><div class="lb-rw" style="color:var(--text-3);cursor:pointer" onclick="rpToast('Opening all 112 SYBUNT donors')"><div>+ 108 more SYBUNT donors</div><div></div><div style="text-align:right">View all &rarr;</div></div><div style="display:flex;justify-content:space-between;padding:12px 18px;background:var(--surface);font-weight:700;font-size:13px"><span>Subtotal &middot; 112 donors</span><span>$124,000</span></div></div></div><div style="display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);border-radius:12px;padding:13px 18px;margin-top:14px;background:#fff"><span style="font-weight:700;font-size:13px">Total lapsed value &middot; 159 donors to re-engage</span><span style="display:flex;align-items:center;gap:10px"><span style="font-weight:700;font-size:15px">$186,400</span><span class="tag amber">Re-engage</span></span></div><div id="rp-menu"></div>
+<div class="rp-toast" id="rp-toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#0F172A;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;z-index:2100;opacity:0;transition:.2s;pointer-events:none"></div>
+<script>
+function rpToast(m){var t=document.getElementById("rp-toast");t.textContent=m;t.style.opacity=1;t.style.transform="translateX(-50%)";clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity=0;t.style.transform="translateX(-50%) translateY(20px)";},2600);}
+(function(){
+  var CFG=window.__RP; if(!CFG) return;
+  var card=document.querySelector(".dt-card");
+  var orig=card?[].slice.call(card.querySelectorAll(".dt-row[data-row]")):[];
+  var pager=card?card.querySelector(".pager"):null;
+  var sels=document.querySelectorAll(".rep-toolbar .right select");
+  var groupSel=sels[0], sortSel=sels[1];
+  var chipWrap=document.getElementById("rp-chips");
+  var menu=document.getElementById("rp-menu");
+  var PAGE=6, page=0, active={};
+  var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  // seed defaults
+  (CFG.defaults||[]).forEach(function(d){ // d=[key,label]
+    var key=d[0],lab=d[1];
+    if(CFG.datePresets&&CFG.datePresets[key]&&CFG.datePresets[key][lab]) active[key]={range:CFG.datePresets[key][lab],label:lab};
+    else active[key]={value:lab};
+  });
+
+  function distinct(key){var s={};orig.forEach(function(r){var v=r.getAttribute("data-"+key);if(v)s[v]=1;});return Object.keys(s);}
+  function num(r){return parseFloat(r.getAttribute("data-amount")||"0");}
+  function nm(r){return (r.getAttribute("data-name")||"").toLowerCase();}
+  function dt(r){return parseInt(r.getAttribute("data-date")||"0");}
+
+  function chips(){
+    if(!chipWrap) return;
+    chipWrap.innerHTML="";
+    (CFG.facets||[]).forEach(function(f){ // f=[label,key]
+      var lab=f[0],key=f[1],a=active[key];
+      var c=document.createElement("div"); c.dataset.key=key; c.dataset.label=lab;
+      if(a){c.className="filter-chip applied";c.innerHTML=lab+": "+(a.label||a.value)+' <span class="x">×</span>';}
+      else{c.className="filter-chip";c.textContent=lab;}
+      chipWrap.appendChild(c);
+    });
+  }
+  function openMenu(chip){
+    var key=chip.dataset.key,lab=chip.dataset.label;
+    var html='<div class="mh">'+lab+'</div>';
+    var opts;
+    if(CFG.datePresets&&CFG.datePresets[key]) opts=Object.keys(CFG.datePresets[key]);
+    else opts=distinct(key);
+    opts.forEach(function(o){ var on=active[key]&&(active[key].label===o||active[key].value===o); html+='<div class="mi'+(on?" sel":"")+'" data-v="'+o.replace(/"/g,"")+'">'+o+(on?' ✓':'')+'</div>'; });
+    if(active[key]) html+='<div class="msep"></div><div class="mi" data-v="__clear" style="color:var(--rose)">Clear filter</div>';
+    menu.innerHTML=html; menu.classList.add("show");
+    var r=chip.getBoundingClientRect(), mw=menu.offsetWidth;
+    menu.style.left=Math.min(r.left,window.innerWidth-mw-8)+"px";
+    menu.style.top=(r.bottom+6)+"px";
+    menu.onclick=function(e){var mi=e.target.closest(".mi");if(!mi)return;var v=mi.getAttribute("data-v");
+      if(v==="__clear"){delete active[key];rpToast(lab+" filter cleared");}
+      else if(CFG.datePresets&&CFG.datePresets[key]){active[key]={range:CFG.datePresets[key][v],label:v};rpToast(lab+": "+v);}
+      else{active[key]={value:v};rpToast(lab+": "+v);}
+      menu.classList.remove("show");page=0;chips();render();};
+  }
+  document.addEventListener("click",function(e){
+    var x=e.target.closest("#rp-chips .filter-chip .x");
+    if(x){e.stopPropagation();var chip=x.closest(".filter-chip");delete active[chip.dataset.key];rpToast(chip.dataset.label+" filter cleared");chips();page=0;render();return;}
+    var chip=e.target.closest("#rp-chips .filter-chip");
+    if(chip){openMenu(chip);return;}
+    if(!e.target.closest("#rp-menu")) menu.classList.remove("show");
+  });
+
+  function filtered(){
+    return orig.filter(function(r){
+      for(var k in active){var a=active[k];
+        if(a.range){var d=dt(r);if(d<a.range[0]||d>a.range[1])return false;}
+        else if(r.getAttribute("data-"+k)!==a.value)return false;}
+      return true;
+    });
+  }
+  function sorted(rows){
+    var v=((sortSel&&sortSel.value)||"").toLowerCase(),rs=rows.slice();
+    if(/larg|amount|balance|lifetime|total|year|↓/.test(v))rs.sort(function(a,b){return num(b)-num(a);});
+    else if(/a→z|donor|fund/.test(v))rs.sort(function(a,b){return nm(a)<nm(b)?-1:1;});
+    else if(/due|soonest/.test(v))rs.sort(function(a,b){return dt(a)-dt(b);});
+    else rs.sort(function(a,b){return dt(b)-dt(a);});
+    return rs;
+  }
+  function groupKey(r){var v=((groupSel&&groupSel.value)||"").toLowerCase();if(/none/.test(v)||!v)return null;
+    if(/donor/.test(v))return (r.getAttribute("data-name")||"?").charAt(0).toUpperCase();
+    if(/date|month/.test(v)){var d=dt(r);if(!d)return "—";return MON[Math.floor(d/100)%100-1]+" "+Math.floor(d/10000);}
+    return r.getAttribute("data-cat")||"—";}
+  function clear(){orig.forEach(function(r){if(r.parentNode)r.parentNode.removeChild(r);});card.querySelectorAll(".dt-genhdr,.dt-empty").forEach(function(g){g.remove();});}
+  function ins(el){card.insertBefore(el,pager);}
+  function hdr(t){var g=document.createElement("div");g.className="dt-row dt-genhdr";g.style.background="#fbfcfe";g.innerHTML='<div style="grid-column:1/-1;font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-2)">'+t+'</div>';return g;}
+  function render(){
+    if(!card)return; clear();
+    var rows=sorted(filtered());
+    if(rows.length===0){var e=document.createElement("div");e.className="dt-empty";e.textContent="No results match these filters. Clear a filter to see more.";ins(e);if(pager){pager.querySelector(".nav").style.display="none";pager.querySelector(".pg-status").textContent="0 rows";}return;}
+    var grouping=groupSel&&!/none/.test((groupSel.value||"").toLowerCase());
+    if(grouping){
+      var seen={},order=[];rows.forEach(function(r){var k=groupKey(r);if(!(k in seen)){seen[k]=[];order.push(k);}seen[k].push(r);});
+      order.forEach(function(k){ins(hdr(k+" · "+seen[k].length));seen[k].forEach(ins);});
+      if(pager){pager.querySelector(".nav").style.display="none";pager.querySelector(".pg-status").textContent="Grouped — showing all "+rows.length+" rows";}
+    }else{
+      var n=rows.length,pages=Math.max(1,Math.ceil(n/PAGE));if(page>=pages)page=pages-1;
+      var a=page*PAGE,b=Math.min(n,a+PAGE);rows.slice(a,b).forEach(ins);
+      if(pager){var nav=pager.querySelector(".nav");nav.style.display="flex";
+        pager.querySelector(".pg-status").textContent="Showing "+(a+1)+"–"+b+" of "+n+" rows";
+        pager.querySelector(".pg-ind").textContent=(page+1)+" / "+pages;
+        pager.querySelector(".pg-prev").disabled=page===0;pager.querySelector(".pg-next").disabled=page>=pages-1;}
+    }
+  }
+  if(sortSel)sortSel.addEventListener("change",function(){page=0;render();rpToast("Sorted · "+sortSel.value);});
+  if(groupSel)groupSel.addEventListener("change",function(){page=0;render();rpToast(/none/i.test(groupSel.value)?"Grouping cleared":"Grouped by "+groupSel.value);});
+  if(pager&&pager.querySelector(".pg-prev")){pager.querySelector(".pg-prev").addEventListener("click",function(){if(page>0){page--;render();}});pager.querySelector(".pg-next").addEventListener("click",function(){page++;render();});}
+  chips(); render();
+})();
+</script>
+</div><!-- /.dash --></div><!-- /.main -->
+<!-- ════ Atlas-themed dialog (replaces native alert/confirm) — auto-injected ════ -->
+<style>
+  #ax-ov{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);z-index:2147483000;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',-apple-system,sans-serif}
+  #ax-ov.show{display:flex}
+  #ax-ov .ax-box{background:#fff;border-radius:16px;width:100%;max-width:430px;box-shadow:0 24px 64px rgba(15,23,42,.30);overflow:hidden;animation:axUp .18s ease}
+  @keyframes axUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  #ax-ov .ax-bd{display:flex;gap:14px;padding:22px 22px 8px}
+  #ax-ov .ax-ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  #ax-ov .ax-ic svg{width:21px;height:21px}
+  #ax-ov .ax-tt{font-size:17px;font-weight:700;color:#0F172A;margin:1px 0 5px}
+  #ax-ov .ax-msg{font-size:13.5px;color:#475569;line-height:1.55;margin:0}
+  #ax-ov .ax-ft{display:flex;justify-content:flex-end;gap:9px;padding:16px 22px 20px}
+  #ax-ov .ax-btn{font-family:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:9px 16px;cursor:pointer;border:1px solid transparent}
+  #ax-ov .ax-ghost{background:#fff;border-color:#E2E8F0;color:#334155}
+  #ax-ov .ax-ghost:hover{background:#F8FAFC;border-color:#94A3B8}
+  #ax-ov .ax-primary{background:#2563EB;color:#fff}
+  #ax-ov .ax-primary:hover{background:#1D4ED8}
+  #ax-ov .ax-danger{background:#BE185D;color:#fff}
+  #ax-ov .ax-danger:hover{background:#9D174D}
+  #ax-ov .ax-gold{background:#B45309;color:#fff}
+  #ax-ov .ax-gold:hover{background:#92400E}
+</style>
+<div id="ax-ov"><div class="ax-box">
+  <div class="ax-bd"><div class="ax-ic" id="ax-ic"></div><div><h3 class="ax-tt" id="ax-tt"></h3><p class="ax-msg" id="ax-msg"></p></div></div>
+  <div class="ax-ft" id="ax-ft"></div>
+</div></div>
+<script>
+(function(){
+  if(window.__axInit) return; window.__axInit=true;
+  var ICONS={
+    danger:['#FCE7F3','#BE185D','<path d="M2.5 4.5h16v3.5h-16zM4 8v9.5a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V8M8 11.5h5"/>'],
+    warn:['#FEF3C7','#D97706','<path d="M10 7.5v4M10 14.3v.2"/><path d="M8.6 3.4 2.6 14a1.6 1.6 0 0 0 1.4 2.4h12A1.6 1.6 0 0 0 17.4 14L11.4 3.4a1.6 1.6 0 0 0-2.8 0Z"/>'],
+    info:['#EFF6FF','#2563EB','<circle cx="10" cy="10" r="7.5"/><path d="M10 9.3v4.2M10 6.4v.2"/>'],
+    success:['#DCFCE7','#15803D','<circle cx="10" cy="10" r="7.5"/><path d="M6.5 10.2l2.2 2.2 4.8-4.8"/>'],
+    docusign:['#FBF4E8','#B45309','<rect x="3" y="2.5" width="14" height="15" rx="2"/><path d="M6 7h8M6 10h5M6 13l1.4 1.4L10.5 11.3"/>']
+  };
+  function el(id){ return document.getElementById(id); }
+  function close(){ var o=el('ax-ov'); if(o) o.classList.remove('show'); }
+  window.axClose=close;
+  function dialog(o){
+    var ov=el('ax-ov'); if(!ov) return; var ic=ICONS[o.icon]||ICONS[o.danger?'danger':'info'];
+    el('ax-ic').style.background=ic[0]; el('ax-ic').style.color=ic[1];
+    el('ax-ic').innerHTML='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+ic[2]+'</svg>';
+    el('ax-tt').textContent=o.title||''; el('ax-tt').style.display=o.title?'':'none'; el('ax-msg').innerHTML=o.message||'';
+    var ft=el('ax-ft'); ft.innerHTML='';
+    if(!o.alert){ var c=document.createElement('button'); c.className='ax-btn ax-ghost'; c.textContent=o.cancelText||'Cancel'; c.onclick=function(){ close(); if(o.onCancel)o.onCancel(); }; ft.appendChild(c); }
+    var ok=document.createElement('button'); ok.className='ax-btn '+(o.btn==='gold'?'ax-gold':(o.danger?'ax-danger':'ax-primary')); ok.textContent=o.confirmText||(o.alert?'Got it':'OK');
+    ok.onclick=function(){ close(); if(o.onConfirm)o.onConfirm(); }; ft.appendChild(ok);
+    ov.classList.add('show'); setTimeout(function(){ try{ok.focus();}catch(e){} },40);
+  }
+  window.atlasConfirm=function(o){ dialog(o||{}); };
+  window.atlasAlert=function(title,message,o){ o=o||{}; dialog({title:title,message:message,alert:true,icon:o.icon||'info',btn:o.btn,confirmText:o.confirmText||'Got it',onConfirm:o.onConfirm}); };
+  // theme all native alert() calls automatically
+  window.alert=function(m){ atlasAlert('Atlas', String(m==null?'':m)); };
+  var ov=el('ax-ov'); if(ov) ov.addEventListener('click',function(e){ if(e.target===this) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
+</script>
+
+<!-- ════ Save as view · dialog + persistence ════ -->
+<style>
+  #sv-ov{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);z-index:2147483200;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',-apple-system,sans-serif}
+  #sv-ov.show{display:flex}
+  #sv-ov .sv-box{background:#fff;border-radius:16px;width:100%;max-width:460px;box-shadow:0 24px 64px rgba(15,23,42,.30);overflow:hidden}
+  #sv-ov .sv-hd{padding:20px 22px 6px}
+  #sv-ov .sv-tt{font-size:18px;font-weight:700;color:#0F172A;display:flex;align-items:center;gap:9px}
+  #sv-ov .sv-tt svg{width:18px;height:18px;color:#2563EB}
+  #sv-ov .sv-sub{font-size:12.5px;color:#64748B;margin-top:5px}
+  #sv-ov .sv-bd{padding:14px 22px 4px}
+  #sv-ov .sv-lab{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#64748B;margin-bottom:6px}
+  #sv-ov .sv-f{width:100%;font:inherit;font-size:14px;color:#1E293B;background:#fff;border:1px solid #E2E8F0;border-radius:9px;padding:10px 12px;margin-bottom:16px;outline:none}
+  #sv-ov .sv-f:focus{border-color:#2563EB;box-shadow:0 0 0 3px #EFF6FF}
+  #sv-ov select.sv-f{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;cursor:pointer}
+  #sv-ov .sv-chk{display:flex;gap:10px;align-items:flex-start;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:11px 13px;margin-bottom:6px;cursor:pointer}
+  #sv-ov .sv-chk input{width:16px;height:16px;margin-top:1px;accent-color:#2563EB;cursor:pointer}
+  #sv-ov .sv-chk .t{font-size:13px;color:#1E293B;font-weight:600}
+  #sv-ov .sv-chk .s{font-size:11.5px;color:#64748B;margin-top:2px;line-height:1.4}
+  #sv-ov .sv-ft{display:flex;justify-content:flex-end;gap:9px;padding:16px 22px 20px}
+  #sv-ov .sv-btn{font-family:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:9px 16px;cursor:pointer;border:1px solid transparent}
+  #sv-ov .sv-ghost{background:#fff;border-color:#E2E8F0;color:#334155}
+  #sv-ov .sv-ghost:hover{background:#F8FAFC;border-color:#94A3B8}
+  #sv-ov .sv-primary{background:#2563EB;color:#fff}
+  #sv-ov .sv-primary:hover{background:#1D4ED8}
+</style>
+<div id="sv-ov"><div class="sv-box">
+  <div class="sv-hd">
+    <div class="sv-tt"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 2l1 3 3 .5L9 8l.5 3L7 9.5 4.5 11l.5-3L3 5.5 6 5z"/></svg> Save as view</div>
+    <div class="sv-sub">Saved views appear under <b>Saved by me</b> in Reports and can be reopened anytime.</div>
+  </div>
+  <div class="sv-bd">
+    <label class="sv-lab" for="sv-name">View name</label>
+    <input class="sv-f" id="sv-name" type="text">
+    <label class="sv-lab" for="sv-vis">Visibility</label>
+    <select class="sv-f" id="sv-vis"><option>Just me</option><option>My team</option><option>Everyone in the diocese</option></select>
+    <label class="sv-chk"><input type="checkbox" id="sv-filters" checked><span><span class="t">Include current filters &amp; sort</span><span class="s" id="sv-filters-sum">No filters applied</span></span></label>
+  </div>
+  <div class="sv-ft">
+    <button class="sv-btn sv-ghost" onclick="closeSaveView()">Cancel</button>
+    <button class="sv-btn sv-primary" onclick="commitSaveView()">Save view</button>
+  </div>
+</div></div>
+<script>
+(function(){
+  var REPORT='Gifts by fund', URL='atlas-report-gifts-by-fund.html';
+  function todayStr(){ var d=new Date(); return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }
+  function currentFilters(){
+    var parts=[];
+    document.querySelectorAll('#rp-chips .filter-chip.applied').forEach(function(c){ parts.push(c.textContent.replace(/\s*×\s*$/,'').trim()); });
+    var sels=document.querySelectorAll('.rep-toolbar .right select');
+    if(sels[0] && !/none/i.test(sels[0].value)) parts.push('Grouped by '+sels[0].value);
+    if(sels[1]) parts.push('Sort: '+sels[1].value);
+    return parts;
+  }
+  window.openSaveView=function(){
+    document.getElementById('sv-name').value=REPORT+' — '+todayStr();
+    var f=currentFilters();
+    document.getElementById('sv-filters-sum').textContent=f.length?f.join(' · '):'No filters applied';
+    document.getElementById('sv-ov').classList.add('show');
+    setTimeout(function(){ var n=document.getElementById('sv-name'); n.focus(); n.select(); },40);
+  };
+  window.closeSaveView=function(){ document.getElementById('sv-ov').classList.remove('show'); };
+  window.commitSaveView=function(){
+    var name=(document.getElementById('sv-name').value||'').trim()||REPORT;
+    var vis=document.getElementById('sv-vis').value;
+    var incl=document.getElementById('sv-filters').checked;
+    var filters=incl?currentFilters():[];
+    var rec={id:'v'+Date.now(), name:name, report:REPORT, url:URL, visibility:vis, filters:filters, date:todayStr()};
+    try{ var arr=JSON.parse(localStorage.getItem('atlas-saved-views')||'[]'); arr.unshift(rec); localStorage.setItem('atlas-saved-views', JSON.stringify(arr)); }catch(e){}
+    closeSaveView();
+    if(window.atlasConfirm){
+      atlasConfirm({icon:'success',title:'View saved',message:'<strong>'+name+'</strong> was saved to your views'+(filters.length?' with the current filters':'')+'.',confirmText:'View saved views',cancelText:'Stay here',onConfirm:function(){ window.location='atlas-reports.html#saved'; }});
+    } else { rpToast('Saved · '+name); }
+  };
+})();
+</script>
+
+<!-- ATLAS-DATEPICKER v1 : reusable click-to-open calendar for text date fields -->
+<style id="atlas-datepicker-css">
+.adp-pop{position:absolute;z-index:2147483000;width:266px;background:#fff;border:1px solid var(--border,#E2E8F0);border-radius:12px;
+  box-shadow:0 12px 34px rgba(15,23,42,.18);padding:12px;font-family:'DM Sans',system-ui,sans-serif;color:var(--text-1,#0F172A);
+  opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .12s ease,transform .12s ease;}
+.adp-pop.open{opacity:1;transform:translateY(0);pointer-events:auto;}
+.adp-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.adp-nav{width:28px;height:28px;border:none;background:transparent;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;
+  color:var(--text-2,#334155);display:flex;align-items:center;justify-content:center;}
+.adp-nav:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
+.adp-title{font-size:13.5px;font-weight:600;letter-spacing:.01em;cursor:pointer;padding:4px 8px;border-radius:8px;}
+.adp-title:hover{background:var(--surface,#F8FAFC);}
+.adp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.adp-dow{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3,#64748B);
+  text-align:center;padding:4px 0;}
+.adp-day{border:none;background:transparent;border-radius:8px;height:32px;font-size:12.5px;cursor:pointer;color:var(--text-1,#0F172A);
+  font-family:inherit;}
+.adp-day:hover{background:var(--blue-pale,#EFF6FF);}
+.adp-day.mut{color:#CBD5E1;}
+.adp-day.today{box-shadow:inset 0 0 0 1px var(--blue,#2563EB);color:var(--blue,#2563EB);font-weight:600;}
+.adp-day.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
+.adp-cell{border:none;background:transparent;border-radius:8px;height:34px;font-size:12.5px;cursor:pointer;color:var(--text-2,#334155);
+  font-family:inherit;}
+.adp-cell:hover{background:var(--blue-pale,#EFF6FF);color:var(--blue,#2563EB);}
+.adp-cell.sel{background:var(--blue,#2563EB)!important;color:#fff!important;font-weight:600;}
+.adp-ft{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border,#E2E8F0);}
+.adp-ft button{border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:4px 6px;border-radius:6px;}
+.adp-today-b{color:var(--blue,#2563EB);} .adp-today-b:hover{background:var(--blue-pale,#EFF6FF);}
+.adp-clear-b{color:var(--text-3,#64748B);} .adp-clear-b:hover{background:var(--surface,#F8FAFC);}
+.adp-mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+</style>
+<script id="atlas-datepicker-js">
+(function(){
+  if (window.__atlasDP) return; window.__atlasDP = true;
+  var MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  var DATE_PH=/\b(m{1,2}\s*[\/\-.]\s*d{1,2}\s*[\/\-.]\s*y{2,4}|y{4}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*d{1,2}|d{1,2}\s*[\/\-.]\s*m{1,2}\s*[\/\-.]\s*y{2,4})\b/i;
+  var WORD_DATE=/\bdate\b/i;
+
+  function looksDate(inp){
+    if(!inp||inp.tagName!=='INPUT') return false;
+    var t=(inp.getAttribute('type')||'text').toLowerCase();
+    if(t!=='text'&&t!=='') return false;              // leave native date/other inputs alone
+    if(inp.getAttribute('data-adp')==='off') return false;
+    if(inp.getAttribute('list')) return false;         // autocomplete fields
+    var ph=inp.getAttribute('placeholder')||'';
+    if(DATE_PH.test(ph)) return true;
+    if(WORD_DATE.test(ph)) return true;
+    // label / aria signal (whole word "date")
+    var lab=inp.getAttribute('aria-label')||'';
+    if(WORD_DATE.test(lab)) return true;
+    // native label association (for=/wrapping label)
+    try{ if(inp.labels){ for(var i=0;i<inp.labels.length;i++){ if(WORD_DATE.test(inp.labels[i].textContent||'')) return true; } } }catch(e){}
+    var isLbl=function(el){ return el && el.matches && el.matches('label,.lbl,.field-label,.form-label'); };
+    // immediate preceding sibling labels (no climbing to broad ancestors)
+    var sib=inp.previousElementSibling, guard=0;
+    while(sib && guard<3){ if(isLbl(sib) && WORD_DATE.test(sib.textContent||'')) return true; sib=sib.previousElementSibling; guard++; }
+    // direct label children of the input's own wrapper only
+    var par=inp.parentElement;
+    if(par){ var kids=par.children; for(var j=0;j<kids.length;j++){ var k=kids[j]; if(k!==inp && isLbl(k) && WORD_DATE.test(k.textContent||'')) return true; } }
+    return false;
+  }
+
+  // ---- format detection & output ----
+  function fmtOf(inp){
+    var ph=(inp.getAttribute('placeholder')||'').toLowerCase();
+    var v=(inp.value||'').trim();
+    if(/y{4}\s*[\/\-.]\s*m/.test(ph)||/^\d{4}-\d{1,2}-\d{1,2}$/.test(v)) return 'iso';
+    if(/d{1,2}\s*[\/\-.]\s*m/.test(ph)) return 'dmy';
+    if(/[a-z]{3,}\s+\d{1,2},?\s+\d{4}/i.test(v)) return 'long';
+    return 'mdy';
+  }
+  function pad(n){return (n<10?'0':'')+n;}
+  function toStr(d,fmt){
+    var y=d.getFullYear(),m=d.getMonth()+1,day=d.getDate();
+    if(fmt==='iso') return y+'-'+pad(m)+'-'+pad(day);
+    if(fmt==='dmy') return pad(day)+'/'+pad(m)+'/'+y;
+    if(fmt==='long') return MON[m-1]+' '+day+', '+y;
+    return pad(m)+'/'+pad(day)+'/'+y;
+  }
+  function parse(v){
+    v=(v||'').trim(); if(!v) return null;
+    var m;
+    if(m=v.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/)) return new Date(+m[1],+m[2]-1,+m[3]);
+    if(m=v.match(/^([a-z]{3,})\s+(\d{1,2}),?\s+(\d{4})$/i)){var mi=MON.findIndex(function(x){return x.toLowerCase().indexOf(m[1].toLowerCase())===0;});if(mi>=0)return new Date(+m[3],mi,+m[2]);}
+    if(m=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/)){var y=+m[3];if(y<100)y+=2000;return new Date(y,+m[1]-1,+m[2]);}
+    var d=new Date(v); return isNaN(d)?null:d;
+  }
+
+  // ---- single shared popover ----
+  var pop,active,view,mode='days';
+  function build(){
+    pop=document.createElement('div');pop.className='adp-pop';pop.setAttribute('role','dialog');
+    document.body.appendChild(pop);
+    pop.addEventListener('mousedown',function(e){e.preventDefault();}); // keep field focus
+  }
+  function close(){ if(pop) pop.classList.remove('open'); active=null; mode='days'; }
+  function open(inp){
+    if(!pop) build();
+    active=inp; mode='days';
+    view=parse(inp.value)||new Date();
+    render(); position(); pop.classList.add('open');
+  }
+  function position(){
+    var r=active.getBoundingClientRect(), sx=window.pageXOffset, sy=window.pageYOffset;
+    pop.style.visibility='hidden'; pop.classList.add('open');
+    var ph=pop.offsetHeight, pw=pop.offsetWidth;
+    pop.classList.remove('open'); pop.style.visibility='';
+    var top=r.bottom+sy+6, left=r.left+sx;
+    if(r.bottom+ph+6>window.innerHeight && r.top-ph-6>0) top=r.top+sy-ph-6;
+    left=Math.min(left, sx+window.innerWidth-pw-8); left=Math.max(left,sx+8);
+    pop.style.top=top+'px'; pop.style.left=left+'px';
+  }
+  function commit(d){
+    var fmt=fmtOf(active);
+    active.value=toStr(d,fmt);
+    active.dispatchEvent(new Event('input',{bubbles:true}));
+    active.dispatchEvent(new Event('change',{bubbles:true}));
+    close();
+  }
+  function render(){
+    if(mode==='months'){renderMonths();return;}
+    if(mode==='years'){renderYears();return;}
+    var y=view.getFullYear(), mo=view.getMonth();
+    var sel=parse(active.value), today=new Date();
+    var first=new Date(y,mo,1), start=first.getDay(), dim=new Date(y,mo+1,0).getDate(), pdim=new Date(y,mo,0).getDate();
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="pm">&#8249;</button>'+
+      '<div class="adp-title" data-a="mode">'+MON[mo]+' '+y+'</div>'+
+      '<button class="adp-nav" data-a="nm">&#8250;</button></div><div class="adp-grid">';
+    for(var i=0;i<7;i++) h+='<div class="adp-dow">'+DOW[i]+'</div>';
+    for(var c=0;c<42;c++){
+      var dn,cls='adp-day',dt;
+      if(c<start){dn=pdim-start+1+c;cls+=' mut';dt=new Date(y,mo-1,dn);}
+      else if(c-start+1<=dim){dn=c-start+1;dt=new Date(y,mo,dn);}
+      else{dn=c-start+1-dim;cls+=' mut';dt=new Date(y,mo+1,dn);}
+      if(dt.getFullYear()===today.getFullYear()&&dt.getMonth()===today.getMonth()&&dt.getDate()===today.getDate())cls+=' today';
+      if(sel&&dt.getFullYear()===sel.getFullYear()&&dt.getMonth()===sel.getMonth()&&dt.getDate()===sel.getDate())cls+=' sel';
+      h+='<button class="'+cls+'" data-d="'+dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate()+'">'+dn+'</button>';
+      if(c>=start+dim-1 && (c+1)%7===0) break;
+    }
+    h+='</div><div class="adp-ft"><button class="adp-today-b" data-a="today">Today</button><button class="adp-clear-b" data-a="clear">Clear</button></div>';
+    pop.innerHTML=h;
+  }
+  function renderMonths(){
+    var y=view.getFullYear();
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="py">&#8249;</button>'+
+      '<div class="adp-title" data-a="years">'+y+'</div><button class="adp-nav" data-a="ny">&#8250;</button></div><div class="adp-mgrid">';
+    for(var i=0;i<12;i++) h+='<button class="adp-cell'+(i===view.getMonth()?' sel':'')+'" data-m="'+i+'">'+MONS[i]+'</button>';
+    h+='</div>'; pop.innerHTML=h;
+  }
+  function renderYears(){
+    var base=view.getFullYear()-6;
+    var h='<div class="adp-hd"><button class="adp-nav" data-a="pyr">&#8249;</button>'+
+      '<div class="adp-title">'+base+' – '+(base+11)+'</div><button class="adp-nav" data-a="nyr">&#8250;</button></div><div class="adp-mgrid">';
+    for(var i=0;i<12;i++){var yr=base+i;h+='<button class="adp-cell'+(yr===view.getFullYear()?' sel':'')+'" data-y="'+yr+'">'+yr+'</button>';}
+    h+='</div>'; pop.innerHTML=h;
+  }
+
+  document.addEventListener('click',function(e){
+    if(!pop) return;
+    var t=e.target;
+    if(pop.contains(t)){
+      var a=t.getAttribute('data-a'), d=t.getAttribute('data-d'), mm=t.getAttribute('data-m'), yy=t.getAttribute('data-y');
+      if(d){var p=d.split('-');commit(new Date(+p[0],+p[1]-1,+p[2]));return;}
+      if(mm!=null){view=new Date(view.getFullYear(),+mm,1);mode='days';render();return;}
+      if(yy!=null){view=new Date(+yy,view.getMonth(),1);mode='months';render();return;}
+      if(a==='pm'){view=new Date(view.getFullYear(),view.getMonth()-1,1);render();}
+      else if(a==='nm'){view=new Date(view.getFullYear(),view.getMonth()+1,1);render();}
+      else if(a==='mode'){mode='months';render();}
+      else if(a==='years'){mode='years';render();}
+      else if(a==='py'){view=new Date(view.getFullYear()-1,view.getMonth(),1);render();}
+      else if(a==='ny'){view=new Date(view.getFullYear()+1,view.getMonth(),1);render();}
+      else if(a==='pyr'){view=new Date(view.getFullYear()-12,view.getMonth(),1);render();}
+      else if(a==='nyr'){view=new Date(view.getFullYear()+12,view.getMonth(),1);render();}
+      else if(a==='today'){commit(new Date());}
+      else if(a==='clear'){active.value='';active.dispatchEvent(new Event('input',{bubbles:true}));active.dispatchEvent(new Event('change',{bubbles:true}));close();}
+      return;
+    }
+    if(active && t===active) return;
+    close();
+  },true);
+
+  document.addEventListener('focusin',function(e){ if(looksDate(e.target)) open(e.target); });
+  document.addEventListener('click',function(e){ if(looksDate(e.target) && active!==e.target) open(e.target); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+  window.addEventListener('resize',function(){ if(active&&pop&&pop.classList.contains('open')) position(); });
+  window.addEventListener('scroll',function(){ if(active&&pop&&pop.classList.contains('open')) position(); },true);
+
+  window.__atlasLooksDate=looksDate; // exposed for tests
+})();
+</script>
+<!-- /ATLAS-DATEPICKER -->
+<!-- ATLAS-NAVCOLLAPSE v1 : expandable/collapsible Campaigns submenu (Appeals / Funds) -->
+<style id="atlas-navcollapse-css">
+.nav-caret{ margin-left:auto; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px;
+  border-radius:5px; opacity:.55; transition:transform .18s ease, opacity .15s, background .15s; flex-shrink:0; }
+.nav-caret:hover{ opacity:1; background:rgba(255,255,255,.12); }
+.nav-caret svg{ width:9px; height:9px; }
+.nav-item.nav-open .nav-caret{ transform:rotate(90deg); }
+.nav-item .nav-badge + .nav-caret{ margin-left:8px; }
+.nav-subwrap{ overflow:hidden; }
+</style>
+<script id="atlas-navcollapse-js">
+(function(){
+  if (window.__atlasNavCollapse) return; window.__atlasNavCollapse = true;
+  var CARET = '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 2l3 3-3 3"/></svg>';
+
+  function setup(link){
+    // collect submenu: a following .nav-subwrap, or loose Appeals/Funds nav-items (portal)
+    var wrap=null, subs=[], next=link.nextElementSibling;
+    if(next && next.classList && next.classList.contains('nav-subwrap')) wrap=next;
+    else {
+      var n=next;
+      while(n && n.classList && n.classList.contains('nav-item') && /atlas-(appeals|funds)\.html$/.test(n.getAttribute('href')||'')){ subs.push(n); n=n.nextElementSibling; }
+    }
+    if(!wrap && !subs.length) return;
+
+    var childActive = wrap ? !!wrap.querySelector('.nav-item.active') : subs.some(function(s){return s.classList.contains('active');});
+    var expanded = link.classList.contains('active') || childActive;
+
+    if(!link.querySelector('.nav-caret')){
+      var car=document.createElement('span'); car.className='nav-caret'; car.setAttribute('aria-label','Toggle submenu'); car.innerHTML=CARET;
+      link.appendChild(car);
+    }
+    var caret=link.querySelector('.nav-caret');
+    function apply(){
+      if(wrap) wrap.style.display = expanded?'':'none';
+      else subs.forEach(function(s){ s.style.display = expanded?'':'none'; });
+      link.classList.toggle('nav-open', expanded);
+      link.setAttribute('aria-expanded', expanded?'true':'false');
+    }
+    apply();
+    caret.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); expanded=!expanded; apply(); });
+  }
+
+  function scan(){
+    var links=document.querySelectorAll('.nav-item[href="atlas-campaign-dashboard.html"]:not([data-navcol])');
+    for(var i=0;i<links.length;i++){ links[i].setAttribute('data-navcol','1'); setup(links[i]); }
+  }
+  function boot(){
+    scan();
+    // portal renders its sidebar via JS — watch for it to appear
+    var host=document.querySelector('.sidebar, #nav') || document.body;
+    try{
+      var mo=new MutationObserver(function(){ scan(); });
+      mo.observe(host, {childList:true, subtree:true});
+      setTimeout(function(){ mo.disconnect(); }, 4000);
+    }catch(e){}
+    var tries=0, t=setInterval(function(){ scan(); if(++tries>12) clearInterval(t); }, 120);
+  }
+  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+<!-- /ATLAS-NAVCOLLAPSE -->
+</body></html>
