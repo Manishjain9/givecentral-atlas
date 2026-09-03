@@ -958,7 +958,7 @@ body {
         <div class="card-body" style="display:flex;flex-direction:column;gap:8px">
           <a class="btn btn-ghost" href="atlas-campaign-outreach.html">Build cultivation list</a>
           <a class="btn btn-ghost" href="atlas-pipeline.html">Open prospects (pipeline)</a>
-          <a class="btn btn-ghost" href="atlas-email-compose.html">Send campaign update</a>
+          <a class="btn btn-ghost" href="atlas-email-campaign.html">Send campaign update</a>
           <a class="btn btn-ghost" href="atlas-campaign-report.html">Open campaign report</a>
         </div>
       </div>
@@ -1059,9 +1059,9 @@ body {
   <!-- ══ SOLICITORS ══ -->
   <div id="pane-solicitors" class="tabpane">
     <div class="card">
-      <div class="card-header"><span class="card-title">Solicitor performance · vs. target</span><span class="card-action" onclick="atlasToast('Target editor · set per-officer goals for this campaign')" style="cursor:pointer">Set targets →</span></div>
+      <div class="card-header"><span class="card-title">Solicitor performance · vs. target</span><span class="card-action" onclick="openTargetEditor()" style="cursor:pointer">Set targets →</span></div>
       <div class="card-body">
-        <table class="cdp-table">
+        <table class="cdp-table" id="solicitor-table">
           <thead><tr><th>Solicitor</th><th class="cdp-num">Target</th><th class="cdp-num">Raised</th><th>% to target</th><th class="cdp-num">Gifts</th><th class="cdp-num">Prospects</th></tr></thead>
           <tbody>
             <tr onclick="window.location='atlas-pipeline.html'"><td>Sarah Reynolds <span class="muted">· Dev Director</span></td><td class="cdp-num">$500k</td><td class="cdp-num">$486k</td><td><span class="mini-bar"><span class="mini-bar-f" style="width:97%"></span></span>97%</td><td class="cdp-num">12</td><td class="cdp-num">18</td></tr>
@@ -2033,5 +2033,41 @@ body {
 })();
 </script>
 <!-- /ATLAS-NAVCOLLAPSE -->
+<script>
+/* ── Solicitor target editor ── */
+function openTargetEditor(){
+  var data=[{n:'Sarah Reynolds',role:'Dev Director',raised:486},{n:'Bridget McCarthy',role:'Dev Director',raised:324},{n:'Julia Kelleher',role:'Officer',raised:198}];
+  var tbody=document.querySelector('#solicitor-table tbody');
+  var trs=tbody?tbody.querySelectorAll('tr'):[];
+  // read current targets from the table so the editor reflects live values
+  data.forEach(function(d,i){ var td=trs[i]&&trs[i].querySelectorAll('td')[1]; d.t=td?(parseFloat(td.textContent.replace(/[^0-9.]/g,''))||0):0; });
+  var body='<div style="font-size:12.5px;color:#475569;margin-bottom:14px">Set each officer’s fundraising target for this campaign. Raised-to-date is shown for reference.</div>'
+    + data.map(function(r,i){
+        return '<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #F1F5F9">'
+          +'<div style="flex:1"><div style="font-weight:600;font-size:13.5px;color:#0F172A">'+r.n+' <span style="color:#94A3B8;font-weight:400">· '+r.role+'</span></div><div style="font-size:11.5px;color:#94A3B8;margin-top:1px">Raised $'+r.raised+'k so far</div></div>'
+          +'<div style="display:flex;align-items:center;gap:5px"><span style="color:#64748B;font-weight:600">$</span><input id="tgt-'+i+'" type="number" min="0" step="10" value="'+r.t+'" style="width:88px;padding:8px 10px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13.5px;text-align:right;font-family:inherit;color:#0F172A;outline:none"><span style="color:#64748B;font-weight:600">k</span></div>'
+        +'</div>';
+      }).join('')
+    + '<div style="font-size:11.5px;color:#94A3B8;margin-top:12px">Officers without a target (Daniel Cho, Unattributed) keep their current “—” and roll up under all-sources totals.</div>';
+  window.atlasOpenModal({
+    title:'Set solicitor targets', sub:'Cathedral Capital Campaign 2026', cta:'Save targets', rawBody:body,
+    onSave:function(){
+      var total=0;
+      data.forEach(function(r,i){
+        var inp=document.getElementById('tgt-'+i); var v=Math.max(0, parseFloat(inp&&inp.value)||0); total+=v;
+        var tds=trs[i].querySelectorAll('td');
+        tds[1].textContent='$'+v+'k';
+        var pct=v>0?Math.round(r.raised/v*100):0;
+        var amber=pct<80?';background:var(--amber)':'';
+        tds[3].innerHTML='<span class="mini-bar"><span class="mini-bar-f" style="width:'+Math.min(pct,100)+'%'+amber+'"></span></span>'+pct+'%';
+      });
+      var foot=document.getElementById('solicitor-table').parentElement.querySelector('.cdp-foot');
+      if(foot) foot.innerHTML='3 officers carrying targets · <strong>$'+total+'k</strong> combined target · <strong>$1.20M</strong> raised across all sources.';
+      if(window.atlasToast) atlasToast('Targets updated · $'+total+'k combined across 3 officers');
+      return true;
+    }
+  });
+}
+</script>
 </body>
 </html>
