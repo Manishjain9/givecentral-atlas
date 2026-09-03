@@ -390,7 +390,6 @@
         <div class="fgroup"><div class="f-label">Timezone</div><select class="f-select"><option>US/Eastern</option><option>US/Central</option><option>US/Mountain</option><option>US/Pacific</option></select></div>
       </div>
       <div class="f-label" style="margin-top:4px">Delivery</div>
-      <div class="tog-row"><div><div class="tr-t">Save to folder</div><div class="tr-s">Stores the PDFs in this queue's folder</div></div><button class="tog on" onclick="tog(this)"></button></div>
       <div class="tog-row"><div><div class="tr-t">Email to recipients</div><div class="tr-s">Sends the report package to the list below</div></div><button class="tog on" onclick="tog(this)"></button></div>
       <div class="tog-row"><div><div class="tr-t">Failure alerts</div><div class="tr-s">Notify admin if the queue misses its window or returns an error</div></div><button class="tog on" onclick="tog(this)"></button></div>
       <div class="adv-toggle" id="advToggle" onclick="toggleAdv()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg>Advanced options</div>
@@ -707,7 +706,6 @@ function schStep(n){
     openModal('Schedule report','Where the output goes each time it runs',
       schStepper(2)
       +'<div class="f-label" style="margin-top:2px">Delivery</div>'
-      +'<div class="tog-row"><div><div class="tr-t">Save to folder</div><div class="tr-s">Store the PDFs in "'+q.folder+'"</div></div><button class="tog '+(SCH.folder?'on':'off')+'" onclick="tog(this)" data-k="folder"></button></div>'
       +'<div class="tog-row"><div><div class="tr-t">Email to recipients</div><div class="tr-s">'+(q.recipients.length?('Send to the '+q.recipients.length+' recipient'+(q.recipients.length!=1?'s':'')+' on this queue'):'No recipients on this queue yet — add them in section 3')+'</div></div><button class="tog '+(SCH.email?'on':'off')+'" onclick="tog(this)" data-k="email"'+(q.recipients.length?'':' disabled style="opacity:.4;pointer-events:none"')+'></button></div>'
       +'<div class="tog-row"><div><div class="tr-t">Failure alerts</div><div class="tr-s">Notify an admin if a run misses its window or errors</div></div><button class="tog '+(SCH.alerts?'on':'off')+'" onclick="tog(this)" data-k="alerts"></button></div>'
       +(q.recipients.length?'<div style="margin-top:12px;font-size:11.5px;color:var(--text3)">Recipients: '+q.recipients.map(p=>p.n).join(', ')+'</div>':''),
@@ -715,7 +713,7 @@ function schStep(n){
   }
   else if(n===3){
     const row=(l,v)=>'<div style="display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--text3)">'+l+'</span><span style="font-weight:600;text-align:right">'+v+'</span></div>';
-    const deliv=[SCH.folder?'Save to folder':null, SCH.email?'Email recipients':null, SCH.alerts?'Failure alerts':null].filter(Boolean).join(' · ')||'None';
+    const deliv=[SCH.email?'Email recipients':null, SCH.alerts?'Failure alerts':null].filter(Boolean).join(' · ')||'None';
     openModal('Schedule report','Confirm and this queue starts running automatically',
       schStepper(3)
       +'<div style="border:1px solid var(--border);border-radius:12px;padding:4px 16px;margin-bottom:14px">'
