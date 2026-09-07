@@ -1453,6 +1453,7 @@ body {
           '<div class="st" data-i="3"><div class="dot">3</div>Filters</div>' +
           '<div class="st" data-i="4"><div class="dot">4</div>Save</div>' +
         '</div>' +
+        '<div id="rpt-ctx" style="display:none;align-items:center;gap:9px;padding:9px 22px;background:#F0F6FF;border-bottom:1px solid #E5EAF1;font-size:12.5px;color:#1E3A8A"><span id="rpt-ctx-ic" style="width:19px;height:19px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0"></span><span>Dataset · <strong id="rpt-ctx-nm"></strong></span></div>' +
         '<div class="body">' +
           '<div class="pane on" data-i="1">' +
             '<div class="lbl">Pick a dataset</div>' +
@@ -1464,14 +1465,8 @@ body {
               '<div class="ds" data-ds="events"><div class="ico" style="background:#BE185D">E</div><div class="nm">Events</div><div class="dz">Galas, retreats · attendance + revenue · 14 records</div></div>' +
               '<div class="ds" data-ds="funds"><div class="ico" style="background:#0891B2">F</div><div class="nm">Funds</div><div class="dz">Fund / GL accounts · raised vs. goal · restrictions · 42 funds</div></div>' +
               '<div class="ds" data-ds="appeals"><div class="ico" style="background:#EA580C">A</div><div class="nm">Appeals</div><div class="dz">Solicitations · channel, response rate, ROI · 36 appeals</div></div>' +
-              '<div class="ds" data-ds="advanced"><div class="ico" style="background:#0D9488">◆</div><div class="nm">Advanced query</div><div class="dz">Full editor · all fields, AND/OR groups, or raw SQL · power users</div></div>' +
+              '<div class="ds" data-ds="advanced"><div class="ico" style="background:#0D9488">◆</div><div class="nm">Advanced query</div><div class="dz">Full editor · all fields, AND/OR groups · power users</div></div>' +
             '</div>' +
-            '<div class="lbl" style="margin-top:18px">Result type</div>' +
-            '<div class="seg" id="rpt-format">' +
-              '<button data-fmt="dynamic" class="on" type="button"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 7a5 5 0 1 1-1.5-3.5M12 2v2.5H9.5"/></svg>Live (Dynamic)</button>' +
-              '<button data-fmt="static" type="button"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="2.5" width="9" height="9" rx="1.5"/><path d="M5 6h4M5 8.5h4"/></svg>Snapshot (Static)</button>' +
-            '</div>' +
-            '<div style="font-size:11.5px;color:#64748B;margin-top:6px" id="rpt-format-hint">Live re-runs against current data every time it opens or is scheduled.</div>' +
           '</div>' +
           '<div class="pane" data-i="2">' +
             '<div class="lbl" id="rpt-cols-lbl">Pick columns <span style="font-weight:400;text-transform:none;color:#64748B;font-size:11px;margin-left:6px">click to toggle · drag in Phase 2 to reorder</span></div>' +
@@ -1551,6 +1546,8 @@ body {
           else if (i < n) s.classList.add('done');
         });
         drawer.querySelector('#rpt-back').style.display = n > 1 ? '' : 'none';
+        var ctx = drawer.querySelector('#rpt-ctx');
+        if (ctx){ ctx.style.display = n > 1 ? 'flex' : 'none'; if (n > 1 && typeof updateCtx === 'function') updateCtx(); }
         var next = drawer.querySelector('#rpt-next');
         if (n === 1) next.textContent = 'Next: Columns →';
         else if (n === 2) next.textContent = 'Next: Filters →';
@@ -1601,6 +1598,14 @@ body {
         colsBox.innerHTML = set.cols.map(function(c){ return '<div class="col-chip' + (c[1]?' on':'') + '">' + c[0] + '</div>'; }).join('');
       }
       renderCols('gifts');
+      // Selected-dataset context bar shown on steps 2–4
+      function updateCtx(){
+        if(!drawer.querySelector('#rpt-ctx')) return;
+        var nm=drawer.querySelector('#rpt-ctx-nm'); if(nm) nm.textContent=(COLSETS[currentDs]?COLSETS[currentDs].name:currentDs);
+        var ds=drawer.querySelector('.ds[data-ds="'+currentDs+'"]'), ic=ds?ds.querySelector('.ico'):null, cic=drawer.querySelector('#rpt-ctx-ic');
+        if(cic && ic){ cic.style.background=ic.style.background; cic.textContent=(ic.textContent||'').trim().charAt(0); }
+      }
+      drawer.__updateCtx=updateCtx;
       // delegated toggle (chips are re-rendered per dataset)
       colsBox.addEventListener('click', function(e){
         var c = e.target.closest('.col-chip'); if (c){ c.classList.toggle('on'); if(typeof refreshSortFields==='function') refreshSortFields(); }
@@ -1831,8 +1836,6 @@ body {
       }
       prevBtn.addEventListener('click', renderPreview);
 
-      var fmtSeg=drawer.querySelector('#rpt-format'), fmtHint=drawer.querySelector('#rpt-format-hint');
-      fmtSeg.addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b)return; fmtSeg.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); queryFormat=b.dataset.fmt; fmtHint.textContent=queryFormat==='dynamic'?'Live re-runs against current data every time it opens or is scheduled.':'Snapshot freezes the results now and stores them as a static record set.'; });
 
       function renderFilters(ds){
         currentDs=ds; groups=[{match:'all',filters:[]}]; activeGroup=0; pendingField=null;
@@ -1841,12 +1844,6 @@ body {
         opvalRow.style.display='none'; treePanel.style.display='none';
         var old=drawer.querySelector('#rpt-sqltoggle-wrap'); if(old) old.remove();
         setSqlMode(false);
-        if(ds==='advanced'){
-          var tw=document.createElement('label'); tw.id='rpt-sqltoggle-wrap'; tw.className='chk'; tw.style.margin='0 0 10px';
-          tw.innerHTML='<input type="checkbox" id="rpt-sqltoggle">Write SQL instead of visual criteria';
-          visualBox.parentNode.insertBefore(tw, visualBox);
-          tw.querySelector('#rpt-sqltoggle').addEventListener('change', function(){ setSqlMode(this.checked); });
-        }
         renderIncludes(ds); renderGroups();
       }
 
@@ -1854,7 +1851,7 @@ body {
         var box=drawer.querySelector('#rpt-summary'); if(!box)return;
         var dsName=COLSETS[currentDs]?COLSETS[currentDs].name:currentDs;
         var colCount=drawer.querySelectorAll('#rpt-cols .col-chip.on').length;
-        var rows=[['Dataset',dsName],['Result type',queryFormat==='dynamic'?'Live (Dynamic)':'Snapshot (Static)'],['Columns',colCount+' column'+(colCount!=1?'s':'')]];
+        var rows=[['Dataset',dsName],['Columns',colCount+' column'+(colCount!=1?'s':'')]];
         if(sortSpec.length)rows.push(['Sort',sortSpec.map(function(s){return s.l+' · '+s.dir;}).join(', ')]);
         rows.push(['Date range',drawer.querySelector('#rpt-daterange').value]);
         var incOn=Object.keys(includeState).filter(function(k){return includeState[k];});
@@ -1895,7 +1892,7 @@ body {
           if(!name){ alert('Name your report before saving.'); nameFld&&nameFld.focus(); return; }
           var fc=totalFilters();
           closeDrawer();
-          showToast('Saved · "'+name+'" · '+(queryFormat==='dynamic'?'Live':'Snapshot')+' · '+(sqlMode?'SQL':(fc?fc+' filter'+(fc!=1?'s':''):'no filters'))+' · in Reports → Saved views');
+          showToast('Saved · "'+name+'" · '+(sqlMode?'SQL':(fc?fc+' filter'+(fc!=1?'s':''):'no filters'))+' · in Reports → Saved views');
         }
       });
       drawer.querySelector('#rpt-back').addEventListener('click', function(){ if(step>1) show(step-1); });
