@@ -3098,40 +3098,144 @@ body {
   };
 
   // ── "+ Add new card" → GiveCentral-style hosted card form in an iframe modal ──
-  var CARD_FORM = [
-   '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>',
-   '*{box-sizing:border-box}body{margin:0;font-family:"DM Sans",system-ui,sans-serif;color:#0F172A;padding:18px 20px;background:#fff}',
-   '.lbl{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#334155;margin:0 0 5px}',
-   '.fld{width:100%;height:42px;border:1px solid #E2E8F0;border-radius:9px;padding:0 12px;font-size:14px;font-family:inherit;outline:none}',
-   '.fld:focus{border-color:#2563EB;box-shadow:0 0 0 3px #EFF4FF}.mono{font-family:monospace}',
-   '.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.mt{margin-top:12px}',
-   '.brand{font-size:11px;color:#2563EB;margin-top:4px;height:14px;font-weight:600}',
-   '.btnrow{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}',
-   '.sec{font-size:11.5px;color:#64748B;text-align:center;margin-top:14px}',
-   '.btn{height:42px;border-radius:9px;font-weight:600;font-size:14px;border:1px solid #E2E8F0;background:#fff;color:#0F172A;padding:0 18px;cursor:pointer}',
-   '.btn.pri{background:#2563EB;border-color:#2563EB;color:#fff}',
-   '</style></head><body>',
-   '<div><div class="lbl">Cardholder name</div><input class="fld" id="nm" placeholder="Name on card"></div>',
-   '<div class="mt"><div class="lbl">Card number</div><input class="fld mono" id="cnum" inputmode="numeric" placeholder="0000 0000 0000 0000" oninput="bd()"><div class="brand" id="bshow"></div></div>',
-   '<div class="row"><div><div class="lbl">Expiry (MM/YY)</div><input class="fld mono" id="exp" placeholder="MM/YY" maxlength="5"></div>',
-   '<div><div class="lbl">CVC</div><input class="fld mono" id="cvc" inputmode="numeric" placeholder="000" maxlength="4"></div></div>',
-   '<div class="mt"><div class="lbl">Billing ZIP</div><input class="fld mono" id="zip" inputmode="numeric" placeholder="ZIP" maxlength="10" style="max-width:170px"></div>',
-   '<div class="btnrow"><button class="btn" onclick="cx()">Cancel</button><button class="btn pri" onclick="sv()">Save card</button></div>',
-   '<div class="sec">Secured by GiveCentral · PCI-compliant hosted fields</div>',
-   '<scr'+'ipt>',
-   'function dg(s){var o="";s=s||"";for(var i=0;i<s.length;i++){var c=s.charAt(i);if(c>="0"&&c<="9")o+=c;}return o;}',
-   'function det(n){n=dg(n);if(n.charAt(0)==="4")return "Visa";var tw=n.substring(0,2);if(tw==="34"||tw==="37")return "Amex";var t=parseInt(tw,10);if((t>=51&&t<=55)||(t>=22&&t<=27))return "Mastercard";if(n.substring(0,4)==="6011"||tw==="65")return "Discover";return n?"Card":"";}',
-   'function fm(n){n=dg(n).substring(0,19);var o="";for(var i=0;i<n.length;i++){if(i>0&&i%4===0)o+=" ";o+=n.charAt(i);}return o;}',
-   'function bd(){var i=document.getElementById("cnum");i.value=fm(i.value);var b=det(i.value);document.getElementById("bshow").textContent=b?("Detected: "+b):"";}',
-   'function sv(){var n=dg(document.getElementById("cnum").value);if(n.length<4){document.getElementById("cnum").focus();return;}var e=document.getElementById("exp").value||"--";parent.postMessage({type:"atlas-card",action:"save",last4:n.substring(n.length-4),exp:e,brand:det(n)},"*");}',
-   'function cx(){parent.postMessage({type:"atlas-card",action:"cancel"},"*");}',
-   '<\/scr'+'ipt></body></html>'
-  ].join('');
+  var CARD_FORM_TPL = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+*{box-sizing:border-box}body{margin:0;font-family:"DM Sans",system-ui,sans-serif;color:#0F172A;padding:16px 20px 20px;background:#fff}
+.dchip{display:flex;align-items:center;gap:10px;background:#EFF4FF;border:1px solid #DBE4FF;border-radius:10px;padding:9px 12px;margin-bottom:14px}
+.dchip .av{width:30px;height:30px;border-radius:50%;background:#BE185D;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:0 0 auto}
+.dchip .t{font-size:12.5px;color:#334155;line-height:1.35}.dchip .t b{color:#0E1E35}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#334155;margin:0 0 5px;display:flex;justify-content:space-between;align-items:center}
+.lk{color:#2563EB;text-transform:none;letter-spacing:0;font-weight:600;cursor:pointer;font-size:11px}
+.fld{width:100%;height:42px;border:1px solid #E2E8F0;border-radius:9px;padding:0 12px;font-size:14px;font-family:inherit;outline:none;background:#fff}
+.fld:focus{border-color:#2563EB;box-shadow:0 0 0 3px #EFF4FF}.mono{font-family:ui-monospace,Menlo,monospace}
+.fld.err{border-color:#DC2626;box-shadow:0 0 0 3px #FEF2F2}
+.wrap{position:relative}.brandbadge{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:#1D4ED8;background:#EFF4FF;border-radius:5px;padding:3px 7px;display:none}
+.err-msg{color:#DC2626;font-size:11px;margin-top:4px;display:none}.err-msg.on{display:block}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.mt{margin-top:12px}
+.addr{display:none;margin-top:10px;border-left:2px solid #E2E8F0;padding-left:12px}
+.opts{margin-top:16px;border-top:1px solid #EEF1F6;padding-top:14px;display:flex;flex-direction:column;gap:11px}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#334155;cursor:pointer}
+.chk input{margin-top:2px;width:16px;height:16px;accent-color:#2563EB;flex:0 0 auto}
+.chk b{color:#0E1E35}.chk .d{color:#64748B;font-size:11.5px;margin-top:1px}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#F7FAFF;border:1px solid #DBE4FF;border-radius:10px;padding:11px 13px}
+.sw .txt{font-size:13px;color:#0E1E35;font-weight:600}.sw .txt .d{font-weight:400;color:#64748B;font-size:11.5px;margin-top:2px}
+.toggle{position:relative;width:40px;height:23px;flex:0 0 auto}.toggle input{opacity:0;width:0;height:0}
+.slide{position:absolute;inset:0;background:#CBD5E1;border-radius:99px;transition:.15s}.slide:before{content:"";position:absolute;height:17px;width:17px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s}
+.toggle input:checked + .slide{background:#2563EB}.toggle input:checked + .slide:before{transform:translateX(17px)}
+.dup{display:none;background:#FFFBEB;border:1px solid #FDE68A;border-radius:9px;padding:9px 12px;font-size:12px;color:#92400E;margin-top:10px}
+.btnrow{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+.btn{height:42px;border-radius:9px;font-weight:600;font-size:14px;border:1px solid #E2E8F0;background:#fff;color:#0F172A;padding:0 18px;cursor:pointer}
+.btn.pri{background:#2563EB;border-color:#2563EB;color:#fff}.btn:disabled{opacity:.5;cursor:not-allowed}
+.sec{font-size:11.5px;color:#64748B;text-align:center;margin-top:14px}
+.proc{padding:6px 2px}.prow{display:flex;align-items:center;gap:11px;font-size:13px;color:#334155;padding:9px 0;border-bottom:1px solid #F4F6FA}
+.prow:last-child{border-bottom:0}.prow b{color:#0E1E35}
+.prow .ic{width:22px;height:22px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700}
+.spin{width:18px;height:18px;border:2px solid #DBE4FF;border-top-color:#2563EB;border-radius:50%;animation:sp .7s linear infinite;flex:0 0 auto}@keyframes sp{to{transform:rotate(360deg)}}
+.done{text-align:center;margin-top:16px}.done .big{width:46px;height:46px;border-radius:50%;background:#DCFCE7;color:#15803D;display:inline-flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:8px}
+</style></head><body>
+<div id="form">
+  <div class="dchip"><div class="av">{{INI}}</div><div class="t">Adding card for <b>{{DONOR}}</b><div style="color:#64748B;font-size:11px">{{ADDRLINE}}</div></div></div>
+  <div><div class="lbl">Cardholder name</div><input class="fld" id="nm" placeholder="Name on card" autocomplete="cc-name" value="{{DONOR}}" oninput="validate()"></div>
+  <div class="mt"><div class="lbl">Card number</div><div class="wrap"><input class="fld mono" id="cnum" inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" oninput="onNum()"><span class="brandbadge" id="bbadge"></span></div><div class="err-msg" id="e-num"></div></div>
+  <div class="row">
+    <div><div class="lbl">Expiry (MM/YY)</div><input class="fld mono" id="exp" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/YY" maxlength="5" oninput="onExp()"><div class="err-msg" id="e-exp"></div></div>
+    <div><div class="lbl">CVC</div><input class="fld mono" id="cvc" inputmode="numeric" autocomplete="cc-csc" placeholder="000" maxlength="3" oninput="onCvc()"><div class="err-msg" id="e-cvc"></div></div>
+  </div>
+  <div class="mt"><div class="lbl">Billing ZIP <span class="lk" id="addrlink" onclick="toggleAddr()">Add full billing address</span></div>
+    <input class="fld mono" id="zip" inputmode="numeric" autocomplete="postal-code" placeholder="ZIP" maxlength="10" style="max-width:170px" oninput="onZip()">
+    <div class="addr" id="addr">
+      <div style="text-align:right;margin-bottom:6px"><span class="lk" onclick="sameAsDonor()">Same as donor address</span></div>
+      <div><div class="lbl">Address line 1</div><input class="fld" id="a1" placeholder="Street address" autocomplete="address-line1"></div>
+      <div class="row"><div><div class="lbl">City</div><input class="fld" id="acity" autocomplete="address-level2"></div><div><div class="lbl">State</div><input class="fld mono" id="astate" maxlength="2" placeholder="ST" autocomplete="address-level1"></div></div>
+    </div>
+  </div>
+  <div class="mt"><div class="lbl">Card nickname <span style="text-transform:none;letter-spacing:0;color:#94A3B8;font-weight:400">optional</span></div><input class="fld" id="nick" placeholder="e.g. Parish Amex" maxlength="24"></div>
+  <div class="dup" id="dup"></div>
+  <div class="opts">
+    <label class="chk"><input type="checkbox" id="def"><span><b>Set as default card</b><div class="d">Use this card first for future gifts and auto-charges.</div></span></label>
+    <label class="chk"><input type="checkbox" id="consent" onchange="validate()"><span><b>Authorization to store card</b> <span style="color:#DC2626">*</span><div class="d">{{DONOR}} authorizes the diocese to securely store this card for future and recurring gifts.</div></span></label>
+    <div class="sw"><div class="txt">Also save to GiveCentral<div class="d">Vault this card on {{DONOR}}&#39;s GiveCentral profile too.</div></div><label class="toggle"><input type="checkbox" id="sync" checked><span class="slide"></span></label></div>
+  </div>
+  <div class="btnrow"><button class="btn" onclick="cx()">Cancel</button><button class="btn pri" id="save" onclick="sv()" disabled>Save card</button></div>
+  <div class="sec">&#128274; Secured by GiveCentral &middot; PCI-compliant hosted fields</div>
+</div>
+<div id="stage" style="display:none"></div>
+<script>
+var DONOR={{DONOR_JSON}};
+var PREADDR={{ADDR_JSON}},PRECITY={{CITY_JSON}},PRESTATE={{STATE_JSON}},PREZIP={{ZIP_JSON}};
+var EXIST="{{EXIST}}".split(",").filter(Boolean);
+function $(id){return document.getElementById(id);}
+function dg(s){return (s||"").replace(/[^0-9]/g,"");}
+function det(n){n=dg(n);if(n.charAt(0)==="4")return"Visa";var tw=n.substring(0,2);if(tw==="34"||tw==="37")return"Amex";var v=parseInt(tw,10);if((v>=51&&v<=55)||(v>=22&&v<=27))return"Mastercard";if(n.substring(0,4)==="6011"||tw==="65")return"Discover";return"";}
+function luhn(n){n=dg(n);var s=0,a=0;for(var i=n.length-1;i>=0;i--){var d=parseInt(n.charAt(i),10);if(a){d*=2;if(d>9)d-=9;}s+=d;a^=1;}return n.length>=12&&s%10===0;}
+function fm(n){n=dg(n).substring(0,19);var o="";for(var i=0;i<n.length;i++){if(i>0&&i%4===0)o+=" ";o+=n.charAt(i);}return o;}
+function cvcLen(){return det($("cnum").value)==="Amex"?4:3;}
+function onNum(){var i=$("cnum");i.value=fm(i.value);var b=det(i.value);var bb=$("bbadge");if(b){bb.textContent=b;bb.style.display="";}else{bb.style.display="none";}$("cvc").maxLength=cvcLen();$("cvc").placeholder=cvcLen()===4?"0000":"000";checkDup();validate();}
+function onExp(){var v=dg($("exp").value).substring(0,4);if(v.length>=3)v=v.substring(0,2)+"/"+v.substring(2);else if(v.length===2)v=v+"/";$("exp").value=v;validate();}
+function onCvc(){$("cvc").value=dg($("cvc").value).substring(0,cvcLen());validate();}
+function onZip(){$("zip").value=$("zip").value.replace(/[^0-9-]/g,"").substring(0,10);validate();}
+function expOk(){var p=$("exp").value.split("/");if(p.length<2||p[1].length<2)return false;var m=parseInt(p[0],10),y=parseInt(p[1],10)+2000;if(!(m>=1&&m<=12))return false;var now=new Date();var end=new Date(y,m,0,23,59,59);return end>=new Date(now.getFullYear(),now.getMonth(),1);}
+function errShow(id,on,msg){var el=$(id);if(msg!=null)el.textContent=msg;el.classList.toggle("on",on);}
+function checkDup(){var n=dg($("cnum").value);var l4=n.substring(n.length-4);var dup=n.length>=4&&EXIST.indexOf(l4)>=0;var d=$("dup");d.style.display=dup?"block":"none";if(dup)d.innerHTML="A card ending <b>"+l4+"</b> is already on file for this donor. Saving will add it as a separate card.";return dup;}
+function validate(){
+  var numDigits=dg($("cnum").value).length;
+  var nOk=luhn($("cnum").value),eOk=expOk(),cOk=$("cvc").value.length===cvcLen(),zOk=dg($("zip").value).length>=5,nameOk=!!$("nm").value.trim(),consent=$("consent").checked;
+  errShow("e-num",!nOk&&numDigits>=12,"Enter a valid card number");$("cnum").classList.toggle("err",!nOk&&numDigits>=12);
+  errShow("e-exp",!eOk&&$("exp").value.length>=5,"Card is expired or date invalid");$("exp").classList.toggle("err",!eOk&&$("exp").value.length>=5);
+  errShow("e-cvc",!cOk&&$("cvc").value.length>0,cvcLen()+"-digit security code");$("cvc").classList.toggle("err",!cOk&&$("cvc").value.length>0);
+  var ok=nOk&&eOk&&cOk&&zOk&&nameOk&&consent;$("save").disabled=!ok;return ok;
+}
+function toggleAddr(){var a=$("addr");var open=a.style.display!=="block";a.style.display=open?"block":"none";$("addrlink").textContent=open?"Hide billing address":"Add full billing address";postH();}
+function sameAsDonor(){$("a1").value=PREADDR;$("acity").value=PRECITY;$("astate").value=PRESTATE;$("zip").value=PREZIP;onZip();validate();}
+function postH(){parent.postMessage({type:"atlas-card",action:"height",h:document.body.scrollHeight},"*");}
+function cx(){parent.postMessage({type:"atlas-card",action:"cancel"},"*");}
+function firstName(){return DONOR.split(" ")[0];}
+function sv(){
+  if(!validate())return;
+  var n=dg($("cnum").value),l4=n.substring(n.length-4),brand=det($("cnum").value)||"Card";
+  var sync=$("sync").checked,isDef=$("def").checked,nick=$("nick").value.trim();
+  $("form").style.display="none";var st=$("stage");st.style.display="";
+  st.innerHTML='<div class="proc"><div class="prow"><span class="spin"></span><span>Encrypting card with GiveCentral&hellip;</span></div></div>';postH();
+  var atlasRow='<div class="prow"><span class="ic" style="background:#15803D">&#10003;</span><span>Saved to <b>Atlas</b> &middot; '+brand+' &bull;&bull;&bull;&bull; '+l4+'</span></div>';
+  setTimeout(function(){
+    if(sync){
+      st.innerHTML='<div class="proc">'+atlasRow+'<div class="prow"><span class="spin"></span><span>Saving to '+firstName()+'&#39;s GiveCentral profile&hellip;</span></div></div>';postH();
+      setTimeout(function(){
+        var defRow=isDef?'<div class="prow"><span class="ic" style="background:#2563EB">&#9733;</span><span>Set as <b>default card</b> in both systems</span></div>':'';
+        st.innerHTML='<div class="proc">'+atlasRow+'<div class="prow"><span class="ic" style="background:#15803D">&#10003;</span><span>Saved to <b>GiveCentral</b> &middot; linked to '+DONOR+'</span></div>'+defRow+'</div><div class="done"><div class="big">&#10003;</div><div style="font-weight:700;font-size:15px">Card saved &amp; synced</div><div style="font-size:12px;color:#64748B;margin-top:2px">Stored in Atlas and GiveCentral for '+DONOR+'.</div></div>';postH();
+        done(l4,brand,nick,isDef,true);
+      },850);
+    } else {
+      st.innerHTML='<div class="proc">'+atlasRow+'<div class="prow"><span class="ic" style="background:#94A3B8">&ndash;</span><span>GiveCentral sync skipped</span></div></div><div class="done"><div class="big">&#10003;</div><div style="font-weight:700;font-size:15px">Card saved to Atlas</div><div style="font-size:12px;color:#64748B;margin-top:2px">Not synced to GiveCentral.</div></div>';postH();
+      done(l4,brand,nick,isDef,false);
+    }
+  },800);
+}
+function done(l4,brand,nick,isDef,synced){
+  setTimeout(function(){parent.postMessage({type:"atlas-card",action:"save",last4:l4,exp:$("exp").value,brand:brand,nick:nick,isDefault:isDef,synced:synced,consent:true},"*");},900);
+}
+window.onload=function(){validate();postH();};
+<\/script>
+</body></html>`;
 
   function openCardModal(sel){
     _cardTarget=sel;
+    var _dn=document.querySelector('.donor-lookup-result .name');
+    var nm=(_dn?_dn.textContent.trim():'')||'this donor';
+    var metaEl=document.querySelector('.donor-lookup-result .meta');
+    var full=metaEl?metaEl.textContent.trim():'';
+    var line1='',city='',state='',zip='';
+    if(full){ var parts=full.split(','); line1=(parts[0]||'').trim(); var rest=parts.slice(1).join(',').trim(); var mm=rest.match(/(.+?)\s+([A-Za-z]{2})\s+(\d{5})/); if(mm){ city=mm[1].trim(); state=mm[2].toUpperCase(); zip=mm[3]; } }
+    var ini=(nm.split(/\s+/).map(function(w){return w.charAt(0);}).join('').substring(0,2)||'D').toUpperCase();
+    var exist=[]; if(sel){ [].slice.call(sel.querySelectorAll('option')).forEach(function(o){ var x=(o.textContent||'').match(/\u2022+\s*(\d{4})/); if(x) exist.push(x[1]); }); }
+    function R(re,val){ html=html.replace(re, function(){ return val; }); }
+    var html=CARD_FORM_TPL;
+    R(/\{\{DONOR_JSON\}\}/g, JSON.stringify(nm));
+    R(/\{\{ADDR_JSON\}\}/g, JSON.stringify(line1)); R(/\{\{CITY_JSON\}\}/g, JSON.stringify(city)); R(/\{\{STATE_JSON\}\}/g, JSON.stringify(state)); R(/\{\{ZIP_JSON\}\}/g, JSON.stringify(zip));
+    R(/\{\{INI\}\}/g, ini); R(/\{\{ADDRLINE\}\}/g, full); R(/\{\{DONOR\}\}/g, nm);
+    R(/\{\{EXIST\}\}/g, exist.join(','));
     var m=document.getElementById('cc-modal'), f=document.getElementById('cc-frame');
-    if(f) f.srcdoc=CARD_FORM;
+    if(f){ f.style.height='560px'; f.srcdoc=html; }
+    var sub=document.querySelector('#cc-modal .cc-modal-sub'); if(sub) sub.textContent='Securely stored for '+nm+' \u00b7 Atlas + GiveCentral';
     if(m) m.classList.add('show');
   }
   window.openCardModal=openCardModal;
@@ -3143,7 +3247,7 @@ body {
     var brand=d.brand||'Card';
     var opt=document.createElement('option');
     opt.value='card'+Date.now();
-    opt.textContent=brand+' •••• '+d.last4+' · exp '+d.exp+' · added '+todayStr();
+    opt.textContent=(d.nick?d.nick+' · ':'')+brand+' •••• '+d.last4+' · exp '+d.exp+(d.isDefault?' · default':'')+' · added '+todayStr();
     var grp=sel.querySelector('optgroup');
     if(grp){ grp.insertBefore(opt, grp.firstChild); } else { sel.insertBefore(opt, sel.firstChild); }
     sel.value=opt.value;
@@ -3152,8 +3256,17 @@ body {
   }
   window.addEventListener('message',function(e){
     var d=e&&e.data; if(!d||d.type!=='atlas-card') return;
-    if(d.action==='save') addCardToSelect(d);
-    window.closeCardModal();
+    if(d.action==='height'){ var f=document.getElementById('cc-frame'); if(f) f.style.height=Math.min((d.h||520)+2, Math.round(window.innerHeight*0.86))+'px'; return; }
+    if(d.action==='cancel'){ window.closeCardModal(); return; }
+    if(d.action==='save'){
+      addCardToSelect(d);
+      window.closeCardModal();
+      var _dn2=document.querySelector('.donor-lookup-result .name');
+      var donor=(_dn2?_dn2.textContent.trim():'donor');
+      var dest=d.synced?('Atlas + GiveCentral'):'Atlas';
+      if(typeof showToast==='function') showToast((d.brand||'Card')+' \u2022\u2022\u2022\u2022 '+d.last4+' saved to '+dest+' for '+donor+(d.isDefault?' \u00b7 set as default':''));
+      return;
+    }
   });
 })();
 </script>
@@ -3167,12 +3280,12 @@ body {
 .cc-modal-sub{font-size:12px;color:var(--text-3,#64748B);margin-top:2px}
 .cc-modal-x{border:0;background:transparent;font-size:15px;color:var(--text-3,#64748B);cursor:pointer;width:30px;height:30px;border-radius:8px}
 .cc-modal-x:hover{background:var(--surface,#F1F5F9)}
-.cc-frame{width:100%;height:462px;border:0;display:block;background:#fff}
+.cc-frame{width:100%;height:560px;border:0;display:block;background:#fff;transition:height .15s ease}
 </style>
 <div id="cc-modal" class="cc-modal-overlay" onclick="if(event.target===this)closeCardModal()">
   <div class="cc-modal-card">
     <div class="cc-modal-head">
-      <div><div class="cc-modal-title">Add a new card</div><div class="cc-modal-sub">Enter details in the secure GiveCentral form below</div></div>
+      <div><div class="cc-modal-title">Add a new card</div><div class="cc-modal-sub">Securely stored in Atlas + GiveCentral</div></div>
       <button class="cc-modal-x" onclick="closeCardModal()" aria-label="Close">✕</button>
     </div>
     <iframe id="cc-frame" title="Add a new card" class="cc-frame"></iframe>

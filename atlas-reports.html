@@ -1364,9 +1364,12 @@ body {
           '#rpt-drawer .col-chip:hover{border-color:#93C5FD}' +
           '#rpt-drawer .col-chip.on{background:#2563EB;border-color:#2563EB;color:white;font-weight:600}' +
           '#rpt-drawer .viz{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}' +
+          '#rpt-drawer .viz .vz{padding:11px 6px}' +
           '#rpt-drawer .viz .vz{padding:14px 8px;border:1.5px solid #E2E8F0;border-radius:9px;text-align:center;cursor:pointer;font-size:11px;font-weight:600;color:#475569;transition:all .12s;background:white}' +
           '#rpt-drawer .viz .vz:hover{border-color:#93C5FD}' +
           '#rpt-drawer .viz .vz.sel{border-color:#2563EB;background:#EFF6FF;color:#2563EB}' +
+          '#rpt-drawer .mini-lbl{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#64748B;margin-bottom:5px}' +
+          '#rpt-drawer #rpt-gm select.fld{width:100%}' +
           '#rpt-drawer .viz .vz svg{width:26px;height:26px;margin-bottom:6px}' +
           '#rpt-drawer .foot{padding:14px 22px;border-top:1px solid #F1F5F9;display:flex;gap:10px;background:#FAFAFA;align-items:center}' +
           '#rpt-drawer .foot .l{font-size:11.5px;color:#64748B;display:flex;gap:6px;align-items:center}' +
@@ -1488,10 +1491,15 @@ body {
           '<div class="pane" data-i="4">' +
             '<div class="lbl">Visualization</div>' +
             '<div class="viz">' +
-              '<div class="vz sel"><svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 10h18M9 5v14"/></svg>Table</div>' +
+              '<div class="vz"><svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 10h18M9 5v14"/></svg>Table</div>' +
+              '<div class="vz sel"><svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="5" width="14" height="3"/><rect x="3" y="10.5" width="18" height="3"/><rect x="3" y="16" width="9" height="3"/></svg>Bar</div>' +
               '<div class="vz"><svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linejoin="round"><path d="M3 19l5-7 4 3 6-9 3 5" stroke-linecap="round"/></svg>Line</div>' +
-              '<div class="vz"><svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="14" width="3" height="6"/><rect x="9" y="9" width="3" height="11"/><rect x="15" y="5" width="3" height="15"/></svg>Bar</div>' +
-              '<div class="vz"><svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l7 4" stroke-linecap="round"/></svg>Pie</div>' +
+              '<div class="vz"><svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 12l0-9M12 12l7.8 4.5" stroke-linecap="round"/></svg>Pie</div>' +
+            '</div>' +
+            '<div class="lbl" style="margin-top:16px" id="rpt-gm-lbl">Chart setup <span style="font-weight:400;text-transform:none;color:#64748B;font-size:11px;margin-left:6px">smart defaults for this dataset — adjust anytime</span></div>' +
+            '<div id="rpt-gm" style="display:flex;gap:10px;margin-bottom:2px">' +
+              '<div style="flex:1"><div class="mini-lbl">Group by (dimension)</div><select class="fld" id="rpt-groupby"></select></div>' +
+              '<div style="flex:1"><div class="mini-lbl">Measure</div><select class="fld" id="rpt-measure"></select></div>' +
             '</div>' +
             '<div class="lbl" style="margin-top:18px">This report</div>' +
             '<div id="rpt-summary" style="border:1px solid #E2E8F0;border-radius:10px;padding:6px 14px;font-size:12.5px;color:#475569;margin-bottom:4px"></div>' +
@@ -1533,7 +1541,7 @@ body {
         if (n === 1) next.textContent = 'Next: Columns →';
         else if (n === 2) next.textContent = 'Next: Filters →';
         else if (n === 3) next.textContent = 'Next: Save →';
-        else if (n === 4) { next.textContent = 'Save report ✓'; if (drawer.__renderSummary) drawer.__renderSummary(); }
+        else if (n === 4) { next.textContent = 'Save report ✓'; if (drawer.__renderSummary) drawer.__renderSummary(); if (drawer.__renderPreview) drawer.__renderPreview(); }
       }
       // ── Dataset → column sets (columns differ per dataset) ──
       var COLSETS = {
@@ -1566,6 +1574,19 @@ body {
           ['Goal',0],['Gifts',0],['Donors',0],['Start date',0],['End date',0],['Status',0] ] },
         advanced: { name:'Advanced query', cols:[['Constituent name',1],['Type',1],['Lifetime giving',1],['Gift amount',1],['Gift date',0],['Gift type',0],['Fund / GL code',0],['Campaign',0],['Pledge balance',0],['Assigned officer',0]] }
       };
+      // ── Smart chart defaults: per dataset, the dimension we group by + the measure we plot ──
+      // Rule: dimension = most useful categorical column; measure = SUM of the primary money column,
+      // else COUNT of records. Bars are sorted high→low and the leader is highlighted.
+      var CHARTDEF = {
+        gifts:     { dim:'Fund / GL code', measure:'Sum of Amount', cats:[['Annual Fund',482000],['Cathedral Capital',365000],['Tuition Assistance',298000],['Ministry Outreach',214000],['Cemetery Care',149000],['Youth Programs',96000],['Music & Liturgy',72000]] },
+        donors:    { dim:'City / State', measure:'Count of records', cats:[['Chicago, IL',842000],['Naperville, IL',514000],['Evanston, IL',377000],['Oak Park, IL',298000],['Wheaton, IL',241000],['Aurora, IL',186000],['Joliet, IL',132000]] },
+        pledges:   { dim:'Status', measure:'Sum of Balance', cats:[['In good standing',186500],['Behind schedule',72300],['Completed',41200],['At risk',28400],['New',15600]] },
+        campaigns: { dim:'Campaign', measure:'Sum of Raised', cats:[['Cathedral Capital',2480000],['Annual Ministry',1320000],['Tuition Assistance',864000],['Youth Center',540000],['Bell Restoration',312000],['Food Pantry',188000]] },
+        events:    { dim:'Event', measure:'Sum of Revenue', cats:[["Bishop's Gala",148000],['Spring Auction',92500],['Golf Classic',61200],['Harvest Dinner',38400],['Youth Benefit',22800],['Wine Tasting',14600]] },
+        funds:     { dim:'Fund name', measure:'Sum of Raised', cats:[['Annual Fund',482000],['Cathedral Capital',365000],['Tuition Assistance',298000],['Ministry Outreach',214000],['Cemetery Care',149000],['Youth Programs',96000],['Music & Liturgy',72000]] },
+        appeals:   { dim:'Category', measure:'Sum of Raised', cats:[['Major gifts',412000],['Direct mail',214000],['Email',168000],['Events',126000],['Online',88000],['Phone',42000]] },
+        advanced:  { dim:'Type', measure:'Sum of Gift amount', cats:[['Individual',624000],['Foundation',388000],['Corporate',242000],['Parish',156000],['Estate',98000]] }
+      };
       var colsBox = drawer.querySelector('#rpt-cols');
       var colsLbl = drawer.querySelector('#rpt-cols-lbl');
       function renderCols(ds){
@@ -1589,7 +1610,7 @@ body {
       drawer.__updateCtx=updateCtx;
       // delegated toggle (chips are re-rendered per dataset)
       colsBox.addEventListener('click', function(e){
-        var c = e.target.closest('.col-chip'); if (c){ c.classList.toggle('on'); if(typeof refreshSortFields==='function') refreshSortFields(); }
+        var c = e.target.closest('.col-chip'); if (c){ c.classList.toggle('on'); if(typeof refreshSortFields==='function') refreshSortFields(); if(typeof populateChartControls==='function') populateChartControls(currentDs); }
       });
 
       // ══ Field catalog (categorized) per dataset ══
@@ -1777,7 +1798,6 @@ body {
       sortListBox.addEventListener('click', function(e){ var x=e.target.closest('.sx'); if(x){ sortSpec.splice(+x.dataset.i,1); renderSort(); } });
 
       function renderOptions(ds){
-        var showGift=(ds==='gifts'||ds==='donors'||ds==='advanced');
         optBox.innerHTML=
           '<div class="oh">Sharing</div>'+
           '<label class="chk"><input type="checkbox" id="opt-run" checked>Others can run this report</label>'+
@@ -1787,13 +1807,12 @@ body {
           '<div style="font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#64748B;margin:8px 0 4px">Output limit</div>'+
           '<label class="rd"><input type="radio" name="opt-lim" value="none" checked>No limit</label>'+
           '<label class="rd"><input type="radio" name="opt-lim" value="top">Top <input type="number" id="opt-topn" value="500" style="width:66px;padding:5px 8px;border:1.5px solid #E2E8F0;border-radius:7px;font-size:12px"> rows</label>'+
-          '<label class="rd"><input type="radio" name="opt-lim" value="rand">Random sample</label>'+
-          (showGift?'<div class="oh">Gift processing</div><div style="display:flex;gap:24px;flex-wrap:wrap"><div><div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px">Credit soft credits to</div><label class="rd"><input type="radio" name="opt-soft" value="donor" checked>Donor</label><label class="rd"><input type="radio" name="opt-soft" value="recip">Recipients</label><label class="rd"><input type="radio" name="opt-soft" value="both">Both</label></div><div><div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px">Credit matching gifts to</div><label class="rd"><input type="radio" name="opt-match" value="donor" checked>Donor</label><label class="rd"><input type="radio" name="opt-match" value="company">Matching company</label><label class="rd"><input type="radio" name="opt-match" value="both">Both</label></div></div>':'');
+          '<label class="rd"><input type="radio" name="opt-lim" value="rand">Random sample</label>';
       }
       function optVal(){
         var lim=(optBox.querySelector('input[name=opt-lim]:checked')||{}).value||'none';
         var limTxt=lim==='none'?'No limit':lim==='top'?('Top '+((optBox.querySelector('#opt-topn')||{}).value||'?')+' rows'):'Random sample';
-        return { run:(optBox.querySelector('#opt-run')||{}).checked, mod:(optBox.querySelector('#opt-mod')||{}).checked, dedupe:(optBox.querySelector('#opt-dedupe')||{}).checked, limit:limTxt, soft:(optBox.querySelector('input[name=opt-soft]:checked')||{}).value, match:(optBox.querySelector('input[name=opt-match]:checked')||{}).value };
+        return { run:(optBox.querySelector('#opt-run')||{}).checked, mod:(optBox.querySelector('#opt-mod')||{}).checked, dedupe:(optBox.querySelector('#opt-dedupe')||{}).checked, limit:limTxt };
       }
 
       function mockCell(l,r){
@@ -1808,14 +1827,97 @@ body {
         if(/email/i.test(l))return 'donor'+(r+1)+'@example.org';
         return 'Sample '+(r+1);
       }
+      // ── Chart controls (Group by / Measure) driven by smart per-dataset defaults ──
+      var gbSel=drawer.querySelector('#rpt-groupby'), measSel=drawer.querySelector('#rpt-measure');
+      function isCatCol(l){ return !isMoney(l) && !/date/i.test(l) && !/ id|^id|#|%|to goal|roi|rate/i.test(l); }
+      function catCols(ds){
+        var def=CHARTDEF[ds]||CHARTDEF.gifts;
+        var on=selectedColumns().filter(isCatCol);
+        if(on.indexOf(def.dim)===-1) on.unshift(def.dim);
+        return on.length?on:[def.dim];
+      }
+      function measureOpts(ds){
+        var def=CHARTDEF[ds]||CHARTDEF.gifts;
+        var money=selectedColumns().filter(isMoney).map(function(l){return 'Sum of '+l;});
+        money.push('Count of records');
+        if(money.indexOf(def.measure)===-1) money.unshift(def.measure);
+        return money;
+      }
+      function populateChartControls(ds){
+        if(!gbSel||!measSel) return;
+        var def=CHARTDEF[ds]||CHARTDEF.gifts;
+        var gv=gbSel.value, mv=measSel.value; // keep user's pick if still valid
+        var gc=catCols(ds); gbSel.innerHTML=gc.map(function(c){return '<option>'+c+'</option>';}).join('');
+        gbSel.value=(gc.indexOf(gv)!==-1)?gv:def.dim;
+        var mo=measureOpts(ds); measSel.innerHTML=mo.map(function(c){return '<option>'+c+'</option>';}).join('');
+        measSel.value=(mo.indexOf(mv)!==-1)?mv:def.measure;
+      }
+      function currentViz(){ var v=drawer.querySelector('.viz .vz.sel'); return v?v.textContent.trim():'Table'; }
+      function buildChartData(ds){
+        var def=CHARTDEF[ds]||CHARTDEF.gifts;
+        var gb=(gbSel&&gbSel.value)||def.dim, meas=(measSel&&measSel.value)||def.measure, rows;
+        if(gb===def.dim){ rows=def.cats.map(function(c){return {label:c[0],val:c[1]};}); }
+        else { // synthesize categories from the chosen column
+          var seen={}, list=[], base=[482000,365000,298000,214000,149000,96000,72000];
+          for(var r=0;r<7;r++){ var lb=mockCell(gb,r); if(!seen[lb]){ seen[lb]=1; list.push({label:lb,val:base[list.length%base.length]}); } }
+          rows=list;
+        }
+        var isCount=/count/i.test(meas);
+        if(isCount) rows=rows.map(function(o){return {label:o.label,val:Math.max(3,Math.round(o.val/1000))};});
+        rows.sort(function(a,b){return b.val-a.val;});
+        return { gb:gb, meas:meas, isCount:isCount, rows:rows.slice(0,8) };
+      }
+      function chartHTML(ds){
+        var d=buildChartData(ds), max=d.rows[0]?d.rows[0].val:1;
+        function fmt(v){ return d.isCount?v.toLocaleString():'$'+v.toLocaleString(); }
+        var bars=d.rows.map(function(o,i){
+          var w=Math.max(3,Math.round(o.val/max*100)), lead=(i===0);
+          return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">'+
+            '<div style="width:120px;font-size:11.5px;color:#475569;text-align:right;flex:0 0 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+o.label+'">'+o.label+'</div>'+
+            '<div style="flex:1;background:#F1F5F9;border-radius:5px;height:20px;position:relative;min-width:40px"><div style="width:'+w+'%;height:100%;border-radius:5px;background:'+(lead?'#2563EB':'#93C5FD')+'"></div></div>'+
+            '<div style="width:82px;font-size:11.5px;font-weight:700;color:#0F172A;flex:0 0 auto">'+fmt(o.val)+'</div>'+
+          '</div>';
+        }).join('');
+        var title=(/^Sum of /.test(d.meas)?d.meas.replace('Sum of ','Total '):'Records')+' by '+d.gb;
+        return '<div style="font-size:11.5px;color:#64748B;margin-bottom:8px">'+title+' · top '+d.rows.length+' · sorted high→low'+(sqlMode?' · from SQL':' · '+estCount()+' est.')+'</div>'+
+          '<div style="border:1px solid #E2E8F0;border-radius:10px;padding:16px 16px 8px;background:white">'+bars+'</div>';
+      }
       function renderPreview(){
+        var viz=currentViz();
+        if(viz!=='Table' && !sqlMode){
+          populateChartControls(currentDs);
+          var pd=buildChartData(currentDs);
+          var title=(/^Sum of /.test(pd.meas)?pd.meas.replace('Sum of ','Total '):'Records')+' by '+pd.gb;
+          var cap='<div style="font-size:11.5px;color:#64748B;margin-bottom:8px">'+title+' · top '+pd.rows.length+' · '+viz+' chart · '+estCount()+' est.</div>';
+          var chart = (window.AtlasReportView? window.AtlasReportView.chart(viz,pd) : '');
+          prevBox.innerHTML=cap+'<div style="border:1px solid #E2E8F0;border-radius:10px;padding:14px;background:white">'+chart+'</div>';
+          return;
+        }
         var cols=[].slice.call(drawer.querySelectorAll('#rpt-cols .col-chip.on')).map(function(c){return c.textContent;});
         if(!cols.length)cols=['Column A','Column B','Column C'];
         var head='<tr>'+cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr>', body='';
         for(var r=0;r<5;r++){ body+='<tr>'+cols.map(function(c){return '<td>'+mockCell(c,r)+'</td>';}).join('')+'</tr>'; }
         prevBox.innerHTML='<div style="font-size:11.5px;color:#64748B;margin-bottom:4px">Sample of 5 · '+(sqlMode?'from SQL':(estCount()+' est.'))+'</div><table class="prevtbl"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>';
       }
+      drawer.__renderPreview=renderPreview;
+      if(gbSel) gbSel.addEventListener('change', renderPreview);
+      if(measSel) measSel.addEventListener('change', renderPreview);
       prevBtn.addEventListener('click', renderPreview);
+
+      // ══════════════════════════════════════════════════════════════════
+      //  GENERATED REPORT — full result view opened after "Save report"
+      //  Renders the chosen visualization (Table / Bar / Line / Pie) live.
+      // ══════════════════════════════════════════════════════════════════
+      function buildSnap(name){
+        var ds=currentDs, d=buildChartData(ds), viz=currentViz();
+        var cols=selectedColumns(); if(!cols.length) cols=(COLSETS[ds]||COLSETS.gifts).cols.filter(function(c){return c[1];}).map(function(c){return c[0];});
+        var dsName=COLSETS[ds]?COLSETS[ds].name:ds;
+        var dateR=(drawer.querySelector('#rpt-daterange')||{}).value||'This fiscal year';
+        var fc=totalFilters(), estRows=sqlMode?'SQL query':(estCount()+' rows');
+        return {name:name, ds:ds, dsName:dsName, dateR:dateR, fc:fc, sqlMode:sqlMode, estRows:estRows, viz:viz, cols:cols, d:d};
+      }
+      function openGeneratedReport(name){ var snap=buildSnap(name); if(window.AtlasReportView) window.AtlasReportView.open(snap); return snap; }
+      drawer.__openGeneratedReport=openGeneratedReport;
 
 
       function renderFilters(ds){
@@ -1846,7 +1948,6 @@ body {
         }
         var o=optVal();
         rows.push(['Output limit',o.limit]);
-        if(currentDs==='gifts'||currentDs==='donors'||currentDs==='advanced')rows.push(['Soft credit',{donor:'Donor',recip:'Recipients',both:'Both'}[o.soft]||'Donor']);
         box.innerHTML=rows.map(function(r){return '<div class="sumrow"><span class="k">'+r[0]+'</span><span class="v">'+r[1]+'</span></div>';}).join('');
       }
       drawer.__renderSummary=renderSummary;
@@ -1854,26 +1955,29 @@ body {
       var drSel=drawer.querySelector('#rpt-daterange'), drCustom=drawer.querySelector('#rpt-datecustom');
       drSel.addEventListener('change', function(){ drCustom.style.display=/Custom/.test(drSel.value)?'grid':'none'; });
 
-      populateSort('gifts'); renderOptions('gifts'); renderFilters('gifts');
+      populateSort('gifts'); renderOptions('gifts'); renderFilters('gifts'); populateChartControls('gifts');
 
       drawer.querySelectorAll('.ds').forEach(function(d){
         d.addEventListener('click', function(){
           drawer.querySelectorAll('.ds').forEach(function(x){ x.classList.remove('sel'); });
           d.classList.add('sel');
           renderCols(d.dataset.ds); populateSort(d.dataset.ds); renderOptions(d.dataset.ds); renderFilters(d.dataset.ds);
+          populateChartControls(d.dataset.ds);
           prevBox.innerHTML='';
         });
       });
 
-      drawer.querySelectorAll('.vz').forEach(function(v){ v.addEventListener('click', function(){ drawer.querySelectorAll('.vz').forEach(function(x){x.classList.remove('sel');}); v.classList.add('sel'); }); });
+      drawer.querySelectorAll('.vz').forEach(function(v){ v.addEventListener('click', function(){ drawer.querySelectorAll('.vz').forEach(function(x){x.classList.remove('sel');}); v.classList.add('sel'); renderPreview(); }); });
       drawer.querySelector('#rpt-next').addEventListener('click', function(){
         if(step<4) show(step+1);
         else {
           var nameFld=drawer.querySelector('#rpt-name'), name=nameFld?nameFld.value.trim():'';
           if(!name){ alert('Name your report before saving.'); nameFld&&nameFld.focus(); return; }
           var fc=totalFilters();
+          var snap=openGeneratedReport(name);
+          if(window.sbmAdd) sbmAdd(snap);
           closeDrawer();
-          showToast('Saved · "'+name+'" · '+(sqlMode?'SQL':(fc?fc+' filter'+(fc!=1?'s':''):'no filters'))+' · in Reports → Saved views');
+          showToast('Saved · "'+name+'" · added to Saved by me · opening report');
         }
       });
       drawer.querySelector('#rpt-back').addEventListener('click', function(){ if(step>1) show(step-1); });
@@ -2166,6 +2270,203 @@ body {
 })();
 </script>
 
+
+<!-- ════ AtlasReportView · shared report renderer (Table/Bar/Column/Line/Area/Pie/Donut) ════ -->
+<script>
+(function(){
+  function fmtMoney(v){ return '$'+Math.round(v).toLocaleString(); }
+  function fmtShort(v,isCount){ v=Math.round(v); if(isCount) return v.toLocaleString(); if(v>=1e6) return '$'+(v/1e6).toFixed(1).replace(/\.0$/,'')+'M'; if(v>=1e3) return '$'+Math.round(v/1e3)+'k'; return '$'+v; }
+  function fmtVal(v,isCount){ return isCount? Math.round(v).toLocaleString() : fmtMoney(v); }
+  function trunc(s,n){ s=String(s); return s.length>n? s.slice(0,n-1)+'…' : s; }
+  var PIECOL=['#2563EB','#7C3AED','#0D9488','#C8A04A','#BE185D','#15803D','#F59E0B','#64748B'];
+
+  function mockCell(l,r){
+    var names=['Margaret Sullivan',"St. Michael's Parish","Patricia O'Brien",'Thomas Kowalski','Fidelity Charitable'];
+    if(/name|donor|constituent/i.test(l))return names[r%names.length];
+    if(/amount|giving|goal|raised|revenue|balance|net|cost|pledged/i.test(l))return '$'+([1900,5000,50000,250,12500][r%5]).toLocaleString();
+    if(/date/i.test(l))return ['Apr 30, 2026','Apr 27, 2026','Apr 22, 2026','Apr 18, 2026','Apr 12, 2026'][r%5];
+    if(/%|rate|to goal|fulfilled|roi/i.test(l))return [62,88,45,100,73][r%5]+'%';
+    if(/ id|^id|#/i.test(l))return 'R-2026-0'+(488-r);
+    if(/type|status|method|channel|frequency|segment|restriction/i.test(l))return ['Standard 1771','Active','Check','Email','Monthly'][r%5];
+    if(/count|attendance|responses|sent/i.test(l))return [3,12,148,26,7][r%5];
+    if(/email/i.test(l))return 'donor'+(r+1)+'@example.org';
+    return 'Sample '+(r+1);
+  }
+
+  function barsBig(d){
+    var max=d.rows[0]?d.rows[0].val:1;
+    return '<div style="padding:4px 2px">'+d.rows.map(function(o,i){
+      var w=Math.max(3,Math.round(o.val/max*100)), lead=(i===0);
+      return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'+
+        '<div style="width:150px;font-size:12.5px;color:#334155;text-align:right;flex:0 0 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+o.label+'">'+o.label+'</div>'+
+        '<div style="flex:1;background:#F1F5F9;border-radius:6px;height:26px;position:relative;min-width:60px"><div style="width:'+w+'%;height:100%;border-radius:6px;background:'+(lead?'#2563EB':'#93C5FD')+';transition:width .5s ease"></div></div>'+
+        '<div style="width:92px;font-size:12.5px;font-weight:700;color:#0F172A;flex:0 0 auto">'+fmtVal(o.val,d.isCount)+'</div>'+
+      '</div>';
+    }).join('')+'</div>';
+  }
+  function columnBig(d){
+    var rows=d.rows, n=rows.length, max=Math.max.apply(null,rows.map(function(r){return r.val;}))||1;
+    var W=720,H=300,padL=16,padR=16,padT=34,padB=56, iw=W-padL-padR, ih=H-padT-padB;
+    var slot=iw/n, bw=Math.min(76, slot*0.6);
+    var bars=rows.map(function(o,i){
+      var bh=Math.max(3,o.val/max*ih), x=padL+i*slot+(slot-bw)/2, y=padT+ih-bh, lead=(i===0);
+      var col=lead?'#15803D':'#2563EB';
+      return '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="4" fill="'+col+'"/>'+
+        '<text x="'+(x+bw/2).toFixed(1)+'" y="'+(y-8).toFixed(1)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0F172A">'+fmtShort(o.val,d.isCount)+'</text>'+
+        '<text x="'+(x+bw/2).toFixed(1)+'" y="'+(padT+ih+18)+'" text-anchor="middle" font-size="10.5" fill="#64748B">'+trunc(o.label,12)+'</text>';
+    }).join('');
+    return '<div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:'+W+'px"><line x1="'+padL+'" y1="'+(padT+ih)+'" x2="'+(W-padR)+'" y2="'+(padT+ih)+'" stroke="#E2E8F0"/>'+bars+'</svg></div>';
+  }
+  function lineBig(d,area){
+    var rows=d.rows, n=rows.length, max=Math.max.apply(null,rows.map(function(r){return r.val;}))||1;
+    var W=720,H=280,padL=58,padR=22,padT=22,padB=56, iw=W-padL-padR, ih=H-padT-padB;
+    function x(i){ return n<=1? padL+iw/2 : padL + i*iw/(n-1); }
+    function y(v){ return padT + ih - (v/max)*ih; }
+    var pts=rows.map(function(r,i){return x(i)+','+y(r.val);});
+    var grid=[0,.25,.5,.75,1].map(function(tk){var yy=padT+ih-tk*ih; return '<line x1="'+padL+'" y1="'+yy+'" x2="'+(padL+iw)+'" y2="'+yy+'" stroke="#EEF2F7"/><text x="'+(padL-9)+'" y="'+(yy+3.5)+'" text-anchor="end" font-size="10" fill="#94A3B8">'+fmtShort(max*tk,d.isCount)+'</text>';}).join('');
+    var fill=area?'rgba(37,99,235,.16)':'rgba(37,99,235,.09)';
+    var poly='<polygon fill="'+fill+'" points="'+padL+','+(padT+ih)+' '+pts.join(' ')+' '+(padL+(n<=1?iw/2:iw))+','+(padT+ih)+'"/>';
+    var line='<polyline fill="none" stroke="#2563EB" stroke-width="2.6" stroke-linejoin="round" points="'+pts.join(' ')+'"/>';
+    var dots=rows.map(function(r,i){return '<circle cx="'+x(i)+'" cy="'+y(r.val)+'" r="4" fill="#fff" stroke="#2563EB" stroke-width="2"/>';}).join('');
+    var xl=rows.map(function(r,i){return '<text x="'+x(i)+'" y="'+(padT+ih+18)+'" text-anchor="middle" font-size="10" fill="#64748B">'+trunc(r.label,11)+'</text>';}).join('');
+    return '<div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:'+W+'px">'+grid+poly+line+dots+xl+'</svg></div>';
+  }
+  function pieBig(d,donut){
+    var rows=d.rows, total=rows.reduce(function(s,r){return s+r.val;},0)||1, cx=130,cy=130,r=104,ri=donut?62:0, a=-Math.PI/2, paths='';
+    rows.forEach(function(row,i){ var frac=row.val/total, a2=a+frac*2*Math.PI;
+      var x1=cx+r*Math.cos(a),y1=cy+r*Math.sin(a),x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);
+      var large=frac>.5?1:0, col=PIECOL[i%PIECOL.length];
+      if(donut){ var xi1=cx+ri*Math.cos(a2),yi1=cy+ri*Math.sin(a2),xi2=cx+ri*Math.cos(a),yi2=cy+ri*Math.sin(a);
+        paths+='<path d="M'+x1.toFixed(2)+' '+y1.toFixed(2)+' A'+r+' '+r+' 0 '+large+' 1 '+x2.toFixed(2)+' '+y2.toFixed(2)+' L'+xi1.toFixed(2)+' '+yi1.toFixed(2)+' A'+ri+' '+ri+' 0 '+large+' 0 '+xi2.toFixed(2)+' '+yi2.toFixed(2)+' Z" fill="'+col+'"/>';
+      } else {
+        paths+='<path d="M'+cx+' '+cy+' L'+x1.toFixed(2)+' '+y1.toFixed(2)+' A'+r+' '+r+' 0 '+large+' 1 '+x2.toFixed(2)+' '+y2.toFixed(2)+' Z" fill="'+col+'"/>';
+      }
+      a=a2;
+    });
+    var center=donut?'<text x="130" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#0F172A">'+fmtShort(total,d.isCount)+'</text><text x="130" y="146" text-anchor="middle" font-size="10" letter-spacing=".05em" fill="#94A3B8">TOTAL</text>':'';
+    var legend=rows.map(function(row,i){return '<div style="display:flex;align-items:center;gap:9px;margin-bottom:8px;font-size:12.5px"><span style="width:12px;height:12px;border-radius:3px;background:'+PIECOL[i%PIECOL.length]+';flex:0 0 auto"></span><span style="flex:1;color:#475569">'+row.label+'</span><span style="font-weight:700;color:#0F172A">'+fmtVal(row.val,d.isCount)+'</span><span style="color:#94A3B8;width:42px;text-align:right">'+Math.round(row.val/total*100)+'%</span></div>';}).join('');
+    return '<div style="display:flex;gap:28px;align-items:center;flex-wrap:wrap;padding:6px 2px"><svg viewBox="0 0 260 260" width="212" height="212" style="flex:0 0 auto">'+paths+center+'</svg><div style="flex:1;min-width:240px">'+legend+'</div></div>';
+  }
+  function tableBig(cols){
+    if(!cols||!cols.length)cols=['Column A','Column B','Column C'];
+    var head='<tr>'+cols.map(function(c){return '<th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#64748B;border-bottom:1.5px solid #E2E8F0;white-space:nowrap">'+c+'</th>';}).join('')+'</tr>', body='';
+    for(var r=0;r<12;r++){ body+='<tr>'+cols.map(function(c){return '<td style="padding:9px 12px;font-size:12.5px;color:#0F172A;border-bottom:1px solid #F1F5F9;white-space:nowrap">'+mockCell(c,r)+'</td>';}).join('')+'</tr>'; }
+    return '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:520px"><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div>';
+  }
+  function chart(viz,d){
+    if(viz==='Line')   return lineBig(d,false);
+    if(viz==='Pie')    return pieBig(d,true);
+    return barsBig(d); // Bar (default)
+  }
+  function bodyFor(viz,d,cols){ return viz==='Table'? tableBig(cols) : chart(viz,d); }
+
+  function downloadCSV(name, cols, d, viz){
+    var csv='';
+    if(viz==='Table'){ csv=cols.join(',')+'\n'; for(var r=0;r<12;r++){ csv+=cols.map(function(c){ return '"'+String(mockCell(c,r)).replace(/"/g,'""')+'"'; }).join(',')+'\n'; } }
+    else { csv=d.gb+','+d.meas+'\n'; csv+=d.rows.map(function(o){ return '"'+o.label+'",'+o.val; }).join('\n')+'\n'; }
+    try{ var blob=new Blob([csv],{type:'text/csv'}); var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=name.replace(/[^\w]+/g,'_')+'.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); },500); }catch(e){}
+    if(window.showToast) showToast('Exported · "'+name+'.csv"');
+  }
+
+  function open(snap){
+    var name=snap.name, dsName=snap.dsName, dateR=snap.dateR, fc=snap.fc, d=snap.d, cols=snap.cols||[], estRows=snap.estRows||'';
+    var chartTitle=(/^Sum of /.test(d.meas)?d.meas.replace('Sum of ','Total '):'Records')+' by '+d.gb;
+    var resultViz=snap.viz||'Bar';
+    var VZ=['Table','Bar','Line','Pie'];
+
+    var old=document.getElementById('rpt-result-scrim'); if(old) old.remove();
+    var sc=document.createElement('div'); sc.id='rpt-result-scrim';
+    sc.style.cssText='position:fixed;inset:0;background:#F5F7FA;z-index:100030;overflow:auto;font-family:DM Sans,sans-serif;opacity:0;transition:opacity .2s';
+    var vizTabs=VZ.map(function(v){return '<button class="rr-vz'+(v===resultViz?' on':'')+'" data-v="'+v+'">'+v+'</button>';}).join('');
+    sc.innerHTML=
+      '<style>'+
+      '#rpt-result-scrim .rr-wrap{max-width:940px;margin:0 auto;padding:0 20px 60px}'+
+      '#rpt-result-scrim .rr-top{background:linear-gradient(135deg,#0F172A,#2563EB);color:#fff;padding:22px 0 26px;margin-bottom:-14px}'+
+      '#rpt-result-scrim .rr-top .rr-wrap{display:flex;align-items:flex-start;gap:14px}'+
+      '#rpt-result-scrim .rr-badge{width:44px;height:44px;border-radius:11px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;flex:0 0 auto}'+
+      '#rpt-result-scrim h1{font-family:DM Serif Display,serif;font-weight:400;font-size:25px;margin:0 0 4px}'+
+      '#rpt-result-scrim .rr-sub{font-size:12.5px;opacity:.88}'+
+      '#rpt-result-scrim .rr-x{margin-left:auto;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:17px;flex:0 0 auto}'+
+      '#rpt-result-scrim .rr-card{background:#fff;border:1px solid #E2E8F0;border-radius:16px;box-shadow:0 8px 28px rgba(15,23,42,.06);padding:20px 22px;margin-top:20px}'+
+      '#rpt-result-scrim .rr-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}'+
+      '#rpt-result-scrim .rr-chip{background:#fff;border:1px solid #E2E8F0;border-radius:99px;padding:6px 13px;font-size:12px;color:#475569}'+
+      '#rpt-result-scrim .rr-chip b{color:#0F172A;font-weight:700}'+
+      '#rpt-result-scrim .rr-vzrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}'+
+      '#rpt-result-scrim .rr-vz{border:1.5px solid #E2E8F0;background:#fff;color:#475569;font:600 12.5px "DM Sans";padding:8px 15px;border-radius:9px;cursor:pointer;transition:all .12s}'+
+      '#rpt-result-scrim .rr-vz:hover{border-color:#93C5FD}'+
+      '#rpt-result-scrim .rr-vz.on{border-color:#2563EB;background:#EFF6FF;color:#2563EB}'+
+      '#rpt-result-scrim .rr-h{font-size:16px;font-weight:700;color:#0F172A;margin-bottom:3px}'+
+      '#rpt-result-scrim .rr-hs{font-size:12px;color:#64748B;margin-bottom:16px}'+
+      '#rpt-result-scrim .rr-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}'+
+      '#rpt-result-scrim .rr-btn{border:1.5px solid #E2E8F0;background:#fff;color:#334155;font:600 13px "DM Sans";padding:10px 16px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}'+
+      '#rpt-result-scrim .rr-btn:hover{border-color:#93C5FD}'+
+      '#rpt-result-scrim .rr-btn.primary{background:#2563EB;border-color:#2563EB;color:#fff}'+
+      '#rpt-result-scrim .rr-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}'+
+      '#rpt-result-scrim .rr-kpi{background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:15px 16px}'+
+      '#rpt-result-scrim .rr-kpi .v{font-family:DM Serif Display,serif;font-size:22px;color:#0F172A}'+
+      '#rpt-result-scrim .rr-kpi .l{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#64748B;margin-top:4px;font-weight:700}'+
+      '</style>'+
+      '<div class="rr-top"><div class="rr-wrap">'+
+        '<div class="rr-badge"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="14" width="4" height="6"/><rect x="10" y="8" width="4" height="12"/><rect x="17" y="4" width="4" height="16"/></svg></div>'+
+        '<div><h1>'+name+'</h1><div class="rr-sub">'+dsName+' · '+dateR+' · generated just now · Guru AI ready</div></div>'+
+        '<div class="rr-x" id="rr-close">✕</div>'+
+      '</div></div>'+
+      '<div class="rr-wrap">'+
+        '<div class="rr-kpis">'+
+          '<div class="rr-kpi"><div class="v">'+fmtShort(d.rows.reduce(function(s,r){return s+r.val;},0),d.isCount)+'</div><div class="l">'+(d.isCount?'Total records':'Total '+d.meas.replace('Sum of ',''))+'</div></div>'+
+          '<div class="rr-kpi"><div class="v">'+d.rows.length+'</div><div class="l">'+d.gb+' groups</div></div>'+
+          '<div class="rr-kpi"><div class="v">'+estRows+'</div><div class="l">Source rows</div></div>'+
+        '</div>'+
+        '<div class="rr-card">'+
+          '<div class="rr-vzrow" id="rr-vzrow">'+vizTabs+'</div>'+
+          '<div class="rr-h" id="rr-h">'+chartTitle+'</div>'+
+          '<div class="rr-hs" id="rr-hs">Sorted high→low · top '+d.rows.length+'</div>'+
+          '<div id="rr-body"></div>'+
+          '<div class="rr-actions">'+
+            '<button class="rr-btn primary" id="rr-csv"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1v9M4.5 6.5L8 10l3.5-3.5M2 13h12"/></svg>Export CSV</button>'+
+            '<button class="rr-btn" id="rr-pdf"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="2" width="10" height="12" rx="1"/><path d="M6 6h4M6 9h4"/></svg>Export PDF</button>'+
+            '<button class="rr-btn" id="rr-sched"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.5"/></svg>Schedule</button>'+
+            '<button class="rr-btn" id="rr-share"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="4" cy="8" r="2"/><circle cx="12" cy="4" r="2"/><circle cx="12" cy="12" r="2"/><path d="M6 7l4-2M6 9l4 2"/></svg>Share</button>'+
+            '<button class="rr-btn" id="rr-edit"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2l3 3L6 13l-4 1 1-4z"/></svg>Edit report</button>'+
+          '</div>'+
+        '</div>'+
+        '<div class="rr-chips">'+
+          '<span class="rr-chip">Dataset · <b>'+dsName+'</b></span>'+
+          '<span class="rr-chip">Columns · <b>'+cols.length+'</b></span>'+
+          '<span class="rr-chip">Group by · <b>'+d.gb+'</b></span>'+
+          '<span class="rr-chip">Measure · <b>'+d.meas+'</b></span>'+
+          '<span class="rr-chip">Date range · <b>'+dateR+'</b></span>'+
+          '<span class="rr-chip">Filters · <b>'+(snap.sqlMode?'Custom SQL':(fc?fc+' active':'None — all records'))+'</b></span>'+
+        '</div>'+
+      '</div>';
+    document.body.appendChild(sc);
+    requestAnimationFrame(function(){ sc.style.opacity=1; });
+
+    var bodyMount=sc.querySelector('#rr-body'), hEl=sc.querySelector('#rr-h'), hsEl=sc.querySelector('#rr-hs');
+    function paint(){
+      if(resultViz==='Table'){ hEl.textContent=cols.length+'-column table'; hsEl.textContent='Sample of 12 rows · '+estRows+' total'; }
+      else if(resultViz==='Pie'||resultViz==='Donut'){ hEl.textContent=chartTitle+' — share of total'; hsEl.textContent='Proportional breakdown · top '+d.rows.length; }
+      else if(resultViz==='Line'||resultViz==='Area'){ hEl.textContent=chartTitle; hsEl.textContent='Trend across '+d.rows.length+' '+d.gb+' groups'; }
+      else { hEl.textContent=chartTitle; hsEl.textContent='Sorted high→low · top '+d.rows.length; }
+      bodyMount.innerHTML=bodyFor(resultViz,d,cols);
+      [].slice.call(sc.querySelectorAll('.rr-vz')).forEach(function(b){ b.classList.toggle('on', b.dataset.v===resultViz); });
+    }
+    paint();
+    sc.querySelector('#rr-vzrow').addEventListener('click', function(e){ var b=e.target.closest('.rr-vz'); if(b){ resultViz=b.dataset.v; paint(); } });
+    function closeRR(){ sc.style.opacity=0; setTimeout(function(){ sc.remove(); },200); }
+    sc.querySelector('#rr-close').addEventListener('click', closeRR);
+    sc.querySelector('#rr-csv').addEventListener('click', function(){ downloadCSV(name, cols, d, resultViz); });
+    sc.querySelector('#rr-pdf').addEventListener('click', function(){ if(window.showToast) showToast('Preparing PDF · "'+name+'" — opening print dialog'); setTimeout(function(){ try{ window.print(); }catch(e){} },300); });
+    sc.querySelector('#rr-sched').addEventListener('click', function(){ if(window.showToast) showToast('Schedule · "'+name+'" — set frequency & recipients'); });
+    sc.querySelector('#rr-share').addEventListener('click', function(){ if(window.showToast) showToast('Share link copied · "'+name+'"'); });
+    sc.querySelector('#rr-edit').addEventListener('click', function(){ closeRR(); if(window.atlasBuildReport) window.atlasBuildReport(); });
+  }
+
+  window.atlasBuildReport=function(){ var b=[].slice.call(document.querySelectorAll('button')).filter(function(x){return /Build a custom report/i.test(x.textContent);})[0]; if(b) b.click(); };
+  window.AtlasReportView={ open:open, chart:chart, table:tableBig, downloadCSV:downloadCSV };
+})();
+</script>
+
 <!-- ════ Saved by me · single home for saved views ════ -->
 <style>
   #sbm-filter{display:inline-flex;background:var(--surface-2,#F1F5F9);border-radius:9px;padding:3px;margin:0 0 16px}
@@ -2212,13 +2513,23 @@ body {
         + '</div>'
         + '<div class="desc">'+esc(v.report||'')+(filt!=='No filters'?' · '+esc(filt):'')+'</div>'
         + '<div class="meta"><span>Saved <strong style="color:var(--text-2)">'+esc(v.date||'')+'</strong></span></div>'
-        + '<div class="sbm-acts"><a class="sbm-open" href="'+esc(v.url||'#')+'">Open report <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3h7v7M11 3L4 10"/></svg></a>'
+        + '<div class="sbm-acts">'+(v.cfg? '<button class="sbm-open" data-open="'+esc(v.id)+'">Open report <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3h7v7M11 3L4 10"/></svg></button>' : '<a class="sbm-open" href="'+esc(v.url||'#')+'">Open report <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3h7v7M11 3L4 10"/></svg></a>')
         + '<button class="sbm-remove" data-id="'+esc(v.id)+'">Remove</button></div>';
       grid.appendChild(card);
     });
     grid.querySelectorAll('.sbm-remove').forEach(function(b){ b.onclick=function(){ sbmRemove(b.getAttribute('data-id')); }; });
+    grid.querySelectorAll('.sbm-open[data-open]').forEach(function(b){ b.onclick=function(){ var rec=load().filter(function(v){return v.id===b.getAttribute('data-open');})[0]; if(rec&&rec.cfg&&window.AtlasReportView) window.AtlasReportView.open(rec.cfg); }; });
     var c=document.getElementById('sbm-count'); if(c) c.textContent=load().length;
   }
+  window.sbmAdd=function(snap){
+    try{
+      var all=load();
+      var filt=[]; if(snap.fc) filt.push(snap.fc+' filter'+(snap.fc!=1?'s':''));
+      filt.push('Group: '+snap.d.gb); filt.push(snap.viz+' chart');
+      all.unshift({ id:'r'+Date.now(), name:snap.name, report:snap.dsName+' \u00b7 '+snap.viz+' chart', visibility:'Just me', filters:filt, date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), cfg:snap });
+      save(all); render();
+    }catch(e){}
+  };
   window.sbmRemove=function(id){
     var rec=load().filter(function(v){return v.id===id;})[0];
     var name=rec?rec.name:'this view';
