@@ -3473,5 +3473,93 @@ body {
 })();
 </script>
 <!-- /ATLAS-NAVCOLLAPSE -->
+
+<style>/* role-users-modal */
+#ru-modal{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100060;display:none;align-items:center;justify-content:center;padding:20px}
+#ru-modal.show{display:flex}
+#ru-modal .ru-card{background:#fff;border-radius:16px;width:min(460px,100%);max-height:82vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(15,23,42,.35);font-family:'DM Sans',sans-serif}
+#ru-modal .ru-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid var(--border)}
+#ru-modal .ru-title{font-weight:700;font-size:15px;color:var(--navy,#0E1E35)}
+#ru-modal .ru-sub{font-size:12px;color:var(--text-3,#64748B);margin-top:2px}
+#ru-modal .ru-x{border:0;background:transparent;font-size:15px;color:var(--text-3);cursor:pointer;width:30px;height:30px;border-radius:8px;flex:0 0 auto}
+#ru-modal .ru-x:hover{background:var(--surface,#F1F5F9)}
+#ru-modal .ru-search{display:flex;align-items:center;gap:8px;margin:14px 18px 6px;border:1.5px solid var(--border);border-radius:10px;padding:9px 12px}
+#ru-modal .ru-search svg{width:14px;height:14px;color:var(--text-3);flex:0 0 auto}
+#ru-modal .ru-search input{border:0;outline:0;width:100%;font-size:13px;font-family:inherit;color:var(--text)}
+#ru-modal .ru-list{overflow-y:auto;padding:6px 10px 14px}
+#ru-modal .ru-row{display:flex;align-items:center;gap:11px;padding:9px 8px;border-radius:9px}
+#ru-modal .ru-row:hover{background:var(--surface,#F8FAFC)}
+#ru-modal .ru-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex:0 0 auto}
+#ru-modal .ru-nm{font-size:13.5px;font-weight:600;color:var(--text)}
+#ru-modal .ru-em{font-size:11.5px;color:var(--text-3);margin-top:1px}
+#ru-modal .ru-pill{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:99px;background:#FEF3C7;color:#92400E;margin-left:6px}
+#ru-modal .ru-empty{text-align:center;color:var(--text-3);font-size:13px;padding:24px}
+#ur-pane-roles .ru-viewall{color:var(--blue,#2563EB);font-weight:600;cursor:pointer}
+#ur-pane-roles .ru-viewall:hover{text-decoration:underline}
+</style>
+<div id="ru-modal" onclick="if(event.target===this)closeRoleUsers()">
+  <div class="ru-card">
+    <div class="ru-head"><div><div class="ru-title">Assigned users</div><div class="ru-sub" id="ru-role"></div></div><button class="ru-x" onclick="closeRoleUsers()" aria-label="Close">&#10005;</button></div>
+    <div class="ru-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input id="ru-q" placeholder="Search name or email" oninput="ruFilter()"></div>
+    <div class="ru-list" id="ru-list"></div>
+  </div>
+</div>
+<script>/* role-users-modal */
+(function(){
+  var D='@diocesestpete.org';
+  function u(n,extra){ var e=n.toLowerCase().replace(/[^a-z ]/g,'').trim().split(/\s+/).join('.')+D; return {n:n,e:e,pending:!!(extra&&extra.pending)}; }
+  var ROLE_USERS={
+    'Development Director / CFO':[u('Sarah Reynolds'),u('Bridget McCarthy')],
+    'Database Administrator':[u('Daniel Cho'),u('Patricia Souza')],
+    'Administrator':[u('Rebecca Hayes')],
+    'Gift Officer':[u('Julia Kelleher'),u('Jamie Morrison',{pending:true}),u('Marcus Bell'),u('Elena Ruiz'),u('David Okafor')],
+    'Read-only':[u('Mary Rodriguez')]
+  };
+  var COLORS=['#2563EB','#7C3AED','#0D9488','#B45309','#BE185D','#15803D','#0891B2'];
+  function initials(n){ return n.split(/\s+/).map(function(w){return w.charAt(0);}).join('').substring(0,2).toUpperCase(); }
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  var curList=[];
+  window.openRoleUsers=function(role){
+    curList=ROLE_USERS[role]||[];
+    document.getElementById('ru-role').textContent=role+' · '+curList.length+' user'+(curList.length!=1?'s':'');
+    var q=document.getElementById('ru-q'); if(q) q.value='';
+    ruRender(curList);
+    document.getElementById('ru-modal').classList.add('show');
+    if(q) setTimeout(function(){q.focus();},50);
+  };
+  window.closeRoleUsers=function(){ document.getElementById('ru-modal').classList.remove('show'); };
+  function ruRender(list){
+    var box=document.getElementById('ru-list');
+    if(!list.length){ box.innerHTML='<div class="ru-empty">No users match.</div>'; return; }
+    box.innerHTML=list.map(function(p,i){
+      return '<div class="ru-row"><div class="ru-av" style="background:'+COLORS[i%COLORS.length]+'">'+initials(p.n)+'</div>'+
+        '<div style="flex:1;min-width:0"><div class="ru-nm">'+esc(p.n)+(p.pending?'<span class="ru-pill">Pending</span>':'')+'</div><div class="ru-em">'+esc(p.e)+'</div></div></div>';
+    }).join('');
+  }
+  window.ruFilter=function(){
+    var q=(document.getElementById('ru-q').value||'').toLowerCase().trim();
+    ruRender(!q?curList:curList.filter(function(p){return (p.n+' '+p.e).toLowerCase().indexOf(q)>-1;}));
+  };
+  // Enhance each role card footer from ROLE_USERS
+  function enhance(){
+    var cards=document.querySelectorAll('#ur-pane-roles .role-detail');
+    cards.forEach(function(card){
+      var nmEl=card.querySelector('.rd-name'); if(!nmEl) return;
+      var role=nmEl.textContent.replace(/\s+/g,' ').trim();
+      // strip trailing "Phase 2" etc.
+      var list=ROLE_USERS[role]; if(!list) return;
+      var cnt=card.querySelector('.rd-count'); if(cnt) cnt.textContent=list.length+' user'+(list.length!=1?'s':'');
+      var uw=card.querySelector('.rd-foot .users-with'); if(!uw) return;
+      var names=list.map(function(p){return p.n;});
+      if(list.length<=2){ uw.textContent=names.join(' · '); }
+      else {
+        uw.innerHTML=esc(names.slice(0,2).join(' · '))+' · <span class="ru-viewall" onclick="openRoleUsers(\''+role.replace(/'/g,"\\'")+'\')">View all '+list.length+'</span>';
+      }
+    });
+  }
+  if(document.readyState!=='loading') enhance(); else document.addEventListener('DOMContentLoaded',enhance);
+})();
+</script>
+
 </body>
 </html>
