@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0E1E35">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Atlas Mobile — Hi-Fi Prototype (Phase 0)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0E1E35; --navy-2:#16294a; --navy-card:#132441;
+  --blue:#2563EB; --blue-2:#1D4ED8; --blue-pale:#EFF4FF; --blue-mid:#BFD3FF;
+  --green:#15803D; --green-l:#DCFCE7; --amber:#B45309; --amber-l:#FEF3C7;
+  --rose:#BE185D; --rose-l:#FCE7F3; --purp:#7C3AED; --purp-l:#F3E8FF; --teal:#0D9488; --teal-l:#CCFBF1;
+  --gold:#C8A04A; --mint:#34D399;
+  --text:#0F172A; --text2:#334155; --text3:#64748B; --text4:#94A3B8;
+  --border:#E5EAF1; --border2:#EEF2F7; --surface:#F6F8FB; --surface2:#F1F5F9; --white:#fff;
+  --shadow-sm:0 1px 2px rgba(15,23,42,.06),0 1px 3px rgba(15,23,42,.05);
+  --shadow-md:0 4px 12px rgba(15,23,42,.08);
+  --shadow-lg:0 12px 34px rgba(15,23,42,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#0b1220;color:var(--text);min-height:100vh;
+  background-image:radial-gradient(1200px 600px at 20% -10%,#182740 0,transparent 60%),radial-gradient(900px 500px at 100% 0,#101b30 0,transparent 55%);}
+.serif{font-family:'DM Serif Display',Georgia,serif;font-weight:400}
+
+/* ===== Stage / controls ===== */
+.stage{max-width:1280px;margin:0 auto;padding:26px 24px 60px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:6px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;color:#fff}
+.brand .logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(145deg,#132441,#0b1626);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.brand h1{font-size:19px;font-weight:700;letter-spacing:-.01em}
+.brand .sub{font-size:12px;color:#93a4bd;font-weight:500;margin-top:1px}
+.seg{display:inline-flex;background:#0e1a2e;border:1px solid #22344f;border-radius:12px;padding:4px;gap:2px}
+.seg button{border:0;background:transparent;color:#9fb0c9;font:600 13px 'DM Sans';padding:8px 15px;border-radius:9px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:.15s}
+.seg button.on{background:var(--blue);color:#fff;box-shadow:var(--shadow-md)}
+.seg.small button{padding:7px 13px;font-size:12.5px}
+.controls-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:14px 0 26px}
+.screen-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.screen-tabs button{border:1px solid #24374f;background:#0e1a2e;color:#aebbcf;font:600 12.5px 'DM Sans';padding:8px 14px;border-radius:20px;cursor:pointer;transition:.15s}
+.screen-tabs button.on{background:#fff;color:var(--navy);border-color:#fff}
+.hint{color:#7f90aa;font-size:12.5px}
+
+.frames{display:flex;gap:46px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+.device-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.device-label{color:#8ea0ba;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+
+/* ===== Device frame ===== */
+.viewport{position:relative;width:100%;height:100%;background:var(--surface);border-radius:42px;overflow:hidden;display:flex;flex-direction:column}
+body.android .viewport{border-radius:30px}
+
+/* status bar */
+.statusbar{height:52px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:14px;font-weight:600;color:var(--text);position:relative;z-index:5}
+.statusbar.on-dark{color:#fff}
+.statusbar .time{font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.statusbar .icons{display:flex;align-items:center;gap:6px}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:6}
+body.android .island{display:none}
+body.android .statusbar{height:34px;padding:0 18px;font-size:13px}
+.a-dot{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;background:#000;display:none;z-index:6}
+body.android .a-dot{display:block}
+
+/* scroll body */
+.body{flex:1;overflow-y:auto;overflow-x:hidden;position:relative}
+.body::-webkit-scrollbar{width:0}
+
+/* bottom chrome */
+.tabbar{flex:0 0 auto;height:76px;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;padding:8px 6px 0;position:relative;z-index:5}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text4);cursor:pointer;padding-top:6px}
+.tab.on{color:var(--blue)}
+.tab .ic{width:26px;height:26px;display:flex;align-items:center;justify-content:center}
+.tab span{font-size:10.5px;font-weight:600}
+body.android .tabbar{height:66px;background:#fff}
+body.android .tab .ic{width:56px;height:30px;border-radius:16px;transition:.15s}
+body.android .tab.on .ic{background:var(--blue-pale)}
+.home-ind{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:135px;height:5px;border-radius:3px;background:#0f172a;opacity:.85;z-index:7}
+body.android .home-ind{width:110px;height:4px;opacity:.5}
+.tabbar-pad{height:22px;flex:0 0 auto;background:inherit}
+
+/* ===== generic mobile components ===== */
+.appbar{padding:8px 20px 12px;display:flex;align-items:center;justify-content:space-between}
+.appbar h2{font-size:26px;font-weight:700;letter-spacing:-.02em}
+body.android .appbar h2{font-size:22px}
+.appbar .count{font-size:13px;color:var(--text3);font-weight:600}
+.iconbtn{width:38px;height:38px;border-radius:12px;border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--text2)}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text3)}
+.search{margin:4px 20px 14px;height:44px;background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;gap:10px;padding:0 14px;color:var(--text4);font-size:15px;box-shadow:var(--shadow-sm)}
+body.android .search{border-radius:26px;background:var(--surface2);border-color:transparent}
+
+.list{padding:0 16px}
+.row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow-sm)}
+body.android .row{border-radius:14px}
+.row .av{width:42px;height:42px;border-radius:50%;background:linear-gradient(145deg,#e9eef6,#dfe7f2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--text3);flex:0 0 auto}
+.row .main{flex:1;min-width:0}
+.row .nm{font-size:15px;font-weight:600;color:var(--text)}
+.row .meta{font-size:12.5px;color:var(--text3);margin-top:2px}
+.row .chev{color:var(--text4);font-size:18px}
+.donor-row{align-items:center}
+.donor-row .main{min-width:0}
+.donor-row .dr-top{display:flex;align-items:center;gap:8px;min-width:0}
+.donor-row .dr-top .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.donor-row .dr-tag{flex:0 0 auto;font-size:10px;padding:2px 8px;border-radius:7px}
+.donor-row .dr-addr{display:flex;align-items:center;gap:4px;margin-top:3px}
+.donor-row .dr-rgt{flex:0 0 auto;text-align:right;padding-left:6px}
+.donor-row .dr-life{font-weight:700;font-size:14px;color:var(--text)}
+.donor-row .dr-ll{font-size:9.5px;color:var(--text4);text-transform:uppercase;letter-spacing:.05em;margin-top:1px}
+
+.fab{position:absolute;right:18px;bottom:96px;width:56px;height:56px;border-radius:50%;background:linear-gradient(145deg,#2f6bff,#1d4ed8);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;box-shadow:0 10px 24px rgba(37,99,235,.42);z-index:6;letter-spacing:.02em}
+.fab.add{background:linear-gradient(145deg,#2f6bff,#1d4ed8);font-size:26px;font-weight:400}
+body.android .fab{border-radius:18px}
+
+.pill{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 9px;border-radius:8px;letter-spacing:.01em}
+.pill.g{background:var(--green-l);color:var(--green)} .pill.a{background:var(--amber-l);color:var(--amber)}
+.pill.b{background:var(--blue-pale);color:var(--blue-2)} .pill.r{background:var(--rose-l);color:var(--rose)}
+.pill.s{background:var(--surface2);color:var(--text3)}
+.chip{display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:7px 14px;border-radius:20px;border:1px solid var(--border);color:var(--text2);background:#fff}
+.chip.on{background:var(--blue-pale);border-color:var(--blue-mid);color:var(--blue-2)}
+
+.btn{display:flex;align-items:center;justify-content:center;height:50px;border-radius:14px;font-weight:600;font-size:15.5px;border:0;width:100%;cursor:pointer}
+.btn.primary{background:var(--blue);color:#fff;box-shadow:0 8px 18px rgba(37,99,235,.28)}
+.btn.ghost{background:#fff;color:var(--text);border:1px solid var(--border)}
+body.android .btn{border-radius:26px;text-transform:none;font-weight:700;letter-spacing:.01em}
+
+.sectlabel{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
+
+/* section header inside body */
+.pad{padding:0 20px}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow-sm)}
+.kpi .lbl{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--text3);text-transform:uppercase}
+.kpi .val{font-size:26px;font-weight:400;margin-top:6px;color:var(--text)}
+.kpi .d{font-size:12px;margin-top:3px}
+.up{color:var(--green);font-weight:600}.dn{color:var(--rose);font-weight:600}.mut{color:var(--text3)}
+
+/* Donor 360 intelligence */
+.d360-hero{background:linear-gradient(160deg,#13294a,#0d1b31);padding:16px 20px 18px;color:#fff;position:relative}
+.d360-hero .top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.d360-hero .back{width:34px;height:34px;border-radius:11px;background:rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center;font-size:18px}
+.d360-hero .pfp{width:46px;height:46px;border-radius:50%;background:linear-gradient(145deg,#7c3aed,#5b21b6);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
+.d360-hero .nm{font-size:18px;font-weight:700;letter-spacing:-.01em}
+.d360-hero .rl{font-size:12px;color:#9fb2cd;margin-top:2px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.08);border-radius:14px;overflow:hidden}
+.tile{background:rgba(255,255,255,.02);padding:11px 4px;text-align:center}
+.tile .v{font-size:19px;font-weight:700}
+.tile .l{font-size:8.5px;font-weight:700;letter-spacing:.06em;color:#8ba0bd;margin-top:2px}
+.d360-tabs{display:flex;gap:20px;padding:12px 20px 0;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:3}
+.d360-tabs .t{font-size:14px;font-weight:600;color:var(--text3);padding-bottom:11px;position:relative}
+.d360-tabs .t.on{color:var(--blue)}
+.d360-tabs .t.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2.5px;background:var(--blue);border-radius:2px}
+
+.card{background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-sm);overflow:hidden}
+.card-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 0}
+.brandtag{font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;background:var(--blue-pale);color:var(--blue-2)}
+.range-big{text-align:center;padding:6px 0 2px}
+.range-big .n{font-size:34px}
+.range-big .s{font-size:12px;color:var(--text3);margin-top:2px}
+.rangebar{height:8px;border-radius:6px;background:var(--surface2);margin:14px 16px 6px;position:relative;overflow:hidden}
+.rangebar>i{position:absolute;left:25%;width:26%;top:0;bottom:0;background:linear-gradient(90deg,#f0b429,#d97706);border-radius:6px}
+.rangeticks{display:flex;justify-content:space-between;padding:0 16px 12px;font-size:10px;color:var(--text4);font-weight:600}
+.dl{display:flex;justify-content:space-between;padding:9px 16px;font-size:13px;border-top:1px solid var(--border2)}
+.dl .k{color:var(--text3)} .dl .v{font-weight:600}
+
+.guru{background:linear-gradient(160deg,#13294a,#0c1930);border-radius:18px;padding:16px;color:#fff;box-shadow:var(--shadow-md)}
+.guru .gh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.guru .gh .l{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.04em;color:#c4b5fd}
+.guru .gh .icon{width:24px;height:24px;border-radius:8px;background:linear-gradient(145deg,#7c3aed,#5b21b6);display:flex;align-items:center;justify-content:center}
+.guru .gh .u{font-size:11px;color:#8ba0bd}
+.ask{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:11px 13px;margin-bottom:9px}
+.ask .k{font-size:9.5px;font-weight:700;letter-spacing:.06em;color:#8ba0bd}
+.ask .v{font-size:15px;font-weight:700;margin-top:3px}
+.ask .d{font-size:11.5px;color:#c9d4e6;margin-top:4px;line-height:1.4}
+.prop{background:linear-gradient(90deg,#3b2e63,#2a2450);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:9px}
+.prop .badge{background:#c4b5fd;color:#2a1a5e;font-size:11px;font-weight:800;padding:2px 8px;border-radius:7px}
+.prop .t{font-size:12.5px;color:#e6e0fb;font-weight:600}
+
+.score-row{display:flex;align-items:center;gap:12px;padding:10px 0}
+.score-row .lab{flex:0 0 128px;font-size:13px;color:var(--text2)}
+.score-row .bar{flex:1;height:7px;border-radius:5px;background:var(--surface2);overflow:hidden}
+.score-row .bar>i{display:block;height:100%;border-radius:5px}
+.score-row .num{flex:0 0 30px;text-align:right;font-weight:700;font-size:13px}
+
+/* design-system gallery */
+.ds{padding:20px;display:flex;flex-direction:column;gap:22px;background:var(--surface)}
+.ds h3{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sw{border-radius:12px;height:56px;display:flex;align-items:flex-end;padding:7px;color:#fff;font-size:10px;font-weight:600;box-shadow:var(--shadow-sm)}
+.typescale>div{margin-bottom:6px;color:var(--text)}
+.stack{display:flex;flex-direction:column;gap:10px}
+.rowflex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.inp{height:46px;border:1px solid var(--border);border-radius:12px;background:#fff;display:flex;align-items:center;padding:0 14px;color:var(--text4);font-size:14px}
+.switch{width:46px;height:28px;border-radius:16px;background:var(--blue);position:relative;flex:0 0 auto}
+.switch::after{content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;top:3px;right:3px;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.switch.off{background:#cbd5e1}.switch.off::after{right:auto;left:3px}
+.card-lite{background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:var(--shadow-sm)}
+.notice{color:#93a4bd;font-size:12.5px;text-align:center;margin-top:34px;line-height:1.7}
+.legend{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:14px;color:#8ea0ba;font-size:12px}
+.legend b{color:#cdd8e8}
+
+/* ===== Phase 1: auth / onboarding / states ===== */
+.auth{padding:6px 26px 30px;display:flex;flex-direction:column;min-height:100%}
+.auth-logo{padding:14px 0 22px;display:flex;align-items:center;gap:10px}
+.auth-logo .mk{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#13294a,#0b1626);display:flex;align-items:center;justify-content:center}
+.auth-logo .nm{font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy)}
+.h-title{font-size:26px;font-weight:700;letter-spacing:-.02em;color:var(--text)}
+body.android .h-title{font-size:23px}
+.h-sub{font-size:14px;color:var(--text3);margin-top:7px;line-height:1.5}
+.field{margin-top:16px}
+.field .lab{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:7px;display:flex;justify-content:space-between;align-items:center}
+.field .box{height:52px;border:1px solid var(--border);border-radius:14px;background:#fff;display:flex;align-items:center;padding:0 15px;gap:10px;font-size:15px;box-shadow:var(--shadow-sm)}
+.field .box.focus{border-color:var(--blue);box-shadow:0 0 0 4px var(--blue-pale)}
+.field .box .ph{color:var(--text4)} .field .box .val{color:var(--text);font-weight:500}
+.field .box .ic{color:var(--text4);flex:0 0 auto} .field .box .eye{margin-left:auto;color:var(--text4);font-size:12px;font-weight:600}
+body.android .field .box{border-radius:10px}
+.divider{display:flex;align-items:center;gap:12px;color:var(--text4);font-size:12px;margin:20px 0}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border)}
+.sso{height:52px;border-radius:14px;border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:600;font-size:15px;color:var(--text);box-shadow:var(--shadow-sm)}
+body.android .sso{border-radius:26px}
+.sso .gc{width:24px;height:24px;border-radius:7px;background:linear-gradient(145deg,#1f8fff,#0a63d6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px}
+.faceid-row{display:flex;align-items:center;justify-content:center;gap:9px;color:var(--blue);font-weight:600;font-size:14.5px;margin-top:16px}
+.faceid-row .fi{width:24px;height:24px;border:2px solid var(--blue);border-radius:7px;position:relative}
+.link{color:var(--blue);font-weight:600}
+.auth-foot{margin-top:auto;text-align:center;color:var(--text3);font-size:13.5px;padding-top:22px}
+.otp{display:flex;gap:9px;justify-content:space-between;margin-top:20px}
+.otp .c{flex:1;height:58px;border:1.5px solid var(--border);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;background:#fff;color:var(--text)}
+.otp .c.f{border-color:var(--blue);box-shadow:0 0 0 4px var(--blue-pale)}
+
+.splash{height:100%;background:linear-gradient(165deg,#13294a,#0a1526);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;color:#fff;position:relative;cursor:pointer}
+.splash .sub{font-size:12px;letter-spacing:.22em;color:#8ba0bd;text-transform:uppercase}
+.splash .hint{position:absolute;bottom:110px;color:#6f83a1;font-size:12px}
+.splash .load{position:absolute;bottom:76px;width:120px;height:4px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+.splash .load i{position:absolute;left:-40%;top:0;bottom:0;width:40%;background:var(--gold);border-radius:3px;animation:load 1.4s infinite}
+@keyframes load{0%{left:-40%}100%{left:120%}}
+
+.ob{height:100%;display:flex;flex-direction:column;padding:0 26px 26px}
+.ob-skip{display:flex;justify-content:flex-end;padding:14px 0 4px;color:var(--text3);font-weight:600;font-size:14px}
+.ob-art{flex:1;border-radius:26px;background:linear-gradient(160deg,#13294a,#0c1930);display:flex;align-items:center;justify-content:center;color:#fff;margin-bottom:20px;overflow:hidden;padding:24px}
+.ob-title{font-size:25px;font-weight:700;letter-spacing:-.02em}
+.ob-sub{font-size:15px;color:var(--text3);margin-top:8px;line-height:1.55}
+.dots{display:flex;gap:7px;margin:18px 0}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--border);transition:.2s}
+.dots i.on{width:22px;border-radius:4px;background:var(--blue)}
+
+.perm{height:100%;display:flex;flex-direction:column;align-items:center;text-align:center;padding:46px 30px 26px}
+.perm .ill{width:118px;height:118px;border-radius:32px;background:var(--blue-pale);display:flex;align-items:center;justify-content:center;margin-bottom:26px;color:var(--blue)}
+.perm .ill.g{background:var(--green-l);color:var(--green)}
+.perm .pt{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.perm .ps{font-size:15px;color:var(--text3);margin-top:10px;line-height:1.55}
+
+.skel-row{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:16px;padding:13px 14px;margin-bottom:10px}
+.skel-c{width:42px;height:42px;border-radius:50%;flex:0 0 auto}
+.shim{background:linear-gradient(90deg,#eef2f7,#e2e8f0,#eef2f7);background-size:200% 100%;animation:shim 1.3s infinite}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.state-block{display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 30px}
+.state-ic{width:82px;height:82px;border-radius:24px;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.state-t{font-size:20px;font-weight:700} .state-s{font-size:14px;color:var(--text3);margin-top:8px;line-height:1.5}
+.offline-banner{margin:2px 16px 12px;background:var(--amber-l);color:var(--amber);border-radius:12px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center}
+.state-tabs{display:flex;gap:6px;padding:8px 16px 6px;flex-wrap:wrap}
+.state-tabs .st{font-size:12px;font-weight:600;padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:#fff;color:var(--text3)}
+.state-tabs .st.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* ===== Phase 2: home / donor 360 / briefs ===== */
+.greet{padding:8px 20px 0;font-size:13px;color:var(--text3);font-weight:600}
+.hero-search{margin:10px 20px 16px;height:52px;border:1.6px solid var(--blue);background:var(--blue-pale);border-radius:16px;display:flex;align-items:center;gap:12px;padding:0 16px;color:var(--text2);font-size:15px;font-weight:500;box-shadow:0 6px 16px rgba(37,99,235,.12)}
+body.android .hero-search{border-radius:26px}
+.hero-search .k{color:var(--blue)}
+.sect{display:flex;align-items:center;justify-content:space-between;padding:8px 20px 8px}
+.sect .l{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.sect .r{font-size:13px;font-weight:600;color:var(--blue)}
+.mtg{margin:0 20px 8px;background:#fff;border:1px solid var(--blue-mid);border-radius:16px;padding:14px;box-shadow:var(--shadow-sm)}
+.mtg .r1{display:flex;justify-content:space-between;align-items:flex-start}
+.attn{padding:0 20px}
+.attn .a{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:11px 12px;margin-bottom:8px;box-shadow:var(--shadow-sm)}
+.attn .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.spark{display:flex;align-items:flex-end;gap:5px;height:60px;padding:0 2px;margin:12px 0 8px}
+.spark i{flex:1;background:var(--blue-pale);border-radius:4px 4px 0 0}
+.spark i.on{background:var(--blue)}
+.mini3{display:flex;gap:8px}
+.mini3 .m{flex:1;background:var(--surface);border-radius:10px;padding:9px 10px}
+.mini3 .m .v{font-weight:700;font-size:15px} .mini3 .m .l{font-size:9.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-top:2px}
+.qa{display:flex;gap:8px;padding:2px 16px 0}
+.qa .b{flex:1;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 4px;text-align:center;box-shadow:var(--shadow-sm)}
+.qa .b .ic{width:38px;height:38px;border-radius:12px;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;margin:0 auto 7px}
+.qa .b span{font-size:11.5px;font-weight:600;color:var(--text2)}
+.tl{padding:14px 16px 26px}
+.tl .item{display:flex;gap:12px;padding-bottom:16px;position:relative}
+.tl .item:not(:last-child)::before{content:"";position:absolute;left:6px;top:15px;bottom:-1px;width:1.5px;background:var(--border)}
+.tl .dot{width:13px;height:13px;border-radius:50%;flex:0 0 auto;margin-top:2px;border:3px solid #fff;box-shadow:0 0 0 1px var(--border);z-index:1}
+.tl .c{flex:1;min-width:0} .tl .t{font-size:14px;font-weight:600} .tl .d{font-size:12.5px;color:var(--text3);margin-top:2px} .tl .mm{font-size:11.5px;color:var(--text4);margin-top:3px}
+.cblock{margin:14px 16px;background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.crow{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--border2)}
+.crow:last-child{border-bottom:0}
+.crow .cic{width:34px;height:34px;border-radius:10px;background:var(--surface2);color:var(--text3);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.crow .k{font-size:11px;color:var(--text3);font-weight:600} .crow .v{font-size:14px;font-weight:500;margin-top:1px}
+.tagwrap{display:flex;gap:7px;flex-wrap:wrap;padding:0 16px 4px}
+.sched .s{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px;margin:0 16px 9px;box-shadow:var(--shadow-sm)}
+.sched .tm{font-weight:700;font-size:13px;color:var(--blue);flex:0 0 56px}
+.brief{margin:6px 16px 26px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:var(--shadow-md)}
+.brief .bstat{display:flex;gap:8px;margin:10px 0 12px}
+.brief .bstat .b{flex:1;background:var(--surface);border-radius:10px;padding:8px 10px}
+
+/* ===== Phase 3: pipeline / campaigns / tasks / comms / events ===== */
+.pstat{display:flex;padding:6px 22px 12px}
+.pstat .p{flex:1} .pstat .p .v{font-weight:700;font-size:18px} .pstat .p .l{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-top:1px}
+.chiprow{display:flex;gap:7px;padding:0 16px 10px;overflow:hidden}
+.pcard{margin:0 16px 10px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:13px 14px;box-shadow:var(--shadow-sm)}
+.pcard .ptop{display:flex;gap:11px;align-items:flex-start}
+.pcard .pav{width:40px;height:40px;border-radius:50%;background:linear-gradient(145deg,#7c3aed,#5b21b6);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:0 0 auto}
+.pcard .pbot{display:flex;align-items:center;justify-content:space-between;margin-top:11px}
+.change-btn{border:1px solid var(--blue-mid);background:var(--blue-pale);color:var(--blue-2);font-size:12px;font-weight:600;padding:6px 12px;border-radius:10px}
+.stage-opt{display:flex;align-items:center;gap:12px;margin:0 16px 9px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:13px 14px}
+.stage-opt.cur{border-color:var(--blue);background:var(--blue-pale)}
+.stage-opt .radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex:0 0 auto;position:relative}
+.stage-opt.cur .radio{border-color:var(--blue)} .stage-opt.cur .radio::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--blue)}
+.stage-opt .mh{margin-left:auto;color:var(--blue);font-weight:600;font-size:12.5px}
+.cbar{height:8px;border-radius:5px;background:var(--surface2);overflow:hidden;margin:9px 0 5px}
+.cbar>i{display:block;height:100%;border-radius:5px;background:var(--blue)}
+.segbar{display:flex;background:var(--surface2);border-radius:12px;padding:4px;margin:6px 20px 14px}
+.segbar .sg{flex:1;text-align:center;font-size:13px;font-weight:600;color:var(--text3);padding:9px;border-radius:9px}
+.segbar .sg.on{background:#fff;color:var(--text);box-shadow:var(--shadow-sm)}
+.portfolio{margin:0 20px 14px;background:linear-gradient(160deg,#13294a,#0c1930);border-radius:16px;padding:16px;color:#fff}
+.portfolio .grid4{display:flex;margin-top:14px}
+.portfolio .grid4 .g{flex:1} .portfolio .grid4 .g .v{font-weight:700;font-size:15px} .portfolio .grid4 .g .l{font-size:8.5px;color:#8ba0bd;font-weight:700;letter-spacing:.04em;margin-top:2px}
+.ccard{margin:0 16px 10px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:13px 14px;box-shadow:var(--shadow-sm)}
+.trow{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 13px;margin:0 16px 9px;box-shadow:var(--shadow-sm)}
+.trow.od{border-color:#f4c4d1}
+.checkbox{width:20px;height:20px;border-radius:6px;border:1.8px solid var(--border);flex:0 0 auto;margin-top:1px}
+.crow2{background:#fff;border:1px solid var(--border);border-radius:14px;padding:11px 13px;margin:0 16px 9px;box-shadow:var(--shadow-sm)}
+.crow2 .r1{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ecard{margin:0 16px 10px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow-sm)}
+
+/* ===== Phase 4: more / guru / notifications / profile / settings / gifts ===== */
+.mprofile{display:flex;align-items:center;gap:12px;margin:6px 16px 8px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:13px 14px;box-shadow:var(--shadow-sm)}
+.mprofile .av{width:44px;height:44px;border-radius:50%;background:linear-gradient(145deg,#e9eef6,#dfe7f2);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--text3)}
+.mgroup-l{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:14px 24px 7px}
+.mcard{margin:0 16px;background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.mrow{display:flex;align-items:center;gap:13px;padding:13px 15px;border-bottom:1px solid var(--border2)}
+.mrow:last-child{border-bottom:0}
+.mrow .mic{width:30px;height:30px;border-radius:9px;background:var(--surface2);color:var(--text2);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.mrow .ml{flex:1;font-size:15px;font-weight:500}
+.mrow .chev{color:var(--text4);font-size:18px}
+.guru-intro{margin:8px 16px 14px;background:linear-gradient(160deg,#13294a,#0c1930);border-radius:16px;padding:15px 16px;color:#fff}
+.guru-intro .t{font-weight:700;font-size:15px} .guru-intro .s{font-size:12.5px;color:#9fb2cd;margin-top:5px;line-height:1.5}
+.sug{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 13px;margin:0 16px 9px;box-shadow:var(--shadow-sm)}
+.guru-input{margin:6px 16px;height:48px;border:1px solid var(--border);border-radius:24px;display:flex;align-items:center;gap:10px;padding:0 6px 0 16px;background:#fff;box-shadow:var(--shadow-sm)}
+.guru-input .snd{width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;margin-left:auto}
+.nrow{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 13px;margin:0 16px 9px;box-shadow:var(--shadow-sm)}
+.nrow .nic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.nrow.unread{border-left:3px solid var(--blue)}
+.prof-head{background:linear-gradient(160deg,#13294a,#0c1930);padding:26px 20px 22px;color:#fff;display:flex;flex-direction:column;align-items:center;text-align:center}
+.prof-head .big{width:82px;height:82px;border-radius:50%;background:linear-gradient(145deg,#3763c9,#274ea1);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;margin-bottom:12px}
+.set-cap{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);padding:16px 22px 7px}
+.set-group{margin:0 16px;background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.set-row{display:flex;align-items:center;gap:12px;padding:14px 15px;border-bottom:1px solid var(--border2)}
+.set-row:last-child{border-bottom:0}
+.set-row .sl{flex:1;font-size:14.5px} .set-row .sv{font-size:13px;color:var(--text3)} .set-row .chev{color:var(--text4);font-size:17px}
+.switch.sm{width:42px;height:25px}.switch.sm::after{width:19px;height:19px}
+.gsum{margin:6px 16px 12px;background:var(--navy);border-radius:16px;padding:14px 16px;color:#fff;display:flex;justify-content:space-between;align-items:center}
+
+.d360-actions{display:flex;gap:8px;margin-top:4px}
+.d360-actions .a{flex:1;background:rgba(255,255,255,.1);border-radius:13px;padding:9px 4px;text-align:center;color:#fff;display:flex;flex-direction:column;align-items:center;gap:5px}
+.d360-actions .a span{font-size:11.5px;font-weight:600}
+.cact{margin-left:auto;font-size:12.5px;font-weight:600;color:var(--blue);background:var(--blue-pale);border:1px solid var(--blue-mid);border-radius:9px;padding:6px 13px;flex:0 0 auto}
+.checkbox.ck{background:var(--green);border-color:var(--green);position:relative}
+.checkbox.ck::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:9px;border:2px solid #fff;border-top:0;border-left:0;transform:rotate(45deg)}
+.callrow{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow-sm)}
+.callrow.primary{border-color:var(--blue-mid);background:var(--blue-pale)}
+.callrow .cic2{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:var(--green-l);color:var(--green)}
+.ta{border:1px solid var(--border);border-radius:12px;background:#fff;min-height:66px;padding:11px 13px;position:relative;box-shadow:var(--shadow-sm)}
+.ta .mic{position:absolute;right:10px;bottom:10px;width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 2px;font-size:14.5px}
+.empty-in{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--text3);font-size:13.5px;padding:32px 20px;text-align:center}
+.res-head{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);padding:2px 4px 8px}
+
+/* ===== standalone full-screen app shell ===== */
+*{-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:#0e1a2e;overscroll-behavior:none}
+#app{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:var(--surface);max-width:480px;margin:0 auto;position:relative}
+#safe-top{flex:0 0 auto;height:env(safe-area-inset-top,0px);background:#fff}
+#appbody{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative}
+#appbody::-webkit-scrollbar{width:0;height:0}
+#tabbar{position:relative;z-index:5}
+.tabbar{height:auto!important;min-height:60px;padding-bottom:calc(6px + env(safe-area-inset-bottom,0px))!important}
+.fab{position:fixed;right:calc(50% - 240px + 18px);left:auto;bottom:calc(82px + env(safe-area-inset-bottom,0px));z-index:20}
+@media (max-width:480px){.fab{right:18px}}
+.sinp{border:0;background:transparent;outline:none;font-size:15px;flex:1;min-width:0;padding:0;color:var(--text);font-family:inherit}
+.sinp::placeholder{color:var(--text4)}
+.d360-nav{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 10px}
+.d360-nav .nbtn{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
+.d360-nav .ntitle{color:#fff;font-weight:600;font-size:15px;opacity:.92}
+.d360-id{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="safe-top"></div>
+  <div id="appbody"></div>
+  <div id="tabbar" class="tabbar"></div>
+</div>
+
+<script>
+/* ---------- chrome ---------- */
+function statusbar(dark){
+  const cls = dark ? 'statusbar on-dark' : 'statusbar';
+  document.getElementById('statusbar').className = cls;
+  const dot = dark ? '#fff' : '#0f172a';
+  return `<span class="time">9:41</span>
+    <span class="icons">
+      <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="7" width="3" height="5" rx="1" fill="${dot}"/><rect x="4.5" y="5" width="3" height="7" rx="1" fill="${dot}"/><rect x="9" y="2.5" width="3" height="9.5" rx="1" fill="${dot}"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="${dot}" opacity=".35"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12"><path d="M8.5 2.5C11 2.5 13.2 3.5 14.8 5.1l-1.4 1.4C12.1 5.2 10.4 4.5 8.5 4.5S4.9 5.2 3.6 6.5L2.2 5.1C3.8 3.5 6 2.5 8.5 2.5Z" fill="${dot}"/><path d="M8.5 6.2c1.2 0 2.3.5 3.1 1.3l-3.1 3.1-3.1-3.1C6.2 6.7 7.3 6.2 8.5 6.2Z" fill="${dot}"/></svg>
+      <svg width="26" height="13" viewBox="0 0 26 13"><rect x="1" y="1" width="21" height="11" rx="3" fill="none" stroke="${dot}" stroke-opacity=".4"/><rect x="3" y="3" width="15" height="7" rx="1.5" fill="${dot}"/><rect x="23.5" y="4" width="1.8" height="5" rx="1" fill="${dot}" opacity=".5"/></svg>
+    </span>`;
+}
+function tabbar(active){
+  const items=[['home','Home'],['donors','Donors'],['pipeline','Pipeline'],['tasks','Tasks'],['more','More']];
+  const ic={
+    home:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/></svg>',
+    donors:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg>',
+    pipeline:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg>',
+    tasks:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg>',
+    more:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>'
+  };
+  return items.map(([k,l])=>`<div class="tab ${k===active?'on':''}" onclick="go('${k}')"><div class="ic">${ic[k]}</div><span>${l}</span></div>`).join('');
+}
+
+/* ---------- Donor 360 shared chrome ---------- */
+function d360hero(tiles){
+  var d=currentDonor;
+  return `<div class="d360-hero">
+    <div class="d360-nav"><div class="nbtn" onclick="go('donors')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></div><div class="ntitle">Donor 360</div><div style="width:36px"></div></div>
+    <div class="d360-sep"></div>
+    <div class="d360-id">${av(d,'lg')}<div style="flex:1"><div class="nm">${d.name}</div><div class="rl">${d.parish} · ${d.tag} donor · Donor since ${d.since}</div></div></div>
+    <div class="tiles">${tiles}</div>
+  </div>
+  <div class="d360-actbar">
+    <div class="act" onclick="go('call')"><div class="ai" style="background:var(--green-l);color:var(--green)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M6 3h3l1.6 5-2 1.4a11 11 0 005 5l1.4-2 5 1.6v3a2 2 0 01-2 2A16 16 0 014 6a2 2 0 012-3Z"/></svg></div><span>Call</span></div>
+    <div class="act" onclick="go('logact')"><div class="ai" style="background:var(--blue-pale);color:var(--blue)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div><span>Log activity</span></div>
+    <div class="act" onclick="go('addtask')"><div class="ai" style="background:#F3E8FF;color:var(--purp)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4M12 12.5v5M9.5 15h5"/></svg></div><span>Add task</span></div>
+  </div>`;
+}
+function d360tabs(a){
+  const t=[['Overview','d360'],['Activity','d360act'],['Intelligence','intel'],['Contact','d360con']];
+  return `<div class="d360-tabs">${t.map(([l,s])=>`<div class="t ${s===a?'on':''}" onclick="go('${s}')">${l}</div>`).join('')}</div>`;
+}
+const gtile=(v,l,c)=>`<div class="tile"><div class="v"${c?` style="color:${c}"`:''}>${v}</div><div class="l">${l}</div></div>`;
+
+/* ---------- shared donor dataset + live search ---------- */
+const DONORS=[
+  {k:'mo',ini:'MO',name:"Margaret O’Brien",tag:'Major',city:'Tampa FL',addr:'148 Bayshore Blvd, Tampa FL 33606',parish:"St. Mary's Cathedral",since:2011,color:'#7C3AED',email:'margaret.obrien@gmail.com',phone:'(813) 555-0142',life:'$84,250',yr:'$10,000',last:'$10,000',pledge:'$25K',photo:'https://randomuser.me/api/portraits/women/44.jpg'},
+  {k:'rl',ini:'RL',name:'Robert & Susan Lin',tag:'Major',city:'Clearwater FL',addr:'12 Harbor Dr, Clearwater FL 33767',parish:'St. Catherine of Siena',since:2015,color:'#2563EB',email:'lin.family@gmail.com',phone:'(727) 555-0110',life:'$52,400',yr:'$5,000',last:'$5,000',pledge:'$10K',photo:'https://randomuser.me/api/portraits/women/68.jpg'},
+  {k:'df',ini:'DF',name:'The Delaney Fdn.',tag:'Foundation',city:'St. Petersburg',addr:'900 Central Ave, St. Petersburg FL 33701',parish:'Diocesan Foundation',since:2008,color:'#0D9488',email:'grants@delaneyfdn.org',phone:'(727) 555-0190',life:'$310,000',yr:'$50,000',last:'$50,000',pledge:'$100K',photo:'https://randomuser.me/api/portraits/men/76.jpg'},
+  {k:'ar',ini:'AR',name:'Anthony Riccardi',tag:'Recurring',city:'Dunedin FL',addr:'5 Oak Ln, Dunedin FL 34698',parish:'St. Catherine of Siena',since:2019,color:'#B45309',email:'a.riccardi@gmail.com',phone:'(727) 555-0175',life:'$18,900',yr:'$1,200',last:'$100',pledge:'—',photo:'https://randomuser.me/api/portraits/men/45.jpg'},
+  {k:'ht',ini:'HT',name:'Helen Tobin',tag:'New this year',city:'Largo FL',addr:'44 Rosery Rd, Largo FL 33770',parish:'St. Patrick',since:2026,color:'#BE185D',email:'helen.tobin@gmail.com',phone:'(727) 555-0133',life:'$1,500',yr:'$1,500',last:'$500',pledge:'—',photo:'https://randomuser.me/api/portraits/women/29.jpg'},
+  {k:'js',ini:'JS',name:'James Sullivan',tag:'Mid-level',city:'St. Petersburg FL',addr:'5 Park Ave, St. Petersburg FL 33701',parish:"St. Michael's",since:2013,color:'#0891B2',email:'jsullivan@gmail.com',phone:'(727) 555-0142',life:'$28,400',yr:'$2,500',last:'$2,500',pledge:'$5K',photo:'https://randomuser.me/api/portraits/men/32.jpg'},
+  {k:'pk',ini:'PK',name:'Patricia Kim',tag:'Mid-level',city:'Seminole FL',addr:'21 Ridge Rd, Seminole FL 33772',parish:'St. Jerome',since:2017,color:'#7C3AED',email:'p.kim@gmail.com',phone:'(727) 555-0166',life:'$14,200',yr:'$500',last:'$500',pledge:'—',photo:'https://randomuser.me/api/portraits/women/33.jpg'},
+  {k:'mg',ini:'MG',name:'Michael & Susan Grant',tag:'Major',city:'Palm Harbor FL',addr:'22 Harbor Dr, Palm Harbor FL 34685',parish:'St. Ignatius',since:2010,color:'#15803D',email:'grant.household@gmail.com',phone:'(727) 555-0188',life:'$96,000',yr:'$12,000',last:'$12,000',pledge:'$40K',photo:'https://randomuser.me/api/portraits/men/41.jpg'},
+  {k:'co',ini:'CO',name:"Claire O'Brien",tag:'New this year',city:'Tampa FL',addr:'148 Bayshore Blvd, Tampa FL 33606',parish:"St. Mary's Cathedral",since:2024,color:'#BE185D',email:'claire.obrien@gmail.com',phone:'(813) 555-0148',life:'$1,200',yr:'$1,200',last:'$300',pledge:'—',photo:'https://randomuser.me/api/portraits/women/50.jpg'}
+];
+const DMAP={}; DONORS.forEach(function(d){DMAP[d.k]=d;});
+var currentDonor = DONORS[0];
+function av(d, cls){ return '<div class="av '+(cls||'')+'" style="background:'+(d.color||'#e9eef6')+'"><span>'+d.ini+'</span><img alt="" src="'+(d.photo||'')+'" onerror="this.remove()"></div>'; }
+function avSR(){ return '<div class="avatar"><span>SR</span><img alt="" src="https://randomuser.me/api/portraits/women/65.jpg" onerror="this.remove()"></div>'; }
+function donorTiles(){ var d=currentDonor; return gtile(d.life,'LIFETIME')+gtile(d.yr,'THIS YR')+gtile(d.last,'LAST GIFT')+gtile(d.pledge,'PLEDGE','var(--mint)'); }
+function openDonor(k){ currentDonor = DMAP[k] || currentDonor; go('d360'); }
+function mapbtn(a){ return ' <span onclick="event.stopPropagation();openMap(\''+String(a).replace(/'/g,"\\'")+'\')" style="display:inline-flex;align-items:center;color:var(--blue);cursor:pointer;vertical-align:middle" title="Open in Maps"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 21s7-6 7-11a7 7 0 10-14 0c0 5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/></svg></span>'; }
+function openMap(a){ try{ window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(a),'_blank'); }catch(e){} toast('Opening map · '+String(a).split(',')[0]); }
+window.openMap=openMap;
+var DTAG={'Major':'g','Foundation':'b','Recurring':'a','Mid-level':'s','New this year':'r'};
+function donorRow(d){ var pc=DTAG[d.tag]||'s'; return `<div class="row donor-row" onclick="openDonor('${d.k}')">${av(d)}<div class="main"><div class="dr-top"><span class="nm">${d.name}</span><span class="pill ${pc} dr-tag">${d.tag}</span></div><div class="meta dr-addr">${mapbtn(d.addr)}${d.addr}</div></div><div class="dr-rgt"><div class="dr-life">${d.life}</div><div class="dr-ll">lifetime</div></div></div>`; }
+function emptyState(msg){ return `<div class="empty-in"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></svg><div>${msg}</div></div>`; }
+/* ---------- tasks dataset + filtering ---------- */
+const TASKS=[
+  {t:"Call Margaret O’Brien — Cathedral ask", due:'Overdue', od:true, who:'mine', done:false},
+  {t:'Send pledge reminder — Lin', due:'Today', od:false, who:'mine', done:false},
+  {t:'Email Q3 cultivation — Riccardi', due:'Today', od:false, who:'mine', done:false},
+  {t:'Prep board deck — Delaney grant', due:'Tomorrow', od:false, who:'team', done:false},
+  {t:'Thank-you calls — spring gala', due:'This week', od:false, who:'team', done:false},
+  {t:'Year-end stewardship call — Grant', due:'Completed today', od:false, who:'mine', done:true},
+  {t:"Gift agreement sent — O’Brien", due:'Completed yesterday', od:false, who:'team', done:true}
+];
+function taskRow(x){
+  return `<div class="trow ${x.od?'od':''}" data-t="${encodeURIComponent(x.t)}"><div class="checkbox ${x.done?'ck':''}" onclick="toggleTask(event,this)"></div>`+
+    `<div style="flex:1"><div style="font-size:14px;font-weight:500;${x.done?'text-decoration:line-through;color:var(--text3)':''}">${x.t}</div>`+
+    `<div style="font-size:12px;font-weight:600;margin-top:3px;color:${x.od?'var(--rose)':(x.done?'var(--green)':'var(--text3)')}">${x.done?'✓ '+x.due:'Due '+x.due}</div></div>`+
+    `${x.done?'':'<div style="display:flex;gap:14px;color:var(--text4);font-size:16px"><span onclick="event.stopPropagation();toast(\'Snoozed 3 days\')">⤿</span><span onclick="event.stopPropagation();toast(\'Reassigned to team\')">⇄</span></div>'}</div>`;
+}
+function taskListHTML(){
+  let rows;
+  if(taskView==='done') rows=TASKS.filter(x=>x.done);
+  else if(taskView==='mine') rows=TASKS.filter(x=>!x.done && x.who==='mine');
+  else if(taskView==='team') rows=TASKS.filter(x=>!x.done && x.who==='team');
+  else rows=TASKS.filter(x=>!x.done);
+  return rows.length ? rows.map(taskRow).join('') : emptyState('No tasks in this view');
+}
+/* ---------- events dataset ---------- */
+const EVENTS=[
+  {n:"Bishop's Annual Gala",date:'May 8, 2026',st:'Confirmed',c:'g',g:'240 guests',when:'upcoming'},
+  {n:'Youth Ministry Retreat',date:'Jun 2, 2026',st:'Planning',c:'a',g:'60 guests',when:'upcoming'},
+  {n:'Cathedral Restoration Tour',date:'Jun 20, 2026',st:'Confirmed',c:'g',g:'35 guests',when:'upcoming'},
+  {n:'Spring Benefit Dinner',date:'Mar 14, 2026',st:'Closed',c:'s',g:'180 attended · $142k raised',when:'past'},
+  {n:'Advent Concert',date:'Dec 18, 2025',st:'Closed',c:'s',g:'320 attended',when:'past'},
+  {n:'Founders Day Brunch',date:'Not scheduled',st:'Draft',c:'b',g:'Draft · 0 invited',when:'draft'}
+];
+var eventView='upcoming';
+function eventCard(e){ return `<div class="ecard"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="font-weight:600;font-size:15px">${e.n}</div><span class="pill ${e.c}">${e.st}</span></div><div style="font-size:12.5px;color:var(--text3);margin-top:8px">${e.date}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><span style="font-size:13px">${e.g}</span><span style="color:var(--blue);font-weight:600;font-size:13px" data-toast="Opening ${e.n}">view ›</span></div></div>`; }
+function setEvent(v){ eventView=v; render(); }
+const NOTIFS=[
+  {u:true,type:'task',bg:'var(--rose-l)',fg:'var(--rose)',ic:'!',t:'3 tasks overdue',d:'$84k pipeline at risk · tap to review',tm:'12m',go:'tasks'},
+  {u:true,type:'gift',bg:'var(--green-l)',fg:'var(--green)',ic:'$',t:'New major gift — $10,000',d:"Margaret O’Brien · Cathedral Capital",tm:'1h',go:'donors'},
+  {u:true,type:'gift',bg:'#FEF3C7',fg:'var(--amber)',ic:'\u25F7',t:'Pledge installment due tomorrow',d:'Robert & Susan Lin · $2,500',tm:'2h',go:'donors'},
+  {u:false,type:'brief',bg:'var(--blue-pale)',fg:'var(--blue)',ic:'\u2605',t:'Meeting brief ready',d:"James & Patricia O’Brien · 2:00 PM",tm:'3h',go:'briefview'},
+  {u:false,type:'campaign',bg:'#FEF3C7',fg:'var(--amber)',ic:'\u25B2',t:'Cathedral Capital at risk',d:'42% to goal · behind pace',tm:'5h',go:'campaigns'},
+  {u:false,type:'sync',bg:'var(--surface2)',fg:'var(--text3)',ic:'\u21BB',t:'GiveCentral sync complete',d:'142 gifts imported · 0 errors',tm:'Today 6:00 AM',go:'settings'}
+];
+var notifView='All';
+function setNotif(v){ notifView=v; render(); }
+function toggleTask(ev,el){ ev.stopPropagation(); var tr=el.closest('.trow'); var key=decodeURIComponent(tr.getAttribute('data-t')); var x=TASKS.find(function(t){return t.t===key;}); if(x){ x.done=!x.done; toast(x.done?'✓ Task completed':'Task reopened'); render(); } }
+
+/* ---------- pipeline dataset + engine ---------- */
+const STAGES=['Identification','Qualification','Cultivation','Solicitation','Stewardship'];
+const STAGEDESC={Identification:'Researched, not yet qualified',Qualification:'Capacity & inclination confirmed',Cultivation:'Building the relationship',Solicitation:'Ask made / in progress',Stewardship:'Gift closed · thanking'};
+const STAGEPILL={Identification:'s',Qualification:'b',Cultivation:'a',Solicitation:'r',Stewardship:'g'};
+const PROSPECTS=[
+  {k:'jo',ini:'JO',color:'#7C3AED',name:"James & Patricia O'Brien",addr:'148 Bayshore Blvd, Tampa FL',zip:'33606',ask:25000,stage:'Cultivation'},
+  {k:'ms',ini:'MS',color:'#7C3AED',name:'Margaret Sullivan',addr:'5 Park Ave, St. Petersburg FL',zip:'33701',ask:10000,stage:'Solicitation'},
+  {k:'mg',ini:'MG',color:'#15803D',name:'Michael & Susan Grant',addr:'22 Harbor Dr, Palm Harbor FL',zip:'34685',ask:25000,stage:'Qualification'},
+  {k:'rl',ini:'RL',color:'#2563EB',name:'Robert & Susan Lin',addr:'12 Harbor Dr, Clearwater FL',zip:'33767',ask:40000,stage:'Cultivation'},
+  {k:'df',ini:'DF',color:'#0D9488',name:'The Delaney Fdn.',addr:'900 Central Ave, St. Petersburg FL',zip:'33701',ask:100000,stage:'Solicitation'},
+  {k:'ew',ini:'EW',color:'#B45309',name:'Eleanor Whitmore',addr:'12 Magnolia Dr, Belleair FL',zip:'33756',ask:15000,stage:'Identification'},
+  {k:'kr',ini:'KR',color:'#0891B2',name:'Kevin Ramirez',addr:'33 Court St, Tampa FL',zip:'33602',ask:5000,stage:'Qualification'},
+  {k:'cb',ini:'CB',color:'#BE185D',name:'Catherine Bianchi',addr:'55 Bay Esplanade, Clearwater FL',zip:'33767',ask:50000,stage:'Stewardship'}
+];
+const PMAP={}; PROSPECTS.forEach(function(p){PMAP[p.k]=p;});
+const NAMESAKE={jo:{ini:'JO',name:"James O'Brien",addr:'5 Oak Ln, Dunedin FL',zip:'34698'}};
+var pipeStage='All', currentProspect=PROSPECTS[0], selStage=PROSPECTS[0].stage;
+function money(n){ return n>=1000000?('$'+(n/1000000).toFixed(2).replace(/0+$/,'').replace(/\.$/,'')+'M'):(n>=1000?('$'+Math.round(n/1000)+'k'):('$'+n)); }
+function prospectCard(p){ var pc=STAGEPILL[p.stage]||'s'; return `<div class="pcard" onclick="openStage('${p.k}')"><div class="ptop"><div class="pav" style="background:${p.color}">${p.ini}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px">${p.name}</div><div style="font-size:11.5px;color:var(--text3);margin-top:2px">${p.addr.split(',')[0]} · ZIP ${p.zip}</div></div><div style="font-weight:700;font-size:14px;white-space:nowrap">Ask ${money(p.ask)}</div></div><div class="pbot"><span class="pill ${pc}">${p.stage}</span><button class="change-btn" onclick="openStage('${p.k}')">Change stage ›</button></div></div>`; }
+function pipeCards(q){ var list=PROSPECTS.filter(function(p){return pipeStage==='All'||p.stage===pipeStage;}); if(q){var nq=q.toLowerCase();list=list.filter(function(p){return (p.name+' '+p.addr+' '+p.zip).toLowerCase().indexOf(nq)>-1;});} return list.length?list.map(prospectCard).join(''):emptyState('No prospects match'); }
+function pipeSearch(inp){ var el=document.getElementById('pipelist'); if(el) el.innerHTML=pipeCards(inp.value.trim()); }
+function setPipe(s){ pipeStage=s; render(); }
+function openStage(k){ currentProspect=PMAP[k]||currentProspect; selStage=currentProspect.stage; go('movestage'); }
+function pickStage(s){ selStage=s; render(); }
+function commitStage(){ var was=currentProspect.stage; currentProspect.stage=selStage; toast(was===selStage?('Stage unchanged · '+selStage):('✓ '+currentProspect.name.split(' ')[0].replace(/[^A-Za-z].*$/,'')+' moved to '+selStage)); pipeStage='All'; go('pipeline'); }
+
+function searchDonors(inp, target, home){
+  const norm=s=>s.toLowerCase().replace(/[’'.,]/g,'').replace(/\s+/g,' ');
+  const q=norm(inp.value.trim());
+  const el=document.querySelector(target); if(!el) return;
+  if(home && !q){ el.innerHTML=''; return; }
+  const m=DONORS.filter(d=> norm(d.name+' '+d.tag+' '+d.addr).includes(q));
+  if(!m.length){ el.innerHTML=emptyState('No donors match “'+inp.value+'”'); return; }
+  el.innerHTML=(home?`<div class="res-head">${m.length} match${m.length>1?'es':''}</div>`:'')+m.map(donorRow).join('')+(home?'':'<div style="height:96px"></div>');
+}
+
+/* ---------- screens ---------- */
+const SCREENS = {
+  ds(){
+    return `<div class="ds">
+      <div>
+        <h3>Core palette</h3>
+        <div class="swatches">
+          <div class="sw" style="background:#0E1E35">Navy</div>
+          <div class="sw" style="background:#2563EB">Blue</div>
+          <div class="sw" style="background:#15803D">Green</div>
+          <div class="sw" style="background:#B45309">Amber</div>
+          <div class="sw" style="background:#BE185D">Rose</div>
+          <div class="sw" style="background:#7C3AED">Purple</div>
+          <div class="sw" style="background:#0D9488">Teal</div>
+          <div class="sw" style="background:#C8A04A">Gold</div>
+        </div>
+      </div>
+      <div>
+        <h3>Type — DM Serif Display + DM Sans</h3>
+        <div class="typescale card-lite">
+          <div class="serif" style="font-size:30px">$18,450</div>
+          <div class="serif" style="font-size:22px">Margaret Sullivan</div>
+          <div style="font-size:15px;font-weight:600">Body / label — 15px semibold</div>
+          <div style="font-size:13px;color:var(--text3)">Meta / caption — 13px, text-3</div>
+          <div class="sectlabel" style="margin-top:4px">Section label · 11px caps</div>
+        </div>
+      </div>
+      <div>
+        <h3>Buttons</h3>
+        <div class="stack">
+          <button class="btn primary">Primary action</button>
+          <button class="btn ghost">Secondary</button>
+        </div>
+      </div>
+      <div>
+        <h3>Inputs & controls</h3>
+        <div class="stack">
+          <div class="inp">Search name, address or ZIP</div>
+          <div class="rowflex">
+            <span class="chip on">Selected</span><span class="chip">Chip</span><span class="chip">Filter</span>
+            <div class="switch"></div><div class="switch off"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3>Status pills</h3>
+        <div class="rowflex">
+          <span class="pill g">On track</span><span class="pill a">At risk</span><span class="pill b">Scheduled</span>
+          <span class="pill r">Bounced</span><span class="pill s">Draft</span>
+        </div>
+      </div>
+      <div>
+        <h3>KPI card & list row</h3>
+        <div class="kpi" style="margin-bottom:10px">
+          <div class="lbl">Gifts today</div><div class="val serif">$18,450</div>
+          <div class="d"><span class="up">↑ 23%</span> <span class="mut">vs. last year</span></div>
+        </div>
+        <div class="row" style="margin:0">
+          <div class="av">MS</div>
+          <div class="main"><div class="nm">Margaret Sullivan</div><div class="meta">Major · Tampa FL</div></div>
+          <div class="chev">›</div>
+        </div>
+      </div>
+      <div>
+        <h3>Dark accent card (intelligence / Guru)</h3>
+        <div class="guru">
+          <div class="gh"><div class="l"><div class="icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="9" r="5"/><path d="M8 18c0 2 8 2 8 0"/></svg></div>GURU AI · ASK STRATEGY</div><div class="u">Updated today</div></div>
+          <div class="ask"><div class="k">PRIMARY ASK</div><div class="v">$40,000 — Cathedral Capital</div></div>
+          <div class="prop"><span class="badge">95/100</span><span class="t">Top-probability ask for Q2 2026</span></div>
+        </div>
+      </div>
+    </div>`;
+  },
+
+  intel(){
+    const tiles = gtile('95','CAPACITY','var(--gold)')+gtile('82','LINKAGE','var(--mint)')+gtile('78','INTEREST')+gtile('$40K','ASK','var(--mint)');
+    return `
+    ${d360hero(tiles)}
+    ${d360tabs('intel')}
+    <div style="padding:16px 16px 26px;display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-h"><span class="sectlabel">Giving capacity</span><span class="brandtag">WealthEngine</span></div>
+        <div class="range-big"><div class="n serif">$25K – $50K</div><div class="s">estimated annual giving capacity</div></div>
+        <div class="rangebar"><i></i></div>
+        <div class="rangeticks"><span>$0</span><span>$25K</span><span>$50K</span><span>$100K+</span></div>
+        <div class="dl"><span class="k">Lifetime capacity</span><span class="v">$500K – $1M</span></div>
+        <div class="dl"><span class="k">Current ask range</span><span class="v" style="color:var(--green)">$40,000 — Cathedral</span></div>
+        <div class="dl"><span class="k">Confidence</span><span class="v">High (87/100)</span></div>
+        <div class="dl"><span class="k">Percentile</span><span class="v">Top 8% of portfolio</span></div>
+      </div>
+
+      <div class="guru">
+        <div class="gh">
+          <div class="l"><div class="icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="9" r="5"/><path d="M8 18c0 2 8 2 8 0"/></svg></div>GURU AI · ASK STRATEGY</div>
+          <div class="u">Updated today</div>
+        </div>
+        <div class="ask">
+          <div class="k">PRIMARY ASK</div>
+          <div class="v">$40,000 — Cathedral Capital Fund</div>
+          <div class="d">Naming opportunity at $25K threshold. Patricia mentioned legacy interest on the Mar 28 call — timing optimal, Q2 cultivation complete.</div>
+        </div>
+        <div class="ask">
+          <div class="k">SECONDARY ASK</div>
+          <div class="v">$5,000 DAF — clear overdue pledge</div>
+          <div class="d">Removes friction on the $12,500 pledge. Tax-efficient via DAF; opens the planned-giving conversation.</div>
+        </div>
+        <div class="prop"><span class="badge">95/100</span><span class="t">Highest-probability ask in pipeline for Q2 2026</span></div>
+      </div>
+
+      <div class="card" style="padding:14px 16px">
+        <div class="sectlabel" style="margin-bottom:6px">Intelligence scores</div>
+        <div class="score-row"><div class="lab">Retention likelihood</div><div class="bar"><i style="width:92%;background:var(--green)"></i></div><div class="num" style="color:var(--green)">92</div></div>
+        <div class="score-row"><div class="lab">Upgrade propensity</div><div class="bar"><i style="width:78%;background:var(--blue)"></i></div><div class="num" style="color:var(--blue)">78</div></div>
+        <div class="score-row"><div class="lab">Wealth capacity</div><div class="bar"><i style="width:70%;background:var(--amber)"></i></div><div class="num" style="color:var(--amber)">70</div></div>
+        <div class="score-row"><div class="lab">Engagement</div><div class="bar"><i style="width:55%;background:var(--teal)"></i></div><div class="num" style="color:var(--teal)">55</div></div>
+      </div>
+    </div>
+    <div class="fab">AI</div>`;
+  },
+
+  donors(){
+    return `
+    <div class="appbar">
+      <div><h2>Donors</h2><div class="greet" style="padding:2px 0 0">3,847 total</div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        ${avSR()}
+      </div>
+    </div>
+    <div class="search">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5.2"/><path d="M11 11l4 4"/></svg>
+      <input class="sinp" placeholder="Search name, address, or ZIP" oninput="searchDonors(this,'#donorlist')">
+    </div>
+    <div class="list" id="donorlist">
+      ${DONORS.map(donorRow).join('')}
+      <div style="height:96px"></div>
+    </div>
+    <div class="fab">AI</div>`;
+  },
+
+  splash(){
+    return `<div class="splash" onclick="go('signin')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 89.83 25" style="width:220px;height:auto;display:block" aria-label="Atlas by GiveCentral"> <g id="atlas-mark"> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="1.21" y1="23.79" x2="12.07" y2="13.53"/> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="12.07" y1="13.53" x2="24.14" y2="7.49"/> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="24.14" y1="7.49" x2="36.22" y2="3.27"/> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="24.14" y1="7.49" x2="27.77" y2="19.57"/> <circle fill="#fff" cx="1.21" cy="23.79" r="1.21"/> <circle fill="#fff" cx="12.07" cy="13.53" r="1.51"/> <circle fill="#fff" cx="24.14" cy="7.49" r="1.66"/> <circle fill="#fff" cx="27.77" cy="19.57" r="1.06"/> <circle fill="none" stroke="#C79E48" stroke-width=".5" opacity=".8" cx="36.22" cy="3.27" r="3.02"/> <circle fill="#C79E48" cx="36.22" cy="3.27" r="2.11"/> </g> <path fill="#fff" d="M43.93,14.67v-.21l.52-.19c.28-.11.49-.25.65-.41.15-.16.28-.39.37-.68L49.76.88h1.77l4.23,12.39c.11.31.24.54.37.7.14.16.35.3.65.41l.25.08v.21h-5.29v-.21l.31-.1c.29-.11.47-.27.53-.47.06-.2.05-.44-.03-.72l-.98-3h-4.62l-1,2.94c-.1.31-.13.55-.09.73.03.18.2.33.49.44l.46.19v.21h-2.87ZM47.09,9.75h4.35l-2.1-6.48-2.25,6.48ZM60.63,14.98c-.89,0-1.58-.22-2.07-.67s-.74-1.15-.74-2.12v-7.12h-1.44v-.21l.5-.08c.43-.1.8-.24,1.11-.42.31-.18.62-.42.93-.73l1.71-1.89h.21l-.06,2.92h2.33v.42h-2.35v7.5c0,.49.11.85.32,1.1.21.25.49.37.82.37.29,0,.55-.07.77-.22.22-.15.44-.34.67-.59l.21.21c-.28.47-.66.85-1.15,1.12-.49.28-1.08.42-1.77.42ZM63.75,14.67v-.21l.25-.08c.5-.17.75-.51.75-1.04V2.19c0-.28-.06-.49-.17-.64-.11-.15-.31-.25-.58-.32l-.27-.06v-.21l3.81-.9.25.19-.08,2.92v7.12c0,.51,0,1.02.01,1.53,0,.51.01,1.01.01,1.51,0,.28.06.5.17.68.11.17.3.3.56.39l.27.06v.21h-4.98ZM71.98,14.98c-.81,0-1.48-.23-2.03-.69-.55-.46-.82-1.12-.82-1.98,0-.65.33-1.25,1-1.8.67-.55,1.71-.96,3.14-1.24.22-.04.47-.09.75-.14.28-.05.57-.1.87-.16v-1.65c0-.94-.11-1.61-.34-1.99-.23-.38-.59-.57-1.07-.57-.33,0-.6.11-.79.32-.19.22-.32.59-.37,1.11l-.04.23c-.03.6-.17,1.03-.44,1.31-.26.28-.59.42-.98.42-.36,0-.66-.11-.9-.33-.24-.22-.35-.52-.35-.9,0-.57.2-1.05.59-1.44.4-.39.92-.68,1.57-.87.65-.19,1.36-.29,2.12-.29,1.24,0,2.19.3,2.86.91.67.6,1.01,1.59,1.01,2.95v4.6c0,.62.29.94.87.94h.46l.19.17c-.26.33-.55.59-.86.77s-.75.27-1.32.27c-.61,0-1.09-.14-1.45-.43-.35-.28-.59-.66-.7-1.14-.42.44-.84.82-1.28,1.14s-1,.47-1.7.47ZM73.25,13.71c.28,0,.54-.07.78-.2s.53-.34.86-.61v-3.5c-.14.03-.28.06-.42.08-.14.03-.3.06-.48.08-.64.17-1.15.45-1.53.84-.38.4-.57.93-.57,1.59,0,.57.13,1,.4,1.28.26.28.58.43.96.43ZM82.83,14.98c-.68,0-1.29-.08-1.83-.24s-1.04-.36-1.5-.59l.02-2.48h.21l.71,1.25c.31.56.64.97,1.01,1.24.37.27.84.41,1.41.41.67,0,1.2-.15,1.61-.45.41-.3.61-.7.61-1.2,0-.46-.15-.83-.44-1.12-.29-.29-.83-.55-1.62-.79l-.87-.27c-.85-.25-1.51-.64-2-1.17-.49-.53-.73-1.17-.73-1.94,0-.92.36-1.69,1.08-2.33.72-.64,1.76-.96,3.1-.96.54,0,1.05.06,1.53.18.48.12.94.3,1.38.53l-.12,2.25h-.21l-.73-1.29c-.26-.46-.52-.78-.78-.97-.26-.19-.64-.28-1.16-.28-.47,0-.92.13-1.33.4-.42.26-.62.64-.62,1.12s.18.85.53,1.12c.35.28.88.53,1.57.77l.94.27c1,.31,1.71.73,2.14,1.26s.65,1.18.65,1.93c0,1.01-.4,1.83-1.2,2.44-.8.61-1.92.92-3.36.92Z"/> <path fill="#fff" d="M43.89,22.82v-2.96h1.09c.21,0,.38.03.52.1.14.07.24.16.31.27.07.11.1.24.1.39s-.03.27-.1.38c-.06.1-.15.18-.26.23-.11.06-.22.09-.34.1l.06-.04c.13,0,.25.04.36.1.11.07.19.15.25.26.06.11.09.23.09.36,0,.15-.04.29-.11.41-.07.12-.18.22-.33.29-.14.07-.32.11-.53.11h-1.13ZM44.32,21.13h.63c.18,0,.31-.04.41-.12.09-.08.14-.2.14-.34s-.05-.25-.14-.34-.23-.12-.42-.12h-.61v.93ZM44.32,22.47h.65c.19,0,.33-.04.43-.13.1-.09.15-.21.15-.37s-.05-.28-.16-.37c-.11-.09-.25-.14-.44-.14h-.64v1.01ZM48.05,22.82v-1.1l-.98-1.86h.48l.76,1.55h-.11l.76-1.55h.47l-.97,1.86v1.1h-.42ZM54.07,22.87c-.28,0-.52-.06-.73-.19-.21-.13-.37-.3-.49-.53-.12-.23-.17-.49-.17-.8s.06-.57.18-.8c.12-.23.28-.41.5-.54.22-.13.48-.2.78-.2.34,0,.62.08.84.24.23.16.37.39.44.67h-.48c-.04-.16-.13-.29-.27-.39-.14-.09-.31-.14-.53-.14-.21,0-.39.05-.54.14-.15.09-.27.23-.35.4-.08.17-.12.38-.12.61s.04.45.12.62.2.3.35.39c.15.09.32.14.52.14.3,0,.52-.09.67-.26s.24-.4.26-.69h-.82v-.33h1.24v1.6h-.38l-.04-.45c-.07.11-.15.2-.23.28s-.19.13-.31.17c-.12.04-.26.06-.42.06ZM56.96,22.82v-2.96h.42v2.96h-.42ZM59.82,22.82l-1.1-2.96h.46l.9,2.52.9-2.52h.45l-1.1,2.96h-.51ZM62.76,22.82v-2.96h1.87v.35h-1.45v.95h1.32v.34h-1.32v.98h1.45v.35h-1.87ZM67.41,22.87c-.29,0-.54-.06-.75-.19s-.37-.31-.49-.54-.17-.5-.17-.8.06-.57.17-.8.28-.41.49-.54.46-.19.75-.19c.35,0,.63.08.84.25s.35.4.41.7h-.46c-.04-.17-.13-.31-.26-.42-.13-.1-.31-.16-.53-.16-.2,0-.37.05-.52.14-.15.09-.26.23-.34.4-.08.17-.12.38-.12.62s.04.45.12.62c.08.17.19.31.34.4.15.09.32.14.52.14.22,0,.4-.05.53-.15.13-.1.22-.24.26-.41h.46c-.06.29-.2.52-.41.69s-.5.25-.84.25ZM70.12,22.82v-2.96h1.87v.35h-1.45v.95h1.32v.34h-1.32v.98h1.45v.35h-1.87ZM73.47,22.82v-2.96h.42l1.51,2.27v-2.27h.42v2.96h-.42l-1.51-2.26v2.26h-.42ZM78.07,22.82v-2.61h-.87v-.35h2.18v.35h-.88v2.61h-.42ZM80.74,22.82v-2.96h1c.23,0,.43.04.57.12.15.08.26.18.33.31.07.13.11.28.11.45,0,.16-.04.3-.11.44-.07.13-.18.24-.34.32s-.35.12-.58.12h-.57v1.2h-.42ZM81.16,21.29h.55c.21,0,.36-.05.46-.15.1-.1.15-.23.15-.4s-.05-.29-.14-.39c-.1-.1-.25-.14-.46-.14h-.55v1.08ZM82.3,22.82l-.64-1.31h.46l.66,1.31h-.49ZM84.05,22.82l1.09-2.96h.46l1.09,2.96h-.45l-.87-2.45-.87,2.45h-.44ZM84.54,22.09l.12-.34h1.39l.12.34h-1.63ZM88.05,22.82v-2.96h.42v2.62h1.35v.33h-1.77Z"/> <g> <path fill="#fff" d="M86.13.4V.13h1.4v.27h-.54v1.49h-.31V.4h-.54Z"/> <path fill="#fff" d="M87.81,1.89V.13h.47l.33.91s.03.08.04.13.03.11.05.18c.02.06.03.12.04.18.01-.06.03-.12.04-.18.02-.06.03-.12.05-.18s.03-.1.04-.14l.33-.91h.48v1.76h-.31v-.89s0-.1,0-.16,0-.13,0-.21c0-.07,0-.15,0-.21-.02.08-.04.15-.06.23-.02.07-.04.14-.06.21-.02.06-.04.11-.05.15l-.32.89h-.27l-.33-.89s-.03-.09-.05-.15c-.02-.06-.04-.13-.06-.2-.02-.07-.04-.15-.07-.22,0,.07,0,.13,0,.21,0,.07,0,.14,0,.2,0,.06,0,.12,0,.16v.89h-.31Z"/> </g> </svg>
+      <div class="hint">Tap to continue</div>
+      <div class="load"><i></i></div>
+    </div>`;
+  },
+
+  signin(){
+    return `<div class="auth">
+      <div class="auth-logo" style="padding:14px 0 24px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 89.83 25" style="width:150px;height:auto;display:block" aria-label="Atlas by GiveCentral"> <g id="atlas-mark"> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="1.21" y1="23.79" x2="12.07" y2="13.53"/> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="12.07" y1="13.53" x2="24.14" y2="7.49"/> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="24.14" y1="7.49" x2="36.22" y2="3.27"/> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="24.14" y1="7.49" x2="27.77" y2="19.57"/> <circle fill="#0E1E35" cx="1.21" cy="23.79" r="1.21"/> <circle fill="#0E1E35" cx="12.07" cy="13.53" r="1.51"/> <circle fill="#0E1E35" cx="24.14" cy="7.49" r="1.66"/> <circle fill="#0E1E35" cx="27.77" cy="19.57" r="1.06"/> <circle fill="none" stroke="#C79E48" stroke-width=".5" opacity=".8" cx="36.22" cy="3.27" r="3.02"/> <circle fill="#C79E48" cx="36.22" cy="3.27" r="2.11"/> </g> <path fill="#0E1E35" d="M43.93,14.67v-.21l.52-.19c.28-.11.49-.25.65-.41.15-.16.28-.39.37-.68L49.76.88h1.77l4.23,12.39c.11.31.24.54.37.7.14.16.35.3.65.41l.25.08v.21h-5.29v-.21l.31-.1c.29-.11.47-.27.53-.47.06-.2.05-.44-.03-.72l-.98-3h-4.62l-1,2.94c-.1.31-.13.55-.09.73.03.18.2.33.49.44l.46.19v.21h-2.87ZM47.09,9.75h4.35l-2.1-6.48-2.25,6.48ZM60.63,14.98c-.89,0-1.58-.22-2.07-.67s-.74-1.15-.74-2.12v-7.12h-1.44v-.21l.5-.08c.43-.1.8-.24,1.11-.42.31-.18.62-.42.93-.73l1.71-1.89h.21l-.06,2.92h2.33v.42h-2.35v7.5c0,.49.11.85.32,1.1.21.25.49.37.82.37.29,0,.55-.07.77-.22.22-.15.44-.34.67-.59l.21.21c-.28.47-.66.85-1.15,1.12-.49.28-1.08.42-1.77.42ZM63.75,14.67v-.21l.25-.08c.5-.17.75-.51.75-1.04V2.19c0-.28-.06-.49-.17-.64-.11-.15-.31-.25-.58-.32l-.27-.06v-.21l3.81-.9.25.19-.08,2.92v7.12c0,.51,0,1.02.01,1.53,0,.51.01,1.01.01,1.51,0,.28.06.5.17.68.11.17.3.3.56.39l.27.06v.21h-4.98ZM71.98,14.98c-.81,0-1.48-.23-2.03-.69-.55-.46-.82-1.12-.82-1.98,0-.65.33-1.25,1-1.8.67-.55,1.71-.96,3.14-1.24.22-.04.47-.09.75-.14.28-.05.57-.1.87-.16v-1.65c0-.94-.11-1.61-.34-1.99-.23-.38-.59-.57-1.07-.57-.33,0-.6.11-.79.32-.19.22-.32.59-.37,1.11l-.04.23c-.03.6-.17,1.03-.44,1.31-.26.28-.59.42-.98.42-.36,0-.66-.11-.9-.33-.24-.22-.35-.52-.35-.9,0-.57.2-1.05.59-1.44.4-.39.92-.68,1.57-.87.65-.19,1.36-.29,2.12-.29,1.24,0,2.19.3,2.86.91.67.6,1.01,1.59,1.01,2.95v4.6c0,.62.29.94.87.94h.46l.19.17c-.26.33-.55.59-.86.77s-.75.27-1.32.27c-.61,0-1.09-.14-1.45-.43-.35-.28-.59-.66-.7-1.14-.42.44-.84.82-1.28,1.14s-1,.47-1.7.47ZM73.25,13.71c.28,0,.54-.07.78-.2s.53-.34.86-.61v-3.5c-.14.03-.28.06-.42.08-.14.03-.3.06-.48.08-.64.17-1.15.45-1.53.84-.38.4-.57.93-.57,1.59,0,.57.13,1,.4,1.28.26.28.58.43.96.43ZM82.83,14.98c-.68,0-1.29-.08-1.83-.24s-1.04-.36-1.5-.59l.02-2.48h.21l.71,1.25c.31.56.64.97,1.01,1.24.37.27.84.41,1.41.41.67,0,1.2-.15,1.61-.45.41-.3.61-.7.61-1.2,0-.46-.15-.83-.44-1.12-.29-.29-.83-.55-1.62-.79l-.87-.27c-.85-.25-1.51-.64-2-1.17-.49-.53-.73-1.17-.73-1.94,0-.92.36-1.69,1.08-2.33.72-.64,1.76-.96,3.1-.96.54,0,1.05.06,1.53.18.48.12.94.3,1.38.53l-.12,2.25h-.21l-.73-1.29c-.26-.46-.52-.78-.78-.97-.26-.19-.64-.28-1.16-.28-.47,0-.92.13-1.33.4-.42.26-.62.64-.62,1.12s.18.85.53,1.12c.35.28.88.53,1.57.77l.94.27c1,.31,1.71.73,2.14,1.26s.65,1.18.65,1.93c0,1.01-.4,1.83-1.2,2.44-.8.61-1.92.92-3.36.92Z"/> <path fill="#0E1E35" d="M43.89,22.82v-2.96h1.09c.21,0,.38.03.52.1.14.07.24.16.31.27.07.11.1.24.1.39s-.03.27-.1.38c-.06.1-.15.18-.26.23-.11.06-.22.09-.34.1l.06-.04c.13,0,.25.04.36.1.11.07.19.15.25.26.06.11.09.23.09.36,0,.15-.04.29-.11.41-.07.12-.18.22-.33.29-.14.07-.32.11-.53.11h-1.13ZM44.32,21.13h.63c.18,0,.31-.04.41-.12.09-.08.14-.2.14-.34s-.05-.25-.14-.34-.23-.12-.42-.12h-.61v.93ZM44.32,22.47h.65c.19,0,.33-.04.43-.13.1-.09.15-.21.15-.37s-.05-.28-.16-.37c-.11-.09-.25-.14-.44-.14h-.64v1.01ZM48.05,22.82v-1.1l-.98-1.86h.48l.76,1.55h-.11l.76-1.55h.47l-.97,1.86v1.1h-.42ZM54.07,22.87c-.28,0-.52-.06-.73-.19-.21-.13-.37-.3-.49-.53-.12-.23-.17-.49-.17-.8s.06-.57.18-.8c.12-.23.28-.41.5-.54.22-.13.48-.2.78-.2.34,0,.62.08.84.24.23.16.37.39.44.67h-.48c-.04-.16-.13-.29-.27-.39-.14-.09-.31-.14-.53-.14-.21,0-.39.05-.54.14-.15.09-.27.23-.35.4-.08.17-.12.38-.12.61s.04.45.12.62.2.3.35.39c.15.09.32.14.52.14.3,0,.52-.09.67-.26s.24-.4.26-.69h-.82v-.33h1.24v1.6h-.38l-.04-.45c-.07.11-.15.2-.23.28s-.19.13-.31.17c-.12.04-.26.06-.42.06ZM56.96,22.82v-2.96h.42v2.96h-.42ZM59.82,22.82l-1.1-2.96h.46l.9,2.52.9-2.52h.45l-1.1,2.96h-.51ZM62.76,22.82v-2.96h1.87v.35h-1.45v.95h1.32v.34h-1.32v.98h1.45v.35h-1.87ZM67.41,22.87c-.29,0-.54-.06-.75-.19s-.37-.31-.49-.54-.17-.5-.17-.8.06-.57.17-.8.28-.41.49-.54.46-.19.75-.19c.35,0,.63.08.84.25s.35.4.41.7h-.46c-.04-.17-.13-.31-.26-.42-.13-.1-.31-.16-.53-.16-.2,0-.37.05-.52.14-.15.09-.26.23-.34.4-.08.17-.12.38-.12.62s.04.45.12.62c.08.17.19.31.34.4.15.09.32.14.52.14.22,0,.4-.05.53-.15.13-.1.22-.24.26-.41h.46c-.06.29-.2.52-.41.69s-.5.25-.84.25ZM70.12,22.82v-2.96h1.87v.35h-1.45v.95h1.32v.34h-1.32v.98h1.45v.35h-1.87ZM73.47,22.82v-2.96h.42l1.51,2.27v-2.27h.42v2.96h-.42l-1.51-2.26v2.26h-.42ZM78.07,22.82v-2.61h-.87v-.35h2.18v.35h-.88v2.61h-.42ZM80.74,22.82v-2.96h1c.23,0,.43.04.57.12.15.08.26.18.33.31.07.13.11.28.11.45,0,.16-.04.3-.11.44-.07.13-.18.24-.34.32s-.35.12-.58.12h-.57v1.2h-.42ZM81.16,21.29h.55c.21,0,.36-.05.46-.15.1-.1.15-.23.15-.4s-.05-.29-.14-.39c-.1-.1-.25-.14-.46-.14h-.55v1.08ZM82.3,22.82l-.64-1.31h.46l.66,1.31h-.49ZM84.05,22.82l1.09-2.96h.46l1.09,2.96h-.45l-.87-2.45-.87,2.45h-.44ZM84.54,22.09l.12-.34h1.39l.12.34h-1.63ZM88.05,22.82v-2.96h.42v2.62h1.35v.33h-1.77Z"/> <g> <path fill="#0E1E35" d="M86.13.4V.13h1.4v.27h-.54v1.49h-.31V.4h-.54Z"/> <path fill="#0E1E35" d="M87.81,1.89V.13h.47l.33.91s.03.08.04.13.03.11.05.18c.02.06.03.12.04.18.01-.06.03-.12.04-.18.02-.06.03-.12.05-.18s.03-.1.04-.14l.33-.91h.48v1.76h-.31v-.89s0-.1,0-.16,0-.13,0-.21c0-.07,0-.15,0-.21-.02.08-.04.15-.06.23-.02.07-.04.14-.06.21-.02.06-.04.11-.05.15l-.32.89h-.27l-.33-.89s-.03-.09-.05-.15c-.02-.06-.04-.13-.06-.2-.02-.07-.04-.15-.07-.22,0,.07,0,.13,0,.21,0,.07,0,.14,0,.2,0,.06,0,.12,0,.16v.89h-.31Z"/> </g> </svg></div>
+      <div class="h-title">Welcome back</div>
+      <div class="h-sub">Sign in to your diocese's fundraising workspace.</div>
+      <div class="field"><div class="lab">Work email</div>
+        <div class="box focus"><svg class="ic" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="3" width="13" height="10" rx="2"/><path d="M2 4l6 4.5L14 4"/></svg><span class="val">sarah.reynolds@diocesestpete.org</span></div>
+      </div>
+      <div class="field"><div class="lab"><span>Password</span></div>
+        <div class="box"><svg class="ic" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5 7V5a3 3 0 016 0v2"/></svg><span class="val">••••••••••</span><span class="eye">Show</span></div>
+      </div>
+      <div style="text-align:right;margin-top:10px"><span class="link" style="font-size:13px" data-toast="Password reset link sent to your email">Forgot password?</span></div>
+      <button class="btn primary" style="margin-top:18px" onclick="go('otp')">Sign in</button>
+      <div class="auth-foot">New to Atlas? <span class="link" onclick="go('signup')">Request access</span></div>
+    </div>`;
+  },
+
+  signup(){
+    return `<div class="auth">
+      <div class="auth-logo"><span class="link" style="font-size:15px" onclick="go('signin')">‹ Back</span></div>
+      <div class="h-title">Request access</div>
+      <div class="h-sub">Atlas access is approved by your organization's administrator.</div>
+      <div class="field"><div class="lab">Full name</div><div class="box"><span class="val">Sarah Reynolds</span></div></div>
+      <div class="field"><div class="lab">Work email</div><div class="box"><span class="val">sarah.reynolds@diocesestpete.org</span></div></div>
+      <div class="field"><div class="lab">Organization / diocese</div><div class="box"><span class="val">Diocese of St. Petersburg</span></div></div>
+      <div class="field"><div class="lab">Role requested</div><div class="box"><span class="val">Development Director</span><span class="eye">▾</span></div></div>
+      <button class="btn primary" style="margin-top:22px" onclick="go('signin')">Request access</button>
+      <div class="auth-foot">Already have an account? <span class="link" onclick="go('signin')">Sign in</span></div>
+    </div>`;
+  },
+
+  otp(){
+    return `<div class="auth">
+      <div class="auth-logo"><span class="link" style="font-size:15px" onclick="go('signin')">‹ Back</span></div>
+      <div class="h-title">Verify it's you</div>
+      <div class="h-sub">We sent a 6-digit code to <b style="color:var(--text2)">s•••••@diocesestpete.org</b>.</div>
+      <div class="otp">
+        <div class="c">2</div><div class="c">6</div><div class="c">4</div><div class="c f">1</div><div class="c"></div><div class="c"></div>
+      </div>
+      <div style="margin-top:18px;color:var(--text3);font-size:13.5px">Didn't get it? <span class="link" data-toast="New verification code sent">Resend in 0:24</span></div>
+      <button class="btn primary" style="margin-top:22px" onclick="go('onboarding')">Verify</button>
+      <div class="auth-foot">Trouble signing in? <span class="link" data-toast="Opening help center">Get help</span></div>
+    </div>`;
+  },
+
+  onboarding(){
+    const bar=(h)=>'<i style="width:4px;height:'+h+'px;border-radius:2px;background:'+(h>28?'#3b82f6':'rgba(255,255,255,.35)')+'"></i>';
+    const wav=[12,22,34,18,40,28,15,42,26,36,20,30,14].map(bar).join('');
+    const camp=(n,p,col)=>'<div><div style="display:flex;justify-content:space-between;font-size:12px;color:#e6edf7"><span>'+n+'</span><span style="color:#9fb2cd">'+p+'%</span></div><div style="height:6px;background:rgba(255,255,255,.10);border-radius:99px;margin-top:5px;overflow:hidden"><div style="height:100%;width:'+p+'%;background:'+col+'"></div></div></div>';
+    const tile=(v,l)=>'<div style="flex:1;background:rgba(255,255,255,.06);border-radius:12px;padding:9px;text-align:center"><div class="serif" style="font-size:16px">'+v+'</div><div style="font-size:8.5px;color:#8ba0bd;letter-spacing:.05em;margin-top:2px">'+l+'</div></div>';
+    const slides=[
+      {t:"Your portfolio, in your pocket",s:"Gifts, pledges and the full Donor 360 — the same Atlas data and terms, sized for a phone.",
+        art:`<div style="width:100%">
+          <div style="text-align:center;margin-bottom:14px"><div class="serif" style="font-size:38px;line-height:1">$1.73M</div><div style="color:#9fb2cd;font-size:12.5px;margin-top:5px">raised · 6 active campaigns</div></div>
+          <div style="height:8px;background:rgba(255,255,255,.10);border-radius:99px;overflow:hidden"><div style="height:100%;width:53%;background:linear-gradient(90deg,#3b82f6,#c8a04a)"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:10.5px;color:#8ba0bd;margin-top:6px"><span>53% of $3.25M goal</span><span>pace 49%</span></div>
+          <div style="display:flex;flex-direction:column;gap:11px;margin-top:16px">${camp('Catholic Ministry Appeal',78,'#22c55e')}${camp('Cathedral Capital',42,'#f59e0b')}${camp('Annual Appeal 2026',61,'#22c55e')}</div>
+          <div style="display:flex;gap:8px;margin-top:16px">${tile('4','ON PACE')}${tile('4,812','DONORS')}${tile('$312K','PLEDGES')}</div>
+        </div>`},
+      {t:"Guru AI tells you the ask",s:"Capacity, propensity and a recommended ask strategy for every prospect — updated daily.",
+        art:`<div style="width:100%">
+          <div style="display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.06);border-radius:14px;padding:11px 12px">
+            <div class="av" style="width:40px;height:40px;border-radius:50%;background:#7C3AED;color:#fff;font-size:13px"><span>JO</span><img alt="" src="https://randomuser.me/api/portraits/men/52.jpg" onerror="this.remove()"></div>
+            <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13.5px">James &amp; Patricia O'Brien</div><div style="font-size:11px;color:#9fb2cd">Major · Stage 3 Cultivation</div></div>
+            <div style="text-align:center"><div style="font-weight:700;color:#c4b5fd;font-size:16px">95</div><div style="font-size:8.5px;color:#8ba0bd">GURU</div></div>
+          </div>
+          <div style="font-size:11px;font-weight:700;color:#c4b5fd;letter-spacing:.05em;margin:14px 0 8px">GURU AI · ASK STRATEGY</div>
+          <div style="background:rgba(255,255,255,.06);border-radius:12px;padding:12px"><div style="font-size:9px;color:#8ba0bd;font-weight:700">PRIMARY ASK</div><div style="font-weight:700;margin-top:3px;font-size:15px">$40,000 — Cathedral Capital</div></div>
+          <div style="margin-top:12px"><div style="display:flex;justify-content:space-between;font-size:11px;color:#c9d4e6"><span>Propensity</span><span>95/100</span></div><div style="height:7px;background:rgba(255,255,255,.10);border-radius:99px;margin-top:5px;overflow:hidden"><div style="height:100%;width:95%;background:linear-gradient(90deg,#7c3aed,#3b82f6)"></div></div></div>
+          <div style="display:flex;gap:8px;margin-top:12px">${['Capacity $250k+','Q2 2026'].map(x=>'<span class="pill" style="background:rgba(255,255,255,.08);color:#cfe0f5">'+x+'</span>').join('')}</div>
+        </div>`},
+      {t:"Log gifts & visits on the go",s:"Dictate a summary, move a prospect stage, prep a meeting brief — all in a tap.",
+        art:`<div style="display:flex;flex-direction:column;align-items:center;gap:16px;width:100%">
+          <div style="display:flex;align-items:center;gap:4px;height:44px">${wav}</div>
+          <div style="width:78px;height:78px;border-radius:50%;background:linear-gradient(145deg,#2f6bff,#1d4ed8);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 34px rgba(37,99,235,.5)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4"/></svg></div>
+          <div style="background:rgba(255,255,255,.06);border-radius:12px;padding:10px 14px;font-size:12.5px;color:#cfe0f5;max-width:260px;text-align:center;line-height:1.5">"Discussed the $10k Cathedral ask — sending the agreement Wednesday."</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">${['Log gift','Move stage','Prep brief'].map(x=>'<span class="pill" style="background:rgba(255,255,255,.08);color:#cfe0f5">'+x+'</span>').join('')}</div>
+        </div>`}
+    ];
+    const i=Math.min(obSlide,slides.length-1), sl=slides[i], last=i===slides.length-1;
+    return `<div class="ob">
+      <div class="ob-skip" onclick="go('notify')">Skip</div>
+      <div class="ob-art">${sl.art}</div>
+      <div class="ob-title">${sl.t}</div>
+      <div class="ob-sub">${sl.s}</div>
+      <div class="dots">${slides.map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('')}</div>
+      <button class="btn primary" onclick="${last?"go('notify')":"obNext()"}">${last?'Get started':'Next'}</button>
+    </div>`;
+  },
+
+  notify(){
+    return `<div class="perm">
+      <div class="ill"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 9a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M9.5 20a2.5 2.5 0 005 0"/></svg></div>
+      <div class="pt">Stay ahead of every gift</div>
+      <div class="ps">Get actionable alerts — a major gift lands, a pledge is at risk, a meeting starts in an hour.</div>
+      <div style="flex:1"></div>
+      <button class="btn primary" style="margin-bottom:12px" onclick="go('welcome')">Allow notifications</button>
+      <button class="btn ghost" onclick="go('welcome')">Not now</button>
+    </div>`;
+  },
+
+  welcome(){
+    return `<div class="perm">
+      <div class="ill g" style="margin-top:10px"><svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M7 12.5l3.2 3.2L17 9"/></svg></div>
+      <div class="pt">You're all set, Sarah</div>
+      <div class="ps">Your diocese workspace is ready. Jump in and find a donor, prep a brief, or log a gift.</div>
+      <div style="flex:1"></div>
+      <button class="btn primary" onclick="go('home')">Go to Home</button>
+    </div>`;
+  },
+
+  states(){
+    const v=stateView;
+    const tabs=['loading','empty','error','offline'].map(s=>`<span class="st ${s===v?'on':''}" onclick="setState('${s}')">${s[0].toUpperCase()+s.slice(1)}</span>`).join('');
+    let inner='';
+    if(v==='loading'){
+      inner=`<div class="list" style="padding-top:6px">${[1,2,3,4,5].map(()=>`<div class="skel-row"><div class="skel-c shim"></div><div style="flex:1"><div class="skel-l shim" style="width:60%"></div><div class="skel-l shim" style="width:38%;margin-top:8px"></div></div></div>`).join('')}</div>`;
+    } else if(v==='empty'){
+      inner=`<div class="state-block"><div class="state-ic" style="background:var(--surface2);color:var(--text4)"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></svg></div><div class="state-t">No donors match</div><div class="state-s">Try a different name, address or ZIP — or clear your search.</div><button class="btn ghost" style="width:auto;padding:0 22px;margin-top:18px">Clear search</button></div>`;
+    } else if(v==='error'){
+      inner=`<div class="state-block"><div class="state-ic" style="background:var(--rose-l);color:var(--rose)"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17v.5"/></svg></div><div class="state-t">Couldn't load donors</div><div class="state-s">Something went wrong on our end. Check your connection and try again.</div><button class="btn primary" style="width:auto;padding:0 26px;margin-top:18px">Retry</button></div>`;
+    } else {
+      inner=`<div class="offline-banner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18M8.5 8.6A11 11 0 003 9M12 20h.01"/></svg>You're offline — showing cached data. Changes sync when you reconnect.</div>
+      <div class="list">${[['MO',"Margaret O'Brien",'Major · cached'],['RL','Robert & Susan Lin','Major · cached'],['AR','Anthony Riccardi','Recurring · cached']].map(([i,n,m])=>`<div class="row" style="opacity:.75"><div class="av">${i}</div><div class="main"><div class="nm">${n}</div><div class="meta">${m}</div></div><div class="chev">›</div></div>`).join('')}</div>`;
+    }
+    return `<div class="appbar"><h2>States</h2>${avSR()}</div>
+      <div class="state-tabs">${tabs}</div>${inner}`;
+  },
+
+  home(){
+    return `
+    <div class="appbar">
+      <div><div class="greet" style="padding:0">Good morning</div><h2 style="margin-top:2px">Sarah</h2></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="iconbtn" style="position:relative;cursor:pointer" onclick="go('notifications')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 9a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M9.5 20a2.5 2.5 0 005 0"/></svg><span style="position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--rose);border:1.5px solid #fff"></span></div>
+        ${avSR()}
+      </div>
+    </div>
+    <div class="greet" style="padding-top:2px">Find a donor</div>
+    <div class="hero-search">
+      <svg class="k" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7.5" cy="7.5" r="5.4"/><path d="M12 12l4 4"/></svg>
+      <input class="sinp" style="color:var(--text)" placeholder="Search name, address, or ZIP" oninput="homeSearch(this)">
+    </div>
+    <div id="homeres" style="padding:0 20px"></div>
+    <div id="home-body">
+    <div class="kpi-grid">
+      <div class="kpi" onclick="go('donors')"><div class="kpi-top"><div class="kpi-ic" style="background:var(--blue-pale);color:var(--blue)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.4 2.9-5.5 6.5-5.5s6.5 2.1 6.5 5.5"/><path d="M16 5.2a3.2 3.2 0 010 6M18 20c0-2.4-.8-4-2-5"/></svg></div><div class="lbl">Active donors</div></div><div class="val serif">3,847</div><div class="d"><span class="up">↑ 8%</span> <span class="mut">retention</span></div></div>
+      <div class="kpi" onclick="go('pipeline')"><div class="kpi-top"><div class="kpi-ic" style="background:#F3E8FF;color:var(--purp)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg></div><div class="lbl">Pipeline value</div></div><div class="val serif">$340k</div><div class="d"><span class="mut">28 prospects · 6 solicit.</span></div></div>
+    </div>
+    <div class="sect" style="padding-top:18px"><span class="l">Today's meetings · 6</span></div>
+    <div class="mtg" onclick="go('briefs')">
+      <div class="r1"><div><div style="font-weight:700;font-size:14px">9:30 AM · Robert & Susan Lin</div><div style="font-size:12.5px;color:var(--text3);margin-top:3px">Stewardship visit · $5k</div></div><span class="pill g">Brief ready</span></div>
+      <div style="text-align:right;margin-top:6px"><span class="r" style="color:var(--blue);font-weight:600;font-size:13px">View brief →</span></div>
+    </div>
+    <div class="mtg" onclick="go('briefs')">
+      <div class="r1"><div><div style="font-weight:700;font-size:14px">11:00 AM · The Delaney Fdn.</div><div style="font-size:12.5px;color:var(--text3);margin-top:3px">Grant check-in · $50k</div></div><span class="pill g">Brief ready</span></div>
+      <div style="text-align:right;margin-top:6px"><span class="r" style="color:var(--blue);font-weight:600;font-size:13px">View brief →</span></div>
+    </div>
+    <div class="mtg" onclick="go('briefs')">
+      <div class="r1"><div><div style="font-weight:700;font-size:14px">2:00 PM · James & Patricia O'Brien</div><div style="font-size:12.5px;color:var(--text3);margin-top:3px">Cathedral ask · $25k</div></div><span class="pill g">Brief ready</span></div>
+      <div style="text-align:right;margin-top:6px"><span class="r" style="color:var(--blue);font-weight:600;font-size:13px">View brief →</span></div>
+    </div>
+    <div class="sect"><span class="l">Needs attention</span></div>
+    <div class="attn">
+      <div class="a" onclick="go('tasks')"><span class="dot" style="background:var(--rose)"></span><div style="flex:1;font-size:13.5px">3 tasks overdue · $84k at risk</div><span class="chev" style="color:var(--text4)">›</span></div>
+      <div class="a" onclick="go('notifications')"><span class="dot" style="background:var(--amber)"></span><div style="flex:1;font-size:13.5px">2 approvals pending</div><span class="chev" style="color:var(--text4)">›</span></div>
+    </div>
+    <div style="height:96px"></div>
+    </div>
+    <div class="fab">AI</div>`;
+  },
+
+  d360(){
+    const tiles = donorTiles();
+    return `${d360hero(tiles)}${d360tabs('d360')}
+    <div style="padding:14px 16px 26px;display:flex;flex-direction:column;gap:14px">
+      <div class="card" style="padding:14px 16px">
+        <div class="card-h" style="padding:0"><span class="sectlabel">Giving history · 10-yr</span></div>
+        <div class="spark">${[30,42,38,55,48,62,70,58,80,92].map((h,i)=>`<i class="${i===9?'on':''}" style="height:${h}%"></i>`).join('')}</div>
+        <div class="mini3">
+          <div class="m"><div class="v serif">$2,005</div><div class="l">Avg gift</div></div>
+          <div class="m"><div class="v serif">$25K</div><div class="l">Largest</div></div>
+          <div class="m"><div class="v serif">38</div><div class="l">Gifts</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="sect" style="padding:0 4px 8px"><span class="l">Recent gifts</span></div>
+        ${[['$2,500','CMA 2026 · Card','Mar 15, 2026'],['$1,000','Cathedral Capital · Check','Dec 2, 2025'],['$2,500','CMA 2025 · Card','Mar 14, 2025']].map(([a,f,dt])=>`<div class="row"><div class="main"><div class="nm">${a}</div><div class="meta">${f}</div></div><div class="meta">${dt}</div></div>`).join('')}
+      </div>
+    </div>
+    <div class="fab">AI</div>`;
+  },
+
+  d360act(){
+    const tiles = donorTiles();
+    const items=[
+      ['var(--green)','Gift received — $2,500 to CMA','online via GiveCentral','Mar 15, 2026 · Auto-synced','+$2,500'],
+      ['var(--blue)','Note — thank-you call logged','Cathedral capital interest · follow up Q3','Mar 16, 2026 · Sarah Reynolds',''],
+      ['var(--text4)','Email — thank-you + 2025 tax summary','to margaret.sullivan@gmail.com','Jan 12, 2026 · Auto-generated',''],
+      ['var(--green)','Task done — year-end stewardship call','diocesan programs discussed','Dec 18, 2025 · Sarah Reynolds',''],
+      ['var(--purp)','Pledge created — $5,000 to CMA 2026','3 annual installments · signed','Aug 22, 2025 · Sarah Reynolds','']
+    ];
+    return `${d360hero(tiles)}${d360tabs('d360act')}
+    <div class="tl">
+      ${items.map(([c,t,d,m,amt])=>`<div class="item"><div class="dot" style="background:${c}"></div><div class="c"><div style="display:flex;justify-content:space-between"><div class="t">${t}</div>${amt?`<div class="amt">${amt}</div>`:''}</div><div class="d">${d}</div><div class="mm">${m}</div></div></div>`).join('')}
+    </div>
+    <div class="fab">AI</div>`;
+  },
+
+  d360con(){
+    const tiles = donorTiles();
+    return `${d360hero(tiles)}${d360tabs('d360con')}
+    <div style="padding:2px 0 26px">
+      <div class="sect"><span class="l">Contact</span></div>
+      <div class="cblock">
+        <div class="crow"><div class="cic"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="3" width="13" height="10" rx="2"/><path d="M2 4l6 4.5L14 4"/></svg></div><div style="flex:1"><div class="k">PREFERRED EMAIL</div><div class="v">${currentDonor.email}</div></div><div class="cact" onclick="go('logact')">Email</div></div>
+        <div class="crow"><div class="cic"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h3l1.5 4-2 1.5a9 9 0 004 4l1.5-2 4 1.5v3a1 1 0 01-1 1A11 11 0 013 4a1 1 0 01-1-1Z"/></svg></div><div style="flex:1"><div class="k">MOBILE</div><div class="v">${currentDonor.phone}</div></div><div class="cact" onclick="go('call')">Call</div></div>
+        <div class="crow"><div class="cic"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 14s5-3.5 5-8a5 5 0 00-10 0c0 4.5 5 8 5 8Z"/><circle cx="8" cy="6" r="1.8"/></svg></div><div style="flex:1"><div class="k">ADDRESS</div><div class="v">${currentDonor.addr}</div></div><div class="cact" onclick="openMap('${currentDonor.addr}')">Map</div></div>
+      </div>
+      <div class="sect"><span class="l">Segments & tags</span></div>
+      <div class="tagwrap"><span class="chip on">Major donor</span><span class="chip">Cathedral capital</span><span class="chip">Recurring</span><span class="chip">Parishioner</span></div>
+      <div class="sect"><span class="l">Relationships</span></div>
+      <div class="list" style="padding:0 16px">
+        ${[['js','James Sullivan','Spouse · joint giving'],['co',"Claire O'Brien",'Daughter · young donor']].map(([k,n,m])=>`<div class="row" onclick="openDonor('${k}')">${av(DMAP[k])}<div class="main"><div class="nm">${n}</div><div class="meta">${m}</div></div><div class="chev">›</div></div>`).join('')}
+      </div>
+      <div class="sect"><span class="l">Linked tasks</span></div>
+      <div class="attn" style="padding:0 16px">
+        <div class="a"><span class="dot" style="background:var(--amber)"></span><div style="flex:1;font-size:13.5px">Prep gift agreement — due Jun 1</div><span class="chev" style="color:var(--text4)">›</span></div>
+      </div>
+      <div style="height:90px"></div>
+    </div>
+    <div class="fab">AI</div>`;
+  },
+
+  briefs(){
+    return `
+    <div class="appbar"><div style="display:flex;align-items:center;gap:8px"><span class="backbtn" onclick="back()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><div><h2 style="font-size:22px">Meeting briefs</h2><div class="greet" style="padding:2px 0 0">Today · 6 meetings</div></div></div>${avSR()}</div>
+    <div class="sect"><span class="l">Today's schedule</span></div>
+    <div class="sched">
+      ${[['9:30','Robert & Susan Lin','Stewardship visit','g'],['11:00','The Delaney Fdn.','Grant check-in','g'],['2:00',"James & Patricia O'Brien",'Cathedral ask · $25k','b']].map(([t,n,s,c])=>`<div class="s"><div class="tm">${t}</div><div style="flex:1"><div style="font-weight:600;font-size:14px">${n}</div><div style="font-size:12px;color:var(--text3);margin-top:2px">${s}</div></div><span class="pill ${c}">${c==='b'?'Featured':'Brief'}</span></div>`).join('')}
+    </div>
+    <div class="sect"><span class="l">Pre-meeting brief · 2:00 PM</span></div>
+    <div class="brief">
+      <div style="display:flex;align-items:center;gap:12px"><div class="av" style="width:44px;height:44px;border-radius:50%;background:#7C3AED;color:#fff"><span>JO</span><img alt="" src="https://randomuser.me/api/portraits/men/52.jpg" onerror="this.remove()"></div><div><div style="font-weight:700;font-size:15px">James & Patricia O'Brien</div><div style="font-size:12.5px;color:var(--text3)">Major · Stage 3 Cultivation · Guru 95</div></div></div>
+      <div class="bstat">
+        <div class="b"><div class="serif" style="font-size:16px">$95K</div><div style="font-size:9.5px;color:var(--text3);font-weight:700;letter-spacing:.04em">LIFETIME</div></div>
+        <div class="b"><div class="serif" style="font-size:16px">$25K</div><div style="font-size:9.5px;color:var(--text3);font-weight:700;letter-spacing:.04em">THIS YEAR</div></div>
+        <div class="b"><div class="serif" style="font-size:16px;color:var(--green)">$40K</div><div style="font-size:9.5px;color:var(--text3);font-weight:700;letter-spacing:.04em">REC. ASK</div></div>
+      </div>
+      <div class="sectlabel" style="margin-bottom:8px">Brief depth</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px"><span class="chip">Quick</span><span class="chip on">Full</span><span class="chip">Strategy</span></div>
+      <button class="btn primary" onclick="genBrief()">Generate brief</button>
+    </div>
+    <div style="height:90px"></div>
+    <div class="fab">AI</div>`;
+  },
+
+  pipeline(){
+    var W={Identification:.1,Qualification:.25,Cultivation:.5,Solicitation:.75,Stewardship:.95};
+    var total=PROSPECTS.reduce(function(s,p){return s+p.ask;},0);
+    var weighted=Math.round(PROSPECTS.reduce(function(s,p){return s+p.ask*W[p.stage];},0));
+    var pct=total?Math.round(weighted/total*100):0;
+    return `
+    <div class="appbar"><div><h2>Pipeline</h2></div>${avSR()}</div>
+    <div class="hero-search"><svg class="k" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7.5" cy="7.5" r="5.4"/><path d="M12 12l4 4"/></svg><input class="sinp" style="color:var(--text2)" placeholder="Search prospect — name, address or ZIP" oninput="pipeSearch(this)"></div>
+    <div class="pstat-card">
+      <div class="p"><div class="v serif">${money(total)}</div><div class="l">Total ask</div><div class="s2">full pipeline</div></div>
+      <div class="p"><div class="v serif" style="color:var(--blue)">${money(weighted)}</div><div class="l">Weighted</div><div class="s2">${pct}% likely</div></div>
+      <div class="p"><div class="v serif">${PROSPECTS.length}</div><div class="l">Prospects</div><div class="s2">active</div></div>
+    </div>
+    <div class="chiprow">${['All'].concat(STAGES).map(function(s){return '<span class="chip '+(pipeStage===s?'on':'')+'" onclick="setPipe(\''+s+'\')">'+s+'</span>';}).join('')}</div>
+    <div id="pipelist">${pipeCards('')}</div>
+    <div style="height:96px"></div>
+    <div class="fab">AI</div>`;
+  },
+
+  movestage(){
+    var p=currentProspect;
+    var short=p.name.replace('James & Patricia',"J. & P.").replace('Michael & Susan',"M. & S.").replace('Robert & Susan',"R. & S.");
+    var alt=NAMESAKE[p.k];
+    var matches='<div class="row" style="border-color:var(--blue);background:var(--blue-pale)"><div class="av" style="background:'+p.color+';color:#fff">'+p.ini+'</div><div class="main"><div class="nm">'+p.name+'</div><div class="meta">'+p.addr+' · ZIP '+p.zip+'</div></div><span class="link" style="font-size:18px;color:var(--blue)">✓</span></div>';
+    if(alt){ matches+='<div class="row"><div class="av">'+alt.ini+'</div><div class="main"><div class="nm">'+alt.name+'</div><div class="meta">'+alt.addr+' · ZIP '+alt.zip+'</div></div><div class="chev">›</div></div>'; }
+    return `
+    <div class="appbar"><div style="display:flex;align-items:center;gap:10px"><span class="backbtn" onclick="go('pipeline')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><h2 style="font-size:22px">Move stage</h2></div></div>
+    <div class="search" style="margin-top:0"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5.2"/><path d="M11 11l4 4"/></svg><input class="sinp" placeholder="Search — name, address or ZIP" oninput="filterRows(this,'.row')"></div>
+    <div class="sect"><span class="l">Matches · address + ZIP disambiguate</span></div>
+    <div class="list">${matches}</div>
+    <div style="display:flex;gap:10px;padding:2px 16px 6px"><button class="btn ghost" style="flex:1;height:44px" onclick="go('pipenote')">＋ Add note</button><button class="btn ghost" style="flex:1;height:44px" onclick="go('pipetask')">＋ Add task</button></div>
+    <div class="sect"><span class="l">Move stage — ${short}</span></div>
+    ${STAGES.map(function(s){ var cur=(s===p.stage), sel=(s===selStage); var right=cur?'<span class="pill b" style="margin-left:auto">Current</span>':(sel?'<span class="mh" style="color:var(--green)">Selected</span>':'<span class="mh">Move here</span>'); return '<div class="stage-opt '+(sel?'cur':'')+'" onclick="pickStage(\''+s+'\')"><div class="radio"></div><div style="flex:1"><div style="font-weight:600;font-size:14px">'+s+'</div><div style="font-size:11.5px;color:var(--text3);margin-top:1px">'+STAGEDESC[s]+'</div></div>'+right+'</div>'; }).join('')}
+    <div style="padding:8px 16px 30px"><button class="btn primary" onclick="commitStage()">${selStage===p.stage?'Keep in '+p.stage:'Move to '+selStage}</button></div>`;
+  },
+  pipenote(){
+    var p=currentProspect;
+    return `
+    <div class="appbar"><div style="display:flex;align-items:center;gap:8px"><span class="backbtn" onclick="go('movestage')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><h2 style="font-size:22px">Add note</h2></div></div>
+    <div class="mprofile"><div class="av" style="background:${p.color};color:#fff">${p.ini}</div><div style="flex:1"><div style="font-weight:700;font-size:15px">${p.name}</div><div style="font-size:12.5px;color:var(--text3)">${p.addr} · ${p.stage}</div></div></div>
+    <div class="sect"><span class="l">Note</span><span class="link" style="font-size:12.5px" onclick="micToggle(document.getElementById('pn-mic'))">Speech-to-text</span></div>
+    <div style="padding:0 16px"><div class="la-wrap"><textarea id="pn-note" class="ta-input" style="width:100%;min-height:120px;box-sizing:border-box" placeholder="Add a note about this prospect…"></textarea><div class="mic" id="pn-mic" onclick="micToggle(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4"/></svg></div></div></div>
+    <div style="padding:16px"><button class="btn primary" onclick="pipeSaveNote()">Save note</button></div>`;
+  },
+  pipetask(){
+    var p=currentProspect;
+    const chip=(l,on)=>`<span class="chip ${on?'on':''}" onclick="chipPick(this)">${l}</span>`;
+    return `
+    <div class="appbar"><div style="display:flex;align-items:center;gap:8px"><span class="backbtn" onclick="go('movestage')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><h2 style="font-size:22px">Add task</h2></div></div>
+    <div class="mprofile"><div class="av" style="background:${p.color};color:#fff">${p.ini}</div><div style="flex:1"><div style="font-weight:700;font-size:15px">${p.name}</div><div style="font-size:12.5px;color:var(--text3)">${p.addr} · ${p.stage}</div></div></div>
+    <div class="sect"><span class="l">Task</span></div>
+    <div style="padding:0 16px"><input id="pt-task" class="ta-input" style="width:100%;box-sizing:border-box" placeholder="e.g. Send Cathedral proposal"></div>
+    <div class="sect"><span class="l">Due</span></div>
+    <div class="chiprow" style="padding-top:0">${chip('Today',true)}${chip('Tomorrow')}${chip('This week')}${chip('Next week')}</div>
+    <div style="padding:16px"><button class="btn primary" onclick="pipeSaveTask()">Add task</button></div>`;
+  },
+
+  campaigns(){
+    const v=campView;
+    const seg=`<div class="segbar"><div class="sg ${v==='overview'?'on':''}" onclick="setCamp('overview')">Overview</div><div class="sg ${v==='all'?'on':''}" onclick="setCamp('all')">All campaigns</div></div>`;
+    if(v==='all'){
+      const all=[
+        ["Catholic Ministry Appeal",'On track','g',0.78,'$1.25M / $1.6M','4,812'],
+        ["Cathedral Capital",'At risk','a',0.42,'$310k / $740k','286'],
+        ["Annual Appeal 2026",'On track','g',0.61,'$480k / $790k','2,140'],
+        ["Marian Congress",'On track','g',0.66,'$95k / $144k','410'],
+        ["Scholarship Drive",'Upcoming','s',0.10,'$14k / $140k','52'],
+        ["Youth Retreat",'Upcoming','s',0.08,'$8k / $100k','36']
+      ];
+      return `<div class="appbar"><div style="display:flex;align-items:center;gap:8px"><span class="backbtn" onclick="back()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><h2 style="font-size:22px">Campaigns</h2></div><span class="count">6</span></div>${seg}
+      <div class="search" style="margin-top:0"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5.2"/><path d="M11 11l4 4"/></svg><input class="sinp" placeholder="Search campaigns" oninput="filterRows(this,'.ccard')"></div>
+      ${all.map(([n,st,c,p,amt,dn])=>`<div class="ccard"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:600;font-size:14px">${n}</div><span class="pill ${c}">${st}</span></div><div class="cbar"><i style="width:${p*100}%"></i></div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3)"><span>${amt}</span><span>${dn} donors ›</span></div></div>`).join('')}
+      <div style="height:96px"></div><div class="fab">AI</div>`;
+    }
+    return `<div class="appbar"><div style="display:flex;align-items:center;gap:8px"><span class="backbtn" onclick="back()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><h2 style="font-size:22px">Campaigns</h2></div>${avSR()}</div>${seg}
+    <div class="portfolio">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.06em;color:#8ba0bd">DIOCESE OF ST. PETERSBURG · FY 2026</div>
+      <div style="font-weight:700;font-size:16px;margin-top:6px">$1.73M raised · 6 active</div>
+      <div class="cbar" style="background:rgba(255,255,255,.14);margin-top:10px"><i style="width:53%;background:var(--gold)"></i></div>
+      <div style="font-size:12px;color:#9fb2cd;margin-top:6px">53% of $3.25M · pace 49% · $1.52M left</div>
+      <div class="grid4"><div class="g"><div class="v" style="color:var(--mint)">4</div><div class="l">ON PACE</div></div><div class="g"><div class="v" style="color:#fca5a5">2</div><div class="l">AT RISK</div></div><div class="g"><div class="v">4,812</div><div class="l">DONORS</div></div><div class="g"><div class="v" style="color:var(--gold)">$312K</div><div class="l">PLEDGES</div></div></div>
+    </div>
+    <div class="sect"><span class="l">Top campaigns</span><span class="r" onclick="setCamp('all')">All ›</span></div>
+    ${[["Catholic Ministry Appeal",'On track','g',0.78,'$1.25M'],["Cathedral Capital",'At risk','a',0.42,'$310k'],["Marian Congress",'On track','g',0.66,'$95k'],["Youth Retreat",'Upcoming','s',0.10,'$8k']].map(([n,st,c,p,amt])=>`<div class="ccard"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:600;font-size:14px">${n}</div><span class="pill ${c}">${st}</span></div><div class="cbar"><i style="width:${p*100}%"></i></div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3)"><span>${amt} raised</span><span style="color:var(--blue);font-weight:600">view ›</span></div></div>`).join('')}
+    <div style="height:96px"></div><div class="fab">AI</div>`;
+  },
+
+  tasks(){
+    return `
+    <div class="appbar"><div><h2>Tasks</h2></div>${avSR()}</div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="lbl">Overdue</div><div class="val serif" style="color:var(--rose)">3</div><div class="d"><span class="dn">$84k at risk</span></div></div>
+      <div class="kpi"><div class="lbl">Due today</div><div class="val serif">0/7</div><div class="d"><span class="mut">3 calls · 2 email · 2 visit</span></div></div>
+      <div class="kpi"><div class="lbl">This week</div><div class="val serif">+8</div><div class="d"><span class="mut">14 tasks · Wed busy</span></div></div>
+      <div class="kpi"><div class="lbl">Completed</div><div class="val serif">🔥 6-day</div><div class="d"><span class="up">94% on-time</span></div></div>
+    </div>
+    <div class="chiprow" style="padding-top:12px">${['All','Mine','Team','Done'].map(c=>`<span class="chip ${c.toLowerCase()===taskView?'on':''}" onclick="setTask('${c.toLowerCase()}')">${c}</span>`).join('')}</div>
+    <div id="tasklist">${taskListHTML()}</div>
+    <div style="height:96px"></div><div class="fab">AI</div>`;
+  },
+
+  comms(){
+    const rows=[
+      ['Cathedral weekly recap','Email · Update · 2h ago · 68% open','Opened','g'],
+      ['Major-donor stewardship','Email · Thank-you · Today 9:10 AM','Delivered','g'],
+      ['Spring appeal — Segment A','Email · Appeal · Tmrw 8:00 AM','Scheduled','a'],
+      ['Lapsed donor re-engage','Email · Re-engage · In progress 42%','Sending','b'],
+      ["Bishop's Gala invite",'Email · Invite · Yesterday · 3 bounces','Bounced','r'],
+      ['April newsletter','Email · Newsletter · Edited 1d ago','Draft','s']
+    ];
+    return `
+    <div class="appbar"><div style="display:flex;align-items:center;gap:8px"><span class="backbtn" onclick="back()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><h2 style="font-size:22px">Communications</h2></div>${avSR()}</div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="lbl">Delivered today</div><div class="val serif">142</div><div class="d"><span class="mut">99.3% · 30-day</span></div></div>
+      <div class="kpi"><div class="lbl">Opens 24h</div><div class="val serif">68%</div><div class="d"><span class="up">↑ 4 pts</span> <span class="mut">38% CTR</span></div></div>
+      <div class="kpi"><div class="lbl">Bounces 7d</div><div class="val serif">3</div><div class="d"><span class="mut">2 hard · 1 soft</span></div></div>
+      <div class="kpi"><div class="lbl">Scheduled</div><div class="val serif">126</div><div class="d"><span class="mut">Next: tmrw 8 AM</span></div></div>
+    </div>
+    <div class="sect" style="padding-top:12px"><span class="l">Recent communications</span></div>
+    ${rows.map(([s,m,st,c])=>`<div class="crow2"><div class="r1"><div style="font-weight:600;font-size:13.5px;min-width:0">${s}</div><span class="pill ${c}">${st}</span></div><div style="font-size:11.5px;color:var(--text3);margin-top:4px">${m}</div></div>`).join('')}
+    <div style="height:96px"></div><div class="fab">AI</div>`;
+  },
+
+  briefview(){
+    return `
+    <div class="appbar"><div style="display:flex;align-items:center;gap:10px"><span class="backbtn" onclick="go('briefs')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><h2 style="font-size:22px">Pre-meeting brief</h2></div></div>
+    <div class="pad" style="padding-bottom:40px">
+      <div class="bv-head">
+        <div class="av" style="width:46px;height:46px;background:#7C3AED;color:#fff;border-radius:50%"><span>JO</span><img alt="" src="https://randomuser.me/api/portraits/men/52.jpg" onerror="this.remove()"></div>
+        <div style="flex:1"><div style="font-weight:700;font-size:16px">James & Patricia O'Brien</div><div style="font-size:12.5px;color:var(--text3)">Major · Stage 3 Cultivation · Guru 95</div></div>
+        <span class="pill b">2:00 PM</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin:12px 0"><span class="pill g">✓ Guru AI generated</span><span style="font-size:11.5px;color:var(--text3)">Full depth · just now</span></div>
+      <div class="bstat" style="margin-bottom:14px">
+        <div class="b"><div class="serif" style="font-size:16px">$95K</div><div class="bl">LIFETIME</div></div>
+        <div class="b"><div class="serif" style="font-size:16px">$25K</div><div class="bl">THIS YEAR</div></div>
+        <div class="b"><div class="serif" style="font-size:16px;color:var(--green)">$40K</div><div class="bl">REC. ASK</div></div>
+      </div>
+      <div class="bv-ask"><div class="sectlabel" style="color:#c4b5fd">Recommended ask</div><div style="font-size:18px;font-weight:700;margin-top:5px">$40,000 — Cathedral Capital Fund</div><div style="font-size:12.5px;color:#c9d4e6;margin-top:6px;line-height:1.5">Naming opportunity unlocks at $25K; the $40K ask positions them at the leadership tier. Guru propensity 95/100.</div></div>
+      <div class="sect" style="padding:16px 0 6px"><span class="l">Giving summary</span></div>
+      <div class="cblock">
+        <div class="crow"><div style="flex:1"><div class="k">LAST GIFT</div><div class="v">$25,000 · CMA · Mar 15, 2026</div></div></div>
+        <div class="crow"><div style="flex:1"><div class="k">LARGEST · FREQUENCY</div><div class="v">$25,000 · every year since 2011</div></div></div>
+        <div class="crow"><div style="flex:1"><div class="k">FUNDS SUPPORTED</div><div class="v">CMA · Cathedral Capital · Scholarship</div></div></div>
+      </div>
+      <div class="sect" style="padding:16px 0 6px"><span class="l">Relationship & interests</span></div>
+      <div class="tagwrap" style="padding:0 0 4px"><span class="chip on">Cathedral capital</span><span class="chip">Legacy / planned</span><span class="chip">Board member</span><span class="chip">Parishioner</span></div>
+      <div class="sect" style="padding:14px 0 6px"><span class="l">Talking points</span></div>
+      <div class="bv-points">
+        <div class="pt"><span class="n">1</span><div>Thank them for the $25,000 CMA gift in March — tie it to the ministry programs it funded.</div></div>
+        <div class="pt"><span class="n">2</span><div>Patricia raised a legacy / naming interest on the Mar 28 call — surface the Cathedral Capital naming opportunity.</div></div>
+        <div class="pt"><span class="n">3</span><div>A $25,000 threshold unlocks a named plaque; the $40K ask moves them to the leadership tier.</div></div>
+        <div class="pt"><span class="n">4</span><div>Timing is optimal — Q2 cultivation is complete and the public phase launches in Q3.</div></div>
+      </div>
+      <div class="sect" style="padding:14px 0 6px"><span class="l">Watch-outs</span></div>
+      <div class="bv-watch">Avoid the delayed restoration timeline unless they raise it. They prefer email over calls — send the agreement, don't phone.</div>
+      <div style="display:flex;gap:10px;margin-top:18px"><button class="btn ghost" data-toast="Directions opened in Maps">Directions</button><button class="btn primary" onclick="go('logact')">Log outcome</button></div>
+      <div style="text-align:center;margin-top:12px"><span class="link" data-toast="Brief shared with your team" style="font-size:13px">Share brief with team</span></div>
+    </div>`;
+  },
+
+  events(){
+    var labs=[['Upcoming','upcoming'],['Past','past'],['Drafts','draft']];
+    var list=EVENTS.filter(function(e){return e.when===eventView;});
+    return `
+    <div class="appbar"><div><h2>Events</h2></div><div style="display:flex;align-items:center;gap:10px">${avSR()}</div></div>
+    <div class="chiprow" style="padding-top:2px">${labs.map(function(l){return '<span class="chip '+(eventView===l[1]?'on':'')+'" onclick="setEvent(\''+l[1]+'\')">'+l[0]+'</span>';}).join('')}</div>
+    ${list.length?list.map(eventCard).join(''):emptyState('No '+eventView+' events')}
+    <div style="height:96px"></div><div class="fab">AI</div>`;
+  },
+
+  gifts(){
+    return `
+    <div class="appbar"><div><h2>Gifts</h2></div>${avSR()}</div>
+    <div class="gsum"><div><div style="font-size:9px;font-weight:700;letter-spacing:.05em;color:#8ba0bd">THIS MONTH</div><div class="serif" style="font-size:22px;margin-top:2px">$284,650</div></div><div style="text-align:right"><div style="font-weight:700;font-size:16px">142</div><div style="font-size:11px;color:#8ba0bd">gifts · $2,005 avg</div></div></div>
+    <div class="search"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5.2"/><path d="M11 11l4 4"/></svg><input class="sinp" placeholder="Search gifts by donor or fund" oninput="filterRows(this,'.giftrow')"></div>
+    <div class="chiprow" style="padding-top:0"><span class="chip on">Recent</span><span class="chip">Pledges</span><span class="chip">Recurring</span><span class="chip">Review</span></div>
+    <div id="giftlist">${[['MO',"Margaret O'Brien",'$10,000','Cathedral · Check','Today'],['MS','Margaret Sullivan','$2,500','CMA 2026 · Card','Today'],['PK','Patricia Kim','$500',"St. Mary's · ACH",'Yesterday'],['KF','Kowalski Family','$1,200','Recurring · Card','May 22']].map(([i,n,a,f,dt])=>`<div class="row giftrow" onclick="go('d360')"><div class="av">${i}</div><div class="main"><div class="nm">${n}</div><div class="meta">${f} · ${dt}</div></div><div style="font-weight:700;font-size:15px">${a}</div></div>`).join('')}</div>
+    <div style="height:96px"></div><div class="fab">AI</div>`;
+  },
+
+  more(){
+    const menu=(rows)=>`<div class="mcard">${rows.map(([ic,l,s,badge])=>`<div class="mrow" onclick="go('${s}')"><div class="mic">${ic}</div><div class="ml">${l}</div>${badge?`<span class="pill r" style="margin-right:6px">${badge}</span>`:''}<div class="chev">›</div></div>`).join('')}</div>`;
+    const I={
+      home:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 11l8-7 8 7M6 10v9h12v-9"/></svg>',
+      don:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg>',
+      camp:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 15l4-4 3 3 5-5 4 4"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg>',
+      brief:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M8 3v4M16 3v4"/></svg>',
+      pipe:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+      task:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg>',
+      comm:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M3 7l9 6 9-6"/></svg>',
+      ev:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+      bell:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 9a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M9.5 20a2.5 2.5 0 005 0"/></svg>',
+      gear:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.5 5.5l2 2M16.5 16.5l2 2M18.5 5.5l-2 2M7.5 16.5l-2 2"/></svg>'
+    };
+    return `
+    <div class="appbar"><div><h2>More</h2></div>${avSR()}</div>
+    <div class="mprofile" onclick="go('profile')"><div class="av">SR</div><div style="flex:1"><div style="font-weight:700;font-size:15px">Sarah Reynolds</div><div style="font-size:12.5px;color:var(--text3)">Development Director · My profile</div></div><div style="color:var(--text4);font-size:18px">›</div></div>
+    <div class="mgroup-l">Main</div>
+    ${menu([[I.home,'Home','home'],[I.don,'Donors','donors'],[I.camp,'Campaigns','campaigns'],[I.brief,'Meeting briefs','briefs']])}
+    <div class="mgroup-l">Fundraising</div>
+    ${menu([[I.pipe,'Prospect pipeline','pipeline'],[I.task,'Tasks & reminders','tasks'],[I.comm,'Communications','comms']])}
+    <div class="mgroup-l">Admin</div>
+    ${menu([[I.bell,'Notifications','notifications','5'],[I.gear,'Settings','settings']])}
+    <div style="height:96px"></div>
+    <div class="fab">AI</div>`;
+  },
+
+  guru(){
+    const sq=[
+      ['Retention','g',"Gave last year but not yet this year (LYBUNT)"],
+      ['Major gifts','','High upgrade propensity, giving under $1,000'],
+      ['Recurring','b','Monthly donors flat for 2+ years'],
+      ['Parish','a','Top 10 by parish, no contact in 90 days'],
+      ['Pledges','','Pledged $500+ last year, no gift this year']
+    ];
+    return `
+    <div class="appbar"><div style="display:flex;align-items:center;gap:8px"><span class="backbtn" onclick="back()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><h2 style="font-size:22px">Guru AI</h2></div>${avSR()}</div>
+    <div class="guru-intro"><div class="t">Ask Guru AI</div><div class="s">Ask in plain English — Guru queries your whole donor database and returns filterable, exportable results.</div></div>
+    <div class="sect" style="padding-bottom:2px"><span class="l">Example</span></div>
+    <div class="sug" style="border-style:dashed"><span style="color:var(--text3);font-size:13.5px">"Show LYBUNT donors this April"</span></div>
+    <div class="sect"><span class="l">Suggested queries</span></div>
+    ${sq.map(([cat,c,desc])=>`<div class="sug"><span class="pill ${c||'s'}">${cat}</span><div style="flex:1;font-size:13px;color:var(--text2)">${desc}</div><div class="chev" style="color:var(--text4)">›</div></div>`).join('')}
+    <div style="height:70px"></div>
+    <div class="guru-input"><span style="color:var(--text4);font-size:14px">Type a question…</span><div class="snd" data-toast="Ask sent to Guru AI">↑</div></div>
+    <div style="height:20px"></div>`;
+  },
+
+  notifications(){
+    var labs=['All','Unread','Tasks','Gifts'];
+    var list=NOTIFS.filter(function(n){ if(notifView==='All')return true; if(notifView==='Unread')return n.u; if(notifView==='Tasks')return n.type==='task'; if(notifView==='Gifts')return n.type==='gift'; return true; });
+    return `
+    <div class="appbar"><div style="display:flex;align-items:center;gap:8px"><span class="backbtn" onclick="back()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><h2 style="font-size:22px">Notifications</h2></div><span class="r" style="color:var(--blue);font-weight:600;font-size:13px" data-toast="All caught up · marked read">Mark all read</span></div>
+    <div class="chiprow" style="padding-top:2px">${labs.map(function(l){return '<span class="chip '+(notifView===l?'on':'')+'" onclick="setNotif(\''+l+'\')">'+l+'</span>';}).join('')}</div>
+    ${list.length?list.map(function(n){return '<div class="nrow '+(n.u?'unread':'')+'" onclick="go(\''+n.go+'\')"><div class="nic" style="background:'+n.bg+';color:'+n.fg+';font-weight:700">'+n.ic+'</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px">'+n.t+'</div><div style="font-size:12px;color:var(--text3);margin-top:2px">'+n.d+'</div></div><div style="font-size:11px;color:var(--text4);flex:0 0 auto">'+n.tm+'</div></div>';}).join(''):emptyState('No notifications here')}
+    <div style="height:96px"></div>`;
+  },
+
+  profile(){
+    return `
+    <div class="prof-head">
+      <div style="width:100%;display:flex;justify-content:flex-start"><span class="link" style="color:#cfe0f5;font-size:22px" onclick="go('more')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span></div>
+      <div class="big">SR</div>
+      <div style="font-size:20px;font-weight:700">Sarah Reynolds</div>
+      <div style="font-size:13px;color:#9fb2cd;margin-top:3px">Development Director · Diocese of St. Petersburg</div>
+      <button class="btn ghost" style="width:auto;padding:0 24px;height:40px;margin-top:16px;background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)" data-toast="Profile editing — coming soon">Edit profile</button>
+    </div>
+    <div class="set-cap">Account</div>
+    <div class="set-group">
+      <div class="set-row"><div class="sl">Email</div><div class="sv">sarah.reynolds@…</div></div>
+      <div class="set-row"><div class="sl">Role & scope</div><div class="sv">Dev Director · Diocese +2</div></div>
+      <div class="set-row" onclick="go('settings')"><div class="sl">Settings</div><div class="chev">›</div></div>
+      <div class="set-row" onclick="go('notifications')"><div class="sl">Notifications</div><div class="chev">›</div></div>
+    </div>
+    <div style="padding:16px"><button class="btn ghost" style="color:var(--rose);border-color:#f4c4d1" onclick="go('signin')">Sign out</button></div>
+    <div style="height:80px"></div>`;
+  },
+
+  settings(){
+    const tog=(on)=>`<div class="switch sm ${on?'':'off'}"></div>`;
+    return `
+    <div class="appbar"><div style="display:flex;align-items:center;gap:8px"><span class="backbtn" onclick="go('more')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><h2 style="font-size:22px">Settings</h2></div></div>
+    <div class="mprofile" onclick="go('profile')"><div class="av">SR</div><div style="flex:1"><div style="font-weight:700;font-size:15px">Sarah Reynolds</div><div style="font-size:12.5px;color:var(--text3)">Development Director · Edit profile</div></div><div style="color:var(--text4);font-size:18px">›</div></div>
+    <div class="set-cap">Notifications</div>
+    <div class="set-group">
+      <div class="set-row"><div class="sl">Push notifications</div>${tog(true)}</div>
+      <div class="set-row"><div class="sl">Email digest</div><div class="sv">Daily ›</div></div>
+    </div>
+    <div class="set-cap">Sync & data</div>
+    <div class="set-group">
+      <div class="set-row"><div class="sl">Sync now</div><div class="sv" style="color:var(--green)">2m ago ›</div></div>
+      <div class="set-row"><div class="sl">Auto-sync on Wi-Fi</div>${tog(true)}</div>
+      <div class="set-row"><div class="sl">Offline mode</div>${tog(false)}</div>
+    </div>
+    <div class="set-cap">Display</div>
+    <div class="set-group">
+      <div class="set-row"><div class="sl">Default landing</div><div class="sv">Home ›</div></div>
+      <div class="set-row"><div class="sl">Text size</div><div class="sv">Default ›</div></div>
+    </div>
+    <div style="padding:16px"><button class="btn ghost" style="color:var(--rose);border-color:#f4c4d1" onclick="go('signin')">Sign out</button></div>
+    <div style="height:80px"></div>`;
+  },
+
+  call(){
+    return `
+    <div class="appbar"><div style="display:flex;align-items:center;gap:8px"><span class="backbtn" onclick="go('d360')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><h2 style="font-size:22px">Call</h2></div></div>
+    <div style="text-align:center;padding:14px 0 8px">
+      ${av(currentDonor,"xl")}
+      <div style="font-weight:700;font-size:18px;margin-top:12px">${currentDonor.name}</div>
+      <div style="font-size:13px;color:var(--text3)">${currentDonor.tag} Donor · ${currentDonor.parish}</div>
+    </div>
+    <div style="padding:8px 16px">
+      <div class="callrow primary" onclick="go('logact')"><div class="cic2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3h3l1.6 5-2 1.4a11 11 0 005 5l1.4-2 5 1.6v3a2 2 0 01-2 2A16 16 0 014 6a2 2 0 012-3Z"/></svg></div><div style="flex:1"><div style="font-weight:600">Call mobile</div><div style="font-size:12px;color:var(--text3)">${currentDonor.phone}</div></div></div>
+      <div class="callrow" onclick="go('logact')"><div class="cic2" style="background:var(--surface2);color:var(--text2)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M3 8l9 6 9-6"/></svg></div><div style="flex:1"><div style="font-weight:600">Text message</div><div style="font-size:12px;color:var(--text3)">${currentDonor.phone} · SMS</div></div></div>
+      <div style="font-size:12.5px;color:var(--text3);text-align:center;margin-top:16px">When the call ends, Atlas prompts you to log it.</div>
+    </div>`;
+  },
+
+  logact(){
+    var d=currentDonor;
+    const chip=(l,on)=>`<span class="chip ${on?'on':''}" onclick="chipPick(this)">${l}</span>`;
+    return `
+    <div class="appbar"><div style="display:flex;align-items:center;gap:8px"><span class="backbtn" onclick="go('d360')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><h2 style="font-size:22px">Log activity</h2></div></div>
+    <div class="mprofile">${av(d)}<div style="flex:1"><div style="font-weight:700;font-size:15px">${d.name}</div><div style="font-size:12.5px;color:var(--text3)">${d.parish} · linked</div></div></div>
+    <div class="pad"><div class="sectlabel" style="margin:8px 0 8px">Type of activity</div><div class="rowflex" style="gap:7px">${['Visit','Call','Email','Meeting','Letter','Event'].map((x,i)=>chip(x,i===1)).join('')}</div></div>
+    <div class="pad"><div class="sectlabel" style="margin:14px 0 8px">Outcome</div><div class="rowflex" style="gap:7px">${['Positive','Neutral','Declined'].map((x,i)=>chip(x,i===0)).join('')}</div></div>
+    <div class="pad"><div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 8px"><div class="sectlabel">Summary</div><span class="link" style="font-size:12.5px" onclick="micToggle(document.querySelector('.mic'))">Speech-to-text</span></div>
+      <div class="la-wrap"><textarea id="la-sum" class="ta-input">Discussed $10k Cathedral ask; she is interested. Prep gift agreement.</textarea><div class="mic" onclick="micToggle(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4"/></svg></div></div>
+      <div style="font-size:11.5px;color:var(--text3);margin-top:7px">Tap the mic to dictate — voice fills the summary.</div>
+      <div class="toggle-row">Create follow-up task<div class="switch" onclick="toggleSw(this)"></div></div>
+    </div>
+    <div class="pad" style="display:flex;gap:10px;margin-top:6px"><button class="btn ghost" onclick="go('d360')">Cancel</button><button class="btn primary" onclick="logSave()">Save activity</button></div>
+    <div style="height:40px"></div>`;
+  },
+
+  addtask(){
+    var d=currentDonor;
+    return `
+    <div class="appbar"><div style="display:flex;align-items:center;gap:8px"><span class="backbtn" onclick="go('d360')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><h2 style="font-size:22px">Add task</h2></div></div>
+    <div class="pad">
+      <div class="field"><div class="lab">Task</div><div class="box"><input id="at-task" class="sinp" style="width:100%" value="Prep gift agreement — Cathedral ask"></div></div>
+      <div class="field"><div class="lab">Linked to</div><div class="box"><span class="val">${d.name}</span></div></div>
+      <div style="display:flex;gap:10px"><div class="field" style="flex:1"><div class="lab">Due date</div><div class="box"><span class="val">Jun 1, 2026</span></div></div><div class="field" style="flex:1"><div class="lab">Assignee</div><div class="box"><span class="val">Me (Sarah) ▾</span></div></div></div>
+      <div class="sectlabel" style="margin:16px 0 8px">Priority</div>
+      <div class="rowflex" style="gap:7px"><span class="chip on" onclick="chipPick(this)">High</span><span class="chip" onclick="chipPick(this)">Medium</span><span class="chip" onclick="chipPick(this)">Low</span></div>
+      <div class="toggle-row" style="margin-top:6px">Remind me 1 day before<div class="switch" onclick="toggleSw(this)"></div></div>
+      <div style="display:flex;gap:10px;margin-top:10px"><button class="btn ghost" onclick="go('d360')">Cancel</button><button class="btn primary" onclick="addTaskSave()">Add task</button></div>
+    </div>
+    <div style="height:40px"></div>`;
+  }
+};
+
+const CFG = {
+  splash:{tab:false,dark:true}, signin:{tab:false,dark:false}, signup:{tab:false,dark:false},
+  otp:{tab:false,dark:false}, onboarding:{tab:false,dark:false}, notify:{tab:false,dark:false},
+  welcome:{tab:false,dark:false}, intel:{tab:'donors',dark:true}, donors:{tab:'donors',dark:false},
+  states:{tab:'donors',dark:false}, ds:{tab:'home',dark:false},
+  home:{tab:'home',dark:false}, d360:{tab:'donors',dark:true}, d360act:{tab:'donors',dark:true},
+  d360con:{tab:'donors',dark:true}, briefs:{tab:'home',dark:false},
+  pipeline:{tab:'pipeline',dark:false}, movestage:{tab:'pipeline',dark:false}, pipenote:{tab:false,dark:false}, pipetask:{tab:false,dark:false}, campaigns:{tab:'more',dark:false},
+  tasks:{tab:'tasks',dark:false}, comms:{tab:'more',dark:false}, events:{tab:'more',dark:false},
+  gifts:{tab:'gifts',dark:false}, more:{tab:'more',dark:false}, guru:{tab:'more',dark:false},
+  notifications:{tab:'more',dark:false}, profile:{tab:'more',dark:false}, settings:{tab:'more',dark:false},
+  call:{tab:false,dark:false}, logact:{tab:false,dark:false}, addtask:{tab:false,dark:false}, briefview:{tab:false,dark:false}
+};
+let screen='splash', obSlide=0, stateView='loading', campView='overview', taskView='mine';
+const os = /Android/i.test(navigator.userAgent) ? 'android' : 'ios';
+document.body.classList.add(os);
+const NAVY='#0e1a2e';
+function render(){
+  const cfg=CFG[screen]||{tab:false,dark:false};
+  document.getElementById('safe-top').style.background = cfg.dark ? NAVY : '#ffffff';
+  const navy=(screen==='splash');
+  document.getElementById('app').style.background = navy ? NAVY : 'var(--surface)';
+  const body=document.getElementById('appbody');
+  body.style.background = navy ? NAVY : 'var(--surface)';
+  body.innerHTML = SCREENS[screen]();
+  body.scrollTop=0;
+  const tb=document.getElementById('tabbar');
+  if(cfg.tab===false){ tb.style.display='none'; } else { tb.style.display='flex'; tb.innerHTML=tabbar(cfg.tab); }
+}
+let navHist=[];
+function go(name){ if(name==='gifts')name='donors'; if(name==='events')name='more'; if(screen && screen!==name && name!=='splash') navHist.push(screen); screen=name; if(name==='onboarding') obSlide=0; render(); }
+function back(){ var p; var auth={splash:1,signin:1,signup:1,otp:1,onboarding:1,notify:1,welcome:1}; do{ p=navHist.pop(); }while(p && auth[p]); screen=p||'more'; render(); }
+window.back=back;
+function obNext(){ obSlide++; render(); }
+function setState(v){ stateView=v; render(); }
+function setCamp(v){ campView=v; render(); }
+function setTask(v){ taskView=v; render(); }
+function filterRows(inp, sel){
+  const q=inp.value.trim().toLowerCase();
+  document.querySelectorAll('#appbody '+sel).forEach(r=>{ r.style.display = r.textContent.toLowerCase().includes(q)?'':'none'; });
+}
+window.go=go; window.obNext=obNext; window.setState=setState; window.setCamp=setCamp; window.setTask=setTask; window.filterRows=filterRows; window.searchDonors=searchDonors;
+function homeSearch(inp){ var q=inp.value.trim(); var body=document.getElementById("home-body"); var res=document.getElementById("homeres"); if(!q){ if(body)body.style.display=""; if(res)res.innerHTML=""; return; } if(body)body.style.display="none"; searchDonors(inp,"#homeres",true); }
+window.homeSearch=homeSearch;
+window.openDonor=openDonor; window.avSR=avSR;
+function toast(m){var t=document.getElementById('app-toast');if(!t){t=document.createElement('div');t.id='app-toast';t.className='app-toast';document.getElementById('app').appendChild(t);}t.textContent=m;t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.classList.remove('show');},2200);}
+function chipPick(el){var p=el.parentNode;for(var i=0;i<p.children.length;i++){p.children[i].classList.remove('on');}el.classList.add('on');}
+function toggleSw(el){el.classList.toggle('off');}
+var _rec=null;
+function simMic(ta,btn){btn.classList.add('rec');toast('Listening…');setTimeout(function(){ta.value=(ta.value+' Confirmed the $10k Cathedral gift; sending the agreement Wednesday.').trim();btn.classList.remove('rec');toast('Voice captured');},1300);}
+function micToggle(btn){var ta=(btn&&btn.closest&&btn.closest('.la-wrap'))?btn.closest('.la-wrap').querySelector('textarea'):document.getElementById('la-sum');if(!ta||!btn)return;if(_rec){try{_rec.stop();}catch(e){}_rec=null;btn.classList.remove('rec');return;}var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(SR){try{_rec=new SR();_rec.lang='en-US';_rec.interimResults=true;ta.dataset.base=ta.value;_rec.onresult=function(e){var s='';for(var i=e.resultIndex;i<e.results.length;i++){s+=e.results[i][0].transcript;}ta.value=(ta.dataset.base+' '+s).trim();};_rec.onerror=function(){simMic(ta,btn);};_rec.onend=function(){btn.classList.remove('rec');_rec=null;};_rec.start();btn.classList.add('rec');toast('Listening…');}catch(e){_rec=null;simMic(ta,btn);}}else{simMic(ta,btn);}}
+function logSave(){ toast('✓ Activity logged · added to timeline'); go('d360act'); }
+function addTaskSave(){var inp=document.getElementById('at-task');var title=inp&&inp.value?inp.value:'New task';TASKS.unshift({t:title,due:'Today',od:false,who:'mine',done:false});taskView='mine';toast('✓ Task added to your list');go('tasks');}
+function genBrief(){ toast("✓ Brief generated by Guru AI"); go("briefview"); } window.genBrief=genBrief; window.setEvent=setEvent; window.setNotif=setNotif; window.toggleTask=toggleTask; function pipeSaveNote(){ toast('✓ Note added to this prospect’s timeline'); go('pipeline'); }
+function pipeSaveTask(){ var inp=document.getElementById('pt-task'); var title=inp&&inp.value?inp.value:('Follow up · '+currentProspect.name); TASKS.unshift({t:title,due:'Today',od:false,who:'mine',done:false}); taskView='mine'; toast('✓ Task added to your list'); go('tasks'); }
+window.pipeSaveNote=pipeSaveNote; window.pipeSaveTask=pipeSaveTask; window.pipeSearch=pipeSearch; window.setPipe=setPipe; window.openStage=openStage; window.pickStage=pickStage; window.commitStage=commitStage; window.toast=toast; window.chipPick=chipPick; window.toggleSw=toggleSw; window.micToggle=micToggle; window.logSave=logSave; window.addTaskSave=addTaskSave;
+document.getElementById('appbody').addEventListener('click',function(e){
+  const f=e.target.closest('.fab'); if(f && !f.classList.contains('add')){ go('guru'); return; }
+  const chip=e.target.closest('.chip'); if(chip && !chip.getAttribute('onclick')){ if(chip.closest('.tagwrap')){ chip.classList.toggle('on'); } else { chipPick(chip); } return; }
+  const sw=e.target.closest('.switch'); if(sw && !sw.getAttribute('onclick')){ toggleSw(sw); return; }
+  const nrow=e.target.closest('.nrow'); if(nrow && !nrow.getAttribute('onclick')){ toast('Marked as read'); return; }
+  const srow=e.target.closest('.set-row'); if(srow && !srow.querySelector('.switch')){ var lb=srow.querySelector('.sl'); var lab=lb?lb.textContent.trim():'Setting'; toast(/sync now/i.test(lab)?'Synced just now ✓':(lab+' updated')); return; }
+  const sc=e.target.closest('.sched .s'); if(sc){ toast('Opening pre-meeting brief…'); return; }
+  const cc=e.target.closest('.ccard'); if(cc){ var nm=cc.querySelector('div'); toast('Opening '+(nm?nm.textContent.trim():'campaign')); return; }
+  const sug=e.target.closest('.sug'); if(sug){ toast('Guru is searching your database…'); return; }
+  const arow=e.target.closest('.a'); if(arow && !arow.getAttribute('onclick')){ go('tasks'); return; }
+  const orow=e.target.closest('.row'); if(orow && !orow.getAttribute('onclick')){ toast('Opening details…'); return; }
+  const tt=e.target.closest('[data-toast]'); if(tt){ toast(tt.getAttribute('data-toast')); }
+});
+render();
+</script>
+<style>
+.av{position:relative;overflow:hidden;font-weight:700}
+.av span{position:relative;z-index:0}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;z-index:1}
+.av.lg{width:48px;height:48px;font-size:15px;color:#fff;flex:0 0 auto}
+.av.xl{width:78px;height:78px;font-size:24px;color:#fff;margin:0 auto}
+.avatar{position:relative;overflow:hidden}
+.avatar span{position:relative;z-index:0}
+.avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+.kpi{cursor:pointer;transition:transform .08s ease}
+.kpi:active{transform:scale(.985)}
+.d360-sep{height:1px;background:rgba(255,255,255,.10);margin:2px 0 14px}
+.d360-actbar{display:flex;gap:10px;padding:14px 16px 2px;background:var(--surface)}
+.d360-actbar .act{flex:1;background:#fff;border:1px solid var(--border);border-radius:14px;padding:11px 6px;display:flex;flex-direction:column;align-items:center;gap:7px;box-shadow:var(--shadow-sm);cursor:pointer}
+.d360-actbar .act:active{transform:scale(.97)}
+.d360-actbar .act .ai{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.d360-actbar .act span{font-size:12px;font-weight:600;color:var(--text2)}
+.app-toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(8px);background:var(--navy);color:#fff;font-size:13px;font-weight:500;padding:11px 18px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:100060;white-space:nowrap;max-width:88%}
+.app-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.la-wrap{position:relative}
+.ta-input{width:100%;min-height:72px;border:1px solid var(--border);border-radius:12px;background:#fff;padding:11px 46px 11px 13px;font-size:13.5px;line-height:1.45;font-family:inherit;color:var(--text);resize:none;outline:none;box-shadow:var(--shadow-sm)}
+.ta-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-pale)}
+.la-wrap .mic{position:absolute;right:9px;bottom:9px;width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.la-wrap .mic.rec{background:var(--rose);animation:micpulse 1s infinite}
+@keyframes micpulse{0%,100%{box-shadow:0 0 0 0 rgba(190,24,93,.5)}50%{box-shadow:0 0 0 7px rgba(190,24,93,0)}}
+.chip{cursor:pointer}.switch{cursor:pointer}
+.tab.on span{font-weight:700}
+.tab .ic{transition:transform .1s ease}
+.tab.on .ic{transform:translateY(-1px)}
+#at-task{border:0;background:transparent;outline:none;font-size:15px;font-family:inherit;color:var(--text)}
+</style>
+<style>
+/* ==== consistency pass: spacing, nav, back button ==== */
+.appbar{padding:12px 16px 12px}
+.appbar h2{font-size:24px;letter-spacing:-.02em}
+.kpi-grid{padding:0 16px}
+.sect{padding:8px 16px}
+.greet{padding-left:16px;padding-right:16px}
+.hero-search{margin-left:16px;margin-right:16px}
+.search{margin-left:16px;margin-right:16px}
+.mtg{margin-left:16px;margin-right:16px}
+.attn{padding:0 16px}
+#homeres{padding:0 16px!important}
+.backbtn{width:34px;height:34px;border-radius:11px;border:1px solid var(--border);background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:20px;line-height:1;color:var(--text2);box-shadow:var(--shadow-sm);cursor:pointer;flex:0 0 auto}
+.backbtn:active{background:var(--surface2)}
+.tabbar{box-shadow:0 -1px 0 var(--border),0 -10px 26px rgba(15,23,42,.05)}
+.tab{position:relative}
+.tab.on::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:26px;height:3px;border-radius:0 0 3px 3px;background:var(--blue)}
+body.android .tab.on::before{display:none}
+.d360-nav .nbtn{border:1px solid rgba(255,255,255,.15)}
+.chip{cursor:pointer;transition:background .12s,border-color .12s}
+.switch{cursor:pointer}
+.callrow,.mrow,.crow,.row,.ecard,.ccard,.pcard,.nrow,.sug{cursor:pointer}
+</style>
+<style>.chiprow{overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap!important;-webkit-overflow-scrolling:touch}.chiprow::-webkit-scrollbar{display:none}.chiprow .chip{flex:0 0 auto}.stage-opt{cursor:pointer}.stage-opt .mh{margin-left:auto}</style>
+<style>
+.kpi{padding:14px 14px 13px}
+.kpi .val{font-size:25px}
+.kpi-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.kpi-ic{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.kpi-top .lbl{margin:0}
+.backbtn{width:36px;height:36px;border-radius:12px;border:1px solid var(--border);background:#fff;color:var(--text2);box-shadow:var(--shadow-sm)}
+.backbtn svg,.nbtn svg{display:block}
+.appbar{min-height:50px;align-items:center}
+.ecard{cursor:pointer}
+.checkbox{cursor:pointer}
+.trow [onclick]{cursor:pointer}
+</style>
+<style>
+.pstat-card{display:flex;margin:6px 16px 12px;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);overflow:hidden}
+.pstat-card .p{flex:1;padding:14px 13px}
+.pstat-card .p + .p{border-left:1px solid var(--border2)}
+.pstat-card .v{font-size:20px;font-weight:700;letter-spacing:-.01em}
+.pstat-card .l{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-top:4px}
+.pstat-card .s2{font-size:10.5px;color:var(--text4);margin-top:3px}
+.bv-head{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:13px 14px;box-shadow:var(--shadow-sm)}
+.bv-ask{background:linear-gradient(160deg,#13294a,#0c1930);border-radius:16px;padding:15px 16px;color:#fff}
+.bv-points .pt{display:flex;gap:11px;align-items:flex-start;margin-bottom:11px;font-size:13.5px;color:var(--text);line-height:1.45}
+.bv-points .pt .n{width:22px;height:22px;border-radius:50%;background:var(--blue-pale);color:var(--blue);font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-top:1px}
+.bv-watch{background:#FEF3C7;border-radius:12px;padding:12px 14px;font-size:13px;color:#7c5b0a;line-height:1.5}
+.bstat .bl{font-size:9.5px;color:var(--text3);font-weight:700;letter-spacing:.04em;margin-top:2px}
+.pad .bstat{display:flex;gap:8px;margin:12px 0 14px}
+.pad .bstat .b{flex:1;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center;box-shadow:var(--shadow-sm)}
+.pad .bstat .b .serif{font-size:18px}
+.pad .bstat .bl{margin-top:3px}
+.cblock .crow .v{font-size:13.5px;font-weight:500;margin-top:2px}
+.pad .cblock{margin-left:0;margin-right:0}
+</style>
+</body>
+</html>
