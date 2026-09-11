@@ -464,12 +464,93 @@ var currentDonor = DONORS[0];
 function av(d, cls){ return '<div class="av '+(cls||'')+'" style="background:'+(d.color||'#e9eef6')+'"><span>'+d.ini+'</span><img alt="" src="'+(d.photo||'')+'" onerror="this.remove()"></div>'; }
 function avSR(){ return '<div class="avatar" onclick="go(\'profile\')" style="cursor:pointer"><span>SR</span><img alt="" src="https://randomuser.me/api/portraits/women/65.jpg" onerror="this.remove()"></div>'; }
 function donorTiles(){ var d=currentDonor; return gtile(d.life,'LIFETIME')+gtile(d.yr,'THIS YR')+gtile(d.last,'LAST GIFT')+gtile(d.pledge,'PLEDGE','var(--mint)'); }
+var INS_IC={
+  card:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 9.5h20"/></svg>',
+  clock:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  star:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17l-5.2 2.7 1-5.8L3.5 9.2l5.9-.9z"/></svg>',
+  spark:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="9" r="5"/><path d="M8 18c0 2 8 2 8 0"/></svg>',
+  brief:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7l-8 5-8-5"/><rect x="4" y="5" width="16" height="14" rx="2"/></svg>'
+};
+function donorInsights(d){
+  var life=parseInt(String(d.life).replace(/[^0-9]/g,''))||0, A=[];
+  if(/Major|Recurring|Foundation/.test(d.tag)) A.push({tone:'amber',ic:'card',t:'Payment method expiring',s:'Card on file expires next month — request an update to avoid a lapsed gift.',cta:'Request update',act:"toast('Update request sent to "+d.name.split(' ')[0].replace(/[^A-Za-z].*/,'')+"')"});
+  if(d.pledge && d.pledge!=='—') A.push({tone:'rose',ic:'clock',t:'Pledge installment due',s:d.pledge+' pledge · next installment due Apr 6.',cta:'Create task',act:"go('addtask')"});
+  if(d.tag==='New this year') A.push({tone:'green',ic:'star',t:'First-year donor',s:'Gave their first gift this year — a prompt thank-you lifts second-gift rates.',cta:'Send thank-you',act:"go('logact')"});
+  else if(life>=75000) A.push({tone:'purple',ic:'star',t:'Lifetime milestone',s:'Crossed $75K in lifetime giving — worth a recognition touch.',cta:'Send recognition',act:"go('logact')"});
+  var guru={tone:'blue',ic:'spark',t:'Guru · next best action',s:(/Major|Foundation/.test(d.tag)?'A $40K Cathedral ask — capacity and timing align (95/100).':'A stewardship touch — 90+ days since last contact.'),cta:'View strategy',act:"go('intel')"};
+  return A.slice(0,2).concat([guru]);
+}
+function insCard(a){ return '<div class="ins '+a.tone+'"><div class="ic">'+(INS_IC[a.ic]||'')+'</div><div style="flex:1;min-width:0"><div class="t">'+a.t+'</div><div class="s">'+a.s+'</div><div class="cta" onclick="'+a.act+'">'+a.cta+' \u2192</div></div></div>'; }
+function glanceData(d){ var rec=/Recurring/.test(d.tag); return [
+  ['Preferred method', rec?'Card · auto-pay':'Check'],
+  ['Giving type', rec?'Recurring monthly':'One-time gifts'],
+  ['Last gift', d.last+' · Mar 15'],
+  ['Last interaction', '12 days ago · call'],
+  ['Engagement', /New/.test(d.tag)?'New · nurture':'Warm', /New/.test(d.tag)?'var(--amber)':'var(--green)'],
+  ['Relationship', 'Donor since '+d.since]
+]; }
+function donorOpps(){
+  var O=[
+   {k:'mo',tone:'amber',ic:'card',t:'Margaret O\u2019Brien \u00b7 card expiring',s:'Auto-pay card expires next month \u2014 request an update.',cta:'Request update',act:"toast('Update request sent to Margaret')"},
+   {k:'ht',tone:'green',ic:'star',t:'Helen Tobin \u00b7 first-year donor',s:'Gave a first gift this year \u2014 a welcome thank-you lifts retention.',cta:'Send thank-you',act:"openDonor('ht')"}
+  ];
+  return O.map(function(o){ return '<div class="ins '+o.tone+'" onclick="openDonor(\''+o.k+'\')"><div class="ic">'+(INS_IC[o.ic]||'')+'</div><div style="flex:1;min-width:0"><div class="t">'+o.t+'</div><div class="s">'+o.s+'</div><div class="cta" onclick="event.stopPropagation();'+o.act+'">'+o.cta+' \u2192</div></div></div>'; }).join('');
+}
+function setDonorSeg(v){ donorSeg=v; render(); }
+window.setDonorSeg=setDonorSeg;
 function openDonor(k){ currentDonor = DMAP[k] || currentDonor; go('d360'); }
 function mapbtn(a){ return ' <span onclick="event.stopPropagation();openMap(\''+String(a).replace(/'/g,"\\'")+'\')" style="display:inline-flex;align-items:center;color:var(--blue);cursor:pointer;vertical-align:middle" title="Open in Maps"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 21s7-6 7-11a7 7 0 10-14 0c0 5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/></svg></span>'; }
 function openMap(a){ try{ window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(a),'_blank'); }catch(e){} toast('Opening map · '+String(a).split(',')[0]); }
 window.openMap=openMap;
 var DTAG={'Major':'g','Foundation':'b','Recurring':'a','Mid-level':'s','New this year':'r'};
-function donorRow(d){ var pc=DTAG[d.tag]||'s'; return `<div class="row donor-row" onclick="openDonor('${d.k}')">${av(d)}<div class="main"><div class="dr-top"><span class="nm">${d.name}</span><span class="pill ${pc} dr-tag">${d.tag}</span></div><div class="meta dr-addr">${mapbtn(d.addr)}${d.addr}</div></div><div class="dr-rgt"><div class="dr-life">${d.life}</div><div class="dr-ll">lifetime</div></div></div>`; }
+/* per-donor status + attention flag (drives row pill, chips, banner) */
+var DSTATUS={
+  mo:{l:'Card expiring',c:'a',flag:'risk',cta:'Create task',scr:'addtask'},
+  rl:{l:'Pledge due Apr 6',c:'b',flag:'follow',cta:'Set reminder',scr:'addtask'},
+  df:{l:'Grant on track',c:'g',cta:'View profile',scr:'profile'},
+  ar:{l:'No contact \u00b7 94d',c:'a',flag:'risk',cta:'Call donor',scr:'call'},
+  ht:{l:'New donor',c:'g',cta:'Log activity',scr:'logact'},
+  js:{l:'Pledge due',c:'b',flag:'follow',cta:'Set reminder',scr:'addtask'},
+  pk:{l:'Lapsing gift',c:'a',flag:'risk',cta:'Call donor',scr:'call'},
+  mg:{l:'Pledge due',c:'b',flag:'follow',cta:'Set reminder',scr:'addtask'},
+  co:{l:'New donor',c:'g',cta:'Log activity',scr:'logact'}
+};
+function dQuick(k,scr){ currentDonor=DMAP[k]||currentDonor; go(scr); }
+window.dQuick=dQuick;
+var DR_IC={
+  phone:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h3l1.6 5-2 1.4a11 11 0 005 5l1.4-2 5 1.6v3a2 2 0 01-2 2A16 16 0 014 6a2 2 0 012-3Z"/></svg>',
+  note:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4l3 3-8 8-4 1 1-4z"/></svg>'
+};
+var SCOPES={mine:{l:'My portfolio',n:124}, all:{l:'All donors',n:'1,240'}};
+var DSEGS=[
+  {k:'All', c:{mine:124, all:'1,240'}},
+  {k:'At risk', c:{mine:6, all:58}, flag:'risk'},
+  {k:'Follow-up', c:{mine:9, all:92}, flag:'follow'},
+  {k:'Major', c:{mine:22, all:180}, tag:'Major'},
+  {k:'Recurring', c:{mine:31, all:410}, tag:'Recurring'},
+  {k:'New', c:{mine:8, all:96}, tag:'New this year'}
+];
+function donorMatch(seg,d){
+  if(seg==='All') return true;
+  if(seg==='At risk'){ var a=DSTATUS[d.k]; return !!(a&&a.flag==='risk'); }
+  if(seg==='Follow-up'){ var b=DSTATUS[d.k]; return !!(b&&b.flag==='follow'); }
+  if(seg==='New') return d.tag==='New this year';
+  return d.tag===seg;
+}
+function segCount(seg){ for(var i=0;i<DSEGS.length;i++){ if(DSEGS[i].k===seg) return DSEGS[i].c[donorScope]; } return null; }
+function setDonorScope(){ donorScope = donorScope==='mine'?'all':'mine'; render(); }
+window.setDonorScope=setDonorScope;
+function donorRow(d){
+  var pc=DTAG[d.tag]||'s';
+  var st=DSTATUS[d.k]||{l:'Active',c:'s',cta:'View profile',scr:'profile'};
+  var primAct = st.scr==='profile' ? ("openDonor('"+d.k+"')") : ("dQuick('"+d.k+"','"+st.scr+"')");
+  return `<div class="row donor-row" onclick="openDonor('${d.k}')">${av(d)}<div class="main"><div class="dr-top"><span class="nm">${d.name}</span><span class="pill ${pc} dr-tag">${d.tag}</span></div><div class="dr-sub"><span class="spill ${st.c}">${st.l}</span><span class="dr-last">${d.last} last gift</span></div></div><div class="dr-rgt"><div class="dr-life">${d.life}</div><div class="dr-ll">lifetime</div></div>
+  <div class="dr-actions">
+    <button class="drc primary ${st.c}" onclick="event.stopPropagation();${primAct}">${st.cta}</button>
+    <button class="drc ico" title="Call" onclick="event.stopPropagation();dQuick('${d.k}','call')">${DR_IC.phone}</button>
+    <button class="drc ico" title="Add note" onclick="event.stopPropagation();dQuick('${d.k}','logact')">${DR_IC.note}</button>
+  </div></div>`;
+}
 function emptyState(msg){ return `<div class="empty-in"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></svg><div>${msg}</div></div>`; }
 /* ---------- tasks dataset + filtering ---------- */
 const TASKS=[
@@ -689,19 +770,32 @@ const SCREENS = {
   },
 
   donors(){
+    var seg=donorSeg, sc=SCOPES[donorScope];
+    var list=DONORS.filter(function(d){ return donorMatch(seg,d); });
+    var total=segCount(seg); if(total==null) total=list.length;
+    var riskN=segCount('At risk');
     return `
-    <div class="appbar">
-      <div><h2>Donors</h2><div class="greet" style="padding:2px 0 0">3,847 total</div></div>
-      <div style="display:flex;align-items:center;gap:10px">
-        ${avSR()}
+    <div class="appbar"><div>
+      <div class="dscope" onclick="setDonorScope()"><h2 style="margin:0">${sc.l}</h2><span class="dcaret">\u25BE</span></div>
+      <div class="greet" style="padding:2px 0 0">${sc.n} donors assigned</div>
+    </div>${avSR()}</div>
+    <div class="dsticky">
+      <div class="search" style="margin:0 16px 10px">
+        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5.2"/><path d="M11 11l4 4"/></svg>
+        <input class="sinp" placeholder="Search donors by name" oninput="searchDonors(this,'#donorlist')">
+      </div>
+      <div class="chiprow dchips">${DSEGS.map(function(s){ var on=seg===s.k; var risk=s.flag==='risk'; return '<span class="chip '+(on?'on':'')+(risk&&!on?' risk':'')+'" onclick="setDonorSeg(\''+s.k+'\')">'+s.k+' <b>'+s.c[donorScope]+'</b></span>'; }).join('')}</div>
+    </div>
+    <div style="padding:2px 16px 0">
+      <div class="attn-banner" onclick="setDonorSeg('At risk')">
+        <span class="ab-ic">!</span>
+        <div class="ab-tx"><b>${riskN} donors need attention</b> \u00b7 card expiring, pledges due &amp; lapsing gifts</div>
+        <span class="ab-ar">\u2192</span>
       </div>
     </div>
-    <div class="search">
-      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5.2"/><path d="M11 11l4 4"/></svg>
-      <input class="sinp" placeholder="Search name, address, or ZIP" oninput="searchDonors(this,'#donorlist')">
-    </div>
+    <div class="sect" style="padding:10px 20px 6px"><span class="l">${seg==='All'?'Donors':seg}</span><span class="r" data-toast="Sorted by lifetime giving" style="color:var(--text4);font-weight:600;font-size:12px">Showing ${list.length} of ${total} \u00b7 Lifetime \u25BE</span></div>
     <div class="list" id="donorlist">
-      ${DONORS.map(donorRow).join('')}
+      ${list.map(donorRow).join('')}
       <div style="height:96px"></div>
     </div>
     <div class="fab">AI</div>`;
@@ -900,22 +994,31 @@ const SCREENS = {
   },
 
   d360(){
-    const tiles = donorTiles();
+    var d=currentDonor; const tiles=donorTiles();
+    var ins=donorInsights(d), g=glanceData(d);
     return `${d360hero(tiles)}${d360tabs('d360')}
-    <div style="padding:14px 16px 26px;display:flex;flex-direction:column;gap:14px">
+    <div style="padding:12px 16px 26px;display:flex;flex-direction:column;gap:14px">
+      <div class="qa-row">
+        <div class="qa" onclick="go('logact')">Send thank-you</div>
+        <div class="qa" onclick="go('d360act')">Giving history</div>
+        <div class="qa" data-toast="Added to segment · Major donors">Add to segment</div>
+        <div class="qa" onclick="go('addtask')">Create task</div>
+      </div>
+      <div class="sect" style="padding:0 2px 0"><span class="l">Needs attention</span></div>
+      <div style="display:flex;flex-direction:column;gap:10px">${ins.map(insCard).join('')}</div>
+      <div class="sect" style="padding:6px 2px 0"><span class="l">At a glance</span></div>
+      <div class="glance">${g.map(function(x){return '<div class="g"><div class="k">'+x[0]+'</div><div class="v"'+(x[2]?' style="color:'+x[2]+'"':'')+'>'+x[1]+'</div></div>';}).join('')}</div>
       <div class="card" style="padding:14px 16px">
-        <div class="card-h" style="padding:0"><span class="sectlabel">Giving history · 10-yr</span></div>
+        <div class="card-h" style="padding:0"><span class="sectlabel">Giving trend · 10-yr</span><span style="font-size:11.5px;color:var(--green);font-weight:700">${d.yr} this yr</span></div>
         <div class="spark">${[30,42,38,55,48,62,70,58,80,92].map((h,i)=>`<i class="${i===9?'on':''}" style="height:${h}%"></i>`).join('')}</div>
-        <div class="mini3">
-          <div class="m"><div class="v serif">$2,005</div><div class="l">Avg gift</div></div>
-          <div class="m"><div class="v serif">$25K</div><div class="l">Largest</div></div>
-          <div class="m"><div class="v serif">38</div><div class="l">Gifts</div></div>
-        </div>
+        <div class="mini3"><div class="m"><div class="v serif">$2,005</div><div class="l">Avg gift</div></div><div class="m"><div class="v serif">${d.last}</div><div class="l">Largest</div></div><div class="m"><div class="v serif">38</div><div class="l">Gifts</div></div></div>
       </div>
-      <div>
-        <div class="sect" style="padding:0 4px 8px"><span class="l">Recent gifts</span></div>
-        ${[['$2,500','CMA 2026 · Card','Mar 15, 2026'],['$1,000','Cathedral Capital · Check','Dec 2, 2025'],['$2,500','CMA 2025 · Card','Mar 14, 2025']].map(([a,f,dt])=>`<div class="row"><div class="main"><div class="nm">${a}</div><div class="meta">${f}</div></div><div class="meta">${dt}</div></div>`).join('')}
+      <div class="sect" style="padding:4px 2px 0"><span class="l">Recent activity</span><span class="r" onclick="go('d360act')" style="color:var(--blue);font-weight:600;font-size:13px">View all \u203A</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${[['#15803D','Gift received — '+d.last,'Mar 15 · GiveCentral'],['#2563EB','Note — thank-you call logged','Mar 16 · Sarah'],['#94A3B8','Email — 2025 tax summary','Jan 12 · auto']].map(([c,tt,m])=>`<div class="row" style="align-items:center"><span style="width:9px;height:9px;border-radius:50%;background:${c};flex:0 0 auto"></span><div class="main"><div class="nm" style="font-size:13.5px">${tt}</div><div class="meta">${m}</div></div></div>`).join('')}
       </div>
+      <div class="sect" style="padding:4px 2px 0"><span class="l">Household &amp; relationships</span><span class="r" onclick="go('d360con')" style="color:var(--blue);font-weight:600;font-size:13px">View \u203A</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill s">James Sullivan · Spouse</span><span class="pill s">Claire · Daughter</span><span class="pill b">Household $112K lifetime</span></div>
     </div>
     <div class="fab">AI</div>`;
   },
@@ -1193,12 +1296,10 @@ const SCREENS = {
     return `
     <div class="appbar"><div><h2>More</h2></div>${avSR()}</div>
     <div class="mprofile" onclick="go('profile')"><div class="av">SR</div><div style="flex:1"><div style="font-weight:700;font-size:15px">Sarah Reynolds</div><div style="font-size:12.5px;color:var(--text3)">Development Director · My profile</div></div><div style="color:var(--text4);font-size:18px">›</div></div>
-    <div class="mgroup-l">Main</div>
-    ${menu([[I.home,'Home','home'],[I.don,'Donors','donors'],[I.camp,'Campaigns','campaigns'],[I.brief,'Meeting briefs','briefs']])}
     <div class="mgroup-l">Fundraising</div>
-    ${menu([[I.pipe,'Prospect pipeline','pipeline'],[I.task,'Tasks & reminders','tasks'],[I.comm,'Communications','comms']])}
-    <div class="mgroup-l">Admin</div>
-    ${menu([[I.bell,'Notifications','notifications','5'],[I.gear,'Settings','settings']])}
+    ${menu([[I.camp,'Campaigns','campaigns'],[I.brief,'Meeting briefs','briefs'],[I.comm,'Communications','comms']])}
+    <div class="mgroup-l">Account</div>
+    ${menu([[I.gear,'Settings','settings']])}
     <div style="height:96px"></div>
     <div class="fab">AI</div>`;
   },
@@ -1259,7 +1360,6 @@ const SCREENS = {
     <div class="set-cap">Notifications</div>
     <div class="set-group">
       <div class="set-row"><div class="sl">Push notifications</div>${tog(true)}</div>
-      <div class="set-row"><div class="sl">Email digest</div><div class="sv">Daily ›</div></div>
     </div>
     <div class="set-cap">Display</div>
     <div class="set-group">
@@ -1291,10 +1391,11 @@ const SCREENS = {
     return `
     <div class="appbar"><div style="display:flex;align-items:center;gap:8px"><span class="backbtn" onclick="go('d360')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span><h2 style="font-size:22px">Log activity</h2></div></div>
     <div class="mprofile">${av(d)}<div style="flex:1"><div style="font-weight:700;font-size:15px">${d.name}</div><div style="font-size:12.5px;color:var(--text3)">${d.parish} · linked</div></div></div>
-    <div class="pad"><div class="sectlabel" style="margin:8px 0 8px">Type of activity</div><div class="rowflex" style="gap:7px">${['Visit','Call','Email','Meeting','Letter','Event'].map((x,i)=>chip(x,i===1)).join('')}</div></div>
-    <div class="pad"><div class="sectlabel" style="margin:14px 0 8px">Outcome</div><div class="rowflex" style="gap:7px">${['Positive','Neutral','Declined'].map((x,i)=>chip(x,i===0)).join('')}</div></div>
+    <div class="pad"><div class="sectlabel" style="margin:8px 0 8px">Type of activity</div><div class="rowflex" style="gap:7px" id="la-types">${['Visit','Call','Meeting'].map(function(x){return '<span class="chip '+(logType===x?'on':'')+'" onclick="setLogType(this,\''+x+'\')">'+x+'</span>';}).join('')}</div></div>
+    <div class="pad" id="la-meta">${logMeta(logType)}</div>
+    <div class="pad"><div class="sectlabel" style="margin:14px 0 8px">Outcome</div><div class="rowflex" style="gap:7px" id="la-out">${logOut(logType)}</div></div>
     <div class="pad"><div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 8px"><div class="sectlabel">Summary</div><span class="link" style="font-size:12.5px" onclick="micToggle(document.querySelector('.mic'))">Speech-to-text</span></div>
-      <div class="la-wrap"><textarea id="la-sum" class="ta-input">Discussed $10k Cathedral ask; she is interested. Prep gift agreement.</textarea><div class="mic" onclick="micToggle(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4"/></svg></div></div>
+      <div class="la-wrap"><textarea id="la-sum" class="ta-input" placeholder="${LOG_PH[logType]}"></textarea><div class="mic" onclick="micToggle(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4"/></svg></div></div>
       <div style="font-size:11.5px;color:var(--text3);margin-top:7px">Tap the mic to dictate — voice fills the summary.</div>
       <div class="toggle-row">Create follow-up task<div class="switch" onclick="toggleSw(this)"></div></div>
     </div>
@@ -1333,7 +1434,7 @@ const CFG = {
   call:{tab:false,dark:false}, logact:{tab:false,dark:false}, addtask:{tab:false,dark:false}, briefview:{tab:false,dark:false}, briefcompose:{tab:false,dark:false}
 };
 let screen='splash', obSlide=0, stateView='loading', campView='overview', taskView='mine';
-var guruMsgs=[], guruAtt=[];
+var guruMsgs=[], guruAtt=[]; var donorSeg='All'; var donorScope='mine';
 const os = /Android/i.test(navigator.userAgent) ? 'android' : 'ios';
 document.body.classList.add(os);
 const NAVY='#0e1a2e';
@@ -1367,11 +1468,86 @@ window.homeSearch=homeSearch;
 window.openDonor=openDonor; window.avSR=avSR;
 function toast(m){var t=document.getElementById('app-toast');if(!t){t=document.createElement('div');t.id='app-toast';t.className='app-toast';document.getElementById('app').appendChild(t);}t.textContent=m;t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.classList.remove('show');},2200);}
 function chipPick(el){var p=el.parentNode;for(var i=0;i<p.children.length;i++){p.children[i].classList.remove('on');}el.classList.add('on');}
+var logType='Call';
+var LOG_PH={
+  Visit:'Summarize the visit — what was discussed and next steps…',
+  Call:'Log the call — topics, sentiment and next steps…',
+  Meeting:'Meeting notes — attendees, decisions and follow-ups…'
+};
+var LOG_OUT={
+  Visit:['Completed','Not home','Declined'],
+  Call:['Reached','Left voicemail','No answer'],
+  Meeting:['Held','Rescheduled','No-show']
+};
+var PIN_IC='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 21s7-6 7-11a7 7 0 10-14 0c0 5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>';
+var SRCH_IC='<svg width="16" height="16" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7" cy="7" r="5.2"/><path d="M11 11l4 4"/></svg>';
+var ADDR_POOL=['Cathedral of St. Jude, St. Petersburg FL','Diocesan Pastoral Center, St. Petersburg FL','St. Mary\'s Cathedral, Tampa FL','Sacred Heart Church, Pinellas Park FL','The Vinoy Resort, St. Petersburg FL','Panera Bread, Clearwater FL','St. Petersburg Yacht Club, St. Petersburg FL','Straub Park, St. Petersburg FL'];
+function _pickRow(txt, sub, on){ return '<div class="pick '+(on?'on':'')+'" onclick="chipPick(this)"><span class="pdot"></span><div class="ptx"><div class="pv">'+txt+'</div>'+(sub?'<div class="ps">'+sub+'</div>':'')+'</div></div>'; }
+function phoneList(d){
+  var arr = d.phones || (d.phone?[{v:d.phone,s:'Mobile · on file'}]:[]);
+  var rows = arr.length ? arr.map(function(p,i){return _pickRow(p.v||p, p.s||'Phone', i===0);}).join('') : '<div class="pick-empty">No saved numbers yet</div>';
+  return '<div class="sectlabel sl2">Phone number</div><div class="pick-list">'+rows+'<button class="pick-add" onclick="revealAdd(this,\'phone\')">+ Add phone number</button></div>';
+}
+function addrList(d, label){
+  var arr = d.addrs || (d.addr?[d.addr]:[]);
+  var rows = arr.length ? arr.map(function(a,i){return _pickRow(a,'Home · on file',i===0);}).join('') : '<div class="pick-empty">No saved addresses yet</div>';
+  return '<div class="sectlabel sl2">'+(label||'Location')+'</div>'
+    +'<div class="addr-search"><span class="addr-ic">'+SRCH_IC+'</span><input class="addr-inp" placeholder="Search a place or address…" oninput="addrSuggest(this)"><div class="addr-sug" id="addr-sug"></div></div>'
+    +'<div class="pick-list" id="la-addrs">'+rows+'<button class="pick-add" onclick="revealAdd(this,\'addr\')">+ Add address manually</button></div>';
+}
+function meetWhen(){
+  return '<div class="sectlabel sl2">Date &amp; time</div>'
+   +'<div class="rowflex" style="gap:7px"><span class="chip on" onclick="chipPick(this)">Today</span><span class="chip" onclick="chipPick(this)">Tomorrow</span><span class="chip" onclick="chipPick(this);toast(\'Calendar\')">Pick date…</span></div>'
+   +'<div class="time-row" onclick="toast(\'Time picker\')"><span class="tl">Start time</span><span class="tv">10:00 AM &middot; 1 hr ▾</span></div>';
+}
+function logMeta(ty){
+  var d=currentDonor||{};
+  if(ty==='Call') return phoneList(d);
+  if(ty==='Visit') return addrList(d,'Location');
+  if(ty==='Meeting') return meetWhen()+'<div style="height:14px"></div>'+addrList(d,'Where');
+  return '';
+}
+function logOut(ty){ var a=LOG_OUT[ty]||['Positive','Neutral','Declined']; return a.map(function(x,i){return '<span class="chip '+(i===0?'on':'')+'" onclick="chipPick(this)">'+x+'</span>';}).join(''); }
+function setLogType(el,ty){ chipPick(el); logType=ty; var ta=document.getElementById('la-sum'); if(ta) ta.setAttribute('placeholder', LOG_PH[ty]||'Add a summary…'); var m=document.getElementById('la-meta'); if(m) m.innerHTML=logMeta(ty); var o=document.getElementById('la-out'); if(o) o.innerHTML=logOut(ty); }
+function addrSuggest(inp){
+  var q=(inp.value||'').toLowerCase().trim();
+  var box=document.getElementById('addr-sug'); if(!box)return;
+  if(!q){ box.innerHTML=''; box.classList.remove('show'); return; }
+  var m=ADDR_POOL.filter(function(a){return a.toLowerCase().indexOf(q)>-1;}).slice(0,5);
+  if(!m.length){ box.innerHTML='<div class="sug-add" onclick="addrChoose(\''+q.replace(/[\\\\\']/g,'')+'\')">Use \u201C'+inp.value+'\u201D \u00b7 add manually</div>'; box.classList.add('show'); return; }
+  box.innerHTML=m.map(function(a){return '<div class="sug-item" onclick="addrChoose(\''+a.replace(/'/g,"\\'")+'\')">'+PIN_IC+'<span>'+a+'</span></div>';}).join('');
+  box.classList.add('show');
+}
+function addrChoose(txt){
+  var list=document.getElementById('la-addrs'); if(!list)return;
+  var picks=list.querySelectorAll('.pick'); for(var i=0;i<picks.length;i++){picks[i].classList.remove('on');}
+  var add=list.querySelector('.pick-add');
+  var div=document.createElement('div'); div.className='pick on'; div.setAttribute('onclick','chipPick(this)');
+  div.innerHTML='<span class="pdot"></span><div class="ptx"><div class="pv">'+txt+'</div><div class="ps">Selected</div></div>';
+  list.insertBefore(div, add);
+  var inp=document.querySelector('.addr-inp'); if(inp) inp.value='';
+  var box=document.getElementById('addr-sug'); if(box){box.innerHTML='';box.classList.remove('show');}
+}
+function revealAdd(btn, kind){
+  var wrap=btn.parentNode;
+  var row=document.createElement('div'); row.className='add-inline';
+  row.innerHTML='<input class="add-inp" placeholder="'+(kind==='phone'?'Enter phone number':'Enter full address')+'"><button class="add-ok">Add</button>';
+  wrap.insertBefore(row, btn); btn.style.display='none';
+  var i=row.querySelector('.add-inp'); i.focus();
+  row.querySelector('.add-ok').onclick=function(){
+    var v=(i.value||'').trim(); if(!v){toast('Enter a value');return;}
+    var picks=wrap.querySelectorAll('.pick'); for(var k=0;k<picks.length;k++){picks[k].classList.remove('on');}
+    var d=document.createElement('div'); d.className='pick on'; d.setAttribute('onclick','chipPick(this)');
+    d.innerHTML='<span class="pdot"></span><div class="ptx"><div class="pv">'+v+'</div><div class="ps">Added</div></div>';
+    wrap.insertBefore(d,row); row.remove(); btn.style.display=''; toast('\u2713 Saved to donor');
+  };
+}
+window.setLogType=setLogType; window.addrSuggest=addrSuggest; window.addrChoose=addrChoose; window.revealAdd=revealAdd;
 function toggleSw(el){el.classList.toggle('off');}
 var _rec=null;
 function simMic(ta,btn){btn.classList.add('rec');toast('Listening…');setTimeout(function(){ta.value=(ta.value+' Confirmed the $10k Cathedral gift; sending the agreement Wednesday.').trim();btn.classList.remove('rec');toast('Voice captured');},1300);}
 function micToggle(btn){var ta=(btn&&btn.closest&&btn.closest('.la-wrap'))?btn.closest('.la-wrap').querySelector('textarea'):document.getElementById('la-sum');if(!ta||!btn)return;if(_rec){try{_rec.stop();}catch(e){}_rec=null;btn.classList.remove('rec');return;}var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(SR){try{_rec=new SR();_rec.lang='en-US';_rec.interimResults=true;ta.dataset.base=ta.value;_rec.onresult=function(e){var s='';for(var i=e.resultIndex;i<e.results.length;i++){s+=e.results[i][0].transcript;}ta.value=(ta.dataset.base+' '+s).trim();};_rec.onerror=function(){simMic(ta,btn);};_rec.onend=function(){btn.classList.remove('rec');_rec=null;};_rec.start();btn.classList.add('rec');toast('Listening…');}catch(e){_rec=null;simMic(ta,btn);}}else{simMic(ta,btn);}}
-function logSave(){ toast('✓ Activity logged · added to timeline'); go('d360act'); }
+function logSave(){ toast('✓ '+(logType||'Activity')+' logged · added to timeline'); go('d360act'); }
 function addTaskSave(){var inp=document.getElementById('at-task');var title=inp&&inp.value?inp.value:'New task';TASKS.unshift({t:title,due:'Today',od:false,who:'mine',done:false});taskView='mine';toast('✓ Task added to your list');go('tasks');}
 function ge(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function guruWelcome(){
@@ -1462,6 +1638,97 @@ render();
 .ta-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-pale)}
 .la-wrap .mic{position:absolute;right:9px;bottom:9px;width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .la-wrap .mic.rec{background:var(--rose);animation:micpulse 1s infinite}
+.dstat-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0;-webkit-overflow-scrolling:touch}
+.dstat-row::-webkit-scrollbar{display:none}
+.dstat{flex:1 0 auto;min-width:80px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 11px;box-shadow:var(--shadow-sm);cursor:pointer}
+.dstat:active{background:var(--surface2)}
+.dstat .v{font-size:18px;font-weight:700;line-height:1}
+.dstat .k{font-size:10px;color:var(--text3);font-weight:600;margin-top:4px;white-space:nowrap}
+.dscope{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.dscope h2{font-size:22px}
+.dcaret{font-size:12px;color:var(--text4);font-weight:700}
+.dsticky{position:sticky;top:0;z-index:20;background:var(--surface);padding-top:4px}
+.dchips{padding-bottom:12px}
+.dchips .chip{padding:6px 12px}
+.dchips .chip b{font-weight:800;margin-left:2px;opacity:.85}
+.dchips .chip.on b{opacity:1}
+.dchips .chip.risk{color:var(--rose);border-color:#F6D2E2}
+.dchips .chip.risk b{color:var(--rose)}
+.donor-row .dr-sub{display:flex;align-items:center;gap:8px;margin-top:4px;min-width:0}
+.spill{display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;white-space:nowrap;flex:0 0 auto;letter-spacing:.01em}
+.spill.g{background:var(--green-l);color:var(--green)}
+.spill.a{background:var(--amber-l);color:var(--amber)}
+.spill.b{background:var(--blue-pale);color:var(--blue-2)}
+.spill.r{background:var(--rose-l);color:var(--rose)}
+.spill.s{background:var(--surface2);color:var(--text3)}
+.donor-row .dr-last{font-size:11.5px;color:var(--text4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.donor-row{flex-wrap:wrap;align-items:center;padding:13px 14px 12px}
+.donor-row .dr-actions{flex:0 0 100%;display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border2)}
+.drc{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;border-radius:10px;border:1px solid var(--border);background:#fff;font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer;padding:0 12px;-webkit-tap-highlight-color:transparent}
+.drc:active{transform:scale(.98)}
+.drc.primary{flex:1;background:var(--blue-pale);border-color:var(--blue-mid);color:var(--blue-2)}
+.drc.primary.a{background:var(--amber-l);border-color:#F3D9A8;color:var(--amber)}
+.drc.primary.b{background:var(--blue-pale);border-color:var(--blue-mid);color:var(--blue-2)}
+.drc.primary.g{background:var(--green-l);border-color:#BBE8CC;color:var(--green)}
+.drc.primary.s{background:var(--surface2);border-color:var(--border);color:var(--text2)}
+.drc.ico{width:40px;padding:0;flex:0 0 auto;color:var(--text3)}
+.drc.ico:active{background:var(--surface2)}
+.sl2{margin:2px 0 9px}
+.pick-list{display:flex;flex-direction:column;gap:8px}
+.pick{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:11px 13px;cursor:pointer;box-shadow:var(--shadow-sm)}
+.pick .pdot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex:0 0 auto;position:relative}
+.pick.on{border-color:var(--blue-mid);background:var(--blue-pale)}
+.pick.on .pdot{border-color:var(--blue)}
+.pick.on .pdot:after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--blue)}
+.pick .ptx{min-width:0}
+.pick .pv{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pick .ps{font-size:11.5px;color:var(--text3);margin-top:1px}
+.pick-empty{font-size:13px;color:var(--text4);padding:9px 2px}
+.pick-add{align-self:flex-start;background:none;border:1px dashed var(--blue-mid);color:var(--blue-2);font-weight:700;font-size:13px;border-radius:10px;padding:9px 13px;cursor:pointer}
+.pick-add:active{background:var(--blue-pale)}
+.addr-search{position:relative;margin-bottom:10px}
+.addr-search .addr-ic{position:absolute;left:13px;top:14px;color:var(--text4);pointer-events:none;display:flex}
+.addr-search .addr-inp{width:100%;height:46px;border:1px solid var(--border);border-radius:12px;padding:0 14px 0 40px;font-size:14px;background:#fff;box-shadow:var(--shadow-sm);color:var(--text)}
+.addr-search .addr-inp:focus{outline:none;border-color:var(--blue-mid)}
+.addr-sug{position:absolute;top:50px;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 14px 30px rgba(15,23,42,.14);z-index:30;overflow:hidden;display:none}
+.addr-sug.show{display:block}
+.sug-item,.sug-add{display:flex;align-items:center;gap:9px;padding:11px 13px;font-size:13.5px;color:var(--text2);cursor:pointer;border-bottom:1px solid var(--border2)}
+.sug-item:last-child{border-bottom:none}
+.sug-item:active,.sug-add:active{background:var(--surface2)}
+.sug-item svg{color:var(--blue);flex:0 0 auto}
+.sug-item span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sug-add{color:var(--blue-2);font-weight:600}
+.time-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow-sm);cursor:pointer}
+.time-row .tl{font-size:13px;color:var(--text3);font-weight:600}
+.time-row .tv{font-size:14px;font-weight:700;color:var(--text)}
+.add-inline{display:flex;gap:8px;align-items:center}
+.add-inline .add-inp{flex:1;height:44px;border:1px solid var(--blue-mid);border-radius:10px;padding:0 12px;font-size:14px;color:var(--text)}
+.add-inline .add-inp:focus{outline:none}
+.add-inline .add-ok{height:44px;padding:0 18px;border:none;border-radius:10px;background:var(--blue);color:#fff;font-weight:700;font-size:13px;cursor:pointer;flex:0 0 auto}
+.attn-banner{display:flex;align-items:center;gap:10px;background:#FFF7ED;border:1px solid #FBE3C4;border-radius:12px;padding:10px 12px;margin-bottom:2px;cursor:pointer}
+.attn-banner:active{background:#FEEFDA}
+.attn-banner .ab-ic{width:20px;height:20px;border-radius:50%;background:var(--amber);color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.attn-banner .ab-tx{flex:1;min-width:0;font-size:12.5px;color:var(--text2);line-height:1.4}
+.attn-banner .ab-tx b{color:var(--text);font-weight:700}
+.attn-banner .ab-ar{color:var(--amber);font-weight:800;flex:0 0 auto;font-size:15px}
+.qa-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.qa-row::-webkit-scrollbar{display:none}
+.qa{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);border-radius:99px;padding:8px 14px;font-size:12.5px;font-weight:600;color:var(--text2);white-space:nowrap;cursor:pointer;flex:0 0 auto;box-shadow:var(--shadow-sm)}
+.qa:active{background:var(--surface2)}
+.ins{display:flex;gap:11px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 13px;box-shadow:var(--shadow-sm);align-items:flex-start}
+.ins .ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ins .t{font-weight:700;font-size:13.5px;color:var(--text)}
+.ins .s{font-size:12px;color:var(--text3);margin-top:2px;line-height:1.45}
+.ins .cta{margin-top:9px;display:inline-flex;align-items:center;gap:4px;font-weight:700;font-size:12.5px;cursor:pointer}
+.ins.amber .ic{background:#FEF3C7;color:var(--amber)} .ins.amber .cta{color:var(--amber)}
+.ins.rose .ic{background:var(--rose-l);color:var(--rose)} .ins.rose .cta{color:var(--rose)}
+.ins.green .ic{background:var(--green-l);color:var(--green)} .ins.green .cta{color:var(--green)}
+.ins.purple .ic{background:#F3E8FF;color:var(--purp)} .ins.purple .cta{color:var(--purp)}
+.ins.blue .ic{background:var(--blue-pale);color:var(--blue)} .ins.blue .cta{color:var(--blue)}
+.glance{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.glance .g{background:#fff;padding:11px 13px}
+.glance .g .k{font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text4)}
+.glance .g .v{font-size:13px;font-weight:600;margin-top:3px;color:var(--text)}
 .task-act{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:99px;border:0;font-family:inherit;font-weight:700;font-size:12.5px;line-height:1;cursor:pointer;transition:filter .12s;white-space:nowrap}
 .task-act:active{filter:brightness(.94)}
 .task-act svg{width:13px;height:13px;flex:0 0 auto}
