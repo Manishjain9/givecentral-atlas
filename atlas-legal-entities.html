@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Atlas — Legal Entities</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root{
+  --navy:#0E1E35; --blue:#2563EB; --blue-mid:#3B82F6; --blue-light:#DBEAFE; --blue-pale:#EFF6FF;
+  --teal:#0D9488; --teal-light:#CCFBF1; --green:#15803D; --green-light:#DCFCE7;
+  --amber:#D97706; --amber-light:#FEF3C7; --rose:#BE185D; --rose-light:#FCE7F3;
+  --purple:#7C3AED; --purple-light:#EDE9FE; --gold:#B45309;
+  --text:#0F172A; --text-2:#334155; --text-3:#64748B; --border:#E2E8F0; --border-soft:#EDF2F7;
+  --surface:#F8FAFC; --white:#fff; --sidebar-w:220px;
+  --shadow-sm:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.05);
+  --shadow-md:0 4px 16px rgba(15,23,42,.06),0 2px 4px rgba(15,23,42,.04);
+}
+html{font-size:14px;-webkit-font-smoothing:antialiased;}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden;}
+a{color:inherit;text-decoration:none;}
+/* sidebar */
+.sidebar{width:var(--sidebar-w);background:var(--navy);min-height:100vh;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow:hidden;}
+.sidebar-logo{padding:16px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sidebar-search{margin:12px 12px 6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;}
+.sidebar-search svg{width:13px;height:13px;color:rgba(255,255,255,.3);flex-shrink:0;}
+.sidebar-search input{background:none;border:none;outline:none;width:100%;font-size:12px;color:rgba(255,255,255,.6);font-family:inherit;cursor:pointer;}
+.sidebar-search input::placeholder{color:rgba(255,255,255,.3);}
+.sidebar-scroll{flex:1;overflow-y:auto;}
+.sidebar-scroll::-webkit-scrollbar{width:0;}
+.nav-group{padding:8px 8px 0;}
+.nav-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:0 10px;margin-bottom:4px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;transition:all .15s;margin-bottom:1px;}
+.nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85);}
+.nav-item.active{background:var(--blue);color:#fff;}
+.nav-item svg{width:14px;height:14px;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.6);border-radius:10px;padding:1px 7px;font-size:10px;font-weight:600;}
+.nav-item.active .nav-badge{background:rgba(255,255,255,.2);color:#fff;}
+.sidebar-user{padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:9px;cursor:pointer;}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.user-name{font-size:12px;font-weight:500;color:rgba(255,255,255,.75);}
+.user-role{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px;}
+/* main */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.topbar-title{font-size:14px;font-weight:600;}
+.topbar-date{font-size:12px;color:var(--text-3);}
+.topbar-search{flex:1;max-width:460px;margin:0 18px;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:text;}
+.topbar-search svg{width:13px;height:13px;color:var(--text-3);}
+.topbar-search input{background:none;border:none;outline:none;width:100%;font-size:12.5px;font-family:inherit;}
+.topbar-search kbd{margin-left:auto;font-size:10.5px;background:#fff;border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--text-3);}
+.topbar-right{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.tb-notif{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;}
+.tb-notif:hover{background:var(--surface);}
+.tb-notif svg{width:15px;height:15px;color:var(--text-2);}
+.notif-dot{position:absolute;top:7px;right:7px;width:7px;height:7px;background:#EF4444;border-radius:50%;border:2px solid #fff;}
+.dash{padding:24px;overflow-y:auto;}
+/* shared */
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.card-body{padding:16px 18px;}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:18px;}
+.crumb{font-size:12px;color:var(--text-3);margin-bottom:5px;display:flex;align-items:center;gap:6px;}
+.crumb a{color:var(--blue);} .crumb svg{width:10px;height:10px;}
+.page-title{font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-.02em;line-height:1.1;}
+.page-sub{color:var(--text-3);font-size:13px;margin-top:5px;}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:6px;white-space:nowrap;}
+.tag.blue{background:var(--blue-light);color:var(--blue);} .tag.green{background:var(--green-light);color:var(--green);}
+.tag.amber{background:var(--amber-light);color:var(--amber);} .tag.rose{background:var(--rose-light);color:var(--rose);}
+.tag.purple{background:var(--purple-light);color:var(--purple);} .tag.grey{background:var(--surface);color:var(--text-3);border:1px solid var(--border);}
+.tag.teal{background:var(--teal-light);color:var(--teal);} .tag.gold{background:#FEF3C7;color:var(--gold);}
+.btn{font-family:inherit;font-size:13px;font-weight:500;padding:9px 16px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent;transition:.15s;}
+.btn svg{width:13px;height:13px;}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 1px 4px rgba(37,99,235,.25);} .btn-primary:hover{background:#1D4ED8;}
+.btn-ghost{background:#fff;border-color:var(--border);color:var(--text-2);} .btn-ghost:hover{background:var(--surface);border-color:#94A3B8;}
+.btn-sm{padding:6px 11px;font-size:12px;}
+.fld{width:100%;font-size:13px;font-family:inherit;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);}
+.fld:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.10);}
+.fld::placeholder{color:#94A3B8;}
+select.fld{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M3 5l3 3 3-3z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+.muted{color:var(--text-3);} .mono{font-variant-numeric:tabular-nums;}
+/* hub tabs (top level) */
+.htabs{display:flex;gap:4px;margin-bottom:16px;}
+.htab{padding:9px 15px;border-radius:9px;font-size:13px;font-weight:600;color:var(--text-3);cursor:pointer;display:flex;align-items:center;gap:7px;border:1px solid transparent;}
+.htab:hover{background:#fff;color:var(--text-2);}
+.htab.on{background:#fff;color:var(--text);border-color:var(--border);box-shadow:var(--shadow-sm);}
+.htab .ct{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:0 7px;font-size:11px;color:var(--text-3);}
+.htab.on .ct{background:var(--blue-pale);border-color:var(--blue-light);color:var(--blue);}
+/* toolbar */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.search-box{flex:1;min-width:240px;max-width:440px;background:#fff;border:1px solid var(--border);border-radius:9px;display:flex;align-items:center;gap:9px;padding:9px 13px;box-shadow:var(--shadow-sm);}
+.search-box svg{width:15px;height:15px;color:var(--text-3);flex-shrink:0;}
+.search-box input{border:none;outline:none;width:100%;font-size:13px;font-family:inherit;color:var(--text);background:none;}
+.toolbar select.fld{width:auto;min-width:130px;box-shadow:var(--shadow-sm);}
+/* entity table */
+.etbl{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.etbl th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);padding:11px 14px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;}
+.etbl th.r,.etbl td.r{text-align:right;}
+.etbl td{padding:12px 14px;border-bottom:1px solid var(--border-soft);font-size:13px;vertical-align:middle;}
+.etbl tr:last-child td{border-bottom:none;}
+.etbl tbody tr{cursor:pointer;transition:background .12s;}
+.etbl tbody tr:hover{background:var(--blue-pale);}
+.etbl tbody tr.grp-row{background:var(--surface);}
+.etbl tbody tr.grp-row:hover{background:var(--blue-pale);}
+.etbl tbody tr.grp-row .ent-name{font-weight:700;}
+.grp-caret{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;cursor:pointer;color:var(--text-3);transition:transform .12s,background .12s;margin-right:4px;flex:0 0 auto;}
+.grp-caret:hover{background:var(--blue-light);color:var(--blue);}
+.grp-caret.open{transform:rotate(90deg);}
+.subchip{display:inline-flex;align-items:center;gap:5px;margin-left:8px;background:var(--blue-pale);color:var(--blue);border:1px solid var(--blue-light);border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.subchip:hover{background:var(--blue-light);}
+.tbl-foot .fa{color:var(--blue);cursor:pointer;font-weight:600;}
+.tbl-foot .fa:hover{text-decoration:underline;}
+.ent-name{font-weight:600;color:var(--text);}
+.ent-id{font-size:11px;color:var(--text-3);margin-top:1px;}
+.hdot{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;}
+.hdot i{width:8px;height:8px;border-radius:50%;flex:0 0 auto;}
+.h-ok i{background:var(--green);} .h-ok{color:var(--green);}
+.h-warn i{background:var(--amber);} .h-warn{color:var(--amber);}
+.h-alert i{background:var(--rose);} .h-alert{color:var(--rose);}
+.tbl-foot{display:flex;align-items:center;justify-content:space-between;padding:12px 4px 0;font-size:12px;color:var(--text-3);}
+/* entity detail */
+.detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:6px;}
+.back-link{font-size:12.5px;color:var(--blue);cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;}
+.back-link svg{width:11px;height:11px;}
+.detail-title{font-family:'DM Serif Display',serif;font-size:24px;letter-spacing:-.01em;}
+.detail-meta{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin:18px 0 18px;flex-wrap:nowrap;overflow-x:auto;}
+.tabs::-webkit-scrollbar{height:4px;} .tabs::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.tab{padding:11px 14px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;}
+.tab:hover{color:var(--text);}
+.tab.on{color:var(--blue);border-bottom-color:var(--blue);font-weight:600;}
+/* fact grid */
+.fact-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.fact{background:#fff;padding:13px 15px;}
+.fact .k{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);}
+.fact .v{font-size:14px;font-weight:600;margin-top:4px;color:var(--text);}
+.sec-lbl{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin:20px 0 10px;}
+/* checklist */
+.check{display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:#fff;}
+.check .ci{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:12px;font-weight:800;color:#fff;}
+.check.ok .ci{background:var(--green);} .check.warn .ci{background:var(--amber);} .check.alert .ci{background:var(--rose);}
+.check .ct{font-size:13px;font-weight:500;color:var(--text);} .check .cs{font-size:11.5px;color:var(--text-3);}
+.check .cact{margin-left:auto;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;}
+/* KPI row */
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:6px;}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:11px;padding:13px 14px;box-shadow:var(--shadow-sm);}
+.kpi .kv{font-family:'DM Serif Display',serif;font-size:20px;line-height:1;}
+.kpi .kk{font-size:11px;color:var(--text-3);font-weight:600;margin-top:6px;}
+/* mini rows */
+.mrow{display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid var(--border-soft);border-radius:10px;margin-bottom:7px;background:#fff;}
+.mav{width:32px;height:32px;border-radius:50%;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:0 0 auto;}
+.mrow .mn{font-size:13px;font-weight:600;} .mrow .ms{font-size:11.5px;color:var(--text-3);}
+.mrow .mr{margin-left:auto;text-align:right;} .mrow .mr .a{font-size:13px;font-weight:700;} .mrow .mr .b{font-size:10.5px;color:var(--text-3);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+/* address cards */
+.addr-card{border:1px solid var(--border);border-radius:11px;padding:14px 15px;background:#fff;}
+.addr-card .al{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3);margin-bottom:7px;display:flex;align-items:center;gap:6px;}
+.addr-card .av{font-size:13px;line-height:1.55;color:var(--text-2);}
+/* global donor search */
+.scope-bar{display:flex;align-items:center;gap:12px;background:var(--blue-pale);border:1px solid var(--blue-light);border-radius:11px;padding:12px 15px;margin-bottom:14px;font-size:12.5px;color:var(--text-2);}
+.scope-bar b{color:var(--text);}
+.scope-bar .si{width:26px;height:26px;border-radius:7px;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.scope-bar select.fld{width:auto;padding:6px 26px 6px 10px;font-size:12px;}
+.scope-bar .preview-as{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+.scope-bar .preview-as .pa-lbl{font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--text-3);white-space:nowrap;}
+.dsr{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border-soft);border-bottom:none;background:#fff;cursor:pointer;}
+.dsr:first-of-type{border-top-left-radius:12px;border-top-right-radius:12px;border-top:1px solid var(--border);}
+.dsr:last-of-type{border-bottom:1px solid var(--border);border-bottom-left-radius:12px;border-bottom-right-radius:12px;}
+.dsr:hover{background:var(--blue-pale);}
+.dsr .lockmini{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;}
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:30;}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:520px;max-width:100vw;background:#fff;box-shadow:-16px 0 40px rgba(15,23,42,.12);z-index:31;display:flex;flex-direction:column;}
+.drawer-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-shrink:0;}
+.drawer-title{font-family:'DM Serif Display',serif;font-size:19px;}
+.drawer-sub{font-size:12px;color:var(--text-3);margin-top:2px;}
+.drawer-x{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:#fff;cursor:pointer;}
+.drawer-x svg{width:13px;height:13px;color:var(--text-2);}
+.drawer-body{flex:1;overflow-y:auto;padding:22px;}
+/* lockbox */
+.lockbox{border:1px dashed var(--amber);background:#FFFBEB;border-radius:12px;padding:20px;text-align:center;}
+.lockbox .lk{width:44px;height:44px;border-radius:50%;background:var(--amber-light);color:var(--amber);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+.lockbox .lt{font-size:14px;font-weight:700;color:var(--text);}
+.lockbox .ls{font-size:12.5px;color:var(--text-2);margin-top:6px;line-height:1.5;}
+.divider{height:1px;background:var(--border);margin:18px 0;}
+.blur{filter:blur(6px);user-select:none;pointer-events:none;opacity:.6;}
+.lbl{display:block;font-size:11px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.drawer-foot{padding:14px 22px;border-top:1px solid var(--border);background:var(--surface);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
+.le-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 12px 30px rgba(15,23,42,.25);opacity:0;pointer-events:none;transition:.2s;z-index:50;}
+.le-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.menu{position:absolute;right:0;top:44px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-md);z-index:20;min-width:210px;overflow:hidden;}
+.menu .mi{padding:10px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;}
+.menu .mi:hover{background:var(--surface);} .menu .mi.on{color:var(--blue);font-weight:600;}
+.menu .mi .ck{margin-left:auto;color:var(--blue);}
+/* form + address autocomplete */
+.form-sec{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:22px 0 14px;padding-bottom:9px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;gap:8px;}
+.form-sec:first-child{margin-top:0;}
+.form-sec svg{width:13px;height:13px;color:var(--text-3);}
+.fw{margin-bottom:14px;}
+.form-row{display:flex;gap:12px;}
+.form-row>.fw{flex:1;margin-bottom:14px;}
+.hint{font-size:11px;color:var(--text-3);margin-top:5px;}
+.addr-search{position:relative;}
+.addr-search .addr-ic{position:absolute;left:12px;top:11px;color:var(--text-3);display:flex;pointer-events:none;}
+.addr-search .addr-inp{width:100%;height:40px;border:1px solid var(--blue-mid);border-radius:8px;padding:0 12px 0 36px;font-size:13px;font-family:inherit;color:var(--text);background:var(--blue-pale);}
+.addr-search .addr-inp:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.10);background:#fff;}
+.addr-search .addr-inp::placeholder{color:var(--text-3);}
+.addr-sug{position:absolute;top:44px;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-md);z-index:5;overflow:hidden;display:none;}
+.addr-sug.show{display:block;}
+.sug-item{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--border-soft);}
+.sug-item:last-child{border-bottom:none;}
+.sug-item:hover{background:var(--blue-pale);}
+.sug-item svg{color:var(--blue);flex:0 0 auto;margin-top:2px;}
+.sug-item .st{font-size:13px;font-weight:600;color:var(--text);}
+.sug-item .sc{font-size:11.5px;color:var(--text-3);margin-top:1px;}
+.sug-add{padding:11px 12px;font-size:12.5px;color:var(--text-3);}
+.addr-fields{margin-top:10px;display:flex;flex-direction:column;gap:10px;}
+.af-row{display:flex;gap:10px;}
+.af-or{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--text-3);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+.af-or::before,.af-or::after{content:"";flex:1;height:1px;background:var(--border);}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr);} .two-col{grid-template-columns:1fr;} .fact-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo" style="padding:16px 16px 14px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 89.83 25" style="width:170px;height:auto;display:block" aria-label="Atlas by GiveCentral"> <g id="atlas-mark"> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="1.21" y1="23.79" x2="12.07" y2="13.53"/> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="12.07" y1="13.53" x2="24.14" y2="7.49"/> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="24.14" y1="7.49" x2="36.22" y2="3.27"/> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="24.14" y1="7.49" x2="27.77" y2="19.57"/> <circle fill="#fff" cx="1.21" cy="23.79" r="1.21"/> <circle fill="#fff" cx="12.07" cy="13.53" r="1.51"/> <circle fill="#fff" cx="24.14" cy="7.49" r="1.66"/> <circle fill="#fff" cx="27.77" cy="19.57" r="1.06"/> <circle fill="none" stroke="#C79E48" stroke-width=".5" opacity=".8" cx="36.22" cy="3.27" r="3.02"/> <circle fill="#C79E48" cx="36.22" cy="3.27" r="2.11"/> </g> <path fill="#fff" d="M43.93,14.67v-.21l.52-.19c.28-.11.49-.25.65-.41.15-.16.28-.39.37-.68L49.76.88h1.77l4.23,12.39c.11.31.24.54.37.7.14.16.35.3.65.41l.25.08v.21h-5.29v-.21l.31-.1c.29-.11.47-.27.53-.47.06-.2.05-.44-.03-.72l-.98-3h-4.62l-1,2.94c-.1.31-.13.55-.09.73.03.18.2.33.49.44l.46.19v.21h-2.87ZM47.09,9.75h4.35l-2.1-6.48-2.25,6.48ZM60.63,14.98c-.89,0-1.58-.22-2.07-.67s-.74-1.15-.74-2.12v-7.12h-1.44v-.21l.5-.08c.43-.1.8-.24,1.11-.42.31-.18.62-.42.93-.73l1.71-1.89h.21l-.06,2.92h2.33v.42h-2.35v7.5c0,.49.11.85.32,1.1.21.25.49.37.82.37.29,0,.55-.07.77-.22.22-.15.44-.34.67-.59l.21.21c-.28.47-.66.85-1.15,1.12-.49.28-1.08.42-1.77.42ZM63.75,14.67v-.21l.25-.08c.5-.17.75-.51.75-1.04V2.19c0-.28-.06-.49-.17-.64-.11-.15-.31-.25-.58-.32l-.27-.06v-.21l3.81-.9.25.19-.08,2.92v7.12c0,.51,0,1.02.01,1.53,0,.51.01,1.01.01,1.51,0,.28.06.5.17.68.11.17.3.3.56.39l.27.06v.21h-4.98ZM71.98,14.98c-.81,0-1.48-.23-2.03-.69-.55-.46-.82-1.12-.82-1.98,0-.65.33-1.25,1-1.8.67-.55,1.71-.96,3.14-1.24.22-.04.47-.09.75-.14.28-.05.57-.1.87-.16v-1.65c0-.94-.11-1.61-.34-1.99-.23-.38-.59-.57-1.07-.57-.33,0-.6.11-.79.32-.19.22-.32.59-.37,1.11l-.04.23c-.03.6-.17,1.03-.44,1.31-.26.28-.59.42-.98.42-.36,0-.66-.11-.9-.33-.24-.22-.35-.52-.35-.9,0-.57.2-1.05.59-1.44.4-.39.92-.68,1.57-.87.65-.19,1.36-.29,2.12-.29,1.24,0,2.19.3,2.86.91.67.6,1.01,1.59,1.01,2.95v4.6c0,.62.29.94.87.94h.46l.19.17c-.26.33-.55.59-.86.77s-.75.27-1.32.27c-.61,0-1.09-.14-1.45-.43-.35-.28-.59-.66-.7-1.14-.42.44-.84.82-1.28,1.14s-1,.47-1.7.47ZM73.25,13.71c.28,0,.54-.07.78-.2s.53-.34.86-.61v-3.5c-.14.03-.28.06-.42.08-.14.03-.3.06-.48.08-.64.17-1.15.45-1.53.84-.38.4-.57.93-.57,1.59,0,.57.13,1,.4,1.28.26.28.58.43.96.43ZM82.83,14.98c-.68,0-1.29-.08-1.83-.24s-1.04-.36-1.5-.59l.02-2.48h.21l.71,1.25c.31.56.64.97,1.01,1.24.37.27.84.41,1.41.41.67,0,1.2-.15,1.61-.45.41-.3.61-.7.61-1.2,0-.46-.15-.83-.44-1.12-.29-.29-.83-.55-1.62-.79l-.87-.27c-.85-.25-1.51-.64-2-1.17-.49-.53-.73-1.17-.73-1.94,0-.92.36-1.69,1.08-2.33.72-.64,1.76-.96,3.1-.96.54,0,1.05.06,1.53.18.48.12.94.3,1.38.53l-.12,2.25h-.21l-.73-1.29c-.26-.46-.52-.78-.78-.97-.26-.19-.64-.28-1.16-.28-.47,0-.92.13-1.33.4-.42.26-.62.64-.62,1.12s.18.85.53,1.12c.35.28.88.53,1.57.77l.94.27c1,.31,1.71.73,2.14,1.26s.65,1.18.65,1.93c0,1.01-.4,1.83-1.2,2.44-.8.61-1.92.92-3.36.92Z"/> <path fill="#fff" d="M43.89,22.82v-2.96h1.09c.21,0,.38.03.52.1.14.07.24.16.31.27.07.11.1.24.1.39s-.03.27-.1.38c-.06.1-.15.18-.26.23-.11.06-.22.09-.34.1l.06-.04c.13,0,.25.04.36.1.11.07.19.15.25.26.06.11.09.23.09.36,0,.15-.04.29-.11.41-.07.12-.18.22-.33.29-.14.07-.32.11-.53.11h-1.13ZM44.32,21.13h.63c.18,0,.31-.04.41-.12.09-.08.14-.2.14-.34s-.05-.25-.14-.34-.23-.12-.42-.12h-.61v.93ZM44.32,22.47h.65c.19,0,.33-.04.43-.13.1-.09.15-.21.15-.37s-.05-.28-.16-.37c-.11-.09-.25-.14-.44-.14h-.64v1.01ZM48.05,22.82v-1.1l-.98-1.86h.48l.76,1.55h-.11l.76-1.55h.47l-.97,1.86v1.1h-.42ZM54.07,22.87c-.28,0-.52-.06-.73-.19-.21-.13-.37-.3-.49-.53-.12-.23-.17-.49-.17-.8s.06-.57.18-.8c.12-.23.28-.41.5-.54.22-.13.48-.2.78-.2.34,0,.62.08.84.24.23.16.37.39.44.67h-.48c-.04-.16-.13-.29-.27-.39-.14-.09-.31-.14-.53-.14-.21,0-.39.05-.54.14-.15.09-.27.23-.35.4-.08.17-.12.38-.12.61s.04.45.12.62.2.3.35.39c.15.09.32.14.52.14.3,0,.52-.09.67-.26s.24-.4.26-.69h-.82v-.33h1.24v1.6h-.38l-.04-.45c-.07.11-.15.2-.23.28s-.19.13-.31.17c-.12.04-.26.06-.42.06ZM56.96,22.82v-2.96h.42v2.96h-.42ZM59.82,22.82l-1.1-2.96h.46l.9,2.52.9-2.52h.45l-1.1,2.96h-.51ZM62.76,22.82v-2.96h1.87v.35h-1.45v.95h1.32v.34h-1.32v.98h1.45v.35h-1.87ZM67.41,22.87c-.29,0-.54-.06-.75-.19s-.37-.31-.49-.54-.17-.5-.17-.8.06-.57.17-.8.28-.41.49-.54.46-.19.75-.19c.35,0,.63.08.84.25s.35.4.41.7h-.46c-.04-.17-.13-.31-.26-.42-.13-.1-.31-.16-.53-.16-.2,0-.37.05-.52.14-.15.09-.26.23-.34.4-.08.17-.12.38-.12.62s.04.45.12.62c.08.17.19.31.34.4.15.09.32.14.52.14.22,0,.4-.05.53-.15.13-.1.22-.24.26-.41h.46c-.06.29-.2.52-.41.69s-.5.25-.84.25ZM70.12,22.82v-2.96h1.87v.35h-1.45v.95h1.32v.34h-1.32v.98h1.45v.35h-1.87ZM73.47,22.82v-2.96h.42l1.51,2.27v-2.27h.42v2.96h-.42l-1.51-2.26v2.26h-.42ZM78.07,22.82v-2.61h-.87v-.35h2.18v.35h-.88v2.61h-.42ZM80.74,22.82v-2.96h1c.23,0,.43.04.57.12.15.08.26.18.33.31.07.13.11.28.11.45,0,.16-.04.3-.11.44-.07.13-.18.24-.34.32s-.35.12-.58.12h-.57v1.2h-.42ZM81.16,21.29h.55c.21,0,.36-.05.46-.15.1-.1.15-.23.15-.4s-.05-.29-.14-.39c-.1-.1-.25-.14-.46-.14h-.55v1.08ZM82.3,22.82l-.64-1.31h.46l.66,1.31h-.49ZM84.05,22.82l1.09-2.96h.46l1.09,2.96h-.45l-.87-2.45-.87,2.45h-.44ZM84.54,22.09l.12-.34h1.39l.12.34h-1.63ZM88.05,22.82v-2.96h.42v2.62h1.35v.33h-1.77Z"/> <g> <path fill="#fff" d="M86.13.4V.13h1.4v.27h-.54v1.49h-.31V.4h-.54Z"/> <path fill="#fff" d="M87.81,1.89V.13h.47l.33.91s.03.08.04.13.03.11.05.18c.02.06.03.12.04.18.01-.06.03-.12.04-.18.02-.06.03-.12.05-.18s.03-.1.04-.14l.33-.91h.48v1.76h-.31v-.89s0-.1,0-.16,0-.13,0-.21c0-.07,0-.15,0-.21-.02.08-.04.15-.06.23-.02.07-.04.14-.06.21-.02.06-.04.11-.05.15l-.32.89h-.27l-.33-.89s-.03-.09-.05-.15c-.02-.06-.04-.13-.06-.2-.02-.07-.04-.15-.07-.22,0,.07,0,.13,0,.21,0,.07,0,.14,0,.2,0,.06,0,.12,0,.16v.89h-.31Z"/> </g> </svg></div>
+  <div class="sidebar-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input type="text" placeholder="Search donors, gifts…" readonly></div>
+  <div class="sidebar-scroll">
+    <div class="nav-group" style="margin-top:8px"><div class="nav-label">Admin</div>
+      <a class="nav-item active" href="atlas-legal-entities.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="5" width="10" height="8" rx="1"/><path d="M4 5V3.5A1.5 1.5 0 015.5 2h3A1.5 1.5 0 0110 3.5V5M7 8v2"/></svg>Legal Entities<span class="nav-badge" id="nav-ct">128</span></a>
+    </div>
+  </div>
+  <div class="sidebar-user"><div class="user-avatar">SR</div><div><div class="user-name">Sarah Reynolds</div><div class="user-role">Development Director</div></div></div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title">Legal Entities</span>
+    <span class="topbar-date">Monday, May 4, 2026</span>
+    <a href="atlas-search.html" class="topbar-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input type="text" placeholder="Search donors, gifts, campaigns…" readonly style="cursor:pointer"><kbd>⌘K</kbd></a>
+    <div class="topbar-right"><a href="atlas-notifications.html" class="tb-notif" title="Notifications"><svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.5 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5zM6 13a1.5 1.5 0 003 0"/></svg><div class="notif-dot"></div></a></div>
+  </div>
+
+  <div class="dash" id="dash"><!-- rendered by JS --></div>
+</div>
+
+<div id="drawer-root"></div>
+
+<script>
+/* ============ DATA ============ */
+var SAINTS=['Mary','Patrick','Joseph','Anne','Michael','Augustine','Catherine','Francis','Thomas','John','Agnes','Bernard','Cecilia','Dominic','Elizabeth','Gabriel','Helena','Ignatius','James','Lawrence','Monica','Nicholas','Paul','Rose','Stephen','Teresa','Vincent','William','Clare','Jude'];
+var TOWNS=['Albany','Troy','Schenectady','Saratoga','Cohoes','Watervliet','Rensselaer','Amsterdam','Gloversville','Johnstown','Hudson','Catskill','Oneonta','Delmar','Colonie','Guilderland','Latham','Clifton Park','Ballston','Glens Falls'];
+var TYPES=['Parish','School','Cemetery','Ministry','Charity','Foundation'];
+var TYPECOLOR={Diocese:'purple',Foundation:'teal',Charity:'blue',Parish:'grey',School:'amber',Cemetery:'grey',Ministry:'blue'};
+function money(n){ if(n>=1e6) return '$'+(n/1e6).toFixed(1)+'M'; if(n>=1e3) return '$'+Math.round(n/1e3)+'K'; return '$'+n; }
+function moneyFull(n){ return '$'+n.toLocaleString('en-US'); }
+
+var ENT=[
+ {name:'Diocese of Albany',type:'Diocese'},
+ {name:'Diocesan Foundation',type:'Foundation'},
+ {name:'Catholic Charities',type:'Charity'},
+ {name:'Scholarship Foundation',type:'Foundation'}
+];
+(function(){ var i=0; while(ENT.length<128){ var s=SAINTS[i%SAINTS.length], t=TOWNS[(i*7)%TOWNS.length], ty=TYPES[i%TYPES.length];
+  var nm = ty==='Parish'?('St. '+s+' Parish · '+t): ty==='School'?('St. '+s+' Catholic School · '+t): ty==='Cemetery'?(s+' Cemetery Assn · '+t): ty==='Ministry'?(s+' Ministry · '+t): ty==='Charity'?('Catholic Charities of '+t): ('Fund for St. '+s+' · '+t);
+  ENT.push({name:nm,type:ty}); i++; } })();
+ENT.forEach(function(e,idx){
+  e.id='LE-'+String(1000+idx);
+  var seed=(idx*37)%100;
+  e.state=['NY','NY','NY','NY','MA'][idx%5];
+  e.status = idx%17===5?'Pending': (idx%29===9?'Inactive':'Active');
+  e.donors = idx<4 ? [1240,1240,860,410][idx] : (40 + (seed*13)%1900);
+  e.ytd = idx<4 ? [2400000,2400000,1300000,540000][idx] : (18000 + (seed*911)%1600000);
+  e.lifetime = e.ytd*(6 + (seed%7));
+  e.ein = (idx%13===4)?'':('14-'+String(1000000+(idx*7919)%8999999));
+  e.stateRegDays = (idx%11===3)?12 : (idx%11===7?-4:210+(seed%150));
+  e.issues=[];
+  if(!e.ein) e.issues.push({t:'Tax ID (EIN) missing',s:'Receipts can’t be issued until an EIN is on file.',lvl:'alert'});
+  if(e.stateRegDays<0) e.issues.push({t:'State charitable registration expired',s:'NY CHAR500 lapsed '+(-e.stateRegDays)+' days ago.',lvl:'alert'});
+  else if(e.stateRegDays<30) e.issues.push({t:'State registration expiring',s:'NY CHAR500 renews in '+e.stateRegDays+' days.',lvl:'warn'});
+  if(idx%19===8) e.issues.push({t:'No remittance address',s:'Add a “send checks to” address for this entity.',lvl:'warn'});
+  e.health = e.issues.some(function(x){return x.lvl==='alert';})?'alert':(e.issues.length?'warn':'ok');
+  e.fye=['Jun 30','Dec 31','Dec 31','Aug 31'][idx%4];
+  e.merchant='GC-'+String(4400+idx);
+  e.funds = 1+(seed%6);
+  // parent/child hierarchy: 4 roots; children roll up by type
+  if(idx<4){ e.parentId=null; }
+  else if(e.type==='Charity'){ e.parentId='LE-1002'; }
+  else if(e.type==='Foundation'){ e.parentId='LE-1003'; }
+  else { e.parentId='LE-1000'; }
+});
+var EMAP={}; ENT.forEach(function(e){EMAP[e.id]=e;});
+var CHILDREN={}; ENT.forEach(function(e){ if(e.parentId){ (CHILDREN[e.parentId]=CHILDREN[e.parentId]||[]).push(e); } });
+function rollup(e){ var d=e.donors,y=e.ytd,l=e.lifetime; (CHILDREN[e.id]||[]).forEach(function(c){ var r=rollup(c); d+=r.donors; y+=r.ytd; l+=r.lifetime; }); return {donors:d,ytd:y,lifetime:l}; }
+function groupHealth(e){ var order={ok:0,warn:1,alert:2}, worst=e.health; (CHILDREN[e.id]||[]).forEach(function(c){ if(order[c.health]>order[worst]) worst=c.health; }); return worst; }
+var expanded={};
+
+/* donors — assigned across entities; a subset shown for global search */
+var DFIRST=['James','Mary','Robert','Patricia','John','Jennifer','Michael','Linda','William','Elizabeth','David','Barbara','Richard','Susan','Joseph','Jessica','Thomas','Sarah','Charles','Karen','Daniel','Nancy','Matthew','Lisa','Anthony','Margaret','Mark','Sandra','Donald','Ashley','Steven','Kimberly','Paul','Emily','Andrew','Donna','Joshua','Michelle','Kenneth','Carol','Kevin','Amanda','Brian','Dorothy','George','Melissa','Edward','Deborah','Ronald','Grace','Timothy','Nora','Jason','Rosa','Jeffrey','Teresa','Ryan','Lucia','Jacob','Priya','Gary','Sofia','Nicholas','Diane','Eric','Ruth','Jonathan','Julia','Stephen','Hannah','Larry','Angela','Justin','Evelyn','Scott','Maria','Brandon','Rita','Frank','Owen'];
+var DLAST=['Smith','O’Brien','Johnson','Williams','Brown','Nguyen','Garcia','Miller','Davis','Riccardi','Martinez','Kim','Anderson','Lombardi','Thomas','Cho','Moore','Kavanagh','Sullivan','Ferraro','Walsh','Delgado','Halloran','Osei','Callahan','Reyes','Bellini','Njoroge','Whitfield','Castellano','Doyle','Tanaka','Sheehan','Gallagher','Blackwood','Aoki','McGrath','Okafor','Vaughn','Pierce','Brennan','Kowalski','Marino','Santos','Dwyer','Mitchell','Nair','Overton','Flynn','Cruz','Weiss','Ramirez','Foster','Bianchi','Novak','Petrov','Haddad','Mensah','Rossi','Duval'];
+var GIFT_FUNDS=['Annual Appeal','Christmas Collection','Capital Campaign','Bishop’s Fund','Tuition Assistance','Building Fund','Memorial Gift'];
+var DONORS=(function(){
+  var arr=[], N=1240;
+  var named=['Margaret O’Brien','Robert & Susan Lin','The Delaney Fdn.','Anthony Riccardi','Helen Tobin','James Sullivan','Patricia Kim','Michael & Susan Grant','Claire O’Brien'];
+  var namedEnt=[0,0,1,1,4,2,3,0,8];
+  for(var i=0;i<N;i++){
+    var nm, eIdx;
+    if(i<named.length){ nm=named[i]; eIdx=namedEnt[i]; }
+    else { nm=DFIRST[(i*13)%DFIRST.length]+' '+DLAST[(i*7)%DLAST.length]; eIdx = (i%4===1)? (Math.floor(i/4)%4) : ((i*97+13)%ENT.length); }
+    var e=ENT[eIdx]; var seed=(i*29)%100;
+    var life=800+(seed*690+i*37)%180000;
+    var ytd=Math.round(life*(0.04+(seed%22)/100));
+    var ini=nm.replace(/[^A-Za-z ]/g,'').split(' ').filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase();
+    var city=TOWNS[(i*3)%TOWNS.length]+' '+e.state;
+    var f1=GIFT_FUNDS[i%GIFT_FUNDS.length], f2=GIFT_FUNDS[(i+3)%GIFT_FUNDS.length];
+    var gifts=[{d:'Mar 15, 2026',a:Math.round(ytd*0.5),f:f1,m:'Card'},{d:'Dec 20, 2025',a:Math.round(ytd*0.3),f:f2,m:'Check'},{d:'Sep 8, 2025',a:Math.round(life*0.06),f:'Capital Campaign',m:'ACH'}];
+    var emailName=nm.replace(/[^A-Za-z ]/g,'').trim().toLowerCase().replace(/\s+/g,'.');
+    arr.push({id:'D-'+(2000+i),name:nm,ini:ini,entityId:e.id,city:city,email:emailName+'@example.org',phone:'(518) 555-'+String(1000+(i%9000)).slice(-4),life:life,ytd:ytd,last:gifts[0].a,gifts:gifts});
+  }
+  return arr;
+})();
+
+/* ============ VIEWER / SCOPE ============ */
+var SCOPES={
+  officer:{label:'Gift Officer — 3 entities',ids:['LE-1000','LE-1001','LE-1002']},
+  director:{label:'Development Director — 8 entities',ids:['LE-1000','LE-1001','LE-1002','LE-1003','LE-1004','LE-1005','LE-1006','LE-1007']},
+  admin:{label:'Administrator — all entities',ids:ENT.map(function(e){return e.id;})}
+};
+var scopeKey='officer';
+function inScope(entityId){ return SCOPES[scopeKey].ids.indexOf(entityId)>-1; }
+
+/* ============ STATE ============ */
+var hubTab='entities';   // 'entities' | 'donors'
+var view='list';         // 'list' | 'entity'
+var curEntity=null;
+var entityTab='overview';
+var entFilterType='All', entFilterHealth='All', entQuery='';
+var donorQuery='';
+
+/* ============ RENDER ============ */
+var dash=document.getElementById('dash');
+function render(){
+  if(view==='entity' && curEntity){ dash.innerHTML=entityDetail(curEntity); return; }
+  dash.innerHTML = pageHead() + hubTabs() + (hubTab==='entities'? entitiesView() : donorSearchView());
+}
+
+function pageHead(){
+  var active=ENT.filter(function(e){return e.status==='Active';}).length;
+  var needs=ENT.filter(function(e){return e.health!=='ok';}).length;
+  var onEntities=(hubTab==='entities');
+  var sub = onEntities
+    ? (ENT.length+' entities · '+active+' active · <span style="color:var(--amber);font-weight:600">'+needs+' need attention</span> · '+GROUP_SUB[groupBy])
+    : ('Find any donor across all '+ENT.length+' entities · gift details limited to your entity access');
+  var consBtn = onEntities ? '<button class="btn btn-ghost" onclick="toggleConsMenu(event)">'+GROUP_LABEL[groupBy]+' ▾</button><span id="cons-menu"></span>' : '';
+  return '<div class="page-head"><div>'
+    +'<div class="crumb"><a href="atlas-dashboard.html">Atlas</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <span>Legal Entities</span></div>'
+    +'<div class="page-title">Legal Entities</div>'
+    +'<div class="page-sub">'+sub+'</div>'
+    +'</div><div style="display:flex;gap:8px;position:relative">'+consBtn+'<button class="btn btn-primary" onclick="addEntityForm()"><svg viewBox=\'0 0 14 14\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.7\' stroke-linecap=\'round\'><path d=\'M7 2v10M2 7h10\'/></svg>Add entity</button></div></div>';
+}
+function hubTabs(){
+  return '<div class="htabs">'
+   +'<div class="htab '+(hubTab==='entities'?'on':'')+'" onclick="setHub(\'entities\')"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="10" height="8" rx="1"/><path d="M4 5V3.5A1.5 1.5 0 015.5 2h3A1.5 1.5 0 0110 3.5V5"/></svg>Entities <span class="ct">'+ENT.length+'</span></div>'
+   +'<div class="htab '+(hubTab==='donors'?'on':'')+'" onclick="setHub(\'donors\')"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="5" r="2.6"/><path d="M1.5 12c0-2.2 2-4 4.5-4s4.5 1.8 4.5 4"/><path d="M11 11l2 2"/></svg>All-donor search</div>'
+   +'</div>';
+}
+
+/* ---- Entities list ---- */
+function entMatch(e){
+  var q=entQuery.toLowerCase();
+  if(entFilterType!=='All' && e.type!==entFilterType) return false;
+  if(entFilterHealth!=='All' && e.health!==entFilterHealth) return false;
+  if(q && (e.name.toLowerCase().indexOf(q)<0 && e.id.toLowerCase().indexOf(q)<0)) return false;
+  return true;
+}
+function healthCell(h){ var hcls=h==='ok'?'h-ok':(h==='warn'?'h-warn':'h-alert'); var hlabel=h==='ok'?'Healthy':(h==='warn'?'Needs review':'Action needed'); return '<span class="hdot '+hcls+'"><i></i>'+hlabel+'</span>'; }
+function entToolbar(){
+  var typeOpts=['All'].concat(['Diocese'],TYPES).filter(function(v,i,a){return a.indexOf(v)===i;});
+  return '<div class="toolbar">'
+    +'<div class="search-box"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input placeholder="Search entities by name or ID…" value="'+entQuery.replace(/"/g,'&quot;')+'" oninput="entSearch(this.value)"></div>'
+    +'<select class="fld" onchange="entSetType(this.value)">'+typeOpts.map(function(t){return '<option'+(t===entFilterType?' selected':'')+'>'+t+'</option>';}).join('')+'</select>'
+    +'<select class="fld" onchange="entSetHealth(this.value)">'+[['All','All health'],['ok','Healthy'],['warn','Needs review'],['alert','Action needed']].map(function(o){return '<option value="'+o[0]+'"'+(o[0]===entFilterHealth?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>'
+    +'</div>';
+}
+var ETBL_HEAD='<thead><tr><th>Entity</th><th>Type</th><th>Tax ID</th><th class="r">Donors</th><th class="r">YTD raised</th><th>Compliance</th><th></th></tr></thead>';
+function flatRow(e,indent){
+  var st=e.status==='Active'?'':' <span class="tag grey" style="margin-left:6px">'+e.status+'</span>';
+  var pad = indent? ' style="padding-left:40px"':'';
+  var kid = indent? '<span style="color:var(--text-3);margin-right:6px">└</span>':'';
+  return '<tr onclick="openEntity(\''+e.id+'\')"><td'+pad+'><div class="ent-name">'+kid+e.name+st+'</div><div class="ent-id mono"'+(indent?' style="padding-left:16px"':'')+'>'+e.id+'</div></td>'
+    +'<td><span class="tag '+(TYPECOLOR[e.type]||'grey')+'">'+e.type+'</span></td>'
+    +'<td class="mono">'+(e.ein?e.ein:'<span class="tag rose">Missing</span>')+'</td>'
+    +'<td class="r mono">'+e.donors.toLocaleString()+'</td>'
+    +'<td class="r mono">'+money(e.ytd)+'</td>'
+    +'<td>'+healthCell(e.health)+'</td>'
+    +'<td class="r"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#94A3B8" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg></td></tr>';
+}
+function entitiesView(){
+  return groupBy==='parent' ? entitiesConsolidated() : (groupBy==='type' ? entitiesByType() : entitiesFlat());
+}
+function entitiesByType(){
+  var anyFilter=(entQuery||entFilterType!=='All'||entFilterHealth!=='All');
+  var order=['Diocese','Foundation','Charity','Parish','School','Cemetery','Ministry'];
+  var byType={}; ENT.forEach(function(e){ (byType[e.type]=byType[e.type]||[]).push(e); });
+  var types=order.filter(function(t){return byType[t];}).concat(Object.keys(byType).filter(function(t){return order.indexOf(t)<0;}));
+  var body='',shownGroups=0,shownRows=0;
+  types.forEach(function(ty){
+    var members=byType[ty]||[];
+    var membShown=members.filter(entMatch);
+    if(anyFilter && membShown.length===0) return;
+    shownGroups++;
+    var key='TYPE:'+ty;
+    var isOpen=anyFilter?true:!!expanded[key];
+    var sum=members.reduce(function(a,e){a.d+=e.donors;a.y+=e.ytd;return a;},{d:0,y:0});
+    var order2={ok:0,warn:1,alert:2};
+    var worst=members.reduce(function(w,e){return order2[e.health]>order2[w]?e.health:w;},'ok');
+    var caret='<span class="grp-caret'+(isOpen?' open':'')+'" onclick="event.stopPropagation();toggleExpand(\''+key+'\')" title="'+(isOpen?'Collapse':'Expand')+'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2l4 4-4 4"/></svg></span>';
+    var chip='<span class="subchip" onclick="event.stopPropagation();toggleExpand(\''+key+'\')">'+(isOpen?'Hide':'View')+' '+members.length+' entit'+(members.length===1?'y':'ies')+' <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" style="transform:rotate('+(isOpen?'-90':'90')+'deg)"><path d="M4 2l4 4-4 4"/></svg></span>';
+    body+='<tr class="grp-row" onclick="toggleExpand(\''+key+'\')"><td><div class="ent-name" style="display:flex;align-items:center;gap:2px">'+caret+ty+' '+chip+'</div><div class="ent-id mono" style="padding-left:18px">grouped by type</div></td>'
+      +'<td><span class="tag '+(TYPECOLOR[ty]||'grey')+'">'+ty+'</span></td>'
+      +'<td class="mono muted">—</td>'
+      +'<td class="r mono" style="font-weight:700">'+sum.d.toLocaleString()+'</td>'
+      +'<td class="r mono" style="font-weight:700">'+money(sum.y)+'</td>'
+      +'<td>'+healthCell(worst)+'</td>'
+      +'<td class="r"></td></tr>';
+    shownRows++;
+    if(isOpen){ (anyFilter?membShown:members).forEach(function(c){ body+=flatRow(c,true); shownRows++; }); }
+  });
+  var footRight=anyFilter?'<span>expanded to matches</span>':'<span><span class="fa" onclick="expandAll()">Expand all</span> · <span class="fa" onclick="collapseAll()">Collapse all</span></span>';
+  var foot='<div class="tbl-foot"><span>'+shownGroups+' type group'+(shownGroups===1?'':'s')+' · totals by entity type</span>'+footRight+'</div>';
+  return entToolbar()+'<table class="etbl">'+ETBL_HEAD+'<tbody>'+(shownRows?body:'<tr><td colspan="7" style="text-align:center;color:var(--text-3);padding:30px">No entities match your filters.</td></tr>')+'</tbody></table>'+foot;
+}
+function entitiesFlat(){
+  var rows=ENT.filter(entMatch);
+  var body=rows.map(function(e){return flatRow(e,false);}).join('');
+  var foot='<div class="tbl-foot"><span>Showing '+rows.length+' of '+ENT.length+' entities · standalone totals</span><span>Sorted by name</span></div>';
+  return entToolbar()+'<table class="etbl">'+ETBL_HEAD+'<tbody>'+(rows.length?body:'<tr><td colspan="7" style="text-align:center;color:var(--text-3);padding:30px">No entities match your filters.</td></tr>')+'</tbody></table>'+foot;
+}
+function entitiesConsolidated(){
+  var anyFilter=(entQuery||entFilterType!=='All'||entFilterHealth!=='All');
+  var roots=ENT.filter(function(e){return !e.parentId;});
+  var body='', shownGroups=0, shownRows=0;
+  roots.forEach(function(r){
+    var kids=CHILDREN[r.id]||[];
+    var kidsShown=kids.filter(entMatch);
+    var rootMatch=entMatch(r);
+    if(anyFilter && !rootMatch && kidsShown.length===0) return;
+    shownGroups++;
+    var isOpen = anyFilter ? true : !!expanded[r.id];
+    var ru=rollup(r);
+    var gh=groupHealth(r);
+    var caret = kids.length? '<span class="grp-caret'+(isOpen?' open':'')+'" onclick="event.stopPropagation();toggleExpand(\''+r.id+'\')" title="'+(isOpen?'Collapse':'Expand')+' sub-entities"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2l4 4-4 4"/></svg></span>' : '<span style="display:inline-block;width:26px;flex:0 0 auto"></span>';
+    var kidBadge = kids.length? '<span class="subchip" onclick="event.stopPropagation();toggleExpand(\''+r.id+'\')">'+(isOpen?'Hide':'View')+' '+kids.length+' sub-entities <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" style="transform:rotate('+(isOpen?'-90':'90')+'deg)"><path d="M4 2l4 4-4 4"/></svg></span>':'';
+    body+='<tr class="grp-row" onclick="openEntity(\''+r.id+'\')"><td><div class="ent-name" style="display:flex;align-items:center;gap:2px">'+caret+r.name+kidBadge+'</div><div class="ent-id mono" style="padding-left:18px">'+r.id+' · rolled-up total</div></td>'
+      +'<td><span class="tag '+(TYPECOLOR[r.type]||'grey')+'">'+r.type+'</span></td>'
+      +'<td class="mono">'+(r.ein?r.ein:'<span class="tag rose">Missing</span>')+'</td>'
+      +'<td class="r mono" style="font-weight:700">'+ru.donors.toLocaleString()+'</td>'
+      +'<td class="r mono" style="font-weight:700">'+money(ru.ytd)+'</td>'
+      +'<td>'+healthCell(gh)+'</td>'
+      +'<td class="r"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#94A3B8" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg></td></tr>';
+    shownRows++;
+    if(isOpen){ (anyFilter?kidsShown:kids).forEach(function(c){ body+=flatRow(c,true); shownRows++; }); }
+  });
+  var footRight = anyFilter? '<span>expanded to matches</span>' : '<span><span class="fa" onclick="expandAll()">Expand all</span> · <span class="fa" onclick="collapseAll()">Collapse all</span></span>';
+  var foot='<div class="tbl-foot"><span>'+shownGroups+' parent group'+(shownGroups===1?'':'s')+' · totals include sub-entities</span>'+footRight+'</div>';
+  return entToolbar()+'<table class="etbl">'+ETBL_HEAD+'<tbody>'+(shownRows?body:'<tr><td colspan="7" style="text-align:center;color:var(--text-3);padding:30px">No entities match your filters.</td></tr>')+'</tbody></table>'+foot;
+}
+function rerenderHub(){ var c=document.getElementById('dash'); var y=window.scrollY; c.innerHTML=pageHead()+hubTabs()+entitiesView(); window.scrollTo(0,y); }
+function toggleExpand(id){ expanded[id]=!expanded[id]; rerenderHub(); }
+function expandAll(){ if(groupBy==='type'){ ENT.forEach(function(e){ expanded['TYPE:'+e.type]=true; }); } else { ENT.forEach(function(e){ if(!e.parentId && (CHILDREN[e.id]||[]).length) expanded[e.id]=true; }); } rerenderHub(); }
+function collapseAll(){ expanded={}; rerenderHub(); }
+window.toggleExpand=toggleExpand; window.expandAll=expandAll; window.collapseAll=collapseAll;
+
+/* ---- Entity detail ---- */
+function openEntity(id){ curEntity=EMAP[id]; ensureDetail(curEntity); view='entity'; entityTab='overview'; subQuery=''; render(); window.scrollTo(0,0); }
+function backToList(){ view='list'; curEntity=null; render(); }
+function setEntityTab(t){ entityTab=t; document.getElementById('ent-tabbody').innerHTML=entityTabBody(curEntity,t); document.querySelectorAll('#ent-tabs .tab').forEach(function(el){el.classList.toggle('on',el.dataset.t===t);}); }
+
+function entityDetail(e){
+  var kids=CHILDREN[e.id]||[]; var parent=e.parentId?EMAP[e.parentId]:null;
+  var tabs=['overview']; if(kids.length) tabs.push('sub'); tabs=tabs.concat(['donors','tax','addresses','banking','receipting','access','funds']);
+  var tlabel={overview:'Overview',sub:'Sub-entities',donors:'Donors',tax:'Tax & compliance',addresses:'Addresses',banking:'Banking & merchant',receipting:'Receipting',access:'Access',funds:'Funds'};
+  var hcls=e.health==='ok'?'green':(e.health==='warn'?'amber':'rose');
+  var hlabel=e.health==='ok'?'Compliant':(e.health==='warn'?e.issues.length+' item(s) to review':e.issues.length+' action(s) needed');
+  var relChip = kids.length? '<span class="tag blue" style="cursor:pointer" onclick="setEntityTab(\'sub\')">'+kids.length+' sub-entities ›</span>' : (parent? '<span class="tag grey" style="cursor:pointer" onclick="openEntity(\''+parent.id+'\')">Part of '+parent.name+' ›</span>' : '');
+  return '<div class="back-link" onclick="backToList()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 2L4 6l4 4"/></svg>All Legal Entities</div>'
+    +'<div class="detail-head"><div><div class="detail-title">'+e.name+'</div>'
+    +'<div class="detail-meta"><span class="tag '+(TYPECOLOR[e.type]||'grey')+'">'+e.type+'</span>'
+    +'<span class="tag '+(e.status==='Active'?'green':'grey')+'">'+e.status+'</span>'
+    +'<span class="tag '+hcls+'">'+hlabel+'</span>'
+    +relChip
+    +'<span class="muted mono" style="font-size:12px">'+e.id+' · EIN '+(e.ein||'—')+'</span></div></div>'
+    +'<div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" onclick="toggleActive()">'+(e.status==='Active'?'Deactivate':'Activate')+'</button><button class="btn btn-primary btn-sm" onclick="editEntityForm()">Edit entity</button></div></div>'
+    +'<div class="tabs" id="ent-tabs">'+tabs.map(function(t){return '<div class="tab '+(t===entityTab?'on':'')+'" data-t="'+t+'" onclick="setEntityTab(\''+t+'\')">'+tlabel[t]+'</div>';}).join('')+'</div>'
+    +'<div id="ent-tabbody">'+entityTabBody(e,entityTab)+'</div>';
+}
+
+function entityTabBody(e,t){
+  if(t==='overview') return ov(e);
+  if(t==='sub') return subTab(e);
+  if(t==='donors') return donorsTab(e);
+  if(t==='tax') return taxTab(e);
+  if(t==='addresses') return addrTab(e);
+  if(t==='banking') return bankTab(e);
+  if(t==='receipting') return receiptTab(e);
+  if(t==='access') return accessTab(e);
+  if(t==='funds') return fundsTab(e);
+  return '';
+}
+function ov(e){
+  var facts=[['Legal name',e.name],['Entity type',e.type],['EIN / Tax ID',e.ein||'— Missing'],['Registered state',e.state],['Fiscal year end',e.fye],['Status',e.status]];
+  var checks=e.issues.length? e.issues.map(function(x,ix){return '<div class="check '+x.lvl+'"><span class="ci">'+(x.lvl==='alert'?'!':'⚠')+'</span><div><div class="ct">'+x.t+'</div><div class="cs">'+x.s+'</div></div><span class="cact" onclick="resolveIssue('+ix+')">Resolve →</span></div>';}).join('')
+     : '<div class="check ok"><span class="ci">✓</span><div><div class="ct">All compliance checks passing</div><div class="cs">EIN on file, registration current, addresses complete.</div></div></div>';
+  var kids=CHILDREN[e.id]||[]; var parent=e.parentId?EMAP[e.parentId]:null; var ru=rollup(e);
+  var ser='font-family:\'DM Serif Display\',serif;font-size:24px';
+  var snap='<div class="sec-lbl">Donor snapshot'+(kids.length?' · this entity':'')+'</div>'
+    +'<div class="card"><div class="card-body">'
+    +'<div style="display:flex;gap:18px"><div><div style="'+ser+'">'+e.donors.toLocaleString()+'</div><div class="muted" style="font-size:12px">donors</div></div>'
+    +'<div><div style="'+ser+'">'+money(e.ytd)+'</div><div class="muted" style="font-size:12px">YTD raised</div></div>'
+    +'<div><div style="'+ser+'">'+money(e.lifetime)+'</div><div class="muted" style="font-size:12px">lifetime</div></div></div>'
+    +(kids.length?'<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-soft);font-size:12.5px;color:var(--text-2)">Incl. '+kids.length+' sub-entities: <b>'+ru.donors.toLocaleString()+'</b> donors · <b>'+money(ru.ytd)+'</b> YTD · <b>'+money(ru.lifetime)+'</b> lifetime</div>':'')
+    +'<div style="margin-top:14px"><button class="btn btn-ghost btn-sm" onclick="setEntityTab(\'donors\')">View donors →</button></div></div></div>';
+  var structure='';
+  if(kids.length){
+    var preview='<div style="margin-top:14px;display:flex;flex-direction:column;gap:7px">'+kids.slice(0,4).map(function(c){return '<div class="mrow" style="cursor:pointer" onclick="openEntity(\''+c.id+'\')"><div style="min-width:0"><div class="mn" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.name+'</div><div class="ms">'+c.type+'</div></div><div class="mr" style="margin-left:auto;text-align:right"><div class="a mono">'+c.donors.toLocaleString()+'</div><div class="b">donors</div></div></div>';}).join('')+'</div>';
+    structure='<div class="sec-lbl">Structure · sub-entities</div><div class="card"><div class="card-body">'
+      +'<div style="display:flex;gap:18px;flex-wrap:wrap"><div><div style="'+ser+'">'+kids.length+'</div><div class="muted" style="font-size:12px">sub-entities</div></div>'
+      +'<div><div style="'+ser+'">'+ru.donors.toLocaleString()+'</div><div class="muted" style="font-size:12px">donors · incl.</div></div>'
+      +'<div><div style="'+ser+'">'+money(ru.ytd)+'</div><div class="muted" style="font-size:12px">YTD · incl.</div></div></div>'
+      +preview
+      +'<div style="margin-top:12px"><button class="btn btn-ghost btn-sm" onclick="setEntityTab(\'sub\')">View all '+kids.length+' sub-entities →</button></div>'
+      +'</div></div>';
+  } else if(parent){
+    structure='<div class="sec-lbl">Structure</div><div class="card"><div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div style="font-size:13px">Part of <b>'+parent.name+'</b><div class="muted" style="font-size:12px;margin-top:2px">This entity rolls up into its parent in consolidated view.</div></div><button class="btn btn-ghost btn-sm" onclick="openEntity(\''+parent.id+'\')">Open parent →</button></div></div>';
+  }
+  return '<div class="two-col"><div><div class="sec-lbl">Key facts</div><div class="fact-grid">'+facts.map(function(f){return '<div class="fact"><div class="k">'+f[0]+'</div><div class="v">'+f[1]+'</div></div>';}).join('')+'</div>'
+    +'<div class="sec-lbl">Compliance health</div>'+checks+'</div>'
+    +'<div>'+snap+structure
+    +'<div class="sec-lbl">Quick links</div>'
+    +'<div class="card"><div class="card-body" style="padding:6px 0">'
+    +qlink('Tax &amp; compliance','tax')+qlink('Addresses','addresses')+qlink('Banking &amp; merchant','banking')+qlink('Users with access','access')+'</div></div>'
+    +'</div></div>';
+}
+var subQuery='';
+function subTab(e){
+  var kids=CHILDREN[e.id]||[]; var ru=rollup(e); var q=subQuery.toLowerCase();
+  var shown=kids.filter(function(c){return !q||c.name.toLowerCase().indexOf(q)>-1||c.id.toLowerCase().indexOf(q)>-1||c.type.toLowerCase().indexOf(q)>-1;});
+  var needs=kids.filter(function(c){return c.health!=='ok';}).length;
+  var kpis=[[kids.length,'Sub-entities'],[ru.donors.toLocaleString(),'Donors · incl.'],[money(ru.ytd),'YTD · incl.'],[money(ru.lifetime),'Lifetime · incl.']];
+  var kh='<div class="kpis" style="grid-template-columns:repeat(4,1fr)">'+kpis.map(function(k){return '<div class="kpi"><div class="kv">'+k[0]+'</div><div class="kk">'+k[1]+'</div></div>';}).join('')+'</div>';
+  var note = needs? '<div class="check warn" style="margin-top:14px"><span class="ci">⚠</span><div><div class="ct">'+needs+' of '+kids.length+' sub-entities need attention</div><div class="cs">Compliance issues in child entities roll up to this parent’s consolidated health.</div></div></div>':'';
+  var search='<div class="toolbar" style="margin-top:16px"><div class="search-box"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input placeholder="Search sub-entities…" value="'+esc(subQuery)+'" oninput="subSearch(this.value)"></div></div>';
+  var rows=shown.map(function(c){return '<tr onclick="openEntity(\''+c.id+'\')"><td><div class="ent-name">'+c.name+'</div><div class="ent-id mono">'+c.id+'</div></td><td><span class="tag '+(TYPECOLOR[c.type]||'grey')+'">'+c.type+'</span></td><td class="mono">'+(c.ein?c.ein:'<span class="tag rose">Missing</span>')+'</td><td class="r mono">'+c.donors.toLocaleString()+'</td><td class="r mono">'+money(c.ytd)+'</td><td>'+healthCell(c.health)+'</td><td class="r"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#94A3B8" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg></td></tr>';}).join('');
+  var table='<table class="etbl" style="margin-top:6px"><thead><tr><th>Sub-entity</th><th>Type</th><th>Tax ID</th><th class="r">Donors</th><th class="r">YTD</th><th>Compliance</th><th></th></tr></thead><tbody>'+(shown.length?rows:'<tr><td colspan="7" style="text-align:center;color:var(--text-3);padding:24px">No sub-entities match.</td></tr>')+'</tbody></table>';
+  return kh+note+search+'<div class="sec-lbl">Sub-entities ('+shown.length+(q?' of '+kids.length:'')+')</div>'+table;
+}
+function subSearch(v){ subQuery=v; document.getElementById('ent-tabbody').innerHTML=subTab(curEntity); var inp=document.querySelector('#ent-tabbody .search-box input'); if(inp){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);} }
+window.subSearch=subSearch;
+function qlink(label,t){ return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--border-soft)" onclick="setEntityTab(\''+t+'\')"><span style="font-size:13px;font-weight:500">'+label+'</span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#94A3B8" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg></div>'; }
+
+function entDonors(e){ return DONORS.filter(function(d){return d.entityId===e.id;}); }
+function donorsTab(e){
+  var list=entDonors(e);
+  var top=list.slice().sort(function(a,b){return b.life-a.life;}).slice(0,4);
+  var recent=list.slice(0,4);
+  var avg = list.length? Math.round(list.reduce(function(s,d){return s+d.life;},0)/list.length) : 0;
+  var kpis=[[e.donors.toLocaleString(),'Donors'],[money(e.ytd),'YTD raised'],[money(e.lifetime),'Lifetime'],[moneyFull(avg),'Avg lifetime'],['+'+(6+(e.donors%40)),'New (90d)'],[String(3+(e.donors%12)),'Lapsing']];
+  var kh='<div class="kpis">'+kpis.map(function(k){return '<div class="kpi"><div class="kv">'+k[0]+'</div><div class="kk">'+k[1]+'</div></div>';}).join('')+'</div>';
+  var topH=top.map(function(d){return '<div class="mrow"><div class="mav">'+d.ini+'</div><div><div class="mn">'+d.name+'</div><div class="ms">'+d.city+'</div></div><div class="mr"><div class="a mono">'+moneyFull(d.life)+'</div><div class="b">lifetime</div></div></div>';}).join('') || '<div class="muted" style="font-size:13px">No donors linked yet.</div>';
+  var recH=recent.map(function(d){return '<div class="mrow"><div class="mav">'+d.ini+'</div><div><div class="mn">'+d.name+'</div><div class="ms">'+d.gifts[0].f+'</div></div><div class="mr"><div class="a mono">'+moneyFull(d.gifts[0].a)+'</div><div class="b">'+d.gifts[0].d+'</div></div></div>';}).join('') || '<div class="muted" style="font-size:13px">No recent gifts.</div>';
+  var tableRows=list.map(function(d){return '<tr onclick="openDonorDrawer(\''+d.id+'\')"><td><div class="ent-name">'+d.name+'</div><div class="ent-id">'+d.city+'</div></td><td class="r mono">'+moneyFull(d.life)+'</td><td class="r mono">'+moneyFull(d.ytd)+'</td><td class="mono">'+d.gifts[0].d+'</td><td class="r"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#94A3B8" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg></td></tr>';}).join('');
+  return kh
+    +'<div class="two-col" style="margin-top:16px"><div><div class="sec-lbl">Top donors</div>'+topH+'</div><div><div class="sec-lbl">Recent gifts</div>'+recH+'</div></div>'
+    +'<div class="sec-lbl">All donors in this entity <span class="muted" style="font-weight:400;text-transform:none;letter-spacing:0">('+list.length+' shown)</span></div>'
+    +'<table class="etbl"><thead><tr><th>Donor</th><th class="r">Lifetime</th><th class="r">YTD</th><th>Last gift</th><th></th></tr></thead><tbody>'+(tableRows||'<tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:24px">No donors linked to this entity in the sample.</td></tr>')+'</tbody></table>';
+}
+function ensureDetail(e){
+  if(e._d) return; e._d=true;
+  var city=(e.name.split('·')[1]||' Albany').trim();
+  e.tax={classification:'501(c)(3) public charity', gen:'0928 · USCCB', footer:'“'+e.name+' is a tax-exempt organization under IRC §501(c)(3), EIN '+(e.ein||'[EIN pending]')+'. No goods or services were provided in exchange for this contribution except as noted. Please retain this receipt for your tax records.”'};
+  e.addresses={
+    registered:{street:'1 Diocesan Plaza',unit:'Suite 400',city:city,state:e.state,zip:'12203',country:'United States'},
+    mailing:{street:'PO Box 1420',unit:'',city:city,state:e.state,zip:'12201',country:'United States'},
+    remittance: e.issues.some(function(x){return /remittance/i.test(x.t);})? null : {street:'40 N Main Ave',unit:'Attn: Finance Office',city:city,state:e.state,zip:'12203',country:'United States'}
+  };
+  e.bank={merchant:e.merchant,deposit:'•••• 4821 · KeyBank',routing:'••••• 0142',payout:'Daily · next-day ACH',processor:'GiveCentral Pay',recon:'Auto · to GL 1010'};
+  e.receipt={logo:e.name.split('·')[0].trim()+' crest',signatory:'Most Rev. Bishop · Chancellor',template:'Entity Gift Acknowledgment v3',autosend:'On gift · within 24h'};
+  e.users=[{n:'Sarah Reynolds',r:'Development Director',i:'SR'},{n:'Jamie Morrison',r:'Gift Officer',i:'JM'},{n:'Ava Chen',r:'Database Admin',i:'AC'},{n:'Tom Boyle',r:'Read-only',i:'TB'}];
+  var fnames=['Annual Appeal','Capital Campaign','Cemetery Care','Tuition Assistance','Ministry Fund','Building Fund'];
+  e.fundList=(e.funds>0?fnames.slice(0,e.funds):[]).map(function(n,i){return {name:n,ytd:Math.round(e.ytd/(i+2))};});
+}
+function secRow(label,actionLabel,onclick){ return '<div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px"><div class="sec-lbl" style="margin:0">'+label+'</div><span style="font-size:12.5px;font-weight:600;color:var(--blue);cursor:pointer" onclick="'+onclick+'">'+actionLabel+'</span></div>'; }
+function openRawDrawer(title,sub,body,onSubmit,saveLabel){
+  window.__submit=onSubmit;
+  document.getElementById('drawer-root').innerHTML='<div class="scrim" onclick="closeDrawer()"></div><div class="drawer"><div class="drawer-head"><div><div class="drawer-title">'+title+'</div><div class="drawer-sub">'+sub+'</div></div><div class="drawer-x" onclick="closeDrawer()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg></div></div><div class="drawer-body">'+body+'</div><div class="drawer-foot"><button class="btn btn-ghost" onclick="closeDrawer()">Cancel</button><button class="btn btn-primary" onclick="doSubmit()">'+(saveLabel||'Save')+'</button></div></div>';
+}
+function doSubmit(){ if(window.__submit) window.__submit(); }
+function editDrawer(title,sub,fields,onSave,saveLabel){
+  var body=fields.map(function(f,idx){ var mt=idx>0?' style="margin-top:14px"':'';
+    if(f.type==='select') return '<label class="lbl"'+mt+'>'+f.label+'</label><select class="fld" id="ef-'+f.key+'">'+f.options.map(function(o){return '<option'+(o===f.value?' selected':'')+'>'+o+'</option>';}).join('')+'</select>';
+    if(f.type==='textarea') return '<label class="lbl"'+mt+'>'+f.label+'</label><textarea class="fld" id="ef-'+f.key+'" style="min-height:96px">'+(f.value||'')+'</textarea>';
+    return '<label class="lbl"'+mt+'>'+f.label+'</label><input class="fld" id="ef-'+f.key+'" value="'+String(f.value||'').replace(/"/g,'&quot;')+'" placeholder="'+(f.ph||'')+'">';
+  }).join('');
+  openRawDrawer(title,sub,body,function(){ var out={}; fields.forEach(function(f){var el=document.getElementById('ef-'+f.key); out[f.key]=el?el.value.trim():'';}); onSave(out); }, saveLabel);
+}
+
+/* ---- Tax & compliance ---- */
+function taxTab(e){
+  var reg = e.stateRegDays<0? '<span class="tag rose">Expired '+(-e.stateRegDays)+'d ago</span>' : (e.stateRegDays<30? '<span class="tag amber">Renews in '+e.stateRegDays+'d</span>':'<span class="tag green">Current</span>');
+  var facts=[['EIN / Tax ID',e.ein||'— Missing'],['Entity classification',e.tax.classification],['NY CHAR500 registration',reg],['Fiscal year end',e.fye],['Group ruling (GEN)',e.tax.gen],['State(s) registered',e.state]];
+  return secRow('Tax &amp; compliance','Edit tax details','editTax()')
+    +'<div class="fact-grid">'+facts.map(function(f){return '<div class="fact"><div class="k">'+f[0]+'</div><div class="v">'+f[1]+'</div></div>';}).join('')+'</div>'
+    +secRow('Receipt substantiation footer','Edit footer','editFooter()')
+    +'<div class="card"><div class="card-body" style="font-size:12.5px;line-height:1.6;color:var(--text-2)">'+e.tax.footer+' <span class="muted" style="display:block;margin-top:8px">Effective-dated · historical receipts keep the values in force when issued.</span></div></div>';
+}
+function rebuildRegIssue(e){ e.issues=e.issues.filter(function(x){return !/registration/i.test(x.t);});
+  if(e.stateRegDays<0) e.issues.push({t:'State charitable registration expired',s:'NY CHAR500 lapsed '+(-e.stateRegDays)+' days ago.',lvl:'alert'});
+  else if(e.stateRegDays<30) e.issues.push({t:'State registration expiring',s:'NY CHAR500 renews in '+e.stateRegDays+' days.',lvl:'warn'}); }
+function editTax(){ var e=curEntity; var regState=e.stateRegDays<0?'Expired':(e.stateRegDays<30?'Renews soon':'Current');
+  editDrawer('Edit tax details',e.id,[
+   {key:'ein',label:'EIN / Tax ID',value:e.ein,ph:'14-XXXXXXX'},
+   {key:'classification',label:'Entity classification',value:e.tax.classification,type:'select',options:['501(c)(3) public charity','501(c)(3) private foundation','Religious organization','Government instrumentality']},
+   {key:'char',label:'NY CHAR500 status',value:regState,type:'select',options:['Current','Renews soon','Expired']},
+   {key:'fye',label:'Fiscal year end',value:e.fye,type:'select',options:['Jun 30','Aug 31','Dec 31']},
+   {key:'gen',label:'Group ruling (GEN)',value:e.tax.gen},
+   {key:'state',label:'State(s) registered',value:e.state}
+  ], function(v){ e.ein=v.ein; e.tax.classification=v.classification; e.fye=v.fye; e.tax.gen=v.gen; e.state=v.state;
+    e.stateRegDays = v.char==='Expired'?-4:(v.char==='Renews soon'?20:210);
+    rebuildRegIssue(e); recomputeHealth(e); closeDrawer(); render(); toast('✓ Tax details saved'); }, 'Save changes'); }
+function editFooter(){ var e=curEntity; editDrawer('Edit receipt footer',e.id,[{key:'footer',label:'Substantiation footer',value:e.tax.footer,type:'textarea'}], function(v){ e.tax.footer=v.footer; closeDrawer(); render(); toast('✓ Footer saved'); },'Save'); }
+
+/* ---- Addresses ---- */
+function fmtAddr(o){ if(!o) return ''; var cs=[o.city,(o.state||'')+(o.zip?' '+o.zip:'')].filter(function(x){return x&&x.trim();}).join(', '); return [o.street,o.unit,cs,(o.country&&o.country!=='United States'?o.country:'')].filter(Boolean).join('<br>'); }
+function addrTab(e){
+  var a=e.addresses;
+  function card(key,title,obj){
+    var body = obj? '<div class="av">'+fmtAddr(obj)+'</div>' : '<div class="av" style="color:var(--amber)">Not set — <span style="color:var(--blue);cursor:pointer;font-weight:600" onclick="editAddr(\''+key+'\')">add address</span></div>';
+    var edit = obj? '<span style="margin-left:auto;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer" onclick="editAddr(\''+key+'\')">Edit</span>':'';
+    return '<div class="addr-card"><div class="al"><svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.6"/></svg>'+title+edit+'</div>'+body+'</div>';
+  }
+  return '<div class="two-col">'+card('registered','Registered / legal',a.registered)+card('mailing','Mailing',a.mailing)+card('remittance','Remittance (send checks to)',a.remittance)+'</div>';
+}
+function editAddr(key){ var e=curEntity; var o=e.addresses[key]||{}; var titles={registered:'Registered / legal address',mailing:'Mailing address',remittance:'Remittance address'};
+  openRawDrawer('Edit '+titles[key],e.id,'<label class="lbl">Find address</label>'+addrEditorHTML(o), function(){ var a=readAddr(); if(!a.street&&!a.city){toast('Enter an address');return;} e.addresses[key]=a; if(key==='remittance'){ e.issues=e.issues.filter(function(x){return !/remittance/i.test(x.t);}); recomputeHealth(e); } closeDrawer(); render(); toast('✓ Address saved'); },'Save address'); }
+
+/* ---- Banking & merchant ---- */
+function bankTab(e){
+  var b=e.bank; var facts=[['GiveCentral merchant',b.merchant],['Deposit account',b.deposit],['Routing',b.routing],['Payout schedule',b.payout],['Processor',b.processor],['Reconciliation',b.recon]];
+  return secRow('Banking &amp; merchant','Edit banking','editBank()')
+    +'<div class="fact-grid">'+facts.map(function(f){return '<div class="fact"><div class="k">'+f[0]+'</div><div class="v mono">'+f[1]+'</div></div>';}).join('')+'</div>'
+    +'<div class="check warn" style="margin-top:16px"><span class="ci">⚠</span><div><div class="ct">Bank &amp; EIN changes are audit-logged</div><div class="cs">Edits to routing, deposit account, or Tax ID require Administrator approval and are retained for 7 years.</div></div></div>';
+}
+function editBank(){ var e=curEntity; var b=e.bank; editDrawer('Edit banking & merchant',e.id+' · audit-logged',[
+  {key:'merchant',label:'GiveCentral merchant',value:b.merchant},
+  {key:'deposit',label:'Deposit account',value:b.deposit},
+  {key:'routing',label:'Routing',value:b.routing},
+  {key:'payout',label:'Payout schedule',value:b.payout,type:'select',options:['Daily · next-day ACH','Weekly · Friday','Monthly · 1st']},
+  {key:'processor',label:'Processor',value:b.processor,type:'select',options:['GiveCentral Pay','Stripe','Authorize.net']},
+  {key:'recon',label:'Reconciliation',value:b.recon}
+ ], function(v){ e.bank=v; closeDrawer(); render(); toast('✓ Banking updated · logged'); },'Save changes'); }
+
+/* ---- Receipting ---- */
+function receiptTab(e){
+  var r=e.receipt;
+  return secRow('Receipting','Edit receipting','editReceipt()')
+   +'<div class="two-col"><div><div class="card"><div class="card-body"><div class="fact" style="border:1px solid var(--border);border-radius:10px"><div class="k">Receipt logo</div><div class="v">'+r.logo+'</div></div><div class="fact" style="border:1px solid var(--border);border-radius:10px;margin-top:8px"><div class="k">Signatory</div><div class="v">'+r.signatory+'</div></div></div></div></div>'
+   +'<div><div class="card"><div class="card-body"><div class="fact" style="border:1px solid var(--border);border-radius:10px"><div class="k">Template</div><div class="v">'+r.template+'</div></div><div class="fact" style="border:1px solid var(--border);border-radius:10px;margin-top:8px"><div class="k">Auto-send</div><div class="v">'+r.autosend+'</div></div></div></div></div></div>';
+}
+function editReceipt(){ var e=curEntity; var r=e.receipt; editDrawer('Edit receipting',e.id,[
+  {key:'logo',label:'Receipt logo',value:r.logo},
+  {key:'signatory',label:'Signatory',value:r.signatory},
+  {key:'template',label:'Acknowledgment template',value:r.template,type:'select',options:['Entity Gift Acknowledgment v3','Standard Receipt v2','Year-end Statement']},
+  {key:'autosend',label:'Auto-send',value:r.autosend,type:'select',options:['On gift · within 24h','On gift · immediate','Manual only']}
+ ], function(v){ e.receipt=v; closeDrawer(); render(); toast('✓ Receipting saved'); },'Save changes'); }
+
+/* ---- Access ---- */
+function accessTab(e){
+  var rows=e.users.map(function(u,ix){return '<div class="mrow"><div class="mav">'+u.i+'</div><div><div class="mn">'+u.n+'</div><div class="ms">'+u.r+'</div></div><div class="mr" style="display:flex;align-items:center;gap:10px;margin-left:auto"><span class="tag green">Active</span><span style="font-size:12px;color:var(--rose);cursor:pointer;font-weight:600" onclick="removeUser('+ix+')">Remove</span></div></div>';}).join('') || '<div class="muted" style="font-size:13px">No users scoped yet.</div>';
+  return secRow('Users scoped to this entity ('+e.users.length+')','+ Add user','addUser()')+rows
+    +'<button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="window.location.href=\'atlas-users-roles.html\'">Manage in Users &amp; roles →</button>';
+}
+function removeUser(ix){ curEntity.users.splice(ix,1); render(); toast('✓ Access removed'); }
+function addUser(){ var e=curEntity; editDrawer('Add user access',e.name,[
+  {key:'name',label:'Full name',value:'',ph:'e.g. Jordan Blake'},
+  {key:'role',label:'Role',value:'Gift Officer',type:'select',options:['Administrator','Database Admin','Development Director','Gift Officer','Read-only']}
+ ], function(v){ if(!v.name){toast('Enter a name');return;} var ini=v.name.split(' ').filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); e.users.push({n:v.name,r:v.role,i:ini}); closeDrawer(); render(); toast('✓ '+v.name+' added'); },'Add user'); }
+
+/* ---- Funds ---- */
+function fundsTab(e){
+  var rows=e.fundList.map(function(f,i){return '<div class="mrow"><div class="mav" style="background:var(--teal-light);color:var(--teal)">$</div><div><div class="mn">'+f.name+'</div><div class="ms">Designation · '+e.id+'-F'+(i+1)+'</div></div><div class="mr" style="display:flex;align-items:center;gap:12px;margin-left:auto"><div style="text-align:right"><div class="a mono">'+money(f.ytd)+'</div><div class="b">YTD</div></div><span style="font-size:12px;color:var(--rose);cursor:pointer;font-weight:600" onclick="removeFund('+i+')">Remove</span></div></div>';}).join('') || '<div class="muted" style="font-size:13px">No designation funds yet.</div>';
+  return secRow('Designation funds owned ('+e.fundList.length+')','+ Add fund','addFund()')+rows;
+}
+function removeFund(i){ curEntity.fundList.splice(i,1); render(); toast('✓ Fund removed'); }
+function addFund(){ var e=curEntity; editDrawer('Add designation fund',e.name,[{key:'name',label:'Fund name',value:'',ph:'e.g. Building Fund'}], function(v){ if(!v.name){toast('Enter a fund name');return;} e.fundList.push({name:v.name,ytd:0}); closeDrawer(); render(); toast('✓ '+v.name+' added'); },'Add fund'); }
+
+/* ---- address autocomplete (shared by entity form + address editor) ---- */
+var ENT_ADDR_POOL=[
+ {street:'40 N Main Ave',city:'Albany',state:'NY',zip:'12203',country:'United States'},
+ {street:'1 Diocesan Plaza',city:'Albany',state:'NY',zip:'12203',country:'United States'},
+ {street:'100 Slingerland St',city:'Albany',state:'NY',zip:'12202',country:'United States'},
+ {street:'50 Broadway',city:'Troy',state:'NY',zip:'12180',country:'United States'},
+ {street:'200 Union St',city:'Schenectady',state:'NY',zip:'12305',country:'United States'},
+ {street:'25 Church Ave',city:'Ballston Spa',state:'NY',zip:'12020',country:'United States'},
+ {street:'12 Lake Ave',city:'Saratoga Springs',state:'NY',zip:'12866',country:'United States'},
+ {street:'88 Remsen St',city:'Cohoes',state:'NY',zip:'12047',country:'United States'},
+ {street:'7 Maple Ave',city:'Delmar',state:'NY',zip:'12054',country:'United States'},
+ {street:'340 Central Ave',city:'Albany',state:'NY',zip:'12206',country:'United States'},
+ {street:'15 Elm St',city:'Glens Falls',state:'NY',zip:'12801',country:'United States'},
+ {street:'600 Boston Post Rd',city:'Boston',state:'MA',zip:'02135',country:'United States'}
+];
+function esc(s){ return String(s==null?'':s).replace(/"/g,'&quot;'); }
+var SRCH_SVG='<svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>';
+function addrEditorHTML(o){ o=o||{};
+  return '<div class="addr-search"><span class="addr-ic">'+SRCH_SVG+'</span><input class="addr-inp" id="af-search" placeholder="Search street, city, or ZIP…" oninput="entAddrSuggest(this)" autocomplete="off"><div class="addr-sug" id="ent-addr-sug"></div></div>'
+   +'<div class="af-or">or enter manually</div>'
+   +'<div class="addr-fields">'
+   +'<input class="fld" id="af-street" placeholder="Street address" value="'+esc(o.street)+'">'
+   +'<input class="fld" id="af-unit" placeholder="Suite / unit / attention (optional)" value="'+esc(o.unit)+'">'
+   +'<div class="af-row"><input class="fld" id="af-city" placeholder="City" value="'+esc(o.city)+'"><input class="fld" id="af-state" placeholder="State" style="max-width:84px" value="'+esc(o.state)+'"><input class="fld" id="af-zip" placeholder="ZIP" style="max-width:104px" value="'+esc(o.zip)+'" oninput="entZipLookup(this)"></div>'
+   +'<select class="fld" id="af-country">'+['United States','Canada','Mexico'].map(function(c){return '<option'+((o.country||'United States')===c?' selected':'')+'>'+c+'</option>';}).join('')+'</select>'
+   +'</div>';
+}
+function readAddr(){ var g=function(id){var el=document.getElementById(id);return el?el.value.trim():'';}; return {street:g('af-street'),unit:g('af-unit'),city:g('af-city'),state:g('af-state'),zip:g('af-zip'),country:g('af-country')}; }
+function entAddrSuggest(inp){
+  var q=inp.value.toLowerCase().trim(); var box=document.getElementById('ent-addr-sug'); if(!box)return;
+  if(q.length<2){ box.innerHTML=''; box.classList.remove('show'); return; }
+  var m=ENT_ADDR_POOL.filter(function(a){ return (a.street+' '+a.city+' '+a.state+' '+a.zip).toLowerCase().indexOf(q)>-1; }).slice(0,6);
+  if(!m.length){ box.innerHTML='<div class="sug-add">No match — fill the fields below to add manually.</div>'; box.classList.add('show'); return; }
+  box.innerHTML=m.map(function(a,ix){return '<div class="sug-item" onclick="entAddrPick('+ix+')"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.6"/></svg><div><div class="st">'+a.street+'</div><div class="sc">'+a.city+', '+a.state+' '+a.zip+'</div></div></div>';}).join('');
+  box.__matches=m; box.classList.add('show');
+}
+function entAddrPick(ix){ var box=document.getElementById('ent-addr-sug'); var a=box.__matches&&box.__matches[ix]; if(!a)return;
+  document.getElementById('af-street').value=a.street; document.getElementById('af-unit').value=''; document.getElementById('af-city').value=a.city; document.getElementById('af-state').value=a.state; document.getElementById('af-zip').value=a.zip; var c=document.getElementById('af-country'); if(c)c.value=a.country||'United States';
+  document.getElementById('af-search').value=a.street+', '+a.city+' '+a.zip; box.innerHTML=''; box.classList.remove('show'); toast('Address filled — edit any field'); }
+function entZipLookup(inp){ var z=inp.value.trim(); if(!/^\d{5}$/.test(z)) return; var a=ENT_ADDR_POOL.find(function(x){return x.zip===z;}); if(a){ var ci=document.getElementById('af-city'), st=document.getElementById('af-state'); if(ci&&!ci.value) ci.value=a.city; if(st&&!st.value) st.value=a.state; toast('ZIP '+z+' → '+a.city+', '+a.state); } }
+
+/* ---- redesigned Add / Edit entity ---- */
+function entityDrawer(mode){
+  var e = mode==='edit'? curEntity : {name:'',type:'Parish',ein:'',state:'NY'};
+  if(mode==='edit') ensureDetail(e);
+  var reg = mode==='edit'? (e.addresses&&e.addresses.registered) : null;
+  var types=['Diocese','Foundation','Charity','Parish','School','Cemetery','Ministry'];
+  var body=''
+    +'<div class="form-sec"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="5" width="10" height="8" rx="1"/><path d="M4 5V3.5A1.5 1.5 0 015.5 2h3A1.5 1.5 0 0110 3.5V5"/></svg>Identity</div>'
+    +'<div class="fw"><label class="lbl">Legal name <span style="color:var(--rose)">*</span></label><input class="fld" id="ef-name" value="'+esc(e.name)+'" placeholder="e.g. St. Anne Parish · Albany"></div>'
+    +'<div class="form-row"><div class="fw"><label class="lbl">Entity type</label><select class="fld" id="ef-type">'+types.map(function(t){return '<option'+(t===e.type?' selected':'')+'>'+t+'</option>';}).join('')+'</select></div>'
+    +'<div class="fw"><label class="lbl">EIN / Tax ID</label><input class="fld" id="ef-ein" value="'+esc(e.ein)+'" placeholder="14-XXXXXXX"><div class="hint">9 digits · required before receipts can be issued</div></div></div>'
+    +(mode==='edit'?'<div class="fw"><label class="lbl">Status</label><select class="fld" id="ef-status">'+['Active','Pending','Inactive'].map(function(s){return '<option'+(s===e.status?' selected':'')+'>'+s+'</option>';}).join('')+'</select></div>':'')
+    +'<div class="form-sec"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.6"/></svg>Registered address</div>'
+    +addrEditorHTML(reg);
+  openRawDrawer(mode==='edit'?'Edit entity':'Add legal entity', mode==='edit'? (e.id+' · changes are audit-logged') : 'Becomes selectable as a scope across Atlas.', body, function(){
+    var g=function(id){var el=document.getElementById(id);return el?el.value.trim():'';};
+    var name=g('ef-name'); if(!name){ toast('Enter a legal name'); var n=document.getElementById('ef-name'); if(n)n.focus(); return; }
+    var a=readAddr();
+    if(mode==='add'){
+      var idx=ENT.length; var ne={name:name,type:g('ef-type'),id:'LE-'+(1000+idx),state:a.state||'NY',status:'Pending',donors:0,ytd:0,lifetime:0,ein:g('ef-ein'),stateRegDays:210,issues:[],fye:'Dec 31',merchant:'GC-'+(4400+idx),funds:0};
+      if(!ne.ein) ne.issues.push({t:'Tax ID (EIN) missing',s:'Receipts can’t be issued until an EIN is on file.',lvl:'alert'});
+      recomputeHealth(ne); ENT.push(ne); EMAP[ne.id]=ne; ensureDetail(ne);
+      if(a.street||a.city) ne.addresses.registered=a;
+      document.getElementById('nav-ct').textContent=ENT.length; closeDrawer(); render(); toast('✓ '+ne.name+' created');
+    } else {
+      e.name=name; e.type=g('ef-type'); e.ein=g('ef-ein'); e.status=g('ef-status')||e.status; if(a.state) e.state=a.state;
+      if(a.street||a.city) e.addresses.registered=a;
+      recomputeHealth(e); closeDrawer(); render(); toast('✓ Changes saved');
+    }
+  }, mode==='edit'?'Save changes':'Create entity');
+}
+function addEntityForm(){ entityDrawer('add'); }
+function editEntityForm(){ entityDrawer('edit'); }
+window.entAddrSuggest=entAddrSuggest; window.entAddrPick=entAddrPick; window.entZipLookup=entZipLookup;
+window.doSubmit=doSubmit; window.editTax=editTax; window.editFooter=editFooter; window.editAddr=editAddr;
+window.editBank=editBank; window.editReceipt=editReceipt; window.addUser=addUser; window.removeUser=removeUser;
+window.addFund=addFund; window.removeFund=removeFund;
+
+/* ---- Global donor search ---- */
+function donorSearchView(){
+  var sc=SCOPES[scopeKey];
+  var isAll=(sc.ids.length===ENT.length);
+  var scopeNames=isAll? ('all '+ENT.length+' entities') : (sc.ids.slice(0,3).map(function(id){return EMAP[id]?EMAP[id].name:id;}).join(', ')+(sc.ids.length>3?' +'+(sc.ids.length-3)+' more':''));
+  var bar='<div class="scope-bar"><span class="si"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M4.5 6V4.5a2.5 2.5 0 015 0V6"/></svg></span>'
+    +'<div>Anyone can find any donor across all '+ENT.length+' entities. <b>Gift &amp; payment details show only for donors in your entities:</b> '+scopeNames+'.</div>'
+    +'<span class="preview-as"><span class="pa-lbl">Preview as:</span><select class="fld" onchange="setScope(this.value)" title="Preview the access-gating as a different role — demo only">'+Object.keys(SCOPES).map(function(k){return '<option value="'+k+'"'+(k===scopeKey?' selected':'')+'>'+SCOPES[k].label+'</option>';}).join('')+'</select></span></div>';
+  var q=donorQuery.toLowerCase();
+  var CAP=60;
+  var myCount=DONORS.filter(function(d){return inScope(d.entityId);}).length;
+  var res, searching=!!q;
+  if(searching){ res=DONORS.filter(function(d){return d.name.toLowerCase().indexOf(q)>-1 || (EMAP[d.entityId]&&EMAP[d.entityId].name.toLowerCase().indexOf(q)>-1) || d.city.toLowerCase().indexOf(q)>-1;}); }
+  else { res=DONORS.filter(function(d){return inScope(d.entityId);}); }
+  var total=res.length, shown=res.slice(0,CAP);
+  var box='<div class="toolbar"><div class="search-box" style="max-width:560px"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input placeholder="Search any of '+DONORS.length.toLocaleString()+' donors by name, entity, or city…" value="'+donorQuery.replace(/"/g,'&quot;')+'" oninput="donorSearch(this.value)"></div></div>';
+  var subline = searching
+    ? (total.toLocaleString()+' result'+(total===1?'':'s')+' matching “'+donorQuery+'” · across all '+ENT.length+' entities')
+    : ('Your donors · '+myCount.toLocaleString()+' across your '+(isAll?ENT.length:sc.ids.length)+' entit'+((isAll?ENT.length:sc.ids.length)===1?'y':'ies')+' — search to find any of '+DONORS.length.toLocaleString()+' donors');
+  var head='<div class="tbl-foot" style="padding:2px 4px 12px"><span>'+subline+'</span>'+(total>CAP?'<span>showing first '+CAP+'</span>':'')+'</div>';
+  var rows=shown.map(function(d){
+    var e=EMAP[d.entityId]; var ok=inScope(d.entityId);
+    var lock = ok? '<span class="lockmini" style="color:var(--green)"><svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h8v5H3zM5 7V5a2 2 0 014 0"/></svg>Full access</span>'
+      : '<span class="lockmini" style="color:var(--amber)"><svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M4.5 6V4.5a2.5 2.5 0 015 0V6"/></svg>Financials locked</span>';
+    return '<div class="dsr" onclick="openDonorDrawer(\''+d.id+'\')"><div class="mav">'+d.ini+'</div><div><div class="mn" style="font-size:13.5px;font-weight:600">'+d.name+'</div><div class="ms" style="font-size:12px;color:var(--text-3)">'+e.name+' · '+d.city+'</div></div>'+lock+'</div>';
+  }).join('');
+  var more = total>CAP? '<div style="text-align:center;padding:14px;color:var(--text-3);font-size:12.5px">+'+(total-CAP).toLocaleString()+' more — '+(searching?'refine your search to narrow results':'search to find any donor')+'</div>':'';
+  return bar+box+head+(shown.length?rows:'<div class="muted" style="padding:24px;text-align:center">No donors found'+(searching?' matching “'+donorQuery+'”':'')+'.</div>')+more;
+}
+function openDonorDrawer(id){
+  var d=DONORS.find(function(x){return x.id===id;}); if(!d) return;
+  var e=EMAP[d.entityId]; var ok=inScope(d.entityId);
+  var identity='<div style="display:flex;align-items:center;gap:13px;margin-bottom:6px"><div class="mav" style="width:46px;height:46px;font-size:15px">'+d.ini+'</div><div><div style="font-size:17px;font-weight:700">'+d.name+'</div><div class="muted" style="font-size:12.5px">'+e.name+'</div></div></div>'
+    +'<div class="fact-grid" style="margin-top:14px"><div class="fact"><div class="k">Home entity</div><div class="v">'+e.name+'</div></div><div class="fact"><div class="k">City</div><div class="v">'+d.city+'</div></div><div class="fact"><div class="k">Email</div><div class="v" style="font-size:12.5px">'+d.email+'</div></div><div class="fact"><div class="k">Phone</div><div class="v mono">'+d.phone+'</div></div></div>';
+  var financials;
+  if(ok){
+    var giftRows=d.gifts.map(function(g){return '<div class="mrow"><div><div class="mn">'+moneyFull(g.a)+' · '+g.f+'</div><div class="ms">'+g.d+' · '+g.m+'</div></div></div>';}).join('');
+    financials='<div class="sec-lbl">Gifts &amp; payments</div>'
+      +'<div class="fact-grid" style="margin-bottom:12px"><div class="fact"><div class="k">Lifetime</div><div class="v mono">'+moneyFull(d.life)+'</div></div><div class="fact"><div class="k">YTD</div><div class="v mono">'+moneyFull(d.ytd)+'</div></div></div>'+giftRows;
+  } else {
+    financials='<div class="sec-lbl">Gifts &amp; payments</div>'
+      +'<div class="lockbox"><div class="lk"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></div>'
+      +'<div class="lt">Financial details restricted</div>'
+      +'<div class="ls"><b>'+d.name+'</b> is managed by <b>'+e.name+'</b>, which isn’t in your entity access. You can see profile &amp; contact, but not gifts or payments.</div>'
+      +'<button class="btn btn-ghost btn-sm" style="margin-top:14px" onclick="requestAccess(this,\''+d.entityId+'\')">Request access →</button></div>'
+      +'<div style="margin-top:14px"><div class="sec-lbl">Preview (locked)</div><div class="fact-grid blur"><div class="fact"><div class="k">Lifetime</div><div class="v mono">$00,000</div></div><div class="fact"><div class="k">YTD</div><div class="v mono">$0,000</div></div></div></div>';
+  }
+  document.getElementById('drawer-root').innerHTML=
+    '<div class="scrim" onclick="closeDrawer()"></div><div class="drawer"><div class="drawer-head"><div><div class="drawer-title">Donor</div><div class="drawer-sub">'+(ok?'In your entity access':'Cross-entity · limited view')+'</div></div><div class="drawer-x" onclick="closeDrawer()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg></div></div><div class="drawer-body">'+identity+'<div class="divider"></div>'+financials+'</div></div>';
+}
+function closeDrawer(){ document.getElementById('drawer-root').innerHTML=''; }
+
+/* ---- events ---- */
+function setHub(t){ hubTab=t; render(); }
+function entSearch(v){ entQuery=v; var w=document.querySelector('.etbl'); var f=document.querySelector('.tbl-foot'); document.getElementById('dash'); rerenderEntities(); }
+function rerenderEntities(){ // re-render just the list area to keep input focus
+  var container=document.getElementById('dash');
+  // rebuild whole hub (simple + safe)
+  var scrollY=window.scrollY; container.innerHTML=pageHead()+hubTabs()+entitiesView(); var inp=container.querySelector('.search-box input'); if(inp){inp.focus(); inp.setSelectionRange(inp.value.length,inp.value.length);} window.scrollTo(0,scrollY);
+}
+function entSetType(v){ entFilterType=v; rerenderEntities(); }
+function entSetHealth(v){ entFilterHealth=v; rerenderEntities(); }
+function donorSearch(v){ donorQuery=v; var container=document.getElementById('dash'); var scrollY=window.scrollY; container.innerHTML=pageHead()+hubTabs()+donorSearchView(); var inp=container.querySelector('.search-box input'); if(inp){inp.focus(); inp.setSelectionRange(inp.value.length,inp.value.length);} window.scrollTo(0,scrollY); }
+function setScope(k){ scopeKey=k; donorSearch(donorQuery); }
+
+/* ---- toast ---- */
+function toast(m){ var t=document.getElementById('le-toast'); if(!t){t=document.createElement('div');t.id='le-toast';document.body.appendChild(t);} t.textContent=m; t.className='le-toast show'; clearTimeout(window.__tt); window.__tt=setTimeout(function(){t.className='le-toast';},2200); }
+
+/* ---- consolidated toggle ---- */
+var groupBy='parent'; // 'parent' | 'type' | 'none'
+var GROUP_LABEL={parent:'Consolidated',type:'By type',none:'Per-entity'};
+var GROUP_SUB={parent:'consolidated totals',type:'grouped by type',none:'per-entity totals'};
+function toggleConsMenu(ev){ ev.stopPropagation(); var host=document.getElementById('cons-menu'); if(host.innerHTML){ host.innerHTML=''; return; }
+  var opts=[['parent','Consolidated','Roll up under parent org'],['type','By type','Group by entity type'],['none','Per-entity','Every entity, standalone']];
+  host.innerHTML='<div class="menu">'+opts.map(function(o){return '<div class="mi '+(groupBy===o[0]?'on':'')+'" onclick="setGroupBy(\''+o[0]+'\')"><div><div>'+o[1]+'</div><div style="font-size:11px;color:var(--text-3);font-weight:400">'+o[2]+'</div></div>'+(groupBy===o[0]?'<span class="ck">✓</span>':'')+'</div>';}).join('')+'</div>';
+}
+function setGroupBy(v){ groupBy=v; expanded={}; var h=document.getElementById('cons-menu'); if(h) h.innerHTML=''; render(); toast('Showing '+GROUP_SUB[v]); }
+document.addEventListener('click',function(){ var h=document.getElementById('cons-menu'); if(h) h.innerHTML=''; });
+
+/* ---- add / edit entity ---- */
+function formFields(v,withStatus){
+  var types=['Diocese','Foundation','Charity','Parish','School','Cemetery','Ministry'];
+  var h='<label class="lbl">Legal name</label><input class="fld" id="f-name" value="'+(v.name||'').replace(/"/g,'&quot;')+'" placeholder="e.g. St. Anne Parish · Albany">'
+   +'<label class="lbl" style="margin-top:14px">Entity type</label><select class="fld" id="f-type">'+types.map(function(t){return '<option'+(t===v.type?' selected':'')+'>'+t+'</option>';}).join('')+'</select>'
+   +'<label class="lbl" style="margin-top:14px">EIN / Tax ID</label><input class="fld" id="f-ein" value="'+(v.ein||'')+'" placeholder="14-XXXXXXX">'
+   +'<label class="lbl" style="margin-top:14px">Registered state</label><input class="fld" id="f-state" value="'+(v.state||'NY')+'">';
+  if(withStatus) h+='<label class="lbl" style="margin-top:14px">Status</label><select class="fld" id="f-status">'+['Active','Pending','Inactive'].map(function(s){return '<option'+(s===v.status?' selected':'')+'>'+s+'</option>';}).join('')+'</select>';
+  return h;
+}
+function openFormDrawer(title,sub,bodyHtml,onSave,saveLabel){
+  window.__onSave=onSave;
+  document.getElementById('drawer-root').innerHTML='<div class="scrim" onclick="closeDrawer()"></div><div class="drawer"><div class="drawer-head"><div><div class="drawer-title">'+title+'</div><div class="drawer-sub">'+sub+'</div></div><div class="drawer-x" onclick="closeDrawer()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg></div></div><div class="drawer-body">'+bodyHtml+'</div><div class="drawer-foot"><button class="btn btn-ghost" onclick="closeDrawer()">Cancel</button><button class="btn btn-primary" onclick="submitForm()">'+(saveLabel||'Save')+'</button></div></div>';
+}
+function submitForm(){ var g=function(id){var el=document.getElementById(id);return el?el.value.trim():'';}; var vals={name:g('f-name'),type:g('f-type'),ein:g('f-ein'),state:g('f-state'),status:g('f-status')}; if(!vals.name){toast('Enter a legal name');return;} if(window.__onSave) window.__onSave(vals); }
+function recomputeHealth(e){ if(e.ein){ e.issues=e.issues.filter(function(x){return !/Tax ID/.test(x.t);}); } e.health=e.issues.some(function(x){return x.lvl==='alert';})?'alert':(e.issues.length?'warn':'ok'); }
+function addEntityForm_legacy(){ openFormDrawer('Add legal entity','Becomes selectable as a scope across Atlas.', formFields({name:'',type:'Parish',ein:'',state:'NY'},false), function(vals){
+  var idx=ENT.length; var e={name:vals.name,type:vals.type,id:'LE-'+(1000+idx),state:vals.state||'NY',status:'Pending',donors:0,ytd:0,lifetime:0,ein:vals.ein,stateRegDays:210,issues:[],fye:'Dec 31',merchant:'GC-'+(4400+idx),funds:0};
+  if(!e.ein) e.issues.push({t:'Tax ID (EIN) missing',s:'Receipts can’t be issued until an EIN is on file.',lvl:'alert'});
+  recomputeHealth(e); ENT.push(e); EMAP[e.id]=e; document.getElementById('nav-ct').textContent=ENT.length; closeDrawer(); render(); toast('✓ '+e.name+' created'); }, 'Create entity'); }
+function editEntityForm_legacy(){ var e=curEntity; openFormDrawer('Edit entity',e.id, formFields(e,true), function(vals){ e.name=vals.name; e.type=vals.type; e.ein=vals.ein; e.state=vals.state; e.status=vals.status; recomputeHealth(e); closeDrawer(); render(); toast('✓ Changes saved'); }, 'Save changes'); }
+function toggleActive(){ var e=curEntity; e.status=(e.status==='Active')?'Inactive':'Active'; render(); toast('✓ '+e.name+' '+(e.status==='Active'?'activated':'deactivated')); }
+function resolveIssue(ix){ curEntity.issues.splice(ix,1); recomputeHealth(curEntity); render(); toast('✓ Marked resolved'); }
+function addRemittance(){ curEntity.issues=curEntity.issues.filter(function(x){return !/remittance/i.test(x.t);}); recomputeHealth(curEntity); render(); toast('✓ Remittance address added'); }
+function requestAccess(btn,entityId){ var e=EMAP[entityId]; btn.outerHTML='<div class="tag green" style="margin-top:14px;display:inline-flex">✓ Request sent to '+(e?e.name:'entity')+' admin</div>'; toast('✓ Access request sent'); }
+
+window.toast=toast; window.toggleConsMenu=toggleConsMenu; window.setGroupBy=setGroupBy;
+window.addEntityForm=addEntityForm; window.editEntityForm=editEntityForm; window.submitForm=submitForm;
+window.toggleActive=toggleActive; window.resolveIssue=resolveIssue; window.addRemittance=addRemittance; window.requestAccess=requestAccess;
+window.openEntity=openEntity; window.backToList=backToList; window.setEntityTab=setEntityTab; window.setHub=setHub;
+window.entSearch=entSearch; window.entSetType=entSetType; window.entSetHealth=entSetHealth;
+window.donorSearch=donorSearch; window.setScope=setScope; window.openDonorDrawer=openDonorDrawer; window.closeDrawer=closeDrawer;
+
+document.getElementById('nav-ct').textContent=ENT.length;
+render();
+</script>
+</body>
+</html>
