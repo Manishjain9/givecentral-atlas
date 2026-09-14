@@ -105,6 +105,23 @@
     }
     .user-name { font-size: 12px; font-weight: 500; color: rgba(255,255,255,.75); }
     .user-role { font-size: 10px; color: rgba(255,255,255,.35); margin-top: 1px; }
+    .sidebar-loc{display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,.55);margin-top:4px;}
+    .sidebar-loc svg{width:10px;height:10px;flex:0 0 auto;color:#C79E48;}
+    .sidebar-loc span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
+    .loc-wrap{position:relative;}
+    .loc-pill{display:inline-flex;align-items:center;gap:6px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:6px 11px;font-size:12.5px;font-weight:600;color:#334155;cursor:pointer;font-family:inherit;}
+    .loc-pill:hover{background:#EEF2F7;border-color:#94A3B8;}
+    .loc-pill svg.pin{width:12px;height:12px;color:#2563EB;flex:0 0 auto;}
+    .loc-pill .cw{color:#64748B;font-size:10px;margin-left:1px;}
+    .loc-pill .lbl{max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .loc-menu{position:absolute;left:0;top:42px;background:#fff;border:1px solid #E2E8F0;border-radius:10px;box-shadow:0 10px 30px rgba(15,23,42,.14);z-index:40;min-width:240px;max-height:320px;overflow:auto;}
+    .loc-menu .lm-h{padding:9px 13px 7px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#64748B;}
+    .loc-menu .lm-i{display:flex;align-items:center;gap:8px;padding:9px 13px;font-size:13px;cursor:pointer;color:#0F172A;}
+    .loc-menu .lm-i:hover{background:#F8FAFC;}
+    .loc-menu .lm-i.on{color:#2563EB;font-weight:600;}
+    .loc-menu .lm-i svg{width:12px;height:12px;color:#64748B;flex:0 0 auto;}
+    .loc-menu .lm-i.on svg{color:#2563EB;}
+    .loc-menu .lm-i .ck{margin-left:auto;color:#2563EB;}
 
     /* ══ MAIN ══ */
     .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -658,6 +675,7 @@ body {
       <div style="flex:1;min-width:0">
         <div class="user-name" id="u-name">Sarah Reynolds</div>
         <div class="user-role" id="u-role">Development Director</div>
+        <div class="sidebar-loc" id="sidebar-loc"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.6"/></svg><span>Diocese of Albany</span></div>
       </div>
       <svg viewBox="0 0 10 10" width="11" height="11" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 6.2l2 2 2-2M3 3.8l2-2 2 2"/></svg>
     </div>
@@ -668,6 +686,7 @@ body {
     <div class="topbar">
       <span class="topbar-title">Dashboard</span>
       <span class="topbar-date">Friday, April 3, 2026</span>
+      <div class="loc-wrap"><button class="loc-pill" onclick="toggleLocMenu(event)" title="Your active location — switch context"><svg class="pin" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.6"/></svg><span class="lbl" id="loc-pill-label">Diocese of Albany</span><span class="cw">▾</span></button><span id="loc-menu-host"></span></div>
       <div class="topbar-right">
         <button class="tb-btn tb-ghost" id="tb-schedule" onclick="openSchedule()">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="2" width="9" height="8" rx="1.2"/><path d="M1.5 5h9M4.5 2v2M7.5 2v2"/></svg>
@@ -3045,6 +3064,21 @@ body {
     setTimeout(function(){ document.addEventListener('click', outside, true); }, 0);
   }
   if(bell) bell.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); openPanel(); }, true);
+})();
+</script>
+<script>
+/* active location / context switcher (sidebar footer + topbar pill) */
+(function(){
+  var LOCS=['Diocese of Albany','Diocesan Foundation','Catholic Charities','Scholarship Foundation','St. Mary Parish · Albany','St. Patrick Catholic School · Amsterdam','Joseph Cemetery Assn · Colonie','Anne Ministry · Troy'];
+  var userLoc='Diocese of Albany';
+  function locToast(m){ var t=document.getElementById('loc-toast'); if(!t){t=document.createElement('div');t.id='loc-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#0E1E35;color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 12px 30px rgba(15,23,42,.25);opacity:0;pointer-events:none;transition:.2s;z-index:60';document.body.appendChild(t);} t.textContent=m;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';clearTimeout(window.__lt);window.__lt=setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';},2000); }
+  var pin='<svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.6"/></svg>';
+  window.toggleLocMenu=function(ev){ ev.stopPropagation(); var host=document.getElementById('loc-menu-host'); if(!host)return; if(host.innerHTML){host.innerHTML='';return;}
+    var items=LOCS.concat(['All entities']);
+    host.innerHTML='<div class="loc-menu"><div class="lm-h">Your locations · '+LOCS.length+'</div>'+items.map(function(n){return '<div class="lm-i '+(userLoc===n?'on':'')+'" data-n="'+n.replace(/"/g,'&quot;')+'" onclick="setUserLoc(this.getAttribute(\'data-n\'))">'+pin+'<span style="flex:1">'+n+'</span>'+(userLoc===n?'<span class="ck">✓</span>':'')+'</div>';}).join('')+'</div>';
+  };
+  window.setUserLoc=function(n){ userLoc=n; var l=document.getElementById('loc-pill-label'); if(l)l.textContent=n; var s=document.querySelector('#sidebar-loc span'); if(s)s.textContent=n; var host=document.getElementById('loc-menu-host'); if(host)host.innerHTML=''; locToast('Now viewing · '+n); };
+  document.addEventListener('click',function(){ var h=document.getElementById('loc-menu-host'); if(h) h.innerHTML=''; });
 })();
 </script>
 </body>
