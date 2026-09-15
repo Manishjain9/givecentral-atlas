@@ -43,6 +43,15 @@ a{color:inherit;text-decoration:none;}
 .user-avatar{width:30px;height:30px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
 .user-name{font-size:12px;font-weight:500;color:rgba(255,255,255,.75);}
 .user-role{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px;}
+.sidebar-loc{display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,.55);margin-top:4px;}
+.sidebar-loc svg{width:10px;height:10px;flex:0 0 auto;color:#C79E48;}
+.sidebar-loc span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;}
+.loc-wrap{position:relative;}
+.loc-pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 11px;font-size:12.5px;font-weight:600;color:var(--text-2);cursor:pointer;font-family:inherit;}
+.loc-pill:hover{background:#EEF2F7;border-color:#94A3B8;}
+.loc-pill svg.pin{width:12px;height:12px;color:var(--blue);flex:0 0 auto;}
+.loc-pill .cw{color:var(--text-3);font-size:10px;margin-left:1px;}
+.loc-pill .lbl{max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 /* main */
 .main{flex:1;min-width:0;display:flex;flex-direction:column;}
 .topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
@@ -232,13 +241,14 @@ select.fld{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <a class="nav-item active" href="atlas-legal-entities.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="5" width="10" height="8" rx="1"/><path d="M4 5V3.5A1.5 1.5 0 015.5 2h3A1.5 1.5 0 0110 3.5V5M7 8v2"/></svg>Legal Entities<span class="nav-badge" id="nav-ct">128</span></a>
     </div>
   </div>
-  <div class="sidebar-user"><div class="user-avatar">SR</div><div><div class="user-name">Sarah Reynolds</div><div class="user-role">Development Director</div></div></div>
+  <div class="sidebar-user"><div class="user-avatar">SR</div><div style="min-width:0"><div class="user-name">Sarah Reynolds</div><div class="user-role">Development Director</div><div class="sidebar-loc" id="sidebar-loc"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.6"/></svg><span>Diocese of Albany</span></div></div></div>
 </aside>
 
 <div class="main">
   <div class="topbar">
     <span class="topbar-title">Legal Entities</span>
     <span class="topbar-date">Monday, May 4, 2026</span>
+    <div class="loc-wrap"><button class="loc-pill" onclick="toggleLocMenu(event)" title="Your active location — switch context"><svg class="pin" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.6"/></svg><span class="lbl" id="loc-pill-label">Diocese of Albany</span><span class="cw">▾</span></button><span id="loc-menu-host"></span></div>
     <a href="atlas-search.html" class="topbar-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input type="text" placeholder="Search donors, gifts, campaigns…" readonly style="cursor:pointer"><kbd>⌘K</kbd></a>
     <div class="topbar-right"><a href="atlas-notifications.html" class="tb-notif" title="Notifications"><svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.5 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5zM6 13a1.5 1.5 0 003 0"/></svg><div class="notif-dot"></div></a></div>
   </div>
@@ -803,6 +813,54 @@ function donorSearchView(){
   var more = total>CAP? '<div style="text-align:center;padding:14px;color:var(--text-3);font-size:12.5px">+'+(total-CAP).toLocaleString()+' more — '+(searching?'refine your search to narrow results':'search to find any donor')+'</div>':'';
   return bar+box+head+(shown.length?rows:'<div class="muted" style="padding:24px;text-align:center">No donors found'+(searching?' matching “'+donorQuery+'”':'')+'.</div>')+more;
 }
+function findDonor(id){ return DONORS.find(function(x){return x.id===id;}); }
+function donorAccount(d){
+  if(!d.account){
+    var seed=parseInt(d.id.replace(/\D/g,''))||0;
+    var st=['active','invited','none','active','suspended'][seed%5];
+    d.account={ status:st, email:d.email, lastLogin: st==='active'?'Mar 28, 2026 · 2:14 PM':'—',
+      methods:(seed%3===0)?[]:[{brand:'Visa',last4:String(4200+seed%700).slice(-4),exp:'08/27'}],
+      consent:{email:true, mail:(seed%2===0), receipts:'Email'},
+      audit:[{d:'Mar 28',t:(st==='active'?'Signed in to portal':'Invite sent'),w:(st==='active'?'donor':'Sarah R.')},{d:'Jan 12',t:'Account record created',w:'system'}] };
+  }
+  return d.account;
+}
+function acctStatusTag(s){ var m={active:['green','Active portal account'],invited:['amber','Invite pending'],none:['grey','No portal account'],suspended:['rose','Access suspended']}; var x=m[s]||m.none; return '<span class="tag '+x[0]+'">'+x[1]+'</span>'; }
+function accountPanel(d, ok){
+  if(!ok){
+    return '<div class="sec-lbl">Account &amp; access</div>'
+     +'<div class="lockbox"><div class="lk"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></div><div class="lt">Account management restricted</div>'
+     +'<div class="ls">Only admins of <b>'+EMAP[d.entityId].name+'</b> can manage this donor’s portal account.</div></div>';
+  }
+  var a=donorAccount(d), id=d.id;
+  var actions='';
+  if(a.status==='none') actions='<button class="btn btn-primary btn-sm" onclick="acctInvite(\''+id+'\')">Send portal invite</button>';
+  else if(a.status==='invited') actions='<button class="btn btn-primary btn-sm" onclick="acctResend(\''+id+'\')">Resend invite</button><button class="btn btn-ghost btn-sm" onclick="acctCancelInvite(\''+id+'\')">Cancel invite</button>';
+  else if(a.status==='active') actions='<button class="btn btn-ghost btn-sm" onclick="acctReset(\''+id+'\')">Send password reset</button><button class="btn btn-ghost btn-sm" style="color:var(--rose);border-color:#f4c4d1" onclick="acctSuspend(\''+id+'\')">Suspend access</button>';
+  else if(a.status==='suspended') actions='<button class="btn btn-primary btn-sm" onclick="acctReactivate(\''+id+'\')">Reactivate access</button>';
+  var methods=a.methods.length? a.methods.map(function(m,i){return '<div class="mrow"><div><div class="mn">'+m.brand+' •••• '+m.last4+'</div><div class="ms">Expires '+m.exp+' · tokenized</div></div><span style="margin-left:auto;font-size:12px;color:var(--rose);cursor:pointer;font-weight:600" onclick="acctRemoveCard(\''+id+'\','+i+')">Remove</span></div>';}).join('') : '<div class="muted" style="font-size:13px">No saved payment methods.</div>';
+  var audit=a.audit.map(function(x){return '<div style="display:flex;gap:10px;font-size:12px;padding:7px 0;border-bottom:1px solid var(--border-soft)"><span style="color:var(--text-3);min-width:52px">'+x.d+'</span><span style="flex:1">'+x.t+'</span><span class="muted">'+x.w+'</span></div>';}).join('');
+  return '<div class="sec-lbl">Account &amp; access</div>'
+    +'<div class="fact-grid" style="margin-bottom:12px"><div class="fact"><div class="k">Portal status</div><div class="v">'+acctStatusTag(a.status)+'</div></div><div class="fact"><div class="k">Last sign-in</div><div class="v" style="font-size:12.5px">'+a.lastLogin+'</div></div><div class="fact"><div class="k">Login email</div><div class="v" style="font-size:12px">'+a.email+'</div></div><div class="fact"><div class="k">Receipts</div><div class="v">'+a.consent.receipts+'</div></div></div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'+actions+'</div>'
+    +'<div class="muted" style="font-size:11.5px;margin-bottom:16px;line-height:1.5">Atlas emails a secure link — passwords are never shown or set here. Every action is audit-logged.</div>'
+    +'<div class="sec-lbl">Saved payment methods</div>'+methods
+    +'<div class="sec-lbl">Communication &amp; consent</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">'
+      +'<span class="tag '+(a.consent.email?'green':'grey')+'" style="cursor:pointer" onclick="acctToggleConsent(\''+id+'\',\'email\')">Email opt-in '+(a.consent.email?'✓':'✕')+'</span>'
+      +'<span class="tag '+(a.consent.mail?'green':'grey')+'" style="cursor:pointer" onclick="acctToggleConsent(\''+id+'\',\'mail\')">Mail opt-in '+(a.consent.mail?'✓':'✕')+'</span>'
+    +'</div>'
+    +'<div class="sec-lbl">Recent account activity</div><div>'+audit+'</div>';
+}
+function acctInvite(id){ var d=findDonor(id); var a=donorAccount(d); a.status='invited'; a.audit.unshift({d:'Today',t:'Portal invite sent',w:'Sarah R.'}); toast('✓ Portal invite emailed to '+d.email); openDonorDrawer(id); }
+function acctResend(id){ var d=findDonor(id); toast('✓ Invite re-sent to '+d.email); }
+function acctCancelInvite(id){ var d=findDonor(id); donorAccount(d).status='none'; toast('Invite cancelled'); openDonorDrawer(id); }
+function acctReset(id){ var d=findDonor(id); donorAccount(d).audit.unshift({d:'Today',t:'Password reset link sent',w:'Sarah R.'}); toast('✓ Reset link emailed — password never shown'); openDonorDrawer(id); }
+function acctSuspend(id){ var d=findDonor(id); var a=donorAccount(d); a.status='suspended'; a.audit.unshift({d:'Today',t:'Portal access suspended',w:'Sarah R.'}); toast('Access suspended'); openDonorDrawer(id); }
+function acctReactivate(id){ var d=findDonor(id); var a=donorAccount(d); a.status='active'; a.audit.unshift({d:'Today',t:'Access reactivated',w:'Sarah R.'}); toast('✓ Access reactivated'); openDonorDrawer(id); }
+function acctRemoveCard(id,i){ var d=findDonor(id); donorAccount(d).methods.splice(i,1); toast('Payment method removed'); openDonorDrawer(id); }
+function acctToggleConsent(id,key){ var d=findDonor(id); var a=donorAccount(d); a.consent[key]=!a.consent[key]; toast('Preference updated'); openDonorDrawer(id); }
+window.acctInvite=acctInvite; window.acctResend=acctResend; window.acctCancelInvite=acctCancelInvite; window.acctReset=acctReset; window.acctSuspend=acctSuspend; window.acctReactivate=acctReactivate; window.acctRemoveCard=acctRemoveCard; window.acctToggleConsent=acctToggleConsent;
 function openDonorDrawer(id){
   var d=DONORS.find(function(x){return x.id===id;}); if(!d) return;
   var e=EMAP[d.entityId]; var ok=inScope(d.entityId);
@@ -822,7 +880,7 @@ function openDonorDrawer(id){
       +'<div style="margin-top:14px"><div class="sec-lbl">Preview (locked)</div><div class="fact-grid blur"><div class="fact"><div class="k">Lifetime</div><div class="v mono">$00,000</div></div><div class="fact"><div class="k">YTD</div><div class="v mono">$0,000</div></div></div></div>';
   }
   document.getElementById('drawer-root').innerHTML=
-    '<div class="scrim" onclick="closeDrawer()"></div><div class="drawer"><div class="drawer-head"><div><div class="drawer-title">Donor</div><div class="drawer-sub">'+(ok?'In your entity access':'Cross-entity · limited view')+'</div></div><div class="drawer-x" onclick="closeDrawer()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg></div></div><div class="drawer-body">'+identity+'<div class="divider"></div>'+financials+'</div></div>';
+    '<div class="scrim" onclick="closeDrawer()"></div><div class="drawer"><div class="drawer-head"><div><div class="drawer-title">Donor</div><div class="drawer-sub">'+(ok?'In your entity access':'Cross-entity · limited view')+'</div></div><div class="drawer-x" onclick="closeDrawer()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg></div></div><div class="drawer-body">'+identity+'<div class="divider"></div>'+financials+'<div class="divider"></div>'+accountPanel(d, ok)+'</div></div>';
 }
 function closeDrawer(){ document.getElementById('drawer-root').innerHTML=''; }
 
@@ -851,7 +909,20 @@ function toggleConsMenu(ev){ ev.stopPropagation(); var host=document.getElementB
   host.innerHTML='<div class="menu">'+opts.map(function(o){return '<div class="mi '+(groupBy===o[0]?'on':'')+'" onclick="setGroupBy(\''+o[0]+'\')"><div><div>'+o[1]+'</div><div style="font-size:11px;color:var(--text-3);font-weight:400">'+o[2]+'</div></div>'+(groupBy===o[0]?'<span class="ck">✓</span>':'')+'</div>';}).join('')+'</div>';
 }
 function setGroupBy(v){ groupBy=v; expanded={}; var h=document.getElementById('cons-menu'); if(h) h.innerHTML=''; render(); toast('Showing '+GROUP_SUB[v]); }
-document.addEventListener('click',function(){ var h=document.getElementById('cons-menu'); if(h) h.innerHTML=''; });
+document.addEventListener('click',function(){ var h=document.getElementById('cons-menu'); if(h) h.innerHTML=''; var lh=document.getElementById('loc-menu-host'); if(lh) lh.innerHTML=''; });
+
+/* ---- active location / context switcher (sidebar footer + topbar pill) ---- */
+var userLoc='Diocese of Albany';
+function userLocList(){ return SCOPES.director.ids.map(function(id){return EMAP[id]?EMAP[id].name:id;}); }
+function toggleLocMenu(ev){ ev.stopPropagation(); var host=document.getElementById('loc-menu-host'); if(!host) return; if(host.innerHTML){ host.innerHTML=''; return; }
+  var pin='<svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.6"/></svg>';
+  var items=userLocList().concat(['All entities']);
+  host.innerHTML='<div class="menu" style="left:0;right:auto;top:42px;min-width:240px;max-height:320px;overflow:auto">'
+    +'<div style="padding:9px 13px 7px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)">Your locations · 8</div>'
+    +items.map(function(n){return '<div class="mi '+(userLoc===n?'on':'')+'" data-n="'+n.replace(/"/g,'&quot;')+'" onclick="setUserLoc(this.getAttribute(\'data-n\'))">'+pin+'<span style="flex:1">'+n+'</span>'+(userLoc===n?'<span class="ck">✓</span>':'')+'</div>';}).join('')+'</div>';
+}
+function setUserLoc(n){ userLoc=n; var l=document.getElementById('loc-pill-label'); if(l) l.textContent=n; var s=document.querySelector('#sidebar-loc span'); if(s) s.textContent=n; var host=document.getElementById('loc-menu-host'); if(host) host.innerHTML=''; toast('Now viewing · '+n); }
+window.toggleLocMenu=toggleLocMenu; window.setUserLoc=setUserLoc;
 
 /* ---- add / edit entity ---- */
 function formFields(v,withStatus){
