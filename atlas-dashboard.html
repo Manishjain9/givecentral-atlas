@@ -686,7 +686,6 @@ body {
     <div class="topbar">
       <span class="topbar-title">Dashboard</span>
       <span class="topbar-date">Friday, April 3, 2026</span>
-      <div class="loc-wrap"><button class="loc-pill" onclick="toggleLocMenu(event)" title="Your active location — switch context"><svg class="pin" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.6"/></svg><span class="lbl" id="loc-pill-label">Diocese of Albany</span><span class="cw">▾</span></button><span id="loc-menu-host"></span></div>
       <div class="topbar-right">
         <button class="tb-btn tb-ghost" id="tb-schedule" onclick="openSchedule()">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="2" width="9" height="8" rx="1.2"/><path d="M1.5 5h9M4.5 2v2M7.5 2v2"/></svg>
@@ -704,6 +703,8 @@ body {
     </div>
 
     <div class="dash">
+
+      <div id="custom-dash" style="display:none"></div>
 
       <!-- Welcome banner -->
       <div class="welcome-banner">
@@ -2150,6 +2151,7 @@ body {
   var ADMIN_RIGHT = '<div class="wb-stat"><div class="wb-stat-num gold">$1.24M</div><div class="wb-stat-lbl">Raised year-to-date</div></div><div style="width:100%;height:1px;background:rgba(255,255,255,.08);margin:6px 0"></div><div class="wb-stat"><div class="wb-stat-num">5</div><div class="wb-stat-lbl">active campaigns</div></div>';
   var READ_RIGHT = '<div class="wb-stat"><div class="wb-stat-num gold">$1.24M</div><div class="wb-stat-lbl">Raised year-to-date</div></div><div style="width:100%;height:1px;background:rgba(255,255,255,.08);margin:6px 0"></div><div class="wb-stat"><div class="wb-stat-num">78%</div><div class="wb-stat-lbl">of $1.6M annual goal</div></div>';
   var ROLES = {
+    region: { av:'MC', avColor:'var(--purple)', name:'Marcus Chen', role:'Region Coordinator', custom:true },
     dev: {
       av:'SR', avColor:'var(--blue)', name:'Sarah Reynolds', role:'Development Director / CFO',
       sub:'You have <strong style="color:white">7 tasks due today</strong>, 3 overdue, and 2 pledges needing follow-up. Your pipeline has 28 active prospects.',
@@ -2496,6 +2498,19 @@ body {
 
   function applyRole(key){
     var r = ROLES[key]; if(!r) return;
+    if(r.custom){
+      var cav=document.getElementById('u-av'); if(cav){ cav.textContent=r.av; cav.style.background=r.avColor; }
+      txt('u-name', r.name); txt('u-role', r.role);
+      var rp=document.getElementById('tb-role-pill'); if(rp) rp.style.display='';
+      var sl=document.querySelector('#sidebar-loc span'); if(sl) sl.textContent='My region · 5 parishes';
+      var lpl=document.getElementById('loc-pill-label'); if(lpl) lpl.textContent='My region · 5 parishes';
+      if(window.showCustomDash) window.showCustomDash(true);
+      if(window.renderCustomDash) window.renderCustomDash();
+      document.body.dataset.role=key;
+      return;
+    }
+    var rp0=document.getElementById('tb-role-pill'); if(rp0) rp0.style.display='none';
+    if(window.showCustomDash) window.showCustomDash(false);
     var av=document.getElementById('u-av'); if(av){ av.textContent=r.av; av.style.background=r.avColor; }
     txt('u-name', r.name); txt('u-role', r.role); txt('wb-name', r.name);
     set('wb-sub', r.sub);
@@ -2547,7 +2562,7 @@ body {
   window.goPipeline = function(){ window.location = window.__pipeUrl || 'atlas-pipeline.html'; };
   window.primaryAction = function(){ window.location = window.__primaryUrl || 'atlas-gift-entry.html'; };
 
-  var ORDER=['dba','admin','dev','officer','read'];
+  var ORDER=['dba','admin','dev','officer','read','region'];
   var idx=0;
   snapshot();  // capture the default (Dev Director) widget bodies before any swap
   var sw=document.getElementById('role-switch');
@@ -3064,6 +3079,191 @@ body {
     setTimeout(function(){ document.addEventListener('click', outside, true); }, 0);
   }
   if(bell) bell.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); openPanel(); }, true);
+})();
+</script>
+<style id="custom-dash-css">
+.role-pill{display:inline-flex;align-items:center;gap:6px;background:#EDE9FE;color:#7C3AED;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600}
+#custom-dash .cx-hero{background:linear-gradient(135deg,#0E1E35,#1E3A5F);border-radius:16px;padding:24px 26px;display:flex;gap:26px;color:#fff;margin-bottom:16px;flex-wrap:wrap}
+#custom-dash .cx-hero-l{flex:1;min-width:280px}
+#custom-dash .cx-gm{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+#custom-dash .cx-name{font-family:'DM Serif Display',serif;font-size:30px;line-height:1.1;margin:4px 0 10px}
+#custom-dash .cx-desc{font-size:13px;line-height:1.6;color:rgba(255,255,255,.7);max-width:520px}
+#custom-dash .cx-hero-r{flex:1;min-width:300px}
+#custom-dash .cx-perm-h{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:10px}
+#custom-dash .cx-perms{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+#custom-dash .cx-perm{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px 11px;font-size:12px;font-weight:500;color:rgba(255,255,255,.85);cursor:pointer}
+#custom-dash .cx-perm:hover{background:rgba(255,255,255,.15)}
+#custom-dash .cx-perm b{font-weight:700}
+#custom-dash .cx-perm .dot{width:6px;height:6px;border-radius:50%;background:#4ADE80}
+#custom-dash .cx-perm.off{color:rgba(255,255,255,.35);background:rgba(255,255,255,.04)}
+#custom-dash .cx-perm.off .dot{background:rgba(255,255,255,.25)}
+#custom-dash .cx-reorder-btn{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit}
+#custom-dash .cx-reorder-btn:hover{background:rgba(255,255,255,.16)}
+#custom-dash .cx-reorder-btn.on{background:#2563EB;border-color:#2563EB}
+#custom-dash .cx-reorder-btn svg{width:13px;height:13px}
+#custom-dash .cx-banner{display:flex;align-items:flex-start;gap:10px;background:#EFF6FF;border:1px solid #DBEAFE;border-radius:12px;padding:12px 15px;margin-bottom:16px;font-size:12.5px;line-height:1.5;color:#1D4ED8}
+#custom-dash .cx-banner svg{width:15px;height:15px;flex:0 0 auto;margin-top:1px;color:#2563EB}
+#custom-dash .cx-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+#custom-dash .cx-stat{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:18px 20px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+#custom-dash .cx-stat .k{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#64748B}
+#custom-dash .cx-stat .v{font-family:'DM Serif Display',serif;font-size:32px;line-height:1;margin-top:10px;color:#0F172A}
+#custom-dash .cx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start}
+#custom-dash .cx-card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:16px 18px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+#custom-dash .cx-card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+#custom-dash .cx-card-h h3{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#64748B;margin:0}
+#custom-dash .cx-move{display:flex;gap:4px}
+#custom-dash .cx-move button{width:22px;height:22px;border:1px solid #E2E8F0;background:#F8FAFC;border-radius:6px;cursor:pointer;font-size:11px;color:#334155;line-height:1}
+#custom-dash .cx-move button:hover{background:#EEF2F7}
+#custom-dash .cx-r{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #EDF2F7}
+#custom-dash .cx-r:last-child{border-bottom:none;padding-bottom:0}
+#custom-dash .cx-r-l{flex:1;min-width:0}
+#custom-dash .cx-r-m{font-size:13.5px;font-weight:600;color:#0F172A}
+#custom-dash .cx-r-s{font-size:11.5px;color:#64748B;margin-top:1px}
+#custom-dash .cx-r-r{font-size:13px;font-weight:700;flex:0 0 auto;text-align:right}
+#custom-dash .cx-r-r.green{color:#15803D}
+#custom-dash .cx-badge{display:inline-flex;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:6px}
+#custom-dash .cx-badge.amber{background:#FEF3C7;color:#B45309}
+#custom-dash .cx-badge.blue{background:#DBEAFE;color:#2563EB}
+#custom-dash .cx-badge.green{background:#DCFCE7;color:#15803D}
+#custom-dash .cx-badge.rose{background:#FCE7F3;color:#BE185D}
+#custom-dash .cx-viewbtn{display:inline-flex;font-size:11.5px;font-weight:600;color:#2563EB;background:#EFF6FF;border-radius:7px;padding:4px 11px;cursor:pointer}
+#custom-dash .cx-prog{margin-bottom:12px}
+#custom-dash .cx-prog:last-child{margin-bottom:0}
+#custom-dash .cx-prog-t{display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;color:#334155;margin-bottom:6px}
+#custom-dash .cx-bar{height:7px;background:#EDF2F7;border-radius:99px;overflow:hidden}
+#custom-dash .cx-bar-f{height:100%;border-radius:99px}
+#custom-dash .cx-note{font-size:12px;color:#64748B;line-height:1.5;margin-bottom:10px}
+#custom-dash .cx-toggle{border:1px dashed #93C5FD;border-radius:12px;padding:14px;text-align:center;color:#2563EB;font-size:13px;font-weight:600;cursor:pointer;margin:16px 0}
+#custom-dash .cx-toggle:hover{background:#EFF6FF}
+#custom-dash .cx-ninth{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start}
+@media(max-width:1100px){#custom-dash .cx-stats,#custom-dash .cx-grid,#custom-dash .cx-ninth{grid-template-columns:repeat(2,1fr)}}
+#custom-dash .kpi-row .kpi-card,#custom-dash .card{animation:none;opacity:1}
+#custom-dash .kpi-row{margin-bottom:16px}
+#custom-dash .cx-grid,#custom-dash .cx-ninth{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:stretch}
+#custom-dash .task-item:not(.due-today):not(.overdue) .task-check{border-color:#94A3B8;background:#fff}
+#custom-dash .cx-grid>.card,#custom-dash .cx-ninth>.card{height:100%}
+@media(max-width:1100px){#custom-dash .cx-grid,#custom-dash .cx-ninth{grid-template-columns:repeat(2,1fr)}}
+</style>
+<style id="cx-permbar-css">
+#custom-dash .welcome-banner{animation:none;opacity:1;margin-bottom:16px}
+#custom-dash .cx-permbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:10px 14px;margin-bottom:16px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+#custom-dash .cx-permbar-h{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#64748B;flex:0 0 auto}
+#custom-dash .cx-permbar .cx-perms{display:flex;flex-wrap:wrap;gap:7px}
+#custom-dash .cx-permbar .cx-perm{background:#F8FAFC;border:1px solid #E2E8F0;color:#334155}
+#custom-dash .cx-permbar .cx-perm:hover{background:#EEF2F7}
+#custom-dash .cx-permbar .cx-perm .dot{background:#16A34A}
+#custom-dash .cx-permbar .cx-perm.off{color:#94A3B8;background:#F1F5F9}
+#custom-dash .cx-permbar .cx-perm.off .dot{background:#CBD5E1}
+#custom-dash .cx-permbar .cx-reorder-btn{margin-left:auto;background:#EFF6FF;border:1px solid #DBEAFE;color:#2563EB}
+#custom-dash .cx-permbar .cx-reorder-btn:hover{background:#DBEAFE}
+#custom-dash .cx-permbar .cx-reorder-btn.on{background:#2563EB;border-color:#2563EB;color:#fff}
+#custom-dash .cx-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 2px 16px;flex-wrap:wrap}
+#custom-dash .cx-why-wrap{position:relative;display:flex;align-items:center;gap:8px}
+#custom-dash .cx-meta-txt{font-size:13px;color:#64748B}
+#custom-dash .cx-meta-txt b{color:#334155;font-weight:700}
+#custom-dash .cx-why{display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:#2563EB;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;padding:2px 4px}
+#custom-dash .cx-why svg{width:13px;height:13px}
+#custom-dash .cx-why:hover{text-decoration:underline}
+#custom-dash .cx-why-pop{position:absolute;top:28px;left:0;width:340px;max-width:92vw;background:#fff;border:1px solid #E2E8F0;border-radius:12px;box-shadow:0 16px 40px rgba(15,23,42,.16);z-index:40;padding:16px}
+#custom-dash .cx-why-h{font-size:13px;font-weight:700;color:#0F172A;margin-bottom:6px}
+#custom-dash .cx-why-desc{font-size:12px;color:#64748B;line-height:1.5;margin-bottom:12px}
+#custom-dash .cx-why-pop .cx-perms{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+#custom-dash .cx-why-pop .cx-perm{background:#F8FAFC;border:1px solid #E2E8F0;color:#334155}
+#custom-dash .cx-why-pop .cx-perm:hover{background:#EEF2F7}
+#custom-dash .cx-why-pop .cx-perm .dot{background:#16A34A}
+#custom-dash .cx-why-pop .cx-perm.off{color:#94A3B8;background:#F1F5F9}
+#custom-dash .cx-why-pop .cx-perm.off .dot{background:#CBD5E1}
+#custom-dash .cx-why-link{display:inline-block;font-size:12.5px;font-weight:600;color:#2563EB}
+#custom-dash .cx-why-link:hover{text-decoration:underline}
+#custom-dash .cx-customize{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid #E2E8F0;border-radius:9px;padding:7px 13px;font-size:12.5px;font-weight:600;color:#334155;cursor:pointer;font-family:inherit;flex:0 0 auto}
+#custom-dash .cx-customize:hover{background:#F8FAFC;border-color:#94A3B8}
+#custom-dash .cx-customize svg{width:13px;height:13px}
+#custom-dash .cx-customize.on{background:#2563EB;border-color:#2563EB;color:#fff}
+</style>
+<script id="custom-dash-controller">
+(function(){
+  var PERMS=[{k:'donors',label:'Donors',onLvl:'View'},{k:'gifts',label:'Gifts & pledges',onLvl:'Edit'},{k:'campaigns',label:'Campaigns',onLvl:'View'},{k:'comms',label:'Communications',onLvl:'View'},{k:'reports',label:'Reports',onLvl:'View'},{k:'admin',label:'Admin',onLvl:'Full'},{k:'audit',label:'Audit log',onLvl:'View'}];
+  var permOn={donors:true,gifts:true,campaigns:true,comms:true,reports:true,admin:false,audit:false};
+  var showNinth=false, reorderMode=false, whyOpen=false;
+  var KI={
+    bld:'<svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="2" y="4" width="9" height="7" rx="1"/><path d="M4.5 4V2.5A1.5 1.5 0 016 1h1a1.5 1.5 0 011.5 1.5V4M6.5 7v2"/></svg>',
+    gift:'<svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6.5 1v11M1.5 6.5h10"/></svg>',
+    clk:'<svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="5"/><path d="M6.5 4.5v3l1.5 1.5"/></svg>',
+    chk:'<svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="2.5" width="10" height="8" rx="1.3"/><path d="M1.5 5.5h10M4 2.5v2M9 2.5v2"/></svg>'
+  };
+  var KPIS=[
+    {ic:KI.bld,label:'Parishes in my region',value:'5',cls:'',sub:'<span class="trend-sub">across your region</span>',bar:100,color:'var(--blue)'},
+    {ic:KI.gift,label:'Gifts logged this week',value:'$18,240',cls:'up',sub:'<span class="trend-up">↑ 9%</span><span class="trend-sub">vs last week</span>',bar:62,color:'var(--green)'},
+    {ic:KI.clk,label:'Pledges due (30d)',value:'12',cls:'warn',sub:'<span class="trend-sub">3 overdue · 9 upcoming</span>',bar:40,color:'var(--amber)'},
+    {ic:KI.chk,label:'Open tasks',value:'6',cls:'',sub:'<span class="trend-sub">2 due today</span>',bar:50,color:'var(--blue)'}
+  ];
+  function kpiCard(k){ return '<div class="kpi-card"><div class="kpi-label">'+k.ic+k.label+'</div><div class="kpi-value '+(k.cls||'')+'">'+k.value+'</div><div class="kpi-trend">'+k.sub+'</div><div class="kpi-mini-bar"><div class="kpi-mini-fill" style="width:'+k.bar+'%;background:'+k.color+'"></div></div></div>'; }
+  /* ---- real dashboard-component builders ---- */
+  function taskList(rows){ return '<div class="task-list">'+rows.map(function(r){return '<div class="task-item '+(r[3]||'')+'"><div class="task-check"></div><div class="task-body"><div class="task-text">'+r[0]+'</div><div class="task-meta"><span class="task-donor">'+r[1]+'</span><span class="task-due-label '+(r[3]||'due-soon')+'">'+r[2]+'</span></div></div></div>';}).join('')+'</div>'; }
+  function pledgeList(rows){ return '<div class="pledge-list">'+rows.map(function(r){return '<div class="pledge-item '+(r[9]||'')+'"><div class="pledge-avatar" style="background:'+r[1]+';color:'+r[2]+'">'+r[0]+'</div><div><div class="pledge-name">'+r[3]+'</div><div class="pledge-campaign">'+r[4]+'</div></div><div class="pledge-right"><div class="pledge-amt">'+r[5]+'</div>'+(r[6]?'<div class="pledge-due" style="background:'+r[7]+';color:'+r[8]+'">'+r[6]+'</div>':'')+'</div></div>';}).join('')+'</div>'; }
+  function giftFeed(rows){ return '<div class="gift-feed">'+rows.map(function(r){return '<div class="gift-item"><div class="gift-dot" style="background:'+r[0]+'"></div><div class="gift-body"><div class="gift-name">'+r[1]+'</div><div class="gift-campaign">'+r[2]+'</div></div><div class="gift-right"><div class="gift-amt">'+r[3]+'</div>'+(r[4]?'<div class="gift-time">'+r[4]+'</div>':'')+'</div></div>';}).join('')+'</div>'; }
+  function ytdFeed(rows){ return '<div class="gift-feed">'+rows.map(function(r){return '<div class="gift-item"><div class="gift-dot" style="background:'+r[0]+'"></div><div class="gift-body"><div class="gift-name">'+r[1]+'</div></div><div class="gift-right"><div class="gift-amt" style="color:var(--green)">'+r[2]+'</div><div class="gift-time">YTD</div></div></div>';}).join('')+'</div>'; }
+  function campaignList(rows){ return '<div class="campaign-list">'+rows.map(function(r){return '<div class="campaign-item"><div class="campaign-top"><span class="campaign-name">'+r[0]+'</span><span class="campaign-pct" style="color:'+r[2]+'">'+r[1]+'%</span></div><div class="campaign-bar"><div class="campaign-fill" style="width:'+r[1]+'%;background:'+r[2]+'"></div></div><div class="campaign-meta"><span>'+r[3]+'</span><span>'+r[4]+'</span></div></div>';}).join('')+'</div>'; }
+  function pillFeed(rows){ return '<div class="gift-feed">'+rows.map(function(r){return '<div class="gift-item"><div class="gift-body"><div class="gift-name">'+r[0]+'</div>'+(r[1]?'<div class="gift-campaign">'+r[1]+'</div>':'')+'</div><div class="gift-right"><div class="pledge-due" style="background:'+r[3]+';color:'+r[4]+'">'+r[2]+'</div></div></div>';}).join('')+'</div>'; }
+  function viewFeed(rows){ return '<div class="gift-feed">'+rows.map(function(r){return '<div class="gift-item"><div class="gift-body"><div class="gift-name">'+r[0]+'</div></div><div class="gift-right"><span style="font-size:11.5px;font-weight:600;color:var(--blue);background:var(--blue-pale);border-radius:7px;padding:4px 12px">View</span></div></div>';}).join('')+'</div>'; }
+  var CARD={
+    tasks:{title:'Tasks due today',req:null,action:'All tasks',actUrl:'atlas-tasks.html',body:function(){return taskList([['Confirm St. Anne’s offertory count','St. Anne Parish','Due today','due-today'],['Approve Q1 parish summary','St. Mary · Albany','Due today','due-today'],['Follow up on lapsed pledge','Doyle Family','Due soon','due-soon'],['Review Building Fund pledge reminders','St. Patrick · Amsterdam','Due soon','due-soon'],['Prep regional giving summary','Internal · reporting','Due soon','due-soon']]);}},
+    pledges:{title:'Pledges due this week',req:'gifts',action:'All pledges',actUrl:'atlas-pledges-list.html',body:function(){return pledgeList([
+      ['DF','#FCE7F3','#BE185D','Doyle Family','CMA 2026 · Inst. 1 of 4','$500','2 days overdue','var(--rose-light)','var(--rose)','overdue'],
+      ['NF','#DBEAFE','#1D4ED8','Nguyen Family','CMA 2026 · Inst. 2 of 4','$250','Due Apr 5','#FEF3C7','#B45309',''],
+      ['RF','#DCFCE7','#15803D','Rossi Family','Building Fund · Yr 1 of 3','$1,000','Due Apr 8','var(--blue-pale)','var(--blue)',''],
+      ['KF','#EDE9FE','#7C3AED','Kowalski Family','Blessed Trinity Campaign','$5,000','Due Apr 9','var(--blue-pale)','var(--blue)',''],
+      ['SF','#FEF3C7','#B45309','Sullivan Foundation','Cathedral Capital · Yr 2 of 5','$7,500','Due Apr 9','var(--blue-pale)','var(--blue)','']
+    ]);}},
+    gifts:{title:'Gifts today',req:'gifts',action:'All gifts',actUrl:'atlas-gifts-pledges.html',body:function(){return giftFeed([
+      ['var(--green)','Delgado Family','Building Fund','$500','9:12 AM'],
+      ['var(--blue)','O’Brien Foundation','Annual Ministry','$2,500','8:40 AM'],
+      ['var(--teal)','Nguyen Family','CMA 2026 · Monthly','$250','8:05 AM'],
+      ['var(--purple)','St. Anne Parish','Spring Festival','$1,200','7:52 AM'],
+      ['var(--rose)','Kowalski Family','Blessed Trinity','$1,000','7:31 AM']
+    ]);}},
+    campaign:{title:'Campaign progress',req:'campaigns',action:'All campaigns',actUrl:'atlas-campaign-dashboard.html',body:function(){return campaignList([
+      ['Annual Ministry (CMA)',82,'var(--blue)','$1,050,000 raised','Goal: $1,280,000'],
+      ['Spring Festival',61,'var(--green)','$18,300 raised','Goal: $30,000'],
+      ['Building Fund',44,'var(--purple)','$220,000 raised','Goal: $500,000'],
+      ['Youth Ministry Retreat',68,'var(--teal)','$34,000 raised','Goal: $50,000'],
+      ['Marian Congress 2026',91,'var(--rose)','$45,500 raised','Goal: $50,000']
+    ]);}},
+    snapshot:{title:'Multi-parish snapshot',req:'reports',action:'Compare',actUrl:'atlas-reports.html',body:function(){return ytdFeed([['var(--blue)','St. Mary · Albany','$42,100'],['var(--green)','St. Anne · Troy','$28,600'],['var(--purple)','St. Patrick · Amsterdam','$19,850'],['var(--teal)','St. Joseph · Cohoes','$34,200'],['var(--amber)','Holy Cross · Troy','$22,400']]);}},
+    batch:{title:'Batch entry queue',req:'gifts',action:'Open batches',actUrl:'atlas-batch-landing.html',body:function(){return pillFeed([['Sunday offertory · Apr 6','22 gifts','Ready to post','#DBEAFE','#2563EB'],['Lockbox scan · batch 3','9 gifts','Posted','#DCFCE7','#15803D'],['Online gifts · Apr 5','14 gifts','Posted','#DCFCE7','#15803D'],['Stock gift · Apr 4','1 gift','Posted','#DCFCE7','#15803D'],['Event revenue · Gala','31 gifts','Needs review','#FEF3C7','#B45309']]);}},
+    comms:{title:'Communications sent',req:'comms',action:'All comms',actUrl:'atlas-communications.html',body:function(){return pillFeed([['Spring appeal','1,240 recipients','Delivered','#DCFCE7','#15803D'],['Festival invitation','540 recipients','Delivered','#DCFCE7','#15803D'],['Pledge reminder','86 recipients','Scheduled','#FEF3C7','#B45309'],['Year-end tax receipts','1,240 recipients','Delivered','#DCFCE7','#15803D']]);}},
+    reports:{title:'Saved reports',req:'reports',action:'All reports',actUrl:'atlas-reports.html',body:function(){return viewFeed([['Regional giving summary · Q1'],['Parish comparison · YTD'],['Lapsed donors · 12 months'],['LYBUNT · this fiscal year']]);}},
+    donorwatch:{title:'Donor watchlist',req:'donors',action:'All donors',actUrl:'atlas-donors-list.html',body:function(){return pillFeed([['Hennessy Family','Lapsed 14 months','Reach out','#FEF3C7','#B45309'],['Alvarez Family','Address bounced','Update','#FEF3C7','#B45309'],['Grant Household','Card expiring','Update','#FEF3C7','#B45309'],['Nolan Family','No gift this year','Reach out','#FEF3C7','#B45309']]);}},
+    admin:{title:'User & role management',req:'admin',action:'Manage',actUrl:'atlas-users-roles.html',body:function(){return '<div class="cx-note">Appeared because <b>Admin</b> was granted — the same registry check, now matched.</div>'+pillFeed([['3 pending invites','St. Mary, St. Anne','Review','#EFF6FF','#2563EB'],['Region Coordinator role','custom permission set','Edit','#EFF6FF','#2563EB']]);}},
+    audit:{title:'Security · login activity',req:'audit',action:'Review',actUrl:'atlas-notifications.html',body:function(){return '<div class="cx-note">Appeared because <b>Audit log</b> was granted.</div>'+pillFeed([['2 new-device sign-ins','last 24h','Review','#FEF3C7','#B45309'],['1 locked account','J. Doyle · 5 tries','Unlock','#FCE7F3','#BE185D']]);}}
+  };
+  var cardOrder=['tasks','pledges','gifts','campaign','snapshot','batch','comms','reports','donorwatch','admin','audit'];
+  function ordinal(n){ var s=['th','st','nd','rd'],v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+  function avail(){ return cardOrder.filter(function(id){ var c=CARD[id]; return c && (c.req===null || permOn[c.req]); }); }
+  function cardHTML(id){ var c=CARD[id]; var arrow='<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5"/></svg>'; var right=reorderMode?'<span class="cx-move"><button onclick="cxMove(\''+id+'\',-1)" title="Move up">↑</button><button onclick="cxMove(\''+id+'\',1)" title="Move down">↓</button></span>':(c.action?'<span class="card-action" onclick="'+(c.actUrl?'go(\''+c.actUrl+'\')':'')+'">'+c.action+' '+arrow+'</span>':''); return '<div class="card"><div class="card-header"><span class="card-title">'+c.title+'</span>'+right+'</div><div class="card-body">'+c.body()+'</div></div>'; }
+  window.showCustomDash=function(on){ var dash=document.querySelector('.dash'); if(!dash) return; [].forEach.call(dash.children,function(ch){ if(ch.id==='custom-dash'){ch.style.display=on?'':'none';} else {ch.style.display=on?'none':'';} }); };
+  window.renderCustomDash=function(){
+    var host=document.getElementById('custom-dash'); if(!host) return;
+    var a=avail();
+    var main=a.filter(function(id){return !CARD[id].collapsible;});
+    var ninth=a.filter(function(id){return CARD[id].collapsible;});
+    var shownCount=main.length+(showNinth?ninth.length:0);
+    var chips=PERMS.map(function(p){ var on=permOn[p.k]; return '<button class="cx-perm '+(on?'':'off')+'" onclick="cxTogglePerm(\''+p.k+'\')"><span class="dot"></span>'+p.label+' <b>'+(on?p.onLvl:'None')+'</b></button>'; }).join('');
+    var hero='<div class="welcome-banner"><div class="wb-bg"></div><div class="wb-left"><div class="wb-greeting">Good morning</div><div class="wb-name">Marcus Chen</div><div class="wb-sub">You have <strong style="color:white">6 open tasks</strong> (2 due today), 12 pledges due in 30 days, and $18,240 in gifts this week across your 5 parishes.</div><div class="wb-pills"><div class="wb-pill highlight"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="2" width="9" height="7.5" rx="1.2"/><path d="M1 4.5h9M3.5 2v2M7.5 2v2"/></svg>6 open tasks</div><div class="wb-pill"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5.5 1v9M1 5.5h9"/></svg>12 pledges due</div><div class="wb-pill"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 7.5l2-2 1.5 1.5 2-2 1.5 1.5"/></svg>$18,240 this week</div></div></div><div class="wb-right"><div class="wb-stat"><div class="wb-stat-num gold">$90,550</div><div class="wb-stat-lbl">Raised across my region</div></div><div style="width:100%;height:1px;background:rgba(255,255,255,.08);margin:6px 0"></div><div class="wb-stat"><div class="wb-stat-num">74%</div><div class="wb-stat-lbl">of $122k regional goal</div></div></div></div>';
+    var why = whyOpen ? '<div class="cx-why-pop" onclick="event.stopPropagation()"><div class="cx-why-h">Why you see these cards</div><div class="cx-why-desc">Your dashboard adapts to the permissions on your role — each card appears because your access matched what it requires. Toggle to preview.</div><div class="cx-perms">'+chips+'</div><a class="cx-why-link" href="atlas-users-roles.html">Manage role &amp; permissions →</a></div>' : '';
+    var metaline='<div class="cx-meta"><div class="cx-why-wrap"><span class="cx-meta-txt">Showing <b>'+shownCount+' of '+a.length+'</b> cards, matched to your access</span><button class="cx-why" onclick="event.stopPropagation();cxToggleWhy()">Why these? <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="5.5"/><path d="M7 6.2v3M7 4.2v.4"/></svg></button>'+why+'</div><button class="cx-customize'+(reorderMode?' on':'')+'" onclick="cxToggleReorder()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h10M2 7h10M2 10h6"/></svg>'+(reorderMode?'Done':'Customize')+'</button></div>';
+    var kpis='<div class="kpi-row">'+KPIS.map(kpiCard).join('')+'</div>';
+    var grid='<div class="cx-grid">'+main.map(cardHTML).join('')+'</div>';
+    var tail='';
+    if(ninth.length){ tail='<div class="cx-toggle" onclick="cxToggle9()">'+(showNinth?'▲ Hide '+ninth.length+' more card'+(ninth.length>1?'s':''):'▼ Show '+ninth.length+' more card'+(ninth.length>1?'s':''))+'</div>'+(showNinth?'<div class="cx-ninth">'+ninth.map(cardHTML).join('')+'</div>':''); }
+    host.innerHTML=hero+metaline+kpis+grid+tail;
+  };
+  window.cxTogglePerm=function(k){ permOn[k]=!permOn[k]; window.renderCustomDash(); };
+  window.cxToggle9=function(){ showNinth=!showNinth; window.renderCustomDash(); };
+  window.cxToggleReorder=function(){ reorderMode=!reorderMode; window.renderCustomDash(); };
+  window.cxMove=function(id,dir){ var i=cardOrder.indexOf(id), j=i+dir; if(j<0||j>=cardOrder.length) return; var t=cardOrder[i];cardOrder[i]=cardOrder[j];cardOrder[j]=t; window.renderCustomDash(); };
+  window.cxToggleWhy=function(){ whyOpen=!whyOpen; window.renderCustomDash(); };
+  document.addEventListener('click',function(){ if(whyOpen){ whyOpen=false; var h=document.getElementById('custom-dash'); if(h && h.style.display!=='none') window.renderCustomDash(); } });
 })();
 </script>
 <script>
