@@ -3145,6 +3145,19 @@ body {
 #custom-dash .cx-guru .guru-body{flex:1;display:flex;flex-direction:column}
 #custom-dash .cx-guru .guru-query-wrap{margin-top:auto}
 @media(max-width:1100px){#custom-dash .cx-guru{grid-row:span 1}}
+#custom-dash .cx-move .cx-rm{color:#BE185D;border-color:#F6D2E2;font-size:14px;font-weight:700}
+#custom-dash .cx-move .cx-rm:hover{background:#FCE7F3}
+#custom-dash .cx-guru{position:relative}
+#custom-dash .cx-raw-ctrl{position:absolute;top:12px;right:12px;z-index:3}
+#custom-dash .cx-raw-ctrl .cx-move button{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#fff}
+#custom-dash .cx-raw-ctrl .cx-move .cx-rm{color:#FCA5A5;border-color:rgba(252,165,165,.45)}
+#custom-dash .cx-lib{border:1px dashed #CBD5E1;border-radius:12px;margin-top:16px;overflow:hidden}
+#custom-dash .cx-lib-bar{padding:14px;text-align:center;color:#475569;font-size:13px;font-weight:600;cursor:pointer}
+#custom-dash .cx-lib-bar:hover{background:#F8FAFC;color:#2563EB}
+#custom-dash .cx-lib-items{display:flex;flex-wrap:wrap;gap:8px;padding:14px 14px 4px;justify-content:center}
+#custom-dash .cx-lib-add{display:inline-flex;align-items:center;gap:6px;background:#EFF6FF;border:1px solid #DBEAFE;color:#2563EB;border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+#custom-dash .cx-lib-add:hover{background:#DBEAFE}
+#custom-dash .cx-lib-add span{font-size:14px;line-height:1}
 #custom-dash .task-item:not(.due-today):not(.overdue) .task-check{border-color:#94A3B8;background:#fff}
 #custom-dash .cx-grid>.card,#custom-dash .cx-ninth>.card{height:100%}
 @media(max-width:1100px){#custom-dash .cx-grid,#custom-dash .cx-ninth{grid-template-columns:repeat(2,1fr)}}
@@ -3189,7 +3202,8 @@ body {
 (function(){
   var PERMS=[{k:'donors',label:'Donors',onLvl:'View'},{k:'gifts',label:'Gifts & pledges',onLvl:'Edit'},{k:'campaigns',label:'Campaigns',onLvl:'View'},{k:'comms',label:'Communications',onLvl:'View'},{k:'reports',label:'Reports',onLvl:'View'},{k:'admin',label:'Admin',onLvl:'Full'},{k:'audit',label:'Audit log',onLvl:'View'}];
   var permOn={donors:true,gifts:true,campaigns:true,comms:true,reports:true,admin:false,audit:false};
-  var showNinth=false, reorderMode=false, whyOpen=false;
+  var showNinth=false, reorderMode=false, whyOpen=false, libOpen=false;
+  var hidden={donorwatch:true,admin:true,audit:true};
   var KI={
     bld:'<svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="2" y="4" width="9" height="7" rx="1"/><path d="M4.5 4V2.5A1.5 1.5 0 016 1h1a1.5 1.5 0 011.5 1.5V4M6.5 7v2"/></svg>',
     gift:'<svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6.5 1v11M1.5 6.5h10"/></svg>',
@@ -3246,28 +3260,32 @@ body {
   var cardOrder=['tasks','pledges','guru','gifts','campaign','snapshot','batch','comms','reports','donorwatch','admin','audit'];
   function ordinal(n){ var s=['th','st','nd','rd'],v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
   function avail(){ return cardOrder.filter(function(id){ var c=CARD[id]; return c && (c.req===null || permOn[c.req]); }); }
-  function cardHTML(id){ var c=CARD[id]; if(c.raw){ return '<div class="cx-guru">'+c.body()+'</div>'; } var arrow='<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5"/></svg>'; var right=reorderMode?'<span class="cx-move"><button onclick="cxMove(\''+id+'\',-1)" title="Move up">↑</button><button onclick="cxMove(\''+id+'\',1)" title="Move down">↓</button></span>':(c.action?'<span class="card-action" onclick="'+(c.actUrl?'go(\''+c.actUrl+'\')':'')+'">'+c.action+' '+arrow+'</span>':''); return '<div class="card"><div class="card-header"><span class="card-title">'+c.title+'</span>'+right+'</div><div class="card-body">'+c.body()+'</div></div>'; }
+  function ctrlHTML(id){ return '<span class="cx-move"><button onclick="cxMove(\''+id+'\',-1)" title="Move up">↑</button><button onclick="cxMove(\''+id+'\',1)" title="Move down">↓</button><button class="cx-rm" onclick="cxRemove(\''+id+'\')" title="Remove from dashboard">×</button></span>'; }
+  function cardHTML(id){ var c=CARD[id]; if(c.raw){ return '<div class="cx-guru">'+(reorderMode?'<div class="cx-raw-ctrl">'+ctrlHTML(id)+'</div>':'')+c.body()+'</div>'; } var arrow='<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5"/></svg>'; var right=reorderMode?ctrlHTML(id):(c.action?'<span class="card-action" onclick="'+(c.actUrl?'go(\''+c.actUrl+'\')':'')+'">'+c.action+' '+arrow+'</span>':''); return '<div class="card"><div class="card-header"><span class="card-title">'+c.title+'</span>'+right+'</div><div class="card-body">'+c.body()+'</div></div>'; }
   window.showCustomDash=function(on){ var dash=document.querySelector('.dash'); if(!dash) return; [].forEach.call(dash.children,function(ch){ if(ch.id==='custom-dash'){ch.style.display=on?'':'none';} else {ch.style.display=on?'none':'';} }); };
   window.renderCustomDash=function(){
     var host=document.getElementById('custom-dash'); if(!host) return;
     var a=avail();
-    var main=a.filter(function(id){return !CARD[id].collapsible;});
-    var ninth=a.filter(function(id){return CARD[id].collapsible;});
-    var shownCount=main.length+(showNinth?ninth.length:0);
+    var placed=a.filter(function(id){return !hidden[id];});
+    var library=a.filter(function(id){return hidden[id];});
+    var shownCount=placed.length;
     var chips=PERMS.map(function(p){ var on=permOn[p.k]; return '<button class="cx-perm '+(on?'':'off')+'" onclick="cxTogglePerm(\''+p.k+'\')"><span class="dot"></span>'+p.label+' <b>'+(on?p.onLvl:'None')+'</b></button>'; }).join('');
     var hero='<div class="welcome-banner"><div class="wb-bg"></div><div class="wb-left"><div class="wb-greeting">Good morning</div><div class="wb-name">Marcus Chen</div><div class="wb-sub">You have <strong style="color:white">6 open tasks</strong> (2 due today), 12 pledges due in 30 days, and $18,240 in gifts this week across your 5 parishes.</div><div class="wb-pills"><div class="wb-pill highlight"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="2" width="9" height="7.5" rx="1.2"/><path d="M1 4.5h9M3.5 2v2M7.5 2v2"/></svg>6 open tasks</div><div class="wb-pill"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5.5 1v9M1 5.5h9"/></svg>12 pledges due</div><div class="wb-pill"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 7.5l2-2 1.5 1.5 2-2 1.5 1.5"/></svg>$18,240 this week</div></div></div><div class="wb-right"><div class="wb-stat"><div class="wb-stat-num gold">$90,550</div><div class="wb-stat-lbl">Raised across my region</div></div><div style="width:100%;height:1px;background:rgba(255,255,255,.08);margin:6px 0"></div><div class="wb-stat"><div class="wb-stat-num">74%</div><div class="wb-stat-lbl">of $122k regional goal</div></div></div></div>';
     var why = whyOpen ? '<div class="cx-why-pop" onclick="event.stopPropagation()"><div class="cx-why-h">Why you see these cards</div><div class="cx-why-desc">Your dashboard adapts to the permissions on your role — each card appears because your access matched what it requires. Toggle to preview.</div><div class="cx-perms">'+chips+'</div><a class="cx-why-link" href="atlas-users-roles.html">Manage role &amp; permissions →</a></div>' : '';
     var metaline='<div class="cx-meta"><div class="cx-why-wrap"><span class="cx-meta-txt">Showing <b>'+shownCount+' of '+a.length+'</b> cards, matched to your access</span><button class="cx-why" onclick="event.stopPropagation();cxToggleWhy()">Why these? <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="5.5"/><path d="M7 6.2v3M7 4.2v.4"/></svg></button>'+why+'</div><button class="cx-customize'+(reorderMode?' on':'')+'" onclick="cxToggleReorder()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h10M2 7h10M2 10h6"/></svg>'+(reorderMode?'Done':'Customize')+'</button></div>';
     var kpis='<div class="kpi-row">'+KPIS.map(kpiCard).join('')+'</div>';
-    var grid='<div class="cx-grid">'+main.map(cardHTML).join('')+'</div>';
+    var grid='<div class="cx-grid">'+placed.map(cardHTML).join('')+'</div>';
     var tail='';
-    if(ninth.length){ tail='<div class="cx-toggle" onclick="cxToggle9()">'+(showNinth?'▲ Hide '+ninth.length+' more card'+(ninth.length>1?'s':''):'▼ Show '+ninth.length+' more card'+(ninth.length>1?'s':''))+'</div>'+(showNinth?'<div class="cx-ninth">'+ninth.map(cardHTML).join('')+'</div>':''); }
+    if(library.length){ var libItems = libOpen ? '<div class="cx-lib-items">'+library.map(function(id){return '<button class="cx-lib-add" onclick="cxAdd(\''+id+'\')"><span>+</span> '+CARD[id].title+'</button>';}).join('')+'</div>' : ''; tail='<div class="cx-lib">'+libItems+'<div class="cx-lib-bar" onclick="cxToggleLib()">'+(libOpen?'▴ Hide widget library':'▾ Add widgets — '+library.length+' more available')+'</div></div>'; }
     host.innerHTML=hero+metaline+kpis+grid+tail;
   };
   window.cxTogglePerm=function(k){ permOn[k]=!permOn[k]; window.renderCustomDash(); };
   window.cxToggle9=function(){ showNinth=!showNinth; window.renderCustomDash(); };
   window.cxToggleReorder=function(){ reorderMode=!reorderMode; window.renderCustomDash(); };
   window.cxMove=function(id,dir){ var i=cardOrder.indexOf(id), j=i+dir; if(j<0||j>=cardOrder.length) return; var t=cardOrder[i];cardOrder[i]=cardOrder[j];cardOrder[j]=t; window.renderCustomDash(); };
+  window.cxRemove=function(id){ hidden[id]=true; window.renderCustomDash(); };
+  window.cxAdd=function(id){ delete hidden[id]; window.renderCustomDash(); };
+  window.cxToggleLib=function(){ libOpen=!libOpen; window.renderCustomDash(); };
   window.cxToggleWhy=function(){ whyOpen=!whyOpen; window.renderCustomDash(); };
   document.addEventListener('click',function(){ if(whyOpen){ whyOpen=false; var h=document.getElementById('custom-dash'); if(h && h.style.display!=='none') window.renderCustomDash(); } });
 })();
