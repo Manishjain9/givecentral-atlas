@@ -1974,10 +1974,12 @@ body {
           var nameFld=drawer.querySelector('#rpt-name'), name=nameFld?nameFld.value.trim():'';
           if(!name){ alert('Name your report before saving.'); nameFld&&nameFld.focus(); return; }
           var fc=totalFilters();
-          var snap=openGeneratedReport(name);
-          if(window.sbmAdd) sbmAdd(snap);
+          var snap=buildSnap(name);
+          var savedId=window.sbmAdd?sbmAdd(snap):null;
           closeDrawer();
           showToast('Saved · "'+name+'" · added to Saved by me · opening report');
+          if(savedId){ setTimeout(function(){ location.href='atlas-report-custom.html?id='+encodeURIComponent(savedId); }, 450); }
+          else if(window.AtlasReportView){ AtlasReportView.open(snap); }
         }
       });
       drawer.querySelector('#rpt-back').addEventListener('click', function(){ if(step>1) show(step-1); });
@@ -2513,7 +2515,7 @@ body {
         + '</div>'
         + '<div class="desc">'+esc(v.report||'')+(filt!=='No filters'?' · '+esc(filt):'')+'</div>'
         + '<div class="meta"><span>Saved <strong style="color:var(--text-2)">'+esc(v.date||'')+'</strong></span></div>'
-        + '<div class="sbm-acts">'+(v.cfg? '<button class="sbm-open" data-open="'+esc(v.id)+'">Open report <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3h7v7M11 3L4 10"/></svg></button>' : '<a class="sbm-open" href="'+esc(v.url||'#')+'">Open report <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3h7v7M11 3L4 10"/></svg></a>')
+        + '<div class="sbm-acts">'+(v.cfg? '<a class="sbm-open" href="atlas-report-custom.html?id='+encodeURIComponent(v.id)+'">Open report <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3h7v7M11 3L4 10"/></svg></a>' : '<a class="sbm-open" href="'+esc(v.url||'#')+'">Open report <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3h7v7M11 3L4 10"/></svg></a>')
         + '<button class="sbm-remove" data-id="'+esc(v.id)+'">Remove</button></div>';
       grid.appendChild(card);
     });
@@ -2526,9 +2528,11 @@ body {
       var all=load();
       var filt=[]; if(snap.fc) filt.push(snap.fc+' filter'+(snap.fc!=1?'s':''));
       filt.push('Group: '+snap.d.gb); filt.push(snap.viz+' chart');
-      all.unshift({ id:'r'+Date.now(), name:snap.name, report:snap.dsName+' \u00b7 '+snap.viz+' chart', visibility:'Just me', filters:filt, date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), cfg:snap });
+      var id='r'+Date.now();
+      all.unshift({ id:id, name:snap.name, report:snap.dsName+' \u00b7 '+snap.viz+' chart', visibility:'Just me', filters:filt, date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), cfg:snap });
       save(all); render();
-    }catch(e){}
+      return id;
+    }catch(e){ return null; }
   };
   window.sbmRemove=function(id){
     var rec=load().filter(function(v){return v.id===id;})[0];
@@ -2544,6 +2548,7 @@ body {
   if(fb) fb.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; fb.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); filter=b.dataset.f; render(); });
   render();
   if(location.hash==='#saved') setTimeout(function(){ var s=document.getElementById('saved'); if(s&&s.scrollIntoView) s.scrollIntoView({block:'start'}); },120);
+  if(location.hash==='#build') setTimeout(function(){ if(window.atlasBuildReport) window.atlasBuildReport(); },200);
 })();
 </script>
 

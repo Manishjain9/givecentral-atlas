@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveCentral Atlas — Saved report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:        #0E1E35;
+  --navy-2:      #152844;
+  --navy-3:      #1E3A5F;
+  --blue:        #2563EB;
+  --blue-mid:    #3B82F6;
+  --blue-light:  #DBEAFE;
+  --blue-pale:   #EFF6FF;
+  --teal:        #0D9488;
+  --teal-light:  #CCFBF1;
+  --green:       #15803D;
+  --green-light: #DCFCE7;
+  --amber:       #D97706;
+  --amber-light: #FEF3C7;
+  --rose:        #BE185D;
+  --rose-light:  #FCE7F3;
+  --purple:      #7C3AED;
+  --purple-light:#EDE9FE;
+  --gold:        #B45309;
+  --text:        #0F172A;
+  --text-2:      #334155;
+  --text-3:      #64748B;
+  --border:      #E2E8F0;
+  --border-soft: #EDF2F7;
+  --surface:     #F8FAFC;
+  --white:       #FFFFFF;
+  --sidebar-w:   220px;
+  --shadow-sm:   0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.05);
+  --shadow-md:   0 4px 16px rgba(15,23,42,.06), 0 2px 4px rgba(15,23,42,.04);
+}
+
+html { font-size: 14px; -webkit-font-smoothing: antialiased; }
+body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+
+/* ══ SIDEBAR ══ */
+.sidebar {
+  width: var(--sidebar-w); background: var(--navy);
+  min-height: 100vh; display: flex; flex-direction: column;
+  flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 18px 18px 14px; display: flex; align-items: center; gap: 11px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.logo-mark {
+      width: 52px; height: 40px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border-radius: 0;
+    }
+.logo-mark svg { width: 52px; height: 40px; }
+.logo-text-wrap { display: flex; flex-direction: column; }
+.logo-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: white; line-height: 1; }
+.logo-sub  { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-top: 3px; }
+
+.sidebar-search {
+  margin: 12px 12px 6px; background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1); border-radius: 8px;
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  cursor: pointer;
+}
+.sidebar-search svg { width: 13px; height: 13px; color: rgba(255,255,255,.3); flex-shrink: 0; }
+.sidebar-search input {
+  background: none; border: none; outline: none; width: 100%;
+  font-size: 12px; color: rgba(255,255,255,.6); font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+}
+.sidebar-search input::placeholder { color: rgba(255,255,255,.3); }
+
+.nav-group { padding: 8px 8px 0; }
+.nav-label { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.28); padding: 0 10px; margin-bottom: 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px; padding: 8px 10px;
+  border-radius: 7px; font-size: 12px; font-weight: 500;
+  color: rgba(255,255,255,.55); cursor: pointer; transition: all .15s; margin-bottom: 1px;
+}
+.nav-item:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.85); }
+.nav-item.active { background: var(--blue); color: white; }
+.nav-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto; background: rgba(255,255,255,.12); color: rgba(255,255,255,.6);
+  border-radius: 10px; padding: 1px 7px; font-size: 10px; font-weight: 600;
+}
+.nav-item.active .nav-badge { background: rgba(255,255,255,.2); color: white; }
+.nav-badge.alert { background: #EF4444; color: white; }
+
+.sidebar-user {
+  margin-top: auto; padding: 12px; border-top: 1px solid rgba(255,255,255,.08);
+  display: flex; align-items: center; gap: 9px;
+  cursor: pointer; transition: background .15s;
+}
+.sidebar-user:hover { background: rgba(255,255,255,.04); }
+.user-avatar {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.user-name { font-size: 12px; font-weight: 500; color: rgba(255,255,255,.75); }
+.user-role { font-size: 10px; color: rgba(255,255,255,.35); margin-top: 1px; }
+
+/* ══ MAIN ══ */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.topbar {
+  background: white; border-bottom: 1px solid var(--border);
+  padding: 0 24px; height: 52px;
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.topbar-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.topbar-date { font-size: 12px; color: var(--text-3); }
+.topbar-search {
+  flex: 1;
+  max-width: 460px; margin: 0 18px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  display: flex; align-items: center; gap: 8px; padding: 7px 12px;
+  cursor: text;
+}
+.topbar-search svg { width: 13px; height: 13px; color: var(--text-3); }
+.topbar-search input { background: none; border: none; outline: none; width: 100%; font-size: 12.5px; color: var(--text); font-family: 'DM Sans', sans-serif; }
+.topbar-search input::placeholder { color: var(--text-3); }
+.topbar-search kbd {
+  margin-left: auto; font-size: 10.5px; font-family: 'DM Sans';
+  background: white; border: 1px solid var(--border); border-radius: 4px;
+  padding: 1px 6px; color: var(--text-3);
+}
+.topbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.tb-btn {
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+  padding: 7px 13px; border-radius: 8px; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.tb-btn svg { width: 12px; height: 12px; }
+.tb-ghost   { background: none; border: 1px solid var(--border); color: var(--text-2); }
+.tb-ghost:hover { background: var(--surface); border-color: #94A3B8; }
+.tb-primary { background: var(--blue); border: none; color: white; box-shadow: 0 1px 4px rgba(37,99,235,.3); }
+.tb-primary:hover { background: #1D4ED8; }
+.tb-notif {
+  width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
+  background: none; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative; transition: background .15s;
+}
+.tb-notif:hover { background: var(--surface); }
+.tb-notif svg { width: 15px; height: 15px; color: var(--text-2); }
+.notif-dot {
+  position: absolute; top: 7px; right: 7px;
+  width: 7px; height: 7px; background: #EF4444; border-radius: 50%;
+  border: 2px solid white;
+}
+
+.dash { padding: 24px; overflow-y: auto; }
+
+/* ══ Common Cards & helpers (used across screens) ══ */
+.card {
+  background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+}
+.card-header {
+  padding: 14px 18px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.card-title { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+.card-action { font-size: 11px; font-weight: 500; color: var(--blue); cursor: pointer; display: flex; align-items: center; gap: 3px; }
+.card-action:hover { color: #1D4ED8; }
+.card-action svg { width: 10px; height: 10px; }
+.card-body { padding: 14px 18px 18px; }
+
+/* ══ Page header (titles + crumb + actions) ══ */
+.page-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  margin-bottom: 20px;
+}
+.crumb { font-size: 12px; color: var(--text-3); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.crumb a { color: var(--blue); }
+.crumb a:hover { text-decoration: underline; }
+.crumb svg { width: 10px; height: 10px; }
+.page-title {
+  font-family: 'DM Serif Display', serif; font-size: 28px; letter-spacing: -.02em;
+  color: var(--text); line-height: 1.1;
+}
+.page-sub { color: var(--text-3); font-size: 13px; margin-top: 4px; }
+
+/* ══ Tags & badges (shared) ══ */
+.tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10.5px; font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.tag.blue  { background: var(--blue-light);  color: var(--blue); }
+.tag.green { background: var(--green-light); color: var(--green); }
+.tag.amber { background: var(--amber-light); color: var(--amber); }
+.tag.rose  { background: var(--rose-light);  color: var(--rose); }
+.tag.purple{ background: var(--purple-light);color: var(--purple); }
+.tag.grey  { background: var(--surface);     color: var(--text-3); border: 1px solid var(--border); }
+.tag.gold  { background: #FEF3C7;            color: var(--gold); }
+
+/* ══ Inputs ══ */
+.lbl { display: block; font-size: 11px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+.lbl .req { color: var(--rose); margin-left: 2px; }
+.fld {
+  width: 100%; font-size: 13px; font-family: 'DM Sans', sans-serif;
+  padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: white; color: var(--text); transition: border-color .15s, box-shadow .15s;
+}
+.fld:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.10); }
+.fld[disabled] { background: var(--surface); color: var(--text-3); }
+.fld::placeholder { color: #94A3B8; }
+textarea.fld { min-height: 90px; resize: vertical; line-height: 1.5; }
+select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M3 5l3 3 3-3z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+
+.btn {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+  padding: 9px 16px; border-radius: 8px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid transparent; transition: background .15s, border-color .15s, color .15s;
+}
+.btn svg { width: 13px; height: 13px; }
+.btn-primary { background: var(--blue); color: white; box-shadow: 0 1px 4px rgba(37,99,235,.25); }
+.btn-primary:hover { background: #1D4ED8; }
+.btn-ghost   { background: white; border-color: var(--border); color: var(--text-2); }
+.btn-ghost:hover { background: var(--surface); border-color: #94A3B8; }
+.btn-rose    { background: var(--rose); color: white; }
+.btn-rose:hover { background: #9D174D; }
+.btn-link    { background: none; color: var(--blue); padding: 6px 8px; }
+.btn-link:hover { color: #1D4ED8; }
+
+/* helpful utilities */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.gap-4 { gap: 4px; } .gap-6 { gap: 6px; } .gap-8 { gap: 8px; } .gap-10 { gap: 10px; } .gap-12 { gap: 12px; } .gap-16 { gap: 16px; } .gap-20 { gap: 20px; }
+.grow { flex: 1; }
+.muted { color: var(--text-3); }
+.mono  { font-variant-numeric: tabular-nums; }
+.mt-4 { margin-top: 4px; } .mt-8 { margin-top: 8px; } .mt-12 { margin-top: 12px; } .mt-16 { margin-top: 16px; } .mt-24 { margin-top: 24px; }
+.mb-4 { margin-bottom: 4px; } .mb-8 { margin-bottom: 8px; } .mb-12 { margin-bottom: 12px; } .mb-16 { margin-bottom: 16px; } .mb-24 { margin-bottom: 24px; }
+
+/* Slide-over drawer (used on log-activity, task-modal screens) */
+.scrim { position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 30; }
+.drawer {
+  position: fixed; right: 0; top: 0; bottom: 0; width: 560px; max-width: 100vw;
+  background: white; box-shadow: -16px 0 40px rgba(15,23,42,.10); z-index: 31;
+  display: flex; flex-direction: column;
+}
+.drawer-head {
+  padding: 18px 22px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  flex-shrink: 0;
+}
+.drawer-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); letter-spacing: -.01em; }
+.drawer-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.drawer-x {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); background: white; cursor: pointer;
+}
+.drawer-x:hover { background: var(--surface); }
+.drawer-x svg { width: 13px; height: 13px; color: var(--text-2); }
+.drawer-body { flex: 1; overflow-y: auto; padding: 22px; }
+.drawer-foot {
+  padding: 14px 22px; border-top: 1px solid var(--border);
+  background: var(--surface); display: flex; align-items: center; gap: 8px; justify-content: flex-end;
+  flex-shrink: 0;
+}
+.drawer-foot .left { margin-right: auto; font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+
+
+.rep-toolbar { display:flex; gap:8px; align-items:center; padding:14px 18px; background:white; border:1px solid var(--border); border-radius:12px; margin-bottom:14px; flex-wrap:wrap; }
+.filter-chip { font-size:12px; padding:6px 11px; border-radius:8px; cursor:pointer; background:white; border:1px dashed var(--border); color:var(--text-2); display:inline-flex; align-items:center; gap:6px; }
+.filter-chip svg { width:11px; height:11px; }
+.filter-chip:hover { border-color:#94A3B8; }
+.filter-chip.applied { background:var(--blue-pale); border:1px solid var(--blue-light); color:var(--blue); font-weight:600; }
+.filter-chip.applied .x { color:var(--blue); }
+.rep-toolbar .right { margin-left:auto; display:flex; gap:6px; align-items:center; }
+
+.kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:14px; }
+.kpi { background:white; border:1px solid var(--border); border-radius:12px; padding:16px 18px; }
+.kpi .l { font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); margin-bottom:8px; }
+.kpi .v { font-family:'DM Serif Display',serif; font-size:26px; line-height:1; color:var(--navy); }
+.kpi .delta { font-size:11.5px; margin-top:6px; color:var(--text-3); }
+.kpi .delta.up { color:var(--green); font-weight:600; }
+.kpi .delta.dn { color:var(--rose); font-weight:600; }
+
+.chart-card { background:white; border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+.chart-card h3 { font-family:'DM Serif Display',serif; font-size:18px; margin-bottom:4px; }
+.chart-card .sub { color:var(--text-3); font-size:12.5px; margin-bottom:18px; }
+
+.bars { display:grid; grid-template-columns:repeat(12,1fr); gap:8px; height:180px; align-items:end; padding:0 6px; }
+.bar { background:linear-gradient(to top, var(--blue), var(--blue-mid)); border-radius:5px 5px 0 0; position:relative; transition:transform .15s; }
+.bar:hover { transform:scaleY(1.02); }
+.bar .v { position:absolute; top:-20px; left:50%; transform:translateX(-50%); font-size:11px; color:var(--text-3); font-weight:500; white-space:nowrap; }
+.bar.lead { background:linear-gradient(to top, var(--green), #22C55E); }
+.bar.warn { background:linear-gradient(to top, var(--amber), #F59E0B); }
+.bar-axis { display:grid; grid-template-columns:repeat(12,1fr); gap:8px; padding:8px 6px 0; font-size:10.5px; color:var(--text-3); text-align:center; }
+
+.dt-card { background:white; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.dt-head, .dt-row { display:grid; grid-template-columns: 200px 110px 1fr 90px 90px 100px; gap:14px; align-items:center; padding:11px 18px; }
+.dt-head { background:var(--surface); border-bottom:1px solid var(--border); font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); }
+.dt-row { border-bottom:1px solid var(--border-soft); font-size:13px; cursor:pointer; }
+.dt-row:hover { background:var(--blue-pale); }
+.dt-row:last-child { border-bottom:none; }
+.dt-row .nm-text .nm { font-weight:500; color:var(--text); }
+.dt-row .nm-text .sub { font-size:11px; color:var(--text-3); margin-top:2px; }
+.dt-row .av { width:28px; height:28px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:700; color:white; margin-right:8px; }
+.dt-row .name { display:flex; align-items:center; }
+
+.pager { padding:10px 18px; display:flex; align-items:center; gap:14px; font-size:12px; color:var(--text-3); border-top:1px solid var(--border-soft); }
+.pager .nav { margin-left:auto; display:flex; gap:4px; }
+.pager .nav button { width:28px; height:28px; border-radius:6px; border:1px solid var(--border); background:white; cursor:pointer; font-size:12px; }
+.pager .nav button.cur { background:var(--blue); color:white; border-color:var(--blue); }
+
+.tag { display:inline-flex; align-items:center; font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:5px; }
+.tag.blue { background:var(--blue-light); color:var(--blue); }
+.tag.green { background:var(--green-light); color:var(--green); }
+.tag.amber { background:var(--amber-light); color:var(--amber); }
+.tag.rose { background:var(--rose-light); color:var(--rose); }
+
+</style>
+
+
+
+
+
+<style id="atlas-sidebar-fix">
+/* Minimal sidebar fix — keeps the CEO's per-page .main / .content
+   layouts untouched. We ONLY:
+     1. Pin the sidebar to the viewport with position:fixed
+     2. Reserve a 220px gutter on the body via padding-left
+     3. Normalize the sidebar's internal flex layout (logo + search top,
+        nav scrolls middle, user block bottom)
+     4. Force SVG icon sizes in the sidebar (some screens lost them) */
+
+html, body { overflow-x: hidden !important; }
+body {
+  padding-left: 220px !important;
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
+}
+*, *::before, *::after { box-sizing: border-box; }
+
+.sidebar {
+  width: 220px !important;
+  background: var(--navy, #0E1E35) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  overflow: hidden !important;          /* sidebar itself does NOT scroll */
+  display: flex !important;
+  flex-direction: column !important;
+  flex-shrink: 0 !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Logo + search are direct flex children that never scroll */
+.sidebar > .sidebar-logo,
+.sidebar > a > .sidebar-search,
+.sidebar > .sidebar-search,
+.sidebar-logo,
+.sidebar-search {
+  position: static !important;
+  flex-shrink: 0 !important;
+  background: var(--navy, #0E1E35) !important;
+  z-index: 2;
+}
+
+/* Fix oversized search icon — explicit 13×13 wins over any inheriting style */
+.sidebar-search {
+  margin: 12px 12px 6px !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.sidebar-search svg {
+  width: 13px !important;
+  height: 13px !important;
+  flex-shrink: 0 !important;
+  color: rgba(255,255,255,.4) !important;
+}
+.sidebar-search input {
+  font-size: 12px !important;
+  height: auto !important;
+  background: none !important;
+  border: none !important;
+  outline: none !important;
+  width: 100% !important;
+}
+/* Logo mark sizing — same fix prevents the brand SVG from ballooning */
+.sidebar-logo .logo-mark {
+  width: 52px !important;
+  height: 40px !important;
+  flex-shrink: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+.sidebar-logo .logo-mark svg {
+  width: 52px !important;
+  height: 40px !important;
+}
+
+/* The MIDDLE area is the only scrollable child */
+.sidebar-scroll {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 0 !important;        /* critical: lets flex item shrink */
+  display: flex !important;
+  flex-direction: column !important;
+}
+.sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.10); border-radius: 4px; }
+.sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.18); }
+
+/* User block sits at the bottom of the sidebar, never scrolls */
+.sidebar-user {
+  position: static !important;
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+  background: var(--navy, #0E1E35) !important;
+}
+
+/* .main is intentionally NOT overridden — each page keeps its own layout. */
+</style>
+
+<style id="atlas-sidebar-logo-canon">
+  /* Atlas sidebar logo — canonical styling injected to guarantee
+     consistent stacking (Atlas above, By GiveCentral below) across every screen. */
+  .sidebar-logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: 11px !important;
+    padding: 18px 18px 14px !important;
+    border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  }
+  .sidebar-logo .logo-mark {
+    width: 52px !important;
+    height: 40px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+  }
+  .sidebar-logo .logo-mark svg {
+    width: 52px !important;
+    height: 40px !important;
+  }
+  .sidebar-logo .logo-text-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 3px !important;
+  }
+  .sidebar-logo .logo-name {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 20px !important;
+    color: white !important;
+    line-height: 1 !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+  }
+  .sidebar-logo .logo-sub {
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    letter-spacing: .1em !important;
+    text-transform: uppercase !important;
+    color: rgba(255,255,255,.35) !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+  }
+</style>
+<style id="ur-nav-underline-fix">.nav-item,.nav-item:link,.nav-item:visited,.nav-item:hover,.nav-item:focus,.nav-item:active,.sidebar-item,.sidebar-item:hover{text-decoration:none}</style>
+</head>
+<body>
+
+
+<aside class="sidebar">
+    <div class="sidebar-logo" style="padding:16px 16px 14px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 89.83 25" style="width:170px;height:auto;display:block" aria-label="Atlas by GiveCentral"> <g id="atlas-mark"> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="1.21" y1="23.79" x2="12.07" y2="13.53"/> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="12.07" y1="13.53" x2="24.14" y2="7.49"/> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="24.14" y1="7.49" x2="36.22" y2="3.27"/> <line fill="none" stroke="#C79D46" stroke-width=".5" x1="24.14" y1="7.49" x2="27.77" y2="19.57"/> <circle fill="#fff" cx="1.21" cy="23.79" r="1.21"/> <circle fill="#fff" cx="12.07" cy="13.53" r="1.51"/> <circle fill="#fff" cx="24.14" cy="7.49" r="1.66"/> <circle fill="#fff" cx="27.77" cy="19.57" r="1.06"/> <circle fill="none" stroke="#C79E48" stroke-width=".5" opacity=".8" cx="36.22" cy="3.27" r="3.02"/> <circle fill="#C79E48" cx="36.22" cy="3.27" r="2.11"/> </g> <path fill="#fff" d="M43.93,14.67v-.21l.52-.19c.28-.11.49-.25.65-.41.15-.16.28-.39.37-.68L49.76.88h1.77l4.23,12.39c.11.31.24.54.37.7.14.16.35.3.65.41l.25.08v.21h-5.29v-.21l.31-.1c.29-.11.47-.27.53-.47.06-.2.05-.44-.03-.72l-.98-3h-4.62l-1,2.94c-.1.31-.13.55-.09.73.03.18.2.33.49.44l.46.19v.21h-2.87ZM47.09,9.75h4.35l-2.1-6.48-2.25,6.48ZM60.63,14.98c-.89,0-1.58-.22-2.07-.67s-.74-1.15-.74-2.12v-7.12h-1.44v-.21l.5-.08c.43-.1.8-.24,1.11-.42.31-.18.62-.42.93-.73l1.71-1.89h.21l-.06,2.92h2.33v.42h-2.35v7.5c0,.49.11.85.32,1.1.21.25.49.37.82.37.29,0,.55-.07.77-.22.22-.15.44-.34.67-.59l.21.21c-.28.47-.66.85-1.15,1.12-.49.28-1.08.42-1.77.42ZM63.75,14.67v-.21l.25-.08c.5-.17.75-.51.75-1.04V2.19c0-.28-.06-.49-.17-.64-.11-.15-.31-.25-.58-.32l-.27-.06v-.21l3.81-.9.25.19-.08,2.92v7.12c0,.51,0,1.02.01,1.53,0,.51.01,1.01.01,1.51,0,.28.06.5.17.68.11.17.3.3.56.39l.27.06v.21h-4.98ZM71.98,14.98c-.81,0-1.48-.23-2.03-.69-.55-.46-.82-1.12-.82-1.98,0-.65.33-1.25,1-1.8.67-.55,1.71-.96,3.14-1.24.22-.04.47-.09.75-.14.28-.05.57-.1.87-.16v-1.65c0-.94-.11-1.61-.34-1.99-.23-.38-.59-.57-1.07-.57-.33,0-.6.11-.79.32-.19.22-.32.59-.37,1.11l-.04.23c-.03.6-.17,1.03-.44,1.31-.26.28-.59.42-.98.42-.36,0-.66-.11-.9-.33-.24-.22-.35-.52-.35-.9,0-.57.2-1.05.59-1.44.4-.39.92-.68,1.57-.87.65-.19,1.36-.29,2.12-.29,1.24,0,2.19.3,2.86.91.67.6,1.01,1.59,1.01,2.95v4.6c0,.62.29.94.87.94h.46l.19.17c-.26.33-.55.59-.86.77s-.75.27-1.32.27c-.61,0-1.09-.14-1.45-.43-.35-.28-.59-.66-.7-1.14-.42.44-.84.82-1.28,1.14s-1,.47-1.7.47ZM73.25,13.71c.28,0,.54-.07.78-.2s.53-.34.86-.61v-3.5c-.14.03-.28.06-.42.08-.14.03-.3.06-.48.08-.64.17-1.15.45-1.53.84-.38.4-.57.93-.57,1.59,0,.57.13,1,.4,1.28.26.28.58.43.96.43ZM82.83,14.98c-.68,0-1.29-.08-1.83-.24s-1.04-.36-1.5-.59l.02-2.48h.21l.71,1.25c.31.56.64.97,1.01,1.24.37.27.84.41,1.41.41.67,0,1.2-.15,1.61-.45.41-.3.61-.7.61-1.2,0-.46-.15-.83-.44-1.12-.29-.29-.83-.55-1.62-.79l-.87-.27c-.85-.25-1.51-.64-2-1.17-.49-.53-.73-1.17-.73-1.94,0-.92.36-1.69,1.08-2.33.72-.64,1.76-.96,3.1-.96.54,0,1.05.06,1.53.18.48.12.94.3,1.38.53l-.12,2.25h-.21l-.73-1.29c-.26-.46-.52-.78-.78-.97-.26-.19-.64-.28-1.16-.28-.47,0-.92.13-1.33.4-.42.26-.62.64-.62,1.12s.18.85.53,1.12c.35.28.88.53,1.57.77l.94.27c1,.31,1.71.73,2.14,1.26s.65,1.18.65,1.93c0,1.01-.4,1.83-1.2,2.44-.8.61-1.92.92-3.36.92Z"/> <path fill="#fff" d="M43.89,22.82v-2.96h1.09c.21,0,.38.03.52.1.14.07.24.16.31.27.07.11.1.24.1.39s-.03.27-.1.38c-.06.1-.15.18-.26.23-.11.06-.22.09-.34.1l.06-.04c.13,0,.25.04.36.1.11.07.19.15.25.26.06.11.09.23.09.36,0,.15-.04.29-.11.41-.07.12-.18.22-.33.29-.14.07-.32.11-.53.11h-1.13ZM44.32,21.13h.63c.18,0,.31-.04.41-.12.09-.08.14-.2.14-.34s-.05-.25-.14-.34-.23-.12-.42-.12h-.61v.93ZM44.32,22.47h.65c.19,0,.33-.04.43-.13.1-.09.15-.21.15-.37s-.05-.28-.16-.37c-.11-.09-.25-.14-.44-.14h-.64v1.01ZM48.05,22.82v-1.1l-.98-1.86h.48l.76,1.55h-.11l.76-1.55h.47l-.97,1.86v1.1h-.42ZM54.07,22.87c-.28,0-.52-.06-.73-.19-.21-.13-.37-.3-.49-.53-.12-.23-.17-.49-.17-.8s.06-.57.18-.8c.12-.23.28-.41.5-.54.22-.13.48-.2.78-.2.34,0,.62.08.84.24.23.16.37.39.44.67h-.48c-.04-.16-.13-.29-.27-.39-.14-.09-.31-.14-.53-.14-.21,0-.39.05-.54.14-.15.09-.27.23-.35.4-.08.17-.12.38-.12.61s.04.45.12.62.2.3.35.39c.15.09.32.14.52.14.3,0,.52-.09.67-.26s.24-.4.26-.69h-.82v-.33h1.24v1.6h-.38l-.04-.45c-.07.11-.15.2-.23.28s-.19.13-.31.17c-.12.04-.26.06-.42.06ZM56.96,22.82v-2.96h.42v2.96h-.42ZM59.82,22.82l-1.1-2.96h.46l.9,2.52.9-2.52h.45l-1.1,2.96h-.51ZM62.76,22.82v-2.96h1.87v.35h-1.45v.95h1.32v.34h-1.32v.98h1.45v.35h-1.87ZM67.41,22.87c-.29,0-.54-.06-.75-.19s-.37-.31-.49-.54-.17-.5-.17-.8.06-.57.17-.8.28-.41.49-.54.46-.19.75-.19c.35,0,.63.08.84.25s.35.4.41.7h-.46c-.04-.17-.13-.31-.26-.42-.13-.1-.31-.16-.53-.16-.2,0-.37.05-.52.14-.15.09-.26.23-.34.4-.08.17-.12.38-.12.62s.04.45.12.62c.08.17.19.31.34.4.15.09.32.14.52.14.22,0,.4-.05.53-.15.13-.1.22-.24.26-.41h.46c-.06.29-.2.52-.41.69s-.5.25-.84.25ZM70.12,22.82v-2.96h1.87v.35h-1.45v.95h1.32v.34h-1.32v.98h1.45v.35h-1.87ZM73.47,22.82v-2.96h.42l1.51,2.27v-2.27h.42v2.96h-.42l-1.51-2.26v2.26h-.42ZM78.07,22.82v-2.61h-.87v-.35h2.18v.35h-.88v2.61h-.42ZM80.74,22.82v-2.96h1c.23,0,.43.04.57.12.15.08.26.18.33.31.07.13.11.28.11.45,0,.16-.04.3-.11.44-.07.13-.18.24-.34.32s-.35.12-.58.12h-.57v1.2h-.42ZM81.16,21.29h.55c.21,0,.36-.05.46-.15.1-.1.15-.23.15-.4s-.05-.29-.14-.39c-.1-.1-.25-.14-.46-.14h-.55v1.08ZM82.3,22.82l-.64-1.31h.46l.66,1.31h-.49ZM84.05,22.82l1.09-2.96h.46l1.09,2.96h-.45l-.87-2.45-.87,2.45h-.44ZM84.54,22.09l.12-.34h1.39l.12.34h-1.63ZM88.05,22.82v-2.96h.42v2.62h1.35v.33h-1.77Z"/> <g> <path fill="#fff" d="M86.13.4V.13h1.4v.27h-.54v1.49h-.31V.4h-.54Z"/> <path fill="#fff" d="M87.81,1.89V.13h.47l.33.91s.03.08.04.13.03.11.05.18c.02.06.03.12.04.18.01-.06.03-.12.04-.18.02-.06.03-.12.05-.18s.03-.1.04-.14l.33-.91h.48v1.76h-.31v-.89s0-.1,0-.16,0-.13,0-.21c0-.07,0-.15,0-.21-.02.08-.04.15-.06.23-.02.07-.04.14-.06.21-.02.06-.04.11-.05.15l-.32.89h-.27l-.33-.89s-.03-.09-.05-.15c-.02-.06-.04-.13-.06-.2-.02-.07-.04-.15-.07-.22,0,.07,0,.13,0,.21,0,.07,0,.14,0,.2,0,.06,0,.12,0,.16v.89h-.31Z"/> </g> </svg></div>
+
+    <a href="atlas-search.html" style="display:block;text-decoration:none">
+      <div class="sidebar-search">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+        <input type="text" placeholder="Search donors, gifts…" readonly>
+      </div>
+    </a>
+
+    <div class="sidebar-scroll">
+
+    <div class="nav-group">
+      <div class="nav-label">Main</div>
+      <a class="nav-item" href="atlas-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="1.5" width="4" height="4" rx="1.2"/><rect x="1.5" y="8.5" width="4" height="4" rx="1.2"/><rect x="8.5" y="8.5" width="4" height="4" rx="1.2"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="atlas-donors-list.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="4.5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5h1c2.8 0 5 2.2 5 5"/></svg>
+        Donors
+        <span class="nav-badge">3,847</span>
+      </a>
+      <a class="nav-item" href="atlas-gifts-pledges.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>
+        Gifts &amp; pledges
+        <span class="nav-badge">142</span>
+      </a>
+      <a class="nav-item" href="atlas-campaign-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>
+        Campaigns
+      </a>
+      <div class="nav-subwrap" style="margin:2px 0 4px 20px;border-left:1.5px solid rgba(255,255,255,.12)">
+        <a class="nav-item" href="atlas-funds.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><ellipse cx="7" cy="3.5" rx="5" ry="2"/><path d="M2 3.5v7c0 1.1 2.2 2 5 2s5-.9 5-2v-7M2 7c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg>Funds</a>
+        <a class="nav-item" href="atlas-appeals.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v5H6l-2.5 2v-2H2z"/></svg>Appeals</a>
+      </div>
+      <a class="nav-item active" href="atlas-reports.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>
+        Reports
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Fundraising</div>
+      <a class="nav-item" href="atlas-pipeline.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v4M7 10v.5"/></svg>
+        Prospect pipeline
+        <span class="nav-badge">28</span>
+      </a>
+      <a class="nav-item" href="atlas-tasks.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 6h11M5 2.5v2M9 2.5v2"/></svg>
+        Tasks &amp; reminders
+        <span class="nav-badge alert">7</span>
+      </a>
+      <a class="nav-item" href="atlas-communications.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3.5h10v7H2zM2 6.5h10M5 3.5v3"/></svg>
+        Communications
+      </a>
+      <a class="nav-item" href="atlas-events-dashboard.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><path d="M2 6h10M5 2v2M9 2v2"/></svg>
+        Events
+      </a>
+      <a class="nav-item" href="atlas-volunteer-management.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
+        Volunteers
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Intelligence</div>
+      <a class="nav-item" href="atlas-guru-ai.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="5" r="3.5"/><path d="M5 10c0 2 4 2 4 0M4.5 8.5c-2 1-3 3.5-3 4.5M9.5 8.5c2 1 3 3.5 3 4.5"/></svg>
+        Guru AI
+      </a>
+      <a class="nav-item" href="atlas-reports.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 11l3-3 2 2 3-3 2 2"/><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>
+        Analytics
+      </a>
+    </div>
+
+    <div class="nav-group" style="margin-top:8px">
+      <div class="nav-label">Admin</div>
+      <a class="nav-item" href="atlas-users-roles.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="10" cy="5.5" r="2"/><path d="M1 12c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5M9 12c0-1.5 1.2-2.7 3-2.7"/></svg>
+        Users &amp; roles
+      </a>
+      <a class="nav-item" href="atlas-tags.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 1.5L12.5 6.5l-5.5 5.5L1.5 6.5V1.5z"/><circle cx="4.5" cy="4.5" r="1"/></svg>Tags &amp; Segment</a>
+      <a class="nav-item" href="atlas-integrations.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="7" r="2.5"/><circle cx="10" cy="7" r="2.5"/><path d="M6.5 7h1"/></svg>
+        Integrations
+      </a>
+      <a class="nav-item" href="atlassmarttriggers.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.6 1.5L3 8h3.7l-.6 4.6L11 5.9H7.4z"/></svg>Smart Triggers</a>
+      <a class="nav-item" href="atlas-sync.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 7a5 5 0 0110 0M12 11a5 5 0 01-10 0M11 4l1.5-1L13 2M3 10l-1.5 1L1 12"/></svg>
+        Sync
+      </a>
+      <a class="nav-item" href="atlas-location-manage.html">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.8"/></svg>
+        Location portal
+      </a>
+    </div>
+
+    </div><!-- /.sidebar-scroll -->
+
+    <div class="sidebar-user">
+      <div class="user-avatar">SR</div>
+      <div>
+        <div class="user-name">Sarah Reynolds</div>
+        <div class="user-role">Development Director</div>
+      </div>
+    </div>
+  </aside>
+
+<div class="main">
+
+<div class="topbar">
+  <span class="topbar-title">Report viewer</span>
+  <span class="topbar-date">Monday, May 4, 2026</span>
+  <a href="atlas-search.html" class="topbar-search">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+    <input type="text" placeholder="Search donors, gifts, campaigns…" readonly style="cursor:pointer">
+    <kbd>⌘K</kbd>
+  </a>
+  <div class="topbar-right">
+    
+    <a href="atlas-guided-tour.html" class="tb-notif" title="Take the tour" style="position:relative">
+      <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><path d="M7.5 4v.5M6.5 7c0-1 .5-1.5 1-1.5s1 .5 1 1-.5 1-1 1.5v.5M7.5 11v.5"/></svg>
+    </a>
+    <a href="atlas-notifications.html" class="tb-notif" title="Notifications">
+      <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.5 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5zM6 13a1.5 1.5 0 003 0"/></svg>
+      <div class="notif-dot"></div>
+    </a>
+  </div>
+</div>
+
+<div class="dash">
+
+<style id="rc-css">
+  /* viz toggle (ported from built-in report viewer) */
+  .viz-tog{display:inline-flex;gap:4px;background:#F1F5F9;border-radius:9px;padding:3px;margin:2px 0 18px}
+  .viz-tog button{font-family:inherit;font-size:12px;font-weight:600;border:0;background:transparent;color:#64748B;padding:6px 13px;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .12s}
+  .viz-tog button svg{width:14px;height:14px}
+  .viz-tog button.on{background:#fff;color:#0F172A;box-shadow:0 1px 2px rgba(15,23,42,.08)}
+  .viz-alt{padding:2px}
+  .viz-tbl{width:100%;border-collapse:collapse}
+  .viz-tbl th{text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#64748B;border-bottom:1.5px solid #E5E9F0}
+  .viz-tbl th.r,.viz-tbl td.r{text-align:right}
+  .viz-tbl td{padding:9px 12px;font-size:13px;color:#0F172A;border-bottom:1px solid #F1F5F9}
+  .viz-tbl tr:last-child td{border-bottom:0}
+  .viz-tbl .barcell{position:relative}
+  .viz-tbl .barcell i{position:absolute;left:0;top:50%;transform:translateY(-50%);height:8px;border-radius:4px;background:#DBEAFE}
+  /* detail table pager */
+  .pager{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid var(--border-soft);font-size:12px;color:var(--text-3)}
+  .pager .nav{display:flex;gap:4px}
+  .pager .nav button{border:1px solid var(--border);background:#fff;color:var(--text-2);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:13px}
+  .pager .nav button.cur{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .pager .nav button:disabled{opacity:.4;cursor:not-allowed}
+  /* interactive filter chips */
+  .rc-toolbar .rc-chip{border-radius:99px;padding:6px 13px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:box-shadow .12s,border-color .12s}
+  .rc-toolbar .rc-chip:hover{box-shadow:0 1px 4px rgba(15,23,42,.10)}
+  .rc-toolbar .rc-chip .cv{opacity:.6;font-size:10px}
+  .rc-toolbar .rc-chip .x{margin-left:2px;font-size:13px;opacity:.65;cursor:pointer}
+  .rc-toolbar .rc-chip .x:hover{opacity:1}
+  #rc-menu{position:fixed;z-index:100040;min-width:190px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 14px 40px rgba(15,23,42,.18);padding:6px;display:none;font-family:'DM Sans',sans-serif}
+  #rc-menu.show{display:block}
+  #rc-menu .mh{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);padding:6px 11px 4px}
+  #rc-menu .mi{padding:8px 11px;font-size:13px;color:var(--text);border-radius:7px;cursor:pointer;white-space:nowrap;display:flex;justify-content:space-between;gap:14px;align-items:center}
+  #rc-menu .mi:hover{background:var(--surface)}
+  #rc-menu .mi.sel{color:var(--blue);font-weight:600}
+  #rc-menu .mi .ck{color:var(--blue);font-weight:700}
+  #rc-menu .msep{height:1px;background:var(--border-soft);margin:5px 4px}
+  /* schedule modal (ported) */
+  .rp-modal-ov{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;z-index:6000}
+  .rp-modal-ov.show{display:flex}
+  .rp-modal{background:#fff;border-radius:16px;width:min(440px,94vw);box-shadow:0 30px 80px rgba(0,0,0,.35);overflow:hidden;font-family:"DM Sans",sans-serif}
+  .rp-modal-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border,#E2E8F0);font-weight:700;font-size:16px;color:var(--navy,#0E1E35)}
+  .rp-x{border:0;background:transparent;font-size:20px;color:var(--text-3,#64748B);cursor:pointer}
+  .rp-modal-b{padding:16px 18px;display:flex;flex-direction:column;gap:13px}
+  .rp-modal-b label{font-size:12px;font-weight:600;color:var(--text-2,#334155);display:flex;flex-direction:column;gap:5px}
+  .rp-modal-b .fld{font-size:13.5px}
+  .rp-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .rp-modal-f{display:flex;justify-content:flex-end;gap:10px;padding:14px 18px;border-top:1px solid var(--border,#E2E8F0)}
+  .rc-missing{background:#fff;border:1px solid var(--border);border-radius:14px;padding:40px 28px;text-align:center;color:var(--text-3);max-width:520px;margin:20px auto}
+  .rc-missing h3{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);margin-bottom:8px}
+</style>
+
+<div id="rc-root"><!-- rendered from saved config --></div>
+
+</div>
+
+<!-- Schedule modal -->
+<div id="rc-sched-ov" class="rp-modal-ov">
+  <div class="rp-modal">
+    <div class="rp-modal-h"><div>Schedule this report</div><button class="rp-x" id="rc-sc-x">&times;</button></div>
+    <div class="rp-modal-b">
+      <label>Frequency<select id="rc-sc-freq" class="fld"><option>Daily</option><option selected>Weekly</option><option>Monthly</option><option>Quarterly</option></select></label>
+      <div class="rp-two">
+        <label id="rc-sc-day-wrap"><span id="rc-sc-day-lbl">Day of week</span><select id="rc-sc-day" class="fld"></select></label>
+        <label>Time<select id="rc-sc-time" class="fld"><option>6:00 AM</option><option selected>8:00 AM</option><option>12:00 PM</option><option>5:00 PM</option></select></label>
+      </div>
+      <label>Send to<input id="rc-sc-to" class="fld" value="finance@diocese.org"></label>
+      <label>Format<select id="rc-sc-fmt" class="fld"><option selected>PDF + CSV</option><option>PDF</option><option>CSV</option></select></label>
+    </div>
+    <div class="rp-modal-f"><button class="btn btn-ghost" id="rc-sc-cancel">Cancel</button><button class="btn btn-primary" id="rc-sc-go">Schedule send</button></div>
+  </div>
+</div>
+
+<div id="rc-menu"></div>
+
+<div class="rp-toast" id="rc-toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#0F172A;color:#fff;padding:12px 18px;border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.20);font-size:13px;font-family:'DM Sans',sans-serif;z-index:100010;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;max-width:460px">Saved</div>
+
+<script id="rc-controller">
+(function(){
+  function toast(msg){ var t=document.getElementById('rc-toast'); if(!t)return; t.textContent=msg; t.style.opacity='1'; t.style.transform='translateX(-50%)'; clearTimeout(t.__h); t.__h=setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(20px)'; },2600); }
+
+  function fmtMoney(v){ return '$'+Math.round(v).toLocaleString(); }
+  function fmtShort(v,isCount){ v=Math.round(v); if(isCount) return v.toLocaleString(); if(v>=1e6) return '$'+(v/1e6).toFixed(1).replace(/\.0$/,'')+'M'; if(v>=1e3) return '$'+Math.round(v/1e3)+'k'; return '$'+v; }
+  function fmtFull(v,isCount){ return isCount? Math.round(v).toLocaleString() : fmtMoney(v); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // detail-table mocks
+  var AVCOL=['var(--rose)','var(--purple)','var(--teal)','var(--blue)','var(--amber)','var(--green)'];
+  var NAMES=['Margaret O’Brien','Robert & Susan Lin','David & Anne Morrison','Margaret Sullivan','Thomas & Lisa Kowalski','Elena Ramirez','St. Michael’s Parish','Patricia Nguyen','James Callahan','Grace Okafor','Anonymous','The Delgado Family'];
+  var SUBS=['Indiv. · St. Mary’s','Household · St. Catherine','Household · St. Brigid','Indiv. · St. Mary’s','Household · St. Brigid','Indiv. · Holy Trinity','Parish','Indiv. · St. Anne','Indiv. · St. Paul','Indiv. · St. Jude','Online','Household · St. Rose'];
+  var DATES=['May 4, 2026','May 3, 2026','May 1, 2026','Apr 27, 2026','Apr 22, 2026','Apr 19, 2026','Apr 15, 2026','Apr 11, 2026','Apr 8, 2026','Apr 4, 2026','Mar 30, 2026','Mar 25, 2026'];
+  var AMTS=[10000,25000,100,1900,5000,75,3200,450,1200,800,250,6400];
+  function isName(l){ return /name|donor|constituent|parish|organization|entity|household|member/i.test(l); }
+  function isMoneyCol(l){ return /amount|total|raised|balance|value|gift|pledged|revenue|goal|net|cost/i.test(l); }
+  function isTagCol(l){ return /type|status|method|receipt|channel|frequency|restriction/i.test(l); }
+  function isDateCol(l){ return /date|when/i.test(l); }
+  function tagFor(l,r){
+    if(/receipt/i.test(l)){ var v=(r%4===2)?'Not issued':'Issued'; return '<span class="tag '+(v==='Issued'?'green':'grey')+'">'+v+'</span>'; }
+    if(/status/i.test(l)){ return '<span class="tag green">Active</span>'; }
+    var types=['Cash','Check','Card','Check','Card','Cash']; return '<span class="tag blue">'+types[r%types.length]+'</span>';
+  }
+  function cellHTML(col,r,i){
+    var l=col;
+    if(i===0 && isName(l)){
+      var nm=NAMES[r%NAMES.length], sub=SUBS[r%SUBS.length], av=AVCOL[r%AVCOL.length], ini=nm.replace(/[^A-Za-z]/,'').charAt(0);
+      return '<div class="name"><span class="av" style="background:'+av+'">'+ini+'</span><div class="nm-text"><div class="nm">'+esc(nm)+'</div><div class="sub">'+esc(sub)+'</div></div></div>';
+    }
+    if(isMoneyCol(l)) return '<div style="text-align:right;font-weight:600">'+fmtMoney(AMTS[r%AMTS.length])+'</div>';
+    if(isTagCol(l)) return tagFor(l,r);
+    if(isDateCol(l)) return DATES[r%DATES.length];
+    if(i===0) return '<div style="font-weight:500">'+esc(NAMES[r%NAMES.length])+'</div>';
+    if(/fund|designation|campaign|appeal/i.test(l)) return ['Cathedral Restoration','CMA Annual Fund','Marian Congress','Youth Ministry','Scholarship'][r%5];
+    if(/%|rate|to goal|fulfilled|roi/i.test(l)) return [62,88,45,100,73][r%5]+'%';
+    if(/email/i.test(l)) return 'donor'+(r+1)+'@example.org';
+    if(/count|attendance|responses|sent/i.test(l)) return [3,12,148,26,7][r%5];
+    return 'Sample '+(r+1);
+  }
+  // plain-text value of a cell (for filtering + distinct values)
+  function cellText(col,r,i){
+    var l=col;
+    if(i===0 && isName(l)) return NAMES[r%NAMES.length];
+    if(isMoneyCol(l)) return fmtMoney(AMTS[r%AMTS.length]);
+    if(/receipt/i.test(l)) return (r%4===2)?'Not issued':'Issued';
+    if(/status/i.test(l)) return 'Active';
+    if(isTagCol(l)){ var types=['Cash','Check','Card','Check','Card','Cash']; return types[r%types.length]; }
+    if(isDateCol(l)) return DATES[r%DATES.length];
+    if(i===0) return NAMES[r%NAMES.length];
+    if(/fund|designation|campaign|appeal/i.test(l)) return ['Cathedral Restoration','CMA Annual Fund','Marian Congress','Youth Ministry','Scholarship'][r%5];
+    if(/%|rate|to goal|fulfilled|roi/i.test(l)) return [62,88,45,100,73][r%5]+'%';
+    if(/email/i.test(l)) return 'donor'+(r+1)+'@example.org';
+    if(/count|attendance|responses|sent/i.test(l)) return String([3,12,148,26,7][r%5]);
+    return 'Sample '+(r+1);
+  }
+
+  var KEY='atlas-saved-views';
+  function loadViews(){ try{ var s=localStorage.getItem(KEY); return s?(JSON.parse(s)||[]):[]; }catch(e){ return []; } }
+  function getParam(n){ try{ return new URLSearchParams(location.search).get(n); }catch(e){ var m=location.search.match(new RegExp('[?&]'+n+'=([^&]*)')); return m?decodeURIComponent(m[1]):null; } }
+
+  function renderMissing(){
+    document.getElementById('rc-root').innerHTML=
+      '<div class="page-head"><div><div class="crumb"><a href="atlas-dashboard.html">Atlas</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <a href="atlas-reports.html">Reports</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <span>Saved report</span></div><div class="page-title">Report not found</div></div></div>'+
+      '<div class="rc-missing"><h3>We couldn’t open this report</h3><p>This saved report may have been removed, or it was built on another device. Open the reports hub to find your saved views or build a new one.</p><div style="margin-top:18px"><a class="btn btn-primary" href="atlas-reports.html#saved">Back to Reports</a></div></div>';
+  }
+
+  // ── viz toggle (ported), honoring card data-viz ──
+  var lastViz='Bar';
+  function initVizToggle(){
+    var card=document.querySelector('#rc-root .chart-card'); if(!card) return;
+    var barsEl=card.querySelector('.bars'); if(!barsEl) return;
+    var axisEl=card.querySelector('.bar-axis');
+    var bars=[].slice.call(barsEl.querySelectorAll('.bar'));
+    var labels=axisEl?[].slice.call(axisEl.querySelectorAll('span')).map(function(s){return (s.getAttribute('data-full')||s.textContent).trim();}):[];
+    function parseVal(t){ t=(t||'').replace(/[$,\s]/g,''); var m=1; if(/k$/i.test(t)){m=1e3;t=t.replace(/k$/i,'');} else if(/M$/i.test(t)){m=1e6;t=t.replace(/M$/i,'');} else if(/%$/.test(t)){t=t.replace(/%$/,'');} var n=parseFloat(t); return isNaN(n)?0:n*m; }
+    var data=bars.map(function(b,i){
+      var vtxt=(b.querySelector('.v')?b.querySelector('.v').textContent.trim():'');
+      var val=vtxt?parseVal(vtxt):(parseFloat(b.style.height)||0);
+      return {label:labels[i]||('Item '+(i+1)), disp:vtxt||String(Math.round(val)), val:val};
+    });
+    if(!data.length) return;
+    var PIE=['#2563EB','#15803D','#F59E0B','#7C3AED','#0D9488','#BE185D','#C8A04A','#64748B','#2563EB','#15803D','#F59E0B','#7C3AED'];
+    var maxV=Math.max.apply(null,data.map(function(d){return d.val;}))||1;
+    var totV=data.reduce(function(s,d){return s+d.val;},0)||1;
+    var IC={ Table:'<rect x="2" y="3" width="12" height="10" rx="1"/><path d="M2 7h12M6 3v10"/>', Bar:'<rect x="2" y="9" width="3" height="4"/><rect x="6.5" y="6" width="3" height="7"/><rect x="11" y="3" width="3" height="10"/>', Line:'<path d="M2 12l3.5-4 3 2 5-6"/>', Pie:'<circle cx="8" cy="8" r="6"/><path d="M8 8V2M8 8l5 2.5"/>' };
+    var tog=document.createElement('div'); tog.className='viz-tog';
+    tog.innerHTML=['Table','Bar','Line','Pie'].map(function(v){ return '<button data-v="'+v+'"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+IC[v]+'</svg>'+v+'</button>'; }).join('');
+    card.insertBefore(tog, barsEl);
+    var alt=document.createElement('div'); alt.className='viz-alt'; alt.style.display='none';
+    if(axisEl && axisEl.parentNode) axisEl.parentNode.insertBefore(alt, axisEl.nextSibling); else barsEl.parentNode.insertBefore(alt, barsEl.nextSibling);
+    function tableHTML(){ var rows=data.map(function(d){ var w=Math.max(2,Math.round(d.val/maxV*100)); return '<tr><td>'+esc(d.label)+'</td><td class="r barcell"><i style="width:'+w+'%"></i><span style="position:relative;font-weight:700">'+esc(d.disp)+'</span></td></tr>'; }).join(''); return '<table class="viz-tbl"><thead><tr><th>Category</th><th class="r">Value</th></tr></thead><tbody>'+rows+'</tbody></table>'; }
+    function lineHTML(){ var n=data.length, W=760,H=240,padL=20,padR=20,padT=26,padB=42,iw=W-padL-padR,ih=H-padT-padB; function x(i){ return n<=1?padL+iw/2:padL+i*iw/(n-1); } function y(v){ return padT+ih-(v/maxV)*ih; } var pts=data.map(function(d,i){return x(i).toFixed(1)+','+y(d.val).toFixed(1);}); var grid=[0,.5,1].map(function(t){var yy=padT+ih-t*ih;return '<line x1="'+padL+'" y1="'+yy+'" x2="'+(padL+iw)+'" y2="'+yy+'" stroke="#EEF2F7"/>';}).join(''); var area='<polygon fill="rgba(37,99,235,.09)" points="'+padL+','+(padT+ih)+' '+pts.join(' ')+' '+(padL+(n<=1?iw/2:iw))+','+(padT+ih)+'"/>'; var line='<polyline fill="none" stroke="#2563EB" stroke-width="2.4" stroke-linejoin="round" points="'+pts.join(' ')+'"/>'; var dots=data.map(function(d,i){return '<circle cx="'+x(i).toFixed(1)+'" cy="'+y(d.val).toFixed(1)+'" r="3.5" fill="#fff" stroke="#2563EB" stroke-width="2"/><text x="'+x(i).toFixed(1)+'" y="'+(y(d.val)-9).toFixed(1)+'" text-anchor="middle" font-size="10.5" font-weight="600" fill="#334155">'+esc(d.disp)+'</text>';}).join(''); var xl=data.map(function(d,i){return '<text x="'+x(i).toFixed(1)+'" y="'+(padT+ih+16)+'" text-anchor="middle" font-size="10.5" fill="#64748B">'+esc(d.label)+'</text>';}).join(''); return '<div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:'+W+'px">'+grid+area+line+dots+xl+'</svg></div>'; }
+    function pieHTML(){ var cx=120,cy=120,r=96,ri=58,a=-Math.PI/2,paths=''; data.forEach(function(d,i){ var frac=d.val/totV,a2=a+frac*2*Math.PI; var x1=cx+r*Math.cos(a),y1=cy+r*Math.sin(a),x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2); var xi1=cx+ri*Math.cos(a2),yi1=cy+ri*Math.sin(a2),xi2=cx+ri*Math.cos(a),yi2=cy+ri*Math.sin(a); var lg=frac>.5?1:0; paths+='<path d="M'+x1.toFixed(2)+' '+y1.toFixed(2)+' A'+r+' '+r+' 0 '+lg+' 1 '+x2.toFixed(2)+' '+y2.toFixed(2)+' L'+xi1.toFixed(2)+' '+yi1.toFixed(2)+' A'+ri+' '+ri+' 0 '+lg+' 0 '+xi2.toFixed(2)+' '+yi2.toFixed(2)+' Z" fill="'+PIE[i%PIE.length]+'"/>'; a=a2; }); var legend=data.map(function(d,i){return '<div style="display:flex;align-items:center;gap:9px;margin-bottom:7px;font-size:12.5px"><span style="width:11px;height:11px;border-radius:3px;background:'+PIE[i%PIE.length]+';flex:0 0 auto"></span><span style="flex:1;color:#475569">'+esc(d.label)+'</span><span style="font-weight:700;color:#0F172A">'+esc(d.disp)+'</span><span style="color:#94A3B8;width:40px;text-align:right">'+Math.round(d.val/totV*100)+'%</span></div>';}).join(''); return '<div style="display:flex;gap:26px;align-items:center;flex-wrap:wrap;padding:4px 2px"><svg viewBox="0 0 240 240" width="200" height="200" style="flex:0 0 auto">'+paths+'</svg><div style="flex:1;min-width:230px">'+legend+'</div></div>'; }
+    function paint(v){ lastViz=v; tog.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===v); }); if(v==='Bar'){ barsEl.style.display=''; if(axisEl)axisEl.style.display=''; alt.style.display='none'; alt.innerHTML=''; return; } barsEl.style.display='none'; if(axisEl)axisEl.style.display='none'; alt.style.display=''; alt.innerHTML = v==='Table'?tableHTML() : v==='Line'?lineHTML() : pieHTML(); }
+    tog.addEventListener('click', function(e){ var b=e.target.closest('button'); if(b) paint(b.dataset.v); });
+    var pref=card.getAttribute('data-viz')||'Bar'; if(pref==='Column')pref='Bar'; if(pref==='Area')pref='Line'; if(pref==='Donut')pref='Pie';
+    paint(pref);
+  }
+
+  function csvDownload(name){
+    var out=[]; var card=document.querySelector('#rc-root .dt-card');
+    if(card){ var head=card.querySelector('.dt-head'); if(head) out.push([].map.call(head.children,function(c){return '"'+c.textContent.trim().replace(/"/g,'""')+'"';}).join(',')); card.querySelectorAll('.dt-row').forEach(function(r){ var kids=[].slice.call(r.children); if(kids.length) out.push(kids.map(function(c){return '"'+c.textContent.trim().replace(/\s+/g,' ').replace(/"/g,'""')+'"';}).join(',')); }); }
+    if(out.length<2){ toast('Nothing to export'); return; }
+    try{ var blob=new Blob([out.join('\n')],{type:'text/csv'}); var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=name.replace(/[^\w]+/g,'_')+'.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(url);},600); }catch(e){}
+    toast('CSV downloaded ('+(out.length-1)+' rows)');
+  }
+
+  // ── Schedule modal wiring ──
+  function schedFreq(){ var f=document.getElementById('rc-sc-freq'), day=document.getElementById('rc-sc-day'), wrap=document.getElementById('rc-sc-day-wrap'), lbl=document.getElementById('rc-sc-day-lbl'); if(!f||!day)return; var v=f.value, opts=[], label='Day', show=true; if(v==='Daily'){ show=false; } else if(v==='Weekly'){ label='Day of week'; opts=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']; } else if(v==='Monthly'){ label='Day of month'; opts=['1st','15th','Last day']; } else if(v==='Quarterly'){ label='Quarter start'; opts=['1st business day','15th','Last day']; } if(wrap) wrap.style.display=show?'':'none'; if(lbl) lbl.textContent=label; day.innerHTML=opts.map(function(o){return '<option>'+o+'</option>';}).join(''); }
+  function openSched(){ var m=document.getElementById('rc-sched-ov'); if(m) m.classList.add('show'); schedFreq(); }
+  function closeSched(){ var m=document.getElementById('rc-sched-ov'); if(m) m.classList.remove('show'); }
+  function commitSched(name){ var g=function(id){var e=document.getElementById(id);return e?e.value:'';}; var freq=g('rc-sc-freq'); var when=(freq==='Daily'?'':' '+g('rc-sc-day')); closeSched(); toast('Scheduled · "'+name+'" · '+freq+when+' at '+g('rc-sc-time')+' → '+g('rc-sc-to')); }
+
+  function render(){
+    var id=getParam('id'), views=loadViews();
+    var rec=id?views.filter(function(v){return v.id===id;})[0]:null;
+    if(!rec || !rec.cfg){ renderMissing(); return; }
+
+    var snap=rec.cfg;
+    var name=snap.name||rec.name||'Custom report';
+    var dsName=snap.dsName||snap.ds||'Report';
+    var dateR=snap.dateR||'This fiscal year';
+    var d=snap.d||{rows:[],gb:'Group',meas:'Value',isCount:true};
+    var baseRows=(d.rows||[]).slice();
+    var cols=(snap.cols&&snap.cols.length)?snap.cols:['Donor','Date','Designation','Type','Receipt','Amount'];
+    var estRows=snap.estRows||'—';
+    var estNum=parseInt(String(estRows).replace(/[^0-9]/g,''),10)||0;
+    var fc=snap.fc||0;
+    var meas=d.meas||'Value';
+    var isCount=!!d.isCount;
+    var gbLabel=d.gb||'Group';
+    var chartTitle=(/^Sum of /.test(meas)?meas.replace('Sum of ','Total '):'Records')+' by '+gbLabel;
+    lastViz=snap.viz||'Bar';
+
+    document.title='GiveCentral Atlas — '+name;
+    var tt=document.querySelector('.topbar-title'); if(tt) tt.textContent='Report viewer';
+
+    // state
+    var shortDate=dateR.replace(/\s*\(.*\)$/,'');
+    var state={ order:'Largest first', grouped:true, page:1, dateLabel:shortDate, filter:null };
+    var DATE_PRESETS=['This fiscal year','Last fiscal year','Year to date','Last 30 days','Last 90 days','This calendar year','All time'];
+    var perPage=7;
+    var totalPages=Math.max(1, Math.min(24, Math.ceil((estNum||perPage)/perPage)));
+
+    function sortedGroups(){
+      var rows=baseRows.slice();
+      if(state.order==='Largest first') rows.sort(function(a,b){return b.val-a.val;});
+      else if(state.order==='Smallest first') rows.sort(function(a,b){return a.val-b.val;});
+      else if(state.order==='A→Z') rows.sort(function(a,b){return String(a.label).localeCompare(String(b.label));});
+      else if(state.order==='Z→A') rows.sort(function(a,b){return String(b.label).localeCompare(String(a.label));});
+      return rows;
+    }
+
+    // static header
+    var totalAll=baseRows.reduce(function(s,r){return s+r.val;},0);
+    var groupsN=baseRows.length;
+    var avg=groupsN?totalAll/groupsN:0;
+    var topG=baseRows.reduce(function(a,b){return (b.val>(a?a.val:-Infinity))?b:a;},null);
+    var subBits=[dsName, dateR, groupsN+' '+gbLabel+(groupsN!=1?' groups':' group')];
+
+    var head=''+
+      '<div class="page-head">'+
+        '<div><div class="crumb"><a href="atlas-dashboard.html">Atlas</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <a href="atlas-reports.html">Reports</a> <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3"/></svg> <span>'+esc(name)+'</span></div>'+
+        '<div class="page-title">'+esc(name)+'</div>'+
+        '<div class="page-sub" id="rc-sub"></div></div>'+
+        '<div class="flex gap-8">'+
+          '<button class="btn btn-ghost" id="rc-sched"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.5M7 9v.5"/></svg> Schedule send</button>'+
+          '<button class="btn btn-ghost" id="rc-csv"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1.5v8M3.5 6.5L7 9.5l3.5-3M2 12h10"/></svg> Export CSV</button>'+
+          '<button class="btn btn-ghost" id="rc-pdf"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2" width="8" height="10" rx="1"/><path d="M5 5h4M5 7h4M5 9h2"/></svg> Export PDF</button>'+
+          '<a class="btn btn-primary" id="rc-edit" href="atlas-reports.html#build"><svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M10 2l2 2-6 6-3 1 1-3z"/></svg> Edit report</a>'+
+        '</div>'+
+      '</div>'+
+      '<div class="rep-toolbar rc-toolbar">'+
+        '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" id="rc-chiprow"></div>'+
+        '<div class="right"><span style="font-size:12px;color:var(--text-3)">Group by</span><select class="fld" id="rc-groupby" style="font-size:12px;padding:6px 28px 6px 10px;width:auto"><option value="grouped">'+esc(gbLabel)+'</option><option value="none">None (flat list)</option></select>'+
+        '<span style="font-size:12px;color:var(--text-3);margin-left:8px">Sort</span><select class="fld" id="rc-sort" style="font-size:12px;padding:6px 28px 6px 10px;width:auto"><option>Largest first</option><option>Smallest first</option><option>A→Z</option><option>Z→A</option></select></div>'+
+      '</div>'+
+      '<div class="kpi-row">'+
+        '<div class="kpi"><div class="l">'+(isCount?'Total records':'Total '+esc(meas.replace('Sum of ','')))+'</div><div class="v">'+fmtShort(totalAll,isCount)+'</div><div class="delta up">across '+groupsN+' '+esc(gbLabel.toLowerCase())+(groupsN!=1?'s':'')+'</div></div>'+
+        '<div class="kpi"><div class="l">'+esc(gbLabel)+' groups</div><div class="v">'+groupsN+'</div><div class="delta">grouped by '+esc(gbLabel.toLowerCase())+'</div></div>'+
+        '<div class="kpi"><div class="l">Average / group</div><div class="v">'+fmtShort(avg,isCount)+'</div><div class="delta">mean per '+esc(gbLabel.toLowerCase())+'</div></div>'+
+        '<div class="kpi"><div class="l">Top '+esc(gbLabel.toLowerCase())+'</div><div class="v" style="font-size:20px;line-height:1.15">'+esc(topG?String(topG.label):'—')+'</div><div class="delta up">'+(topG?fmtShort(topG.val,isCount):'')+'</div></div>'+
+      '</div>'+
+      '<div id="rc-chart-mount"></div>'+
+      '<div id="rc-table-mount"></div>';
+
+    document.getElementById('rc-root').innerHTML=head;
+
+    function renderChart(){
+      var mount=document.getElementById('rc-chart-mount');
+      if(!state.grouped){ mount.innerHTML=''; return; }
+      var rows=sortedGroups();
+      var maxV=Math.max.apply(null,rows.map(function(r){return r.val;}))||1;
+      var gtc='repeat('+Math.max(1,rows.length)+',1fr)';
+      var barsHTML=rows.map(function(r){ var h=Math.max(6,Math.round(r.val/maxV*100)); var cls=(r.val>=avg*1.15)?'bar lead':(r.val<=avg*0.6)?'bar warn':'bar'; return '<div class="'+cls+'" style="height:'+h+'%"><span class="v">'+fmtShort(r.val,isCount)+'</span></div>'; }).join('');
+      var axisHTML=rows.map(function(r){ var full=String(r.label); var shortl=full.length>10?full.slice(0,9)+'…':full; return '<span data-full="'+esc(full)+'">'+esc(shortl)+'</span>'; }).join('');
+      mount.innerHTML='<div class="chart-card" data-viz="'+esc(lastViz)+'">'+
+        '<h3>'+esc(chartTitle)+'</h3>'+
+        '<p class="sub">Bars colored: <span style="color:var(--green);font-weight:600">green</span> = above average, <span style="color:var(--amber);font-weight:600">amber</span> = below.</p>'+
+        '<div class="bars" style="grid-template-columns:'+gtc+'">'+barsHTML+'</div>'+
+        '<div class="bar-axis" style="grid-template-columns:'+gtc+'">'+axisHTML+'</div>'+
+      '</div>';
+      initVizToggle();
+    }
+
+    // candidate seed pool for the detail table (deterministic mock rows)
+    var POOL=Math.max(perPage, Math.min(estNum||perPage, 48));
+    function matchedSeeds(){
+      var out=[];
+      for(var s=0;s<POOL;s++){
+        if(state.filter){ var ci=state.filter.colIndex; var txt=cellText(cols[ci],s,ci); if(txt!==state.filter.val) continue; }
+        out.push(s);
+      }
+      return out;
+    }
+    function distinctValues(colIndex){
+      var seen={}, vals=[];
+      for(var s=0;s<POOL;s++){ var t=cellText(cols[colIndex],s,colIndex); if(!(t in seen)){ seen[t]=1; vals.push(t); } if(vals.length>=8) break; }
+      return vals;
+    }
+
+    function renderTable(){
+      var mount=document.getElementById('rc-table-mount');
+      var colTpl=cols.map(function(c,i){ return i===0?'1.9fr':(isMoneyCol(c)?'0.9fr':'1fr'); }).join(' ');
+      var headHTML='<div class="dt-head" style="grid-template-columns:'+colTpl+'">'+cols.map(function(c){ return '<div'+(isMoneyCol(c)?' style="text-align:right"':'')+'>'+esc(c)+'</div>'; }).join('')+'</div>';
+      var seeds=matchedSeeds();
+      var totalRowsDisp = state.filter ? seeds.length : (estNum||perPage);
+      totalPages = Math.max(1, Math.min(24, Math.ceil((state.filter?seeds.length:(estNum||perPage))/perPage)));
+      if(state.page>totalPages) state.page=totalPages;
+      var offset=(state.page-1)*perPage;
+      var pageSeeds = state.filter ? seeds.slice(offset, offset+perPage) : (function(){ var a=[]; for(var k=0;k<perPage;k++) a.push(offset+k); return a; })();
+      var rowsHTML='';
+      pageSeeds.forEach(function(seed){
+        rowsHTML+='<div class="dt-row" style="grid-template-columns:'+colTpl+'">'+cols.map(function(c,ci){ return '<div>'+cellHTML(c,seed,ci)+'</div>'; }).join('')+'</div>';
+      });
+      if(!pageSeeds.length) rowsHTML='<div style="padding:26px 18px;text-align:center;color:var(--text-3);font-size:13px">No rows match this filter.</div>';
+      var from=totalRowsDisp?offset+1:0, to=Math.min(offset+perPage,totalRowsDisp);
+      var statusTxt = state.filter
+        ? ('Showing '+from.toLocaleString()+'–'+to.toLocaleString()+' of '+totalRowsDisp.toLocaleString()+' filtered rows')
+        : ('Showing '+from.toLocaleString()+'–'+to.toLocaleString()+' of '+totalRowsDisp.toLocaleString()+' rows');
+      var prevDis=state.page<=1?' disabled':'', nextDis=state.page>=totalPages?' disabled':'';
+      mount.innerHTML='<div class="dt-card">'+headHTML+rowsHTML+
+        '<div class="pager"><span>'+statusTxt+'</span>'+
+        '<div class="nav"><button id="rc-prev"'+prevDis+'>‹</button><button class="cur">'+state.page+'</button><button id="rc-next"'+nextDis+'>›</button></div></div>'+
+      '</div>';
+      var pv=document.getElementById('rc-prev'), nx=document.getElementById('rc-next');
+      if(pv) pv.addEventListener('click', function(){ if(state.page>1){ state.page--; renderTable(); } });
+      if(nx) nx.addEventListener('click', function(){ if(state.page<totalPages){ state.page++; renderTable(); } });
+    }
+
+    function rebuildSub(){
+      var sub=document.getElementById('rc-sub'); if(!sub) return;
+      var bits=[dsName, state.dateLabel, groupsN+' '+gbLabel+(groupsN!=1?' groups':' group')];
+      sub.innerHTML=esc(bits.join(' · '))+' · '+esc(fmtFull(totalAll,isCount))+' total · refreshed just now';
+    }
+
+    // ── interactive filter chips ──
+    function renderChips(){
+      var row=document.getElementById('rc-chiprow'); if(!row) return;
+      var groupTxt = state.grouped ? ('Group: '+gbLabel) : 'Group: None';
+      var filterChip = state.filter
+        ? '<span class="rc-chip" id="rc-chip-filter" style="background:var(--blue-pale);border:1px solid #BFDBFE;color:var(--blue)">'+esc(cols[state.filter.colIndex])+': '+esc(state.filter.val)+'<span class="x" id="rc-filter-x">×</span></span>'
+        : '<span class="rc-chip" id="rc-chip-filter" style="background:#fff;border:1px solid var(--border);color:var(--text-3)">All records<span class="cv">▾</span></span>';
+      row.innerHTML=
+        '<span class="rc-chip" id="rc-chip-date" style="background:var(--blue-pale);border:1px solid #BFDBFE;color:var(--blue);font-weight:600">Date: '+esc(state.dateLabel)+'<span class="cv">▾</span></span>'+
+        filterChip;
+      document.getElementById('rc-chip-date').addEventListener('click', function(e){ openDateMenu(e.currentTarget); });
+      var fx=document.getElementById('rc-filter-x');
+      document.getElementById('rc-chip-filter').addEventListener('click', function(e){ if(e.target.id==='rc-filter-x') return; openFilterMenu(e.currentTarget); });
+      if(fx) fx.addEventListener('click', function(e){ e.stopPropagation(); state.filter=null; state.page=1; renderChips(); renderTable(); toast('Filter cleared'); });
+    }
+
+    // ── shared dropdown menu ──
+    function showMenu(anchor, html){
+      var m=document.getElementById('rc-menu'); m.innerHTML=html;
+      var r=anchor.getBoundingClientRect();
+      m.style.left=Math.min(r.left, window.innerWidth-230)+'px';
+      m.style.top=(r.bottom+6)+'px';
+      m.classList.add('show');
+    }
+    function hideMenu(){ var m=document.getElementById('rc-menu'); if(m) m.classList.remove('show'); }
+    function openDateMenu(anchor){
+      var html='<div class="mh">Date range</div>'+DATE_PRESETS.map(function(p){ return '<div class="mi" data-date="'+esc(p)+'">'+esc(p)+(p===state.dateLabel?'<span class="ck">✓</span>':'')+'</div>'; }).join('');
+      showMenu(anchor, html);
+      document.getElementById('rc-menu').querySelectorAll('.mi').forEach(function(mi){ mi.addEventListener('click', function(){ state.dateLabel=mi.getAttribute('data-date'); hideMenu(); rebuildSub(); renderChips(); toast('Date range · '+state.dateLabel); }); });
+    }
+    function openGroupMenu(anchor){
+      var html='<div class="mh">Group by</div>'+
+        '<div class="mi" data-g="1">'+esc(gbLabel)+(state.grouped?'<span class="ck">✓</span>':'')+'</div>'+
+        '<div class="mi" data-g="0">None (flat list)'+(!state.grouped?'<span class="ck">✓</span>':'')+'</div>';
+      showMenu(anchor, html);
+      document.getElementById('rc-menu').querySelectorAll('.mi').forEach(function(mi){ mi.addEventListener('click', function(){ state.grouped=(mi.getAttribute('data-g')==='1'); var sel=document.getElementById('rc-groupby'); if(sel) sel.value=state.grouped?'grouped':'none'; hideMenu(); renderChart(); renderChips(); toast(state.grouped?('Grouped by '+gbLabel):'Ungrouped — flat list'); }); });
+    }
+    function openFilterMenu(anchor){
+      // step 1: choose a column
+      var html='<div class="mh">Filter by</div>'+cols.map(function(c,i){ return '<div class="mi" data-col="'+i+'">'+esc(c)+' <span class="cv">›</span></div>'; }).join('');
+      if(state.filter) html+='<div class="msep"></div><div class="mi" data-clear="1" style="color:var(--rose)">Clear filter</div>';
+      showMenu(anchor, html);
+      var menu=document.getElementById('rc-menu');
+      menu.querySelectorAll('.mi[data-col]').forEach(function(mi){ mi.addEventListener('click', function(){ openFilterValues(anchor, parseInt(mi.getAttribute('data-col'),10)); }); });
+      var cl=menu.querySelector('.mi[data-clear]'); if(cl) cl.addEventListener('click', function(){ state.filter=null; state.page=1; hideMenu(); renderChips(); renderTable(); toast('Filter cleared'); });
+    }
+    function openFilterValues(anchor, colIndex){
+      var vals=distinctValues(colIndex);
+      var html='<div class="mh">'+esc(cols[colIndex])+'</div>'+vals.map(function(v){ return '<div class="mi" data-val="'+esc(v)+'">'+esc(v)+'</div>'; }).join('');
+      showMenu(anchor, html);
+      document.getElementById('rc-menu').querySelectorAll('.mi').forEach(function(mi){ mi.addEventListener('click', function(){ state.filter={colIndex:colIndex, val:mi.getAttribute('data-val')}; state.page=1; hideMenu(); renderChips(); renderTable(); toast(cols[colIndex]+': '+state.filter.val); }); });
+    }
+    document.addEventListener('mousedown', function(e){ var m=document.getElementById('rc-menu'); if(m&&m.classList.contains('show')&&!m.contains(e.target)&&!(e.target.closest&&e.target.closest('.rc-chip'))){ hideMenu(); } });
+
+    rebuildSub();
+    renderChips();
+    renderChart();
+    renderTable();
+
+    // wire controls
+    document.getElementById('rc-csv').addEventListener('click', function(){ csvDownload(name); });
+    document.getElementById('rc-pdf').addEventListener('click', function(){ toast('Preparing PDF · "'+name+'" — opening print dialog'); setTimeout(function(){ try{ window.print(); }catch(e){} },300); });
+    document.getElementById('rc-sched').addEventListener('click', openSched);
+    document.getElementById('rc-sort').addEventListener('change', function(){ state.order=this.value; renderChart(); toast('Sorted · '+state.order); });
+    document.getElementById('rc-groupby').addEventListener('change', function(){ state.grouped=(this.value==='grouped'); renderChart(); renderChips(); toast(state.grouped?('Grouped by '+gbLabel):'Ungrouped — flat list'); });
+
+    // schedule modal buttons
+    document.getElementById('rc-sc-x').addEventListener('click', closeSched);
+    document.getElementById('rc-sc-cancel').addEventListener('click', closeSched);
+    document.getElementById('rc-sched-ov').addEventListener('click', function(e){ if(e.target===this) closeSched(); });
+    document.getElementById('rc-sc-freq').addEventListener('change', schedFreq);
+    document.getElementById('rc-sc-go').addEventListener('click', function(){ commitSched(name); });
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', render); else render();
+})();
+</script>
+
+</body></html>
