@@ -248,7 +248,6 @@ select.fld{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   <div class="topbar">
     <span class="topbar-title">Legal Entities</span>
     <span class="topbar-date">Monday, May 4, 2026</span>
-    <div class="loc-wrap"><button class="loc-pill" onclick="toggleLocMenu(event)" title="Your active location — switch context"><svg class="pin" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.6"/></svg><span class="lbl" id="loc-pill-label">Diocese of Albany</span><span class="cw">▾</span></button><span id="loc-menu-host"></span></div>
     <a href="atlas-search.html" class="topbar-search"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input type="text" placeholder="Search donors, gifts, campaigns…" readonly style="cursor:pointer"><kbd>⌘K</kbd></a>
     <div class="topbar-right"><a href="atlas-notifications.html" class="tb-notif" title="Notifications"><svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.5 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5zM6 13a1.5 1.5 0 003 0"/></svg><div class="notif-dot"></div></a></div>
   </div>
@@ -263,7 +262,7 @@ select.fld{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 var SAINTS=['Mary','Patrick','Joseph','Anne','Michael','Augustine','Catherine','Francis','Thomas','John','Agnes','Bernard','Cecilia','Dominic','Elizabeth','Gabriel','Helena','Ignatius','James','Lawrence','Monica','Nicholas','Paul','Rose','Stephen','Teresa','Vincent','William','Clare','Jude'];
 var TOWNS=['Albany','Troy','Schenectady','Saratoga','Cohoes','Watervliet','Rensselaer','Amsterdam','Gloversville','Johnstown','Hudson','Catskill','Oneonta','Delmar','Colonie','Guilderland','Latham','Clifton Park','Ballston','Glens Falls'];
 var TYPES=['Parish','School','Cemetery','Ministry','Charity','Foundation'];
-var TYPECOLOR={Diocese:'purple',Foundation:'teal',Charity:'blue',Parish:'grey',School:'amber',Cemetery:'grey',Ministry:'blue'};
+var TYPECOLOR={Diocese:'purple',Foundation:'teal',Charity:'blue',Parish:'grey',School:'amber',Cemetery:'grey',Ministry:'blue',Department:'teal'};
 function money(n){ if(n>=1e6) return '$'+(n/1e6).toFixed(1)+'M'; if(n>=1e3) return '$'+Math.round(n/1e3)+'K'; return '$'+n; }
 function moneyFull(n){ return '$'+n.toLocaleString('en-US'); }
 
@@ -303,7 +302,26 @@ ENT.forEach(function(e,idx){
 });
 var EMAP={}; ENT.forEach(function(e){EMAP[e.id]=e;});
 var CHILDREN={}; ENT.forEach(function(e){ if(e.parentId){ (CHILDREN[e.parentId]=CHILDREN[e.parentId]||[]).push(e); } });
-function rollup(e){ var d=e.donors,y=e.ytd,l=e.lifetime; (CHILDREN[e.id]||[]).forEach(function(c){ var r=rollup(c); d+=r.donors; y+=r.ytd; l+=r.lifetime; }); return {donors:d,ytd:y,lifetime:l}; }
+function rollup(e,seen){ seen=seen||{}; if(seen[e.id]) return {donors:0,ytd:0,lifetime:0}; seen[e.id]=1; var d=e.donors,y=e.ytd,l=e.lifetime; (CHILDREN[e.id]||[]).forEach(function(c){ var r=rollup(c,seen); d+=r.donors; y+=r.ytd; l+=r.lifetime; }); return {donors:d,ytd:y,lifetime:l}; }
+function rebuildChildren(){ for(var k in CHILDREN) delete CHILDREN[k]; ENT.forEach(function(e){ if(e.parentId){ (CHILDREN[e.parentId]=CHILDREN[e.parentId]||[]).push(e); } }); }
+function descendantIds(id){ var out={}, stack=(CHILDREN[id]||[]).slice(); while(stack.length){ var c=stack.pop(); if(!c||out[c.id]) continue; out[c.id]=1; (CHILDREN[c.id]||[]).forEach(function(k){stack.push(k);}); } return out; }
+// EIN status: sole | primary (shared, is owner) | duplicate (shared, not owner) | shared (Department under parent with same EIN) | none
+function einInfo(e){
+  if(!e.ein) return {state:'none'};
+  var sharers=ENT.filter(function(x){return x.ein===e.ein;});
+  if(sharers.length<=1) return {state:'sole'};
+  var parent=e.parentId?EMAP[e.parentId]:null;
+  if(e.type==='Department' && parent && parent.ein===e.ein) return {state:'shared', owner:parent};
+  var prim=sharers.filter(function(x){return x.type!=='Department';}).sort(function(a,b){return a.id<b.id?-1:(a.id>b.id?1:0);})[0]||sharers[0];
+  return {state:(prim===e?'primary':'duplicate'), owner:prim};
+}
+function einTag(e){ var i=einInfo(e);
+  if(i.state==='primary') return ' <span class="tag green" title="Primary entity for this EIN">Primary</span>';
+  if(i.state==='duplicate') return ' <span class="tag rose" title="EIN already used by '+(i.owner?i.owner.name:'another entity')+'">Duplicate</span>';
+  if(i.state==='shared') return ' <span class="tag teal" title="Shares its parent’s EIN">Shared</span>';
+  return '';
+}
+function einCell(e){ return (e.ein? e.ein : '<span class="tag rose">Missing</span>') + einTag(e); }
 function groupHealth(e){ var order={ok:0,warn:1,alert:2}, worst=e.health; (CHILDREN[e.id]||[]).forEach(function(c){ if(order[c.health]>order[worst]) worst=c.health; }); return worst; }
 var expanded={};
 
@@ -387,7 +405,7 @@ function entMatch(e){
 }
 function healthCell(h){ var hcls=h==='ok'?'h-ok':(h==='warn'?'h-warn':'h-alert'); var hlabel=h==='ok'?'Healthy':(h==='warn'?'Needs review':'Action needed'); return '<span class="hdot '+hcls+'"><i></i>'+hlabel+'</span>'; }
 function entToolbar(){
-  var typeOpts=['All'].concat(['Diocese'],TYPES).filter(function(v,i,a){return a.indexOf(v)===i;});
+  var typeOpts=['All'].concat(['Diocese'],TYPES,['Department']).filter(function(v,i,a){return a.indexOf(v)===i;});
   return '<div class="toolbar">'
     +'<div class="search-box"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input placeholder="Search entities by name or ID…" value="'+entQuery.replace(/"/g,'&quot;')+'" oninput="entSearch(this.value)"></div>'
     +'<select class="fld" onchange="entSetType(this.value)">'+typeOpts.map(function(t){return '<option'+(t===entFilterType?' selected':'')+'>'+t+'</option>';}).join('')+'</select>'
@@ -401,7 +419,7 @@ function flatRow(e,indent){
   var kid = indent? '<span style="color:var(--text-3);margin-right:6px">└</span>':'';
   return '<tr onclick="openEntity(\''+e.id+'\')"><td'+pad+'><div class="ent-name">'+kid+e.name+st+'</div><div class="ent-id mono"'+(indent?' style="padding-left:16px"':'')+'>'+e.id+'</div></td>'
     +'<td><span class="tag '+(TYPECOLOR[e.type]||'grey')+'">'+e.type+'</span></td>'
-    +'<td class="mono">'+(e.ein?e.ein:'<span class="tag rose">Missing</span>')+'</td>'
+    +'<td class="mono">'+einCell(e)+'</td>'
     +'<td class="r mono">'+e.donors.toLocaleString()+'</td>'
     +'<td class="r mono">'+money(e.ytd)+'</td>'
     +'<td>'+healthCell(e.health)+'</td>'
@@ -412,7 +430,7 @@ function entitiesView(){
 }
 function entitiesByType(){
   var anyFilter=(entQuery||entFilterType!=='All'||entFilterHealth!=='All');
-  var order=['Diocese','Foundation','Charity','Parish','School','Cemetery','Ministry'];
+  var order=['Diocese','Foundation','Charity','Parish','School','Cemetery','Ministry','Department'];
   var byType={}; ENT.forEach(function(e){ (byType[e.type]=byType[e.type]||[]).push(e); });
   var types=order.filter(function(t){return byType[t];}).concat(Object.keys(byType).filter(function(t){return order.indexOf(t)<0;}));
   var body='',shownGroups=0,shownRows=0;
@@ -465,7 +483,7 @@ function entitiesConsolidated(){
     var kidBadge = kids.length? '<span class="subchip" onclick="event.stopPropagation();toggleExpand(\''+r.id+'\')">'+(isOpen?'Hide':'View')+' '+kids.length+' sub-entities <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" style="transform:rotate('+(isOpen?'-90':'90')+'deg)"><path d="M4 2l4 4-4 4"/></svg></span>':'';
     body+='<tr class="grp-row" onclick="openEntity(\''+r.id+'\')"><td><div class="ent-name" style="display:flex;align-items:center;gap:2px">'+caret+r.name+kidBadge+'</div><div class="ent-id mono" style="padding-left:18px">'+r.id+' · rolled-up total</div></td>'
       +'<td><span class="tag '+(TYPECOLOR[r.type]||'grey')+'">'+r.type+'</span></td>'
-      +'<td class="mono">'+(r.ein?r.ein:'<span class="tag rose">Missing</span>')+'</td>'
+      +'<td class="mono">'+einCell(r)+'</td>'
       +'<td class="r mono" style="font-weight:700">'+ru.donors.toLocaleString()+'</td>'
       +'<td class="r mono" style="font-weight:700">'+money(ru.ytd)+'</td>'
       +'<td>'+healthCell(gh)+'</td>'
@@ -520,7 +538,7 @@ function entityTabBody(e,t){
   return '';
 }
 function ov(e){
-  var facts=[['Legal name',e.name],['Entity type',e.type],['EIN / Tax ID',e.ein||'— Missing'],['Registered state',e.state],['Fiscal year end',e.fye],['Status',e.status]];
+  var facts=[['Legal name',e.name],['Entity type',e.type],['EIN / Tax ID',(e.ein||'— Missing')+einTag(e)],['Registered state',e.state],['Fiscal year end',e.fye],['Status',e.status]];
   var checks=e.issues.length? e.issues.map(function(x,ix){return '<div class="check '+x.lvl+'"><span class="ci">'+(x.lvl==='alert'?'!':'⚠')+'</span><div><div class="ct">'+x.t+'</div><div class="cs">'+x.s+'</div></div><span class="cact" onclick="resolveIssue('+ix+')">Resolve →</span></div>';}).join('')
      : '<div class="check ok"><span class="ci">✓</span><div><div class="ct">All compliance checks passing</div><div class="cs">EIN on file, registration current, addresses complete.</div></div></div>';
   var kids=CHILDREN[e.id]||[]; var parent=e.parentId?EMAP[e.parentId]:null; var ru=rollup(e);
@@ -562,7 +580,7 @@ function subTab(e){
   var kh='<div class="kpis" style="grid-template-columns:repeat(4,1fr)">'+kpis.map(function(k){return '<div class="kpi"><div class="kv">'+k[0]+'</div><div class="kk">'+k[1]+'</div></div>';}).join('')+'</div>';
   var note = needs? '<div class="check warn" style="margin-top:14px"><span class="ci">⚠</span><div><div class="ct">'+needs+' of '+kids.length+' sub-entities need attention</div><div class="cs">Compliance issues in child entities roll up to this parent’s consolidated health.</div></div></div>':'';
   var search='<div class="toolbar" style="margin-top:16px"><div class="search-box"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg><input placeholder="Search sub-entities…" value="'+esc(subQuery)+'" oninput="subSearch(this.value)"></div></div>';
-  var rows=shown.map(function(c){return '<tr onclick="openEntity(\''+c.id+'\')"><td><div class="ent-name">'+c.name+'</div><div class="ent-id mono">'+c.id+'</div></td><td><span class="tag '+(TYPECOLOR[c.type]||'grey')+'">'+c.type+'</span></td><td class="mono">'+(c.ein?c.ein:'<span class="tag rose">Missing</span>')+'</td><td class="r mono">'+c.donors.toLocaleString()+'</td><td class="r mono">'+money(c.ytd)+'</td><td>'+healthCell(c.health)+'</td><td class="r"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#94A3B8" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg></td></tr>';}).join('');
+  var rows=shown.map(function(c){return '<tr onclick="openEntity(\''+c.id+'\')"><td><div class="ent-name">'+c.name+'</div><div class="ent-id mono">'+c.id+'</div></td><td><span class="tag '+(TYPECOLOR[c.type]||'grey')+'">'+c.type+'</span></td><td class="mono">'+einCell(c)+'</td><td class="r mono">'+c.donors.toLocaleString()+'</td><td class="r mono">'+money(c.ytd)+'</td><td>'+healthCell(c.health)+'</td><td class="r"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#94A3B8" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg></td></tr>';}).join('');
   var table='<table class="etbl" style="margin-top:6px"><thead><tr><th>Sub-entity</th><th>Type</th><th>Tax ID</th><th class="r">Donors</th><th class="r">YTD</th><th>Compliance</th><th></th></tr></thead><tbody>'+(shown.length?rows:'<tr><td colspan="7" style="text-align:center;color:var(--text-3);padding:24px">No sub-entities match.</td></tr>')+'</tbody></table>';
   return kh+note+search+'<div class="sec-lbl">Sub-entities ('+shown.length+(q?' of '+kids.length:'')+')</div>'+table;
 }
@@ -598,6 +616,12 @@ function ensureDetail(e){
   e.bank={merchant:e.merchant,deposit:'•••• 4821 · KeyBank',routing:'••••• 0142',payout:'Daily · next-day ACH',processor:'GiveCentral Pay',recon:'Auto · to GL 1010'};
   e.receipt={logo:e.name.split('·')[0].trim()+' crest',signatory:'Most Rev. Bishop · Chancellor',template:'Entity Gift Acknowledgment v3',autosend:'On gift · within 24h'};
   e.users=[{n:'Sarah Reynolds',r:'Development Director',i:'SR'},{n:'Jamie Morrison',r:'Gift Officer',i:'JM'},{n:'Ava Chen',r:'Database Admin',i:'AC'},{n:'Tom Boyle',r:'Read-only',i:'TB'}];
+  e.loginActivity=[
+    {u:'Sarah Reynolds',i:'SR',when:'Today · 8:42 AM',ip:'73.12.44.9',loc:'Albany, NY',device:'Chrome · macOS',status:'ok'},
+    {u:'Jamie Morrison',i:'JM',when:'Today · 7:15 AM',ip:'98.45.2.100',loc:'Troy, NY',device:'Safari · iPhone',status:'ok'},
+    {u:'Ava Chen',i:'AC',when:'Yesterday · 11:58 PM',ip:'45.133.1.77',loc:'Kyiv, UA',device:'Firefox · Windows',status:'flagged',reason:'New device · unusual location (~4,800 mi from usual sign-ins)'},
+    {u:'Tom Boyle',i:'TB',when:'Mar 27 · 3:04 AM',ip:'185.220.101.4',loc:'Unknown · VPN/Tor',device:'Chrome · Linux',status:'flagged',reason:'5 failed attempts before success · known Tor exit node'}
+  ];
   var fnames=['Annual Appeal','Capital Campaign','Cemetery Care','Tuition Assistance','Ministry Fund','Building Fund'];
   e.fundList=(e.funds>0?fnames.slice(0,e.funds):[]).map(function(n,i){return {name:n,ytd:Math.round(e.ytd/(i+2))};});
 }
@@ -619,7 +643,8 @@ function editDrawer(title,sub,fields,onSave,saveLabel){
 /* ---- Tax & compliance ---- */
 function taxTab(e){
   var reg = e.stateRegDays<0? '<span class="tag rose">Expired '+(-e.stateRegDays)+'d ago</span>' : (e.stateRegDays<30? '<span class="tag amber">Renews in '+e.stateRegDays+'d</span>':'<span class="tag green">Current</span>');
-  var facts=[['EIN / Tax ID',e.ein||'— Missing'],['Entity classification',e.tax.classification],['NY CHAR500 registration',reg],['Fiscal year end',e.fye],['Group ruling (GEN)',e.tax.gen],['State(s) registered',e.state]];
+  var pr=einInfo(e); var einRow=(e.ein||'— Missing')+einTag(e)+(pr.state==='shared'&&pr.owner?'<div class="ms" style="margin-top:2px">Shared from parent '+esc(pr.owner.name)+'</div>':(pr.state==='duplicate'&&pr.owner?'<div class="ms" style="margin-top:2px;color:var(--rose)">Primary is '+esc(pr.owner.name)+'</div>':''));
+  var facts=[['EIN / Tax ID',einRow],['Entity classification',e.tax.classification],['NY CHAR500 registration',reg],['Fiscal year end',e.fye],['Group ruling (GEN)',e.tax.gen],['State(s) registered',e.state]];
   return secRow('Tax &amp; compliance','Edit tax details','editTax()')
     +'<div class="fact-grid">'+facts.map(function(f){return '<div class="fact"><div class="k">'+f[0]+'</div><div class="v">'+f[1]+'</div></div>';}).join('')+'</div>'
     +secRow('Receipt substantiation footer','Edit footer','editFooter()')
@@ -689,7 +714,27 @@ function editReceipt(){ var e=curEntity; var r=e.receipt; editDrawer('Edit recei
 function accessTab(e){
   var rows=e.users.map(function(u,ix){return '<div class="mrow"><div class="mav">'+u.i+'</div><div><div class="mn">'+u.n+'</div><div class="ms">'+u.r+'</div></div><div class="mr" style="display:flex;align-items:center;gap:10px;margin-left:auto"><span class="tag green">Active</span><span style="font-size:12px;color:var(--rose);cursor:pointer;font-weight:600" onclick="removeUser('+ix+')">Remove</span></div></div>';}).join('') || '<div class="muted" style="font-size:13px">No users scoped yet.</div>';
   return secRow('Users scoped to this entity ('+e.users.length+')','+ Add user','addUser()')+rows
-    +'<button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="window.location.href=\'atlas-users-roles.html\'">Manage in Users &amp; roles →</button>';
+    +'<button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="window.location.href=\'atlas-users-roles.html\'">Manage in Users &amp; roles →</button>'
+    +loginActivityHTML(e);
+}
+function loginActivityHTML(e){
+  var la=e.loginActivity||[];
+  var flagged=la.filter(function(x){return x.status==='flagged' && !x.resolved;}).length;
+  var note = flagged? '<div class="check alert" style="margin-bottom:10px"><span class="ci">!</span><div><div class="ct">'+flagged+' suspicious sign-in'+(flagged>1?'s':'')+' need review</div><div class="cs">Unrecognized device or location detected. Sign out the session or require a password reset.</div></div></div>' : '';
+  var rows=la.map(function(x,ix){
+    var flaggedNow = x.status==='flagged' && !x.resolved;
+    var right;
+    if(flaggedNow){ right='<div style="display:flex;gap:10px;margin-left:auto;align-items:center;flex-shrink:0">'
+        +'<span style="font-size:12px;color:var(--blue);cursor:pointer;font-weight:600" onclick="entForceSignout('+ix+')">Sign out</span>'
+        +'<span style="font-size:12px;color:var(--rose);cursor:pointer;font-weight:600" onclick="entRequireReset('+ix+')">Require reset</span>'
+        +'<span style="font-size:12px;color:var(--text-3);cursor:pointer" onclick="entDismissFlag('+ix+')">Dismiss</span></div>'; }
+    else { right='<div style="margin-left:auto;flex-shrink:0">'+(x.resolved?'<span class="tag grey">'+x.resolved+'</span>':'<span class="tag green">OK</span>')+'</div>'; }
+    var tag = flaggedNow? ' <span class="tag rose">Suspicious</span>' : '';
+    var reason = flaggedNow? '<div class="ms" style="color:var(--rose)">'+x.reason+'</div>' : '';
+    return '<div class="mrow" style="align-items:flex-start'+(flaggedNow?';background:#FFF7F9;border-radius:8px;padding:8px':'')+'"><div class="mav">'+x.i+'</div>'
+      +'<div style="min-width:0"><div class="mn">'+x.u+tag+'</div><div class="ms">'+x.when+' · '+x.loc+' · '+x.device+' · IP '+x.ip+'</div>'+reason+'</div>'+right+'</div>';
+  }).join('') || '<div class="muted" style="font-size:13px">No sign-in activity recorded.</div>';
+  return secRow('Recent sign-in activity'+(flagged?' · '+flagged+' flagged':''),'Export log','toast(\'Sign-in log exported\')')+note+rows;
 }
 function removeUser(ix){ curEntity.users.splice(ix,1); render(); toast('✓ Access removed'); }
 function addUser(){ var e=curEntity; editDrawer('Add user access',e.name,[
@@ -751,12 +796,15 @@ function entityDrawer(mode){
   var e = mode==='edit'? curEntity : {name:'',type:'Parish',ein:'',state:'NY'};
   if(mode==='edit') ensureDetail(e);
   var reg = mode==='edit'? (e.addresses&&e.addresses.registered) : null;
-  var types=['Diocese','Foundation','Charity','Parish','School','Cemetery','Ministry'];
+  var types=['Diocese','Foundation','Charity','Parish','School','Cemetery','Ministry','Department'];
+  var excl=mode==='edit'? (function(){ var d=descendantIds(e.id); d[e.id]=1; return d; })() : {};
+  var parentOpts='<option value="">— None (top-level entity) —</option>'+ENT.filter(function(x){return !excl[x.id];}).map(function(x){return '<option value="'+x.id+'"'+((e.parentId===x.id)?' selected':'')+'>'+esc(x.name)+' · '+x.type+'</option>';}).join('');
   var body=''
     +'<div class="form-sec"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="5" width="10" height="8" rx="1"/><path d="M4 5V3.5A1.5 1.5 0 015.5 2h3A1.5 1.5 0 0110 3.5V5"/></svg>Identity</div>'
     +'<div class="fw"><label class="lbl">Legal name <span style="color:var(--rose)">*</span></label><input class="fld" id="ef-name" value="'+esc(e.name)+'" placeholder="e.g. St. Anne Parish · Albany"></div>'
-    +'<div class="form-row"><div class="fw"><label class="lbl">Entity type</label><select class="fld" id="ef-type">'+types.map(function(t){return '<option'+(t===e.type?' selected':'')+'>'+t+'</option>';}).join('')+'</select></div>'
-    +'<div class="fw"><label class="lbl">EIN / Tax ID</label><input class="fld" id="ef-ein" value="'+esc(e.ein)+'" placeholder="14-XXXXXXX"><div class="hint">9 digits · required before receipts can be issued</div></div></div>'
+    +'<div class="form-row"><div class="fw"><label class="lbl">Entity type</label><select class="fld" id="ef-type" onchange="efTypeChange()">'+types.map(function(t){return '<option'+(t===e.type?' selected':'')+'>'+t+'</option>';}).join('')+'</select></div>'
+    +'<div class="fw"><label class="lbl">EIN / Tax ID</label><input class="fld" id="ef-ein" value="'+esc(e.ein)+'" placeholder="14-XXXXXXX"><div class="hint" id="ef-ein-hint">9 digits · required before receipts can be issued</div></div></div>'
+    +'<div class="fw"><label class="lbl">Parent entity</label><select class="fld" id="ef-parent" onchange="efTypeChange()">'+parentOpts+'</select><div class="hint" id="ef-parent-hint">Sets where this rolls up in the consolidated view. Departments inherit the parent’s Tax ID.</div></div>'
     +(mode==='edit'?'<div class="fw"><label class="lbl">Status</label><select class="fld" id="ef-status">'+['Active','Pending','Inactive'].map(function(s){return '<option'+(s===e.status?' selected':'')+'>'+s+'</option>';}).join('')+'</select></div>':'')
     +'<div class="form-sec"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.6"/></svg>Registered address</div>'
     +addrEditorHTML(reg);
@@ -764,21 +812,46 @@ function entityDrawer(mode){
     var g=function(id){var el=document.getElementById(id);return el?el.value.trim():'';};
     var name=g('ef-name'); if(!name){ toast('Enter a legal name'); var n=document.getElementById('ef-name'); if(n)n.focus(); return; }
     var a=readAddr();
+    var pid=g('ef-parent')||null; var ptype=g('ef-type'); var ein=g('ef-ein');
+    if(ptype==='Department' && pid && EMAP[pid] && EMAP[pid].ein) ein=EMAP[pid].ein; // Department shares parent's Tax ID
     if(mode==='add'){
-      var idx=ENT.length; var ne={name:name,type:g('ef-type'),id:'LE-'+(1000+idx),state:a.state||'NY',status:'Pending',donors:0,ytd:0,lifetime:0,ein:g('ef-ein'),stateRegDays:210,issues:[],fye:'Dec 31',merchant:'GC-'+(4400+idx),funds:0};
-      if(!ne.ein) ne.issues.push({t:'Tax ID (EIN) missing',s:'Receipts can’t be issued until an EIN is on file.',lvl:'alert'});
-      recomputeHealth(ne); ENT.push(ne); EMAP[ne.id]=ne; ensureDetail(ne);
+      var idx=ENT.length; var ne={name:name,type:ptype,id:'LE-'+(1000+idx),state:a.state||'NY',status:'Pending',donors:0,ytd:0,lifetime:0,ein:ein,stateRegDays:210,issues:[],fye:'Dec 31',merchant:'GC-'+(4400+idx),funds:0,parentId:pid};
+      ENT.push(ne); EMAP[ne.id]=ne; rebuildChildren(); recomputeHealth(ne); ensureDetail(ne);
       if(a.street||a.city) ne.addresses.registered=a;
-      document.getElementById('nav-ct').textContent=ENT.length; closeDrawer(); render(); toast('✓ '+ne.name+' created');
+      document.getElementById('nav-ct').textContent=ENT.length; closeDrawer(); render();
+      var di=einInfo(ne);
+      if(di.state==='duplicate') toast('⚠ '+ne.name+' created — EIN already primary for '+di.owner.name+'; flagged as duplicate');
+      else if(di.state==='shared') toast('✓ '+ne.name+' created — shares '+di.owner.name+'’s Tax ID');
+      else toast('✓ '+ne.name+' created');
     } else {
-      e.name=name; e.type=g('ef-type'); e.ein=g('ef-ein'); e.status=g('ef-status')||e.status; if(a.state) e.state=a.state;
+      e.name=name; e.type=ptype; e.parentId=pid; e.ein=ein; e.status=g('ef-status')||e.status; if(a.state) e.state=a.state;
       if(a.street||a.city) e.addresses.registered=a;
-      recomputeHealth(e); closeDrawer(); render(); toast('✓ Changes saved');
+      rebuildChildren(); recomputeHealth(e); closeDrawer(); render();
+      var de=einInfo(e);
+      if(de.state==='duplicate') toast('⚠ Saved — EIN already primary for '+de.owner.name+'; flagged as duplicate');
+      else toast('✓ Changes saved');
     }
   }, mode==='edit'?'Save changes':'Create entity');
 }
 function addEntityForm(){ entityDrawer('add'); }
 function editEntityForm(){ entityDrawer('edit'); }
+function efTypeChange(){
+  var t=(document.getElementById('ef-type')||{}).value;
+  var pid=(document.getElementById('ef-parent')||{}).value;
+  var ein=document.getElementById('ef-ein'), hint=document.getElementById('ef-ein-hint');
+  if(!ein) return;
+  if(t==='Department' && pid && EMAP[pid]){
+    ein.value=EMAP[pid].ein||''; ein.readOnly=true; ein.style.background='var(--surface)';
+    if(hint) hint.innerHTML='Inherited from parent <b>'+esc(EMAP[pid].name)+'</b> — a Department shares its headquarters’ Tax ID.';
+  } else {
+    ein.readOnly=false; ein.style.background='';
+    if(hint) hint.textContent='9 digits · required before receipts can be issued';
+  }
+}
+window.efTypeChange=efTypeChange;
+window.entForceSignout=function(ix){ if(curEntity.loginActivity&&curEntity.loginActivity[ix]) curEntity.loginActivity[ix].resolved='Signed out'; setEntityTab('access'); toast('✓ Session signed out'); };
+window.entRequireReset=function(ix){ if(curEntity.loginActivity&&curEntity.loginActivity[ix]) curEntity.loginActivity[ix].resolved='Reset required'; setEntityTab('access'); toast('✓ Password reset required at next sign-in'); };
+window.entDismissFlag=function(ix){ if(curEntity.loginActivity&&curEntity.loginActivity[ix]) curEntity.loginActivity[ix].resolved='Recognized'; setEntityTab('access'); toast('✓ Marked as recognized'); };
 window.entAddrSuggest=entAddrSuggest; window.entAddrPick=entAddrPick; window.entZipLookup=entZipLookup;
 window.doSubmit=doSubmit; window.editTax=editTax; window.editFooter=editFooter; window.editAddr=editAddr;
 window.editBank=editBank; window.editReceipt=editReceipt; window.addUser=addUser; window.removeUser=removeUser;
@@ -939,7 +1012,12 @@ function openFormDrawer(title,sub,bodyHtml,onSave,saveLabel){
   document.getElementById('drawer-root').innerHTML='<div class="scrim" onclick="closeDrawer()"></div><div class="drawer"><div class="drawer-head"><div><div class="drawer-title">'+title+'</div><div class="drawer-sub">'+sub+'</div></div><div class="drawer-x" onclick="closeDrawer()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg></div></div><div class="drawer-body">'+bodyHtml+'</div><div class="drawer-foot"><button class="btn btn-ghost" onclick="closeDrawer()">Cancel</button><button class="btn btn-primary" onclick="submitForm()">'+(saveLabel||'Save')+'</button></div></div>';
 }
 function submitForm(){ var g=function(id){var el=document.getElementById(id);return el?el.value.trim():'';}; var vals={name:g('f-name'),type:g('f-type'),ein:g('f-ein'),state:g('f-state'),status:g('f-status')}; if(!vals.name){toast('Enter a legal name');return;} if(window.__onSave) window.__onSave(vals); }
-function recomputeHealth(e){ if(e.ein){ e.issues=e.issues.filter(function(x){return !/Tax ID/.test(x.t);}); } e.health=e.issues.some(function(x){return x.lvl==='alert';})?'alert':(e.issues.length?'warn':'ok'); }
+function recomputeHealth(e){
+  e.issues=e.issues.filter(function(x){return !/Tax ID/.test(x.t);});
+  if(!e.ein){ e.issues.push({t:'Tax ID (EIN) missing',s:'Receipts can’t be issued until an EIN is on file.',lvl:'alert'}); }
+  else { var i=einInfo(e); if(i.state==='duplicate'){ e.issues.push({t:'Duplicate Tax ID (EIN)',s:'EIN '+e.ein+' is already primary for '+(i.owner?i.owner.name:'another entity')+'. Only one entity can be primary per EIN — set this as a Department sharing a parent’s ID, or use a distinct EIN.',lvl:'alert'}); } }
+  e.health=e.issues.some(function(x){return x.lvl==='alert';})?'alert':(e.issues.length?'warn':'ok');
+}
 function addEntityForm_legacy(){ openFormDrawer('Add legal entity','Becomes selectable as a scope across Atlas.', formFields({name:'',type:'Parish',ein:'',state:'NY'},false), function(vals){
   var idx=ENT.length; var e={name:vals.name,type:vals.type,id:'LE-'+(1000+idx),state:vals.state||'NY',status:'Pending',donors:0,ytd:0,lifetime:0,ein:vals.ein,stateRegDays:210,issues:[],fye:'Dec 31',merchant:'GC-'+(4400+idx),funds:0};
   if(!e.ein) e.issues.push({t:'Tax ID (EIN) missing',s:'Receipts can’t be issued until an EIN is on file.',lvl:'alert'});
