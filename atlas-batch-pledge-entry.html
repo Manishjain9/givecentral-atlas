@@ -135,6 +135,11 @@
     .batch-table thead th:last-child{border-right:none}
     .col-n{width:38px}.col-donor{width:190px}.col-date{width:95px}.col-fund{width:165px}
     .col-type{width:100px}.col-amt{width:100px}.col-pay{width:110px}.col-ref{width:95px}
+    .col-dpchkno{width:90px}.col-dpchk{width:120px}.col-dpcard{width:140px}
+    /* Down-payment columns are driven by the batch Default type */
+    .batch-table .dp-check,.batch-table .dp-cc{display:none}
+    .batch-table.dt-check .dp-check{display:table-cell}
+    .batch-table.dt-cc .dp-cc{display:table-cell}
     .col-gl{width:80px}.col-note{width:150px}.col-status{width:130px}.col-act{width:52px}
 
     /* Row states */
@@ -1316,7 +1321,7 @@
     </div>
     <div class="cfg-field">
       <div class="cfg-label">Default type</div>
-      <select class="cfg-select"><option>Check</option><option>Credit card</option><option>ACH</option><option>DAF</option><option>Stock</option></select>
+      <select class="cfg-select" id="batch-dt" onchange="setBatchDefaultType(this.value)"><option>Check</option><option>Credit card</option><option>ACH</option><option>DAF</option><option>Stock</option></select>
     </div>
     <div class="cfg-field">
       <div class="cfg-label">Default date</div>
@@ -1384,7 +1389,7 @@
 
   <!-- Batch table -->
   <div class="batch-wrap">
-    <table class="batch-table">
+    <table class="batch-table dt-check" id="batch-table">
       <thead>
         <tr>
           <th class="col-n">#</th>
@@ -1395,7 +1400,10 @@
           <th class="col-amt" style="text-align:right">Pledge amount</th>
           <th class="col-pay">Frequency</th>
           <th class="col-ref">Installments</th>
-          <th class="col-card">Auto-charge card</th>
+          <th class="col-card dp-cc">Auto-charge card</th>
+          <th class="col-dpchkno dp-check" title="Check number for the first/down payment">Check #</th>
+          <th class="col-dpchk dp-check" title="Date on the first/down-payment check">Check date</th>
+          <th class="col-dpcard dp-cc" title="Card number for the first/down payment">Card number</th>
           <th class="col-gl">GL code</th>
           <th class="col-note">Note</th>
           <th class="col-status">Accuracy</th>
@@ -1545,11 +1553,11 @@ function getPledgeById(pid){
 // BATCH ROWS
 // ─────────────────────────────────────────────────────────────
 let BATCH_ROWS = [
-  { id:1,  donorId:881,  donor:"O'Brien, James",      date:"06/30/2026",fund:"Cathedral Capital Fund", type:"Capital",          amt:30000, pay:"Annual",      ref:"3",  gl:"5001", note:"3-year capital commitment"},
-  { id:2,  donorId:1044, donor:"Sullivan, Margaret",  date:"06/01/2026",fund:"CMA Annual Fund",         type:"Annual",           amt:2400,  pay:"Monthly",     ref:"12", gl:"5002", note:""},
+  { id:1,  donorId:881,  donor:"O'Brien, James",      date:"06/30/2026",fund:"Cathedral Capital Fund", type:"Capital",          amt:30000, pay:"Annual",      ref:"3",  gl:"5001", note:"3-year capital commitment", dpCheckNo:"10441", dpCheckDate:"06/28/2026"},
+  { id:2,  donorId:1044, donor:"Sullivan, Margaret",  date:"06/01/2026",fund:"CMA Annual Fund",         type:"Annual",           amt:2400,  pay:"Monthly",     ref:"12", gl:"5002", note:"", dpCard:"•••• 8842"},
   { id:3,  donorId:2201, donor:"Kim, Patricia",       date:"06/01/2026",fund:"CMA Annual Fund",         type:"Annual",           amt:1200,  pay:"Quarterly",   ref:"4",  gl:"5002", note:""},
   { id:4,  donorId:null, donor:"Hennessy, R",         date:"06/15/2026",fund:"Cathedral Capital Fund", type:"Capital",          amt:10000, pay:"Annual",      ref:"5",  gl:"5001", note:""},
-  { id:5,  donorId:3847, donor:"Harrington, David",   date:"06/01/2026",fund:"CMA Annual Fund",         type:"Matching",         amt:5000,  pay:"One-time",    ref:"1",  gl:"5003", note:"2:1 employer match"},
+  { id:5,  donorId:3847, donor:"Harrington, David",   date:"06/01/2026",fund:"CMA Annual Fund",         type:"Matching",         amt:5000,  pay:"One-time",    ref:"1",  gl:"5003", note:"2:1 employer match", dpCheckNo:"2290", dpCheckDate:"06/02/2026"},
   { id:6,  donorId:5501, donor:"Ramirez, Elena",      date:"06/01/2026",fund:"CMA Annual Fund",         type:"Annual"           ,amt:600,   pay:"Monthly",     ref:"12", gl:"5002", note:""},
   { id:7,  donorId:6612, donor:"Grant, Michael",      date:"06/15/2026",fund:"CMA Annual Fund",         type:"Annual",           amt:2500,  pay:"Semi-annual", ref:"2",  gl:"5002", note:""},
   { id:8,  donorId:7721, donor:"Costello, Barbara",   date:"07/01/2026",fund:"Cathedral Capital Fund", type:"Estate / Bequest", amt:100000,pay:"One-time",    ref:"1",  gl:"5004", note:"Planned — estate intention"},
@@ -1872,7 +1880,10 @@ function renderBatch() {
         ${(function(){var allow=['Monthly','Quarterly','Annually'];var cur=({'Annual':'Annually','Semi-annual':'Quarterly','One-time':'Annually'})[r.pay]||r.pay;if(allow.indexOf(cur)<0)cur='Annually';return allow.map(p=>`<option ${p===cur?'selected':''}>${p}</option>`).join('');})()}
       </select></td>
       <td><input class="ci" value="${r.ref}" placeholder="—" onchange="rowEdited(${r.id},'ref',this.value)"></td>
-      <td>${(typeof cardCell==='function'?cardCell(r):'\u2014')}</td>
+      <td class="dp-cc">${(typeof cardCell==='function'?cardCell(r):'\u2014')}</td>
+      <td class="cell-dp dp-check"><input class="ci" value="${r.dpCheckNo||''}" placeholder="\u2014" title="Down-payment check number" onchange="rowEdited(${r.id},'dpCheckNo',this.value)"></td>
+      <td class="cell-dp dp-check"><input class="ci" value="${r.dpCheckDate||''}" placeholder="mm/dd/yyyy" title="Down-payment check date" onchange="rowEdited(${r.id},'dpCheckDate',this.value)"></td>
+      <td class="cell-dp dp-cc"><input class="ci" value="${r.dpCard||''}" placeholder="Card number" inputmode="numeric" autocomplete="off" title="Down-payment card number (masked on save)" onblur="maskDpCard(${r.id},this)" onchange="maskDpCard(${r.id},this)"></td>
       <td><input class="ci" value="${r.gl}" placeholder="e.g. 5002" onchange="rowEdited(${r.id},'gl',this.value)" data-rid="${r.id}"></td>
       <td><input class="ci" value="${r.note}" placeholder="Optional…" onchange="rowEdited(${r.id},'note',this.value)"></td>
       <td style="padding:6px 8px">
@@ -2252,7 +2263,7 @@ function commitDonor(inp, rid) {
 
 function addRow() {
   const newId = Math.max(...BATCH_ROWS.map(r=>r.id))+1;
-  BATCH_ROWS.push({id:newId,donorId:null,donor:'',date:'06/01/2026',fund:'CMA Annual Fund',type:'Annual',amt:0,pay:'Monthly',ref:'12',gl:'5002',note:'',pledgeId:null});
+  BATCH_ROWS.push({id:newId,donorId:null,donor:'',date:'06/01/2026',fund:'CMA Annual Fund',type:'Annual',amt:0,pay:'Monthly',ref:'12',gl:'5002',note:'',pledgeId:null,dpCheckNo:'',dpCheckDate:'',dpCard:''});
   revalidateAll();
   setTimeout(()=>document.querySelector(`#row-${newId} .ci`)?.focus(),50);
 }
@@ -2593,11 +2604,18 @@ function saveDraft(){
 }
 
 function exportCSV(){
-  const headers = ['Donor','Start date','Fund','Pledge amount','Pledge type','Frequency','Installments','GL','Note'];
+  const dt = (document.getElementById('batch-dt')||{}).value || '';
+  const isCheck = /check/i.test(dt), isCC = /credit/i.test(dt);
+  const headers = ['Donor','Start date','Fund','Pledge amount','Pledge type','Frequency','Installments']
+    .concat(isCheck ? ['Down payment check #','Down payment check date'] : [])
+    .concat(isCC ? ['Down payment card'] : [])
+    .concat(['GL','Note']);
   const rows = BATCH_ROWS.map(r => [
     r.donor || '', r.date || '', r.fund || '',
-    r.amt || 0, r.type || '', r.pay || '', r.ref || '', r.gl || '', (r.note || '').replace(/[\r\n,]/g, ' ')
-  ]);
+    r.amt || 0, r.type || '', r.pay || '', r.ref || ''
+  ].concat(isCheck ? [r.dpCheckNo||'', r.dpCheckDate||''] : [])
+   .concat(isCC ? [r.dpCard||''] : [])
+   .concat([r.gl || '', (r.note || '').replace(/[\r\n,]/g, ' ')]));
   const csv = [headers, ...rows].map(row =>
     row.map(c => {
       const s = String(c);
@@ -4309,21 +4327,31 @@ revalidateAll();
   function last4(ref){ var m=(ref||'').match(/(\d{4})(?!.*\d)/); return m?m[1]:''; }
   window.isCardRow=function(r){ return CARD_ALL || /credit/i.test(r.pay||'') || /credit/i.test(r.type||''); };
   window.getCards=function(donorId){ return SAVED_CARDS[donorId]||[]; };
+  var BRANDS=['Visa','Mastercard','Amex','Visa','Discover'];
+  function seedLast4(seed){ // deterministic 4-digit string from any seed
+    var n=0, s=String(seed);
+    for(var i=0;i<s.length;i++){ n=(n*31+s.charCodeAt(i))>>>0; }
+    return String(1000+(n%9000));
+  }
   function initCards(){
-    if(CARD_ALL) return;
-    rows().forEach(function(r){
-      if(window.isCardRow(r) && r.donorId){
-        if(!SAVED_CARDS[r.donorId]) SAVED_CARDS[r.donorId]=[];
-        var l4=last4(r.ref); if(!l4) return;
-        var id='cc'+r.donorId+'_'+l4;
-        if(!SAVED_CARDS[r.donorId].some(function(c){return c.id===id;})) SAVED_CARDS[r.donorId].push({id:id,label:'Card \u2022\u2022\u2022\u2022 '+l4,last4:l4,brand:'Card'});
-        if(!r.card) r.card=id;
-      }
+    rows().forEach(function(r,i){
+      if(!window.isCardRow(r)) return;
+      var key=r.donorId || ('r'+r.id);
+      if(!SAVED_CARDS[key]) SAVED_CARDS[key]=[];
+      // A saved card on file for the Auto-charge card column
+      var l4=seedLast4(key);
+      var brand=BRANDS[(parseInt(l4,10))%BRANDS.length];
+      var id='cc'+key+'_'+l4;
+      if(!SAVED_CARDS[key].some(function(c){return c.id===id;}))
+        SAVED_CARDS[key].push({id:id,label:brand+' \u2022\u2022\u2022\u2022 '+l4,last4:l4,brand:brand});
+      if(!r.card) r.card=id;
+      // A masked down-payment card number for the Card number column
+      if(!r.dpCard) r.dpCard='\u2022\u2022\u2022\u2022 '+seedLast4(key+'dp');
     });
   }
   window.cardCell=function(r){
     if(!window.isCardRow(r)) return '<span class="ci-date-na" title="Card applies to credit-card gifts only">\u2014</span>';
-    var cards=window.getCards(r.donorId);
+    var cards=window.getCards(r.donorId || ('r'+r.id));
     var opts=cards.map(function(c){return '<option value="'+c.id+'"'+(r.card===c.id?' selected':'')+'>'+c.label+'</option>';}).join('');
     return '<select class="cs card-sel" onchange="onCardSelect('+r.id+',this.value)"><option value="">'+(cards.length?'Select card\u2026':'No card on file')+'</option>'+opts+'<option value="__add__">+ Add new card</option></select>';
   };
@@ -4332,6 +4360,24 @@ revalidateAll();
     if(val==='__add__'){ openCardModal(id); if(typeof revalidateAll==='function') revalidateAll(); return; }
     r.card=val;
   };
+  /* ---- Down payment columns, driven by the batch "Default type" ---- */
+  window.setBatchDefaultType=function(val){
+    var t=document.getElementById('batch-table'); if(!t)return;
+    t.classList.remove('dt-check','dt-cc');
+    if(/credit/i.test(val)) t.classList.add('dt-cc');
+    else if(/check/i.test(val)) t.classList.add('dt-check');
+    // ACH / DAF / Stock → neither check nor card columns apply
+  };
+  window.maskDpCard=function(id,el){
+    var r=findRow(id); if(!r)return;
+    var digits=(el.value||'').replace(/\D/g,'');
+    if(!digits){ r.dpCard=''; el.value=''; return; }
+    var masked='•••• '+digits.slice(-4);
+    r.dpCard=masked; el.value=masked;
+  };
+  // Sync columns to the current Default type on load
+  if(document.readyState!=='loading'){ var s=document.getElementById('batch-dt'); if(s) window.setBatchDefaultType(s.value); }
+  else document.addEventListener('DOMContentLoaded',function(){ var s=document.getElementById('batch-dt'); if(s) window.setBatchDefaultType(s.value); });
     var CARD_FORM_TPL = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
 *{box-sizing:border-box}body{margin:0;font-family:"DM Sans",system-ui,sans-serif;color:#0F172A;padding:16px 20px 20px;background:#fff}
 .dchip{display:flex;align-items:center;gap:10px;background:#EFF4FF;border:1px solid #DBE4FF;border-radius:10px;padding:9px 12px;margin-bottom:14px}
