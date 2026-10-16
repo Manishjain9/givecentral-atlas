@@ -322,6 +322,12 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .sched-note { font-size:12px; font-weight:600; border-radius:8px; padding:8px 11px; margin-top:10px; }
 .sched-note.ok { color:#15803D; background:#F0FDF4; border:1px solid #BBF7D0; }
 .sched-note.warn { color:#B45309; background:#FFFBEB; border:1px solid #FDE68A; }
+.sched-note{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sched-note .nt{flex:1;min-width:180px;}
+.sched-dist{background:#fff;border:1px solid currentColor;border-radius:7px;color:#B45309;font-weight:700;cursor:pointer;font-size:11.5px;padding:5px 10px;white-space:nowrap;}
+.sched-dist:hover{background:#FEF3C7;}
+.sum-actions button.is-disabled{opacity:.45;cursor:not-allowed;}
+.sched-amt.over{border-color:#F59E0B !important;background:#FFFBEB;}
 /* Receipt segmented control */
 .rcpt-seg { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
 .rcpt-seg button { font:inherit; font-size:13px; font-weight:500; color:var(--text); background:#fff; border:1px solid var(--border); border-radius:9px; padding:11px 10px; cursor:pointer; transition:all .12s; }
@@ -1650,12 +1656,24 @@ body {
     ebStatus('realized');
   }
   var schedRefresh = null;
+  var schedBalanced = true;
+  function updateSaveGate(){
+    var btns=document.querySelectorAll('.sum-actions button');
+    btns.forEach(function(b){
+      var t=(b.textContent||'').toLowerCase();
+      if(/cancel/.test(t)) return;           // Cancel stays enabled
+      b.disabled=!schedBalanced;
+      b.classList.toggle('is-disabled', !schedBalanced);
+      b.title = schedBalanced ? '' : 'The installment schedule must equal the total pledge amount before saving';
+    });
+  }
   function bindPills(){
     schedRefresh = null;
-    var grid = sec3Body.querySelector('.freq-grid'); if (!grid) return;
+    var grid = sec3Body.querySelector('.freq-grid'); if (!grid){ schedBalanced=true; updateSaveGate(); return; }
     var rowsEl = sec3Body.querySelector('#sched-rows');
-    if (!rowsEl) {  // non-schedule body (matching / estate) — just toggle pills if any
+    if (!rowsEl) {  // non-schedule body (matching / estate) — no installment reconciliation
       grid.querySelectorAll('.freq-pill').forEach(function(p){ p.onclick=function(){ grid.querySelectorAll('.freq-pill').forEach(function(s){s.classList.remove('on');}); p.classList.add('on'); }; });
+      schedBalanced=true; updateSaveGate();
       return;
     }
     var countEl = sec3Body.querySelector('#sched-count');
@@ -1692,6 +1710,7 @@ body {
       noteEl.style.display='none';
       if(addBtn) addBtn.style.display='none';
       if(countEl) countEl.disabled=false;
+      schedBalanced=true; updateSaveGate();   // auto schedules always balance to the total
     }
     function renderCustom(){
       var n=custom.length;
@@ -1719,11 +1738,30 @@ body {
       var maxd=null; custom.forEach(function(r){ var d=parseD(r.date); if(d&&(!maxd||d>maxd)) maxd=d; });
       if(finalEl&&maxd) finalEl.value=toVal(maxd);
       var diff=+(t-sum).toFixed(2);
+      schedBalanced=(Math.abs(diff)<0.01);
+      // highlight any row pushing the schedule over the total
+      var over=diff<0;
+      rowsEl.querySelectorAll('.sched-amt').forEach(function(el){ el.classList.toggle('over', over); });
       noteEl.style.display='';
-      if(Math.abs(diff)<0.01){ noteEl.className='sched-note ok'; noteEl.textContent='✓ Scheduled '+money(sum)+' — matches the pledge total'; }
-      else if(diff>0){ noteEl.className='sched-note warn'; noteEl.textContent='⚠ Scheduled '+money(sum)+' of '+money(t)+' — '+money(diff)+' still unscheduled'; }
-      else { noteEl.className='sched-note warn'; noteEl.textContent='⚠ Scheduled '+money(sum)+' — '+money(-diff)+' over the pledge total'; }
+      var distBtn='<button type="button" class="sched-dist" onclick="window.schedDistribute&&window.schedDistribute()">Distribute remaining evenly</button>';
+      if(schedBalanced){ noteEl.className='sched-note ok'; noteEl.innerHTML='<span class="nt">✓ Scheduled '+money(sum)+' — matches the pledge total of '+money(t)+'</span>'; }
+      else if(diff>0){ noteEl.className='sched-note warn'; noteEl.innerHTML='<span class="nt">⚠ '+money(diff)+' still unscheduled — '+money(sum)+' of '+money(t)+' allocated. Save is disabled until the schedule equals the total.</span>'+distBtn; }
+      else { noteEl.className='sched-note warn'; noteEl.innerHTML='<span class="nt">⚠ '+money(-diff)+' over the pledge total — '+money(sum)+' scheduled against a '+money(t)+' pledge. Save is disabled until it reconciles.</span>'+distBtn; }
+      updateSaveGate();
     }
+    // spread the unallocated balance evenly across installments, then true-up the last row
+    function schedDistribute(){
+      var t=total(), n=custom.length; if(!n) return;
+      var sum=custom.reduce(function(s,r){return s+(+r.amount||0);},0);
+      var rem=+(t-sum).toFixed(2); if(Math.abs(rem)<0.01) return;
+      var per=Math.round(rem/n*100)/100;
+      custom.forEach(function(r){ r.amount=Math.max(0, +((+r.amount||0)+per).toFixed(2)); });
+      var ns=custom.reduce(function(s,r){return s+r.amount;},0);
+      var drift=+(t-ns).toFixed(2);
+      custom[n-1].amount=Math.max(0, +(custom[n-1].amount+drift).toFixed(2));
+      renderCustom();
+    }
+    window.schedDistribute=schedDistribute;
     function switchTo(f){ if(f==='custom'){ if(!custom.length) custom=computeAuto(lastAutoFreq); renderCustom(); } else { lastAutoFreq=f; renderAuto(); } }
 
     grid.querySelectorAll('.freq-pill').forEach(function(p){
