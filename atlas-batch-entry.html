@@ -250,9 +250,10 @@
     .stk-bar{display:flex;align-items:center;gap:14px;padding:8px 12px;flex-wrap:wrap}
     .stk-bar .stk-ic{width:18px;height:18px;color:#7C3AED;flex-shrink:0}
     .stk-bar .stk-f{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}
+    .stk-bar .stk-f label{white-space:nowrap;flex-shrink:0}
     .stk-bar .stk-f input{min-width:60px;padding:4px 7px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:inherit;color:var(--text)}
     .stk-bar .stk-f input.sym{width:74px;text-transform:uppercase}
-    .stk-bar .stk-fmv{margin-left:auto;font-size:11px;color:#5B21B6;font-weight:700}
+    .stk-bar .stk-fmv{font-size:11px;color:#5B21B6;font-weight:800;background:#EDE9FE;border:1px solid #DDD6FE;border-radius:7px;padding:5px 10px;white-space:nowrap}
     .stk-bar .stk-note{flex-basis:100%;font-size:10px;color:#7C3AED;margin-top:2px}
     .ac-header{padding:6px 12px;background:var(--surf);border-bottom:1px solid var(--border);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
     .ac-item{padding:8px 12px;cursor:pointer;border-bottom:.5px solid var(--border);transition:background .1s;display:flex;align-items:flex-start;gap:10px}
@@ -1963,9 +1964,9 @@ function renderStockSubRow(r){
     <td colspan="14">
       <div class="stk-bar">
         <svg class="stk-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="14" height="14"><path d="M1.5 10l3-3 2.5 2.5L12 4"/><path d="M9 4h3v3"/></svg>
-        <div class="stk-f"><label>Symbol</label><input class="ci sym" value="${sym}" placeholder="AAPL" onchange="stockEdit(${r.id},'sym',this.value)"></div>
-        <div class="stk-f"><label>Shares</label><input class="ci" value="${sh}" placeholder="0" onchange="stockEdit(${r.id},'shares',this.value)"></div>
-        <div class="stk-f"><label>Price / share · gift-date avg</label><input class="ci" value="${price}" placeholder="0.00" onchange="stockEdit(${r.id},'price',this.value)"></div>
+        <div class="stk-f"><label>Symbol</label><input class="ci sym" value="${sym}" placeholder="AAPL" oninput="stockLive(${r.id},'sym',this.value)" onchange="stockEdit(${r.id},'sym',this.value)"></div>
+        <div class="stk-f"><label>Shares</label><input class="ci" value="${sh}" placeholder="0" inputmode="decimal" oninput="stockLive(${r.id},'shares',this.value)" onchange="stockEdit(${r.id},'shares',this.value)"></div>
+        <div class="stk-f"><label>Price / share</label><input class="ci" value="${price}" placeholder="0.00" inputmode="decimal" oninput="stockLive(${r.id},'price',this.value)" onchange="stockEdit(${r.id},'price',this.value)"></div>
         <div class="stk-fmv">FMV $${fmv.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
         <span class="stk-note">No cash received — receipt states shares &amp; symbol, not a dollar amount.</span>
       </div>
@@ -1980,6 +1981,24 @@ function stockEdit(rid, field, val){
   else if (field==='price') r.stockPrice = parseFloat(val)||0;
   r.amt = +((r.stockShares||0)*(r.stockPrice||0)).toFixed(2);
   revalidateAll();
+}
+// Live FMV: recompute shares × price as the user types, updating the DOM
+// in place so focus/caret are preserved (no full re-render).
+function stockLive(rid, field, val){
+  const r = BATCH_ROWS.find(x=>x.id===rid);
+  if (!r) return;
+  if (field==='sym') r.stockSym = val.toUpperCase();
+  else if (field==='shares') r.stockShares = parseFloat(val)||0;
+  else if (field==='price') r.stockPrice = parseFloat(val)||0;
+  r.amt = +((r.stockShares||0)*(r.stockPrice||0)).toFixed(2);
+  const fmvStr = '$'+r.amt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  const sub = document.getElementById('stk-sub-'+rid);
+  if (sub){ const box = sub.querySelector('.stk-fmv'); if (box) box.textContent = 'FMV '+fmvStr; }
+  const row = document.getElementById('row-'+rid);
+  if (row){
+    const amt = row.querySelector('.amt-stock b'); if (amt) amt.textContent = fmvStr;
+    const small = row.querySelector('.amt-stock small'); if (small) small.textContent = (r.stockShares||'—')+' sh · '+(r.stockSym||'—')+' · FMV';
+  }
 }
 
 // ─────────────────────────────────────────────────────────────

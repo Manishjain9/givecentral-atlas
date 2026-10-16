@@ -1023,24 +1023,63 @@ body {
       <div class="entry-card">
         <h3><span class="step">3</span> <span id="step3-title">Amount &amp; details</span> <span class="muted" id="type-label-3" style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;margin-left:6px">— for cash gift</span></h3>
 
-        <!-- Common: amount + date (always shown, hidden for stock) -->
-        <div class="row3" id="common-amount-row">
+        <!-- Gift post date + Gift subtype (two-up) -->
+        <div class="row2">
+          <div>
+            <span class="lbl">Gift post date</span>
+            <input class="fld" type="date">
+            <p class="muted" style="font-size:11px;margin-top:5px">Date the gift was entered on the donor record</p>
+          </div>
+          <div>
+            <span class="lbl">Gift subtype</span>
+            <select class="fld" id="gift-subtype">
+              <option>— None —</option>
+              <option>Outright gift</option>
+              <option>Matching gift</option>
+              <option>In-kind</option>
+              <option>Memorial / tribute</option>
+              <option>Planned gift</option>
+            </select>
+            <p class="muted" style="font-size:11px;margin-top:5px">How this gift is counted in reporting</p>
+          </div>
+        </div>
+
+        <!-- Common: amount + date + method (always shown, hidden for stock) -->
+        <div class="row3" id="common-amount-row" style="margin-top:14px">
           <div>
             <span class="lbl">Amount<span class="req">*</span></span>
             <input class="fld" value="$10,000.00" style="font-size:18px;font-weight:600" id="amt-fld" oninput="if(window.recomputeSoft)recomputeSoft()">
           </div>
           <div>
             <span class="lbl">Gift date<span class="req">*</span></span>
-            <input class="fld" type="text" value="May 4, 2026">
+            <input class="fld" type="date" value="2026-05-04">
           </div>
           <div id="meth-wrap">
             <span class="lbl" id="meth-lbl">Payment method</span>
-            <select class="fld" id="meth-fld">
+            <select class="fld" id="meth-fld" onchange="if(window.methDateSync)methDateSync()">
               <option>Cash</option>
               <option>Personal check</option>
               <option>Cashier's check</option>
               <option>Wire transfer</option>
             </select>
+          </div>
+        </div>
+
+        <!-- Legal entity + payment-method date (two-up; the date shows for wire / check, any gift type) -->
+        <div class="row2" style="margin-top:14px">
+          <div>
+            <span class="lbl">Legal entity<span class="req">*</span></span>
+            <select class="fld" id="ge-entity" onchange="geEntityChange(this.value)">
+              <option selected>Diocese of Albany</option>
+              <option>St. Mary&rsquo;s Parish</option>
+              <option>Catholic Schools of Albany</option>
+              <option>St. Agnes Cemetery</option>
+            </select>
+          </div>
+          <div id="meth-date-row" style="display:none">
+            <span class="lbl" id="meth-date-lbl">Check date</span>
+            <input class="fld" type="date" id="meth-date-fld">
+            <p class="muted" style="font-size:11px;margin-top:5px" id="meth-date-help">Date funds were received</p>
           </div>
         </div>
 
@@ -1356,46 +1395,59 @@ body {
       <!-- Step 4: Designation -->
       <div class="entry-card">
         <h3><span class="step" id="step-desig">4</span> Designation</h3>
-        <div class="row2">
-          <div>
-            <span class="lbl">Campaign</span>
-            <select class="fld">
-              <option>Cathedral Capital Campaign 2026</option>
-              <option>Annual Appeal 2026</option>
-              <option>Bishop's Annual Gala 2026</option>
-              <option>(none)</option>
-            </select>
-          </div>
-          <div>
-            <span class="lbl">Appeal<span class="req">*</span></span>
-            <select class="fld">
-              <option>Spring 2026 mailing</option>
-              <option>Year-end 2026</option>
-              <option>Online giving</option>
-            </select>
-          </div>
-        </div>
-        <div class="row2" style="margin-top:12px">
-          <div>
-            <span class="lbl">Legal entity<span class="req">*</span></span>
-            <select class="fld" id="ge-entity" onchange="geEntityChange(this.value)">
-              <option selected>Diocese of Albany</option>
-              <option>St. Mary&rsquo;s Parish</option>
-              <option>Catholic Schools of Albany</option>
-              <option>St. Agnes Cemetery</option>
-            </select>
-          </div>
-          <div>
+
+        <!-- Fund (full width, first) -->
+        <div class="row3">
+          <div style="grid-column:1 / -1">
             <span class="lbl">Fund<span class="req">*</span></span>
             <select class="fld" id="ge-fund" onchange="geFundChange()">
               <option>Cathedral Restoration · GL 4001</option>
               <option>General Operating · GL 4000</option>
+              <option>Bishop’s Annual Appeal · GL 4100</option>
               <option>Scholarship · GL 4200</option>
             </select>
           </div>
         </div>
-        <p class="muted" style="font-size:11.5px;margin-top:10px;">
-          Legal entity: <strong style="color:var(--text-2)" id="ge-entity-note">Diocese of Albany</strong> · funds are filtered by entity · the entity owns the receipt EIN · GL chart exports to QuickBooks Online tonight.
+
+        <!-- Campaign + Appeal -->
+        <div class="row2" style="margin-top:14px">
+          <div>
+            <span class="lbl" style="display:flex;align-items:center;justify-content:space-between;gap:10px">Campaign <a href="#" onclick="return false" style="font-size:11px;font-weight:600;color:var(--blue);text-transform:none;letter-spacing:0">Show all campaigns</a></span>
+            <select class="fld" id="ge-campaign">
+              <option>— None —</option>
+              <option>Cathedral Capital Campaign 2026</option>
+              <option>Annual Appeal 2026</option>
+              <option>Bishop's Annual Gala 2026</option>
+            </select>
+          </div>
+          <div>
+            <span class="lbl">Appeal<span class="req">*</span></span>
+            <select class="fld" id="ge-appeal" onchange="geAppealChange()">
+              <!-- options injected from shared appeal list -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Package (name only · shared with Appeals page) -->
+        <div class="row2" style="margin-top:14px">
+          <div>
+            <span class="lbl">Package</span>
+            <select class="fld" id="ge-package" onchange="gePackageChange()">
+              <!-- options injected per selected appeal -->
+            </select>
+            <p class="muted" style="font-size:11px;margin-top:5px">Saved to the package list for everyone</p>
+          </div>
+          <div id="ge-pkg-custom" style="display:none">
+            <span class="lbl">New package name</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input class="fld" id="ge-pkg-name" placeholder="e.g. Table of 10" style="flex:1">
+              <button type="button" onclick="gePkgCreate()" style="flex-shrink:0;padding:9px 14px;background:linear-gradient(135deg,#2563EB,#1E40AF);color:#fff;border:none;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;white-space:nowrap">Add</button>
+            </div>
+          </div>
+        </div>
+
+        <p class="muted" style="font-size:11.5px;margin-top:12px;">
+          Legal entity: <strong style="color:var(--text-2)" id="ge-entity-note">Diocese of Albany</strong> · fund → campaign → appeal each narrows the next; a package belongs to the selected appeal · GL chart exports to QuickBooks Online tonight.
         </p>
       </div>
 
@@ -1553,8 +1605,30 @@ body {
       // generic step-3 payment-method dropdown to avoid asking twice.
       var methWrap = document.getElementById('meth-wrap');
       if (methWrap) methWrap.style.display = (t === 'recurring') ? 'none' : '';
+
+      // Re-evaluate the method-driven date field (wire / check) for the new type
+      if (window.methDateSync) methDateSync();
     });
   });
+
+  // ── Payment-method date (wire transfer or check, in any gift type) ──
+  window.methDateSync = function(){
+    var m = document.getElementById('meth-fld'), row = document.getElementById('meth-date-row');
+    if (!m || !row) return;
+    var v = m.value || '', isWire = /wire/i.test(v), isCheck = /check/i.test(v);
+    // The Check gift-type panel already captures its own check dates — don't duplicate.
+    var checkPanel = document.querySelector('[data-type-fields="check"]');
+    var checkPanelOn = checkPanel && checkPanel.style.display !== 'none';
+    var methHidden = (document.getElementById('meth-wrap') || {}).style && document.getElementById('meth-wrap').style.display === 'none';
+    var show = !methHidden && (isWire || (isCheck && !checkPanelOn));
+    row.style.display = show ? '' : 'none';
+    if (show){
+      var lbl = document.getElementById('meth-date-lbl'), help = document.getElementById('meth-date-help');
+      if (isWire){ if(lbl) lbl.textContent = 'Wire date'; if(help) help.textContent = 'Date the wire transfer was received'; }
+      else { if(lbl) lbl.textContent = 'Check date'; if(help) help.textContent = 'Date written on the check'; }
+    }
+  };
+  methDateSync();
 
   // ── Recurring panel: frequency toggle + "Ends" detail ──
   var recPanel = document.querySelector('[data-type-fields="recurring"]');
@@ -3324,5 +3398,87 @@ window.onload=function(){validate();postH();};
     <iframe id="cc-frame" title="Add a new card" class="cc-frame"></iframe>
   </div>
 </div>
+
+<!-- ATLAS-APPEAL-PACKAGES v1 : appeal-scoped packages shared with atlas-appeals.html -->
+<script id="atlas-appeal-packages-js">
+(function(){
+  if (window.__atlasPkg) return; window.__atlasPkg = true;
+
+  // ── Shared store (localStorage key is identical in atlas-appeals.html) ──
+  var PKG_KEY = 'atlas_appeal_packages_v2';
+  var PKG_SEED = {
+    'GALA26':   [{id:'GALA26-TBL',  name:'Gala Table (10 seats)'},
+                 {id:'GALA26-SEAT', name:'Individual Seat'},
+                 {id:'GALA26-SPON', name:'Presenting Sponsor'}],
+    'CTFBISHP': [{id:'CTFBISHP-LEAD',name:'Leadership Circle'},
+                 {id:'CTFBISHP-SUST',name:'Sustainer'}],
+    'ONLINE26': [{id:'ONLINE26-STD', name:'Monthly Partner (Standard)'},
+                 {id:'ONLINE26-PAT',name:'Monthly Partner (Patron)'}],
+    'XMAS25':   [{id:'XMAS25-ADV',  name:'Advent Giving'}]
+  };
+  function pkgLoad(){
+    try{ var raw=localStorage.getItem(PKG_KEY); if(raw){ var o=JSON.parse(raw); if(o&&typeof o==='object') return o; } }catch(e){}
+    var seed=JSON.parse(JSON.stringify(PKG_SEED)); pkgSave(seed); return seed;
+  }
+  function pkgSave(s){ try{ localStorage.setItem(PKG_KEY, JSON.stringify(s)); }catch(e){} }
+  function pkgFor(id){ var s=pkgLoad(); return (s[id]||[]).slice(); }
+  function pkgAdd(id,pkg){ var s=pkgLoad(); if(!s[id]) s[id]=[]; s[id].push(pkg); pkgSave(s); }
+  window.atlasPkgFor = pkgFor;
+
+  // ── Appeal list (ids aligned with atlas-appeals.html) ──
+  var APPEALS = [
+    {id:'GALA26',   desc:'2026 Bishop’s Annual Gala'},
+    {id:'CTFBISHP', desc:'Called to Flourish – Bishop Solicitation'},
+    {id:'CTFDM1',   desc:'Called to Flourish – Direct Mail 1'},
+    {id:'ONLINE26', desc:'Online Giving — Evergreen'},
+    {id:'XMAS25',   desc:'Christmas Appeal 2025'},
+    {id:'LENT26',   desc:'Lenten Appeal 2026'},
+    {id:'MDC26',    desc:'Major-Donor Cultivation FY26'},
+    {id:'CORP26',   desc:'Corporate Sponsorship Drive 2026'}
+  ];
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function money(n){ return '$'+Number(n||0).toLocaleString('en-US'); }
+
+  function renderAppeals(){
+    var sel=document.getElementById('ge-appeal'); if(!sel) return;
+    sel.innerHTML = APPEALS.map(function(a){ return '<option value="'+esc(a.id)+'">'+esc(a.id)+' · '+esc(a.desc)+'</option>'; }).join('');
+  }
+  function renderPackages(selId){
+    var ap=document.getElementById('ge-appeal'), sel=document.getElementById('ge-package');
+    if(!ap||!sel) return;
+    var list=pkgFor(ap.value);
+    var html='<option value="">— None —</option>';
+    list.forEach(function(p){ html+='<option value="'+esc(p.id)+'"'+(p.id===selId?' selected':'')+'>'+esc(p.name)+'</option>'; });
+    html+='<option value="__custom__">＋ Custom package…</option>';
+    sel.innerHTML=html;
+    syncCustom();
+  }
+  function syncCustom(){
+    var sel=document.getElementById('ge-package'), box=document.getElementById('ge-pkg-custom');
+    if(!sel||!box) return;
+    box.style.display = (sel.value==='__custom__') ? '' : 'none';
+  }
+  window.geAppealChange = function(){ renderPackages(); };
+  window.gePackageChange = function(){ syncCustom(); };
+  window.gePkgCreate = function(){
+    var ap=document.getElementById('ge-appeal');
+    var nm=document.getElementById('ge-pkg-name');
+    if(!ap||!nm) return;
+    var name=(nm.value||'').trim();
+    if(!name){ nm.focus(); if(window.atlasToast) atlasToast('Give the package a name first'); return; }
+    var base=ap.value+'-'+name.toUpperCase().replace(/[^A-Z0-9]+/g,'').slice(0,6);
+    var id=base, n=2, existing=pkgFor(ap.value);
+    while(existing.some(function(p){return p.id===id;})){ id=base+n; n++; }
+    pkgAdd(ap.value, {id:id, name:name, custom:true});
+    nm.value='';
+    renderPackages(id);
+    if(window.atlasToast) atlasToast('Package “'+name+'” added to '+ap.value+' · now on the Appeals page');
+  };
+
+  function init(){ renderAppeals(); renderPackages(); }
+  if(document.readyState!=='loading') init(); else document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+<!-- end Atlas Appeal Packages -->
 </body>
 </html>

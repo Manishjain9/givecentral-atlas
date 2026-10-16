@@ -310,6 +310,23 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .schedule-row .v { font-weight:500; color:var(--text); }
 .schedule-row.total { padding-top:10px; border-top:1px solid var(--border); border-bottom:none; margin-top:6px; }
 .schedule-row.total .d, .schedule-row.total .v { font-weight:600; }
+/* Editable (custom/irregular) schedule */
+.schedule-row.sched-edit { align-items:center; padding:7px 0; }
+.sched-edit .sched-controls { display:flex; gap:8px; align-items:center; }
+.sched-edit .sched-dt { width:148px; padding:7px 9px; font-size:12px; }
+.sched-edit .sched-amt { width:120px; padding:7px 9px; font-size:12px; text-align:right; font-variant-numeric:tabular-nums; }
+.sched-rm { border:1px solid var(--border); background:#fff; color:#94A3B8; width:28px; height:32px; border-radius:7px; cursor:pointer; font-size:16px; line-height:1; flex-shrink:0; }
+.sched-rm:hover { border-color:#EF4444; color:#EF4444; }
+.sched-add { font-size:12px; font-weight:600; color:var(--blue); background:var(--blue-pale); border:1px solid #DBE5FF; border-radius:7px; padding:5px 11px; cursor:pointer; }
+.sched-add:hover { background:#E0EAFF; }
+.sched-note { font-size:12px; font-weight:600; border-radius:8px; padding:8px 11px; margin-top:10px; }
+.sched-note.ok { color:#15803D; background:#F0FDF4; border:1px solid #BBF7D0; }
+.sched-note.warn { color:#B45309; background:#FFFBEB; border:1px solid #FDE68A; }
+/* Receipt segmented control */
+.rcpt-seg { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.rcpt-seg button { font:inherit; font-size:13px; font-weight:500; color:var(--text); background:#fff; border:1px solid var(--border); border-radius:9px; padding:11px 10px; cursor:pointer; transition:all .12s; }
+.rcpt-seg button:hover { border-color:#94A3B8; }
+.rcpt-seg button.on { background:var(--blue-pale); border-color:var(--blue); color:var(--blue); font-weight:600; box-shadow:0 0 0 1px var(--blue) inset; }
 
 .docusign-card { background:linear-gradient(135deg, #FBF4E8, white); border:1px solid #F1D78F; border-radius:11px; padding:14px 16px; display:flex; align-items:center; gap:12px; }
 .docusign-card .ico { width:32px; height:32px; border-radius:8px; background:var(--gold); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; }
@@ -761,35 +778,37 @@ body {
       <div class="entry-card">
         <h3><span class="step">3</span> <span id="sec3-title">Schedule</span></h3>
         <div id="sec3-body">
-        <span class="lbl">Frequency</span>
+        <span class="lbl">Frequency<span class="req">*</span></span>
         <div class="freq-grid">
-          <div class="freq-pill">Monthly</div>
-          <div class="freq-pill">Quarterly</div>
-          <div class="freq-pill on">Annually</div>
-          <div class="freq-pill">Custom / irregular</div>
+          <div class="freq-pill" data-freq="monthly">Monthly</div>
+          <div class="freq-pill" data-freq="quarterly">Quarterly</div>
+          <div class="freq-pill on" data-freq="annually">Annually</div>
+          <div class="freq-pill" data-freq="custom">Custom / irregular</div>
         </div>
 
         <div class="row3 mt-12" style="margin-top:14px">
           <div>
             <span class="lbl">Number of installments</span>
-            <input class="fld" value="3">
+            <input class="fld" id="sched-count" type="number" min="1" value="3">
           </div>
           <div>
             <span class="lbl">First payment due</span>
-            <input class="fld" value="June 30, 2026">
+            <input class="fld" id="sched-first" type="date" value="2026-06-30">
           </div>
           <div>
             <span class="lbl">Final payment due</span>
-            <input class="fld" value="June 30, 2028" disabled>
+            <input class="fld" id="sched-final" type="date" value="2028-06-30" disabled>
           </div>
         </div>
 
         <div class="schedule-preview">
-          <h4>Generated schedule</h4>
-          <div class="schedule-row"><span class="d">Installment 1 of 3</span><span class="v">June 30, 2026 · $10,000.00</span></div>
-          <div class="schedule-row"><span class="d">Installment 2 of 3</span><span class="v">June 30, 2027 · $10,000.00</span></div>
-          <div class="schedule-row"><span class="d">Installment 3 of 3</span><span class="v">June 30, 2028 · $10,000.00</span></div>
-          <div class="schedule-row total"><span class="d">Total committed</span><span class="v mono">$30,000.00</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <h4 style="margin:0">Generated schedule</h4>
+            <button type="button" id="sched-add" class="sched-add" style="display:none">+ Add installment</button>
+          </div>
+          <div id="sched-rows"></div>
+          <div class="schedule-row total"><span class="d">Total committed</span><span class="v mono" id="sched-total">$30,000.00</span></div>
+          <div id="sched-note" class="sched-note" style="display:none"></div>
         </div>
 
         <div class="row2 mt-12" style="margin-top:14px">
@@ -855,6 +874,34 @@ body {
           <span class="toggle"><span class="tog-track"><span class="tog-knob"></span></span></span>
         </div>
         <p class="muted" style="font-size:11.5px;margin-top:10px">Envelope status will show on Margaret's <a href="atlas-docusign-agreements.html" style="color:var(--blue)">Gift Agreements</a> tab once sent.</p>
+      </div>
+
+      <div class="entry-card">
+        <h3><span class="step">6</span> Receipt</h3>
+        <span class="lbl">Receipt status</span>
+        <div class="rcpt-seg" id="rcpt-seg">
+          <button type="button" class="on" data-v="receipted">Receipted</button>
+          <button type="button" data-v="not">Not receipted</button>
+          <button type="button" data-v="dnr">Do not receipt</button>
+        </div>
+        <div class="row3 mt-12" style="margin-top:14px">
+          <div id="rcpt-date-wrap">
+            <span class="lbl">Receipt date</span>
+            <input class="fld" type="date" id="rcpt-date">
+          </div>
+          <div id="rcpt-num-wrap">
+            <span class="lbl">Receipt number</span>
+            <input class="fld" id="rcpt-num" placeholder="e.g. R-2026-00842">
+          </div>
+          <div id="rcpt-amt-wrap">
+            <span class="lbl">Receiptable amount</span>
+            <input class="fld" id="rcpt-amt" value="$30,000.00">
+          </div>
+        </div>
+        <p class="muted" style="font-size:11.5px;margin-top:10px" id="rcpt-amt-help">
+          Defaults to the gift amount. Lower it to the tax-deductible portion when part of the gift is a benefit received — e.g. an <strong style="color:var(--text-2)">$800</strong> table sponsorship where $300 is the dinner value is <strong style="color:var(--text-2)">receiptable at $500</strong>.
+        </p>
+        <div id="rcpt-dnr-note" class="sched-note warn" style="display:none;margin-top:12px">This gift is marked <b>Do not receipt</b> — no tax receipt will be issued.</div>
       </div>
 
     </div>
@@ -1602,13 +1649,95 @@ body {
     if(doc) doc.onchange = function(){ var cur = root.querySelector('#eb-statusSeg button.on'); if(cur) ebStatus(cur.dataset.v); };
     ebStatus('realized');
   }
+  var schedRefresh = null;
   function bindPills(){
-    sec3Body.querySelectorAll('.freq-pill').forEach(function(p){
-      p.onclick = function(){
-        p.parentElement.querySelectorAll('.freq-pill').forEach(function(s){ s.classList.remove('on'); });
-        p.classList.add('on');
-      };
+    schedRefresh = null;
+    var grid = sec3Body.querySelector('.freq-grid'); if (!grid) return;
+    var rowsEl = sec3Body.querySelector('#sched-rows');
+    if (!rowsEl) {  // non-schedule body (matching / estate) — just toggle pills if any
+      grid.querySelectorAll('.freq-pill').forEach(function(p){ p.onclick=function(){ grid.querySelectorAll('.freq-pill').forEach(function(s){s.classList.remove('on');}); p.classList.add('on'); }; });
+      return;
+    }
+    var countEl = sec3Body.querySelector('#sched-count');
+    var firstEl = sec3Body.querySelector('#sched-first');
+    var finalEl = sec3Body.querySelector('#sched-final');
+    var totalEl = sec3Body.querySelector('#sched-total');
+    var noteEl  = sec3Body.querySelector('#sched-note');
+    var addBtn  = sec3Body.querySelector('#sched-add');
+    var custom = [];  // [{date:'yyyy-mm-dd', amount:Number}]
+
+    function freq(){ var on=grid.querySelector('.freq-pill.on'); return on?on.dataset.freq:'annually'; }
+    function total(){ var tf=document.getElementById('pledge-total'); return tf?(parseFloat(tf.value.replace(/[^0-9.]/g,''))||0):0; }
+    function money(n){ return '$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+    function parseD(s){ var p=String(s||'').split('-'); if(p.length!==3) return null; var d=new Date(+p[0],+p[1]-1,+p[2]); return isNaN(d.getTime())?null:d; }
+    function toVal(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+    function fmtD(d){ return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+    function addMonths(d,m){ var x=new Date(d.getTime()); var day=x.getDate(); x.setDate(1); x.setMonth(x.getMonth()+m); var last=new Date(x.getFullYear(),x.getMonth()+1,0).getDate(); x.setDate(Math.min(day,last)); return x; }
+    function stepMonths(f){ return f==='monthly'?1:f==='quarterly'?3:12; }
+
+    var lastAutoFreq='annually';
+    function computeAuto(freqOverride){
+      var n=Math.max(1, parseInt(countEl.value,10)||1);
+      var t=total(), per=Math.floor(t/n*100)/100, rows=[], acc=0;
+      var f=freqOverride||freq(); if(f==='custom') f=lastAutoFreq;
+      var first=parseD(firstEl.value)||new Date(), step=stepMonths(f);
+      for(var i=0;i<n;i++){ var amt=(i===n-1)?+(t-acc).toFixed(2):per; acc+=per; rows.push({date:toVal(addMonths(first,step*i)),amount:amt}); }
+      return rows;
+    }
+    function renderAuto(){
+      var rows=computeAuto(), n=rows.length;
+      rowsEl.innerHTML=rows.map(function(r,i){ var d=parseD(r.date); return '<div class="schedule-row"><span class="d">Installment '+(i+1)+' of '+n+'</span><span class="v">'+(d?fmtD(d):r.date)+' · '+money(r.amount)+'</span></div>'; }).join('');
+      if(finalEl&&rows.length){ var last=parseD(rows[rows.length-1].date); if(last) finalEl.value=toVal(last); }
+      totalEl.textContent=money(rows.reduce(function(s,r){return s+r.amount;},0));
+      noteEl.style.display='none';
+      if(addBtn) addBtn.style.display='none';
+      if(countEl) countEl.disabled=false;
+    }
+    function renderCustom(){
+      var n=custom.length;
+      rowsEl.innerHTML=custom.map(function(r,i){
+        return '<div class="schedule-row sched-edit"><span class="d">Installment '+(i+1)+'</span>'
+          +'<span class="sched-controls">'
+            +'<input type="date" class="fld sched-dt" data-i="'+i+'" value="'+r.date+'">'
+            +'<input type="text" class="fld sched-amt" data-i="'+i+'" value="'+money(r.amount)+'">'
+            +'<button type="button" class="sched-rm" data-i="'+i+'" title="Remove installment">&times;</button>'
+          +'</span></div>';
+      }).join('');
+      rowsEl.querySelectorAll('.sched-dt').forEach(function(el){ el.onchange=function(){ custom[+el.dataset.i].date=el.value; recompTotals(); }; });
+      rowsEl.querySelectorAll('.sched-amt').forEach(function(el){
+        el.oninput=function(){ custom[+el.dataset.i].amount=parseFloat(el.value.replace(/[^0-9.]/g,''))||0; recompTotals(); };
+        el.onblur =function(){ el.value=money(custom[+el.dataset.i].amount); };
+      });
+      rowsEl.querySelectorAll('.sched-rm').forEach(function(el){ el.onclick=function(){ if(custom.length<=1) return; custom.splice(+el.dataset.i,1); renderCustom(); }; });
+      if(addBtn) addBtn.style.display='';
+      if(countEl){ countEl.value=n; countEl.disabled=false; }
+      recompTotals();
+    }
+    function recompTotals(){
+      var sum=custom.reduce(function(s,r){return s+(r.amount||0);},0), t=total();
+      totalEl.textContent=money(sum);
+      var maxd=null; custom.forEach(function(r){ var d=parseD(r.date); if(d&&(!maxd||d>maxd)) maxd=d; });
+      if(finalEl&&maxd) finalEl.value=toVal(maxd);
+      var diff=+(t-sum).toFixed(2);
+      noteEl.style.display='';
+      if(Math.abs(diff)<0.01){ noteEl.className='sched-note ok'; noteEl.textContent='✓ Scheduled '+money(sum)+' — matches the pledge total'; }
+      else if(diff>0){ noteEl.className='sched-note warn'; noteEl.textContent='⚠ Scheduled '+money(sum)+' of '+money(t)+' — '+money(diff)+' still unscheduled'; }
+      else { noteEl.className='sched-note warn'; noteEl.textContent='⚠ Scheduled '+money(sum)+' — '+money(-diff)+' over the pledge total'; }
+    }
+    function switchTo(f){ if(f==='custom'){ if(!custom.length) custom=computeAuto(lastAutoFreq); renderCustom(); } else { lastAutoFreq=f; renderAuto(); } }
+
+    grid.querySelectorAll('.freq-pill').forEach(function(p){
+      p.onclick=function(){ grid.querySelectorAll('.freq-pill').forEach(function(s){s.classList.remove('on');}); p.classList.add('on'); switchTo(p.dataset.freq); };
     });
+    if(countEl) countEl.oninput=function(){ if(freq()==='custom'){ custom=computeAuto(); renderCustom(); } else renderAuto(); };
+    if(firstEl) firstEl.onchange=function(){ if(freq()==='custom'){ custom=computeAuto(); renderCustom(); } else renderAuto(); };
+    if(addBtn) addBtn.onclick=function(){ var last=custom[custom.length-1]; var nd=last?parseD(last.date):parseD(firstEl.value); var next=nd?toVal(addMonths(nd,1)):(firstEl.value||''); custom.push({date:next,amount:0}); renderCustom(); };
+
+    schedRefresh=function(){ if(freq()==='custom') recompTotals(); else renderAuto(); };
+    var tf=document.getElementById('pledge-total');
+    if(tf && !tf.dataset.schedBound){ tf.dataset.schedBound='1'; tf.addEventListener('input', function(){ if(schedRefresh) schedRefresh(); }); }
+
+    switchTo(freq());
   }
   bindPills();
 
@@ -1655,6 +1784,35 @@ body {
     else if (sum > 100) { st.className = 'sc-status warn'; st.textContent = '⚠ ' + sum + '% assigned — ' + (sum - 100) + '% over-allocated'; }
     else { st.className = 'sc-status warn'; st.textContent = '⚠ ' + sum + '% assigned — ' + (100 - sum) + '% unassigned'; }
   };
+})();
+</script>
+
+<!-- ════ Receipt section ════ -->
+<script>
+(function(){
+  var seg = document.getElementById('rcpt-seg'); if(!seg) return;
+  var dateW = document.getElementById('rcpt-date-wrap');
+  var numW  = document.getElementById('rcpt-num-wrap');
+  var amtW  = document.getElementById('rcpt-amt-wrap');
+  var help  = document.getElementById('rcpt-amt-help');
+  var dnr   = document.getElementById('rcpt-dnr-note');
+  var amtEl = document.getElementById('rcpt-amt');
+  // Default receiptable amount to the pledge total
+  var tf = document.getElementById('pledge-total'); if(tf && amtEl) amtEl.value = tf.value;
+  function apply(v){
+    var showDate = (v==='receipted'), showAmt = (v!=='dnr');
+    if(dateW) dateW.style.display = showDate ? '' : 'none';
+    if(numW)  numW.style.display  = showDate ? '' : 'none';
+    if(amtW)  amtW.style.display  = showAmt ? '' : 'none';
+    if(help)  help.style.display  = showAmt ? '' : 'none';
+    if(dnr)   dnr.style.display   = (v==='dnr') ? '' : 'none';
+  }
+  seg.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    seg.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on'); apply(b.dataset.v);
+  });
+  apply('receipted');
 })();
 </script>
 

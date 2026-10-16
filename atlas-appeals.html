@@ -423,11 +423,36 @@ tr.sel-row td { background:var(--blue-pale); }
 .asrch-opt input,.asrch-all input{accent-color:var(--blue);width:15px;height:15px;pointer-events:none;flex-shrink:0;}
 .asrch-all{display:flex;align-items:center;gap:9px;padding:8px 12px;font-size:12px;font-weight:700;color:var(--text-2);border-bottom:1px solid var(--border);cursor:pointer;background:var(--surface);position:sticky;top:0;}
 .asrch-empty{padding:10px 12px;font-size:12.5px;color:var(--text-3);}
+.pkg-chip{display:inline-flex;align-items:center;gap:5px;margin-top:5px;font-size:10.5px;font-weight:700;color:#1E40AF;background:#EFF4FF;border:1px solid #DBE5FF;border-radius:20px;padding:2px 9px;cursor:pointer;line-height:1.4;user-select:none;}
+.pkg-chip:hover{background:#E0EAFF;}
+.pkg-chip .car{font-size:8px;transition:transform .15s;}
+.pkg-chip.open .car{transform:rotate(180deg);}
+.pkg-detail-row>td{background:#F8FAFF;padding:10px 16px 14px;border-bottom:1px solid var(--border,#E2E8F0);}
+.pkg-list{display:flex;flex-direction:column;gap:6px;}
+.pkg-item{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text-2,#334155);}
+.pkg-item .pk-nm{font-weight:600;color:var(--navy,#0F172A);}
+.pkg-item .pk-amt{margin-left:auto;font-weight:700;color:#15803D;font-variant-numeric:tabular-nums;}
+.pkg-item .pk-id{font-size:10px;color:var(--text-3,#94A3B8);font-weight:600;background:#EDF2F7;border-radius:5px;padding:1px 6px;}
+.pkg-item .pk-new{font-size:9px;font-weight:700;color:#7C3AED;background:#F3E8FF;border-radius:20px;padding:1px 7px;}
+.pkg-empty{font-size:11.5px;color:var(--text-3,#94A3B8);font-style:italic;}
 </style>
 <script>
 var money=function(n){ return '$'+Math.round(n).toLocaleString('en-US'); };
 var parseMoney=function(s){ var n=parseFloat(String(s||'').replace(/[^0-9.]/g,'')); return isNaN(n)?0:n; };
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ── Shared appeal-package store (same localStorage key as atlas-gift-entry.html) ── */
+var PKG_KEY='atlas_appeal_packages_v2';
+var PKG_SEED={
+  'GALA26':  [{id:'GALA26-TBL',name:'Gala Table (10 seats)'},{id:'GALA26-SEAT',name:'Individual Seat'},{id:'GALA26-SPON',name:'Presenting Sponsor'}],
+  'CTFBISHP':[{id:'CTFBISHP-LEAD',name:'Leadership Circle'},{id:'CTFBISHP-SUST',name:'Sustainer'}],
+  'ONLINE26':[{id:'ONLINE26-STD',name:'Monthly Partner (Standard)'},{id:'ONLINE26-PAT',name:'Monthly Partner (Patron)'}],
+  'XMAS25':  [{id:'XMAS25-ADV',name:'Advent Giving'}]
+};
+function pkgLoad(){ try{ var raw=localStorage.getItem(PKG_KEY); if(raw){ var o=JSON.parse(raw); if(o&&typeof o==='object') return o; } }catch(e){} var s=JSON.parse(JSON.stringify(PKG_SEED)); pkgSave(s); return s; }
+function pkgSave(s){ try{ localStorage.setItem(PKG_KEY,JSON.stringify(s)); }catch(e){} }
+function pkgFor(id){ var s=pkgLoad(); return (s[id]||[]).slice(); }
+
 /* ── Campaign/Fund multi-select picker (matches Funds screen) ── */
 var ASSIGN_OPTS={ campaigns:['Catholic Ministry Appeal 2026','Cathedral Capital Campaign 2026','Called to Flourish','Annual Fund 2026',"Bishop's Annual Gala 2026",'Christmas Appeal 2026'], funds:['General Fund','Annual Fund','Cathedral Restoration','Building & Maintenance','Called to Flourish — Diocesan','Scholarship Fund','Endowment — Unrestricted'] };
 var fAssign={campaigns:[],funds:[]};
@@ -493,7 +518,7 @@ var COLS = [
   {k:'active',label:'Active', sortable:true}
 ];
 
-var PER=10, state={q:'', cat:'all', activeOnly:true, sortKey:'id', sortDir:1, page:0, sel:{}};
+var PER=10, state={q:'', cat:'all', activeOnly:true, sortKey:'id', sortDir:1, page:0, sel:{}, pkgOpen:{}};
 var editingId=null;
 
 function toDateNum(s){ var m=String(s||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/); return m?(+m[3]*10000+ +m[1]*100+ +m[2]):0; }
@@ -539,11 +564,15 @@ function render(){
   var body=document.getElementById('rows');
   if(!slice.length){ body.innerHTML='<tr class="empty-row"><td colspan="'+(COLS.length+2)+'">No appeals match your filters. <a href="#" onclick="clearFilters();return false" style="color:var(--blue)">Clear filters</a> or create a <a href="#" onclick="openNew();return false" style="color:var(--blue)">new appeal</a>.</td></tr>'; }
   else body.innerHTML = slice.map(function(a){
-    return '<tr class="'+(a.active?'':'inactive')+(state.sel[a.id]?' sel-row':'')+'" data-id="'+esc(a.id)+'">'
+    var pkgs=pkgFor(a.id), open=!!state.pkgOpen[a.id];
+    var chip = pkgs.length
+      ? '<span class="pkg-chip'+(open?' open':'')+'" onclick="togglePkg(event,\''+esc(a.id)+'\')">📦 Packages ('+pkgs.length+')<span class="car">▾</span></span>'
+      : '';
+    var row = '<tr class="'+(a.active?'':'inactive')+(state.sel[a.id]?' sel-row':'')+'" data-id="'+esc(a.id)+'">'
       + '<td class="cb-cell"><input type="checkbox" '+(state.sel[a.id]?'checked':'')+' onclick="toggleSel(event,\''+esc(a.id)+'\')"></td>'
       + '<td class="kb-cell"><button class="kbtn" onclick="openKebab(event,\''+esc(a.id)+'\')">⋯</button></td>'
       + '<td><span class="id-link" onclick="openEdit(\''+esc(a.id)+'\')">'+esc(a.id)+'</span></td>'
-      + '<td class="desc-cell" title="'+esc(a.desc)+'">'+esc(a.desc)+'</td>'
+      + '<td class="desc-cell" title="'+esc(a.desc)+'">'+esc(a.desc)+(chip?('<br>'+chip):'')+'</td>'
       + '<td>'+catCell(a.cat)+'</td>'
       + '<td class="num">'+(a.goal?money(a.goal):'<span class="muted">—</span>')+'</td>'
       + '<td class="num">'+miniCell(a.raised,a.goal)+'</td>'
@@ -552,6 +581,13 @@ function render(){
       + '<td>'+(a.end||'<span class="muted">—</span>')+'</td>'
       + '<td><span class="pill '+(a.active?'yes':'no')+'"><span class="dot"></span>'+(a.active?'Yes':'No')+'</span></td>'
       + '</tr>';
+    var det='';
+    if(open && pkgs.length){
+      det = '<tr class="pkg-detail-row"><td colspan="'+(COLS.length+2)+'"><div class="pkg-list">'
+          + pkgs.map(function(p){ return '<div class="pkg-item"><span class="pk-id">'+esc(p.id)+'</span><span class="pk-nm">'+esc(p.name)+'</span>'+(p.custom?'<span class="pk-new">added in gift entry</span>':'')+'</div>'; }).join('')
+          + '</div></td></tr>';
+    }
+    return row+det;
   }).join('');
   // pager
   var from=total? state.page*PER+1:0, to=Math.min(total, state.page*PER+PER);
@@ -562,6 +598,7 @@ function render(){
 }
 
 /* ── Bulk select / duplicate by category ── */
+function togglePkg(e,id){ e.stopPropagation(); if(state.pkgOpen[id]) delete state.pkgOpen[id]; else state.pkgOpen[id]=true; render(); }
 function filteredIds(){ return filtered().map(function(a){return a.id;}); }
 function selCount(){ return Object.keys(state.sel).length; }
 function toggleSel(e,id){ e.stopPropagation(); if(state.sel[id]) delete state.sel[id]; else state.sel[id]=true; render(); }
