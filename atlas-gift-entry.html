@@ -1647,6 +1647,8 @@ body {
 
       // Re-evaluate the method-driven date field (wire / check) for the new type
       if (window.methDateSync) methDateSync();
+      // Re-evaluate the pledge-schedule save gate (only active for New pledge)
+      if (window.updateGpGate) updateGpGate();
     });
   });
 
@@ -2620,24 +2622,42 @@ body {
 })();
 </script>
 
+<style id="gp-sched-css">
+  .schedule-row.sched-edit{align-items:center;padding:7px 0;display:flex;justify-content:space-between}
+  .sched-edit .sched-controls{display:flex;gap:8px;align-items:center}
+  .sched-edit .sched-dt{width:150px;padding:7px 9px;font-size:12px}
+  .sched-edit .sched-amt{width:118px;padding:7px 9px;font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
+  .sched-edit .sched-amt.over{border-color:#F59E0B !important;background:#FFFBEB}
+  .sched-rm{border:1px solid var(--border,#E2E8F0);background:#fff;color:#94A3B8;width:28px;height:32px;border-radius:7px;cursor:pointer;font-size:16px;line-height:1;flex-shrink:0}
+  .sched-rm:hover{border-color:#EF4444;color:#EF4444}
+  .sched-add{font-size:12px;font-weight:600;color:var(--blue,#2563EB);background:var(--blue-pale,#EFF4FF);border:1px solid #DBE5FF;border-radius:7px;padding:5px 11px;cursor:pointer}
+  .sched-add:hover{background:#E0EAFF}
+  .sched-note{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;font-weight:600;border-radius:8px;padding:8px 11px;margin-top:10px}
+  .sched-note .nt{flex:1;min-width:170px}
+  .sched-note.ok{color:#15803D;background:#F0FDF4;border:1px solid #BBF7D0}
+  .sched-note.warn{color:#B45309;background:#FFFBEB;border:1px solid #FDE68A}
+  .sched-dist{background:#fff;border:1px solid currentColor;border-radius:7px;color:#B45309;font-weight:700;cursor:pointer;font-size:11.5px;padding:5px 10px;white-space:nowrap}
+  .sched-dist:hover{background:#FEF3C7}
+  .sum-actions button.is-disabled{opacity:.45;cursor:not-allowed}
+</style>
 <script id="newpledge-flow">
 (function(){
   var gpBody = document.getElementById('gp-body');
   if (!gpBody) return;
 
   var SCHEDULE_HTML =
-    '<span class="lbl">Frequency</span>'
-    + '<div class="freq-grid"><div class="freq-pill">Monthly</div><div class="freq-pill">Quarterly</div><div class="freq-pill on">Annually</div><div class="freq-pill">Custom / irregular</div></div>'
+    '<span class="lbl">Frequency<span class="req">*</span></span>'
+    + '<div class="freq-grid"><div class="freq-pill" data-freq="monthly">Monthly</div><div class="freq-pill" data-freq="quarterly">Quarterly</div><div class="freq-pill on" data-freq="annually">Annually</div><div class="freq-pill" data-freq="custom">Custom / irregular</div></div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">'
-      + '<div><span class="lbl">Number of installments</span><input class="fld" value="3"></div>'
-      + '<div><span class="lbl">First payment due</span><input class="fld" value="June 30, 2026"></div>'
-      + '<div><span class="lbl">Final payment due</span><input class="fld" value="June 30, 2028" disabled></div>'
+      + '<div><span class="lbl">Number of installments</span><input class="fld" id="gp-sched-count" type="number" min="1" value="3"></div>'
+      + '<div><span class="lbl">First payment due</span><input class="fld" id="gp-sched-first" type="date" value="2026-06-30"></div>'
+      + '<div><span class="lbl">Final payment due</span><input class="fld" id="gp-sched-final" type="date" value="2028-06-30" disabled></div>'
     + '</div>'
-    + '<div class="schedule-preview"><h4>Generated schedule</h4>'
-      + '<div class="schedule-row"><span>Installment 1 of 3</span><span class="mono">June 30, 2026 · $3,333.33</span></div>'
-      + '<div class="schedule-row"><span>Installment 2 of 3</span><span class="mono">June 30, 2027 · $3,333.33</span></div>'
-      + '<div class="schedule-row"><span>Installment 3 of 3</span><span class="mono">June 30, 2028 · $3,333.34</span></div>'
-      + '<div class="schedule-row total"><span>Total committed</span><span class="mono">$10,000.00</span></div>'
+    + '<div class="schedule-preview">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><h4 style="margin:0">Generated schedule</h4><button type="button" id="gp-sched-add" class="sched-add" style="display:none">+ Add installment</button></div>'
+      + '<div id="gp-sched-rows"></div>'
+      + '<div class="schedule-row total"><span>Total committed</span><span class="mono" id="gp-sched-total">$10,000.00</span></div>'
+      + '<div id="gp-sched-note" class="sched-note" style="display:none"></div>'
     + '</div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">'
       + '<div><span class="lbl">How installments are collected</span><select class="fld" onchange="plgPay(this.value)"><option value="card" selected>Auto-charge card on file</option><option value="invoice">Invoice / statement each due date</option><option value="manual">Manual — record each payment</option></select></div>'
@@ -2674,13 +2694,121 @@ body {
       + '<div><span class="lbl">Lapse rule</span><select class="fld"><option selected>Manual review only — no auto-lapse</option></select></div>'
     + '</div>';
 
-  window.onGpType = function(t){
-    if (t === 'Matching') gpBody.innerHTML = MATCHING_HTML;
-    else if (t === 'Estate / bequest') gpBody.innerHTML = ESTATE_HTML;
-    else gpBody.innerHTML = SCHEDULE_HTML;
+  // ── Control-total save gate (pledge schedule must equal the gift Amount) ──
+  var gpBalanced = true;
+  function updateGpGate(){
+    var panel=document.querySelector('[data-type-fields="newpledge"]');
+    var active = panel && panel.style.display!=='none';
+    var block = active && !gpBalanced;
+    document.querySelectorAll('.sum-actions .primary, .sum-actions .ghost').forEach(function(b){
+      b.disabled=block; b.classList.toggle('is-disabled', block);
+      b.title = block ? 'The pledge schedule must equal the gift Amount before saving' : '';
+    });
+  }
+  window.updateGpGate = updateGpGate;
+
+  function bindGenericPills(){
     gpBody.querySelectorAll('.freq-pill').forEach(function(p){
       p.onclick = function(){ p.parentElement.querySelectorAll('.freq-pill').forEach(function(s){ s.classList.remove('on'); }); p.classList.add('on'); };
     });
+  }
+
+  // ── Editable Custom/irregular schedule (mirrors atlas-pledge-create) ──
+  function bindGpSchedule(){
+    var grid=gpBody.querySelector('.freq-grid'); if(!grid) return;
+    var rowsEl=gpBody.querySelector('#gp-sched-rows');
+    var countEl=gpBody.querySelector('#gp-sched-count');
+    var firstEl=gpBody.querySelector('#gp-sched-first');
+    var finalEl=gpBody.querySelector('#gp-sched-final');
+    var totalEl=gpBody.querySelector('#gp-sched-total');
+    var noteEl=gpBody.querySelector('#gp-sched-note');
+    var addBtn=gpBody.querySelector('#gp-sched-add');
+    var custom=[], lastAutoFreq='annually';
+    function freq(){ var on=grid.querySelector('.freq-pill.on'); return on?on.dataset.freq:'annually'; }
+    function total(){ var tf=document.getElementById('amt-fld'); return tf?(parseFloat(tf.value.replace(/[^0-9.]/g,''))||0):0; }
+    function money(n){ return '$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+    function parseD(s){ var p=String(s||'').split('-'); if(p.length!==3) return null; var d=new Date(+p[0],+p[1]-1,+p[2]); return isNaN(d.getTime())?null:d; }
+    function toVal(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+    function fmtD(d){ return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+    function addMonths(d,m){ var x=new Date(d.getTime()); var day=x.getDate(); x.setDate(1); x.setMonth(x.getMonth()+m); var last=new Date(x.getFullYear(),x.getMonth()+1,0).getDate(); x.setDate(Math.min(day,last)); return x; }
+    function stepMonths(f){ return f==='monthly'?1:f==='quarterly'?3:12; }
+    function computeAuto(freqOverride){
+      var n=Math.max(1, parseInt(countEl.value,10)||1);
+      var t=total(), per=Math.floor(t/n*100)/100, rows=[], acc=0;
+      var f=freqOverride||freq(); if(f==='custom') f=lastAutoFreq;
+      var first=parseD(firstEl.value)||new Date(), step=stepMonths(f);
+      for(var i=0;i<n;i++){ var amt=(i===n-1)?+(t-acc).toFixed(2):per; acc+=per; rows.push({date:toVal(addMonths(first,step*i)),amount:amt}); }
+      return rows;
+    }
+    function renderAuto(){
+      var rows=computeAuto(), n=rows.length;
+      rowsEl.innerHTML=rows.map(function(r,i){ var d=parseD(r.date); return '<div class="schedule-row"><span>Installment '+(i+1)+' of '+n+'</span><span class="mono">'+(d?fmtD(d):r.date)+' · '+money(r.amount)+'</span></div>'; }).join('');
+      if(finalEl&&rows.length){ var last=parseD(rows[rows.length-1].date); if(last) finalEl.value=toVal(last); }
+      totalEl.textContent=money(rows.reduce(function(s,r){return s+r.amount;},0));
+      noteEl.style.display='none'; if(addBtn) addBtn.style.display='none'; if(countEl) countEl.disabled=false;
+      gpBalanced=true; updateGpGate();
+    }
+    function renderCustom(){
+      var n=custom.length;
+      rowsEl.innerHTML=custom.map(function(r,i){
+        return '<div class="schedule-row sched-edit"><span>Installment '+(i+1)+'</span>'
+          +'<span class="sched-controls">'
+            +'<input type="date" class="fld sched-dt" data-i="'+i+'" value="'+r.date+'">'
+            +'<input type="text" class="fld sched-amt" data-i="'+i+'" value="'+money(r.amount)+'">'
+            +'<button type="button" class="sched-rm" data-i="'+i+'" title="Remove installment">&times;</button>'
+          +'</span></div>';
+      }).join('');
+      rowsEl.querySelectorAll('.sched-dt').forEach(function(el){ el.onchange=function(){ custom[+el.dataset.i].date=el.value; recompTotals(); }; });
+      rowsEl.querySelectorAll('.sched-amt').forEach(function(el){
+        el.oninput=function(){ custom[+el.dataset.i].amount=parseFloat(el.value.replace(/[^0-9.]/g,''))||0; recompTotals(); };
+        el.onblur =function(){ el.value=money(custom[+el.dataset.i].amount); };
+      });
+      rowsEl.querySelectorAll('.sched-rm').forEach(function(el){ el.onclick=function(){ if(custom.length<=1) return; custom.splice(+el.dataset.i,1); renderCustom(); }; });
+      if(addBtn) addBtn.style.display=''; if(countEl){ countEl.value=n; countEl.disabled=false; }
+      recompTotals();
+    }
+    function recompTotals(){
+      var sum=custom.reduce(function(s,r){return s+(r.amount||0);},0), t=total();
+      totalEl.textContent=money(sum);
+      var maxd=null; custom.forEach(function(r){ var d=parseD(r.date); if(d&&(!maxd||d>maxd)) maxd=d; });
+      if(finalEl&&maxd) finalEl.value=toVal(maxd);
+      var diff=+(t-sum).toFixed(2);
+      gpBalanced=(Math.abs(diff)<0.01);
+      var over=diff<0; rowsEl.querySelectorAll('.sched-amt').forEach(function(el){ el.classList.toggle('over', over); });
+      noteEl.style.display='';
+      var distBtn='<button type="button" class="sched-dist" onclick="window.schedDistributeGp&&window.schedDistributeGp()">Distribute remaining evenly</button>';
+      if(gpBalanced){ noteEl.className='sched-note ok'; noteEl.innerHTML='<span class="nt">✓ Scheduled '+money(sum)+' — matches the gift Amount of '+money(t)+'</span>'; }
+      else if(diff>0){ noteEl.className='sched-note warn'; noteEl.innerHTML='<span class="nt">⚠ '+money(diff)+' still unscheduled — '+money(sum)+' of '+money(t)+' allocated. Save is disabled until it reconciles.</span>'+distBtn; }
+      else { noteEl.className='sched-note warn'; noteEl.innerHTML='<span class="nt">⚠ '+money(-diff)+' over the gift Amount — '+money(sum)+' scheduled against '+money(t)+'. Save is disabled until it reconciles.</span>'+distBtn; }
+      updateGpGate();
+    }
+    function schedDistribute(){
+      var t=total(), n=custom.length; if(!n) return;
+      var sum=custom.reduce(function(s,r){return s+(+r.amount||0);},0);
+      var rem=+(t-sum).toFixed(2); if(Math.abs(rem)<0.01) return;
+      var per=Math.round(rem/n*100)/100;
+      custom.forEach(function(r){ r.amount=Math.max(0, +((+r.amount||0)+per).toFixed(2)); });
+      var ns=custom.reduce(function(s,r){return s+r.amount;},0);
+      custom[n-1].amount=Math.max(0, +(custom[n-1].amount+(+(t-ns).toFixed(2))).toFixed(2));
+      renderCustom();
+    }
+    window.schedDistributeGp=schedDistribute;
+    function switchTo(f){ if(f==='custom'){ if(!custom.length) custom=computeAuto(lastAutoFreq); renderCustom(); } else { lastAutoFreq=f; renderAuto(); } }
+    grid.querySelectorAll('.freq-pill').forEach(function(p){
+      p.onclick=function(){ grid.querySelectorAll('.freq-pill').forEach(function(s){s.classList.remove('on');}); p.classList.add('on'); switchTo(p.dataset.freq); };
+    });
+    if(countEl) countEl.oninput=function(){ if(freq()==='custom'){ custom=computeAuto(); renderCustom(); } else renderAuto(); };
+    if(firstEl) firstEl.onchange=function(){ if(freq()==='custom'){ custom=computeAuto(); renderCustom(); } else renderAuto(); };
+    if(addBtn) addBtn.onclick=function(){ var last=custom[custom.length-1]; var nd=last?parseD(last.date):parseD(firstEl.value); var next=nd?toVal(addMonths(nd,1)):(firstEl.value||''); custom.push({date:next,amount:0}); renderCustom(); };
+    window.__gpRefresh=function(){ if(freq()==='custom') recompTotals(); else renderAuto(); };
+    var tf=document.getElementById('amt-fld'); if(tf && !tf.dataset.gpBound){ tf.dataset.gpBound='1'; tf.addEventListener('input', function(){ if(window.__gpRefresh) window.__gpRefresh(); }); }
+    switchTo(freq());
+  }
+
+  window.onGpType = function(t){
+    if (t === 'Matching'){ gpBody.innerHTML = MATCHING_HTML; bindGenericPills(); gpBalanced=true; updateGpGate(); }
+    else if (t === 'Estate / bequest'){ gpBody.innerHTML = ESTATE_HTML; bindGenericPills(); gpBalanced=true; updateGpGate(); }
+    else { gpBody.innerHTML = SCHEDULE_HTML; bindGpSchedule(); }
   };
   onGpType('Capital — multi-year');
 
