@@ -1497,6 +1497,44 @@ body {
         </div>
       </div>
 
+      <!-- Step 7: Receipt -->
+      <style>
+        .ge-rcpt-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+        .ge-rcpt-seg button{font:inherit;font-size:13px;font-weight:500;color:var(--text,#0F172A);background:#fff;border:1px solid var(--border,#E2E8F0);border-radius:9px;padding:11px 10px;cursor:pointer;transition:all .12s}
+        .ge-rcpt-seg button:hover{border-color:#94A3B8}
+        .ge-rcpt-seg button.on{background:var(--blue-pale,#EFF4FF);border-color:var(--blue,#2563EB);color:var(--blue,#2563EB);font-weight:600;box-shadow:0 0 0 1px var(--blue,#2563EB) inset}
+      </style>
+      <div class="entry-card">
+        <h3><span class="step" id="step-receipt">7</span> Receipt <span class="muted" style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;margin-left:6px">optional · tax receipting</span></h3>
+        <span class="lbl">Receipt status</span>
+        <div class="ge-rcpt-seg" id="ge-rcpt-seg">
+          <button type="button" class="on" data-v="receipted">Receipted</button>
+          <button type="button" data-v="not">Not receipted</button>
+          <button type="button" data-v="dnr">Do not receipt</button>
+        </div>
+        <div class="row3" style="margin-top:14px">
+          <div id="ge-rcpt-date-wrap">
+            <span class="lbl">Receipt date</span>
+            <input class="fld" type="date" id="ge-rcpt-date">
+          </div>
+          <div id="ge-rcpt-num-wrap">
+            <span class="lbl">Receipt number</span>
+            <input class="fld" id="ge-rcpt-num" placeholder="e.g. R-2026-00842">
+          </div>
+          <div id="ge-rcpt-amt-wrap">
+            <span class="lbl">Receiptable amount</span>
+            <input class="fld" id="ge-rcpt-amt" value="$10,000.00">
+          </div>
+        </div>
+        <p class="muted" style="font-size:11.5px;margin-top:10px" id="ge-rcpt-help">
+          Defaults to the gift amount. Lower it to the tax-deductible portion when part of the gift is a benefit received — e.g. an <strong style="color:var(--text-2)">$800</strong> table sponsorship where $300 is the dinner value is <strong style="color:var(--text-2)">receiptable at $500</strong>.
+        </p>
+        <div id="ge-rcpt-dnr-note" class="note-card" style="display:none;margin-top:12px">
+          <div class="ico">!</div>
+          <div class="body">This gift is marked <b>Do not receipt</b> — no tax receipt will be issued.</div>
+        </div>
+      </div>
+
     </div>
 
     <!-- RIGHT: live summary -->
@@ -1599,6 +1637,7 @@ body {
       setStep('step-desig', isStock ? 6 : 4);
       setStep('step-soft',  isStock ? 7 : 5);
       setStep('step-notes', isStock ? 8 : 6);
+      setStep('step-receipt', isStock ? 9 : 7);
       if (isStock && window.stkCalc) setTimeout(window.stkCalc, 20);
 
       // Recurring carries its own "Payment method on file" field, so hide the
@@ -3480,5 +3519,36 @@ window.onload=function(){validate();postH();};
 })();
 </script>
 <!-- end Atlas Appeal Packages -->
+
+<!-- Receipt section logic -->
+<script>
+(function(){
+  function boot(){
+    var seg=document.getElementById('ge-rcpt-seg'); if(!seg) return;
+    var dateW=document.getElementById('ge-rcpt-date-wrap');
+    var numW=document.getElementById('ge-rcpt-num-wrap');
+    var amtW=document.getElementById('ge-rcpt-amt-wrap');
+    var help=document.getElementById('ge-rcpt-help');
+    var dnr=document.getElementById('ge-rcpt-dnr-note');
+    var amtEl=document.getElementById('ge-rcpt-amt');
+    var gift=document.getElementById('amt-fld'); if(gift&&amtEl) amtEl.value=gift.value;  // default to gift amount
+    function apply(v){
+      var showDate=(v==='receipted'), showAmt=(v!=='dnr');
+      if(dateW) dateW.style.display=showDate?'':'none';
+      if(numW)  numW.style.display =showDate?'':'none';
+      if(amtW)  amtW.style.display =showAmt?'':'none';
+      if(help)  help.style.display =showAmt?'':'none';
+      if(dnr)   dnr.style.display  =(v==='dnr')?'':'none';
+    }
+    seg.addEventListener('click', function(e){
+      var b=e.target.closest('button'); if(!b) return;
+      seg.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on'); apply(b.dataset.v);
+    });
+    apply('receipted');
+  }
+  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
 </body>
 </html>
