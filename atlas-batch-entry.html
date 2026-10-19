@@ -1468,6 +1468,52 @@
 <!-- AUTOCOMPLETE -->
 <div class="autocomplete" id="autocomplete"></div>
 
+<!-- RECURRING GIFT · manage flow (ported from pledge batch) -->
+<style id="rec-css">
+  .rec-chip{display:inline-flex;align-items:center;margin-top:5px;font-size:10.5px;font-weight:700;color:#5B21B6;background:#EDE9FE;border:1px solid #DDD6FE;border-radius:20px;padding:2px 9px;cursor:pointer;line-height:1.4;user-select:none;white-space:nowrap}
+  .rec-chip:hover{background:#DDD6FE}
+  .rec-chip.paused{color:#92400E;background:#FEF3C7;border-color:#FDE68A}
+  .ac-rec{font-size:11px;font-weight:600;color:#5B21B6;margin-top:3px}
+  .pay-ov{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100060;display:none;align-items:center;justify-content:center;padding:22px;font-family:inherit}
+  .pay-ov.show{display:flex}
+  .pay-modal{background:#fff;border-radius:16px;width:min(480px,100%);box-shadow:0 24px 64px rgba(15,23,42,.30);overflow:hidden;animation:recpop .16s ease}
+  @keyframes recpop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .pay-head{display:flex;align-items:flex-start;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border,#E2E8F0)}
+  .pay-head .t{font-size:16px;font-weight:700;color:var(--ink,#0F172A)}
+  .pay-head .s{font-size:12px;color:var(--muted,#64748B);margin-top:3px}
+  .pay-head .x{border:none;background:none;font-size:16px;color:#94A3B8;cursor:pointer;line-height:1}
+  .pay-body{padding:16px 18px}
+  .pay-btn{font:inherit;font-size:12.5px;font-weight:600;border:1px solid var(--border,#E2E8F0);background:#fff;color:var(--ink,#334155);border-radius:9px;padding:9px 13px;cursor:pointer}
+  .pay-btn:hover{background:#F8FAFC}
+  .pay-btn.pri{background:#2563EB;border-color:#2563EB;color:#fff}
+  .pay-btn.pri:hover{background:#1D4ED8}
+  .pay-btn:disabled{opacity:.5;cursor:not-allowed}
+  .rec-detail{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border,#E2E8F0);border:1px solid var(--border,#E2E8F0);border-radius:11px;overflow:hidden;margin-bottom:14px}
+  .rec-detail .rd{background:#fff;padding:11px 13px}
+  .rec-detail .rl{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#94A3B8}
+  .rec-detail .rv{font-size:14px;font-weight:600;color:var(--ink,#0F172A);margin-top:3px}
+  .rec-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+  .rec-foot{display:flex;justify-content:flex-end;gap:8px}
+  .rec-paused{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;border-radius:9px;padding:9px 12px;font-size:12px;font-weight:600;margin-bottom:12px}
+  .rec-edit{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+  .rec-edit .fld label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#64748B;margin-bottom:5px}
+  .rec-edit .fld input,.rec-edit .fld select{width:100%;font:inherit;font-size:13px;padding:8px 10px;border:1px solid var(--border,#E2E8F0);border-radius:8px;box-sizing:border-box}
+  .pay-succ{text-align:center}
+  .pay-succ .succ-ic{width:46px;height:46px;border-radius:50%;background:#DCFCE7;color:#15803D;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 10px}
+  .pay-succ .succ-amt{font-size:22px;font-weight:800;color:var(--ink,#0F172A)}
+  .pay-succ .succ-sub{font-size:12.5px;color:#64748B;margin-top:2px}
+  .pay-succ .succ-list{list-style:none;padding:0;margin:14px 0;text-align:left;font-size:12.5px;color:#334155}
+  .pay-succ .succ-list li{padding:6px 0 6px 22px;position:relative}
+  .pay-succ .succ-list li:before{content:"\2713";position:absolute;left:0;color:#15803D;font-weight:800}
+  .pay-succ .succ-acts{display:flex;justify-content:center;gap:8px}
+</style>
+<div class="pay-ov" id="rec-ov" onclick="if(event.target===this)closeRecModal()">
+  <div class="pay-modal">
+    <div class="pay-head"><div><div class="t">Recurring gift</div><div class="s" id="rec-sub"></div></div><button class="x" onclick="closeRecModal()">&#10005;</button></div>
+    <div class="pay-body" id="rec-body"></div>
+  </div>
+</div>
+
 <!-- MODAL -->
 <div class="modal-overlay" id="modal-overlay" onclick="handleOverlay(event)">
   <div class="modal">
@@ -1517,6 +1563,16 @@ const DONOR_DB = [
   { id:4450, name:"Mendez, Carlos",       color:"#15803D", initials:"CM", status:"active",
     history:[ /* first-time donor to CMA */ ]},
 ];
+
+// Enrich a few donors with an active recurring gift (mock data, mirrors the pledge batch)
+(function(){
+  var REC={
+    1044:{amt:200,freq:'Annually',fund:'Catholic Charities General',next:'2027-09-01'},
+    6612:{amt:100,freq:'Monthly',  fund:'CMA Annual Fund',          next:'2026-11-01'},
+    3847:{amt:50, freq:'Monthly',  fund:'CMA Annual Fund',          next:'2026-11-05'}
+  };
+  DONOR_DB.forEach(function(d){ if(REC[d.id]) d.recurring=REC[d.id]; });
+})();
 
 // Posted gifts (for duplicate detection)
 const POSTED_GIFTS = [
@@ -1891,6 +1947,13 @@ function renderBatch() {
           ${topSignal.fix?`<span class="sig-fix" data-action="${topSignal.fixAction.replace(/"/g,'&quot;')}" onclick="runFix(this)">${topSignal.fix}</span>`:''}
         </div>` : '';
 
+    // Recurring-gift chip (opens the manage flow)
+    const recChipHtml = (donor && donor.recurring) ? (function(){
+      const rc=donor.recurring; const fr={Annually:'yr',Monthly:'mo',Quarterly:'qtr','Semi-annual':'6mo',Weekly:'wk'}[rc.freq]||rc.freq;
+      const label=rc.paused?'&#8635; Recurring paused · Manage':('&#8635; Recurring $'+rc.amt.toLocaleString()+'/'+fr+' · Manage');
+      return '<span class="rec-chip'+(rc.paused?' paused':'')+'" onmousedown="event.preventDefault()" onclick="openRecModal('+donor.id+')">'+label+'</span>';
+    })() : '';
+
     // Status pill
     const spClass = severity==='valid'?'sp-ok':severity==='error'?'sp-err':severity==='warn'?'sp-warn':'sp-info';
     const errCnt  = rowSignals.filter(s=>s.sev==='error').length;
@@ -1911,7 +1974,7 @@ function renderBatch() {
           onfocus="showAutoComplete(this,${r.id})"
           onblur="commitDonor(this,${r.id})"
           data-rid="${r.id}">
-        ${sparkHtml}${sigHtml}
+        ${sparkHtml}${sigHtml}${recChipHtml}
       </td>
       <td><input class="ci" value="${r.date}" style="width:100%" onchange="rowEdited(${r.id},'date',this.value)" data-rid="${r.id}"></td>
       <td><select class="cs" onchange="rowEdited(${r.id},'fund',this.value)">
@@ -2393,6 +2456,7 @@ function showAutoComplete(inp, rid) {
           <div class="ac-name">${d.name} <span class="ac-id">#${d.id}</span>${d.dns?'<span class="ac-warn-badge">DNS</span>':''}</div>
           <div class="ac-sub">${d.status==='lapsed'?'⚠ Lapsed donor · ':''} ${d.history.length} prior gifts</div>
           ${histPills?`<div class="ac-hist">${histPills}${isOutlier?'<span class="ac-warn-badge">Outlier vs. entered amt</span>':''}</div>`:''}
+          ${d.recurring?`<div class="ac-rec">&#8635; Recurring gift · $${d.recurring.amt.toLocaleString()} ${d.recurring.freq} · ${d.recurring.fund} · next ${d.recurring.next}</div>`:''}
         </div>
       </div>`;
     }).join('');
@@ -4558,6 +4622,83 @@ window.onload=function(){validate();postH();};
     }
   });
   initCards(); if(typeof revalidateAll==='function') revalidateAll();
+})();
+</script>
+
+<!-- RECURRING GIFT · manage flow logic -->
+<script>
+(function(){
+  function _fmt(n){ return '$'+Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  var _recDonor=null;
+  function _recAddCycle(dateStr, freq){
+    var p=(dateStr||'').split('-'); var d=new Date(+p[0],((+p[1]||1)-1),(+p[2]||1));
+    if(isNaN(d.getTime())) d=new Date();
+    if(freq==='Monthly') d.setMonth(d.getMonth()+1);
+    else if(freq==='Quarterly') d.setMonth(d.getMonth()+3);
+    else if(freq==='Semi-annual') d.setMonth(d.getMonth()+6);
+    else if(freq==='Weekly') d.setDate(d.getDate()+7);
+    else d.setFullYear(d.getFullYear()+1);
+    var mm=String(d.getMonth()+1); if(mm.length<2)mm='0'+mm; var dd=String(d.getDate()); if(dd.length<2)dd='0'+dd;
+    return d.getFullYear()+'-'+mm+'-'+dd;
+  }
+  function openRecModal(id){
+    if(typeof hideAC==='function') hideAC();
+    var d=DONOR_DB.find(function(x){return x.id===id;}); if(!d||!d.recurring) return;
+    _recDonor=d; renderRec('view');
+    document.getElementById('rec-ov').classList.add('show');
+  }
+  function closeRecModal(){ document.getElementById('rec-ov').classList.remove('show'); }
+  function renderRec(mode){
+    var d=_recDonor, r=d.recurring, b=document.getElementById('rec-body');
+    document.getElementById('rec-sub').textContent=d.name+' · '+(r.paused?'paused recurring gift':'active recurring gift');
+    if(mode==='edit'){
+      var freqs=['Weekly','Monthly','Quarterly','Semi-annual','Annually'];
+      b.innerHTML='<div class="rec-edit">'+
+        '<div class="fld"><label>Amount</label><input id="re-amt" inputmode="decimal" value="'+r.amt+'"></div>'+
+        '<div class="fld"><label>Frequency</label><select id="re-freq">'+freqs.map(function(f){return '<option '+(f===r.freq?'selected':'')+'>'+f+'</option>';}).join('')+'</select></div>'+
+        '<div class="fld"><label>Designation</label><input id="re-fund" value="'+r.fund+'"></div>'+
+        '<div class="fld"><label>Next charge</label><input id="re-next" type="date" value="'+r.next+'"></div>'+
+      '</div>'+
+      '<div class="rec-foot"><button class="pay-btn" onclick="renderRec(\'view\')">Cancel</button><button class="pay-btn pri" onclick="recEditSave()">Save schedule</button></div>';
+      return;
+    }
+    if(mode==='charged'){
+      b.innerHTML='<div class="pay-succ"><div class="succ-ic">&#10003;</div>'+
+        '<div class="succ-amt">'+_fmt(r.amt)+'</div><div class="succ-sub">charged now for '+d.name+'</div>'+
+        '<ul class="succ-list"><li>Receipt queued for '+d.name+'</li><li>Recorded in '+d.name+'’s giving history</li><li>Next scheduled charge: '+r.next+'</li></ul>'+
+        '<div class="succ-acts"><button class="pay-btn" onclick="renderRec(\'view\')">Back</button><button class="pay-btn pri" onclick="closeRecModal()">Done</button></div></div>';
+      return;
+    }
+    b.innerHTML=(r.paused?'<div class="rec-paused">&#9208; This recurring gift is paused — no charges will run until resumed.</div>':'')+
+      '<div class="rec-detail">'+
+        '<div class="rd"><div class="rl">Amount</div><div class="rv">'+_fmt(r.amt)+'</div></div>'+
+        '<div class="rd"><div class="rl">Frequency</div><div class="rv">'+r.freq+'</div></div>'+
+        '<div class="rd"><div class="rl">Designation</div><div class="rv">'+r.fund+'</div></div>'+
+        '<div class="rd"><div class="rl">Next charge</div><div class="rv">'+(r.paused?'—':r.next)+'</div></div>'+
+      '</div>'+
+      '<div class="rec-actions">'+
+        '<button class="pay-btn" '+(r.paused?'disabled':'')+' onclick="recCharge()">Charge now</button>'+
+        '<button class="pay-btn" '+(r.paused?'disabled':'')+' onclick="recSkip()">Skip next charge</button>'+
+        (r.paused?'<button class="pay-btn" onclick="recResume()">Resume</button>':'<button class="pay-btn" onclick="recPause()">Pause</button>')+
+        '<button class="pay-btn" onclick="renderRec(\'edit\')">Edit schedule</button>'+
+      '</div>'+
+      '<div class="rec-foot"><button class="pay-btn pri" onclick="closeRecModal()">Done</button></div>';
+  }
+  function recRefresh(){ if(typeof revalidateAll==='function') revalidateAll(); }
+  function _t(m){ if(typeof batchToast==='function') batchToast(m); }
+  function recCharge(){ renderRec('charged'); _t('Recurring gift charged · '+_fmt(_recDonor.recurring.amt)+' · '+_recDonor.name); }
+  function recSkip(){ var r=_recDonor.recurring; r.next=_recAddCycle(r.next,r.freq); renderRec('view'); recRefresh(); _t('Next charge skipped · new date '+r.next); }
+  function recPause(){ _recDonor.recurring.paused=true; renderRec('view'); recRefresh(); _t('Recurring gift paused · '+_recDonor.name); }
+  function recResume(){ _recDonor.recurring.paused=false; renderRec('view'); recRefresh(); _t('Recurring gift resumed · '+_recDonor.name); }
+  function recEditSave(){ var r=_recDonor.recurring;
+    r.amt=parseFloat(document.getElementById('re-amt').value)||r.amt;
+    r.freq=document.getElementById('re-freq').value;
+    r.fund=document.getElementById('re-fund').value||r.fund;
+    r.next=document.getElementById('re-next').value||r.next;
+    renderRec('view'); recRefresh(); _t('Recurring schedule updated · '+_recDonor.name);
+  }
+  window.openRecModal=openRecModal; window.closeRecModal=closeRecModal; window.renderRec=renderRec;
+  window.recCharge=recCharge; window.recSkip=recSkip; window.recPause=recPause; window.recResume=recResume; window.recEditSave=recEditSave;
 })();
 </script>
 </body>

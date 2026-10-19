@@ -377,6 +377,12 @@ tr.sel-row td { background:var(--blue-pale); }
       <div class="assign-chips" id="f-funds-chips"></div>
       <div class="asrch"><input class="fld" id="f-funds-add" autocomplete="off" placeholder="Search funds to add…" oninput="asrchInput('edit','funds')" onfocus="asrchInput('edit','funds')"><div class="asrch-list" id="asrch-edit-funds"></div></div>
     </div>
+    <div class="assign-wrap field-mt">
+      <span class="lbl">Packages for this appeal</span>
+      <div style="font-size:12px;color:var(--text-3);margin:-2px 0 7px">Named giving options donors can choose (e.g. gala table, sponsorship tier). These appear on the Appeals row and in gift entry.</div>
+      <div class="assign-chips" id="f-pkgs-chips"></div>
+      <div class="asrch" style="display:flex;gap:8px"><input class="fld" id="f-pkgs-add" autocomplete="off" placeholder="Type a package name, press Enter…" onkeydown="pkgAddKey(event)" style="flex:1"><button type="button" class="btn btn-ghost" onclick="pkgAddFromInput()">Add</button></div>
+    </div>
     <div class="row2 field-mt">
       <div><span class="lbl">Start date</span><input class="fld" id="f-start" placeholder="MM/DD/YYYY"></div>
       <div><span class="lbl">End date</span><input class="fld" id="f-end" placeholder="MM/DD/YYYY"></div>
@@ -451,6 +457,15 @@ var PKG_SEED={
 };
 function pkgLoad(){ try{ var raw=localStorage.getItem(PKG_KEY); if(raw){ var o=JSON.parse(raw); if(o&&typeof o==='object') return o; } }catch(e){} var s=JSON.parse(JSON.stringify(PKG_SEED)); pkgSave(s); return s; }
 function pkgSave(s){ try{ localStorage.setItem(PKG_KEY,JSON.stringify(s)); }catch(e){} }
+function pkgSetFor(id,arr){ var s=pkgLoad(); if(arr&&arr.length) s[id]=arr; else delete s[id]; pkgSave(s); }
+
+/* ── Package editor (New / Edit appeal modal) ── */
+var fPkgs=[];
+function renderPkgChips(){ var c=document.getElementById('f-pkgs-chips'); if(!c)return; c.innerHTML=fPkgs.length?fPkgs.map(function(p,i){return '<span class="achip">'+esc(p.name)+'<span class="x" onclick="pkgChipRemove('+i+')">×</span></span>';}).join(''):'<span class="assign-none">None yet</span>'; }
+function pkgAddFromInput(){ var inp=document.getElementById('f-pkgs-add'); if(!inp)return; var v=(inp.value||'').trim(); if(!v)return; if(!fPkgs.some(function(p){return p.name.toLowerCase()===v.toLowerCase();})) fPkgs.push({name:v}); inp.value=''; renderPkgChips(); inp.focus(); }
+function pkgAddKey(e){ if(e.key==='Enter'){ e.preventDefault(); pkgAddFromInput(); } }
+function pkgChipRemove(i){ fPkgs.splice(i,1); renderPkgChips(); }
+function pkgBuild(appealId){ var used={}; return fPkgs.map(function(p){ var pid=p.id; if(!pid){ var base=appealId+'-'+((p.name.toUpperCase().replace(/[^A-Z0-9]+/g,'').slice(0,6))||'PKG'); pid=base; var n=2; while(used[pid]){ pid=base+n; n++; } } used[pid]=1; return {id:pid, name:p.name}; }); }
 function pkgFor(id){ var s=pkgLoad(); return (s[id]||[]).slice(); }
 
 /* ── Campaign/Fund multi-select picker (matches Funds screen) ── */
@@ -668,6 +683,7 @@ function openNew(){
   ['f-id','f-desc','f-start','f-end','f-goal','f-solic'].forEach(function(i){ document.getElementById(i).value=''; });
   document.getElementById('f-cat').selectedIndex=0; document.getElementById('f-active').checked=true;
   fAssign={campaigns:[],funds:[]}; renderAllAssign();
+  fPkgs=[]; renderPkgChips();
   document.getElementById('f-id').disabled=false;
   document.getElementById('form-ov').classList.add('open');
   setTimeout(function(){ document.getElementById('f-id').focus(); },40);
@@ -683,6 +699,7 @@ function openEdit(id){
   document.getElementById('f-cat').value=a.cat;
   document.getElementById('f-start').value=a.start; document.getElementById('f-end').value=a.end;
   fAssign={campaigns:(a.campaigns?a.campaigns.slice():(a.campaign?[a.campaign]:[])), funds:(a.funds?a.funds.slice():(a.fund?[a.fund]:[]))}; renderAllAssign();
+  fPkgs=pkgFor(a.id).map(function(p){return {id:p.id, name:p.name};}); renderPkgChips();
   document.getElementById('f-goal').value=a.goal?money(a.goal):'';
   document.getElementById('f-solic').value='';
   document.getElementById('f-active').checked=a.active;
@@ -707,16 +724,18 @@ function saveForm(){
     var a=APPEALS.find(function(x){return x.id===editingId;});
     a.desc=desc; a.cat=cat; a.start=start; a.end=end; a.campaigns=campaigns; a.funds=funds; a.goal=goal; a.active=active;
   }
+  var pkgs=pkgBuild(id); pkgSetFor(id, pkgs);
   closeForm(); refresh();
   if(isNew){
-    showCf('Appeal created','Saved to the Appeals list.', [['Appeal ID',id],['Description',desc],['Category',cat],['Campaign(s)',campaigns.join(', ')],['Fund(s)',funds.join(', ')],['Goal',goal?money(goal):''],['Start date',start],['End date',end],['Number solicited',solic],['Status',active?'Active':'Inactive']]);
-  } else atlasToast('Appeal updated · '+id);
+    showCf('Appeal created','Saved to the Appeals list.', [['Appeal ID',id],['Description',desc],['Category',cat],['Campaign(s)',campaigns.join(', ')],['Fund(s)',funds.join(', ')],['Package(s)',pkgs.map(function(p){return p.name;}).join(', ')],['Goal',goal?money(goal):''],['Start date',start],['End date',end],['Number solicited',solic],['Status',active?'Active':'Inactive']]);
+  } else atlasToast('Appeal updated · '+id+(pkgs.length?' · '+pkgs.length+' package'+(pkgs.length!==1?'s':''):''));
 }
 function dupAppeal(id){
   closeKebab(); var a=APPEALS.find(function(x){return x.id===id;}); if(!a) return;
   var base=a.id.replace(/\d+$/,''), n=2, nid=a.id+'-COPY';
   while(APPEALS.some(function(x){return x.id===nid;})){ nid=a.id+'-COPY'+n; n++; }
   APPEALS.unshift({id:nid, desc:a.desc+' (copy)', cat:a.cat, start:'', end:'', campaigns:(a.campaigns?a.campaigns.slice():(a.campaign?[a.campaign]:[])), funds:(a.funds?a.funds.slice():(a.fund?[a.fund]:[])), goal:a.goal, raised:0, gifts:0, active:true});
+  var srcPkgs=pkgFor(a.id); if(srcPkgs.length){ pkgSetFor(nid, srcPkgs.map(function(p){ return {id:nid+'-'+p.id.split('-').slice(1).join('-'), name:p.name}; })); }
   refresh(); atlasToast('Duplicated as '+nid);
 }
 function toggleActive(id){ closeKebab(); var a=APPEALS.find(function(x){return x.id===id;}); if(!a) return; a.active=!a.active; refresh(); atlasToast(a.id+(a.active?' activated':' deactivated')); }
