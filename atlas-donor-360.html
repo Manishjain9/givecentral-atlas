@@ -617,9 +617,13 @@ body {
   .sp-av{width:46px;height:46px;border-radius:50%;background:#EDE9FE;color:#6D28D9;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0}
   .sp-nm{font-size:16px;font-weight:700;color:var(--text)}
   .sp-meta{font-size:12.5px;color:var(--text-3);margin-top:2px}
-  .sp-actions{margin-left:auto;display:flex;align-items:center;gap:16px}
-  .sp-link{font-size:13px;font-weight:600;color:var(--blue);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0}
-  .sp-promote{font-size:13px;font-weight:600;color:#6D28D9;cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0}
+  .sp-actions{margin-left:auto;display:flex;align-items:center;gap:9px}
+  .sp-link,.sp-promote{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;border-radius:9px;padding:8px 14px;line-height:1;transition:background .12s,border-color .12s,box-shadow .12s}
+  .sp-link svg,.sp-promote svg{width:14px;height:14px;flex-shrink:0}
+  .sp-link{color:var(--text-2);background:#fff;border:1px solid var(--border)}
+  .sp-link:hover{border-color:#C4B5FD;color:#6D28D9;background:#FAF8FF}
+  .sp-promote{color:#fff;background:#6D28D9;border:1px solid #6D28D9}
+  .sp-promote:hover{background:#5B21B6;box-shadow:0 2px 8px rgba(109,40,217,.28)}
   .sp-sep{color:#6D28D9;cursor:pointer}
   .sp-joint{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:16px;padding-top:16px;border-top:1px solid #E4DDFB}
   @media(max-width:860px){.sp-joint{grid-template-columns:1fr}}
@@ -741,6 +745,27 @@ body {
   .pm-field .lbl{font-size:13px;font-weight:700;color:var(--text);margin-bottom:7px}
   .pm-field input{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none}
   .pm-field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-pale)}
+  .pm-addr{border:1px solid var(--border);border-radius:11px;padding:12px;background:var(--surface)}
+  .pm-addr-head{display:flex;align-items:center;gap:12px;margin-bottom:9px;flex-wrap:wrap}
+  .pm-addr-type{padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:#fff;color:var(--text)}
+  .pm-addr-chk{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-3);cursor:pointer}
+  .pm-addr-chk input{width:15px;height:15px;accent-color:var(--blue)}
+  .pm-addr input,.pm-addr select{font-family:'DM Sans',sans-serif;font-size:13.5px;color:var(--text);outline:none}
+  .pm-addr-street{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;margin-bottom:9px}
+  .pm-addr-row{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:9px}
+  .pm-addr-row input,.pm-addr-row select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff}
+  .pm-addr input:focus,.pm-addr select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-pale)}
+  .pm-ac{position:relative;margin-bottom:9px}
+  .pm-ac .pm-addr-street{margin-bottom:0}
+  .pm-addr-panel{position:absolute;z-index:70;left:0;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 14px 34px rgba(15,23,42,.16);max-height:230px;overflow:auto;display:none;padding:5px}
+  .pm-addr-panel.open{display:block}
+  .padr-row{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:8px;cursor:pointer}
+  .padr-row:hover,.padr-row.active{background:var(--blue-pale)}
+  .padr-row .pin{width:13px;height:13px;color:var(--text-3);flex-shrink:0;margin-top:2px}
+  .padr-row .a1{color:var(--text);font-weight:500;font-size:13px}
+  .padr-row .a1 mark{background:#FEF3C7;border-radius:2px;padding:0 1px}
+  .padr-row .a2{color:var(--text-3);font-size:11.5px;margin-top:1px}
+  .padr-foot{font-size:11px;color:var(--text-3);padding:7px 10px 3px;border-top:1px solid var(--border);margin-top:4px}
   .pm-acc{border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden}
   .pm-acc>summary{list-style:none;cursor:pointer;padding:13px 16px;display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--text);background:var(--surface)}
   .pm-acc>summary::-webkit-details-marker{display:none}
@@ -4302,9 +4327,12 @@ window.clFilter=function(cat,el){
       : 'Not a separate donor · soft-credited on joint gifts';
     var decBadge = HH.spouseDeceased ? '<span class="sp-deceased">Deceased</span>' : '';
     // actions + overflow menu (Gap: remove / unlink)
+    var icEdit='<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.5l2.5 2.5M8 3.5L3 8.5v2.5h2.5l5-5z"/></svg>';
+    var icPromote='<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v6M4 5.5L7 2.5l3 3M3 11.5h8"/></svg>';
+    var icOpen='<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2.5h6.5V9M11.5 2.5L5.5 8.5M9.5 8v3.5h-7v-7H6"/></svg>';
     var primaryAction = HH.isSeparateDonor
-      ? '<button class="sp-link" onclick="spGoToSpouse()">Open record →</button>'
-      : (HH.spouseDeceased ? '' : '<button class="sp-link" onclick="spEdit()">Edit</button><button class="sp-promote" onclick="spPromoteOpen()">Promote to full constituent</button>');
+      ? '<button class="sp-link" onclick="spGoToSpouse()">'+icOpen+'Open record</button>'
+      : (HH.spouseDeceased ? '' : '<button class="sp-link" onclick="spEdit()">'+icEdit+'Edit</button><button class="sp-promote" onclick="spPromoteOpen()">'+icPromote+'Promote to full constituent</button>');
     var menuItems = '';
     if(!HH.spouseDeceased) menuItems += '<button onclick="spMarkDeceased()">Mark '+HH.spouseFirst+' deceased</button>';
     menuItems += (HH.isSeparateDonor
@@ -4453,7 +4481,7 @@ window.clFilter=function(cat,el){
       extra:{lbl:'Date of death', ph:'MM/DD/YYYY'}},
     {k:'divorce', t:'Separation or divorce', s:'{S} leaves the household and gets their own address',
       happens:['{S} gets their own constituent record, ID, and new mailing address.','Past joint giving is split: each gift stays credited to whoever gave it; shared joint gifts keep {P} as hard credit with {S} soft-credited.','Future appeals are sent to each person separately; household counts as 2.','Soft credits already recorded are preserved on both records.'],
-      extra:{lbl:'{S}’s new mailing address', ph:'Street, City, State ZIP'},
+      extra:{lbl:'{S}’s new mailing address', type:'address'},
       split:true}
   ];
   var pmReason='own', pmPickerOpen=false;
@@ -4492,8 +4520,22 @@ window.clFilter=function(cat,el){
   function renderPmBody(){
     var r=reasonOf(pmReason);
     // 1) required input first
-    document.getElementById('pm-extra').innerHTML = r.extra
-      ? ('<div class="pm-field"><div class="lbl">'+fill(r.extra.lbl)+'</div><input placeholder="'+r.extra.ph+'"></div>') : '';
+    var exHTML='';
+    if(r.extra && r.extra.type==='address'){
+      exHTML='<div class="pm-field"><div class="lbl">'+fill(r.extra.lbl)+'</div>'
+        +'<div class="pm-addr">'
+          +'<div class="pm-addr-head"><select class="pm-addr-type"><option selected>Home</option><option>Work</option><option>Seasonal</option><option>Estate</option><option>Other</option></select>'
+            +'<label class="pm-addr-chk"><input type="checkbox"> Same as household until move-out</label></div>'
+          +'<div class="pm-ac"><input class="pm-addr-street" placeholder="Start typing a street, city, or ZIP…" autocomplete="off"><div class="pm-addr-panel"></div></div>'
+          +'<div class="pm-addr-row">'
+            +'<input class="pm-addr-city" placeholder="City">'
+            +'<select class="pm-addr-state"><option selected>State</option><option>NY</option><option>CT</option><option>NJ</option><option>MA</option><option>VT</option></select>'
+            +'<input class="pm-addr-zip" placeholder="ZIP">'
+          +'</div></div></div>';
+    } else if(r.extra){
+      exHTML='<div class="pm-field"><div class="lbl">'+fill(r.extra.lbl)+'</div><input placeholder="'+(r.extra.ph||'')+'"></div>';
+    }
+    document.getElementById('pm-extra').innerHTML = exHTML;
     // 2) What happens (accordion, open) + optional split (accordion, collapsed)
     var happens='<details class="pm-acc" open><summary>What happens'+CARET+'</summary><div class="bd">'
       +'<ul style="list-style:none;display:flex;flex-direction:column;gap:11px">'
@@ -4551,6 +4593,42 @@ window.clFilter=function(cat,el){
   document.getElementById('pm-ov').addEventListener('click',function(e){ if(e.target===this) spPromoteClose(); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') spPromoteClose(); });
   (function(){ var b=document.getElementById('pm-body'); if(b){ b.addEventListener('scroll',pmFade); b.addEventListener('toggle',function(){ setTimeout(pmFade,0); },true); } })();
+
+  // ── street autocomplete for the divorce new-address field (matches add-constituent) ──
+  var ADDR=[
+    {s:'412 Wendover Drive',c:'Albany',st:'NY',z:'12203'},{s:'142 Elm Street',c:'Albany',st:'NY',z:'12203'},
+    {s:'55 Cathedral Place',c:'Albany',st:'NY',z:'12202'},{s:'210 Washington Avenue',c:'Albany',st:'NY',z:'12203'},
+    {s:'9 Maple Avenue',c:'Troy',st:'NY',z:'12180'},{s:'18 Birch Lane',c:'Albany',st:'NY',z:'12208'},
+    {s:'77 Pine Street',c:'Schenectady',st:'NY',z:'12305'},{s:'30 Delaware Avenue',c:'Delmar',st:'NY',z:'12054'},
+    {s:'64 Willow Way',c:'Albany',st:'NY',z:'12203'},{s:'41 Grove Street',c:'Albany',st:'NY',z:'12206'},
+    {s:'23 Chapel Street',c:'Cohoes',st:'NY',z:'12047'},{s:'88 Lark Street',c:'Albany',st:'NY',z:'12210'}
+  ];
+  function aesc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function ahl(t,q){ var i=t.toLowerCase().indexOf(q); if(i<0||!q) return aesc(t); return aesc(t.slice(0,i))+'<mark>'+aesc(t.slice(i,i+q.length))+'</mark>'+aesc(t.slice(i+q.length)); }
+  var APIN='<svg class="pin" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12.5S2.5 8.8 2.5 5.5a4.5 4.5 0 0 1 9 0C11.5 8.8 7 12.5 7 12.5z"/><circle cx="7" cy="5.3" r="1.6"/></svg>';
+  function aRender(street){
+    var p=street.parentNode.querySelector('.pm-addr-panel'); if(!p) return;
+    var q=(street.value||'').trim().toLowerCase();
+    if(q.length<2){ p.classList.remove('open'); p.innerHTML=''; pmFade(); return; }
+    var res=ADDR.filter(function(a){ return (a.s+' '+a.c+' '+a.z).toLowerCase().indexOf(q)>-1; }).slice(0,6);
+    if(!res.length){ p.innerHTML='<div class="padr-foot" style="border-top:none">No match — enter the address manually</div>'; p.classList.add('open'); return; }
+    p.innerHTML=res.map(function(a){ return '<div class="padr-row" data-i="'+ADDR.indexOf(a)+'">'+APIN+'<div><div class="a1">'+ahl(a.s,q)+'</div><div class="a2">'+aesc(a.c)+', '+a.st+' '+a.z+'</div></div></div>'; }).join('')
+      +'<div class="padr-foot">Type a street, city, or ZIP · address lookup</div>';
+    p.classList.add('open');
+  }
+  function aFill(block,a){
+    var st=block.querySelector('.pm-addr-street'); if(st) st.value=a.s;
+    var c=block.querySelector('.pm-addr-city'); if(c) c.value=a.c;
+    var z=block.querySelector('.pm-addr-zip'); if(z) z.value=a.z;
+    var ss=block.querySelector('.pm-addr-state'); if(ss) Array.prototype.forEach.call(ss.options,function(o){ if(o.textContent.trim()===a.st) o.selected=true; });
+  }
+  document.addEventListener('input',function(e){ var s=e.target.closest('.pm-addr-street'); if(s) aRender(s); });
+  document.addEventListener('focusin',function(e){ var s=e.target.closest('.pm-addr-street'); if(s && (s.value||'').trim().length>=2) aRender(s); });
+  document.addEventListener('click',function(e){
+    var row=e.target.closest('.pm-addr-panel .padr-row');
+    if(row){ var p=row.closest('.pm-addr-panel'), block=row.closest('.pm-addr'), a=ADDR[+row.dataset.i]; if(block&&a) aFill(block,a); p.classList.remove('open'); p.innerHTML=''; pmFade(); return; }
+    if(!e.target.closest('.pm-ac')) document.querySelectorAll('.pm-addr-panel.open').forEach(function(p){ p.classList.remove('open'); });
+  });
 
   // ── render all ──
   window.spRender=function(){ HH._addrEdit=false; renderResult(); renderIra(); renderPanel(); reflectHero(); };
