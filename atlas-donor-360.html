@@ -600,6 +600,84 @@ body {
   .sidebar-logo .logo-sub{font-size:9px !important;font-weight:600 !important;letter-spacing:.1em !important;text-transform:uppercase !important;color:rgba(255,255,255,.35) !important;margin:0 !important;line-height:1 !important}
 </style>
   <style id="nav-nowrap">.nav-item{white-space:nowrap}</style>
+<style id="spouse-css">
+  /* ── IRA / QCD auto-flag banner ── */
+  #ira-flag:empty{display:none}
+  .ira-band{display:flex;align-items:center;gap:16px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:14px;padding:16px 18px;margin-bottom:16px}
+  .ira-band .tx{flex:1;min-width:0}
+  .ira-band .t{font-size:13.5px;font-weight:700;color:#9A3412}
+  .ira-band .s{font-size:12.5px;color:#B45309;margin-top:3px;line-height:1.5}
+  .ira-band .btn{flex-shrink:0;background:var(--blue);color:#fff;border:none;border-radius:9px;padding:11px 18px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer}
+  .ira-band .btn:hover{background:#1D4ED8}
+  /* ── Spouse panel ── */
+  .sp-card{background:#F5F3FF;border:1px solid #E4DDFB;border-radius:16px;padding:18px 20px;margin-bottom:18px}
+  .sp-top{display:flex;align-items:flex-start;gap:12px}
+  .sp-kicker{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6D28D9}
+  .sp-ident{display:flex;align-items:center;gap:12px;margin-top:10px}
+  .sp-av{width:46px;height:46px;border-radius:50%;background:#EDE9FE;color:#6D28D9;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0}
+  .sp-nm{font-size:16px;font-weight:700;color:var(--text)}
+  .sp-meta{font-size:12.5px;color:var(--text-3);margin-top:2px}
+  .sp-actions{margin-left:auto;display:flex;align-items:center;gap:16px}
+  .sp-link{font-size:13px;font-weight:600;color:var(--blue);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0}
+  .sp-promote{font-size:13px;font-weight:600;color:#6D28D9;cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0}
+  .sp-sep{color:#6D28D9;cursor:pointer}
+  .sp-joint{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:16px;padding-top:16px;border-top:1px solid #E4DDFB}
+  @media(max-width:860px){.sp-joint{grid-template-columns:1fr}}
+  .sp-joint .lbl{font-size:11px;color:var(--text-3);margin-bottom:4px}
+  .sp-joint .val{font-size:14px;color:var(--text);font-weight:500}
+  .sp-badge{display:inline-flex;align-items:center;font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-pale);border-radius:20px;padding:4px 11px}
+  /* empty state */
+  .sp-empty{display:flex;align-items:center;gap:12px}
+  .sp-empty .ic{width:40px;height:40px;border-radius:10px;background:#EDE9FE;color:#6D28D9;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .sp-empty .add{margin-left:auto;background:#6D28D9;color:#fff;border:none;border-radius:9px;padding:10px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer}
+  /* ── Inline add/edit spouse form ── */
+  .spf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 16px;margin-top:14px}
+  @media(max-width:860px){.spf-grid{grid-template-columns:1fr 1fr}}
+  .spf-field.wide{grid-column:span 2}
+  .spf-field .lbl{font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:5px}
+  .spf-field input,.spf-field select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:9px;font-size:13.5px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);outline:none}
+  .spf-field input:focus,.spf-field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-pale)}
+  .spf-checks{display:flex;flex-wrap:wrap;gap:22px;margin-top:16px}
+  .spf-chk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-2);cursor:pointer;user-select:none}
+  .spf-chk input{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
+  .spf-prev{display:grid;grid-template-columns:1fr 1fr;gap:18px;background:#fff;border:1px solid #E4DDFB;border-radius:11px;padding:14px 16px;margin-top:16px}
+  @media(max-width:860px){.spf-prev{grid-template-columns:1fr}}
+  .spf-prev .lbl{font-size:11px;color:var(--text-3);margin-bottom:3px}
+  .spf-prev .val{font-size:14px;color:var(--text);font-weight:500}
+  .spf-foot{display:flex;align-items:center;gap:14px;margin-top:18px}
+  .spf-save{background:var(--blue);color:#fff;border:none;border-radius:9px;padding:11px 20px;font-size:13.5px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer}
+  .spf-cancel{background:#fff;border:1px solid var(--border);color:var(--text-2);border-radius:9px;padding:11px 18px;font-size:13.5px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer}
+  .spf-note{font-size:12.5px;color:var(--text-3)}
+  /* ── Promote modal ── */
+  #pm-ov{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100060;display:none;align-items:center;justify-content:center;padding:24px;font-family:'DM Sans',sans-serif}
+  #pm-ov.open{display:flex}
+  .pm-modal{background:#fff;border-radius:18px;width:min(620px,100%);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,.35);overflow:hidden}
+  .pm-body{padding:28px 30px;overflow:auto}
+  .pm-kick{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6D28D9}
+  .pm-title{font-family:'DM Serif Display',serif;font-size:30px;color:var(--text);margin:8px 0 20px;line-height:1.1}
+  .pm-q{font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px}
+  .pm-opt{display:flex;align-items:flex-start;gap:14px;border:1.5px solid var(--border);border-radius:12px;padding:16px 18px;cursor:pointer;margin-bottom:12px;transition:border-color .12s,background .12s}
+  .pm-opt:hover{border-color:#C4B5FD}
+  .pm-opt.on{border-color:var(--blue);background:var(--blue-pale)}
+  .pm-radio{width:20px;height:20px;border-radius:50%;border:2px solid #CBD5E1;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center}
+  .pm-opt.on .pm-radio{border-color:var(--blue)}
+  .pm-opt.on .pm-radio::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--blue)}
+  .pm-opt .ot{font-size:15px;font-weight:700;color:var(--text)}
+  .pm-opt .os{font-size:13px;color:var(--text-3);margin-top:3px;line-height:1.45}
+  .pm-happens{background:var(--surface);border-radius:14px;padding:20px 22px;margin-top:20px}
+  .pm-happens .hh{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px}
+  .pm-happens ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+  .pm-happens li{display:flex;align-items:flex-start;gap:12px;font-size:13.5px;color:var(--text-2);line-height:1.45}
+  .pm-happens li svg{width:19px;height:19px;color:var(--blue);flex-shrink:0;margin-top:1px}
+  .pm-happens .fine{font-size:12.5px;color:var(--text-3);margin-top:14px}
+  .pm-extra{margin-top:20px}
+  .pm-extra .lbl{font-size:13px;font-weight:700;color:var(--text);margin-bottom:7px}
+  .pm-extra input{width:min(300px,100%);padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none}
+  .pm-extra input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-pale)}
+  .pm-foot{display:flex;justify-content:flex-end;gap:12px;padding:18px 30px;border-top:1px solid var(--border)}
+  .pm-cancel{background:#fff;border:1px solid var(--border);color:var(--text-2);border-radius:10px;padding:11px 22px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer}
+  .pm-go{background:var(--blue);border:none;color:#fff;border-radius:10px;padding:11px 24px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer}
+</style>
 </head>
 <body>
 
@@ -813,6 +891,10 @@ body {
 
         <!-- OVERVIEW TAB -->
         <div class="tab-content active" id="tab-overview">
+
+          <!-- Spouse-on-record: IRA/QCD auto-flag + spouse panel (self-contained) -->
+          <div id="ira-flag"></div>
+          <div id="spouse-panel"></div>
 
           <!-- Giving history chart — KPIs above, interactive bars, year-detail card below -->
           <div class="section">
@@ -4032,6 +4114,203 @@ window.clFilter=function(cat,el){
     md.querySelector('.cr-foot').innerHTML='<button class="cr-btn ghost" onclick="atlasCorrectClose()">Close</button><button class="cr-btn pri" onclick="window.location=\'atlas-gift-correction-center.html\'">Open Correction Center</button>';
     toast('Correction posted · audit entry logged');
   };
+})();
+</script>
+<!-- ════ Spouse-on-record · promote modal ════ -->
+<div id="pm-ov"><div class="pm-modal">
+  <div class="pm-body">
+    <div class="pm-kick" id="pm-kick">SULLIVAN HOUSEHOLD</div>
+    <div class="pm-title" id="pm-title">Promote to a full constituent</div>
+    <div class="pm-q">Why?</div>
+    <div id="pm-opts"></div>
+    <div class="pm-happens"><div class="hh">What happens</div><ul id="pm-happens-list"></ul>
+      <div class="fine">Nothing is deleted. Every change is logged and can be reversed by an administrator.</div></div>
+    <div class="pm-extra" id="pm-extra"></div>
+  </div>
+  <div class="pm-foot">
+    <button class="pm-cancel" onclick="spPromoteClose()">Cancel</button>
+    <button class="pm-go" id="pm-go" onclick="spPromoteConfirm()">Promote</button>
+  </div>
+</div></div>
+
+<script id="spouse-js">
+(function(){
+  // ── household state ──
+  var HH={
+    primaryFirst:'Margaret', primaryTitle:'Mrs.', primaryLast:'Sullivan', primaryFull:'Margaret T. Sullivan',
+    spouseTitle:'Mr.', spouseFirst:'Thomas', spouseLast:'Sullivan',
+    sameAddress:true, includeJoint:true, softCredit:true,
+    isSeparateDonor:false, hasSpouse:true,
+    iraFlag:true, iraGiftDate:'Oct 14, 2026'
+  };
+  // ── reciprocal record linking ──
+  // Default (Margaret's) view → Open record opens Thomas as his own 360.
+  HH.spouseHref='atlas-donor-360.html?name='+encodeURIComponent('Thomas Sullivan')
+    +'&parish='+encodeURIComponent('St. Michael’s Parish · Tampa, FL')+'&since=2011&view=spouse';
+  var _sp=new URLSearchParams(location.search);
+  if(_sp.get('view')==='spouse'){
+    // We are now viewing the spouse's own record — swap perspective.
+    HH.primaryTitle='Mr.'; HH.primaryFirst='Thomas'; HH.primaryLast='Sullivan'; HH.primaryFull='Thomas Sullivan';
+    HH.spouseTitle='Mrs.'; HH.spouseFirst='Margaret'; HH.spouseLast='Sullivan';
+    HH.isSeparateDonor=true; HH.iraFlag=false; HH.hasSpouse=true;
+    HH.spouseHref='atlas-donor-360.html';  // back to Margaret
+  }
+  function initials(f,l){ return ((f||' ')[0]+(l||' ')[0]).toUpperCase(); }
+  function jointAddressee(){ return HH.primaryTitle+' '+HH.primaryFirst+' and '+HH.spouseTitle+' '+HH.spouseFirst+' '+HH.primaryLast; }
+  function jointSalutation(){ return 'Dear '+HH.primaryFirst+' and '+HH.spouseFirst; }
+  function toast(m){ if(window.atlasToast) atlasToast(m); }
+
+  // ── IRA / QCD auto-flag banner ──
+  function renderIra(){
+    var el=document.getElementById('ira-flag'); if(!el) return;
+    if(HH.hasSpouse && !HH.isSeparateDonor && HH.iraFlag){
+      el.innerHTML='<div class="ira-band"><div class="tx">'
+        +'<div class="t">A gift arrived from '+HH.spouseFirst+'’s own IRA</div>'
+        +'<div class="s">A qualified charitable distribution must be credited and receipted to the IRA owner. Promote '+HH.spouseFirst+' to credit it to '+(HH.spouseTitle==='Mr.'?'him':'her')+'.</div></div>'
+        +'<button class="btn" onclick="spPromoteOpen(\'own\')">Promote '+HH.spouseFirst+'</button></div>';
+    } else el.innerHTML='';
+  }
+
+  // ── spouse panel (read) ──
+  function renderPanel(){
+    var el=document.getElementById('spouse-panel'); if(!el) return;
+    if(!HH.hasSpouse){
+      el.innerHTML='<div class="sp-card"><div class="sp-empty">'
+        +'<div class="ic"><svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="6" r="3"/><path d="M3.5 15a5.5 5.5 0 0 1 11 0"/></svg></div>'
+        +'<div><div class="sp-kicker">Household</div><div class="sp-nm" style="margin-top:3px">No spouse on record</div></div>'
+        +'<button class="add" onclick="spEdit()">Add spouse</button></div></div>';
+      return;
+    }
+    var statusLine = HH.isSeparateDonor
+      ? 'Full constituent · linked in this household'
+      : 'Not a separate donor · soft-credited on joint gifts';
+    var actions = HH.isSeparateDonor
+      ? '<button class="sp-link" onclick="spGoToSpouse()">Open record →</button>'
+      : '<button class="sp-link" onclick="spEdit()">Edit</button><button class="sp-promote" onclick="spPromoteOpen()">Promote to full constituent</button>';
+    el.innerHTML='<div class="sp-card" id="sp-view">'
+      +'<div class="sp-top"><div style="flex:1">'
+        +'<div class="sp-kicker">Spouse</div>'
+        +'<div class="sp-ident"><div class="sp-av">'+initials(HH.spouseFirst,HH.spouseLast)+'</div>'
+          +'<div><div class="sp-nm">'+HH.spouseTitle+' '+HH.spouseFirst+' '+HH.spouseLast+'</div>'
+          +'<div class="sp-meta">'+statusLine+'</div></div></div>'
+      +'</div><div class="sp-actions">'+actions+'</div></div>'
+      +'<div class="sp-joint">'
+        +'<div><div class="lbl">Joint addressee</div><div class="val">'+jointAddressee()+'</div></div>'
+        +'<div><div class="lbl">Joint salutation</div><div class="val">'+jointSalutation()+'</div></div>'
+        +'<div><div class="lbl">Receipts &amp; letters</div><div class="val">'+(HH.isSeparateDonor?'Joint by default · '+HH.spouseFirst+' can also receive own receipts':'Joint, to the household address')+'</div></div>'
+      +'</div>'
+      +(HH.isSeparateDonor?'':'<div style="margin-top:14px"><span class="sp-badge">Household counts as 1 donor</span></div>')
+      +'</div>';
+  }
+
+  // ── inline add / edit spouse form ──
+  window.spEdit=function(){
+    var el=document.getElementById('spouse-panel'); if(!el) return;
+    el.innerHTML='<div class="sp-card">'
+      +'<div class="sp-top"><div style="flex:1"><div class="sp-nm" style="font-size:18px">Spouse</div></div>'
+        +'<button class="sp-link" onclick="spLinkExisting()">Spouse already in Atlas? Link the existing constituent</button></div>'
+      +'<div class="spf-grid">'
+        +'<div class="spf-field"><div class="lbl">Title</div><select id="spf-title"><option'+(HH.spouseTitle==='Mr.'?' selected':'')+'>Mr.</option><option'+(HH.spouseTitle==='Mrs.'?' selected':'')+'>Mrs.</option><option'+(HH.spouseTitle==='Ms.'?' selected':'')+'>Ms.</option><option'+(HH.spouseTitle==='Dr.'?' selected':'')+'>Dr.</option></select></div>'
+        +'<div class="spf-field"><div class="lbl">First name</div><input id="spf-first" value="'+(HH.spouseFirst||'')+'"></div>'
+        +'<div class="spf-field"><div class="lbl">Last name</div><input id="spf-last" value="'+(HH.spouseLast||'')+'"></div>'
+        +'<div class="spf-field"><div class="lbl">Birthday (optional)</div><input placeholder="MM/DD"></div>'
+        +'<div class="spf-field wide"><div class="lbl">Email (optional)</div><input placeholder="Spouse’s own email"></div>'
+        +'<div class="spf-field wide"><div class="lbl">Mobile (optional)</div><input placeholder="Spouse’s own phone"></div>'
+      +'</div>'
+      +'<div class="spf-checks">'
+        +'<label class="spf-chk"><input type="checkbox" id="spf-addr" '+(HH.sameAddress?'checked':'')+'>Same address as '+HH.primaryFirst+'</label>'
+        +'<label class="spf-chk"><input type="checkbox" id="spf-joint" '+(HH.includeJoint?'checked':'')+' onchange="spPreview()">Include in joint addressee and salutation</label>'
+        +'<label class="spf-chk"><input type="checkbox" id="spf-soft" '+(HH.softCredit?'checked':'')+'>Soft-credit on '+HH.primaryFirst+'’s gifts</label>'
+      +'</div>'
+      +'<div class="spf-prev">'
+        +'<div><div class="lbl">Joint addressee preview</div><div class="val" id="spf-prev-add"></div></div>'
+        +'<div><div class="lbl">Joint salutation preview</div><div class="val" id="spf-prev-sal"></div></div>'
+      +'</div>'
+      +'<div class="spf-foot"><button class="spf-save" onclick="spSave()">Save spouse</button>'
+        +'<button class="spf-cancel" onclick="spRender()">Cancel</button>'
+        +'<span class="spf-note">Saved inside '+HH.primaryFirst+'’s record. '+(HH.spouseFirst||'The spouse')+' won’t appear as a separate donor.</span></div>'
+      +'</div>';
+    ['spf-title','spf-first','spf-last','spf-joint'].forEach(function(id){ var e=document.getElementById(id); if(e){ e.addEventListener('input',spPreview); e.addEventListener('change',spPreview); } });
+    spPreview();
+  };
+  window.spPreview=function(){
+    var t=(document.getElementById('spf-title')||{}).value||HH.spouseTitle;
+    var f=(document.getElementById('spf-first')||{}).value||HH.spouseFirst;
+    var joint=(document.getElementById('spf-joint')||{}).checked;
+    var add=document.getElementById('spf-prev-add'), sal=document.getElementById('spf-prev-sal');
+    if(add) add.textContent = joint ? (HH.primaryTitle+' '+HH.primaryFirst+' and '+t+' '+f+' '+HH.primaryLast) : (HH.primaryTitle+' '+HH.primaryFull);
+    if(sal) sal.textContent = joint ? ('Dear '+HH.primaryFirst+' and '+f) : ('Dear '+HH.primaryFirst);
+  };
+  window.spSave=function(){
+    HH.spouseTitle=(document.getElementById('spf-title')||{}).value||HH.spouseTitle;
+    HH.spouseFirst=(document.getElementById('spf-first')||{}).value||HH.spouseFirst;
+    HH.spouseLast=(document.getElementById('spf-last')||{}).value||HH.spouseLast;
+    HH.includeJoint=(document.getElementById('spf-joint')||{}).checked;
+    HH.sameAddress=(document.getElementById('spf-addr')||{}).checked;
+    HH.softCredit=(document.getElementById('spf-soft')||{}).checked;
+    HH.hasSpouse=true; HH.isSeparateDonor=false;
+    spRender(); toast(HH.spouseFirst+' saved as spouse · counts as 1 donor');
+  };
+  window.spLinkExisting=function(){ toast('Search Atlas to link an existing constituent as spouse'); };
+  window.spGoToSpouse=function(){ window.location.href=HH.spouseHref; };
+
+  // ── promote modal ──
+  var REASONS=[
+    {k:'own', t:'{S} is giving in '+'their own name', s:'An IRA distribution, their own donor-advised fund, or their employer’s matching gift',
+      happens:['{S} gets their own constituent record and ID, inside the same household.','The '+HH.iraGiftDate+' IRA gift is credited and receipted to {S}.','Joint gifts stay credited to {P}, with {S}’s soft credit shown on both records.','Joint mailings continue; {S} can also receive their own receipts.']},
+    {k:'death', t:'{P} has died, and {S} becomes the primary donor', s:'{S} takes over the household and its giving relationship',
+      happens:['{P} is marked deceased; all mail and appeals to {P} stop.','{S} becomes the primary household member, addressed as {ST} {S} {L}.','{P}’s full giving history stays visible from {S}’s record.','{S} is flagged for pastoral and planned-giving follow-up.'],
+      extra:{lbl:'Date of death', ph:'MM/DD/YYYY'}},
+    {k:'divorce', t:'Separation or divorce', s:'{S} leaves the household and gets their own address',
+      happens:['{S} gets their own constituent record, ID, and mailing address.','Past joint giving stays intact on both records.','Future appeals are sent to each person separately.','Soft credits already recorded are preserved.'],
+      extra:{lbl:'{S}’s new mailing address', ph:'Street, City, State ZIP'}}
+  ];
+  var pmReason='own';
+  function fill(str){ return (str||'')
+    .replace(/\{S\}/g,HH.spouseFirst).replace(/\{P\}/g,HH.primaryFirst)
+    .replace(/\{ST\}/g,HH.spouseTitle).replace(/\{L\}/g,HH.spouseLast); }
+  var CHK='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8.2"/><path d="M6.5 10.2l2.3 2.3 4.7-5"/></svg>';
+  window.spPromoteOpen=function(reason){
+    pmReason=reason||'own';
+    document.getElementById('pm-kick').textContent=(HH.primaryLast+' household').toUpperCase();
+    document.getElementById('pm-title').textContent='Promote '+HH.spouseFirst+' '+HH.spouseLast+' to a full constituent';
+    document.getElementById('pm-go').textContent='Promote '+HH.spouseFirst;
+    renderPmOpts(); renderPmBody();
+    document.getElementById('pm-ov').classList.add('open');
+  };
+  function renderPmOpts(){
+    document.getElementById('pm-opts').innerHTML=REASONS.map(function(r){
+      return '<div class="pm-opt'+(r.k===pmReason?' on':'')+'" onclick="spPmPick(\''+r.k+'\')">'
+        +'<div class="pm-radio"></div><div><div class="ot">'+fill(r.t)+'</div><div class="os">'+fill(r.s)+'</div></div></div>';
+    }).join('');
+  }
+  function renderPmBody(){
+    var r=REASONS.filter(function(x){return x.k===pmReason;})[0]||REASONS[0];
+    document.getElementById('pm-happens-list').innerHTML=r.happens.map(function(h){ return '<li>'+CHK+'<span>'+fill(h)+'</span></li>'; }).join('');
+    document.getElementById('pm-extra').innerHTML = r.extra ? ('<div class="lbl">'+fill(r.extra.lbl)+'</div><input placeholder="'+r.extra.ph+'">') : '';
+  }
+  window.spPmPick=function(k){ pmReason=k; renderPmOpts(); renderPmBody(); };
+  window.spPromoteClose=function(){ document.getElementById('pm-ov').classList.remove('open'); };
+  window.spPromoteConfirm=function(){
+    document.getElementById('pm-ov').classList.remove('open');
+    if(pmReason==='death'){
+      HH.isSeparateDonor=true; HH.iraFlag=false;
+      toast(HH.primaryFirst+' marked deceased · '+HH.spouseFirst+' is now primary donor');
+    } else if(pmReason==='divorce'){
+      HH.hasSpouse=true; HH.isSeparateDonor=true; HH.iraFlag=false;
+      toast(HH.spouseFirst+' separated into own record · joint history preserved');
+    } else {
+      HH.isSeparateDonor=true; HH.iraFlag=false;
+      toast(HH.spouseFirst+' promoted · '+HH.iraGiftDate+' IRA gift credited to '+HH.spouseFirst);
+    }
+    spRender();
+  };
+  document.getElementById('pm-ov').addEventListener('click',function(e){ if(e.target===this) spPromoteClose(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') spPromoteClose(); });
+
+  // ── render all ──
+  window.spRender=function(){ renderIra(); renderPanel(); };
+  spRender();
 })();
 </script>
 <script id="nav-active-sync">(function(){function run(){try{var cur=(location.pathname.split("/").pop()||"index.html").toLowerCase();document.querySelectorAll(".nav-item[href]").forEach(function(a){var h=(a.getAttribute("href")||"").split(/[?#]/)[0].toLowerCase().split("/").pop();if(h&&h===cur)a.classList.add("active");});}catch(e){}}if(document.readyState!=="loading")run();else document.addEventListener("DOMContentLoaded",run);})();</script>
