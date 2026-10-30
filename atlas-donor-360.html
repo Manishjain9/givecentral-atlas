@@ -95,6 +95,7 @@
       padding: 8px 10px; border-radius: 7px;
       font-size: 12px; font-weight: 500; color: rgba(255,255,255,.55);
       cursor: pointer; transition: all .15s; margin-bottom: 1px;
+      white-space: nowrap;
     }
     .nav-item:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.85); }
     .nav-item.active { background: var(--blue); color: white; }
@@ -581,6 +582,10 @@ body {
   margin-top: auto !important;
   background: var(--navy, #0E1E35) !important;
 }
+.nav-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:0 10px;margin-bottom:4px;}
+.sidebar-loc{display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,.55);margin-top:4px;}
+.sidebar-loc svg{width:10px;height:10px;flex:0 0 auto;color:#C79E48;}
+.sidebar-loc span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
 
 /* .main is intentionally NOT overridden — each page keeps its own layout. */
 </style>
@@ -594,6 +599,7 @@ body {
   .sidebar-logo .logo-name{font-family:'DM Serif Display',serif !important;font-size:20px !important;color:#fff !important;line-height:1 !important;font-weight:400 !important;margin:0 !important}
   .sidebar-logo .logo-sub{font-size:9px !important;font-weight:600 !important;letter-spacing:.1em !important;text-transform:uppercase !important;color:rgba(255,255,255,.35) !important;margin:0 !important;line-height:1 !important}
 </style>
+  <style id="nav-nowrap">.nav-item{white-space:nowrap}</style>
 </head>
 <body>
 
@@ -626,6 +632,11 @@ body {
         Gifts &amp; pledges
         <span class="nav-badge">142</span>
       </a>
+      <!-- gc-nav -->
+      <div class="nav-subwrap" style="margin:2px 0 4px 20px;border-left:1.5px solid rgba(255,255,255,.12)">
+        <a class="nav-item" href="atlas-gifts-pledges.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5h10M2 7h10M2 10.5h10"/></svg>All gifts &amp; pledges</a>
+        <a class="nav-item" href="atlas-gift-correction-center.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0" title="Gift Correction &amp; Reversal Center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7a5 5 0 1 1-1.5-3.6"/><path d="M12 1.5v3H9"/></svg>Gift Correction</a>
+      </div>
       <a class="nav-item" href="atlas-campaign-dashboard.html">
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>
         Campaigns
@@ -707,6 +718,7 @@ body {
       <div style="flex:1;min-width:0">
         <div class="user-name" id="u-name">Sarah Reynolds</div>
         <div class="user-role" id="u-role">Development Director</div>
+        <div class="sidebar-loc" id="sidebar-loc"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 12s5-3 5-7a5 5 0 00-10 0c0 4 5 7 5 7z"/><circle cx="7" cy="5" r="1.6"/></svg><span>Diocese of Albany</span></div>
       </div>
       <svg viewBox="0 0 10 10" width="11" height="11" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 6.2l2 2 2-2M3 3.8l2-2 2 2"/></svg>
     </div>
@@ -874,56 +886,18 @@ body {
           <div class="section">
             <div class="section-header">
               <span class="section-title">Recent gifts</span>
-              <span class="section-action" onclick="window.location='atlas-donor-ledger.html'">All gifts <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5h7M6 2.5l3 3-3 3"/></svg></span>
+              <div style="display:flex;align-items:center;gap:14px;position:relative">
+                <button type="button" class="rg-cols-btn" id="rg-cols-btn" onclick="rgToggleCols(event)"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="10" height="10" rx="1.5"/><path d="M5 1.5v10M8.5 1.5v10"/></svg>Columns</button>
+                <div class="rg-cols-menu" id="rg-cols-menu"></div>
+                <span class="section-action" onclick="window.location='atlas-donor-ledger.html'">All gifts <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5h7M6 2.5l3 3-3 3"/></svg></span>
+              </div>
             </div>
-            <table class="gift-table" id="recent-gifts-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Campaign / fund</th>
-                  <th>Type</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Mar 15, 2026</td>
-                  <td>Catholic Ministry Appeal</td>
-                  <td>Online gift<div style="font-size:10.5px;color:var(--text-3);margin-top:1px">Card · Visa ••4242</div></td>
-                  <td style="font-weight:600;color:var(--text)">$2,500.00</td>
-                  <td><span class="gift-status status-received"><span class="status-dot" style="background:var(--green)"></span>Received</span></td>
-                </tr>
-                <tr>
-                  <td>Jan 3, 2026</td>
-                  <td>CMA 2026 Pledge — installment 2</td>
-                  <td>Pledge payment<div style="font-size:10.5px;color:var(--text-3);margin-top:1px">Check #1042</div></td>
-                  <td style="font-weight:600;color:var(--text)">$1,000.00</td>
-                  <td><span class="gift-status status-received"><span class="status-dot" style="background:var(--green)"></span>Received</span></td>
-                </tr>
-                <tr>
-                  <td>Nov 28, 2025</td>
-                  <td>Giving Tuesday · St. Michael's</td>
-                  <td>Online gift<div style="font-size:10.5px;color:var(--text-3);margin-top:1px">Apple Pay</div></td>
-                  <td style="font-weight:600;color:var(--text)">$500.00</td>
-                  <td><span class="gift-status status-received"><span class="status-dot" style="background:var(--green)"></span>Received</span></td>
-                </tr>
-                <tr>
-                  <td>Sep 10, 2025</td>
-                  <td>CMA 2026 Pledge — installment 1</td>
-                  <td>Pledge payment<div style="font-size:10.5px;color:var(--text-3);margin-top:1px">Stock · 25 sh AAPL</div></td>
-                  <td style="font-weight:600;color:var(--text)">$2,100.00</td>
-                  <td><span class="gift-status status-received"><span class="status-dot" style="background:var(--green)"></span>Received</span></td>
-                </tr>
-                <tr>
-                  <td>Jun 15, 2026</td>
-                  <td>CMA 2026 Pledge — installment 3</td>
-                  <td>Pledge<div style="font-size:10.5px;color:var(--text-3);margin-top:1px">Scheduled · auto-pay</div></td>
-                  <td style="font-weight:600;color:var(--amber)">$1,900.00</td>
-                  <td><span class="gift-status status-pledge"><span class="status-dot" style="background:var(--amber)"></span>Pending</span></td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="rg-table-wrap">
+              <table class="gift-table" id="recent-gifts-table">
+                <thead><tr id="rg-head"></tr></thead>
+                <tbody id="rg-body"></tbody>
+              </table>
+            </div>
           </div>
 
           <!-- Open pledge -->
@@ -3629,7 +3603,7 @@ body {
   }
 
   function scan(){
-    var links=document.querySelectorAll('.nav-item[href="atlas-campaign-dashboard.html"]:not([data-navcol])');
+    var links=document.querySelectorAll('.nav-item[href="atlas-campaign-dashboard.html"]:not([data-navcol]), a.nav-item[href="atlas-gifts-pledges.html"]:not([data-navcol])');
     for(var i=0;i<links.length;i++){ links[i].setAttribute('data-navcol','1'); setup(links[i]); }
   }
   function boot(){
@@ -3736,5 +3710,264 @@ window.clFilter=function(cat,el){
   });
 };
 </script>
+
+<!-- Recent gifts · column configuration (Batches-style) -->
+<style id="rg-cols-css">
+  .rg-cols-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--text-2);background:#fff;border:1px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer;line-height:1}
+  .rg-cols-btn:hover{border-color:#94A3B8;color:var(--text)}
+  .rg-cols-btn svg{width:12px;height:12px}
+  .rg-cols-menu{position:fixed;z-index:100000;background:#fff;border:1px solid var(--border);border-radius:11px;box-shadow:0 14px 34px rgba(15,23,42,.22);padding:8px 10px 10px;width:min(430px,86vw);display:none}
+  .rg-cols-menu.open{display:block}
+  .rg-cols-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px 12px}
+  .rg-cols-menu .hd{display:flex;align-items:center;justify-content:space-between;padding:4px 8px 8px;border-bottom:1px solid var(--border);margin-bottom:4px}
+  .rg-cols-menu .hd .t{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)}
+  .rg-cols-menu .hd .rs{font-size:11.5px;font-weight:600;color:var(--blue);cursor:pointer}
+  .rg-col-row{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;font-size:13px;color:var(--text);cursor:pointer;user-select:none}
+  .rg-col-row:hover{background:var(--surface)}
+  .rg-col-row input{width:15px;height:15px;accent-color:var(--blue);cursor:pointer}
+  .rg-col-row.locked{opacity:.55;cursor:default}
+  .rg-col-row .lk{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3)}
+  #recent-gifts-table .rg-sub{font-size:10.5px;color:var(--text-3);margin-top:1px}
+  #recent-gifts-table th.num,#recent-gifts-table td.num{text-align:right}
+  #recent-gifts-table td.kb,#recent-gifts-table th.kb{width:34px;text-align:right}
+  .gt-pill{display:inline-flex;align-items:center;border-radius:20px;padding:2px 11px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .gt-pill.blue{background:#EFF4FF;color:#2563EB}
+  .gt-pill.green{background:#E8FBF3;color:#0F7A52}
+  .gt-pill.indigo{background:#EEF0FF;color:#4F46E5}
+  .gt-pill.amber{background:#FEF3C7;color:#92400E}
+  .gt-pill.grey{background:var(--surface);color:var(--text-2)}
+  .rcpt-pill{display:inline-flex;align-items:center;border-radius:20px;padding:2px 11px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .rcpt-pill.issued{background:#E8FBF3;color:#0F7A52}
+  .rcpt-pill.queued{background:#FEF3C7;color:#92400E}
+  .rcpt-pill.none{background:#FEF2F2;color:#B91C1C}
+  .rg-kebab{border:none;background:none;color:var(--text-3);cursor:pointer;padding:4px 6px;border-radius:6px;font-size:16px;line-height:1}
+  .rg-kebab:hover{background:var(--surface);color:var(--text)}
+  .rg-row-menu{position:fixed;z-index:120;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 14px 34px rgba(15,23,42,.18);padding:6px;min-width:176px;display:none}
+  .rg-row-menu.open{display:block}
+  .rg-row-menu button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:none;background:none;font-size:13px;color:var(--text);padding:8px 10px;border-radius:7px;cursor:pointer}
+  .rg-row-menu button:hover{background:var(--surface)}
+  /* airier ledger-style table (matches donor-ledger) */
+  .rg-table-wrap{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+  #recent-gifts-table{width:auto;min-width:100%;border-collapse:collapse}
+  #recent-gifts-table th,#recent-gifts-table td{white-space:nowrap}
+  #recent-gifts-table thead th{background:#fff;border-radius:0;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);padding:12px 16px;text-align:left;border-bottom:1px solid var(--border)}
+  #recent-gifts-table thead th.num{text-align:right}
+  #recent-gifts-table tbody td{padding:15px 16px;font-size:13px;color:var(--text-2);border-bottom:1px solid var(--border);vertical-align:middle}
+  #recent-gifts-table tbody tr:last-child td{border-bottom:none}
+  #recent-gifts-table tbody tr:hover td{background:var(--blue-pale)}
+  #recent-gifts-table tbody td.num{text-align:right;font-weight:700;color:var(--text);font-size:14px;font-variant-numeric:tabular-nums}
+  #recent-gifts-table tbody td:first-child{color:var(--text-2)}
+  #recent-gifts-table thead th:first-child,#recent-gifts-table tbody td:first-child{white-space:nowrap}
+</style>
+<script id="rg-cols-js">
+(function(){
+  var COLS=[
+    {id:'date',label:'Date',locked:true},
+    {id:'designation',label:'Designation',def:true},
+    {id:'type',label:'Type',def:true},
+    {id:'receipt',label:'Receipt',def:true},
+    {id:'amount',label:'Amount',locked:true,num:true},
+    {id:'campaign',label:'Campaign'},
+    {id:'appeal',label:'Appeal'},
+    {id:'fund',label:'Fund · GL'},
+    {id:'method',label:'Payment method'},
+    {id:'ref',label:'Reference / Check #'},
+    {id:'receiptno',label:'Receipt #'},
+    {id:'soft',label:'Soft credit'},
+    {id:'entity',label:'Legal entity'},
+    {id:'subtype',label:'Gift subtype'},
+    {id:'package',label:'Package'},
+    {id:'postdate',label:'Gift post date'},
+    {id:'receiptstatus',label:'Receipt status'},
+    {id:'receiptable',label:'Receiptable amount',num:true},
+    {id:'tribute',label:'Tribute / honorary'},
+    {id:'batch',label:'Batch ID'},
+    {id:'by',label:'Entered by'},
+    {id:'ack',label:'Acknowledged'},
+    {id:'status',label:'Gift status'}
+  ];
+  var ROWS=[
+    {date:'Mar 15, 2026',designation:'Annual Fund · Spring ’26',campaign:'Catholic Ministry Appeal',type:'Online gift',typeCls:'blue',amount:'$2,500.00',amtColor:'var(--text)',receiptStatus:'Issued',receiptCls:'issued',status:'Received',statusColor:'var(--green)',statusCls:'status-received',appeal:'Spring 2026 mailing',fund:'Annual Fund · GL 4100',method:'Visa ••4242',ref:'—',receiptno:'R-2026-1842',soft:'—',batch:'BX-2026-014',by:'S. Reynolds',ack:'Mar 16, 2026',entity:'Diocese of Albany',subtype:'Outright gift',package:'—',postdate:'Mar 16, 2026',receiptStatusForm:'Receipted',receiptable:'$2,500.00',tribute:'—'},
+    {date:'Jan 3, 2026',designation:'Annual Fund · Year-end ’25',campaign:'CMA 2026 Pledge',type:'Pledge payment',typeCls:'green',amount:'$1,000.00',amtColor:'var(--text)',receiptStatus:'Issued',receiptCls:'issued',status:'Received',statusColor:'var(--green)',statusCls:'status-received',appeal:'Year-end 2025',fund:'Annual Fund · GL 4100',method:'Check',ref:'#1042',receiptno:'R-2026-0421',soft:'—',batch:'BX-2026-003',by:'D. Cho',ack:'Jan 5, 2026',entity:'Diocese of Albany',subtype:'Outright gift',package:'—',postdate:'Jan 5, 2026',receiptStatusForm:'Receipted',receiptable:'$1,000.00',tribute:'In honor of W. Moran'},
+    {date:'Nov 28, 2025',designation:'General Fund · Giving Tuesday ’25',campaign:'Giving Tuesday · St. Michael’s',type:'Online gift',typeCls:'blue',amount:'$500.00',amtColor:'var(--text)',receiptStatus:'Issued',receiptCls:'issued',status:'Received',statusColor:'var(--green)',statusCls:'status-received',appeal:'Giving Tuesday 2025',fund:'General Fund · GL 4000',method:'Apple Pay',ref:'—',receiptno:'R-2025-3380',soft:'—',batch:'online',by:'System',ack:'Nov 28, 2025',entity:'Diocese of Albany',subtype:'Outright gift',package:'Giving Tuesday — Online',postdate:'Nov 28, 2025',receiptStatusForm:'Receipted',receiptable:'$500.00',tribute:'—'},
+    {date:'Sep 10, 2025',designation:'Annual Fund · installment 1',campaign:'CMA 2026 Pledge',type:'Pledge payment',typeCls:'green',amount:'$2,100.00',amtColor:'var(--text)',receiptStatus:'Issued',receiptCls:'issued',status:'Received',statusColor:'var(--green)',statusCls:'status-received',appeal:'—',fund:'Annual Fund · GL 4100',method:'Stock transfer',ref:'DTC-8841',receiptno:'R-2025-2990',soft:'—',batch:'BX-2025-221',by:'S. Reynolds',ack:'Sep 12, 2025',entity:'Diocese of Albany',subtype:'Outright gift',package:'—',postdate:'Sep 12, 2025',receiptStatusForm:'Receipted',receiptable:'Shares only',tribute:'—'},
+    {date:'Jun 15, 2026',designation:'Annual Fund · installment 3',campaign:'CMA 2026 Pledge',type:'Pledge',typeCls:'amber',amount:'$1,900.00',amtColor:'var(--amber)',receiptStatus:'Not issued',receiptCls:'none',status:'Pending',statusColor:'var(--amber)',statusCls:'status-pledge',appeal:'—',fund:'Annual Fund · GL 4100',method:'Auto-pay card',ref:'—',receiptno:'—',soft:'—',batch:'—',by:'—',ack:'—',entity:'Diocese of Albany',subtype:'Pledge',package:'—',postdate:'—',receiptStatusForm:'Not receipted',receiptable:'—',tribute:'—'}
+  ];
+  var KEY='atlas_donor360_recentcols_v2';
+  function defaults(){ var s={}; COLS.forEach(function(c){ s[c.id]=!!(c.locked||c.def); }); return s; }
+  function load(){ try{ var r=localStorage.getItem(KEY); if(r){ var o=JSON.parse(r); COLS.forEach(function(c){ if(c.locked) o[c.id]=true; }); return o; } }catch(e){} return defaults(); }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+  var state=load();
+  function cell(id,r){
+    if(id==='type') return '<span class="gt-pill '+(r.typeCls||'grey')+'">'+r.type+'</span>';
+    if(id==='receipt') return '<span class="rcpt-pill '+(r.receiptCls||'none')+'">'+r.receiptStatus+'</span>';
+    if(id==='receiptstatus'){ var v=r.receiptStatusForm||'—'; var c=/^Receipted/.test(v)?'green':/^Not/.test(v)?'amber':/^Do not/.test(v)?'grey':'grey'; return v==='—'?'—':'<span class="gt-pill '+c+'">'+v+'</span>'; }
+    if(id==='amount') return '<span style="font-weight:700;color:'+r.amtColor+'">'+r.amount+'</span>';
+    if(id==='status') return '<span class="gift-status '+r.statusCls+'"><span class="status-dot" style="background:'+r.statusColor+'"></span>'+r.status+'</span>';
+    return (r[id]!=null&&r[id]!=='')?r[id]:'—';
+  }
+  function renderTable(){
+    var head=document.getElementById('rg-head'), body=document.getElementById('rg-body'); if(!head||!body) return;
+    var vis=COLS.filter(function(c){ return state[c.id]; });
+    head.innerHTML=vis.map(function(c){ return '<th'+(c.num?' class="num"':'')+'>'+c.label+'</th>'; }).join('')+'<th class="kb"></th>';
+    body.innerHTML=ROWS.map(function(r,i){
+      return '<tr>'+vis.map(function(c){ return '<td'+(c.num?' class="num"':'')+'>'+cell(c.id,r)+'</td>'; }).join('')
+        +'<td class="kb"><button type="button" class="rg-kebab" onclick="rgRowMenu(event,'+i+')">⋯</button></td></tr>';
+    }).join('');
+  }
+  function renderMenu(){
+    var m=document.getElementById('rg-cols-menu'); if(!m) return;
+    m.innerHTML='<div class="hd"><span class="t">Show columns</span><span class="rs" onclick="rgResetCols(event)">Reset</span></div>'+
+      '<div class="rg-cols-grid">'+COLS.map(function(c){
+        return '<label class="rg-col-row'+(c.locked?' locked':'')+'"><input type="checkbox" '+(state[c.id]?'checked':'')+(c.locked?' disabled':'')+' onchange="rgSetCol(\''+c.id+'\',this.checked)">'+c.label+(c.locked?'<span class="lk">Always</span>':'')+'</label>';
+      }).join('')+'</div>';
+  }
+  window.rgToggleCols=function(e){
+    e.stopPropagation();
+    var m=document.getElementById('rg-cols-menu'), b=document.getElementById('rg-cols-btn'); if(!m||!b) return;
+    if(m.classList.contains('open')){ m.classList.remove('open'); return; }
+    m.style.visibility='hidden'; m.classList.add('open');
+    var r=b.getBoundingClientRect(), mw=m.offsetWidth||430, mh=m.offsetHeight||0;
+    var left=Math.min(r.right-mw, window.innerWidth-mw-10); if(left<10) left=10;
+    var top=r.bottom+6; if(top+mh>window.innerHeight-10) top=Math.max(10, r.top-mh-6);
+    m.style.left=left+'px'; m.style.top=top+'px'; m.style.visibility='';
+  };
+  window.rgSetCol=function(id,on){ state[id]=on; save(); renderTable(); };
+  window.rgResetCols=function(e){ if(e)e.stopPropagation(); state=defaults(); save(); renderMenu(); renderTable(); };
+  document.addEventListener('click', function(e){ var m=document.getElementById('rg-cols-menu'), b=document.getElementById('rg-cols-btn'); if(!m||!m.classList.contains('open')) return; if(m.contains(e.target)||(b&&b.contains(e.target))) return; m.classList.remove('open'); });
+
+  // per-row kebab menu
+  var rowMenu=document.createElement('div'); rowMenu.className='rg-row-menu'; document.body.appendChild(rowMenu);
+  function rtoast(msg){ if(window.atlasToast) atlasToast(msg); }
+  window.rgRowMenu=function(e,i){
+    e.stopPropagation(); var r=ROWS[i]||{};
+    rowMenu.innerHTML=''
+      +'<button onclick="window.rgRowAct(\'view\','+i+')"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1 7s2.5-4.5 6-4.5S13 7 13 7s-2.5 4.5-6 4.5S1 7 1 7z"/><circle cx="7" cy="7" r="1.8"/></svg>View gift</button>'
+      +(r.receiptStatus==='Issued'?'<button onclick="window.rgRowAct(\'resend\','+i+')"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="3" width="11" height="8" rx="1.5"/><path d="M1.5 4L7 8l5.5-4"/></svg>Resend receipt</button>':'')
+      +'<button onclick="window.rgRowAct(\'correct\','+i+')"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7a5 5 0 1 1-1.5-3.6"/><path d="M12 2v3H9"/></svg>Correct / reverse</button>';
+    rowMenu.classList.add('open');
+    var rect=e.currentTarget.getBoundingClientRect(), mw=rowMenu.offsetWidth||180;
+    var left=Math.min(rect.right-mw, window.innerWidth-mw-8); if(left<8)left=8;
+    var top=rect.bottom+6; if(top+rowMenu.offsetHeight>window.innerHeight-8) top=rect.top-rowMenu.offsetHeight-6;
+    rowMenu.style.left=left+'px'; rowMenu.style.top=top+'px';
+  };
+  window.rgRowAct=function(a,i){ rowMenu.classList.remove('open'); var r=ROWS[i]||{};
+    if(a==='view') rtoast('Opening gift · '+r.date+' · '+r.amount);
+    else if(a==='resend') rtoast('Receipt re-sent · '+(r.receiptno||''));
+    else if(a==='correct'){ var dn=(document.querySelector('.donor-name')||{}).textContent||'Margaret T. Sullivan'; window.atlasCorrect&&window.atlasCorrect({donor:dn.trim(),date:r.date,designation:r.designation,amount:r.amount,type:r.type,receipt:r.receiptStatus}); }
+  };
+  document.addEventListener('click', function(e){ if(!rowMenu.classList.contains('open')) return; if(rowMenu.contains(e.target)||(e.target.closest&&e.target.closest('.rg-kebab'))) return; rowMenu.classList.remove('open'); });
+
+  // move the columns menu out to <body> so no section stacking-context can sit over it
+  var _colMenu=document.getElementById('rg-cols-menu');
+  if(_colMenu && _colMenu.parentNode!==document.body) document.body.appendChild(_colMenu);
+  renderMenu(); renderTable();
+})();
+</script>
+
+<!-- ════ Correct / reverse gift · shared flow ════ -->
+<style id="atlas-correct-css">
+#cr-ov{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100050;display:none;align-items:center;justify-content:center;padding:22px;font-family:'DM Sans',sans-serif}
+#cr-ov.show{display:flex}
+#cr-modal{background:#fff;border-radius:16px;width:min(560px,100%);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,.35);overflow:hidden}
+.cr-head{padding:18px 22px;border-bottom:1px solid #E2E8F0;display:flex;align-items:flex-start;gap:12px}
+.cr-head .t{font-size:17px;font-weight:700;color:#0F172A}
+.cr-head .s{font-size:12px;color:#64748B;margin-top:3px}
+.cr-head .x{margin-left:auto;border:none;background:none;font-size:18px;color:#94A3B8;cursor:pointer;line-height:1}
+.cr-body{padding:16px 22px;overflow:auto}
+.cr-gift{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:11px;padding:12px 14px;margin-bottom:4px}
+.cr-gift .nm{font-weight:700;color:#0F172A;font-size:14px}
+.cr-gift .mt{font-size:12px;color:#64748B;margin-top:2px}
+.cr-gift .amt{margin-left:auto;font-weight:800;color:#0F172A;font-size:15px}
+.cr-lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#475569;margin:14px 0 7px}
+.cr-seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.cr-seg button{font:inherit;font-size:12.5px;font-weight:600;color:#334155;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;padding:10px 8px;cursor:pointer;text-align:center}
+.cr-seg button.on{border-color:#2563EB;background:#EFF4FF;color:#2563EB}
+.cr-fld{width:100%;font:inherit;font-size:13px;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:9px;box-sizing:border-box;color:#0F172A;margin-bottom:10px}
+.cr-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cr-info{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:10px 12px;font-size:12px;color:#334155;line-height:1.5;margin-top:4px}
+.cr-chk{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#334155;margin:2px 0 10px}
+.cr-chk input{margin-top:2px}
+.cr-foot{padding:14px 22px;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:9px;background:#FAFAFA}
+.cr-btn{font:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:9px 16px;cursor:pointer;border:1px solid transparent}
+.cr-btn.ghost{background:#fff;border-color:#E2E8F0;color:#334155}
+.cr-btn.pri{background:#2563EB;color:#fff}
+.cr-btn.pri:disabled{opacity:.5;cursor:not-allowed}
+.cr-succ{text-align:center;padding:10px 6px}
+.cr-succ .ic{width:52px;height:52px;border-radius:50%;background:#DCFCE7;color:#15803D;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px}
+.cr-succ .st{font-size:17px;font-weight:700;color:#0F172A}
+.cr-succ .ss{font-size:12.5px;color:#64748B;margin-top:3px}
+.cr-succ ul{list-style:none;padding:0;margin:14px auto 0;max-width:430px;text-align:left;font-size:12.5px;color:#334155}
+.cr-succ li{padding:8px 0 8px 24px;position:relative;border-bottom:1px solid #F1F5F9}
+.cr-succ li:last-child{border-bottom:none}
+.cr-succ li:before{content:"\2713";position:absolute;left:0;color:#15803D;font-weight:800}
+</style>
+<div id="cr-ov" onclick="if(event.target===this)atlasCorrectClose()"><div id="cr-modal"></div></div>
+<script id="atlas-correct-js">
+(function(){
+  var ov=document.getElementById('cr-ov'), md=document.getElementById('cr-modal');
+  if(!ov||!md) return;
+  var G={}, mode='reclassify';
+  function money(v){ return (typeof v==='string')?v:('$'+Number(v||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})); }
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function toast(m){ if(window.atlasToast) atlasToast(m); }
+  function today(){ try{return new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}catch(e){return '';} }
+  var REASONS=['Duplicate entry','Data-entry error','Donor requested refund','Returned / NSF check','Payment reversal / chargeback','Fraud / unauthorized','Other'];
+  var issued=function(){ return G.receipt==='Issued'||G.receipt==='Receipted'; };
+  function dyn(){
+    if(mode==='reclassify'){
+      return '<span class="cr-lbl">What needs correcting?</span>'
+        +'<select class="cr-fld" id="cr-field"><option>Fund / GL code</option><option>Designation (campaign / appeal)</option><option>Donor record</option><option>Gift type</option></select>'
+        +'<div class="cr-row2"><select class="cr-fld"><option>Cathedral Restoration · GL 4001</option><option>General Operating · GL 4000</option><option selected>Annual Fund · GL 4100</option><option>Scholarship · GL 4200</option></select>'
+        +'<select class="cr-fld cr-reason"><option value="" selected disabled>Reason…</option>'+REASONS.map(function(r){return '<option>'+r+'</option>';}).join('')+'</select></div>'
+        +'<textarea class="cr-fld cr-note" placeholder="Note for the audit trail…" rows="2"></textarea>'
+        +'<div class="cr-info">The original gift is <b>reversed</b> and a <b>corrected gift</b> is posted with the new values — giving totals are preserved and an immutable audit entry is logged.</div>';
+    }
+    if(mode==='reverse'){
+      return '<span class="cr-lbl">Reason for reversal</span>'
+        +'<select class="cr-fld cr-reason"><option value="" selected disabled>Select a reason…</option>'+REASONS.map(function(r){return '<option>'+r+'</option>';}).join('')+'</select>'
+        +'<textarea class="cr-fld cr-note" placeholder="Add context for the audit trail…" rows="2"></textarea>'
+        +(issued()?'<label class="cr-chk"><input type="checkbox" id="cr-voidrcpt" checked> Void the issued tax receipt and email '+esc(G.donor||'the donor')+' a corrected acknowledgement.</label>':'')
+        +'<div class="cr-info">A <b>reversing entry</b> (negative '+money(G.amount)+') posts to the original batch, a <b>GL reversal</b> is generated for export, and an immutable audit entry is logged. This can’t be undone.</div>';
+    }
+    return '<span class="cr-lbl">Check return / NSF</span>'
+      +'<div class="cr-row2"><input class="cr-fld" placeholder="NSF bank fee · e.g. $25.00"><select class="cr-fld cr-reason"><option value="" disabled>Reason…</option><option selected>Returned / NSF check</option><option>Payment reversal / chargeback</option></select></div>'
+      +'<textarea class="cr-fld cr-note" placeholder="Note for the audit trail…" rows="2"></textarea>'
+      +'<div class="cr-info">The gift is reversed, the donor’s balance and any linked pledge are restored, the receipt is voided, and the NSF fee is recorded. All downstream impacts are logged.</div>';
+  }
+  function render(){
+    md.innerHTML=
+      '<div class="cr-head"><div><div class="t">Correct / reverse gift</div><div class="s">Reclassify, reverse, or record an NSF · writes an immutable audit entry</div></div><button class="x" onclick="atlasCorrectClose()">✕</button></div>'
+      +'<div class="cr-body">'
+        +'<div class="cr-gift"><div><div class="nm">'+esc(G.donor||'Gift')+'</div><div class="mt">'+esc(G.designation||'')+(G.date?' · '+esc(G.date):'')+'</div></div><div class="amt">'+money(G.amount)+'</div></div>'
+        +'<span class="cr-lbl">Correction type</span>'
+        +'<div class="cr-seg" id="cr-seg"><button data-m="reclassify" class="'+(mode==='reclassify'?'on':'')+'">Reclassify</button><button data-m="reverse" class="'+(mode==='reverse'?'on':'')+'">Reverse</button><button data-m="nsf" class="'+(mode==='nsf'?'on':'')+'">Check return / NSF</button></div>'
+        +'<div id="cr-dyn">'+dyn()+'</div>'
+      +'</div>'
+      +'<div class="cr-foot"><button class="cr-btn ghost" onclick="atlasCorrectClose()">Cancel</button><button class="cr-btn pri" id="cr-confirm" onclick="atlasCorrectConfirm()">Confirm correction</button></div>';
+    md.querySelector('#cr-seg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;mode=b.dataset.m;render();});
+    validate();
+  }
+  function validate(){
+    var reason=md.querySelector('.cr-reason'), note=md.querySelector('.cr-note'), btn=md.querySelector('#cr-confirm');
+    function sync(){ var r=reason?reason.value:''; btn.disabled=!(r && !(r==='Other' && !(note&&note.value.trim()))); }
+    if(reason) reason.addEventListener('change',sync);
+    if(note) note.addEventListener('input',sync);
+    sync();
+  }
+  window.atlasCorrect=function(g){ G=g||{}; mode='reclassify'; render(); ov.classList.add('show'); };
+  window.atlasCorrectClose=function(){ ov.classList.remove('show'); };
+  window.atlasCorrectConfirm=function(){
+    var reason=(md.querySelector('.cr-reason')||{}).value||'correction', items;
+    if(mode==='reclassify') items=['Original gift reversed on its batch','Corrected gift posted with the new values','GL reversal + re-post generated for export','Audit entry logged · '+today()+' · S. Reynolds'];
+    else if(mode==='reverse') items=['Reversing entry posted ('+money(G.amount)+' negated) on the original batch','GL reversal entry generated for accounting export',(issued()&&(md.querySelector('#cr-voidrcpt')||{}).checked)?'Tax receipt voided · corrected acknowledgement queued':'No tax receipt was issued — nothing to void','Audit entry logged · '+today()+' · S. Reynolds'];
+    else items=['Gift reversed · donor balance & linked pledge restored','Tax receipt voided','NSF bank fee recorded','Audit entry logged · '+today()+' · S. Reynolds'];
+    md.querySelector('.cr-body').innerHTML='<div class="cr-succ"><div class="ic">✓</div><div class="st">Correction posted</div><div class="ss">'+esc(G.donor||'Gift')+' · '+money(G.amount)+' · '+esc(reason)+'</div><ul>'+items.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>';
+    md.querySelector('.cr-foot').innerHTML='<button class="cr-btn ghost" onclick="atlasCorrectClose()">Close</button><button class="cr-btn pri" onclick="window.location=\'atlas-gift-correction-center.html\'">Open Correction Center</button>';
+    toast('Correction posted · audit entry logged');
+  };
+})();
+</script>
+<script id="nav-active-sync">(function(){function run(){try{var cur=(location.pathname.split("/").pop()||"index.html").toLowerCase();document.querySelectorAll(".nav-item[href]").forEach(function(a){var h=(a.getAttribute("href")||"").split(/[?#]/)[0].toLowerCase().split("/").pop();if(h&&h===cur)a.classList.add("active");});}catch(e){}}if(document.readyState!=="loading")run();else document.addEventListener("DOMContentLoaded",run);})();</script>
 </body>
 </html>
