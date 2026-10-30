@@ -42,11 +42,12 @@ body{font-family:'DM Sans',sans-serif;background:#EEF2F7;color:var(--text);displ
 .nav-badge.alert{background:var(--rose);color:#fff}
 .nav-caret{margin-left:6px;width:10px;height:10px;flex-shrink:0;transition:transform .18s;color:rgba(255,255,255,.45)}
 .nav-parent.open>.nav-item .nav-caret{transform:rotate(90deg)}
-.nav-sub{overflow:hidden;max-height:0;transition:max-height .2s ease}
-.nav-parent.open .nav-sub{max-height:160px}
-.nav-subitem{display:flex;align-items:center;gap:9px;padding:7px 10px 7px 33px;border-radius:7px;font-size:11.5px;font-weight:500;color:rgba(255,255,255,.5);cursor:pointer;margin-bottom:1px;text-decoration:none}
+.nav-sub{overflow:hidden;max-height:0;transition:max-height .2s ease;margin:0 0 0 20px;border-left:1.5px solid rgba(255,255,255,.12)}
+.nav-parent.open .nav-sub{max-height:160px;margin-top:2px;margin-bottom:4px}
+.nav-subitem{display:flex;align-items:center;gap:9px;padding:7px 10px 7px 14px;border-radius:0 7px 7px 0;font-size:11.5px;font-weight:500;color:rgba(255,255,255,.5);cursor:pointer;margin-bottom:1px;text-decoration:none}
 .nav-subitem:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
 .nav-subitem.active{background:var(--blue);color:#fff}
+.nav-subitem svg{width:13px;height:13px;flex-shrink:0}
 .nav-subitem .dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;opacity:.75}
 .sidebar-user{padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:9px;flex-shrink:0}
 .user-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;background:var(--blue)}
@@ -421,6 +422,58 @@ body{font-family:'DM Sans',sans-serif;background:#EEF2F7;color:var(--text);displ
 .ad-close svg{width:14px;height:14px}
 .ad-body{flex:1;overflow-y:auto;padding:20px 22px}
 </style>
+  <style id="nav-nowrap">.nav-item{white-space:nowrap}</style>
+<style id="gc-redesign">
+/* slim triage insights strip (replaces big cards) */
+.triage{display:flex!important;align-items:center;gap:12px;grid-template-columns:none!important;padding:10px 16px!important;background:var(--surf);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.tr-lead{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--text)}
+.tr-lead .ic{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:var(--amberl);color:var(--amber)}
+.tr-lead .ic svg{width:12px;height:12px}
+.tr-lead.clear .ic{background:var(--greenl);color:var(--green)}
+.tr-dot{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--text2);cursor:pointer;padding:3px 9px;border-radius:20px;border:1px solid transparent}
+.tr-dot:hover{background:#fff;border-color:var(--border)}
+.tr-dot i{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tr-audit{margin-left:auto;font-size:12px;color:var(--text3);white-space:nowrap}
+.tr-audit a{color:var(--blue);font-weight:600;cursor:pointer}
+/* unified filter chips with severity dots */
+.lpf-chip{display:inline-flex;align-items:center;gap:6px}
+.lpf-chip i{width:6px;height:6px;border-radius:50%}
+/* worklist table */
+.gift-list{padding:0}
+.gc-tbl{width:100%;border-collapse:collapse}
+.gc-tbl thead th{position:sticky;top:0;z-index:2;background:#fff;font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);text-align:left;padding:9px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
+.gc-tbl th.num,.gc-tbl td.num{text-align:right}
+.gc-tbl th.srt{cursor:pointer;user-select:none}
+.gc-tbl th.srt:hover{color:var(--text)}
+.gc-tbl th .car{font-size:8px;margin-left:3px;color:var(--blue)}
+.gc-tbl td{padding:11px 14px;font-size:12.5px;border-bottom:.5px solid var(--border);vertical-align:middle;color:var(--text2)}
+.gc-tbl tbody tr.giftrow{cursor:pointer}
+.gc-tbl tbody tr.giftrow:hover td{background:var(--surf)}
+.gc-tbl tbody tr.sel td{background:var(--bluep)}
+.gc-tbl tbody tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--blue)}
+.gc-tbl td.cbx,.gc-tbl th.cbx{width:30px;text-align:center;padding-left:14px;padding-right:0}
+.gc-tbl .cbx input{width:14px;height:14px;accent-color:var(--blue);cursor:pointer;vertical-align:middle}
+.gc-dn{font-weight:600;color:var(--text);font-size:12.5px}
+.gc-dn-sub{font-size:10.5px;color:var(--text3);margin-top:1px}
+.gc-amt{font-family:'DM Mono',monospace;font-weight:600;color:var(--text);font-size:12.5px}
+.gc-grp td{background:var(--surf);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);padding:6px 14px;border-bottom:.5px solid var(--border)}
+.gc-grp .ct{color:var(--text4);font-weight:600}
+.gc-flag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;border-radius:20px;padding:2px 8px;white-space:nowrap}
+.gc-flag svg{width:9px;height:9px}
+.gc-rowact{display:flex;gap:6px;justify-content:flex-end;align-items:center}
+.gc-rb{font-size:11px;font-weight:600;border:1px solid var(--border);background:#fff;border-radius:6px;padding:5px 11px;cursor:pointer;white-space:nowrap;color:var(--text2)}
+.gc-rb:hover{border-color:#94A3B8}
+.gc-rb.pri{border-color:var(--blue);color:var(--blue);background:var(--bluep)}
+.gc-rb.pri:hover{background:var(--bluel)}
+.gc-rb.danger{border-color:var(--red);color:var(--red);background:var(--redl)}
+.gc-keb{border:1px solid transparent;background:none;color:var(--text3);cursor:pointer;font-size:15px;line-height:1;padding:3px 7px;border-radius:6px}
+.gc-keb:hover{background:var(--surf);border-color:var(--border)}
+.gc-menu{position:fixed;z-index:100060;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 30px rgba(15,23,42,.16);padding:5px;min-width:180px}
+.gc-menu button{display:flex;width:100%;align-items:center;gap:8px;text-align:left;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:12.5px;color:var(--text2);padding:8px 10px;border-radius:7px;cursor:pointer}
+.gc-menu button:hover{background:var(--surf)}
+.gc-menu button.danger{color:var(--red)}
+.gc-menu .sep{height:1px;background:var(--border);margin:4px 6px}
+</style>
 </head>
 <body>
 <script>
@@ -449,8 +502,15 @@ function atlasAddr(n){
       <div class="nav-parent open">
         <a class="nav-item" onclick="this.parentElement.classList.toggle('open')"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 1.5v11M2 6.5h10"/></svg>Gifts &amp; pledges<span class="nav-badge">142</span><svg class="nav-caret" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 2L6.5 5L3.5 8"/></svg></a>
         <div class="nav-sub">
-          <a class="nav-subitem" href="atlas-gifts-pledges.html"><span class="dot"></span>All gifts &amp; pledges</a>
-          <a class="nav-subitem active"><span class="dot"></span>Gift Correction</a>
+          <a class="nav-subitem" href="atlas-gifts-pledges.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5h10M2 7h10M2 10.5h10"/></svg>All gifts &amp; pledges</a>
+          <a class="nav-subitem active"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7a5 5 0 1 1-1.5-3.6"/><path d="M12 1.5v3H9"/></svg>Gift Correction</a>
+        </div>
+      </div>
+      <div class="nav-parent open">
+        <a class="nav-item" href="atlas-campaign-dashboard.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>Campaigns<svg class="nav-caret" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 2L6.5 5L3.5 8"/></svg></a>
+        <div class="nav-sub">
+          <a class="nav-subitem" href="atlas-funds.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="7" cy="3.5" rx="5" ry="2"/><path d="M2 3.5v7c0 1.1 2.2 2 5 2s5-.9 5-2v-7M2 7c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg>Funds</a>
+          <a class="nav-subitem" href="atlas-appeals.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5h10v5H6l-2.5 2v-2H2z"/></svg>Appeals</a>
         </div>
       </div>
       <a class="nav-item" href="atlas-reports.html"><svg class="nav-ic" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 3h11M1.5 7h7M1.5 11h5"/></svg>Reports</a>
@@ -502,8 +562,8 @@ function atlasAddr(n){
   <!-- ── WORKLIST (primary view) ── -->
   <div class="left-panel">
     <div class="lp-head">
-      <div><div class="lp-title">Find a gift</div>
-      <div class="lp-sub">Search by donor, check #, batch ID, or amount — flagged gifts appear first</div></div>
+      <div><div class="lp-title">Gift corrections &amp; reversals</div>
+      <div class="lp-sub" id="queue-count">Review, reclassify and reverse posted gifts — flagged gifts appear first</div></div>
     </div>
     <div class="triage" id="triage"></div>
     <div class="lp-search-wrap">
@@ -910,47 +970,120 @@ function renderListFilter() {
   const counts = {all:GIFTS.length};
   GIFTS.forEach(g => counts[g.status] = (counts[g.status]||0)+1);
   counts.flagged = GIFTS.filter(g => giftFlag(g)).length;
-  const chips = [['all','All'],['flagged','Needs attention'],['posted','Posted'],['corrected','Corrected'],['reversed','Reversed'],['nsf','NSF']];
-  document.getElementById('lp-filter').innerHTML = chips.map(([k,l]) =>
-    `<button class="lpf-chip ${listStatus===k?'on':''}" onclick="setListFilter('${k}')">${l}${counts[k]!=null?' ('+counts[k]+')':''}</button>`).join('');
+  counts.lowconf = GIFTS.filter(g => { const fl = giftFlag(g); return fl && fl.cls === 'gf-ocr'; }).length;
+  counts.closed = GIFTS.filter(g => g.fundClosed).length;
+  // [key, label, severity-dot-color|null]
+  const chips = [
+    ['all','All',null],['flagged','Needs attention','var(--amber)'],
+    ['nsf','NSF','var(--red)'],['lowconf','Low-confidence','var(--amber)'],['closed','Fund closed','#7C3AED'],
+    ['posted','Posted',null],['corrected','Corrected',null],['reversed','Reversed',null]
+  ];
+  document.getElementById('lp-filter').innerHTML = chips.map(([k,l,c]) =>
+    `<button class="lpf-chip ${listStatus===k?'on':''}" onclick="setListFilter('${k}')">${c?`<i style="background:${k===listStatus?'#fff':c}"></i>`:''}${l}${counts[k]!=null?' ('+counts[k]+')':''}</button>`).join('');
 }
 function setListFilter(s) { listStatus = s; renderListFilter(); renderGiftList(); }
 function filterGifts(v) { listSearch = v; renderGiftList(); }
 
 function giftsFiltered() {
   const f = listSearch.toLowerCase();
+  const special = {flagged:1, lowconf:1, closed:1};
   return GIFTS.filter(g => {
-    if (listStatus === 'flagged' && !giftFlag(g)) return false;
-    if (listStatus !== 'all' && listStatus !== 'flagged' && g.status !== listStatus) return false;
+    const fl = giftFlag(g);
+    if (listStatus === 'flagged' && !fl) return false;
+    if (listStatus === 'lowconf' && !(fl && fl.cls === 'gf-ocr')) return false;
+    if (listStatus === 'closed' && !g.fundClosed) return false;
+    if (listStatus !== 'all' && !special[listStatus] && g.status !== listStatus) return false;
     return !f || g.donor.toLowerCase().includes(f) || g.check.includes(listSearch) || g.batch.includes(listSearch) || g.fund.toLowerCase().includes(f);
   });
 }
+// ── SORT STATE ──
+let sortKey = null, sortDir = 1;
+function setSort(k){ if(sortKey===k){ sortDir*=-1; } else { sortKey=k; sortDir=1; } renderGiftList(); }
+function sortRows(rows){
+  if(!sortKey) return rows;
+  const val = g => sortKey==='amt' ? g.amt : new Date(g.date).getTime();
+  return rows.slice().sort((a,b)=> (val(a)-val(b))*sortDir);
+}
 
-function renderGiftList() {
+function rowCells(g){
   const statusLabel = {posted:'Posted', corrected:'Corrected', reversed:'Reversed', nsf:'NSF'};
   const statusClass = {posted:'gb-posted', corrected:'gb-corrected', reversed:'gb-reversed', nsf:'gb-nsf'};
+  const fl = giftFlag(g);
+  const flagMarkup = fl
+    ? `<span class="gc-flag ${fl.cls}"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M5.5 2v3.5M5.5 8v.3"/><path d="M1 9.5L5.5 1 10 9.5H1z"/></svg>${fl.label}</span>`
+    : `<span class="gi-badge ${statusClass[g.status]}">${statusLabel[g.status]}</span>`;
+  // contextual primary action
+  let pri;
+  if (g.status==='nsf')      pri = `<button class="gc-rb danger" onclick="event.stopPropagation();quickAction('${g.id}','reverse')">Reverse</button>`;
+  else if (g.fundClosed)     pri = `<button class="gc-rb pri" onclick="event.stopPropagation();quickAction('${g.id}','reassign')">Reassign</button>`;
+  else if (fl)               pri = `<button class="gc-rb pri" onclick="event.stopPropagation();selectGift('${g.id}')">Review</button>`;
+  else                       pri = `<button class="gc-rb" onclick="event.stopPropagation();quickAction('${g.id}','correct')">Correct →</button>`;
+  return `<td class="cbx"><input type="checkbox" ${BULK.has(g.id)?'checked':''} onclick="event.stopPropagation();toggleBulk('${g.id}')" title="Select"></td>
+    <td><div class="gc-dn">${g.donor}</div><div class="gc-dn-sub">${g.parish} · ${g.officer}</div></td>
+    <td>${g.fund}<div class="gc-dn-sub">GL ${g.gl}</div></td>
+    <td>#${g.check}</td>
+    <td>${g.date}</td>
+    <td class="num"><span class="gc-amt">$${g.amt.toLocaleString()}</span></td>
+    <td>${flagMarkup}</td>
+    <td class="num"><div class="gc-rowact">${pri}<button class="gc-keb" onclick="event.stopPropagation();rowMenu('${g.id}',event)" title="More">⋯</button></div></td>`;
+}
+function renderGiftList() {
   const rows = giftsFiltered();
-  document.getElementById('gift-list').innerHTML = rows.map(g => {
-    const fl = giftFlag(g);
-    return `<div class="gift-item ${selectedGift?.id===g.id?'selected':''}">
-      <div class="gi-row">
-        <input type="checkbox" class="gi-check" ${BULK.has(g.id)?'checked':''} onclick="event.stopPropagation();toggleBulk('${g.id}')" title="Select for bulk action">
-        <div class="gi-main" onclick="selectGift('${g.id}')">
-          <div class="gi-top"><span class="gi-donor">${g.donor}</span><span class="gi-amt">$${g.amt.toLocaleString()}</span></div>
-          <div class="gi-meta"><span>${g.fund.split(' ').slice(0,2).join(' ')}</span><span>·</span><span>Chk #${g.check}</span><span>·</span><span>${g.date}</span><span class="gi-badge ${statusClass[g.status]}">${statusLabel[g.status]}</span></div>
-          ${fl ? `<div class="gi-flag ${fl.cls}"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M5.5 2v3.5M5.5 8v.3"/><path d="M1 9.5L5.5 1 10 9.5H1z"/></svg>${fl.label}</div>` : ''}
-        </div>
-        <div class="gi-actions" onclick="event.stopPropagation()">
-          ${g.status==='nsf' ? `<button class="gi-act danger" onclick="quickAction('${g.id}','reverse')">Reverse</button>` : ''}
-          ${g.fundClosed ? `<button class="gi-act" onclick="quickAction('${g.id}','reassign')">Reassign</button>` : ''}
-          <button class="gi-act" onclick="quickAction('${g.id}','correct')">Correct →</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('') || '<div class="empty-state" style="padding:40px 20px"><h3>No gifts match</h3><p>Adjust the filter or search above.</p></div>';
+  if (!rows.length) {
+    document.getElementById('gift-list').innerHTML = '<div class="empty-state" style="padding:48px 20px"><h3>No gifts match</h3><p>Adjust the filter or search above.</p></div>';
+    renderBulkBar(); renderTriage(); return;
+  }
+  const car = k => sortKey===k ? `<span class="car">${sortDir>0?'▲':'▼'}</span>` : '';
+  const allSel = rows.every(g => BULK.has(g.id));
+  const head = `<thead><tr>
+    <th class="cbx"><input type="checkbox" ${allSel?'checked':''} onclick="toggleSelectAll(event)" title="Select all"></th>
+    <th>Donor</th><th>Fund · GL</th><th>Check</th>
+    <th class="srt" onclick="setSort('date')">Date${car('date')}</th>
+    <th class="srt num" onclick="setSort('amt')">Amount${car('amt')}</th>
+    <th>Status</th><th class="num">Action</th>
+  </tr></thead>`;
+  const tr = g => `<tr class="giftrow ${selectedGift?.id===g.id?'sel':''}" onclick="selectGift('${g.id}')">${rowCells(g)}</tr>`;
+  let body;
+  const grouped = !sortKey && (listStatus==='all' || listStatus==='flagged');
+  if (grouped) {
+    const flagged = rows.filter(g => giftFlag(g));
+    const clean   = rows.filter(g => !giftFlag(g));
+    const grp = (label,n) => `<tr class="gc-grp"><td colspan="8">${label} <span class="ct">· ${n}</span></td></tr>`;
+    body = '<tbody>';
+    if (flagged.length) body += grp('Needs attention', flagged.length) + flagged.map(tr).join('');
+    if (clean.length && listStatus!=='flagged') body += grp('Reviewed &amp; clean', clean.length) + clean.map(tr).join('');
+    body += '</tbody>';
+  } else {
+    body = '<tbody>' + sortRows(rows).map(tr).join('') + '</tbody>';
+  }
+  document.getElementById('gift-list').innerHTML = '<table class="gc-tbl">' + head + body + '</table>';
   renderBulkBar();
   renderTriage();
 }
+function toggleSelectAll(ev){
+  const rows = giftsFiltered();
+  const allSel = rows.every(g => BULK.has(g.id));
+  rows.forEach(g => allSel ? BULK.delete(g.id) : BULK.add(g.id));
+  renderGiftList();
+}
+function rowMenu(id, ev){
+  document.querySelectorAll('.gc-menu').forEach(m=>m.remove());
+  const g = GIFTS.find(x=>x.id===id); if(!g) return;
+  const m = document.createElement('div'); m.className='gc-menu';
+  m.innerHTML = `
+    <button onclick="selectGift('${id}');closeRowMenu()">Open &amp; fix</button>
+    <button onclick="quickAction('${id}','correct');closeRowMenu()">Reclassify donor / fund</button>
+    <button onclick="quickAction('${id}','reassign');closeRowMenu()">Reassign fund</button>
+    <div class="sep"></div>
+    <button class="danger" onclick="quickAction('${id}','reverse');closeRowMenu()">Reverse / NSF</button>`;
+  document.body.appendChild(m);
+  const r = ev.target.getBoundingClientRect();
+  m.style.top = (r.bottom+4)+'px';
+  let left = r.right - m.offsetWidth;
+  m.style.left = Math.max(8,left)+'px';
+  setTimeout(()=>document.addEventListener('click', closeRowMenu, {once:true}), 0);
+}
+function closeRowMenu(){ document.querySelectorAll('.gc-menu').forEach(m=>m.remove()); }
 
 function toggleBulk(id) { BULK.has(id) ? BULK.delete(id) : BULK.add(id); renderGiftList(); }
 function clearBulk() { BULK.clear(); renderGiftList(); }
@@ -1428,27 +1561,24 @@ function quickAction(id, action) {
 
 function renderTriage() {
   const el = document.getElementById('triage'); if (!el) return;
-  const total = GIFTS.length;
   const nsf = GIFTS.filter(g => g.status === 'nsf').length;
   const ocr = GIFTS.filter(g => { const fl = giftFlag(g); return fl && fl.cls === 'gf-ocr'; }).length;
   const closed = GIFTS.filter(g => g.fundClosed).length;
+  const attn = GIFTS.filter(g => giftFlag(g)).length;
   const warn = '<svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7.5 5v3.5M7.5 10.8v.2"/><path d="M1.5 12.5L7.5 1.5l6 11H1.5z"/></svg>';
-  const scan = '<svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="3" width="12" height="9" rx="1.5"/><path d="M4 6h4M4 9h6"/></svg>';
-  const tag  = '<svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5L13.5 7l-6.5 6.5L1.5 8V1.5z"/><circle cx="5" cy="5" r="1"/></svg>';
-  const bars = '<svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 12.5V8M7.5 12.5V4M12.5 12.5V6.5"/></svg>';
-  const tile = (accent, bg, ic, v, l, sub, bar, fn) =>
-    `<div class="tr-card" style="--accent:${accent}" onclick="${fn}">
-      <div class="tr-top"><div class="tr-ic" style="background:${bg};color:${accent}">${ic}</div><div class="tr-v">${v}</div></div>
-      <div class="tr-l">${l}</div>
-      ${bar != null
-        ? `<div class="tr-bar"><i style="width:${Math.max(bar,4)}%"></i></div><div class="tr-sub"><span>${sub}</span><span>${Math.round(bar)}% of list</span></div>`
-        : `<div class="tr-sub" style="color:${accent};font-weight:700">${sub}</div>`}
-    </div>`;
-  el.innerHTML =
-    tile('var(--red)',  'var(--redl)',   warn, nsf,            'NSF to reverse',        'of '+total+' gifts', nsf/total*100,    "setListFilter('nsf')") +
-    tile('var(--amber)','var(--amberl)', scan, ocr,            'Low-confidence scans',  'of '+total+' gifts', ocr/total*100,    "setListFilter('flagged')") +
-    tile('#7C3AED',     '#EDE9FE',       tag,  closed,         'Fund closed — reassign','of '+total+' gifts', closed/total*100, "setListFilter('flagged')") +
-    tile('var(--blue)', 'var(--bluep)',  bars, AUDIT_LOG.length,'Logged corrections',   'View audit trail →', null,             "openAudit()");
+  const check = '<svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3 3 6-7"/></svg>';
+  const dot = (color, n, label, fn) => n > 0
+    ? `<span class="tr-dot" onclick="${fn}"><i style="background:${color}"></i>${n} ${label}</span>` : '';
+  const lead = attn > 0
+    ? `<span class="tr-lead"><span class="ic">${warn}</span>${attn} ${attn===1?'gift needs':'gifts need'} attention</span>`
+    : `<span class="tr-lead clear"><span class="ic">${check}</span>All gifts reviewed</span>`;
+  el.innerHTML = lead
+    + dot('var(--red)',   nsf,    'NSF',          "setListFilter('nsf')")
+    + dot('var(--amber)', ocr,    'low-confidence',"setListFilter('lowconf')")
+    + dot('#7C3AED',      closed, 'fund closed',  "setListFilter('closed')")
+    + `<span class="tr-audit"><a onclick="openAudit()">${AUDIT_LOG.length} logged corrections — audit trail →</a></span>`;
+  const qc = document.getElementById('queue-count');
+  if (qc) qc.textContent = GIFTS.length + ' gifts in review · ' + attn + ' flagged · ' + AUDIT_LOG.length + ' corrected this period';
 }
 
 // ── AUDIT RENDER ──────────────────────────────────────────────────────────────
@@ -1737,5 +1867,6 @@ renderAuditAnalytics();
 })();
 </script>
 <!-- /ATLAS-DATEPICKER -->
+<script id="nav-active-sync">(function(){function run(){try{var cur=(location.pathname.split("/").pop()||"index.html").toLowerCase();document.querySelectorAll(".nav-item[href]").forEach(function(a){var h=(a.getAttribute("href")||"").split(/[?#]/)[0].toLowerCase().split("/").pop();if(h&&h===cur)a.classList.add("active");});}catch(e){}}if(document.readyState!=="loading")run();else document.addEventListener("DOMContentLoaded",run);})();</script>
 </body>
 </html>

@@ -608,6 +608,7 @@ body {
   }
 </style>
 <style id="ur-nav-underline-fix">.nav-item,.nav-item:link,.nav-item:visited,.nav-item:hover,.nav-item:focus,.nav-item:active,.sidebar-item,.sidebar-item:hover{text-decoration:none}</style>
+  <style id="nav-nowrap">.nav-item{white-space:nowrap}</style>
 </head>
 <body>
 <script>
@@ -653,6 +654,11 @@ function atlasAddr(n){
         Gifts &amp; pledges
         <span class="nav-badge">142</span>
       </a>
+      <!-- gc-nav -->
+      <div class="nav-subwrap" style="margin:2px 0 4px 20px;border-left:1.5px solid rgba(255,255,255,.12)">
+        <a class="nav-item" href="atlas-gifts-pledges.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5h10M2 7h10M2 10.5h10"/></svg>All gifts &amp; pledges</a>
+        <a class="nav-item" href="atlas-gift-correction-center.html" style="padding-left:14px;font-size:11.5px;margin-left:0;border-top-left-radius:0;border-bottom-left-radius:0" title="Gift Correction &amp; Reversal Center"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7a5 5 0 1 1-1.5-3.6"/><path d="M12 1.5v3H9"/></svg>Gift Correction</a>
+      </div>
       <a class="nav-item" href="atlas-campaign-dashboard.html">
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 8.5l2.5-2.5 2 2 2.5-2.5 2 2"/><rect x="1.5" y="1.5" width="11" height="11" rx="2"/></svg>
         Campaigns
@@ -776,6 +782,10 @@ function atlasAddr(n){
       <a class="btn btn-ghost" href="atlas-batch-landing.html">
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3h10M2 7h10M2 11h10"/></svg>
         New batch
+      </a>
+      <a class="btn btn-ghost" href="atlas-gift-correction-center.html" title="Correct or reverse posted gifts — reclassify, refund, or write off with a full audit trail">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5a5 5 0 1 1-.6 4.2"/><path d="M3 2v3h3"/></svg>
+        Corrections &amp; reversals
       </a>
       <a class="btn btn-primary" href="atlas-gift-entry.html">
         <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg>
@@ -2094,7 +2104,9 @@ function atlasAddr(n){
     var donor=(row.querySelector('.nm')||{}).textContent||'this gift';
     var amt=(row.querySelector('.amt')||{}).textContent||'';
     var rc=row.children[4]; var rtext=rc?rc.textContent.trim():'';
-    return { donor:donor, amt:amt, issued:/issued/i.test(rtext), href:row.getAttribute('href')||'atlas-donor-360.html', row:row };
+    var date=(row.children[1]?row.children[1].textContent.trim():'');
+    var desig=(row.children[2]?row.children[2].textContent.trim():'');
+    return { donor:donor, amt:amt, date:date, designation:desig, issued:/issued/i.test(rtext), href:row.getAttribute('href')||'atlas-donor-360.html', row:row };
   }
   window.openGiftMenu=function(e, kebab){
     e.preventDefault(); e.stopPropagation();
@@ -2102,11 +2114,12 @@ function atlasAddr(n){
     var ICO={view:"<path d='M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z'/><circle cx='7' cy='7' r='1.8'/>",
       edit:"<path d='M2 12l1-3 6.5-6.5 2 2L5 11z'/>",
       resend:"<rect x='1.5' y='3' width='11' height='8' rx='1.5'/><path d='M1.5 4L7 8l5.5-4'/>",
+      correct:"<path d='M12 7a5 5 0 1 1-1.5-3.6'/><path d='M12 2v3H9'/>",
       void:"<circle cx='7' cy='7' r='5.5'/><path d='M3.2 3.2l7.6 7.6'/>"};
     function btn(act,label,cls){ return '<button class="'+(cls||'')+'" onclick="ggAction(\''+act+'\')"><svg viewBox=\'0 0 14 14\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'>'+ICO[act]+'</svg>'+label+'</button>'; }
     var html = btn('view','View') + btn('edit','Edit');
     if(info.issued) html += btn('resend','Resend receipt');
-    html += '<div class="sep"></div>' + btn('void','Void gift','danger');
+    html += '<div class="sep"></div>' + btn('correct','Correct / reverse') + btn('void','Void gift','danger');
     menu.innerHTML = html;
     menu.classList.add('show');
     var r=kebab.getBoundingClientRect(), mw=menu.offsetWidth, mh=menu.offsetHeight;
@@ -2119,6 +2132,7 @@ function atlasAddr(n){
     if(a==='view') window.location=info.href;
     else if(a==='edit') window.location='atlas-gift-entry.html';
     else if(a==='resend') ggToast('Receipt re-sent to '+info.donor);
+    else if(a==='correct') window.atlasCorrect&&window.atlasCorrect({donor:info.donor,date:info.date,designation:info.designation,amount:info.amt,receipt:info.issued?'Issued':'Not issued'});
     else if(a==='void') openVoid(info);
   };
   window.openVoid=function(info){
@@ -2658,7 +2672,7 @@ function atlasAddr(n){
   }
 
   function scan(){
-    var links=document.querySelectorAll('.nav-item[href="atlas-campaign-dashboard.html"]:not([data-navcol])');
+    var links=document.querySelectorAll('.nav-item[href="atlas-campaign-dashboard.html"]:not([data-navcol]), a.nav-item[href="atlas-gifts-pledges.html"]:not([data-navcol])');
     for(var i=0;i<links.length;i++){ links[i].setAttribute('data-navcol','1'); setup(links[i]); }
   }
   function boot(){
@@ -2676,5 +2690,110 @@ function atlasAddr(n){
 })();
 </script>
 <!-- /ATLAS-NAVCOLLAPSE -->
+
+<!-- ════ Correct / reverse gift · shared flow ════ -->
+<style id="atlas-correct-css">
+#cr-ov{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100050;display:none;align-items:center;justify-content:center;padding:22px;font-family:'DM Sans',sans-serif}
+#cr-ov.show{display:flex}
+#cr-modal{background:#fff;border-radius:16px;width:min(560px,100%);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,.35);overflow:hidden}
+.cr-head{padding:18px 22px;border-bottom:1px solid #E2E8F0;display:flex;align-items:flex-start;gap:12px}
+.cr-head .t{font-size:17px;font-weight:700;color:#0F172A}
+.cr-head .s{font-size:12px;color:#64748B;margin-top:3px}
+.cr-head .x{margin-left:auto;border:none;background:none;font-size:18px;color:#94A3B8;cursor:pointer;line-height:1}
+.cr-body{padding:16px 22px;overflow:auto}
+.cr-gift{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:11px;padding:12px 14px;margin-bottom:4px}
+.cr-gift .nm{font-weight:700;color:#0F172A;font-size:14px}
+.cr-gift .mt{font-size:12px;color:#64748B;margin-top:2px}
+.cr-gift .amt{margin-left:auto;font-weight:800;color:#0F172A;font-size:15px}
+.cr-lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#475569;margin:14px 0 7px}
+.cr-seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.cr-seg button{font:inherit;font-size:12.5px;font-weight:600;color:#334155;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;padding:10px 8px;cursor:pointer;text-align:center}
+.cr-seg button.on{border-color:#2563EB;background:#EFF4FF;color:#2563EB}
+.cr-fld{width:100%;font:inherit;font-size:13px;padding:9px 11px;border:1.5px solid #E2E8F0;border-radius:9px;box-sizing:border-box;color:#0F172A;margin-bottom:10px}
+.cr-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cr-info{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:10px 12px;font-size:12px;color:#334155;line-height:1.5;margin-top:4px}
+.cr-chk{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:#334155;margin:2px 0 10px}
+.cr-chk input{margin-top:2px}
+.cr-foot{padding:14px 22px;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:9px;background:#FAFAFA}
+.cr-btn{font:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:9px 16px;cursor:pointer;border:1px solid transparent}
+.cr-btn.ghost{background:#fff;border-color:#E2E8F0;color:#334155}
+.cr-btn.pri{background:#2563EB;color:#fff}
+.cr-btn.pri:disabled{opacity:.5;cursor:not-allowed}
+.cr-succ{text-align:center;padding:10px 6px}
+.cr-succ .ic{width:52px;height:52px;border-radius:50%;background:#DCFCE7;color:#15803D;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px}
+.cr-succ .st{font-size:17px;font-weight:700;color:#0F172A}
+.cr-succ .ss{font-size:12.5px;color:#64748B;margin-top:3px}
+.cr-succ ul{list-style:none;padding:0;margin:14px auto 0;max-width:430px;text-align:left;font-size:12.5px;color:#334155}
+.cr-succ li{padding:8px 0 8px 24px;position:relative;border-bottom:1px solid #F1F5F9}
+.cr-succ li:last-child{border-bottom:none}
+.cr-succ li:before{content:"\2713";position:absolute;left:0;color:#15803D;font-weight:800}
+</style>
+<div id="cr-ov" onclick="if(event.target===this)atlasCorrectClose()"><div id="cr-modal"></div></div>
+<script id="atlas-correct-js">
+(function(){
+  var ov=document.getElementById('cr-ov'), md=document.getElementById('cr-modal');
+  if(!ov||!md) return;
+  var G={}, mode='reclassify';
+  function money(v){ return (typeof v==='string')?v:('$'+Number(v||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})); }
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function toast(m){ if(window.atlasToast) atlasToast(m); }
+  function today(){ try{return new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}catch(e){return '';} }
+  var REASONS=['Duplicate entry','Data-entry error','Donor requested refund','Returned / NSF check','Payment reversal / chargeback','Fraud / unauthorized','Other'];
+  var issued=function(){ return G.receipt==='Issued'||G.receipt==='Receipted'; };
+  function dyn(){
+    if(mode==='reclassify'){
+      return '<span class="cr-lbl">What needs correcting?</span>'
+        +'<select class="cr-fld"><option>Fund / GL code</option><option>Designation (campaign / appeal)</option><option>Donor record</option><option>Gift type</option></select>'
+        +'<div class="cr-row2"><select class="cr-fld"><option>Cathedral Restoration · GL 4001</option><option>General Operating · GL 4000</option><option selected>Annual Fund · GL 4100</option><option>Scholarship · GL 4200</option></select>'
+        +'<select class="cr-fld cr-reason"><option value="" selected disabled>Reason…</option>'+REASONS.map(function(r){return '<option>'+r+'</option>';}).join('')+'</select></div>'
+        +'<textarea class="cr-fld cr-note" placeholder="Note for the audit trail…" rows="2"></textarea>'
+        +'<div class="cr-info">The original gift is <b>reversed</b> and a <b>corrected gift</b> is posted with the new values — giving totals are preserved and an immutable audit entry is logged.</div>';
+    }
+    if(mode==='reverse'){
+      return '<span class="cr-lbl">Reason for reversal</span>'
+        +'<select class="cr-fld cr-reason"><option value="" selected disabled>Select a reason…</option>'+REASONS.map(function(r){return '<option>'+r+'</option>';}).join('')+'</select>'
+        +'<textarea class="cr-fld cr-note" placeholder="Add context for the audit trail…" rows="2"></textarea>'
+        +(issued()?'<label class="cr-chk"><input type="checkbox" id="cr-voidrcpt" checked> Void the issued tax receipt and email '+esc(G.donor||'the donor')+' a corrected acknowledgement.</label>':'')
+        +'<div class="cr-info">A <b>reversing entry</b> (negative '+money(G.amount)+') posts to the original batch, a <b>GL reversal</b> is generated for export, and an immutable audit entry is logged. This can’t be undone.</div>';
+    }
+    return '<span class="cr-lbl">Check return / NSF</span>'
+      +'<div class="cr-row2"><input class="cr-fld" placeholder="NSF bank fee · e.g. $25.00"><select class="cr-fld cr-reason"><option value="" disabled>Reason…</option><option selected>Returned / NSF check</option><option>Payment reversal / chargeback</option></select></div>'
+      +'<textarea class="cr-fld cr-note" placeholder="Note for the audit trail…" rows="2"></textarea>'
+      +'<div class="cr-info">The gift is reversed, the donor’s balance and any linked pledge are restored, the receipt is voided, and the NSF fee is recorded. All downstream impacts are logged.</div>';
+  }
+  function render(){
+    md.innerHTML=
+      '<div class="cr-head"><div><div class="t">Correct / reverse gift</div><div class="s">Reclassify, reverse, or record an NSF · writes an immutable audit entry</div></div><button class="x" onclick="atlasCorrectClose()">✕</button></div>'
+      +'<div class="cr-body">'
+        +'<div class="cr-gift"><div><div class="nm">'+esc(G.donor||'Gift')+'</div><div class="mt">'+esc(G.designation||'')+(G.date?' · '+esc(G.date):'')+'</div></div><div class="amt">'+money(G.amount)+'</div></div>'
+        +'<span class="cr-lbl">Correction type</span>'
+        +'<div class="cr-seg" id="cr-seg"><button data-m="reclassify" class="'+(mode==='reclassify'?'on':'')+'">Reclassify</button><button data-m="reverse" class="'+(mode==='reverse'?'on':'')+'">Reverse</button><button data-m="nsf" class="'+(mode==='nsf'?'on':'')+'">Check return / NSF</button></div>'
+        +'<div id="cr-dyn">'+dyn()+'</div>'
+      +'</div>'
+      +'<div class="cr-foot"><button class="cr-btn ghost" onclick="atlasCorrectClose()">Cancel</button><button class="cr-btn pri" id="cr-confirm" onclick="atlasCorrectConfirm()">Confirm correction</button></div>';
+    md.querySelector('#cr-seg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;mode=b.dataset.m;render();});
+    validate();
+  }
+  function validate(){
+    var reason=md.querySelector('.cr-reason'), note=md.querySelector('.cr-note'), btn=md.querySelector('#cr-confirm');
+    function sync(){ var r=reason?reason.value:''; btn.disabled=!(r && !(r==='Other' && !(note&&note.value.trim()))); }
+    if(reason) reason.addEventListener('change',sync);
+    if(note) note.addEventListener('input',sync);
+    sync();
+  }
+  window.atlasCorrect=function(g){ G=g||{}; mode='reclassify'; render(); ov.classList.add('show'); };
+  window.atlasCorrectClose=function(){ ov.classList.remove('show'); };
+  window.atlasCorrectConfirm=function(){
+    var reason=(md.querySelector('.cr-reason')||{}).value||'correction', items;
+    if(mode==='reclassify') items=['Original gift reversed on its batch','Corrected gift posted with the new values','GL reversal + re-post generated for export','Audit entry logged · '+today()+' · S. Reynolds'];
+    else if(mode==='reverse') items=['Reversing entry posted ('+money(G.amount)+' negated) on the original batch','GL reversal entry generated for accounting export',(issued()&&(md.querySelector('#cr-voidrcpt')||{}).checked)?'Tax receipt voided · corrected acknowledgement queued':'No tax receipt was issued — nothing to void','Audit entry logged · '+today()+' · S. Reynolds'];
+    else items=['Gift reversed · donor balance & linked pledge restored','Tax receipt voided','NSF bank fee recorded','Audit entry logged · '+today()+' · S. Reynolds'];
+    md.querySelector('.cr-body').innerHTML='<div class="cr-succ"><div class="ic">✓</div><div class="st">Correction posted</div><div class="ss">'+esc(G.donor||'Gift')+' · '+money(G.amount)+' · '+esc(reason)+'</div><ul>'+items.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>';
+    md.querySelector('.cr-foot').innerHTML='<button class="cr-btn ghost" onclick="atlasCorrectClose()">Close</button><button class="cr-btn pri" onclick="window.location=\'atlas-gift-correction-center.html\'">Open Correction Center</button>';
+    toast('Correction posted · audit entry logged');
+  };
+})();
+</script>
+<script id="nav-active-sync">(function(){function run(){try{var cur=(location.pathname.split("/").pop()||"index.html").toLowerCase();document.querySelectorAll(".nav-item[href]").forEach(function(a){var h=(a.getAttribute("href")||"").split(/[?#]/)[0].toLowerCase().split("/").pop();if(h&&h===cur)a.classList.add("active");});}catch(e){}}if(document.readyState!=="loading")run();else document.addEventListener("DOMContentLoaded",run);})();</script>
 </body>
 </html>

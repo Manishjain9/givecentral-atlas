@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas Mobile — Hi-Fi Prototype (Phase 0)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0E1E35; --navy-2:#16294a; --navy-card:#132441;
+  --blue:#2563EB; --blue-2:#1D4ED8; --blue-pale:#EFF4FF; --blue-mid:#BFD3FF;
+  --green:#15803D; --green-l:#DCFCE7; --amber:#B45309; --amber-l:#FEF3C7;
+  --rose:#BE185D; --rose-l:#FCE7F3; --purp:#7C3AED; --purp-l:#F3E8FF; --teal:#0D9488; --teal-l:#CCFBF1;
+  --gold:#C8A04A; --mint:#34D399;
+  --text:#0F172A; --text2:#334155; --text3:#64748B; --text4:#94A3B8;
+  --border:#E5EAF1; --border2:#EEF2F7; --surface:#F6F8FB; --surface2:#F1F5F9; --white:#fff;
+  --shadow-sm:0 1px 2px rgba(15,23,42,.06),0 1px 3px rgba(15,23,42,.05);
+  --shadow-md:0 4px 12px rgba(15,23,42,.08);
+  --shadow-lg:0 12px 34px rgba(15,23,42,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#0b1220;color:var(--text);min-height:100vh;
+  background-image:radial-gradient(1200px 600px at 20% -10%,#182740 0,transparent 60%),radial-gradient(900px 500px at 100% 0,#101b30 0,transparent 55%);}
+.serif{font-family:'DM Serif Display',Georgia,serif;font-weight:400}
+
+/* ===== Stage / controls ===== */
+.stage{max-width:1280px;margin:0 auto;padding:26px 24px 60px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:6px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;color:#fff}
+.brand .logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(145deg,#132441,#0b1626);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.brand h1{font-size:19px;font-weight:700;letter-spacing:-.01em}
+.brand .sub{font-size:12px;color:#93a4bd;font-weight:500;margin-top:1px}
+.seg{display:inline-flex;background:#0e1a2e;border:1px solid #22344f;border-radius:12px;padding:4px;gap:2px}
+.seg button{border:0;background:transparent;color:#9fb0c9;font:600 13px 'DM Sans';padding:8px 15px;border-radius:9px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:.15s}
+.seg button.on{background:var(--blue);color:#fff;box-shadow:var(--shadow-md)}
+.seg.small button{padding:7px 13px;font-size:12.5px}
+.controls-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:14px 0 26px}
+.screen-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.screen-tabs button{border:1px solid #24374f;background:#0e1a2e;color:#aebbcf;font:600 12.5px 'DM Sans';padding:8px 14px;border-radius:20px;cursor:pointer;transition:.15s}
+.screen-tabs button.on{background:#fff;color:var(--navy);border-color:#fff}
+.hint{color:#7f90aa;font-size:12.5px}
+
+.frames{display:flex;gap:46px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+.device-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.device-label{color:#8ea0ba;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+
+/* ===== Device frame ===== */
+.frame{position:relative;width:390px;height:844px;background:#000;border-radius:52px;padding:12px;box-shadow:0 40px 80px -20px rgba(0,0,0,.7),0 0 0 2px #1c1c1e,0 0 0 8px #0a0a0b;flex:0 0 auto}
+.frame.android{border-radius:38px;padding:9px;box-shadow:0 40px 80px -20px rgba(0,0,0,.7),0 0 0 2px #202124,0 0 0 7px #0a0a0b}
+.viewport{position:relative;width:100%;height:100%;background:var(--surface);border-radius:42px;overflow:hidden;display:flex;flex-direction:column}
+.frame.android .viewport{border-radius:30px}
+
+/* status bar */
+.statusbar{height:52px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:14px;font-weight:600;color:var(--text);position:relative;z-index:5}
+.statusbar.on-dark{color:#fff}
+.statusbar .time{font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.statusbar .icons{display:flex;align-items:center;gap:6px}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:6}
+.frame.android .island{display:none}
+.frame.android .statusbar{height:34px;padding:0 18px;font-size:13px}
+.a-dot{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;background:#000;display:none;z-index:6}
+.frame.android .a-dot{display:block}
+
+/* scroll body */
+.body{flex:1;overflow-y:auto;overflow-x:hidden;position:relative}
+.body::-webkit-scrollbar{width:0}
+
+/* bottom chrome */
+.tabbar{flex:0 0 auto;height:76px;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;padding:8px 6px 0;position:relative;z-index:5}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text4);cursor:pointer;padding-top:6px}
+.tab.on{color:var(--blue)}
+.tab .ic{width:26px;height:26px;display:flex;align-items:center;justify-content:center}
+.tab span{font-size:10.5px;font-weight:600}
+.frame.android .tabbar{height:66px;background:#fff}
+.frame.android .tab .ic{width:56px;height:30px;border-radius:16px;transition:.15s}
+.frame.android .tab.on .ic{background:var(--blue-pale)}
+.home-ind{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:135px;height:5px;border-radius:3px;background:#0f172a;opacity:.85;z-index:7}
+.frame.android .home-ind{width:110px;height:4px;opacity:.5}
+.tabbar-pad{height:22px;flex:0 0 auto;background:inherit}
+
+/* ===== generic mobile components ===== */
+.appbar{padding:8px 20px 12px;display:flex;align-items:center;justify-content:space-between}
+.appbar h2{font-size:26px;font-weight:700;letter-spacing:-.02em}
+.frame.android .appbar h2{font-size:22px}
+.appbar .count{font-size:13px;color:var(--text3);font-weight:600}
+.iconbtn{width:38px;height:38px;border-radius:12px;border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--text2)}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text3)}
+.search{margin:4px 20px 14px;height:44px;background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;gap:10px;padding:0 14px;color:var(--text4);font-size:15px;box-shadow:var(--shadow-sm)}
+.frame.android .search{border-radius:26px;background:var(--surface2);border-color:transparent}
+
+.list{padding:0 16px}
+.row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow-sm)}
+.frame.android .row{border-radius:14px}
+.row .av{width:42px;height:42px;border-radius:50%;background:linear-gradient(145deg,#e9eef6,#dfe7f2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--text3);flex:0 0 auto}
+.row .main{flex:1;min-width:0}
+.row .nm{font-size:15px;font-weight:600;color:var(--text)}
+.row .meta{font-size:12.5px;color:var(--text3);margin-top:2px}
+.row .chev{color:var(--text4);font-size:18px}
+
+.fab{position:absolute;right:18px;bottom:96px;width:56px;height:56px;border-radius:50%;background:linear-gradient(145deg,#2f6bff,#1d4ed8);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;box-shadow:0 10px 24px rgba(37,99,235,.42);z-index:6;letter-spacing:.02em}
+.fab.add{background:linear-gradient(145deg,#2f6bff,#1d4ed8);font-size:26px;font-weight:400}
+.frame.android .fab{border-radius:18px}
+
+.pill{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 9px;border-radius:8px;letter-spacing:.01em}
+.pill.g{background:var(--green-l);color:var(--green)} .pill.a{background:var(--amber-l);color:var(--amber)}
+.pill.b{background:var(--blue-pale);color:var(--blue-2)} .pill.r{background:var(--rose-l);color:var(--rose)}
+.pill.s{background:var(--surface2);color:var(--text3)}
+.chip{display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:7px 14px;border-radius:20px;border:1px solid var(--border);color:var(--text2);background:#fff}
+.chip.on{background:var(--blue-pale);border-color:var(--blue-mid);color:var(--blue-2)}
+
+.btn{display:flex;align-items:center;justify-content:center;height:50px;border-radius:14px;font-weight:600;font-size:15.5px;border:0;width:100%;cursor:pointer}
+.btn.primary{background:var(--blue);color:#fff;box-shadow:0 8px 18px rgba(37,99,235,.28)}
+.btn.ghost{background:#fff;color:var(--text);border:1px solid var(--border)}
+.frame.android .btn{border-radius:26px;text-transform:none;font-weight:700;letter-spacing:.01em}
+
+.sectlabel{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
+
+/* section header inside body */
+.pad{padding:0 20px}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow-sm)}
+.kpi .lbl{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--text3);text-transform:uppercase}
+.kpi .val{font-size:26px;font-weight:400;margin-top:6px;color:var(--text)}
+.kpi .d{font-size:12px;margin-top:3px}
+.up{color:var(--green);font-weight:600}.dn{color:var(--rose);font-weight:600}.mut{color:var(--text3)}
+
+/* Donor 360 intelligence */
+.d360-hero{background:linear-gradient(160deg,#13294a,#0d1b31);padding:16px 20px 18px;color:#fff;position:relative}
+.d360-hero .top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.d360-hero .back{width:34px;height:34px;border-radius:11px;background:rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center;font-size:18px}
+.d360-hero .pfp{width:46px;height:46px;border-radius:50%;background:linear-gradient(145deg,#7c3aed,#5b21b6);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
+.d360-hero .nm{font-size:18px;font-weight:700;letter-spacing:-.01em}
+.d360-hero .rl{font-size:12px;color:#9fb2cd;margin-top:2px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.08);border-radius:14px;overflow:hidden}
+.tile{background:rgba(255,255,255,.02);padding:11px 4px;text-align:center}
+.tile .v{font-size:19px;font-weight:700}
+.tile .l{font-size:8.5px;font-weight:700;letter-spacing:.06em;color:#8ba0bd;margin-top:2px}
+.d360-tabs{display:flex;gap:20px;padding:12px 20px 0;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:3}
+.d360-tabs .t{font-size:14px;font-weight:600;color:var(--text3);padding-bottom:11px;position:relative}
+.d360-tabs .t.on{color:var(--blue)}
+.d360-tabs .t.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2.5px;background:var(--blue);border-radius:2px}
+
+.card{background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-sm);overflow:hidden}
+.card-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 0}
+.brandtag{font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;background:var(--blue-pale);color:var(--blue-2)}
+.range-big{text-align:center;padding:6px 0 2px}
+.range-big .n{font-size:34px}
+.range-big .s{font-size:12px;color:var(--text3);margin-top:2px}
+.rangebar{height:8px;border-radius:6px;background:var(--surface2);margin:14px 16px 6px;position:relative;overflow:hidden}
+.rangebar>i{position:absolute;left:25%;width:26%;top:0;bottom:0;background:linear-gradient(90deg,#f0b429,#d97706);border-radius:6px}
+.rangeticks{display:flex;justify-content:space-between;padding:0 16px 12px;font-size:10px;color:var(--text4);font-weight:600}
+.dl{display:flex;justify-content:space-between;padding:9px 16px;font-size:13px;border-top:1px solid var(--border2)}
+.dl .k{color:var(--text3)} .dl .v{font-weight:600}
+
+.guru{background:linear-gradient(160deg,#13294a,#0c1930);border-radius:18px;padding:16px;color:#fff;box-shadow:var(--shadow-md)}
+.guru .gh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.guru .gh .l{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.04em;color:#c4b5fd}
+.guru .gh .icon{width:24px;height:24px;border-radius:8px;background:linear-gradient(145deg,#7c3aed,#5b21b6);display:flex;align-items:center;justify-content:center}
+.guru .gh .u{font-size:11px;color:#8ba0bd}
+.ask{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:11px 13px;margin-bottom:9px}
+.ask .k{font-size:9.5px;font-weight:700;letter-spacing:.06em;color:#8ba0bd}
+.ask .v{font-size:15px;font-weight:700;margin-top:3px}
+.ask .d{font-size:11.5px;color:#c9d4e6;margin-top:4px;line-height:1.4}
+.prop{background:linear-gradient(90deg,#3b2e63,#2a2450);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:9px}
+.prop .badge{background:#c4b5fd;color:#2a1a5e;font-size:11px;font-weight:800;padding:2px 8px;border-radius:7px}
+.prop .t{font-size:12.5px;color:#e6e0fb;font-weight:600}
+
+.score-row{display:flex;align-items:center;gap:12px;padding:10px 0}
+.score-row .lab{flex:0 0 128px;font-size:13px;color:var(--text2)}
+.score-row .bar{flex:1;height:7px;border-radius:5px;background:var(--surface2);overflow:hidden}
+.score-row .bar>i{display:block;height:100%;border-radius:5px}
+.score-row .num{flex:0 0 30px;text-align:right;font-weight:700;font-size:13px}
+
+/* design-system gallery */
+.ds{padding:20px;display:flex;flex-direction:column;gap:22px;background:var(--surface)}
+.ds h3{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sw{border-radius:12px;height:56px;display:flex;align-items:flex-end;padding:7px;color:#fff;font-size:10px;font-weight:600;box-shadow:var(--shadow-sm)}
+.typescale>div{margin-bottom:6px;color:var(--text)}
+.stack{display:flex;flex-direction:column;gap:10px}
+.rowflex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.inp{height:46px;border:1px solid var(--border);border-radius:12px;background:#fff;display:flex;align-items:center;padding:0 14px;color:var(--text4);font-size:14px}
+.switch{width:46px;height:28px;border-radius:16px;background:var(--blue);position:relative;flex:0 0 auto}
+.switch::after{content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;top:3px;right:3px;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.switch.off{background:#cbd5e1}.switch.off::after{right:auto;left:3px}
+.card-lite{background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:var(--shadow-sm)}
+.notice{color:#93a4bd;font-size:12.5px;text-align:center;margin-top:34px;line-height:1.7}
+.legend{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:14px;color:#8ea0ba;font-size:12px}
+.legend b{color:#cdd8e8}
+
+/* ===== Phase 1: auth / onboarding / states ===== */
+.auth{padding:6px 26px 30px;display:flex;flex-direction:column;min-height:100%}
+.auth-logo{padding:14px 0 22px;display:flex;align-items:center;gap:10px}
+.auth-logo .mk{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#13294a,#0b1626);display:flex;align-items:center;justify-content:center}
+.auth-logo .nm{font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy)}
+.h-title{font-size:26px;font-weight:700;letter-spacing:-.02em;color:var(--text)}
+.frame.android .h-title{font-size:23px}
+.h-sub{font-size:14px;color:var(--text3);margin-top:7px;line-height:1.5}
+.field{margin-top:16px}
+.field .lab{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:7px;display:flex;justify-content:space-between;align-items:center}
+.field .box{height:52px;border:1px solid var(--border);border-radius:14px;background:#fff;display:flex;align-items:center;padding:0 15px;gap:10px;font-size:15px;box-shadow:var(--shadow-sm)}
+.field .box.focus{border-color:var(--blue);box-shadow:0 0 0 4px var(--blue-pale)}
+.field .box .ph{color:var(--text4)} .field .box .val{color:var(--text);font-weight:500}
+.field .box .ic{color:var(--text4);flex:0 0 auto} .field .box .eye{margin-left:auto;color:var(--text4);font-size:12px;font-weight:600}
+.frame.android .field .box{border-radius:10px}
+.divider{display:flex;align-items:center;gap:12px;color:var(--text4);font-size:12px;margin:20px 0}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border)}
+.sso{height:52px;border-radius:14px;border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:600;font-size:15px;color:var(--text);box-shadow:var(--shadow-sm)}
+.frame.android .sso{border-radius:26px}
+.sso .gc{width:24px;height:24px;border-radius:7px;background:linear-gradient(145deg,#1f8fff,#0a63d6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px}
+.faceid-row{display:flex;align-items:center;justify-content:center;gap:9px;color:var(--blue);font-weight:600;font-size:14.5px;margin-top:16px}
+.faceid-row .fi{width:24px;height:24px;border:2px solid var(--blue);border-radius:7px;position:relative}
+.link{color:var(--blue);font-weight:600}
+.auth-foot{margin-top:auto;text-align:center;color:var(--text3);font-size:13.5px;padding-top:22px}
+.otp{display:flex;gap:9px;justify-content:space-between;margin-top:20px}
+.otp .c{flex:1;height:58px;border:1.5px solid var(--border);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;background:#fff;color:var(--text)}
+.otp .c.f{border-color:var(--blue);box-shadow:0 0 0 4px var(--blue-pale)}
+
+.splash{height:100%;background:linear-gradient(165deg,#13294a,#0a1526);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;color:#fff;position:relative;cursor:pointer}
+.splash .sub{font-size:12px;letter-spacing:.22em;color:#8ba0bd;text-transform:uppercase}
+.splash .hint{position:absolute;bottom:110px;color:#6f83a1;font-size:12px}
+.splash .load{position:absolute;bottom:76px;width:120px;height:4px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+.splash .load i{position:absolute;left:-40%;top:0;bottom:0;width:40%;background:var(--gold);border-radius:3px;animation:load 1.4s infinite}
+@keyframes load{0%{left:-40%}100%{left:120%}}
+
+.ob{height:100%;display:flex;flex-direction:column;padding:0 26px 26px}
+.ob-skip{display:flex;justify-content:flex-end;padding:14px 0 4px;color:var(--text3);font-weight:600;font-size:14px}
+.ob-art{flex:1;border-radius:26px;background:linear-gradient(160deg,#13294a,#0c1930);display:flex;align-items:center;justify-content:center;color:#fff;margin-bottom:20px;overflow:hidden;padding:24px}
+.ob-title{font-size:25px;font-weight:700;letter-spacing:-.02em}
+.ob-sub{font-size:15px;color:var(--text3);margin-top:8px;line-height:1.55}
+.dots{display:flex;gap:7px;margin:18px 0}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--border);transition:.2s}
+.dots i.on{width:22px;border-radius:4px;background:var(--blue)}
+
+.perm{height:100%;display:flex;flex-direction:column;align-items:center;text-align:center;padding:46px 30px 26px}
+.perm .ill{width:118px;height:118px;border-radius:32px;background:var(--blue-pale);display:flex;align-items:center;justify-content:center;margin-bottom:26px;color:var(--blue)}
+.perm .ill.g{background:var(--green-l);color:var(--green)}
+.perm .pt{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.perm .ps{font-size:15px;color:var(--text3);margin-top:10px;line-height:1.55}
+
+.skel-row{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:16px;padding:13px 14px;margin-bottom:10px}
+.skel-c{width:42px;height:42px;border-radius:50%;flex:0 0 auto}
+.shim{background:linear-gradient(90deg,#eef2f7,#e2e8f0,#eef2f7);background-size:200% 100%;animation:shim 1.3s infinite}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.state-block{display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 30px}
+.state-ic{width:82px;height:82px;border-radius:24px;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.state-t{font-size:20px;font-weight:700} .state-s{font-size:14px;color:var(--text3);margin-top:8px;line-height:1.5}
+.offline-banner{margin:2px 16px 12px;background:var(--amber-l);color:var(--amber);border-radius:12px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center}
+.state-tabs{display:flex;gap:6px;padding:8px 16px 6px;flex-wrap:wrap}
+.state-tabs .st{font-size:12px;font-weight:600;padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:#fff;color:var(--text3)}
+.state-tabs .st.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* ===== Phase 2: home / donor 360 / briefs ===== */
+.greet{padding:8px 20px 0;font-size:13px;color:var(--text3);font-weight:600}
+.hero-search{margin:10px 20px 16px;height:52px;border:1.6px solid var(--blue);background:var(--blue-pale);border-radius:16px;display:flex;align-items:center;gap:12px;padding:0 16px;color:var(--text2);font-size:15px;font-weight:500;box-shadow:0 6px 16px rgba(37,99,235,.12)}
+.frame.android .hero-search{border-radius:26px}
+.hero-search .k{color:var(--blue)}
+.sect{display:flex;align-items:center;justify-content:space-between;padding:8px 20px 8px}
+.sect .l{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.sect .r{font-size:13px;font-weight:600;color:var(--blue)}
+.mtg{margin:0 20px 8px;background:#fff;border:1px solid var(--blue-mid);border-radius:16px;padding:14px;box-shadow:var(--shadow-sm)}
+.mtg .r1{display:flex;justify-content:space-between;align-items:flex-start}
+.attn{padding:0 20px}
+.attn .a{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:11px 12px;margin-bottom:8px;box-shadow:var(--shadow-sm)}
+.attn .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.spark{display:flex;align-items:flex-end;gap:5px;height:60px;padding:0 2px;margin:12px 0 8px}
+.spark i{flex:1;background:var(--blue-pale);border-radius:4px 4px 0 0}
+.spark i.on{background:var(--blue)}
+.mini3{display:flex;gap:8px}
+.mini3 .m{flex:1;background:var(--surface);border-radius:10px;padding:9px 10px}
+.mini3 .m .v{font-weight:700;font-size:15px} .mini3 .m .l{font-size:9.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-top:2px}
+.qa{display:flex;gap:8px;padding:2px 16px 0}
+.qa .b{flex:1;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 4px;text-align:center;box-shadow:var(--shadow-sm)}
+.qa .b .ic{width:38px;height:38px;border-radius:12px;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;margin:0 auto 7px}
+.qa .b span{font-size:11.5px;font-weight:600;color:var(--text2)}
+.tl{padding:14px 16px 26px}
+.tl .item{display:flex;gap:12px;padding-bottom:16px;position:relative}
+.tl .item:not(:last-child)::before{content:"";position:absolute;left:6px;top:15px;bottom:-1px;width:1.5px;background:var(--border)}
+.tl .dot{width:13px;height:13px;border-radius:50%;flex:0 0 auto;margin-top:2px;border:3px solid #fff;box-shadow:0 0 0 1px var(--border);z-index:1}
+.tl .c{flex:1;min-width:0} .tl .t{font-size:14px;font-weight:600} .tl .d{font-size:12.5px;color:var(--text3);margin-top:2px} .tl .mm{font-size:11.5px;color:var(--text4);margin-top:3px}
+.cblock{margin:14px 16px;background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.crow{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--border2)}
+.crow:last-child{border-bottom:0}
+.crow .cic{width:34px;height:34px;border-radius:10px;background:var(--surface2);color:var(--text3);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.crow .k{font-size:11px;color:var(--text3);font-weight:600} .crow .v{font-size:14px;font-weight:500;margin-top:1px}
+.tagwrap{display:flex;gap:7px;flex-wrap:wrap;padding:0 16px 4px}
+.sched .s{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px;margin:0 16px 9px;box-shadow:var(--shadow-sm)}
+.sched .tm{font-weight:700;font-size:13px;color:var(--blue);flex:0 0 56px}
+.brief{margin:6px 16px 26px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:var(--shadow-md)}
+.brief .bstat{display:flex;gap:8px;margin:10px 0 12px}
+.brief .bstat .b{flex:1;background:var(--surface);border-radius:10px;padding:8px 10px}
+
+/* ===== Phase 3: pipeline / campaigns / tasks / comms / events ===== */
+.pstat{display:flex;padding:6px 22px 12px}
+.pstat .p{flex:1} .pstat .p .v{font-weight:700;font-size:18px} .pstat .p .l{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-top:1px}
+.chiprow{display:flex;gap:7px;padding:0 16px 10px;overflow:hidden}
+.pcard{margin:0 16px 10px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:13px 14px;box-shadow:var(--shadow-sm)}
+.pcard .ptop{display:flex;gap:11px;align-items:flex-start}
+.pcard .pav{width:40px;height:40px;border-radius:50%;background:linear-gradient(145deg,#7c3aed,#5b21b6);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:0 0 auto}
+.pcard .pbot{display:flex;align-items:center;justify-content:space-between;margin-top:11px}
+.change-btn{border:1px solid var(--blue-mid);background:var(--blue-pale);color:var(--blue-2);font-size:12px;font-weight:600;padding:6px 12px;border-radius:10px}
+.stage-opt{display:flex;align-items:center;gap:12px;margin:0 16px 9px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:13px 14px}
+.stage-opt.cur{border-color:var(--blue);background:var(--blue-pale)}
+.stage-opt .radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex:0 0 auto;position:relative}
+.stage-opt.cur .radio{border-color:var(--blue)} .stage-opt.cur .radio::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--blue)}
+.stage-opt .mh{margin-left:auto;color:var(--blue);font-weight:600;font-size:12.5px}
+.cbar{height:8px;border-radius:5px;background:var(--surface2);overflow:hidden;margin:9px 0 5px}
+.cbar>i{display:block;height:100%;border-radius:5px;background:var(--blue)}
+.segbar{display:flex;background:var(--surface2);border-radius:12px;padding:4px;margin:6px 20px 14px}
+.segbar .sg{flex:1;text-align:center;font-size:13px;font-weight:600;color:var(--text3);padding:9px;border-radius:9px}
+.segbar .sg.on{background:#fff;color:var(--text);box-shadow:var(--shadow-sm)}
+.portfolio{margin:0 20px 14px;background:linear-gradient(160deg,#13294a,#0c1930);border-radius:16px;padding:16px;color:#fff}
+.portfolio .grid4{display:flex;margin-top:14px}
+.portfolio .grid4 .g{flex:1} .portfolio .grid4 .g .v{font-weight:700;font-size:15px} .portfolio .grid4 .g .l{font-size:8.5px;color:#8ba0bd;font-weight:700;letter-spacing:.04em;margin-top:2px}
+.ccard{margin:0 16px 10px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:13px 14px;box-shadow:var(--shadow-sm)}
+.trow{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 13px;margin:0 16px 9px;box-shadow:var(--shadow-sm)}
+.trow.od{border-color:#f4c4d1}
+.checkbox{width:20px;height:20px;border-radius:6px;border:1.8px solid var(--border);flex:0 0 auto;margin-top:1px}
+.crow2{background:#fff;border:1px solid var(--border);border-radius:14px;padding:11px 13px;margin:0 16px 9px;box-shadow:var(--shadow-sm)}
+.crow2 .r1{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ecard{margin:0 16px 10px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow-sm)}
+
+/* ===== Phase 4: more / guru / notifications / profile / settings / gifts ===== */
+.mprofile{display:flex;align-items:center;gap:12px;margin:6px 16px 8px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:13px 14px;box-shadow:var(--shadow-sm)}
+.mprofile .av{width:44px;height:44px;border-radius:50%;background:linear-gradient(145deg,#e9eef6,#dfe7f2);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--text3)}
+.mgroup-l{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:14px 24px 7px}
+.mcard{margin:0 16px;background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.mrow{display:flex;align-items:center;gap:13px;padding:13px 15px;border-bottom:1px solid var(--border2)}
+.mrow:last-child{border-bottom:0}
+.mrow .mic{width:30px;height:30px;border-radius:9px;background:var(--surface2);color:var(--text2);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.mrow .ml{flex:1;font-size:15px;font-weight:500}
+.mrow .chev{color:var(--text4);font-size:18px}
+.guru-intro{margin:8px 16px 14px;background:linear-gradient(160deg,#13294a,#0c1930);border-radius:16px;padding:15px 16px;color:#fff}
+.guru-intro .t{font-weight:700;font-size:15px} .guru-intro .s{font-size:12.5px;color:#9fb2cd;margin-top:5px;line-height:1.5}
+.sug{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 13px;margin:0 16px 9px;box-shadow:var(--shadow-sm)}
+.guru-input{margin:6px 16px;height:48px;border:1px solid var(--border);border-radius:24px;display:flex;align-items:center;gap:10px;padding:0 6px 0 16px;background:#fff;box-shadow:var(--shadow-sm)}
+.guru-input .snd{width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;margin-left:auto}
+.nrow{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 13px;margin:0 16px 9px;box-shadow:var(--shadow-sm)}
+.nrow .nic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.nrow.unread{border-left:3px solid var(--blue)}
+.prof-head{background:linear-gradient(160deg,#13294a,#0c1930);padding:26px 20px 22px;color:#fff;display:flex;flex-direction:column;align-items:center;text-align:center}
+.prof-head .big{width:82px;height:82px;border-radius:50%;background:linear-gradient(145deg,#3763c9,#274ea1);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;margin-bottom:12px}
+.set-cap{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);padding:16px 22px 7px}
+.set-group{margin:0 16px;background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.set-row{display:flex;align-items:center;gap:12px;padding:14px 15px;border-bottom:1px solid var(--border2)}
+.set-row:last-child{border-bottom:0}
+.set-row .sl{flex:1;font-size:14.5px} .set-row .sv{font-size:13px;color:var(--text3)} .set-row .chev{color:var(--text4);font-size:17px}
+.switch.sm{width:42px;height:25px}.switch.sm::after{width:19px;height:19px}
+.gsum{margin:6px 16px 12px;background:var(--navy);border-radius:16px;padding:14px 16px;color:#fff;display:flex;justify-content:space-between;align-items:center}
+</style>
+  <style id="nav-nowrap">.nav-item{white-space:nowrap}</style>
+</head>
+<body>
+<div class="stage">
+  <div class="top">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="-1 -1 42 28" width="26" height="18" fill="none"><line x1="1.2" y1="23.8" x2="12" y2="13.5" stroke="#C8A04A" stroke-width=".9"/><line x1="12" y1="13.5" x2="24.1" y2="7.5" stroke="#C8A04A" stroke-width=".9"/><line x1="24.1" y1="7.5" x2="36.2" y2="3.3" stroke="#C8A04A" stroke-width=".9"/><line x1="24.1" y1="7.5" x2="27.8" y2="19.6" stroke="#C8A04A" stroke-width=".9"/><circle cx="1.2" cy="23.8" r="1.2" fill="#fff"/><circle cx="12" cy="13.5" r="1.5" fill="#fff"/><circle cx="24.1" cy="7.5" r="1.7" fill="#fff"/><circle cx="27.8" cy="19.6" r="1.1" fill="#fff"/><circle cx="36.2" cy="3.3" r="2.1" fill="#C8A04A"/></svg>
+      </div>
+      <div>
+        <h1>Atlas Mobile — Hi-Fi Prototype</h1>
+        <div class="sub">Phase 0 · design system + component kit + 2 template screens</div>
+      </div>
+    </div>
+    <div class="seg small" id="platform">
+      <button class="on" data-os="ios">iOS</button>
+      <button data-os="android">Android</button>
+    </div>
+  </div>
+
+  <div class="controls-row">
+    <div class="screen-tabs" id="screens">
+      <button class="on" data-s="splash">Splash</button>
+      <button data-s="signin">Sign in</button>
+      <button data-s="signup">Request access</button>
+      <button data-s="otp">Verify</button>
+      <button data-s="onboarding">Onboarding</button>
+      <button data-s="notify">Notifications</button>
+      <button data-s="welcome">Welcome</button>
+      <button data-s="home">Home</button>
+      <button data-s="donors">Donors</button>
+      <button data-s="d360">Donor 360</button>
+      <button data-s="briefs">Meeting briefs</button>
+      <button data-s="pipeline">Pipeline</button>
+      <button data-s="campaigns">Campaigns</button>
+      <button data-s="gifts">Gifts</button>
+      <button data-s="tasks">Tasks</button>
+      <button data-s="comms">Communications</button>
+      <button data-s="events">Events</button>
+      <button data-s="guru">Guru AI</button>
+      <button data-s="notifications">Notifications</button>
+      <button data-s="more">More hub</button>
+      <button data-s="profile">Profile</button>
+      <button data-s="settings">Settings</button>
+      <button data-s="states">States</button>
+      <button data-s="ds">Design system</button>
+    </div>
+    <div class="hint">The phone navigates itself — start at <b style="color:#cdd8e8">Splash</b> and tap through: auth → onboarding → Home, then the <b style="color:#cdd8e8">bottom tab bar</b>, <b style="color:#cdd8e8">More</b> hub, donor rows, and the <b style="color:#cdd8e8">AI</b> button reach every screen. The list above is just an optional jump-to.</div>
+  </div>
+
+  <div class="frames">
+    <div class="device-wrap">
+      <div class="frame ios" id="frame">
+        <div class="island"></div>
+        <div class="a-dot"></div>
+        <div class="viewport">
+          <div class="statusbar" id="statusbar"></div>
+          <div class="body" id="body"></div>
+          <div class="tabbar" id="tabbar"></div>
+          <div class="home-ind"></div>
+        </div>
+      </div>
+      <div class="device-label" id="devlabel">iPhone · iOS styling</div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><b>Colors</b> Atlas tokens</span>
+    <span><b>Type</b> DM Sans + DM Serif Display</span>
+    <span><b>Accents</b> dark navy cards on a light app</span>
+    <span><b>Targets</b> 44px min</span>
+  </div>
+  <div class="notice">This Phase 0 sets the visual language. Once signed off, the same kit scales to splash · auth (email/password · GiveCentral SSO · biometric) · onboarding · every wireframe screen · empty / loading / error / offline states.</div>
+</div>
+
+<script>
+/* ---------- chrome ---------- */
+function statusbar(dark){
+  const cls = dark ? 'statusbar on-dark' : 'statusbar';
+  document.getElementById('statusbar').className = cls;
+  const dot = dark ? '#fff' : '#0f172a';
+  return `<span class="time">9:41</span>
+    <span class="icons">
+      <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="7" width="3" height="5" rx="1" fill="${dot}"/><rect x="4.5" y="5" width="3" height="7" rx="1" fill="${dot}"/><rect x="9" y="2.5" width="3" height="9.5" rx="1" fill="${dot}"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="${dot}" opacity=".35"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12"><path d="M8.5 2.5C11 2.5 13.2 3.5 14.8 5.1l-1.4 1.4C12.1 5.2 10.4 4.5 8.5 4.5S4.9 5.2 3.6 6.5L2.2 5.1C3.8 3.5 6 2.5 8.5 2.5Z" fill="${dot}"/><path d="M8.5 6.2c1.2 0 2.3.5 3.1 1.3l-3.1 3.1-3.1-3.1C6.2 6.7 7.3 6.2 8.5 6.2Z" fill="${dot}"/></svg>
+      <svg width="26" height="13" viewBox="0 0 26 13"><rect x="1" y="1" width="21" height="11" rx="3" fill="none" stroke="${dot}" stroke-opacity=".4"/><rect x="3" y="3" width="15" height="7" rx="1.5" fill="${dot}"/><rect x="23.5" y="4" width="1.8" height="5" rx="1" fill="${dot}" opacity=".5"/></svg>
+    </span>`;
+}
+function tabbar(active){
+  const items=[['home','Home'],['donors','Donors'],['gifts','Gifts'],['tasks','Tasks'],['more','More']];
+  const ic={
+    home:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/></svg>',
+    donors:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg>',
+    gifts:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M3 12h18M12 8v12M8 8a2.5 2.5 0 010-5c2 0 4 5 4 5M16 8a2.5 2.5 0 000-5c-2 0-4 5-4 5"/></svg>',
+    tasks:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg>',
+    more:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>'
+  };
+  return items.map(([k,l])=>`<div class="tab ${k===active?'on':''}" onclick="go('${k}')"><div class="ic">${ic[k]}</div><span>${l}</span></div>`).join('');
+}
+
+/* ---------- Donor 360 shared chrome ---------- */
+function d360hero(tiles){
+  return `<div class="d360-hero">
+    <div class="top">
+      <div class="back" onclick="go('donors')">‹</div>
+      <div class="pfp">MS</div>
+      <div style="flex:1"><div class="nm">Margaret Sullivan</div><div class="rl">St. Michael's · Major Donor · Donor since 2009</div></div>
+    </div>
+    <div class="tiles">${tiles}</div>
+  </div>`;
+}
+function d360tabs(a){
+  const t=[['Overview','d360'],['Activity','d360act'],['Intelligence','intel'],['Contact','d360con']];
+  return `<div class="d360-tabs">${t.map(([l,s])=>`<div class="t ${s===a?'on':''}" onclick="go('${s}')">${l}</div>`).join('')}</div>`;
+}
+const gtile=(v,l,c)=>`<div class="tile"><div class="v"${c?` style="color:${c}"`:''}>${v}</div><div class="l">${l}</div></div>`;
+
+/* ---------- screens ---------- */
+const SCREENS = {
+  ds(){
+    return `<div class="ds">
+      <div>
+        <h3>Core palette</h3>
+        <div class="swatches">
+          <div class="sw" style="background:#0E1E35">Navy</div>
+          <div class="sw" style="background:#2563EB">Blue</div>
+          <div class="sw" style="background:#15803D">Green</div>
+          <div class="sw" style="background:#B45309">Amber</div>
+          <div class="sw" style="background:#BE185D">Rose</div>
+          <div class="sw" style="background:#7C3AED">Purple</div>
+          <div class="sw" style="background:#0D9488">Teal</div>
+          <div class="sw" style="background:#C8A04A">Gold</div>
+        </div>
+      </div>
+      <div>
+        <h3>Type — DM Serif Display + DM Sans</h3>
+        <div class="typescale card-lite">
+          <div class="serif" style="font-size:30px">$18,450</div>
+          <div class="serif" style="font-size:22px">Margaret Sullivan</div>
+          <div style="font-size:15px;font-weight:600">Body / label — 15px semibold</div>
+          <div style="font-size:13px;color:var(--text3)">Meta / caption — 13px, text-3</div>
+          <div class="sectlabel" style="margin-top:4px">Section label · 11px caps</div>
+        </div>
+      </div>
+      <div>
+        <h3>Buttons</h3>
+        <div class="stack">
+          <button class="btn primary">Primary action</button>
+          <button class="btn ghost">Secondary</button>
+        </div>
+      </div>
+      <div>
+        <h3>Inputs & controls</h3>
+        <div class="stack">
+          <div class="inp">Search name, address or ZIP</div>
+          <div class="rowflex">
+            <span class="chip on">Selected</span><span class="chip">Chip</span><span class="chip">Filter</span>
+            <div class="switch"></div><div class="switch off"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3>Status pills</h3>
+        <div class="rowflex">
+          <span class="pill g">On track</span><span class="pill a">At risk</span><span class="pill b">Scheduled</span>
+          <span class="pill r">Bounced</span><span class="pill s">Draft</span>
+        </div>
+      </div>
+      <div>
+        <h3>KPI card & list row</h3>
+        <div class="kpi" style="margin-bottom:10px">
+          <div class="lbl">Gifts today</div><div class="val serif">$18,450</div>
+          <div class="d"><span class="up">↑ 23%</span> <span class="mut">vs. last year</span></div>
+        </div>
+        <div class="row" style="margin:0">
+          <div class="av">MS</div>
+          <div class="main"><div class="nm">Margaret Sullivan</div><div class="meta">Major · Tampa FL</div></div>
+          <div class="chev">›</div>
+        </div>
+      </div>
+      <div>
+        <h3>Dark accent card (intelligence / Guru)</h3>
+        <div class="guru">
+          <div class="gh"><div class="l"><div class="icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="9" r="5"/><path d="M8 18c0 2 8 2 8 0"/></svg></div>GURU AI · ASK STRATEGY</div><div class="u">Updated today</div></div>
+          <div class="ask"><div class="k">PRIMARY ASK</div><div class="v">$40,000 — Cathedral Capital</div></div>
+          <div class="prop"><span class="badge">95/100</span><span class="t">Top-probability ask for Q2 2026</span></div>
+        </div>
+      </div>
+    </div>`;
+  },
+
+  intel(){
+    const tiles = gtile('95','CAPACITY','var(--gold)')+gtile('82','LINKAGE','var(--mint)')+gtile('78','INTEREST')+gtile('$40K','ASK','var(--mint)');
+    return `
+    ${d360hero(tiles)}
+    ${d360tabs('intel')}
+    <div style="padding:16px 16px 26px;display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-h"><span class="sectlabel">Giving capacity</span><span class="brandtag">WealthEngine</span></div>
+        <div class="range-big"><div class="n serif">$25K – $50K</div><div class="s">estimated annual giving capacity</div></div>
+        <div class="rangebar"><i></i></div>
+        <div class="rangeticks"><span>$0</span><span>$25K</span><span>$50K</span><span>$100K+</span></div>
+        <div class="dl"><span class="k">Lifetime capacity</span><span class="v">$500K – $1M</span></div>
+        <div class="dl"><span class="k">Current ask range</span><span class="v" style="color:var(--green)">$40,000 — Cathedral</span></div>
+        <div class="dl"><span class="k">Confidence</span><span class="v">High (87/100)</span></div>
+        <div class="dl"><span class="k">Percentile</span><span class="v">Top 8% of portfolio</span></div>
+      </div>
+
+      <div class="guru">
+        <div class="gh">
+          <div class="l"><div class="icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="9" r="5"/><path d="M8 18c0 2 8 2 8 0"/></svg></div>GURU AI · ASK STRATEGY</div>
+          <div class="u">Updated today</div>
+        </div>
+        <div class="ask">
+          <div class="k">PRIMARY ASK</div>
+          <div class="v">$40,000 — Cathedral Capital Fund</div>
+          <div class="d">Naming opportunity at $25K threshold. Patricia mentioned legacy interest on the Mar 28 call — timing optimal, Q2 cultivation complete.</div>
+        </div>
+        <div class="ask">
+          <div class="k">SECONDARY ASK</div>
+          <div class="v">$5,000 DAF — clear overdue pledge</div>
+          <div class="d">Removes friction on the $12,500 pledge. Tax-efficient via DAF; opens the planned-giving conversation.</div>
+        </div>
+        <div class="prop"><span class="badge">95/100</span><span class="t">Highest-probability ask in pipeline for Q2 2026</span></div>
+      </div>
+
+      <div class="card" style="padding:14px 16px">
+        <div class="sectlabel" style="margin-bottom:6px">Intelligence scores</div>
+        <div class="score-row"><div class="lab">Retention likelihood</div><div class="bar"><i style="width:92%;background:var(--green)"></i></div><div class="num" style="color:var(--green)">92</div></div>
+        <div class="score-row"><div class="lab">Upgrade propensity</div><div class="bar"><i style="width:78%;background:var(--blue)"></i></div><div class="num" style="color:var(--blue)">78</div></div>
+        <div class="score-row"><div class="lab">Wealth capacity</div><div class="bar"><i style="width:70%;background:var(--amber)"></i></div><div class="num" style="color:var(--amber)">70</div></div>
+        <div class="score-row"><div class="lab">Engagement</div><div class="bar"><i style="width:55%;background:var(--teal)"></i></div><div class="num" style="color:var(--teal)">55</div></div>
+      </div>
+    </div>
+    <div class="fab">AI</div>`;
+  },
+
+  donors(){
+    const donors=[
+      ['MO',"Margaret O’Brien",'Major · Tampa FL'],
+      ['RL','Robert & Susan Lin','Major · Clearwater FL'],
+      ['DF','The Delaney Fdn.','Foundation'],
+      ['AR','Anthony Riccardi','Recurring · Dunedin FL'],
+      ['HT','Helen Tobin','New this year'],
+      ['JS','James Sullivan','Mid-level · St. Pete FL'],
+      ['PK','Patricia Kim','Mid-level'],
+      ['MG','Michael & Susan Grant','Major · Palm Harbor FL']
+    ];
+    return `
+    <div class="appbar">
+      <div><h2>Donors</h2></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="count">3,847</span>
+        <div class="avatar">SR</div>
+      </div>
+    </div>
+    <div class="search">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5.2"/><path d="M11 11l4 4"/></svg>
+      <span>Search donors</span>
+    </div>
+    <div class="list">
+      ${donors.map(([i,n,m])=>`<div class="row" onclick="go('d360')"><div class="av">${i}</div><div class="main"><div class="nm">${n}</div><div class="meta">${m}</div></div><div class="chev">›</div></div>`).join('')}
+      <div style="height:96px"></div>
+    </div>
+    <div class="fab add">+</div>`;
+  },
+
+  splash(){
+    return `<div class="splash" onclick="go('signin')">
+      <svg viewBox="-2 -2 44 30" width="132" height="90" fill="none"><line x1="1.2" y1="23.8" x2="12" y2="13.5" stroke="#C8A04A" stroke-width=".9"/><line x1="12" y1="13.5" x2="24.1" y2="7.5" stroke="#C8A04A" stroke-width=".9"/><line x1="24.1" y1="7.5" x2="36.2" y2="3.3" stroke="#C8A04A" stroke-width=".9"/><line x1="24.1" y1="7.5" x2="27.8" y2="19.6" stroke="#C8A04A" stroke-width=".9"/><circle cx="1.2" cy="23.8" r="1.5" fill="#fff"/><circle cx="12" cy="13.5" r="1.9" fill="#fff"/><circle cx="24.1" cy="7.5" r="2.1" fill="#fff"/><circle cx="27.8" cy="19.6" r="1.4" fill="#fff"/><circle cx="36.2" cy="3.3" r="2.6" fill="#C8A04A"/></svg>
+      <div style="text-align:center">
+        <div class="serif" style="font-size:38px;line-height:1;color:#fff">Atlas</div>
+        <div class="sub" style="margin-top:10px">By GiveCentral</div>
+      </div>
+      <div class="hint">Tap to continue</div>
+      <div class="load"><i></i></div>
+    </div>`;
+  },
+
+  signin(){
+    return `<div class="auth">
+      <div class="auth-logo">
+        <div class="mk"><svg viewBox="-1 -1 42 28" width="22" height="15" fill="none"><line x1="1.2" y1="23.8" x2="12" y2="13.5" stroke="#C8A04A" stroke-width="1"/><line x1="12" y1="13.5" x2="24.1" y2="7.5" stroke="#C8A04A" stroke-width="1"/><line x1="24.1" y1="7.5" x2="36.2" y2="3.3" stroke="#C8A04A" stroke-width="1"/><line x1="24.1" y1="7.5" x2="27.8" y2="19.6" stroke="#C8A04A" stroke-width="1"/><circle cx="1.2" cy="23.8" r="1.3" fill="#fff"/><circle cx="12" cy="13.5" r="1.6" fill="#fff"/><circle cx="24.1" cy="7.5" r="1.8" fill="#fff"/><circle cx="27.8" cy="19.6" r="1.2" fill="#fff"/><circle cx="36.2" cy="3.3" r="2.2" fill="#C8A04A"/></svg></div>
+        <div class="nm">Atlas</div>
+      </div>
+      <div class="h-title">Welcome back</div>
+      <div class="h-sub">Sign in to your diocese's fundraising workspace.</div>
+      <div class="field"><div class="lab">Work email</div>
+        <div class="box focus"><svg class="ic" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="3" width="13" height="10" rx="2"/><path d="M2 4l6 4.5L14 4"/></svg><span class="val">sarah.reynolds@diocesestpete.org</span></div>
+      </div>
+      <div class="field"><div class="lab"><span>Password</span></div>
+        <div class="box"><svg class="ic" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5 7V5a3 3 0 016 0v2"/></svg><span class="val">••••••••••</span><span class="eye">Show</span></div>
+      </div>
+      <div style="text-align:right;margin-top:10px"><span class="link" style="font-size:13px">Forgot password?</span></div>
+      <button class="btn primary" style="margin-top:18px" onclick="go('otp')">Sign in</button>
+      <div class="faceid-row" onclick="go('welcome')"><span class="fi"></span>Use Face ID</div>
+      <div class="divider">or</div>
+      <div class="sso" onclick="go('otp')"><span class="gc">G</span>Continue with GiveCentral</div>
+      <div class="auth-foot">New to Atlas? <span class="link" onclick="go('signup')">Request access</span></div>
+    </div>`;
+  },
+
+  signup(){
+    return `<div class="auth">
+      <div class="auth-logo"><span class="link" style="font-size:15px" onclick="go('signin')">‹ Back</span></div>
+      <div class="h-title">Request access</div>
+      <div class="h-sub">Atlas access is approved by your organization's administrator.</div>
+      <div class="field"><div class="lab">Full name</div><div class="box"><span class="val">Sarah Reynolds</span></div></div>
+      <div class="field"><div class="lab">Work email</div><div class="box"><span class="val">sarah.reynolds@diocesestpete.org</span></div></div>
+      <div class="field"><div class="lab">Organization / diocese</div><div class="box"><span class="val">Diocese of St. Petersburg</span></div></div>
+      <div class="field"><div class="lab">Role requested</div><div class="box"><span class="val">Development Director</span><span class="eye">▾</span></div></div>
+      <button class="btn primary" style="margin-top:22px" onclick="go('signin')">Request access</button>
+      <div class="auth-foot">Already have an account? <span class="link" onclick="go('signin')">Sign in</span></div>
+    </div>`;
+  },
+
+  otp(){
+    return `<div class="auth">
+      <div class="auth-logo"><span class="link" style="font-size:15px" onclick="go('signin')">‹ Back</span></div>
+      <div class="h-title">Verify it's you</div>
+      <div class="h-sub">We sent a 6-digit code to <b style="color:var(--text2)">s•••••@diocesestpete.org</b>.</div>
+      <div class="otp">
+        <div class="c">2</div><div class="c">6</div><div class="c">4</div><div class="c f">1</div><div class="c"></div><div class="c"></div>
+      </div>
+      <div style="margin-top:18px;color:var(--text3);font-size:13.5px">Didn't get it? <span class="link">Resend in 0:24</span></div>
+      <button class="btn primary" style="margin-top:22px" onclick="go('onboarding')">Verify</button>
+      <div class="auth-foot">Trouble signing in? <span class="link">Get help</span></div>
+    </div>`;
+  },
+
+  onboarding(){
+    const slides=[
+      {t:"Your portfolio, in your pocket",s:"Gifts, pledges and the full Donor 360 — the same Atlas data and terms, sized for a phone.",
+        art:`<div style="text-align:center"><div class="serif" style="font-size:40px">$1.73M</div><div style="color:#9fb2cd;font-size:13px;margin-top:4px">raised · 6 active campaigns</div><div style="display:flex;gap:8px;margin-top:16px">${['On track','At risk','On track'].map(s=>`<span class="pill ${s==='At risk'?'a':'g'}" style="background:rgba(255,255,255,.08);color:#cfe0f5">${s}</span>`).join('')}</div></div>`},
+      {t:"Guru AI tells you the ask",s:"Capacity, propensity and a recommended ask strategy for every prospect — updated daily.",
+        art:`<div style="width:100%"><div style="font-size:11px;font-weight:700;color:#c4b5fd;letter-spacing:.05em">GURU AI · ASK STRATEGY</div><div style="background:rgba(255,255,255,.06);border-radius:12px;padding:12px;margin-top:10px"><div style="font-size:9px;color:#8ba0bd;font-weight:700">PRIMARY ASK</div><div style="font-weight:700;margin-top:3px">$40,000 — Cathedral Capital</div></div><div style="background:linear-gradient(90deg,#3b2e63,#2a2450);border-radius:12px;padding:9px 12px;margin-top:8px;font-size:12px;color:#e6e0fb"><b>95/100</b> top ask · Q2 2026</div></div>`},
+      {t:"Log gifts & visits on the go",s:"Dictate a summary, move a prospect stage, prep a meeting brief — all in a tap.",
+        art:`<div style="display:flex;flex-direction:column;align-items:center;gap:14px"><div style="width:70px;height:70px;border-radius:50%;background:linear-gradient(145deg,#2f6bff,#1d4ed8);display:flex;align-items:center;justify-content:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4"/></svg></div><div style="color:#9fb2cd;font-size:13px">"Discussed $10k Cathedral ask…"</div></div>`}
+    ];
+    const i=Math.min(obSlide,slides.length-1), sl=slides[i], last=i===slides.length-1;
+    return `<div class="ob">
+      <div class="ob-skip" onclick="go('notify')">Skip</div>
+      <div class="ob-art">${sl.art}</div>
+      <div class="ob-title">${sl.t}</div>
+      <div class="ob-sub">${sl.s}</div>
+      <div class="dots">${slides.map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('')}</div>
+      <button class="btn primary" onclick="${last?"go('notify')":"obNext()"}">${last?'Get started':'Next'}</button>
+    </div>`;
+  },
+
+  notify(){
+    return `<div class="perm">
+      <div class="ill"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 9a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M9.5 20a2.5 2.5 0 005 0"/></svg></div>
+      <div class="pt">Stay ahead of every gift</div>
+      <div class="ps">Get actionable alerts — a major gift lands, a pledge is at risk, a meeting starts in an hour.</div>
+      <div style="flex:1"></div>
+      <button class="btn primary" style="margin-bottom:12px" onclick="go('welcome')">Allow notifications</button>
+      <button class="btn ghost" onclick="go('welcome')">Not now</button>
+    </div>`;
+  },
+
+  welcome(){
+    return `<div class="perm">
+      <div class="ill g" style="margin-top:10px"><svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M7 12.5l3.2 3.2L17 9"/></svg></div>
+      <div class="pt">You're all set, Sarah</div>
+      <div class="ps">Your diocese workspace is ready. Jump in and find a donor, prep a brief, or log a gift.</div>
+      <div style="flex:1"></div>
+      <button class="btn primary" onclick="go('home')">Go to Home</button>
+    </div>`;
+  },
+
+  states(){
+    const v=stateView;
+    const tabs=['loading','empty','error','offline'].map(s=>`<span class="st ${s===v?'on':''}" onclick="setState('${s}')">${s[0].toUpperCase()+s.slice(1)}</span>`).join('');
+    let inner='';
+    if(v==='loading'){
+      inner=`<div class="list" style="padding-top:6px">${[1,2,3,4,5].map(()=>`<div class="skel-row"><div class="skel-c shim"></div><div style="flex:1"><div class="skel-l shim" style="width:60%"></div><div class="skel-l shim" style="width:38%;margin-top:8px"></div></div></div>`).join('')}</div>`;
+    } else if(v==='empty'){
+      inner=`<div class="state-block"><div class="state-ic" style="background:var(--surface2);color:var(--text4)"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></svg></div><div class="state-t">No donors match</div><div class="state-s">Try a different name, address or ZIP — or clear your search.</div><button class="btn ghost" style="width:auto;padding:0 22px;margin-top:18px">Clear search</button></div>`;
+    } else if(v==='error'){
+      inner=`<div class="state-block"><div class="state-ic" style="background:var(--rose-l);color:var(--rose)"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17v.5"/></svg></div><div class="state-t">Couldn't load donors</div><div class="state-s">Something went wrong on our end. Check your connection and try again.</div><button class="btn primary" style="width:auto;padding:0 26px;margin-top:18px">Retry</button></div>`;
+    } else {
+      inner=`<div class="offline-banner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18M8.5 8.6A11 11 0 003 9M12 20h.01"/></svg>You're offline — showing cached data. Changes sync when you reconnect.</div>
+      <div class="list">${[['MO',"Margaret O'Brien",'Major · cached'],['RL','Robert & Susan Lin','Major · cached'],['AR','Anthony Riccardi','Recurring · cached']].map(([i,n,m])=>`<div class="row" style="opacity:.75"><div class="av">${i}</div><div class="main"><div class="nm">${n}</div><div class="meta">${m}</div></div><div class="chev">›</div></div>`).join('')}</div>`;
+    }
+    return `<div class="appbar"><h2>States</h2><div class="avatar">SR</div></div>
+      <div class="state-tabs">${tabs}</div>${inner}`;
+  },
+
+  home(){
+    return `
+    <div class="appbar">
+      <div><div class="greet" style="padding:0">Good morning</div><h2 style="margin-top:2px">Sarah</h2></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="iconbtn" style="position:relative"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 9a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M9.5 20a2.5 2.5 0 005 0"/></svg><span style="position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--rose);border:1.5px solid #fff"></span></div>
+        <div class="avatar">SR</div>
+      </div>
+    </div>
+    <div class="greet" style="padding-top:2px">Find a donor</div>
+    <div class="hero-search" onclick="go('donors')">
+      <svg class="k" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7.5" cy="7.5" r="5.4"/><path d="M12 12l4 4"/></svg>
+      Search name, address, or ZIP
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="lbl">Gifts today</div><div class="val serif">$18,450</div><div class="d"><span class="up">↑ 23%</span> <span class="mut">vs. last year</span></div></div>
+      <div class="kpi"><div class="lbl">Pledges due 30d</div><div class="val serif">$86,200</div><div class="d"><span class="mut">14 installments · </span><span class="dn">3 overdue</span></div></div>
+      <div class="kpi"><div class="lbl">Active donors</div><div class="val serif">3,847</div><div class="d"><span class="up">↑ 8%</span> <span class="mut">retention</span></div></div>
+      <div class="kpi"><div class="lbl">Pipeline value</div><div class="val serif">$340k</div><div class="d"><span class="mut">28 prospects · 6 solicit.</span></div></div>
+    </div>
+    <div class="sect"><span class="l">Today's meetings · 6</span><span class="r" onclick="go('briefs')">Briefs ›</span></div>
+    <div class="mtg" onclick="go('briefs')">
+      <div class="r1"><div><div style="font-weight:700;font-size:14px">2:00 PM · James & Patricia O'Brien</div><div style="font-size:12.5px;color:var(--text3);margin-top:3px">Cathedral ask · $25k</div></div><span class="pill g">Brief ready</span></div>
+      <div style="text-align:right;margin-top:6px"><span class="r" style="color:var(--blue);font-weight:600;font-size:13px">View brief →</span></div>
+    </div>
+    <div class="sect"><span class="l">Needs attention</span></div>
+    <div class="attn">
+      <div class="a"><span class="dot" style="background:var(--rose)"></span><div style="flex:1;font-size:13.5px">3 tasks overdue · $84k at risk</div><span class="chev" style="color:var(--text4)">›</span></div>
+      <div class="a"><span class="dot" style="background:var(--amber)"></span><div style="flex:1;font-size:13.5px">2 approvals pending</div><span class="chev" style="color:var(--text4)">›</span></div>
+    </div>
+    <div style="height:96px"></div>
+    <div class="fab">AI</div>`;
+  },
+
+  d360(){
+    const tiles = gtile('$128K','LIFETIME')+gtile('$2,500','THIS YR')+gtile('$2,500','LAST GIFT')+gtile('$5K','PLEDGE','var(--mint)');
+    return `${d360hero(tiles)}${d360tabs('d360')}
+    <div style="padding:14px 16px 26px;display:flex;flex-direction:column;gap:14px">
+      <div class="card" style="padding:14px 16px">
+        <div class="card-h" style="padding:0"><span class="sectlabel">Giving history · 10-yr</span><span class="r" style="color:var(--blue);font-size:12.5px;font-weight:600" onclick="go('d360act')">Ledger ›</span></div>
+        <div class="spark">${[30,42,38,55,48,62,70,58,80,92].map((h,i)=>`<i class="${i===9?'on':''}" style="height:${h}%"></i>`).join('')}</div>
+        <div class="mini3">
+          <div class="m"><div class="v serif">$2,005</div><div class="l">Avg gift</div></div>
+          <div class="m"><div class="v serif">$25K</div><div class="l">Largest</div></div>
+          <div class="m"><div class="v serif">38</div><div class="l">Gifts</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="sect" style="padding:0 4px 8px"><span class="l">Recent gifts</span><span class="r" onclick="go('d360act')">All ›</span></div>
+        ${[['$2,500','CMA 2026 · Card','Mar 15, 2026'],['$1,000','Cathedral Capital · Check','Dec 2, 2025'],['$2,500','CMA 2025 · Card','Mar 14, 2025']].map(([a,f,dt])=>`<div class="row"><div class="main"><div class="nm">${a}</div><div class="meta">${f}</div></div><div class="meta">${dt}</div></div>`).join('')}
+      </div>
+      <div class="qa">
+        <div class="b" onclick="go('donors')"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></div><span>Log gift</span></div>
+        <div class="b"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16M4 12h16M4 19h10"/></svg></div><span>Log activity</span></div>
+        <div class="b"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 9h16M8 3v4M16 3v4"/></svg></div><span>Add task</span></div>
+      </div>
+    </div>
+    <div class="fab">AI</div>`;
+  },
+
+  d360act(){
+    const tiles = gtile('$128K','LIFETIME')+gtile('$2,500','THIS YR')+gtile('$2,500','LAST GIFT')+gtile('$5K','PLEDGE','var(--mint)');
+    const items=[
+      ['var(--green)','Gift received — $2,500 to CMA','online via GiveCentral','Mar 15, 2026 · Auto-synced','+$2,500'],
+      ['var(--blue)','Note — thank-you call logged','Cathedral capital interest · follow up Q3','Mar 16, 2026 · Sarah Reynolds',''],
+      ['var(--text4)','Email — thank-you + 2025 tax summary','to margaret.sullivan@gmail.com','Jan 12, 2026 · Auto-generated',''],
+      ['var(--green)','Task done — year-end stewardship call','diocesan programs discussed','Dec 18, 2025 · Sarah Reynolds',''],
+      ['var(--purp)','Pledge created — $5,000 to CMA 2026','3 annual installments · signed','Aug 22, 2025 · Sarah Reynolds','']
+    ];
+    return `${d360hero(tiles)}${d360tabs('d360act')}
+    <div class="tl">
+      ${items.map(([c,t,d,m,amt])=>`<div class="item"><div class="dot" style="background:${c}"></div><div class="c"><div style="display:flex;justify-content:space-between"><div class="t">${t}</div>${amt?`<div class="amt">${amt}</div>`:''}</div><div class="d">${d}</div><div class="mm">${m}</div></div></div>`).join('')}
+    </div>
+    <div class="fab">AI</div>`;
+  },
+
+  d360con(){
+    const tiles = gtile('$128K','LIFETIME')+gtile('$2,500','THIS YR')+gtile('$2,500','LAST GIFT')+gtile('$5K','PLEDGE','var(--mint)');
+    return `${d360hero(tiles)}${d360tabs('d360con')}
+    <div style="padding:2px 0 26px">
+      <div class="sect"><span class="l">Contact</span><span class="r">Edit</span></div>
+      <div class="cblock">
+        <div class="crow"><div class="cic"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="3" width="13" height="10" rx="2"/><path d="M2 4l6 4.5L14 4"/></svg></div><div><div class="k">PREFERRED EMAIL</div><div class="v">margaret.sullivan@gmail.com</div></div></div>
+        <div class="crow"><div class="cic"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h3l1.5 4-2 1.5a9 9 0 004 4l1.5-2 4 1.5v3a1 1 0 01-1 1A11 11 0 013 4a1 1 0 01-.-1Z"/></svg></div><div><div class="k">MOBILE</div><div class="v">(727) 555-0142</div></div></div>
+        <div class="crow"><div class="cic"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 14s5-3.5 5-8a5 5 0 00-10 0c0 4.5 5 8 5 8Z"/><circle cx="8" cy="6" r="1.8"/></svg></div><div><div class="k">ADDRESS</div><div class="v">5 Park Ave, St. Petersburg FL 33701</div></div></div>
+      </div>
+      <div class="sect"><span class="l">Segments & tags</span><span class="r">+ Tag</span></div>
+      <div class="tagwrap"><span class="chip on">Major donor</span><span class="chip">Cathedral capital</span><span class="chip">Recurring</span><span class="chip">Parishioner</span></div>
+      <div class="sect"><span class="l">Relationships</span></div>
+      <div class="list" style="padding:0 16px">
+        ${[['JS','James Sullivan','Spouse · joint giving'],['CO',"Claire O'Brien",'Daughter · young donor']].map(([i,n,m])=>`<div class="row"><div class="av">${i}</div><div class="main"><div class="nm">${n}</div><div class="meta">${m}</div></div><div class="chev">›</div></div>`).join('')}
+      </div>
+      <div class="sect"><span class="l">Linked tasks</span></div>
+      <div class="attn" style="padding:0 16px">
+        <div class="a"><span class="dot" style="background:var(--amber)"></span><div style="flex:1;font-size:13.5px">Prep gift agreement — due Jun 1</div><span class="chev" style="color:var(--text4)">›</span></div>
+      </div>
+    </div>`;
+  },
+
+  briefs(){
+    return `
+    <div class="appbar"><div><h2>Meeting briefs</h2><div class="greet" style="padding:2px 0 0">Today · 6 meetings</div></div><div class="avatar">SR</div></div>
+    <div class="sect"><span class="l">Today's schedule</span></div>
+    <div class="sched">
+      ${[['9:30','Robert & Susan Lin','Stewardship visit','g'],['11:00','The Delaney Fdn.','Grant check-in','g'],['2:00',"James & Patricia O'Brien",'Cathedral ask · $25k','b']].map(([t,n,s,c])=>`<div class="s"><div class="tm">${t}</div><div style="flex:1"><div style="font-weight:600;font-size:14px">${n}</div><div style="font-size:12px;color:var(--text3);margin-top:2px">${s}</div></div><span class="pill ${c}">${c==='b'?'Featured':'Brief'}</span></div>`).join('')}
+    </div>
+    <div class="sect"><span class="l">Pre-meeting brief · 2:00 PM</span></div>
+    <div class="brief">
+      <div style="display:flex;align-items:center;gap:12px"><div class="av" style="width:44px;height:44px">JO</div><div><div style="font-weight:700;font-size:15px">James & Patricia O'Brien</div><div style="font-size:12.5px;color:var(--text3)">Major · Stage 3 Cultivation · Guru 95</div></div></div>
+      <div class="bstat">
+        <div class="b"><div class="serif" style="font-size:16px">$95K</div><div style="font-size:9.5px;color:var(--text3);font-weight:700;letter-spacing:.04em">LIFETIME</div></div>
+        <div class="b"><div class="serif" style="font-size:16px">$25K</div><div style="font-size:9.5px;color:var(--text3);font-weight:700;letter-spacing:.04em">THIS YEAR</div></div>
+        <div class="b"><div class="serif" style="font-size:16px;color:var(--green)">$40K</div><div style="font-size:9.5px;color:var(--text3);font-weight:700;letter-spacing:.04em">REC. ASK</div></div>
+      </div>
+      <div class="sectlabel" style="margin-bottom:8px">Brief depth</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px"><span class="chip">Quick</span><span class="chip on">Full</span><span class="chip">Strategy</span></div>
+      <button class="btn primary">Generate brief</button>
+    </div>
+    <div style="height:90px"></div>
+    <div class="fab">AI</div>`;
+  },
+
+  pipeline(){
+    const props=[
+      ['JO',"James & Patricia O'Brien",'148 Bayshore Blvd · ZIP 33606','Cultivation','a','$25k'],
+      ['MS','Margaret Sullivan','5 Park Ave · ZIP 33701','Solicitation','a','$10k'],
+      ['MG','Michael & Susan Grant','22 Harbor Dr · ZIP 34685','Qualification','b','$25k']
+    ];
+    return `
+    <div class="appbar"><div><h2>Pipeline</h2></div><div class="avatar">SR</div></div>
+    <div class="hero-search" onclick="go('movestage')"><svg class="k" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7.5" cy="7.5" r="5.4"/><path d="M12 12l4 4"/></svg>Search prospect — name, address or ZIP</div>
+    <div class="pstat">
+      <div class="p"><div class="v serif">$1.84M</div><div class="l">Total</div></div>
+      <div class="p"><div class="v serif">$510k</div><div class="l">Weighted</div></div>
+      <div class="p"><div class="v serif">42</div><div class="l">Prospects</div></div>
+    </div>
+    <div class="chiprow"><span class="chip on">All</span><span class="chip">Cultivation</span><span class="chip">Solicit.</span><span class="chip">Qualif.</span></div>
+    ${props.map(([i,n,a,st,c,ask])=>`<div class="pcard"><div class="ptop"><div class="pav">${i}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px">${n}</div><div style="font-size:11.5px;color:var(--text3);margin-top:2px">${a}</div></div><div style="font-weight:700;font-size:14px">Ask ${ask}</div></div><div class="pbot"><span class="pill ${c}">${st}</span><button class="change-btn" onclick="go('movestage')">Change stage ›</button></div></div>`).join('')}
+    <div style="height:96px"></div>
+    <div class="fab">AI</div>`;
+  },
+
+  movestage(){
+    const stages=[
+      ['Identification','Researched, not yet qualified',false],
+      ['Qualification','Capacity & inclination confirmed',false],
+      ['Cultivation','Building the relationship',true],
+      ['Solicitation','Ask made / in progress',false],
+      ['Stewardship','Gift closed · thanking',false]
+    ];
+    return `
+    <div class="appbar"><div style="display:flex;align-items:center;gap:10px"><span class="link" style="font-size:22px" onclick="go('pipeline')">‹</span><h2 style="font-size:22px">Move stage</h2></div></div>
+    <div class="search" style="margin-top:0"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5.2"/><path d="M11 11l4 4"/></svg><span>Search — name, address or ZIP</span></div>
+    <div class="sect"><span class="l">Matches · address + ZIP disambiguate</span></div>
+    <div class="list">
+      <div class="row" style="border-color:var(--blue);background:var(--blue-pale)"><div class="av">JO</div><div class="main"><div class="nm">James & Patricia O'Brien</div><div class="meta">148 Bayshore Blvd, Tampa FL · ZIP 33606</div></div><span class="link" style="font-size:18px">✓</span></div>
+      <div class="row"><div class="av">JO</div><div class="main"><div class="nm">James O'Brien</div><div class="meta">5 Oak Ln, Dunedin FL · ZIP 34698</div></div><div class="chev">›</div></div>
+    </div>
+    <div class="sect"><span class="l">Move stage — J. & P. O'Brien</span></div>
+    ${stages.map(([n,d,cur])=>`<div class="stage-opt ${cur?'cur':''}"><div class="radio"></div><div><div style="font-weight:600;font-size:14px">${n}</div><div style="font-size:11.5px;color:var(--text3);margin-top:1px">${d}</div></div>${cur?'<span class="pill b" style="margin-left:auto">Current</span>':'<span class="mh">Move here</span>'}</div>`).join('')}
+    <div style="padding:8px 16px 26px"><button class="btn primary" onclick="go('pipeline')">Update stage</button></div>`;
+  },
+
+  campaigns(){
+    const v=campView;
+    const seg=`<div class="segbar"><div class="sg ${v==='overview'?'on':''}" onclick="setCamp('overview')">Overview</div><div class="sg ${v==='all'?'on':''}" onclick="setCamp('all')">All campaigns</div></div>`;
+    if(v==='all'){
+      const all=[
+        ["Catholic Ministry Appeal",'On track','g',0.78,'$1.25M / $1.6M','4,812'],
+        ["Cathedral Capital",'At risk','a',0.42,'$310k / $740k','286'],
+        ["Annual Appeal 2026",'On track','g',0.61,'$480k / $790k','2,140'],
+        ["Marian Congress",'On track','g',0.66,'$95k / $144k','410'],
+        ["Scholarship Drive",'Upcoming','s',0.10,'$14k / $140k','52'],
+        ["Youth Retreat",'Upcoming','s',0.08,'$8k / $100k','36']
+      ];
+      return `<div class="appbar"><div><h2>Campaigns</h2></div><span class="count">6</span></div>${seg}
+      <div class="search" style="margin-top:0"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5.2"/><path d="M11 11l4 4"/></svg><span>Search campaigns</span></div>
+      ${all.map(([n,st,c,p,amt,dn])=>`<div class="ccard"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:600;font-size:14px">${n}</div><span class="pill ${c}">${st}</span></div><div class="cbar"><i style="width:${p*100}%"></i></div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3)"><span>${amt}</span><span>${dn} donors ›</span></div></div>`).join('')}
+      <div style="height:96px"></div><div class="fab">AI</div>`;
+    }
+    return `<div class="appbar"><div><h2>Campaigns</h2></div><div class="avatar">SR</div></div>${seg}
+    <div class="portfolio">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.06em;color:#8ba0bd">DIOCESE OF ST. PETERSBURG · FY 2026</div>
+      <div style="font-weight:700;font-size:16px;margin-top:6px">$1.73M raised · 6 active</div>
+      <div class="cbar" style="background:rgba(255,255,255,.14);margin-top:10px"><i style="width:53%;background:var(--gold)"></i></div>
+      <div style="font-size:12px;color:#9fb2cd;margin-top:6px">53% of $3.25M · pace 49% · $1.52M left</div>
+      <div class="grid4"><div class="g"><div class="v" style="color:var(--mint)">4</div><div class="l">ON PACE</div></div><div class="g"><div class="v" style="color:#fca5a5">2</div><div class="l">AT RISK</div></div><div class="g"><div class="v">4,812</div><div class="l">DONORS</div></div><div class="g"><div class="v" style="color:var(--gold)">$312K</div><div class="l">PLEDGES</div></div></div>
+    </div>
+    <div class="sect"><span class="l">Top campaigns</span><span class="r" onclick="setCamp('all')">All ›</span></div>
+    ${[["Catholic Ministry Appeal",'On track','g',0.78,'$1.25M'],["Cathedral Capital",'At risk','a',0.42,'$310k'],["Marian Congress",'On track','g',0.66,'$95k'],["Youth Retreat",'Upcoming','s',0.10,'$8k']].map(([n,st,c,p,amt])=>`<div class="ccard"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:600;font-size:14px">${n}</div><span class="pill ${c}">${st}</span></div><div class="cbar"><i style="width:${p*100}%"></i></div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3)"><span>${amt} raised</span><span style="color:var(--blue);font-weight:600">view ›</span></div></div>`).join('')}
+    <div style="height:96px"></div><div class="fab">AI</div>`;
+  },
+
+  tasks(){
+    return `
+    <div class="appbar"><div><h2>Tasks</h2></div><div class="avatar">SR</div></div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="lbl">Overdue</div><div class="val serif" style="color:var(--rose)">3</div><div class="d"><span class="dn">$84k at risk</span></div></div>
+      <div class="kpi"><div class="lbl">Due today</div><div class="val serif">0/7</div><div class="d"><span class="mut">3 calls · 2 email · 2 visit</span></div></div>
+      <div class="kpi"><div class="lbl">This week</div><div class="val serif">+8</div><div class="d"><span class="mut">14 tasks · Wed busy</span></div></div>
+      <div class="kpi"><div class="lbl">Completed</div><div class="val serif">🔥 6-day</div><div class="d"><span class="up">94% on-time</span></div></div>
+    </div>
+    <div class="chiprow" style="padding-top:12px"><span class="chip">All</span><span class="chip on">Mine</span><span class="chip">Team</span><span class="chip">Done</span></div>
+    ${[["Call Margaret O'Brien — Cathedral ask",'Overdue',true],['Send pledge reminder — Lin','Today',false],['Email Q3 cultivation — Riccardi','Today',false]].map(([t,due,od])=>`<div class="trow ${od?'od':''}"><div class="checkbox"></div><div style="flex:1"><div style="font-size:14px;font-weight:500">${t}</div><div style="font-size:12px;font-weight:600;margin-top:3px;color:${od?'var(--rose)':'var(--text3)'}">Due ${due}</div></div><div style="display:flex;gap:12px;color:var(--text4);font-size:16px">⤿ ⇄</div></div>`).join('')}
+    <div style="height:96px"></div><div class="fab">AI</div>`;
+  },
+
+  comms(){
+    const rows=[
+      ['Cathedral weekly recap','Email · Update · 2h ago · 68% open','Opened','g'],
+      ['Major-donor stewardship','Email · Thank-you · Today 9:10 AM','Delivered','g'],
+      ['Spring appeal — Segment A','Email · Appeal · Tmrw 8:00 AM','Scheduled','a'],
+      ['Lapsed donor re-engage','Email · Re-engage · In progress 42%','Sending','b'],
+      ["Bishop's Gala invite",'Email · Invite · Yesterday · 3 bounces','Bounced','r'],
+      ['April newsletter','Email · Newsletter · Edited 1d ago','Draft','s']
+    ];
+    return `
+    <div class="appbar"><div><h2>Communications</h2></div><div class="avatar">SR</div></div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="lbl">Delivered today</div><div class="val serif">142</div><div class="d"><span class="mut">99.3% · 30-day</span></div></div>
+      <div class="kpi"><div class="lbl">Opens 24h</div><div class="val serif">68%</div><div class="d"><span class="up">↑ 4 pts</span> <span class="mut">38% CTR</span></div></div>
+      <div class="kpi"><div class="lbl">Bounces 7d</div><div class="val serif">3</div><div class="d"><span class="mut">2 hard · 1 soft</span></div></div>
+      <div class="kpi"><div class="lbl">Scheduled</div><div class="val serif">126</div><div class="d"><span class="mut">Next: tmrw 8 AM</span></div></div>
+    </div>
+    <div class="sect" style="padding-top:12px"><span class="l">Recent communications</span></div>
+    ${rows.map(([s,m,st,c])=>`<div class="crow2"><div class="r1"><div style="font-weight:600;font-size:13.5px;min-width:0">${s}</div><span class="pill ${c}">${st}</span></div><div style="font-size:11.5px;color:var(--text3);margin-top:4px">${m}</div></div>`).join('')}
+    <div style="height:96px"></div><div class="fab">AI</div>`;
+  },
+
+  events(){
+    return `
+    <div class="appbar"><div><h2>Events</h2></div><div class="avatar">SR</div></div>
+    <div class="chiprow" style="padding-top:2px"><span class="chip on">Upcoming</span><span class="chip">Past</span><span class="chip">Drafts</span></div>
+    ${[["Bishop's Annual Gala",'May 8, 2026','Confirmed','g','240 guests'],['Youth Ministry Retreat','Jun 2, 2026','Planning','a','60 guests'],['Cathedral Restoration Tour','Jun 20, 2026','Confirmed','g','35 guests']].map(([n,dt,st,c,g])=>`<div class="ecard"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="font-weight:600;font-size:15px">${n}</div><span class="pill ${c}">${st}</span></div><div style="font-size:12.5px;color:var(--text3);margin-top:8px">${dt}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><span style="font-size:13px">${g}</span><span style="color:var(--blue);font-weight:600;font-size:13px">view ›</span></div></div>`).join('')}
+    <div style="height:96px"></div><div class="fab add">+</div>`;
+  },
+
+  gifts(){
+    return `
+    <div class="appbar"><div><h2>Gifts</h2></div><div class="avatar">SR</div></div>
+    <div class="gsum"><div><div style="font-size:9px;font-weight:700;letter-spacing:.05em;color:#8ba0bd">THIS MONTH</div><div class="serif" style="font-size:22px;margin-top:2px">$284,650</div></div><div style="text-align:right"><div style="font-weight:700;font-size:16px">142</div><div style="font-size:11px;color:#8ba0bd">gifts · $2,005 avg</div></div></div>
+    <div class="chiprow" style="padding-top:2px"><span class="chip on">Recent</span><span class="chip">Pledges</span><span class="chip">Recurring</span><span class="chip">Review</span></div>
+    ${[['MO',"Margaret O'Brien",'$10,000','Cathedral · Check','Today'],['MS','Margaret Sullivan','$2,500','CMA 2026 · Card','Today'],['PK','Patricia Kim','$500',"St. Mary's · ACH",'Yesterday'],['KF','Kowalski Family','$1,200','Recurring · Card','May 22']].map(([i,n,a,f,dt])=>`<div class="row" onclick="go('d360')"><div class="av">${i}</div><div class="main"><div class="nm">${n}</div><div class="meta">${f} · ${dt}</div></div><div style="font-weight:700;font-size:15px">${a}</div></div>`).join('')}
+    <div style="height:96px"></div><div class="fab add">+</div>`;
+  },
+
+  more(){
+    const menu=(rows)=>`<div class="mcard">${rows.map(([ic,l,s,badge])=>`<div class="mrow" onclick="go('${s}')"><div class="mic">${ic}</div><div class="ml">${l}</div>${badge?`<span class="pill r" style="margin-right:6px">${badge}</span>`:''}<div class="chev">›</div></div>`).join('')}</div>`;
+    const I={
+      home:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 11l8-7 8 7M6 10v9h12v-9"/></svg>',
+      don:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg>',
+      camp:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 15l4-4 3 3 5-5 4 4"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg>',
+      brief:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M8 3v4M16 3v4"/></svg>',
+      pipe:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+      task:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg>',
+      comm:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M3 7l9 6 9-6"/></svg>',
+      ev:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+      bell:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 9a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M9.5 20a2.5 2.5 0 005 0"/></svg>',
+      gear:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.5 5.5l2 2M16.5 16.5l2 2M18.5 5.5l-2 2M7.5 16.5l-2 2"/></svg>'
+    };
+    return `
+    <div class="appbar"><div><h2>More</h2></div><div class="avatar">SR</div></div>
+    <div class="mprofile" onclick="go('profile')"><div class="av">SR</div><div style="flex:1"><div style="font-weight:700;font-size:15px">Sarah Reynolds</div><div style="font-size:12.5px;color:var(--text3)">Development Director · My profile</div></div><div style="color:var(--text4);font-size:18px">›</div></div>
+    <div class="mgroup-l">Main</div>
+    ${menu([[I.home,'Home','home'],[I.don,'Donors','donors'],[I.camp,'Campaigns','campaigns'],[I.brief,'Meeting briefs','briefs']])}
+    <div class="mgroup-l">Fundraising</div>
+    ${menu([[I.pipe,'Prospect pipeline','pipeline'],[I.task,'Tasks & reminders','tasks'],[I.comm,'Communications','comms'],[I.ev,'Events','events']])}
+    <div class="mgroup-l">Admin</div>
+    ${menu([[I.bell,'Notifications','notifications','5'],[I.gear,'Settings','settings']])}
+    <div style="height:96px"></div>
+    <div class="fab">AI</div>`;
+  },
+
+  guru(){
+    const sq=[
+      ['Retention','g',"Gave last year but not yet this year (LYBUNT)"],
+      ['Major gifts','','High upgrade propensity, giving under $1,000'],
+      ['Recurring','b','Monthly donors flat for 2+ years'],
+      ['Parish','a','Top 10 by parish, no contact in 90 days'],
+      ['Pledges','','Pledged $500+ last year, no gift this year']
+    ];
+    return `
+    <div class="appbar"><div><h2>Guru AI</h2></div><div class="avatar">SR</div></div>
+    <div class="guru-intro"><div class="t">Ask Guru AI</div><div class="s">Ask in plain English — Guru queries your whole donor database and returns filterable, exportable results.</div></div>
+    <div class="sect" style="padding-bottom:2px"><span class="l">Example</span></div>
+    <div class="sug" style="border-style:dashed"><span style="color:var(--text3);font-size:13.5px">"Show LYBUNT donors this April"</span></div>
+    <div class="sect"><span class="l">Suggested queries</span></div>
+    ${sq.map(([cat,c,desc])=>`<div class="sug"><span class="pill ${c||'s'}">${cat}</span><div style="flex:1;font-size:13px;color:var(--text2)">${desc}</div><div class="chev" style="color:var(--text4)">›</div></div>`).join('')}
+    <div style="height:70px"></div>
+    <div class="guru-input"><span style="color:var(--text4);font-size:14px">Type a question…</span><div class="snd">↑</div></div>
+    <div style="height:20px"></div>`;
+  },
+
+  notifications(){
+    const items=[
+      ['unread','var(--rose-l)','var(--rose)','!','3 tasks overdue','$84k pipeline at risk · tap to review','12m'],
+      ['unread','var(--green-l)','var(--green)','$','New major gift — $10,000',"Margaret O'Brien · Cathedral Capital",'1h'],
+      ['','var(--blue-pale)','var(--blue)','@','Bridget mentioned you','"…loop in Sarah on the Delaney grant"','3h'],
+      ['','var(--surface2)','var(--text3)','↻','GiveCentral sync complete','142 gifts imported · 0 errors','Today 6:00 AM']
+    ];
+    return `
+    <div class="appbar"><div><h2>Notifications</h2></div><span class="r" style="color:var(--blue);font-weight:600;font-size:13px">Mark all read</span></div>
+    <div class="chiprow" style="padding-top:2px"><span class="chip on">All</span><span class="chip">Unread</span><span class="chip">@Mentions</span><span class="chip">Tasks</span></div>
+    ${items.map(([u,bg,fg,ic,t,d,tm])=>`<div class="nrow ${u}"><div class="nic" style="background:${bg};color:${fg};font-weight:700">${ic}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px">${t}</div><div style="font-size:12px;color:var(--text3);margin-top:2px">${d}</div></div><div style="font-size:11px;color:var(--text4);flex:0 0 auto">${tm}</div></div>`).join('')}
+    <div style="height:96px"></div>`;
+  },
+
+  profile(){
+    return `
+    <div class="prof-head">
+      <div style="width:100%;display:flex;justify-content:flex-start"><span class="link" style="color:#cfe0f5;font-size:22px" onclick="go('more')">‹</span></div>
+      <div class="big">SR</div>
+      <div style="font-size:20px;font-weight:700">Sarah Reynolds</div>
+      <div style="font-size:13px;color:#9fb2cd;margin-top:3px">Development Director · Diocese of St. Petersburg</div>
+      <button class="btn ghost" style="width:auto;padding:0 24px;height:40px;margin-top:16px;background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)">Edit profile</button>
+    </div>
+    <div class="set-cap">Account</div>
+    <div class="set-group">
+      <div class="set-row"><div class="sl">Email</div><div class="sv">sarah.reynolds@…</div></div>
+      <div class="set-row"><div class="sl">Role & scope</div><div class="sv">Dev Director · Diocese +2</div></div>
+      <div class="set-row" onclick="go('settings')"><div class="sl">Settings</div><div class="chev">›</div></div>
+      <div class="set-row" onclick="go('notifications')"><div class="sl">Notifications</div><div class="chev">›</div></div>
+    </div>
+    <div style="padding:16px"><button class="btn ghost" style="color:var(--rose);border-color:#f4c4d1" onclick="go('signin')">Sign out</button></div>
+    <div style="height:80px"></div>`;
+  },
+
+  settings(){
+    const tog=(on)=>`<div class="switch sm ${on?'':'off'}"></div>`;
+    return `
+    <div class="appbar"><div style="display:flex;align-items:center;gap:8px"><span class="link" style="font-size:22px" onclick="go('more')">‹</span><h2 style="font-size:22px">Settings</h2></div></div>
+    <div class="mprofile"><div class="av">SR</div><div style="flex:1"><div style="font-weight:700;font-size:15px">Sarah Reynolds</div><div style="font-size:12.5px;color:var(--text3)">Development Director · Edit profile</div></div><div style="color:var(--text4);font-size:18px">›</div></div>
+    <div class="set-cap">Notifications</div>
+    <div class="set-group">
+      <div class="set-row"><div class="sl">Push notifications</div>${tog(true)}</div>
+      <div class="set-row"><div class="sl">Email digest</div><div class="sv">Daily ›</div></div>
+    </div>
+    <div class="set-cap">Sync & data</div>
+    <div class="set-group">
+      <div class="set-row"><div class="sl">Sync now</div><div class="sv" style="color:var(--green)">2m ago ›</div></div>
+      <div class="set-row"><div class="sl">Auto-sync on Wi-Fi</div>${tog(true)}</div>
+      <div class="set-row"><div class="sl">Offline mode</div>${tog(false)}</div>
+    </div>
+    <div class="set-cap">Display</div>
+    <div class="set-group">
+      <div class="set-row"><div class="sl">Default landing</div><div class="sv">Home ›</div></div>
+      <div class="set-row"><div class="sl">Text size</div><div class="sv">Default ›</div></div>
+    </div>
+    <div style="padding:16px"><button class="btn ghost" style="color:var(--rose);border-color:#f4c4d1" onclick="go('signin')">Sign out</button></div>
+    <div style="height:80px"></div>`;
+  }
+};
+
+const CFG = {
+  splash:{tab:false,dark:true}, signin:{tab:false,dark:false}, signup:{tab:false,dark:false},
+  otp:{tab:false,dark:false}, onboarding:{tab:false,dark:false}, notify:{tab:false,dark:false},
+  welcome:{tab:false,dark:false}, intel:{tab:'donors',dark:true}, donors:{tab:'donors',dark:false},
+  states:{tab:'donors',dark:false}, ds:{tab:'home',dark:false},
+  home:{tab:'home',dark:false}, d360:{tab:'donors',dark:true}, d360act:{tab:'donors',dark:true},
+  d360con:{tab:'donors',dark:true}, briefs:{tab:'home',dark:false},
+  pipeline:{tab:'more',dark:false}, movestage:{tab:'more',dark:false}, campaigns:{tab:'more',dark:false},
+  tasks:{tab:'tasks',dark:false}, comms:{tab:'more',dark:false}, events:{tab:'more',dark:false},
+  gifts:{tab:'gifts',dark:false}, more:{tab:'more',dark:false}, guru:{tab:'more',dark:false},
+  notifications:{tab:'more',dark:false}, profile:{tab:'more',dark:false}, settings:{tab:'more',dark:false}
+};
+let os='ios', screen='splash', obSlide=0, stateView='loading', campView='overview';
+
+function render(){
+  const cfg=CFG[screen]||{tab:false,dark:false};
+  const frame=document.getElementById('frame');
+  frame.className='frame '+os;
+  document.getElementById('devlabel').textContent = os==='ios' ? 'iPhone · iOS styling' : 'Pixel · Android (Material) styling';
+  document.getElementById('statusbar').innerHTML = statusbar(cfg.dark);
+  const body=document.getElementById('body');
+  body.innerHTML = SCREENS[screen]();
+  body.scrollTop = 0;
+  const tb=document.getElementById('tabbar');
+  const hi=document.querySelector('.home-ind');
+  if(cfg.tab===false){ tb.style.display='none'; } else { tb.style.display='flex'; tb.innerHTML=tabbar(cfg.tab); }
+  if(hi) hi.style.background = cfg.dark ? 'rgba(255,255,255,.8)' : '#0f172a';
+}
+function go(name){
+  screen=name;
+  if(name==='onboarding') obSlide=0;
+  document.querySelectorAll('#screens button').forEach(x=>x.classList.toggle('on',x.dataset.s===name));
+  render();
+}
+function obNext(){ obSlide++; render(); }
+function setState(v){ stateView=v; render(); }
+function setCamp(v){ campView=v; render(); }
+window.go=go; window.obNext=obNext; window.setState=setState; window.setCamp=setCamp;
+
+document.getElementById('platform').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  os=b.dataset.os;
+  document.querySelectorAll('#platform button').forEach(x=>x.classList.toggle('on',x===b));
+  render();
+});
+document.getElementById('screens').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  go(b.dataset.s);
+});
+/* the AI (Guru) FAB opens Guru AI from any screen */
+document.getElementById('body').addEventListener('click',e=>{
+  const f=e.target.closest('.fab');
+  if(f && !f.classList.contains('add')) go('guru');
+});
+render();
+</script>
+<script id="nav-active-sync">(function(){function run(){try{var cur=(location.pathname.split("/").pop()||"index.html").toLowerCase();document.querySelectorAll(".nav-item[href]").forEach(function(a){var h=(a.getAttribute("href")||"").split(/[?#]/)[0].toLowerCase().split("/").pop();if(h&&h===cur)a.classList.add("active");});}catch(e){}}if(document.readyState!=="loading")run();else document.addEventListener("DOMContentLoaded",run);})();</script>
+</body>
+</html>
