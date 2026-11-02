@@ -784,6 +784,28 @@ body {
   .sp-res .go{background:none;border:none;font-size:13px;font-weight:700;color:#047857;cursor:pointer;white-space:nowrap}
   .sp-res .x{background:none;border:none;color:#10B981;cursor:pointer;font-size:16px;line-height:1;padding:2px 4px}
   .donor-tag.deceased{background:#E2E8F0;color:#475569}
+  /* parish affiliation history */
+  .ph-tabs{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:12px}
+  .ph-tab{border:none;background:none;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:var(--text-3);padding:7px 14px;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+  .ph-tab.on{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(15,23,42,.1)}
+  .ph-ct{font-size:11px;font-weight:700;background:var(--border);color:var(--text-2);border-radius:20px;padding:1px 7px;min-width:18px;text-align:center}
+  .ph-tab.on .ph-ct{background:var(--blue-pale);color:var(--blue)}
+  .ph-item{display:flex;align-items:flex-start;gap:12px;padding:13px 14px;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;background:#fff}
+  .ph-item.primary{border-color:#C4B5FD;box-shadow:0 0 0 3px #F5F3FF}
+  .ph-item.past{background:var(--surface)}
+  .ph-av{width:38px;height:38px;border-radius:10px;background:var(--gold-light);color:var(--gold,#B45309);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+  .ph-item.past .ph-av{background:#E2E8F0;color:#64748B}
+  .ph-main{flex:1;min-width:0}
+  .ph-nm{font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ph-badge{font-size:10px;font-weight:700;color:#6D28D9;background:#EDE9FE;border-radius:20px;padding:2px 9px}
+  .ph-addr{font-size:11.5px;color:var(--text-3);margin-top:2px}
+  .ph-range{font-size:12px;color:var(--text-2);margin-top:4px}
+  .ph-range .dur{color:var(--text-3)}
+  .ph-acts{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .ph-act{font-size:11.5px;font-weight:600;color:var(--blue);background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;white-space:nowrap}
+  .ph-act:hover{background:var(--blue-pale)}
+  .ph-act.end{color:var(--text-3)}
+  .ph-empty{font-size:12.5px;color:var(--text-3);padding:16px;text-align:center;border:1px dashed var(--border);border-radius:10px}
 </style>
 </head>
 <body>
@@ -1484,6 +1506,17 @@ body {
                 <span style="font-size:10px;font-weight:600;color:var(--text-3);background:var(--surface);padding:2px 7px;border-radius:20px">Prospect</span>
               </div>
             </div>
+
+            <!-- Parish affiliations · Current / Past -->
+            <div class="section-header">
+              <span class="section-title">Parish affiliations</span>
+              <a class="section-action" href="atlas-edit-constituent.html">+ Add parish <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5h7M6 2.5l3 3-3 3"/></svg></a>
+            </div>
+            <div class="ph-tabs" id="ph-tabs">
+              <button class="ph-tab on" data-ph="current" onclick="phTab('current',this)">Current <span class="ph-ct" id="ph-ct-current">0</span></button>
+              <button class="ph-tab" data-ph="past" onclick="phTab('past',this)">Past <span class="ph-ct" id="ph-ct-past">0</span></button>
+            </div>
+            <div id="ph-body" style="margin-bottom:18px"></div>
 
             <!-- Professional / Civic affiliations -->
             <div class="section-header">
@@ -4633,6 +4666,48 @@ window.clFilter=function(cat,el){
   // ── render all ──
   window.spRender=function(){ HH._addrEdit=false; renderResult(); renderIra(); renderPanel(); reflectHero(); };
   spRender();
+})();
+</script>
+<script id="parish-history-js">
+(function(){
+  var PH=[
+    {parish:"St. Michael's Parish", addr:'205 Barfield Rd · Tampa, FL 33606', primary:true,  start:'2008-05', end:''},
+    {parish:'St. Catherine of Siena', addr:'1850 Western Ave · Tampa, FL 33609', primary:false, start:'2019-01', end:''},
+    {parish:'Our Lady of Mercy', addr:"1 Our Lady's Dr · Tampa, FL 33612", primary:false, start:'1996-09', end:'2008-05'},
+    {parish:"St. Joseph's", addr:'270 Central Ave · Tampa, FL 33602', primary:false, start:'1988-06', end:'1996-09'}
+  ];
+  var phView='current';
+  var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmt(ym){ if(!ym) return ''; var p=ym.split('-'); return MON[(+p[1]||1)-1]+' '+p[0]; }
+  function yrs(a,b){ var pa=a.split('-'), pb=(b||'2026-11').split('-'); var m=((+pb[0])-(+pa[0]))*12 + ((+pb[1]||1)-(+pa[1]||1)); var y=Math.max(0,Math.round(m/12)); return y<=1?'about 1 yr':y+' yrs'; }
+  function initials(n){ var w=n.replace(/^St\.?\s+/i,'').split(/\s+/); return ((w[0]||'')[0]+((w[1]||'')[0]||'')).toUpperCase(); }
+  function phCounts(){ return {current:PH.filter(function(p){return !p.end;}).length, past:PH.filter(function(p){return !!p.end;}).length}; }
+  function phRender(){
+    var body=document.getElementById('ph-body'); if(!body) return;
+    var c=phCounts(); var cc=document.getElementById('ph-ct-current'), pc=document.getElementById('ph-ct-past');
+    if(cc) cc.textContent=c.current; if(pc) pc.textContent=c.past;
+    var list;
+    if(phView==='current'){ list=PH.filter(function(p){return !p.end;}).sort(function(a,b){ return (b.primary-a.primary) || (b.start<a.start?-1:1); }); }
+    else { list=PH.filter(function(p){return !!p.end;}).sort(function(a,b){ return b.end<a.end?-1:1; }); }
+    if(!list.length){ body.innerHTML='<div class="ph-empty">No '+phView+' parish affiliations.</div>'; return; }
+    body.innerHTML=list.map(function(p){
+      var past=!!p.end;
+      var range = past ? (fmt(p.start)+' – '+fmt(p.end)+' <span class="dur">· '+yrs(p.start,p.end)+'</span>')
+                       : ('Since '+fmt(p.start)+' <span class="dur">· '+yrs(p.start,'')+'</span>');
+      var acts = past ? '' : '<div class="ph-acts">'
+        +(p.primary?'':'<button class="ph-act" onclick="phSetPrimary(\''+p.parish+'\')">Set primary</button>')
+        +'<button class="ph-act end" onclick="phEnd(\''+p.parish+'\')">End</button></div>';
+      return '<div class="ph-item'+(p.primary&&!past?' primary':'')+(past?' past':'')+'">'
+        +'<div class="ph-av">'+initials(p.parish)+'</div>'
+        +'<div class="ph-main"><div class="ph-nm">'+p.parish+(p.primary&&!past?'<span class="ph-badge">Primary</span>':'')+'</div>'
+          +'<div class="ph-addr">'+p.addr+'</div><div class="ph-range">'+range+'</div></div>'
+        +acts+'</div>';
+    }).join('');
+  }
+  window.phTab=function(v,el){ phView=v; document.querySelectorAll('#ph-tabs .ph-tab').forEach(function(t){t.classList.remove('on');}); if(el) el.classList.add('on'); phRender(); };
+  window.phSetPrimary=function(name){ PH.forEach(function(p){ if(!p.end) p.primary=(p.parish===name); }); phRender(); if(window.atlasToast) atlasToast(name+' set as primary parish'); };
+  window.phEnd=function(name){ var p=PH.filter(function(x){return x.parish===name;})[0]; if(!p) return; p.end='2026-11'; if(p.primary){ p.primary=false; var fc=PH.filter(function(x){return !x.end;})[0]; if(fc) fc.primary=true; } phRender(); if(window.atlasToast) atlasToast(name+' moved to past affiliations'); };
+  phRender();
 })();
 </script>
 <script id="nav-active-sync">(function(){function run(){try{var cur=(location.pathname.split("/").pop()||"index.html").toLowerCase();document.querySelectorAll(".nav-item[href]").forEach(function(a){var h=(a.getAttribute("href")||"").split(/[?#]/)[0].toLowerCase().split("/").pop();if(h&&h===cur)a.classList.add("active");});}catch(e){}}if(document.readyState!=="loading")run();else document.addEventListener("DOMContentLoaded",run);})();</script>
