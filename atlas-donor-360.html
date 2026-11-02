@@ -1225,7 +1225,7 @@ body {
             <table class="gift-table" id="gifts-ledger-table">
               <thead>
                 <tr>
-                  <th>Date</th><th>Campaign / fund</th><th>Type</th><th>Amount</th><th>Status</th><th></th>
+                  <th>Date</th><th>Campaign / fund</th><th>Type</th><th>Amount</th><th>Received from</th><th>Status</th><th></th>
                 </tr>
               </thead>
               <tbody id="gifts-ledger-tbody"></tbody>
@@ -2073,12 +2073,13 @@ body {
     ];
     // Method-specific detail per gift (check #, stock detail, etc.) shown under the Type
     (function(){ var chk=1042; GIFT_LEDGER.forEach(function(g){
-      if(g.type==='Check')            g.det='Check #'+(chk++);
-      else if(g.type==='Stock')       g.det='25 sh AAPL · $200.00/sh · Schwab';
-      else if(g.type==='Matching gift')g.det='Employer 1:1 match';
-      else if(g.type==='Online gift') g.det='Card · Visa ••4242';
-      else if(g.type==='Pledge payment')g.det='Pledge installment · ACH';
-      else if(g.type==='Pledge')      g.det='Scheduled · auto-pay';
+      if(g.type==='Check')            { g.det='Check #'+(chk++); g.rf='Margaret T. Sullivan'; }
+      else if(g.type==='Stock')       { g.det='25 sh AAPL · $200.00/sh · Schwab'; g.rf='Margaret T. Sullivan'; }
+      else if(g.type==='Matching gift'){ g.det='Employer 1:1 match'; g.rf='State Farm Insurance'; }
+      else if(g.type==='Online gift') { g.det='Card · Visa ••4242'; g.rf='Joint account · Margaret'; }
+      else if(g.type==='Pledge payment'){ g.det='Pledge installment · ACH'; g.rf='Joint account · James O’Brien'; }
+      else if(g.type==='Pledge')      { g.det='Scheduled · auto-pay'; g.rf='Joint account · auto-pay'; }
+      if(!g.rf) g.rf='—';
     }); })();
 
     function statusBadge(s){
@@ -2100,13 +2101,14 @@ body {
       );
       const tbody = document.getElementById('gifts-ledger-tbody');
       tbody.innerHTML = filtered.length === 0
-        ? '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:24px;font-style:italic">No gifts match the current filters</td></tr>'
+        ? '<tr><td colspan="7" style="text-align:center;color:var(--text-3);padding:24px;font-style:italic">No gifts match the current filters</td></tr>'
         : filtered.map(g => { var href='atlas-gift-detail.html?donor='+encodeURIComponent('Margaret T. Sullivan')+'&date='+encodeURIComponent(g.date)+'&fund='+encodeURIComponent(g.fund)+'&type='+encodeURIComponent(g.type)+'&method='+encodeURIComponent(g.det||'')+'&amount='+encodeURIComponent(fmtMoney(g.amount))+'&status='+encodeURIComponent(g.status); return `
           <tr style="cursor:pointer" onclick="window.location='${href}'">
             <td>${g.date}</td>
             <td>${g.fund}</td>
             <td>${g.type}${g.det?`<div style="font-size:10.5px;color:var(--text-3);margin-top:1px">${g.det}</div>`:''}</td>
             <td style="font-weight:600;color:${g.status === 'Pending' ? 'var(--amber)' : 'var(--text)'}">${fmtMoney(g.amount)}</td>
+            <td>${g.rf||'—'}</td>
             <td>${statusBadge(g.status)}</td>
             <td style="text-align:right"><a href="${href}" onclick="event.stopPropagation()" title="Open gift detail" style="color:var(--blue);font-size:13px;font-weight:700;text-decoration:none">→</a></td>
           </tr>`; }).join('');
@@ -2125,8 +2127,8 @@ body {
         (t === 'all' || g.type === t) &&
         (f === 'all' || g.fund === f)
       );
-      const rows = [['Date','Fund','Type','Amount','Status']].concat(
-        filtered.map(g => [g.date, g.fund, g.type, g.amount, g.status])
+      const rows = [['Date','Fund','Type','Amount','Received from','Status']].concat(
+        filtered.map(g => [g.date, g.fund, g.type, g.amount, g.rf||'—', g.status])
       );
       const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv' });
@@ -4033,11 +4035,11 @@ window.clFilter=function(cat,el){
     {id:'status',label:'Gift status'}
   ];
   var ROWS=[
-    {date:'Mar 15, 2026',designation:'Annual Fund · Spring ’26',campaign:'Catholic Ministry Appeal',type:'Online gift',typeCls:'blue',amount:'$2,500.00',amtColor:'var(--text)',receiptStatus:'Issued',receiptCls:'issued',status:'Received',statusColor:'var(--green)',statusCls:'status-received',appeal:'Spring 2026 mailing',fund:'Annual Fund · GL 4100',method:'Visa ••4242',ref:'—',receiptno:'R-2026-1842',soft:'—',batch:'BX-2026-014',by:'S. Reynolds',ack:'Mar 16, 2026',receivedfrom:'Joint account',entity:'Diocese of Albany',subtype:'Outright gift',package:'—',postdate:'Mar 16, 2026',receiptStatusForm:'Receipted',receiptable:'$2,500.00',tribute:'—',enddate:'—'},
+    {date:'Mar 15, 2026',designation:'Annual Fund · Spring ’26',campaign:'Catholic Ministry Appeal',type:'Online gift',typeCls:'blue',amount:'$2,500.00',amtColor:'var(--text)',receiptStatus:'Issued',receiptCls:'issued',status:'Received',statusColor:'var(--green)',statusCls:'status-received',appeal:'Spring 2026 mailing',fund:'Annual Fund · GL 4100',method:'Visa ••4242',ref:'—',receiptno:'R-2026-1842',soft:'—',batch:'BX-2026-014',by:'S. Reynolds',ack:'Mar 16, 2026',receivedfrom:'Joint account · Margaret T. Sullivan',entity:'Diocese of Albany',subtype:'Outright gift',package:'—',postdate:'Mar 16, 2026',receiptStatusForm:'Receipted',receiptable:'$2,500.00',tribute:'—',enddate:'—'},
     {date:'Jan 3, 2026',designation:'Annual Fund · Year-end ’25',campaign:'CMA 2026 Pledge',type:'Pledge payment',typeCls:'green',amount:'$1,000.00',amtColor:'var(--text)',receiptStatus:'Issued',receiptCls:'issued',status:'Received',statusColor:'var(--green)',statusCls:'status-received',appeal:'Year-end 2025',fund:'Annual Fund · GL 4100',method:'Check',ref:'#1042',receiptno:'R-2026-0421',soft:'—',batch:'BX-2026-003',by:'D. Cho',ack:'Jan 5, 2026',receivedfrom:'Margaret T. Sullivan',entity:'Diocese of Albany',subtype:'Outright gift',package:'—',postdate:'Jan 5, 2026',receiptStatusForm:'Receipted',receiptable:'$1,000.00',tribute:'In honor of W. Moran',enddate:'Dec 31, 2026'},
-    {date:'Nov 28, 2025',designation:'General Fund · Giving Tuesday ’25',campaign:'Giving Tuesday · St. Michael’s',type:'Online gift',typeCls:'blue',amount:'$500.00',amtColor:'var(--text)',receiptStatus:'Issued',receiptCls:'issued',status:'Received',statusColor:'var(--green)',statusCls:'status-received',appeal:'Giving Tuesday 2025',fund:'General Fund · GL 4000',method:'Apple Pay',ref:'—',receiptno:'R-2025-3380',soft:'—',batch:'online',by:'System',ack:'Nov 28, 2025',receivedfrom:'Joint account',entity:'Diocese of Albany',subtype:'Outright gift',package:'Giving Tuesday — Online',postdate:'Nov 28, 2025',receiptStatusForm:'Receipted',receiptable:'$500.00',tribute:'—',enddate:'—'},
+    {date:'Nov 28, 2025',designation:'General Fund · Giving Tuesday ’25',campaign:'Giving Tuesday · St. Michael’s',type:'Online gift',typeCls:'blue',amount:'$500.00',amtColor:'var(--text)',receiptStatus:'Issued',receiptCls:'issued',status:'Received',statusColor:'var(--green)',statusCls:'status-received',appeal:'Giving Tuesday 2025',fund:'General Fund · GL 4000',method:'Apple Pay',ref:'—',receiptno:'R-2025-3380',soft:'—',batch:'online',by:'System',ack:'Nov 28, 2025',receivedfrom:'Joint account · James O’Brien',entity:'Diocese of Albany',subtype:'Outright gift',package:'Giving Tuesday — Online',postdate:'Nov 28, 2025',receiptStatusForm:'Receipted',receiptable:'$500.00',tribute:'—',enddate:'—'},
     {date:'Sep 10, 2025',designation:'Annual Fund · installment 1',campaign:'CMA 2026 Pledge',type:'Pledge payment',typeCls:'green',amount:'$2,100.00',amtColor:'var(--text)',receiptStatus:'Issued',receiptCls:'issued',status:'Received',statusColor:'var(--green)',statusCls:'status-received',appeal:'—',fund:'Annual Fund · GL 4100',method:'Stock transfer',ref:'DTC-8841',receiptno:'R-2025-2990',soft:'—',batch:'BX-2025-221',by:'S. Reynolds',ack:'Sep 12, 2025',receivedfrom:'James O’Brien (spouse)',entity:'Diocese of Albany',subtype:'Outright gift',package:'—',postdate:'Sep 12, 2025',receiptStatusForm:'Receipted',receiptable:'Shares only',tribute:'—',enddate:'Jun 15, 2026'},
-    {date:'Jun 15, 2026',designation:'Annual Fund · installment 3',campaign:'CMA 2026 Pledge',type:'Pledge',typeCls:'amber',amount:'$1,900.00',amtColor:'var(--amber)',receiptStatus:'Not issued',receiptCls:'none',status:'Pending',statusColor:'var(--amber)',statusCls:'status-pledge',appeal:'—',fund:'Annual Fund · GL 4100',method:'Auto-pay card',ref:'—',receiptno:'—',soft:'—',batch:'—',by:'—',ack:'—',receivedfrom:'Joint account',entity:'Diocese of Albany',subtype:'Pledge',package:'—',postdate:'—',receiptStatusForm:'Not receipted',receiptable:'—',tribute:'—',enddate:'Jun 15, 2026'}
+    {date:'Jun 15, 2026',designation:'Annual Fund · installment 3',campaign:'CMA 2026 Pledge',type:'Pledge',typeCls:'amber',amount:'$1,900.00',amtColor:'var(--amber)',receiptStatus:'Not issued',receiptCls:'none',status:'Pending',statusColor:'var(--amber)',statusCls:'status-pledge',appeal:'—',fund:'Annual Fund · GL 4100',method:'Auto-pay card',ref:'—',receiptno:'—',soft:'—',batch:'—',by:'—',ack:'—',receivedfrom:'Joint account · auto-pay (Margaret)',entity:'Diocese of Albany',subtype:'Pledge',package:'—',postdate:'—',receiptStatusForm:'Not receipted',receiptable:'—',tribute:'—',enddate:'Jun 15, 2026'}
   ];
   var KEY='atlas_donor360_recentcols_v3';
   function colById(id){ for(var i=0;i<COLS.length;i++){ if(COLS[i].id===id) return COLS[i]; } return null; }
