@@ -41,12 +41,14 @@
     .c-btn-primary:hover { background: #1D4ED8; }
 
     /* ── CAMPAIGN BANNER ── */
-    .campaign-banner { background: var(--navy2); border-bottom: 1px solid rgba(255,255,255,.06); padding: 14px 28px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .campaign-banner { background: var(--navy2); border-bottom: 1px solid rgba(255,255,255,.06); padding: 14px 24px; margin: 16px 28px 0; border-radius: 14px 14px 0 0; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
     .cb-title { font-family: 'DM Serif Display', serif; font-size: 19px; color: white; }
     .cb-sub   { font-size: 11px; color: rgba(255,255,255,.4); margin-top: 2px; }
     .cb-stats { display: flex; gap: 0; margin-left: auto; background: rgba(0,0,0,.2); border-radius: 9px; overflow: hidden; flex-shrink: 0; }
     .cbs { padding: 9px 16px; border-right: 1px solid rgba(255,255,255,.07); text-align: center; }
     .cbs:last-child { border-right: none; }
+    .cbs-click { cursor: pointer; transition: background .12s; }
+    .cbs-click:hover { background: rgba(255,255,255,.07); }
     .cbs-val { font-family: 'DM Serif Display', serif; font-size: 18px; color: white; line-height: 1; }
     .cbs-val.gold  { color: #FCD34D; }
     .cbs-val.green { color: #86EFAC; }
@@ -54,7 +56,7 @@
     .cbs-val.amber { color: #FDE68A; }
     .cbs-lbl { font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,.38); margin-top: 2px; }
     /* Campaign progress bar */
-    .campaign-progress { background: rgba(0,0,0,.2); padding: 8px 28px; display: flex; align-items: center; gap: 12px; }
+    .campaign-progress { background: rgba(0,0,0,.2); padding: 8px 24px; margin: 0 28px; border-radius: 0 0 14px 14px; display: flex; align-items: center; gap: 12px; }
     .cp-label { font-size: 11px; color: rgba(255,255,255,.4); white-space: nowrap; }
     .cp-track { flex: 1; height: 5px; background: rgba(255,255,255,.1); border-radius: 3px; overflow: hidden; }
     .cp-fill-pledged { height: 100%; border-radius: 3px 0 0 3px; background: #FCD34D; display: inline-block; }
@@ -63,6 +65,31 @@
     .cp-pct   { font-size: 11px; font-weight: 700; color: #FCD34D; white-space: nowrap; }
 
     /* ── MAIN CONTENT ── */
+    /* standard app topbar (matches other pages) */
+    .topbar { background: white; border-bottom: 1px solid var(--border); padding: 0 24px; height: 52px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .topbar-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .topbar-date { font-size: 12px; color: var(--text3); }
+    .topbar-search { flex: 1; max-width: 460px; margin: 0 18px; background: var(--surf); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 7px 12px; cursor: text; text-decoration: none; }
+    .topbar-search svg { width: 13px; height: 13px; color: var(--text3); }
+    .topbar-search input { background: none; border: none; outline: none; width: 100%; font-size: 12.5px; color: var(--text); font-family: 'DM Sans', sans-serif; }
+    .topbar-search input::placeholder { color: var(--text3); }
+    .topbar-search kbd { margin-left: auto; font-size: 10.5px; font-family: 'DM Sans',sans-serif; background: white; border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; color: var(--text3); }
+    .topbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .tb-btn { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; padding: 7px 13px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background .15s, border-color .15s; text-decoration: none; }
+    .tb-btn svg { width: 12px; height: 12px; }
+    .tb-ghost { background: none; border: 1px solid var(--border); color: var(--text2); }
+    .tb-ghost:hover { background: var(--surf); border-color: #94A3B8; }
+    .tb-primary { background: var(--blue); border: none; color: white; box-shadow: 0 1px 4px rgba(37,99,235,.3); }
+    .tb-primary:hover { background: #1D4ED8; }
+    .tb-notif { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border); background: none; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+    .tb-notif:hover { background: var(--surf); }
+    .tb-notif svg { width: 15px; height: 15px; color: var(--text2); }
+    .notif-dot { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; background: #EF4444; border-radius: 50%; border: 2px solid white; }
+    .rep-crumb { background: white; border-bottom: 1px solid var(--border); padding: 9px 24px; font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 7px; }
+    .rep-crumb a { color: var(--text3); text-decoration: none; }
+    .rep-crumb a:hover { color: var(--blue); }
+    .rep-crumb svg { width: 9px; height: 9px; color: var(--text4); flex-shrink: 0; }
+    .rep-crumb span { color: var(--text2); font-weight: 600; }
     .main { padding: 20px 28px 60px; display: flex; flex-direction: column; gap: 20px; }
 
     /* ── REPORT SWITCHER ── */
@@ -99,6 +126,29 @@
     .filter-search { padding: 5px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 12px; font-family: 'DM Sans', sans-serif; outline: none; background: white; color: var(--text); }
     .filter-search:focus { border-color: var(--blue); }
     .filter-select { padding: 5px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 12px; font-family: 'DM Sans', sans-serif; outline: none; background: white; color: var(--text); cursor: pointer; }
+    /* toolbar rework: count, filters popover, chips, clear */
+    .flt-count { font-size: 12px; color: var(--text3); white-space: nowrap; }
+    .flt-wrap { position: relative; }
+    .flt-btn { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border: 1px solid var(--border); border-radius: 7px; background: white; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--text2); cursor: pointer; }
+    .flt-btn:hover, .flt-btn.on { border-color: var(--border2); }
+    .flt-btn svg { width: 12px; height: 12px; }
+    .flt-badge { display: none; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 20px; background: var(--navy); color: white; font-size: 10px; font-weight: 700; }
+    .flt-badge.show { display: inline-flex; }
+    .delinq-active .flt-badge { background: var(--rose); }
+    .flt-pop { position: fixed; z-index: 2000; background: white; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 40px rgba(15,23,42,.18); padding: 14px; width: 248px; max-height: min(70vh, 460px); overflow: auto; display: none; flex-direction: column; gap: 12px; }
+    .flt-pop.open { display: flex; }
+    .flt-pop .fl { display: block; }
+    .flt-pop .fl > span { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text3); margin-bottom: 5px; }
+    .flt-pop .filter-select { width: 100%; }
+    .flt-pop .flt-foot { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 11px; }
+    .flt-chips { display: flex; flex-wrap: wrap; gap: 7px; padding: 8px 18px; background: var(--surf); border-bottom: 1px solid var(--border); }
+    .delinq-active .flt-chips { background: #FFF5F5; border-bottom-color: #FBCFE8; }
+    .flt-chips:empty { display: none; }
+    .flt-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; background: white; border: 1px solid var(--border); border-radius: 20px; padding: 3px 5px 3px 10px; color: var(--text2); }
+    .flt-chip b { font-weight: 600; color: var(--text); }
+    .flt-chip button { border: none; background: none; cursor: pointer; color: var(--text3); font-size: 14px; line-height: 1; padding: 0 2px; }
+    .flt-chip button:hover { color: var(--rose); }
+    .flt-clear { font-size: 12px; font-weight: 600; color: var(--blue); cursor: pointer; background: none; border: none; font-family: 'DM Sans', sans-serif; }
 
     /* ── PLEDGE BALANCE TABLE ── */
     .pledge-table-wrap { overflow-x: auto; }
@@ -119,6 +169,16 @@
     .pledge-table tr.row-delinq td  { background: #FFF5F5; }
     .pledge-table tr.row-delinq:hover td { background: #FFE8F0; }
     .pledge-table tr.row-complete td { opacity: .65; }
+    /* active sort column + sticky Donor column */
+    .pledge-table th.th-active { color: #fff; background: var(--navy3); }
+    .pledge-table th:first-child, .pledge-table td:first-child { position: sticky; left: 0; z-index: 2; }
+    .pledge-table th:first-child { z-index: 3; }
+    .pledge-table td:first-child { background: #fff; }
+    .pledge-table tr.row-behind  td:first-child { background: #FFFBEB; }
+    .pledge-table tr.row-delinq  td:first-child { background: #FFF5F5; }
+    .pledge-table tr:hover td:first-child { background: var(--surf); }
+    .pledge-table tr.row-behind:hover td:first-child { background: #FEF3C7; }
+    .pledge-table tr.row-delinq:hover td:first-child { background: #FFE8F0; }
 
     /* Donor name cell */
     .donor-name { font-size: 13px; font-weight: 600; color: var(--text); }
@@ -536,23 +596,36 @@
 </aside>
 
 
-<!-- TOP CHROME -->
-<div class="page-chrome">
-  <div class="chrome-mark"><svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7.5" stroke="white" stroke-width="1.5"/><path d="M5.5 9.5C6.5 11.5 9 13 9 13s2.5-1.5 3.5-3.5S12 5 9 5 4.5 7.5 5.5 9.5z" fill="white" fill-opacity=".9"/></svg></div>
-  <div class="chrome-title">GiveCentral Atlas</div>
-  <div class="chrome-sep"></div>
-  <div class="chrome-trail">Reports → Campaigns → <b>Cathedral Restoration Capital Campaign</b></div>
-  <div class="chrome-right">
-    <button class="c-btn c-btn-ghost">
+<!-- TOP CHROME (standard app topbar) -->
+<div class="topbar">
+  <span class="topbar-title">Report viewer</span>
+  <span class="topbar-date">Monday, May 4, 2026</span>
+  <a href="atlas-search.html" class="topbar-search">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5l2.5 2.5"/></svg>
+    <input type="text" placeholder="Search donors, gifts, campaigns…" readonly style="cursor:pointer">
+    <kbd>⌘K</kbd>
+  </a>
+  <div class="topbar-right">
+    <button class="tb-btn tb-ghost">
       <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 1v7M3 5.5l3 3 3-3"/><path d="M1.5 10.5h9"/></svg>
       Export
     </button>
-    <button class="c-btn c-btn-ghost">
+    <button class="tb-btn tb-ghost">
       <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 3h9a.7.7 0 01.7.7v6a.7.7 0 01-.7.7h-9a.7.7 0 01-.7-.7V3.7a.7.7 0 01.7-.7z"/><path d="M1.5 3.5l4.5 3 4.5-3"/></svg>
       Email report
     </button>
-    <button class="c-btn c-btn-primary">Schedule queue</button>
+    <button class="tb-btn tb-primary">Schedule queue</button>
+    <a href="atlas-notifications.html" class="tb-notif" title="Notifications">
+      <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7.5 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5zM6 13a1.5 1.5 0 003 0"/></svg>
+      <div class="notif-dot"></div>
+    </a>
   </div>
+</div>
+<!-- breadcrumb row -->
+<div class="rep-crumb">
+  <a href="atlas-reports.html">Reports</a>
+  <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 2l3 3-3 3"/></svg>
+  <span>Cathedral Restoration Capital Campaign</span>
 </div>
 
 <!-- CAMPAIGN BANNER -->
@@ -565,8 +638,9 @@
     <div class="cbs"><div class="cbs-val gold">$8.74M</div><div class="cbs-lbl">Total pledged</div></div>
     <div class="cbs"><div class="cbs-val green">$5.12M</div><div class="cbs-lbl">Cash received</div></div>
     <div class="cbs"><div class="cbs-val amber">$3.62M</div><div class="cbs-lbl">Pledge balance</div></div>
-    <div class="cbs"><div class="cbs-val rose">$284K</div><div class="cbs-lbl">Overdue</div></div>
-    <div class="cbs"><div class="cbs-val">148</div><div class="cbs-lbl">Active pledges</div></div>
+    <div class="cbs cbs-click" onclick="kpiFilter('delinq')" title="Filter to delinquent pledges"><div class="cbs-val rose">$284K</div><div class="cbs-lbl">Overdue</div></div>
+    <div class="cbs cbs-click" onclick="kpiFilter('all')" title="Show all active pledges"><div class="cbs-val">148</div><div class="cbs-lbl">Active pledges</div></div>
+    <div class="cbs"><div class="cbs-val green">58.6%</div><div class="cbs-lbl">Fulfilment rate</div></div>
   </div>
 </div>
 <div class="campaign-progress" style="background:var(--navy2);border-bottom:1px solid rgba(255,255,255,.06)">
@@ -617,33 +691,58 @@
           <button class="filter-pill" onclick="filterBalance('delinq',this)">Delinquent (12)</button>
           <button class="filter-pill" onclick="filterBalance('complete',this)">Fulfilled (0)</button>
           <div style="flex:1"></div>
-          <input type="text" class="filter-search" placeholder="Search donor…" style="width:180px">
-          <select class="filter-select">
-            <option>All gift officers</option>
-            <option>Mike Donovan</option>
-            <option>Sarah Reynolds</option>
-            <option>Janet Williams</option>
-          </select>
-          <select class="filter-select">
-            <option>All parishes</option>
-            <option>St. Michael's</option>
-            <option>Holy Cross</option>
-            <option>Cathedral</option>
+          <span class="flt-count" id="pb-count"></span>
+          <input type="text" id="pb-search" class="filter-search" placeholder="Search donor…" oninput="applyPledge()" style="width:160px">
+          <div class="flt-wrap">
+            <button class="flt-btn" id="pb-filters-btn" onclick="toggleFilters('pb',event)">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1 2.5h10M3 6h6M5 9.5h2"/></svg>
+              Filters <span class="flt-badge" id="pb-fbadge"></span>
+            </button>
+            <div class="flt-pop" id="pb-pop" onclick="event.stopPropagation()">
+              <label class="fl"><span>Gift officer</span>
+                <select class="filter-select" id="pb-officer" onchange="applyPledge()">
+                  <option value="all">All gift officers</option><option>Mike D.</option><option>Sarah R.</option><option>Janet W.</option>
+                </select></label>
+              <label class="fl"><span>Parish</span>
+                <select class="filter-select" id="pb-parish" onchange="applyPledge()">
+                  <option value="all">All parishes</option><option>Cathedral</option><option>St. Michael's</option><option>Holy Cross</option><option>All parishes</option><option>Diocese</option>
+                </select></label>
+              <label class="fl"><span>Gift type</span>
+                <select class="filter-select" id="pb-type" onchange="applyPledge()">
+                  <option value="all">All gift types</option><option>Credit card</option><option>ACH / bank</option><option>Check</option><option>Stock</option><option>DAF</option>
+                </select></label>
+              <label class="fl"><span>Next payment</span>
+                <select class="filter-select" id="pb-when" onchange="applyPledge()">
+                  <option value="all">Any time</option><option value="today">Due today</option><option value="week">Due this week</option><option value="month">Due this month</option><option value="year">Due this year</option>
+                </select></label>
+              <div class="flt-foot"><button class="flt-clear" onclick="clearFilters('pb')">Clear all</button><button class="flt-btn" onclick="toggleFilters('pb',event)">Done</button></div>
+            </div>
+          </div>
+          <select class="filter-select" id="pb-sort" onchange="applyPledge()">
+            <option value="balance">Sort: outstanding balance</option>
+            <option value="largest">Sort: largest pledge first</option>
+            <option value="nextdate">Sort: next payment (soonest)</option>
+            <option value="pct">Sort: % paid (low→high)</option>
+            <option value="paid">Sort: paid to date</option>
+            <option value="overdue">Sort: overdue amount</option>
+            <option value="donoraz">Sort: donor (A–Z)</option>
+            <option value="gifttype">Sort: gift type</option>
           </select>
         </div>
+        <div class="flt-chips" id="pb-chips"></div>
 
         <div class="pledge-table-wrap">
           <table class="pledge-table" id="pledge-table">
             <thead>
               <tr>
-                <th style="width:200px">Donor <span class="sort-arrow">↕</span></th>
-                <th style="width:110px;text-align:right">Pledge total <span class="sort-arrow">↑</span></th>
-                <th style="width:105px;text-align:right">Paid to date <span class="sort-arrow">↕</span></th>
-                <th style="width:110px;text-align:right">Balance <span class="sort-arrow">↕</span></th>
-                <th style="width:95px;text-align:right">Overdue <span class="sort-arrow">↕</span></th>
-                <th style="width:130px">Progress</th>
+                <th style="width:200px" data-sort="donoraz" onclick="pbSort('donoraz')">Donor <span class="sort-arrow">↕</span></th>
+                <th style="width:110px;text-align:right" data-sort="largest" onclick="pbSort('largest')">Pledge total <span class="sort-arrow">↕</span></th>
+                <th style="width:105px;text-align:right" data-sort="paid" onclick="pbSort('paid')">Paid to date <span class="sort-arrow">↕</span></th>
+                <th style="width:110px;text-align:right" data-sort="balance" onclick="pbSort('balance')">Balance <span class="sort-arrow">↕</span></th>
+                <th style="width:95px;text-align:right" data-sort="overdue" onclick="pbSort('overdue')">Overdue <span class="sort-arrow">↕</span></th>
+                <th style="width:130px" data-sort="pct" onclick="pbSort('pct')">Progress <span class="sort-arrow">↕</span></th>
                 <th style="width:80px">Status</th>
-                <th style="width:120px">Next payment</th>
+                <th style="width:120px" data-sort="nextdate" onclick="pbSort('nextdate')">Next payment <span class="sort-arrow">↕</span></th>
                 <th style="width:130px">Installments</th>
                 <th style="width:110px">Gift officer</th>
                 <th style="width:90px">Parish</th>
@@ -655,18 +754,7 @@
         </div>
 
         <div class="report-footer">
-          <div class="rf-stat"><div class="rf-val">148</div><div class="rf-lbl">Active pledges</div></div>
-          <div class="rf-sep"></div>
-          <div class="rf-stat"><div class="rf-val">$8.74M</div><div class="rf-lbl">Total pledged</div></div>
-          <div class="rf-sep"></div>
-          <div class="rf-stat"><div class="rf-val" style="color:#86EFAC">$5.12M</div><div class="rf-lbl">Cash received</div></div>
-          <div class="rf-sep"></div>
-          <div class="rf-stat"><div class="rf-val" style="color:#FDE68A">$3.62M</div><div class="rf-lbl">Outstanding</div></div>
-          <div class="rf-sep"></div>
-          <div class="rf-stat"><div class="rf-val" style="color:#FDA4AF">$284K</div><div class="rf-lbl">Overdue</div></div>
-          <div class="rf-sep"></div>
-          <div class="rf-stat"><div class="rf-val">58.6%</div><div class="rf-lbl">Fulfilment rate</div></div>
-          <div class="rf-note">Generated May 12, 2026 · Atlas CRM · Confidential — development office use only</div>
+          <div class="rf-note" style="margin-left:0">Generated May 12, 2026 · Atlas CRM · Confidential — development office use only</div>
         </div>
       </div>
 
@@ -733,17 +821,44 @@
           <button class="filter-pill rose" onclick="filterDelinq('high',this)">30–89 days (5)</button>
           <button class="filter-pill rose" onclick="filterDelinq('moderate',this)">1–29 days (3)</button>
           <div style="flex:1"></div>
-          <select class="filter-select">
-            <option>All gift officers</option>
-            <option>Mike Donovan</option>
-            <option>Sarah Reynolds</option>
-          </select>
-          <select class="filter-select">
-            <option>Sort by: days overdue</option>
-            <option>Sort by: amount overdue</option>
-            <option>Sort by: pledge total</option>
+          <span class="flt-count" id="dq-count"></span>
+          <input type="text" id="dq-search" class="filter-search" placeholder="Search donor…" oninput="applyDelinq()" style="width:160px">
+          <div class="flt-wrap">
+            <button class="flt-btn" id="dq-filters-btn" onclick="toggleFilters('dq',event)">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1 2.5h10M3 6h6M5 9.5h2"/></svg>
+              Filters <span class="flt-badge" id="dq-fbadge"></span>
+            </button>
+            <div class="flt-pop" id="dq-pop" onclick="event.stopPropagation()">
+              <label class="fl"><span>Gift officer</span>
+                <select class="filter-select" id="dq-officer" onchange="applyDelinq()">
+                  <option value="all">All gift officers</option><option>Mike D.</option><option>Sarah R.</option><option>Janet W.</option>
+                </select></label>
+              <label class="fl"><span>Recommended action</span>
+                <select class="filter-select" id="dq-action" onchange="applyDelinq()">
+                  <option value="all">All actions</option><option value="call">Personal call</option><option value="legal">Legal review</option><option value="letter">Formal letter</option><option value="reminder">Send reminder</option>
+                </select></label>
+              <label class="fl"><span>Gift type</span>
+                <select class="filter-select" id="dq-type" onchange="applyDelinq()">
+                  <option value="all">All gift types</option><option>Credit card</option><option>ACH / bank</option><option>Check</option><option>Stock</option><option>DAF</option>
+                </select></label>
+              <label class="fl"><span>Last contact</span>
+                <select class="filter-select" id="dq-when" onchange="applyDelinq()">
+                  <option value="all">Any time</option><option value="today">Contacted today</option><option value="week">This week</option><option value="month">This month</option><option value="year">This year</option>
+                </select></label>
+              <div class="flt-foot"><button class="flt-clear" onclick="clearFilters('dq')">Clear all</button><button class="flt-btn" onclick="toggleFilters('dq',event)">Done</button></div>
+            </div>
+          </div>
+          <select class="filter-select" id="dq-sort" onchange="applyDelinq()">
+            <option value="days">Sort: days overdue</option>
+            <option value="overdue">Sort: amount overdue (largest)</option>
+            <option value="pledge">Sort: pledge total</option>
+            <option value="contact">Sort: oldest contact</option>
+            <option value="recent">Sort: most recent contact</option>
+            <option value="pct">Sort: % paid (low→high)</option>
+            <option value="donoraz">Sort: donor (A–Z)</option>
           </select>
         </div>
+        <div class="flt-chips" id="dq-chips"></div>
 
         <div class="pledge-table-wrap">
           <table class="pledge-table" id="delinq-table">
@@ -820,9 +935,54 @@ const DELINQ_DATA = [
   { id:20, donor:"Sullivan, Catherine",        pledge:12000,  paid:6000,   overdue:2000,   days:8,   freq:"Semi-annual $2K",   lastContact:"May 3, 2026",  officer:"Mike D.", action:"reminder",priority:"moderate", note:"Payment likely in transit" },
 ];
 
-// ── RENDER PLEDGE TABLE ───────────────────────────────────────────────────────
-function renderPledge(filter) {
-  const rows = filter === 'all' ? PLEDGES : PLEDGES.filter(p => p.status === filter);
+// ── enrich both datasets with a gift type / payment method (for filters + sorting) ──
+(function(){
+  var TYPES=['Credit card','ACH / bank','Check','Stock','DAF'];
+  PLEDGES.forEach(function(p,i){ if(!p.type) p.type=TYPES[(p.id+i)%TYPES.length]; });
+  DELINQ_DATA.forEach(function(d,i){ if(!d.type) d.type=TYPES[(d.id+i)%TYPES.length]; });
+})();
+
+// ── date-window helper (anchored to the report's "as of" date) ──
+var REPORT_NOW = new Date(2026, 4, 12);  // May 12, 2026
+function inWindow(dateStr, win){
+  if (win==='all' || !win) return true;
+  var d = new Date(dateStr); if (isNaN(d)) return false;
+  var n = REPORT_NOW;
+  if (win==='today')  return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth() && d.getDate()===n.getDate();
+  if (win==='week')   { var ws=new Date(n); ws.setDate(n.getDate()-n.getDay()); ws.setHours(0,0,0,0); var we=new Date(ws); we.setDate(ws.getDate()+7); return d>=ws && d<we; }
+  if (win==='month')  return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth();
+  if (win==='year')   return d.getFullYear()===n.getFullYear();
+  return true;
+}
+
+// ── PLEDGE BALANCE: filter + sort state ───────────────────────────────────────
+var PB = { status:'all', q:'', officer:'all', parish:'all', type:'all', when:'all', sort:'balance' };
+function renderPledge() {
+  var rows = PLEDGES.filter(function(p){
+    if (PB.status!=='all'){
+      if (PB.status==='complete'){ if (p.paid!==p.pledge) return false; }
+      else if (p.status!==PB.status) return false;
+    }
+    if (PB.officer!=='all' && p.officer!==PB.officer) return false;
+    if (PB.parish!=='all'  && p.parish!==PB.parish) return false;
+    if (PB.type!=='all'    && p.type!==PB.type) return false;
+    if (PB.when!=='all'    && !inWindow(p.nextDate, PB.when)) return false;
+    if (PB.q){ var q=PB.q.toLowerCase(); if ((p.donor+' '+p.parish+' '+p.officer+' '+p.type).toLowerCase().indexOf(q)<0) return false; }
+    return true;
+  });
+  var dir = { pct:1, nextdate:1, donoraz:1, gifttype:1 }[PB.sort] ? 1 : -1;
+  rows.sort(function(a,b){
+    var av,bv;
+    if (PB.sort==='largest'){ av=a.pledge; bv=b.pledge; }
+    else if (PB.sort==='paid'){ av=a.paid; bv=b.paid; }
+    else if (PB.sort==='overdue'){ av=a.overdue; bv=b.overdue; }
+    else if (PB.sort==='pct'){ av=a.paid/a.pledge; bv=b.paid/b.pledge; }
+    else if (PB.sort==='nextdate'){ av=new Date(a.nextDate).getTime()||Infinity; bv=new Date(b.nextDate).getTime()||Infinity; }
+    else if (PB.sort==='donoraz'){ av=a.donor.toLowerCase(); bv=b.donor.toLowerCase(); }
+    else if (PB.sort==='gifttype'){ av=a.type; bv=b.type; }
+    else { av=a.pledge-a.paid; bv=b.pledge-b.paid; }
+    return av<bv?-dir:av>bv?dir:0;
+  });
   document.getElementById('pledge-tbody').innerHTML = rows.map(p => {
     const pct = Math.round((p.paid / p.pledge) * 100);
     const balance = p.pledge - p.paid;
@@ -865,15 +1025,41 @@ function renderPledge(filter) {
       <td style="font-size:11px;color:var(--text2)">${p.officer}</td>
       <td style="font-size:11px;color:var(--text3)">${p.parish}</td>
     </tr>`;
-  }).join('');
+  }).join('') || '<tr><td colspan="11" style="text-align:center;color:var(--text3);padding:26px;font-style:italic">No pledges match these filters.</td></tr>';
+  pbMeta(rows.length);
+}
+function applyPledge(){
+  var s=document.getElementById('pb-search'), o=document.getElementById('pb-officer'), pa=document.getElementById('pb-parish'), ty=document.getElementById('pb-type'), wn=document.getElementById('pb-when'), so=document.getElementById('pb-sort');
+  PB.q = s?s.value:''; PB.officer = o?o.value:'all'; PB.parish = pa?pa.value:'all'; PB.type = ty?ty.value:'all'; PB.when = wn?wn.value:'all'; PB.sort = so?so.value:'balance';
+  renderPledge();
 }
 
-// ── RENDER DELINQUENCY TABLE ──────────────────────────────────────────────────
-function renderDelinq(filter) {
-  const rows = filter === 'all' ? DELINQ_DATA :
-    filter === 'critical' ? DELINQ_DATA.filter(d => d.days >= 90) :
-    filter === 'high'     ? DELINQ_DATA.filter(d => d.days >= 30 && d.days < 90) :
-    DELINQ_DATA.filter(d => d.days < 30);
+// ── DELINQUENCY: filter + sort state ──────────────────────────────────────────
+var DQ = { sev:'all', q:'', officer:'all', action:'all', type:'all', when:'all', sort:'days' };
+function renderDelinq() {
+  var rows = DELINQ_DATA.filter(function(d){
+    if (DQ.sev==='critical' && !(d.days>=90)) return false;
+    if (DQ.sev==='high'     && !(d.days>=30 && d.days<90)) return false;
+    if (DQ.sev==='moderate' && !(d.days<30)) return false;
+    if (DQ.officer!=='all'  && d.officer!==DQ.officer) return false;
+    if (DQ.action!=='all'   && d.action!==DQ.action) return false;
+    if (DQ.type!=='all'     && d.type!==DQ.type) return false;
+    if (DQ.when!=='all'     && !inWindow(d.lastContact, DQ.when)) return false;
+    if (DQ.q){ var q=DQ.q.toLowerCase(); if ((d.donor+' '+d.officer+' '+d.freq+' '+d.type).toLowerCase().indexOf(q)<0) return false; }
+    return true;
+  });
+  var dir = { contact:1, pct:1, donoraz:1 }[DQ.sort] ? 1 : -1;  // these ascend; others descend
+  rows.sort(function(a,b){
+    var av,bv;
+    if (DQ.sort==='overdue'){ av=a.overdue; bv=b.overdue; }
+    else if (DQ.sort==='pledge'){ av=a.pledge; bv=b.pledge; }
+    else if (DQ.sort==='contact'){ av=new Date(a.lastContact).getTime(); bv=new Date(b.lastContact).getTime(); }
+    else if (DQ.sort==='recent'){ av=new Date(a.lastContact).getTime(); bv=new Date(b.lastContact).getTime(); dir=-1; }
+    else if (DQ.sort==='pct'){ av=a.paid/a.pledge; bv=b.paid/b.pledge; }
+    else if (DQ.sort==='donoraz'){ av=a.donor.toLowerCase(); bv=b.donor.toLowerCase(); }
+    else { av=a.days; bv=b.days; }
+    return av<bv?-dir:av>bv?dir:0;
+  });
 
   const actionMap = {
     call:    { label:'Personal call', cls:'ab-call' },
@@ -916,7 +1102,13 @@ function renderDelinq(filter) {
         <button class="action-btn ab-done" title="Mark contacted">✓ Done</button>
       </td>
     </tr>`;
-  }).join('');
+  }).join('') || '<tr><td colspan="11" style="text-align:center;color:var(--text3);padding:26px;font-style:italic">No delinquent pledges match these filters.</td></tr>';
+  dqMeta(rows.length);
+}
+function applyDelinq(){
+  var s=document.getElementById('dq-search'), o=document.getElementById('dq-officer'), ac=document.getElementById('dq-action'), ty=document.getElementById('dq-type'), wn=document.getElementById('dq-when'), so=document.getElementById('dq-sort');
+  DQ.q = s?s.value:''; DQ.officer = o?o.value:'all'; DQ.action = ac?ac.value:'all'; DQ.type = ty?ty.value:'all'; DQ.when = wn?wn.value:'all'; DQ.sort = so?so.value:'days';
+  renderDelinq();
 }
 
 // ── TAB SWITCHING ─────────────────────────────────────────────────────────────
@@ -932,17 +1124,79 @@ function showTab(tab) {
 function filterBalance(f, btn) {
   document.querySelectorAll('.filter-row .filter-pill:not(.rose)').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  renderPledge(f);
+  PB.status = f;
+  renderPledge();
 }
 function filterDelinq(f, btn) {
   document.querySelectorAll('.filter-pill.rose').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  renderDelinq(f);
+  DQ.sev = f;
+  renderDelinq();
 }
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
-renderPledge('all');
-renderDelinq('all');
+// ── toolbar: meta (count + chips + badge), popover, clear, KPI, header sort ──
+var WHEN_LBL = { pb:{today:'Due today',week:'Due this week',month:'Due this month',year:'Due this year'},
+                 dq:{today:'Contacted today',week:'Contacted this week',month:'Contacted this month',year:'Contacted this year'} };
+function chipHTML(prefix, list){
+  var host=document.getElementById(prefix+'-chips'); if(!host) return;
+  host.innerHTML = list.map(function(c){ return '<span class="flt-chip"><b>'+c.lbl+'</b><button title="Remove" onclick="chipClear(\''+prefix+'\',\''+c.key+'\')">×</button></span>'; }).join('')
+    + (list.length ? '<button class="flt-clear" onclick="clearFilters(\''+prefix+'\')">Clear all</button>' : '');
+}
+function pbMeta(n){
+  var cnt=document.getElementById('pb-count'); if(cnt) cnt.textContent = n+(n===1?' result':' results');
+  var list=[];
+  if(PB.q) list.push({key:'q',lbl:'“'+PB.q+'”'});
+  if(PB.officer!=='all') list.push({key:'officer',lbl:'Officer: '+PB.officer});
+  if(PB.parish!=='all')  list.push({key:'parish',lbl:'Parish: '+PB.parish});
+  if(PB.type!=='all')    list.push({key:'type',lbl:'Type: '+PB.type});
+  if(PB.when!=='all')    list.push({key:'when',lbl:WHEN_LBL.pb[PB.when]||PB.when});
+  var pop=list.filter(function(c){return c.key!=='q';}).length;
+  var badge=document.getElementById('pb-fbadge'); if(badge){ badge.textContent=pop; badge.classList.toggle('show',pop>0); }
+  chipHTML('pb', list);
+}
+function dqMeta(n){
+  var cnt=document.getElementById('dq-count'); if(cnt) cnt.textContent = n+(n===1?' result':' results');
+  var list=[];
+  if(DQ.q) list.push({key:'q',lbl:'“'+DQ.q+'”'});
+  if(DQ.officer!=='all') list.push({key:'officer',lbl:'Officer: '+DQ.officer});
+  if(DQ.action!=='all')  list.push({key:'action',lbl:'Action: '+({call:'Personal call',legal:'Legal review',letter:'Formal letter',reminder:'Send reminder'}[DQ.action]||DQ.action)});
+  if(DQ.type!=='all')    list.push({key:'type',lbl:'Type: '+DQ.type});
+  if(DQ.when!=='all')    list.push({key:'when',lbl:WHEN_LBL.dq[DQ.when]||DQ.when});
+  var pop=list.filter(function(c){return c.key!=='q';}).length;
+  var badge=document.getElementById('dq-fbadge'); if(badge){ badge.textContent=pop; badge.classList.toggle('show',pop>0); }
+  chipHTML('dq', list);
+}
+function chipClear(prefix, key){
+  if(key==='q'){ var s=document.getElementById(prefix+'-search'); if(s) s.value=''; }
+  else { var sel=document.getElementById(prefix+'-'+key); if(sel) sel.value='all'; }
+  prefix==='pb'?applyPledge():applyDelinq();
+}
+function clearFilters(prefix){
+  var s=document.getElementById(prefix+'-search'); if(s) s.value='';
+  ['officer','parish','type','when','action'].forEach(function(f){ var e=document.getElementById(prefix+'-'+f); if(e) e.value='all'; });
+  var so=document.getElementById(prefix+'-sort'); if(so) so.value = prefix==='pb'?'balance':'days';
+  if(prefix==='pb'){
+    document.querySelectorAll('.report-body-pledge .filter-pill').forEach(function(b){ b.classList.toggle('active', (b.getAttribute('onclick')||'').indexOf("'all'")>=0); });
+    PB.status='all'; applyPledge();
+  } else {
+    document.querySelectorAll('.filter-pill.rose').forEach(function(b){ b.classList.toggle('active', (b.getAttribute('onclick')||'').indexOf("'all'")>=0); });
+    DQ.sev='all'; applyDelinq();
+  }
+  closePop(prefix);
+}
+function toggleFilters(prefix, ev){ if(ev) ev.stopPropagation(); var pop=document.getElementById(prefix+'-pop'), btn=document.getElementById(prefix+'-filters-btn'); if(!pop) return; var open=!pop.classList.contains('open'); pop.classList.toggle('open',open); if(btn) btn.classList.toggle('on',open);
+  if(open && btn && btn.getBoundingClientRect){ var r=btn.getBoundingClientRect(), w=248; var left=Math.max(8, Math.min(r.right-w, window.innerWidth-w-8)); pop.style.left=left+'px'; pop.style.top=(r.bottom+6)+'px'; } }
+function closePop(prefix){ var pop=document.getElementById(prefix+'-pop'), btn=document.getElementById(prefix+'-filters-btn'); if(pop) pop.classList.remove('open'); if(btn) btn.classList.remove('on'); }
+document.addEventListener('click', function(e){ ['pb','dq'].forEach(function(p){ var pop=document.getElementById(p+'-pop'), btn=document.getElementById(p+'-filters-btn'); if(pop&&pop.classList.contains('open') && !pop.contains(e.target) && btn && !btn.contains(e.target)) closePop(p); }); });
+function kpiFilter(st){ showTab('balance'); document.querySelectorAll('.report-body-pledge .filter-pill').forEach(function(b){ if((b.getAttribute('onclick')||'').indexOf("filterBalance('"+st+"'")>=0) filterBalance(st,b); }); var w=document.getElementById('tabs-wrap'); if(w&&w.scrollIntoView) w.scrollIntoView({behavior:'smooth',block:'start'}); }
+// header-click sort for the balance table, synced with the Sort dropdown
+function pbSort(key){ var so=document.getElementById('pb-sort'); if(so){ so.value=key; } PB.sort=key; renderPledge(); pbSyncHeads(); }
+function pbSyncHeads(){ document.querySelectorAll('#pledge-table thead th[data-sort]').forEach(function(th){ var a=th.querySelector('.sort-arrow'); if(a) a.textContent = th.dataset.sort===PB.sort ? '▾' : '↕'; th.classList.toggle('th-active', th.dataset.sort===PB.sort); }); }
+
+renderPledge();
+renderDelinq();
+pbSyncHeads();
 </script>
 <!-- ════════════════════════════════════════════════════════
      Atlas Dead-CTA Rescue · v1
