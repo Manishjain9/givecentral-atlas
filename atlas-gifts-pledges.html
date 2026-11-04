@@ -309,7 +309,11 @@ select.fld { appearance: none; background-image: url("data:image/svg+xml,%3Csvg 
 .qa-card .desc { font-size:11.5px; color:var(--text-3); margin-top:2px; }
 
 .gift-table { background:white; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
-.gt-head, .gt-row { display:grid; grid-template-columns: 1.4fr 110px 1fr 100px 100px 110px 36px; gap:14px; align-items:center; padding:11px 18px; }
+.gt-head, .gt-row { display:grid; grid-template-columns: 1.4fr 104px 1fr 1.15fr 92px 96px 106px 34px; gap:13px; align-items:center; padding:11px 18px; }
+.gt-row .gt-src .sfrom { font-weight:500; color:var(--text); }
+.gt-row .gt-src .ssub { font-size:11px; color:var(--text-3); margin-top:2px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.gt-row .gt-src .acct { font-size:9.5px; font-weight:700; letter-spacing:.02em; padding:1px 7px; border-radius:20px; background:var(--surface); color:var(--text-3); border:1px solid var(--border); }
+.gt-row .gt-src .acct.joint { background:var(--blue-pale); color:var(--blue); border-color:#BFDBFE; }
 .gt-head { background:var(--surface); border-bottom:1px solid var(--border); font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); }
 .gt-row { border-bottom:1px solid var(--border-soft); font-size:13px; cursor:pointer; }
 .gt-row:hover { background:var(--blue-pale); }
@@ -862,6 +866,7 @@ function atlasAddr(n){
       <div class="sortable" data-sort="donor">Donor <span class="sc"></span></div>
       <div class="sortable" data-sort="date">Date <span class="sc"></span></div>
       <div>Designation</div>
+      <div>Received from</div>
       <div>Type</div>
       <div>Receipt</div>
       <div class="sortable" data-sort="amount" style="text-align:right">Amount <span class="sc"></span></div>
@@ -1069,10 +1074,10 @@ function atlasAddr(n){
   var AVC=['var(--rose)','var(--purple)','var(--amber)','var(--green)','var(--blue)','#0D9488','#B45309','#7C3AED'];
 
   var SEED=[
-   {name:"Margaret O'Brien",sub:"Indiv. · Major donor",av:'var(--rose)',date:new Date(2026,4,4),fund:'Cathedral Restoration',appeal:"Spring ’26",type:'Cash',tc:'blue',rec:'Issued',rc:'green',amt:10000,href:'atlas-donor-360.html'},
-   {name:"Robert & Susan Lin",sub:"Household · Cathedral committee",av:'var(--purple)',date:new Date(2026,4,3),fund:'Cathedral Restoration',appeal:"Spring ’26",type:'Check',tc:'blue',rec:'Issued',rc:'green',amt:25000,href:'atlas-donor-360.html'},
-   {name:"Schwab Charitable (DAF)",sub:"Donor: Margaret O'Brien",av:'var(--amber)',date:new Date(2026,4,2),fund:'Cathedral Restoration',appeal:'',type:'DAF',tc:'amber',rec:'Soft credit',rc:'amber',amt:15000,href:'atlas-donor-360.html'},
-   {name:"Anthony Riccardi",sub:"100 sh AAPL · stock",av:'var(--green)',date:new Date(2026,3,22),fund:'Annual Appeal',appeal:'Year-end',type:'Stock',tc:'purple',rec:'Issued (no $)',rc:'green',amt:18400,href:'atlas-stock-gift.html'}
+   {name:"Margaret O'Brien",sub:"Indiv. · Major donor",av:'var(--rose)',date:new Date(2026,4,4),fund:'Cathedral Restoration',appeal:"Spring ’26",type:'Cash',tc:'blue',rec:'Issued',rc:'green',amt:10000,href:'atlas-donor-360.html',receivedFrom:"Margaret O'Brien",household:'—',acctLabel:'Individual',jointAcct:false},
+   {name:"Robert & Susan Lin",sub:"Household · Cathedral committee",av:'var(--purple)',date:new Date(2026,4,3),fund:'Cathedral Restoration',appeal:"Spring ’26",type:'Check',tc:'blue',rec:'Issued',rc:'green',amt:25000,href:'atlas-donor-360.html',receivedFrom:'Joint account',household:'Lin household',acctLabel:'Joint',jointAcct:true},
+   {name:"Schwab Charitable (DAF)",sub:"Donor: Margaret O'Brien",av:'var(--amber)',date:new Date(2026,4,2),fund:'Cathedral Restoration',appeal:'',type:'DAF',tc:'amber',rec:'Soft credit',rc:'amber',amt:15000,href:'atlas-donor-360.html',receivedFrom:'Schwab Charitable DAF',household:"O'Brien household",acctLabel:'DAF',jointAcct:false},
+   {name:"Anthony Riccardi",sub:"100 sh AAPL · stock",av:'var(--green)',date:new Date(2026,3,22),fund:'Annual Appeal',appeal:'Year-end',type:'Stock',tc:'purple',rec:'Issued (no $)',rc:'green',amt:18400,href:'atlas-stock-gift.html',receivedFrom:'Anthony Riccardi',household:'—',acctLabel:'Individual',jointAcct:false}
   ];
 
   var DATA=SEED.slice();
@@ -1090,7 +1095,15 @@ function atlasAddr(n){
     g.initial=((g.name.replace(/[^A-Za-z]/,'')[0])||'?').toUpperCase();
     g.dateTxt=fmt(g.date);
     g.desig=g.fund+(g.appeal?' · '+g.appeal:'');
-    g.search=(g.name+' '+g.desig+' '+g.type+' '+g.rec).toLowerCase();
+    // Household / joint account / from whom received (fill where not seeded)
+    if(g.receivedFrom==null){
+      var last=(g.name.split(/[\s&]+/).slice(-1)[0]||g.name);
+      if(/DAF/i.test(g.type)){ g.receivedFrom=g.name; g.household=last+' household'; g.acctLabel='DAF'; g.jointAcct=false; }
+      else if(g.sub==='Organization'){ g.receivedFrom=g.name; g.household='—'; g.acctLabel='Org account'; g.jointAcct=false; }
+      else if(g.sub==='Household'){ g.household=last+' household'; g.jointAcct=rnd()<0.62; g.receivedFrom=g.jointAcct?'Joint account':g.name; g.acctLabel=g.jointAcct?'Joint':'Individual'; }
+      else { g.receivedFrom=g.name; g.household='—'; g.acctLabel='Individual'; g.jointAcct=false; }
+    }
+    g.search=(g.name+' '+g.desig+' '+g.type+' '+g.rec+' '+g.receivedFrom+' '+(g.household||'')).toLowerCase();
   });
 
   function uniq(key){ var s=[]; DATA.forEach(function(g){ if(g[key] && s.indexOf(g[key])===-1) s.push(g[key]); }); s.sort(); return s; }
@@ -1127,6 +1140,7 @@ function atlasAddr(n){
     return '<a class="gt-row" href="'+g.href+'">'
       +'<div class="name"><span class="av" style="background:'+g.av+'">'+g.initial+'</span><div class="nm-text"><div class="nm">'+esc(g.name)+'</div><div class="sub">'+esc(g.sub)+'</div><div class="sub addr">'+esc(atlasAddr(g.name))+'</div></div></div>'
       +'<div>'+g.dateTxt+'</div><div>'+esc(g.desig)+'</div>'
+      +'<div class="gt-src"><div class="sfrom">'+esc(g.receivedFrom)+'</div><div class="ssub">'+esc(g.household||'—')+(g.acctLabel?' <span class="acct'+(g.jointAcct?' joint':'')+'">'+esc(g.acctLabel)+'</span>':'')+'</div></div>'
       +'<div><span class="tag '+g.tc+'">'+g.type+'</span></div>'
       +'<div><span class="tag '+g.rc+'">'+g.rec+'</span></div>'
       +'<div class="amt">'+money(g.amt)+'</div>'
@@ -1163,8 +1177,8 @@ function atlasAddr(n){
   if(pagerEl) pagerEl.addEventListener('change',function(e){ if(e.target.id==='rg-size'){ state.size=parseInt(e.target.value,10); state.page=0; render(); } });
   var exportBtn=document.getElementById('rg-export');
   if(exportBtn) exportBtn.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation();
-    var list=getFiltered(), lines=[['Donor','Date','Designation','Type','Receipt','Amount']];
-    list.forEach(function(g){ lines.push([g.name,g.dateTxt,g.desig,g.type,g.rec,money(g.amt)]); });
+    var list=getFiltered(), lines=[['Donor','Date','Designation','Received from','Household','Account','Type','Receipt','Amount']];
+    list.forEach(function(g){ lines.push([g.name,g.dateTxt,g.desig,g.receivedFrom,g.household||'—',g.acctLabel||'',g.type,g.rec,money(g.amt)]); });
     var csv=lines.map(function(r){ return r.map(function(c){ var s=String(c).replace(/"/g,'""'); return /[",\n]/.test(s)?'"'+s+'"':s; }).join(','); }).join('\n');
     var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}), url=URL.createObjectURL(blob), a=document.createElement('a');
     a.href=url; a.download='recent-gifts-'+new Date().toISOString().slice(0,10)+'.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -2046,6 +2060,46 @@ function atlasAddr(n){
     document.getElementById('pb-drawer-scrim').classList.add('show');
     document.getElementById('pb-drawer').classList.add('show');
   };
+
+  /* ── Batch receipts modal (matches the donor-ledger receipt modal pattern) ── */
+  function brToast(m){ if(window.atlasToast) atlasToast(m); }
+  window.openBatchReceipts = function(id){
+    var b = POSTED_BATCHES.find(function(x){ return x.id===id; });
+    if(!b){ brToast('Batch not found'); return; }
+    var ex=document.getElementById('br-scrim'); if(ex) ex.remove();
+    var sample = (b.gifts_sample && b.gifts_sample.length) ? b.gifts_sample : [];
+    var rows = sample.map(function(g,i){
+      var rn='R-'+(b.id.replace(/[^0-9]/g,'').slice(-4)||'2026')+'-'+String(i+1).padStart(2,'0');
+      return '<div style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-top:1px solid #EEF2F7">'
+        +'<div style="flex:1;min-width:0"><div style="font-weight:600;color:#0F172A;font-size:13px">'+g.donor+'</div><div style="font-size:11px;color:#64748B">'+g.fund+' · '+g.type+' · Receipt #'+rn+'</div></div>'
+        +'<div style="font-family:\'DM Mono\',monospace;font-weight:600;color:#0F172A;font-size:13px">'+fmtMoneyFull(g.amt)+'</div>'
+        +'<span class="tag green" style="font-size:10px">Issued</span>'
+        +'<button onclick="window.print()" title="Download PDF" style="border:1px solid #D7DEE8;background:#fff;color:#334155;padding:6px 11px;border-radius:7px;font:600 11px \'DM Sans\',sans-serif;cursor:pointer">PDF</button>'
+        +'</div>';
+    }).join('');
+    var more = b.gifts - sample.length;
+    if(more>0) rows += '<div style="padding:12px 18px;border-top:1px solid #EEF2F7;font-size:12px;color:#64748B;font-style:italic">+ '+more+' more receipt'+(more===1?'':'s')+' in this batch — use Download all to export the full set.</div>';
+    if(!sample.length) rows = '<div style="padding:22px 18px;border-top:1px solid #EEF2F7;font-size:12.5px;color:#64748B;text-align:center">'+b.gifts+' receipts issued for this batch, totalling '+fmtMoneyFull(b.total)+'. Use <strong>Download all</strong> to export them as a single PDF.</div>';
+    var sc=document.createElement('div'); sc.id='br-scrim';
+    sc.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:100060;display:flex;align-items:center;justify-content:center;padding:24px;font-family:\'DM Sans\',sans-serif';
+    sc.innerHTML='<div style="background:#fff;border-radius:14px;width:min(560px,95vw);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 26px 70px rgba(15,23,42,.35);overflow:hidden">'
+      +'<div style="padding:15px 20px;border-bottom:1px solid #E5EAF1;display:flex;align-items:flex-start;gap:10px">'
+        +'<div style="flex:1"><div style="font-size:14px;font-weight:700;color:#0F172A">Receipts · '+b.name+'</div>'
+          +'<div style="font-size:12px;color:#64748B;margin-top:2px">'+b.id+' · '+b.gifts+' receipts · '+fmtMoneyFull(b.total)+' · all issued</div></div>'
+        +'<button id="br-x" style="width:28px;height:28px;border-radius:50%;border:none;background:#F1F5F9;color:#64748B;font-size:16px;cursor:pointer">×</button></div>'
+      +'<div style="overflow:auto">'+rows+'</div>'
+      +'<div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 20px;border-top:1px solid #E5EAF1;background:#FAFAFA">'
+        +'<button id="br-dl" style="display:inline-flex;align-items:center;gap:7px;border:1.5px solid #D7DEE8;background:#fff;color:#334155;padding:9px 16px;border-radius:9px;font:600 13px \'DM Sans\',sans-serif;cursor:pointer"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1.5v8M3.5 6.5L7 9.5l3.5-3M2 12h10"/></svg>Download all (PDF)</button>'
+        +'<button id="br-email" style="border:none;background:#2563EB;color:#fff;padding:9px 18px;border-radius:9px;font:600 13px \'DM Sans\',sans-serif;cursor:pointer">Email all to donors</button></div>'
+      +'</div>';
+    document.body.appendChild(sc);
+    function close(){ sc.remove(); }
+    sc.addEventListener('click', function(e){ if(e.target===sc) close(); });
+    sc.querySelector('#br-x').addEventListener('click', close);
+    sc.querySelector('#br-dl').addEventListener('click', function(){ brToast('Downloading '+b.gifts+' receipts for '+b.id+' · PDF'); });
+    sc.querySelector('#br-email').addEventListener('click', function(){ close(); brToast('Emailing '+b.gifts+' receipts to donors'); });
+    document.addEventListener('keydown', function esc(e){ if(e.key==='Escape'){ close(); document.removeEventListener('keydown',esc); } });
+  };
   // Expand the drawer to list every gift in the batch (no separate posted-batch page).
   window.pbViewAllGifts = function(){
     var b = window.__pbCurrent; if(!b) return;
@@ -2298,7 +2352,7 @@ function atlasAddr(n){
     if(a==='view'){ if(window.openPostedDrawer && curBatchId) openPostedDrawer(curBatchId); }
     else if(a==='audit') ggToast('Audit report generated · PDF downloading');
     else if(a==='gl') ggToast('GL export started · file ready in ~30s');
-    else if(a==='receipts') ggToast('Opening receipts for this batch');
+    else if(a==='receipts') openBatchReceipts(curBatchId);
     else if(a==='reverse'){ if(window.atlasConfirm) atlasConfirm({icon:'danger',danger:true,title:'Reverse this posted batch?',message:'Posting is locked. Reversing creates offsetting entries for every gift in the batch and writes an immutable audit record. Requires DBA approval.',confirmText:'Request reversal',cancelText:'Cancel',onConfirm:function(){ ggToast('Batch reversal requested · pending DBA approval · audit entry created'); }}); else ggToast('Batch reversal requested'); } };
 
   document.addEventListener('click', function(e){ if(!e.target.closest('#gt-menu') && !e.target.closest('.kebab')) closeMenu(); });
