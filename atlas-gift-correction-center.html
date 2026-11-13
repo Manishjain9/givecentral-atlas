@@ -88,7 +88,11 @@ body{font-family:'DM Sans',sans-serif;background:#EEF2F7;color:var(--text);displ
 .lp-head{padding:14px 16px 12px;border-bottom:1px solid var(--border)}
 .lp-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--text);margin-bottom:3px}
 .lp-sub{font-size:11px;color:var(--text3)}
-.lp-search-wrap{padding:10px 12px;border-bottom:1px solid var(--border)}
+.lp-search-wrap{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center}
+.search-wrap-rel{flex:1}
+.lp-period{flex:0 0 auto;padding:7px 8px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;background:var(--surf);color:var(--text2);cursor:pointer}
+.lp-period:focus{border-color:var(--blue);background:white}
+.lp-period.on{border-color:var(--blue);color:var(--blue);font-weight:600;background:var(--bluep)}
 .lp-search{width:100%;padding:7px 10px 7px 30px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;background:var(--surf);color:var(--text)}
 .lp-search:focus{border-color:var(--blue);background:white}
 .search-icon{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:var(--text4)}
@@ -369,6 +373,36 @@ body{font-family:'DM Sans',sans-serif;background:#EEF2F7;color:var(--text);displ
 .an-stat{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:10px 12px}
 .an-stat .v{font-family:'DM Serif Display',serif;font-size:21px;color:var(--text);line-height:1}
 .an-stat .l{font-size:10px;color:var(--text3);margin-top:4px}
+.an-stat-live{cursor:pointer;border-color:var(--amber);background:var(--amberl)}
+.an-stat-live:hover{box-shadow:0 0 0 2px var(--amberl)}
+/* Approval queue */
+.pq-wrap{background:white;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.pq-head{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--text);margin-bottom:12px}
+.pq-head svg{width:14px;height:14px;color:var(--amber)}
+.pq-count{margin-left:auto;font-size:10px;font-weight:600;color:#92400E;background:var(--amberl);border:1px solid var(--amber);padding:2px 8px;border-radius:20px}
+.pq-empty{font-size:12px;color:var(--text3);line-height:1.5}
+.pq-card{border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:10px;padding:12px 14px;margin-bottom:10px;background:var(--surf)}
+.pq-card:last-child{margin-bottom:0}
+.pq-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.pq-type{font-size:12px;font-weight:700;color:var(--text)}
+.pq-id{font-size:10px;color:var(--text3);font-family:ui-monospace,monospace}
+.pq-rule{display:flex;align-items:center;gap:5px;font-size:10.5px;color:#92400E;margin-bottom:10px}
+.pq-rule svg{width:11px;height:11px;flex:0 0 auto}
+.pq-ft{display:flex;align-items:center;gap:10px;background:white;border:1px solid var(--border);border-radius:8px;padding:9px 10px;margin-bottom:9px}
+.pq-col{flex:1;min-width:0}
+.pq-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);margin-bottom:2px}
+.pq-donor{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pq-meta{font-size:10.5px;color:var(--text2);margin-top:1px}
+.pq-arrow{width:16px;height:12px;flex:0 0 auto}
+.pq-reason{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:6px}
+.pq-sub{font-size:10px;color:var(--text3);margin-bottom:10px}
+.pq-actions{display:flex;gap:8px;justify-content:flex-end}
+.pq-btn{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;font-family:'DM Sans',sans-serif;padding:6px 12px;border-radius:7px;cursor:pointer;border:1px solid transparent}
+.pq-btn svg{width:11px;height:11px}
+.pq-reject{background:white;border-color:var(--border);color:var(--text2)}
+.pq-reject:hover{border-color:var(--red);color:var(--red)}
+.pq-approve{background:var(--green);color:white}
+.pq-approve:hover{filter:brightness(.94)}
 .an-bars{display:flex;flex-direction:column;gap:7px}
 .an-bar-row{display:flex;align-items:center;gap:10px;font-size:11.5px}
 .an-bar-row .nm{width:150px;color:var(--text2);flex-shrink:0}
@@ -441,6 +475,31 @@ body{font-family:'DM Sans',sans-serif;background:#EEF2F7;color:var(--text);displ
 /* unified filter chips with severity dots */
 .lpf-chip{display:inline-flex;align-items:center;gap:6px}
 .lpf-chip i{width:6px;height:6px;border-radius:50%}
+/* Unified filter toolbar */
+.lp-filter-row{display:flex;align-items:center;gap:10px;padding:8px 12px 10px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.lp-filter-row .lp-filter{padding:0;border-bottom:none;flex:1}
+.lp-summary{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
+.lp-shown{font-size:11.5px;color:var(--text3)}
+.lp-shown b{color:var(--text);font-weight:700}
+.lp-tags{display:inline-flex;gap:4px;flex-wrap:wrap}
+.lp-tag{font-size:10.5px;font-weight:600;color:var(--text2);background:var(--surf);border:1px solid var(--border);border-radius:5px;padding:2px 7px}
+.lp-clear{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;font-family:'DM Sans',sans-serif;color:var(--blue);background:none;border:none;cursor:pointer;padding:2px 2px}
+.lp-clear svg{width:10px;height:10px}
+.lp-clear:hover{text-decoration:underline}
+/* Custom date range */
+.lp-range{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bluep)}
+.lp-range input[type=date]{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);background:white;outline:none}
+.lp-range input[type=date]:focus{border-color:var(--blue)}
+.lp-range-sep{font-size:11.5px;color:var(--text3)}
+.lp-range-apply{font-size:11.5px;font-weight:600;font-family:'DM Sans',sans-serif;padding:6px 12px;border-radius:7px;border:none;background:var(--blue);color:white;cursor:pointer}
+.lp-range-apply:hover{filter:brightness(.95)}
+/* Banner (triage) extras */
+.tr-meta{font-size:11.5px;color:var(--text3)}
+.tr-actions{display:inline-flex;gap:8px;margin-left:auto}
+.tr-cta{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;font-family:'DM Sans',sans-serif;padding:5px 11px;border-radius:7px;border:1px solid var(--border);background:white;color:var(--text);cursor:pointer}
+.tr-cta:hover{border-color:#94A3B8}
+.tr-cta.danger{background:var(--redl);border-color:var(--red);color:var(--red)}
+.tr-cta.danger:hover{filter:brightness(.97)}
 /* worklist table */
 .gift-list{padding:0}
 .gc-tbl{width:100%;border-collapse:collapse}
@@ -458,7 +517,7 @@ body{font-family:'DM Sans',sans-serif;background:#EEF2F7;color:var(--text);displ
 .gc-tbl .cbx input{width:14px;height:14px;accent-color:var(--blue);cursor:pointer;vertical-align:middle}
 .gc-dn{font-weight:600;color:var(--text);font-size:12.5px}
 .gc-dn-sub{font-size:10.5px;color:var(--text3);margin-top:1px}
-.gc-amt{font-family:'DM Mono',monospace;font-weight:600;color:var(--text);font-size:12.5px}
+.gc-amt{font-family:'DM Mono',monospace;font-weight:600;color:var(--text);font-size:12.5px;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 .gc-grp td{background:var(--surf);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);padding:6px 14px;border-bottom:.5px solid var(--border)}
 .gc-grp .ct{color:var(--text4);font-weight:600}
 .gc-flag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;border-radius:20px;padding:2px 8px;white-space:nowrap}
@@ -468,7 +527,10 @@ body{font-family:'DM Sans',sans-serif;background:#EEF2F7;color:var(--text);displ
 .gc-rb:hover{border-color:#94A3B8}
 .gc-rb.pri{border-color:var(--blue);color:var(--blue);background:var(--bluep)}
 .gc-rb.pri:hover{background:var(--bluel)}
-.gc-rb.danger{border-color:var(--red);color:var(--red);background:var(--redl)}
+.gc-rb.danger{border-color:var(--red);color:#fff;background:var(--red);box-shadow:0 1px 2px rgba(220,38,38,.25)}
+.gc-rb.danger:hover{filter:brightness(.94);border-color:var(--red)}
+.gc-rb.ghost{border-color:transparent;background:none;color:var(--text3);opacity:.85}
+.gc-rb.ghost:hover{border-color:var(--border);background:#fff;color:var(--text2);opacity:1}
 .gc-keb{border:1px solid transparent;background:none;color:var(--text3);cursor:pointer;font-size:15px;line-height:1;padding:3px 7px;border-radius:6px}
 .gc-keb:hover{background:var(--surf);border-color:var(--border)}
 .gc-menu{position:fixed;z-index:100060;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 30px rgba(15,23,42,.16);padding:5px;min-width:180px}
@@ -551,7 +613,7 @@ function atlasAddr(n){
   <div class="topbar">
     <div class="tb-crumb">
       <a href="atlas-gifts-pledges.html">Gifts &amp; pledges</a><span class="sep">›</span>
-      <span class="cur">Gift Correction &amp; Reversal Center</span>
+      <span class="cur">Corrections &amp; reversals</span>
     </div>
     <div class="tb-right">
       <button class="tbtn" onclick="openAudit()"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1.5 2.5h9M1.5 6h9M1.5 9.5h5.5"/></svg>Audit trail</button>
@@ -573,8 +635,25 @@ function atlasAddr(n){
         <div class="search-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M8 8l2 2"/></svg></div>
         <input type="text" class="lp-search" placeholder="Search gifts…" oninput="filterGifts(this.value)">
       </div>
+      <select class="lp-period" id="lp-period" onchange="setListPeriod(this.value)" title="Filter by date">
+        <option value="all">All dates</option>
+        <option value="today">Today</option>
+        <option value="week">This week</option>
+        <option value="month">This month</option>
+        <option value="year">This year</option>
+        <option value="custom">Custom range…</option>
+      </select>
     </div>
-    <div class="lp-filter" id="lp-filter"></div>
+    <div class="lp-range" id="lp-range" style="display:none">
+      <input type="date" id="range-from" onchange="setRange()" title="From date">
+      <span class="lp-range-sep">to</span>
+      <input type="date" id="range-to" onchange="setRange()" title="To date">
+      <button class="lp-range-apply" onclick="setRange()">Apply</button>
+    </div>
+    <div class="lp-filter-row">
+      <div class="lp-filter" id="lp-filter"></div>
+      <div class="lp-summary" id="lp-summary"></div>
+    </div>
     <div class="bulk-bar" id="bulk-bar">
       <b id="bulk-count">0 selected</b>
       <select id="bulk-fund" style="flex:1;min-width:0">
@@ -896,12 +975,13 @@ function atlasAddr(n){
         <option value="nsf">NSF / check return</option>
         <option value="amount">Amount correction</option>
       </select>
-      <button class="btn btn-primary" style="font-size:12px;padding:6px 13px">Export CSV</button>
+      <button class="btn btn-primary" style="font-size:12px;padding:6px 13px" onclick="exportAuditCSV()">Export CSV</button>
       <button class="ad-close" onclick="closeAudit()" title="Close"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>
     </div>
   </div>
   <div class="ad-body">
     <div id="audit-analytics"></div>
+    <div id="audit-pending"></div>
     <div id="audit-entries"></div>
   </div>
 </aside>
@@ -918,10 +998,10 @@ const GIFTS = [
   {id:'G002', donor:"Sullivan, Margaret",  amt:1000,  fund:"Cathedral Capital",    gl:"5200", batch:"2026-0412", date:"Apr 12, 2026", check:"8821",  officer:"Mike D.", status:"posted",    parish:"Cathedral",      memo:"Capital campaign", ocr:0.72, rYear:2026, receipt:true,  house:[{nm:"Sullivan, Thomas",rel:"Spouse · #4821"},{nm:"Sullivan Family Foundation",rel:"DAF · linked"}]},
   {id:'G003', donor:"Walsh, Thomas",       amt:500,   fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0412", date:"Apr 12, 2026", check:"10441", officer:"Sarah R.",status:"corrected", parish:"St. Michael's",  memo:"CMA", ocr:0.90, rYear:2026, receipt:true,  house:[{nm:"Walsh, Susan",rel:"Spouse · #4820"}]},
   {id:'G004', donor:"Harrington, David",  amt:5000,  fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0415", date:"Apr 15, 2026", check:"3301",  officer:"Mike D.", status:"reversed",  parish:"Cathedral",      memo:"Bishop appeal", ocr:0.95, rYear:2025, receipt:true,  house:[{nm:"Harrington, Susan",rel:"Spouse · #4803"}]},
-  {id:'G005', donor:"Kim, Dr. Patricia",  amt:750,   fund:"General Fund",         gl:"4050", batch:"2026-0415", date:"Apr 15, 2026", check:"2219",  officer:"Janet W.",status:"posted",    parish:"Holy Cross",     memo:"General", ocr:0.88, rYear:2026, receipt:true,  house:[{nm:"Kim, Daniel",rel:"Spouse · #5102"}]},
-  {id:'G006', donor:"Morrison, Peter",    amt:2000,  fund:"School Scholarship",   gl:"4300", batch:"2026-0415", date:"Apr 15, 2026", check:"9922",  officer:"Sarah R.",status:"posted",    parish:"St. Catherine's",memo:"Scholarship", ocr:0.94, rYear:2026, receipt:true, fundClosed:true, house:[{nm:"Morrison, Clare",rel:"Spouse · #4931"}]},
+  {id:'G005', donor:"Kim, Dr. Patricia",  amt:750,   fund:"General Fund",         gl:"4050", batch:"2026-0415", date:"Apr 15, 2026", check:"2219",  officer:"Janet W.",status:"posted",    parish:"Holy Cross",     memo:"General", ocr:0.88, rYear:2026, receipt:true, gtype:"recurring",  house:[{nm:"Kim, Daniel",rel:"Spouse · #5102"}]},
+  {id:'G006', donor:"Morrison, Peter",    amt:2000,  fund:"School Scholarship",   gl:"4300", batch:"2026-0415", date:"Apr 15, 2026", check:"9922",  officer:"Sarah R.",status:"posted",    parish:"St. Catherine's",memo:"Scholarship", ocr:0.94, rYear:2026, receipt:true, house:[{nm:"Morrison, Clare",rel:"Spouse · #4931"}]},
   {id:'G007', donor:"Mendez, Carlos",     amt:250,   fund:"Cathedral Capital",    gl:"5200", batch:"2026-0418", date:"Apr 18, 2026", check:"7711",  officer:"Janet W.",status:"nsf",       parish:"Cathedral",      memo:"CMA", ocr:0.68, rYear:2026, receipt:true,  house:[{nm:"Mendez, Sofia",rel:"Spouse · #5202"}]},
-  {id:'G008', donor:"Collins, Brian",     amt:1500,  fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0418", date:"Apr 18, 2026", check:"4456",  officer:"Mike D.", status:"posted",    parish:"Cathedral",      memo:"CMA 2026", ocr:0.91, rYear:2026, receipt:true,  house:[{nm:"Collins, Mary",rel:"Spouse · #4709"}]},
+  {id:'G008', donor:"Collins, Brian",     amt:1500,  fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0418", date:"Apr 18, 2026", check:"4456",  officer:"Mike D.", status:"posted",    parish:"Cathedral",      memo:"CMA 2026", ocr:0.91, rYear:2026, receipt:true, gtype:"pledge",  house:[{nm:"Collins, Mary",rel:"Spouse · #4709"}]},
   {id:'G009', donor:"Fitzgerald, Anne",   amt:300,   fund:"General Fund",         gl:"4050", batch:"2026-0418", date:"Apr 18, 2026", check:"1122",  officer:"Janet W.",status:"posted",    parish:"Holy Cross",     memo:"General fund", ocr:0.80, rYear:2025, receipt:true,  house:[{nm:"Fitzgerald, James",rel:"Spouse · #5044"}]},
   {id:'G010', donor:"Nguyen, Thomas",     amt:1200,  fund:"CMA Annual Fund",      gl:"4100", batch:"2026-0420", date:"Apr 20, 2026", check:"5533",  officer:"Sarah R.",status:"posted",    parish:"St. Catherine's",memo:"CMA", ocr:0.97, rYear:2026, receipt:true,  house:[{nm:"Nguyen, Linh",rel:"Spouse · #5310"}]},
 ];
@@ -960,37 +1040,134 @@ const AUDIT_LOG = [
   },
 ];
 
+// ── PENDING APPROVAL QUEUE ────────────────────────────────────────────────────
+// Corrections that exceed the approval threshold ($2,500+ or amount changes)
+// and are waiting on a Finance reviewer before they post.
+let PENDING = [
+  {
+    id:"APR-101", type:"Amount correction", submitted:"Apr 19, 2026 · 4:51 PM", by:"K. Novicky", rule:"Amount changes require Finance approval",
+    from:{donor:"O'Brien, James (#4810)", fund:"CMA Annual Fund", amt:"$2,500.00", check:"#10441"},
+    to:  {donor:"O'Brien, James (#4810)", fund:"CMA Annual Fund", amt:"$2,050.00", check:"#10441"},
+    reason:"Check keyed as $2,500 — actual written amount is $2,050 (bank-cleared amount confirmed). Difference re-posted.",
+  },
+  {
+    id:"APR-102", type:"Fund reclassification", submitted:"Apr 20, 2026 · 9:07 AM", by:"M. Donovan", rule:"Correction of $5,000 or more",
+    from:{donor:"Harrington, David (#4802)", fund:"CMA Annual Fund", amt:"$5,000.00", check:"#3301"},
+    to:  {donor:"Harrington, David (#4802)", fund:"Cathedral Capital", amt:"$5,000.00", check:"#3301"},
+    reason:"Donor intent letter designates Capital campaign, not CMA. Reassigning fund + GL on the $5,000 gift.",
+  },
+];
+
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let selectedGift = null;
 let correctionType = null;
 let currentStep = 1;
 
 // ── RENDER GIFT LIST ──────────────────────────────────────────────────────────
-let listSearch = '', listStatus = 'all';
+let listSearch = '', listStatus = 'all', listPeriod = 'all';
+let rangeFrom = null, rangeTo = null;
+const REVIEW_NOW = new Date('Apr 20, 2026');
+function inPeriod(dateStr, period) {
+  if (period === 'all') return true;
+  const d = new Date(dateStr);
+  if (isNaN(d)) return true;
+  const now = REVIEW_NOW;
+  if (period === 'today') return d.toDateString() === now.toDateString();
+  if (period === 'week') { const diff = (now - d) / 86400000; return diff >= 0 && diff < 7; }
+  if (period === 'month') return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  if (period === 'year') return d.getFullYear() === now.getFullYear();
+  if (period === 'custom') {
+    if (!rangeFrom && !rangeTo) return true;
+    if (rangeFrom && d < rangeFrom) return false;
+    if (rangeTo && d > rangeTo) return false;
+    return true;
+  }
+  return true;
+}
+const PERIOD_LABEL = {today:'Today', week:'This week', month:'This month', year:'This year'};
+function periodLabel() {
+  if (listPeriod === 'custom') {
+    const f = rangeFrom ? rangeFrom.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '…';
+    const t = rangeTo ? rangeTo.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '…';
+    return (!rangeFrom && !rangeTo) ? 'Custom range' : f + ' – ' + t;
+  }
+  return PERIOD_LABEL[listPeriod] || '';
+}
 const BULK = new Set();
 
+// Base respects the active DATE filter only — so chip counts show what the
+// selected period actually contains (keeps the two filter systems honest).
+function periodBase() { return GIFTS.filter(g => inPeriod(g.date, listPeriod)); }
+// Custom range only counts as active once at least one date is set.
+function periodActive() { return listPeriod !== 'all' && !(listPeriod === 'custom' && !rangeFrom && !rangeTo); }
+function anyFilterActive() { return listStatus !== 'all' || periodActive() || !!(listSearch && listSearch.trim()); }
+
+const CHIP_LABEL = {all:'All', flagged:'Needs attention', nsf:'NSF', lowconf:'Low-confidence', posted:'Posted', corrected:'Corrected', reversed:'Reversed'};
+
 function renderListFilter() {
-  const counts = {all:GIFTS.length};
-  GIFTS.forEach(g => counts[g.status] = (counts[g.status]||0)+1);
-  counts.flagged = GIFTS.filter(g => giftFlag(g)).length;
-  counts.lowconf = GIFTS.filter(g => { const fl = giftFlag(g); return fl && fl.cls === 'gf-ocr'; }).length;
-  counts.closed = GIFTS.filter(g => g.fundClosed).length;
+  const base = periodBase();
+  const counts = {all:base.length};
+  base.forEach(g => counts[g.status] = (counts[g.status]||0)+1);
+  counts.flagged = base.filter(g => giftFlag(g)).length;
+  counts.lowconf = base.filter(g => { const fl = giftFlag(g); return fl && fl.cls === 'gf-ocr'; }).length;
   // [key, label, severity-dot-color|null]
   const chips = [
     ['all','All',null],['flagged','Needs attention','var(--amber)'],
-    ['nsf','NSF','var(--red)'],['lowconf','Low-confidence','var(--amber)'],['closed','Fund closed','#7C3AED'],
+    ['nsf','NSF','var(--red)'],['lowconf','Low-confidence','var(--amber)'],
     ['posted','Posted',null],['corrected','Corrected',null],['reversed','Reversed',null]
   ];
   document.getElementById('lp-filter').innerHTML = chips.map(([k,l,c]) =>
     `<button class="lpf-chip ${listStatus===k?'on':''}" onclick="setListFilter('${k}')">${c?`<i style="background:${k===listStatus?'#fff':c}"></i>`:''}${l}${counts[k]!=null?' ('+counts[k]+')':''}</button>`).join('');
+  renderFilterSummary();
 }
+
+function renderFilterSummary() {
+  const el = document.getElementById('lp-summary'); if (!el) return;
+  const shown = giftsFiltered().length, total = GIFTS.length;
+  const active = anyFilterActive();
+  const tags = [];
+  if (periodActive()) tags.push(periodLabel());
+  if (listStatus !== 'all') tags.push(CHIP_LABEL[listStatus]);
+  if (listSearch && listSearch.trim()) tags.push('“' + listSearch.trim() + '”');
+  el.innerHTML =
+    `<span class="lp-shown">Showing <b>${shown}</b> of ${total}</span>` +
+    (tags.length ? `<span class="lp-tags">${tags.map(t=>`<span class="lp-tag">${t}</span>`).join('')}</span>` : '') +
+    (active ? `<button class="lp-clear" onclick="clearAllFilters()"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 2.5l6 6M8.5 2.5l-6 6"/></svg>Clear filters</button>` : '');
+}
+
 function setListFilter(s) { listStatus = s; renderListFilter(); renderGiftList(); }
 function filterGifts(v) { listSearch = v; renderGiftList(); }
+function setListPeriod(p) {
+  listPeriod = p;
+  const sel = document.getElementById('lp-period');
+  if (sel) sel.classList.toggle('on', p !== 'all');
+  const range = document.getElementById('lp-range');
+  if (range) range.style.display = (p === 'custom') ? 'flex' : 'none';
+  renderListFilter(); renderGiftList();
+}
+function setRange() {
+  const fv = (document.getElementById('range-from')||{}).value;
+  const tv = (document.getElementById('range-to')||{}).value;
+  rangeFrom = fv ? new Date(fv + 'T00:00:00') : null;
+  rangeTo   = tv ? new Date(tv + 'T23:59:59') : null;
+  if (rangeFrom && rangeTo && rangeFrom > rangeTo) { const t = rangeFrom; rangeFrom = new Date(rangeTo); rangeFrom.setHours(0,0,0,0); rangeTo = new Date(t); rangeTo.setHours(23,59,59,0); }
+  renderListFilter(); renderGiftList();
+}
+function clearAllFilters() {
+  listStatus = 'all'; listPeriod = 'all'; listSearch = ''; rangeFrom = null; rangeTo = null;
+  const sel = document.getElementById('lp-period'); if (sel) { sel.value = 'all'; sel.classList.remove('on'); }
+  const rg = document.getElementById('lp-range'); if (rg) rg.style.display = 'none';
+  const rf = document.getElementById('range-from'); if (rf) rf.value = '';
+  const rt = document.getElementById('range-to'); if (rt) rt.value = '';
+  const sr = document.querySelector('.lp-search'); if (sr) sr.value = '';
+  renderListFilter(); renderGiftList();
+}
 
 function giftsFiltered() {
   const f = listSearch.toLowerCase();
   const special = {flagged:1, lowconf:1, closed:1};
   return GIFTS.filter(g => {
+    if (!inPeriod(g.date, listPeriod)) return false;
     const fl = giftFlag(g);
     if (listStatus === 'flagged' && !fl) return false;
     if (listStatus === 'lowconf' && !(fl && fl.cls === 'gf-ocr')) return false;
@@ -1020,7 +1197,7 @@ function rowCells(g){
   if (g.status==='nsf')      pri = `<button class="gc-rb danger" onclick="event.stopPropagation();quickAction('${g.id}','reverse')">Reverse</button>`;
   else if (g.fundClosed)     pri = `<button class="gc-rb pri" onclick="event.stopPropagation();quickAction('${g.id}','reassign')">Reassign</button>`;
   else if (fl)               pri = `<button class="gc-rb pri" onclick="event.stopPropagation();selectGift('${g.id}')">Review</button>`;
-  else                       pri = `<button class="gc-rb" onclick="event.stopPropagation();quickAction('${g.id}','correct')">Correct →</button>`;
+  else                       pri = `<button class="gc-rb ghost" onclick="event.stopPropagation();quickAction('${g.id}','correct')">Correct</button>`;
   return `<td class="cbx"><input type="checkbox" ${BULK.has(g.id)?'checked':''} onclick="event.stopPropagation();toggleBulk('${g.id}')" title="Select"></td>
     <td><div class="gc-dn">${g.donor}</div><div class="gc-dn-sub">${g.parish} · ${g.officer}</div></td>
     <td>${g.fund}<div class="gc-dn-sub">GL ${g.gl}</div></td>
@@ -1033,8 +1210,8 @@ function rowCells(g){
 function renderGiftList() {
   const rows = giftsFiltered();
   if (!rows.length) {
-    document.getElementById('gift-list').innerHTML = '<div class="empty-state" style="padding:48px 20px"><h3>No gifts match</h3><p>Adjust the filter or search above.</p></div>';
-    renderBulkBar(); renderTriage(); return;
+    document.getElementById('gift-list').innerHTML = '<div class="empty-state" style="padding:48px 20px"><h3>No gifts match these filters</h3><p>Nothing in the current date range and status. Try widening the filters.</p>' + (anyFilterActive() ? '<button class="btn btn-primary" style="margin-top:14px;font-size:12px;padding:7px 14px" onclick="clearAllFilters()">Clear all filters</button>' : '') + '</div>';
+    renderBulkBar(); renderTriage(); renderListFilter(); return;
   }
   const car = k => sortKey===k ? `<span class="car">${sortDir>0?'▲':'▼'}</span>` : '';
   const allSel = rows.every(g => BULK.has(g.id));
@@ -1062,6 +1239,7 @@ function renderGiftList() {
   document.getElementById('gift-list').innerHTML = '<table class="gc-tbl">' + head + body + '</table>';
   renderBulkBar();
   renderTriage();
+  renderFilterSummary();
 }
 function toggleSelectAll(ev){
   const rows = giftsFiltered();
@@ -1388,6 +1566,22 @@ function renderConfirmSummary() {
     ['auto','GL reversal + re-post entries generated for accounting export'],
     [receiptOn ? (prior?'review':'auto') : 'skip', receiptOn ? (prior ? 'Amended '+g.rYear+' tax receipt — must be reviewed before sending' : 'Original receipt voided · corrected receipt reissued') : 'No tax-receipt change'],
   ];
+  // Pledge / recurring-payment next steps — only when the gift is (or becomes) a pledge or recurring payment
+  const isPledgeLinked = correctionType === 'pledge' || g.gtype === 'pledge' || g.gtype === 'recurring';
+  if (isPledgeLinked) {
+    const recurring = g.gtype === 'recurring';
+    impact.push(
+      ['auto', recurring
+        ? 'Recurring gift schedule re-linked — this installment reallocated to the corrected fund'
+        : 'Pledge balance recalculated — payment reapplied to the linked pledge'],
+      ['auto', recurring
+        ? 'Next scheduled charge unaffected — future installments post to the corrected fund'
+        : 'Installment schedule updated — remaining balance and paid-to-date adjusted'],
+      ['review', recurring
+        ? 'Donor notified if the recurring commitment total changed — review before sending'
+        : 'Pledge fulfillment status re-evaluated — review if this closes or reopens the pledge'],
+    );
+  }
   const badge = {auto:['ni-auto','Auto'], review:['ni-required','Review req.'], skip:['ni-manual','Skipped']};
   const ico = {auto:'<svg viewBox="0 0 10 10" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round"><path d="M1.5 5l2 2 5-5"/></svg>', review:'<svg viewBox="0 0 10 10" fill="none" stroke="var(--red)" stroke-width="1.4" stroke-linecap="round"><path d="M5 2v3M5 7v.5"/><path d="M1 8.5L5 1l4 7.5H1z"/></svg>', skip:'<svg viewBox="0 0 10 10" fill="none" stroke="#94A3B8" stroke-width="1.4" stroke-linecap="round"><path d="M2 5h6"/></svg>'};
   const bg = {auto:'var(--greenl)', review:'var(--redl)', skip:'#F1F5F9'};
@@ -1417,11 +1611,15 @@ function renderConfirmSummary() {
 function submitForApproval() {
   if (!selectedGift) return;
   const g = GIFTS.find(f => f.id === selectedGift.id);
-  addAuditEntry({ id:'AUD-APR-'+Date.now(), type:(correctionType==='amount'?'Amount correction':'Reclassification')+' — pending approval', ts:'Just now', user:'Current user',
+  const typeName = {donor:'Donor reclassification',fund:'Fund reclassification',both:'Donor & fund reclassification',amount:'Amount correction',date:'Gift date correction',method:'Payment method correction',pledge:'Pledge linkage',duplicate:'Duplicate reversed'}[correctionType] || 'Correction';
+  const notes = (document.getElementById('reason-notes')||{}).value || '';
+  PENDING.unshift({
+    id:'APR-'+Date.now().toString().slice(-4), type:typeName, submitted:'Just now', by:'Current user',
+    rule: correctionType==='amount' ? 'Amount changes require Finance approval' : 'Correction of $2,500 or more',
     from:{donor:g.donor, fund:g.fund, amt:'$'+g.amt.toLocaleString()+'.00', check:'#'+g.check},
-    to:{donor:g.donor+' (proposed)', fund:g.fund, amt:'$'+g.amt.toLocaleString()+'.00 (proposed)', check:'#'+g.check},
-    reason:'Submitted to Finance approval queue. '+(document.getElementById('reason-select').value||'')+(document.getElementById('reason-notes').value ? ' — '+document.getElementById('reason-notes').value : ''),
-    receiptAction:'Pending — no receipt action until approved.', hash:Math.random().toString(36).substr(2,32) });
+    to:  {donor:g.donor+' (proposed)', fund:g.fund+' (proposed)', amt:'$'+g.amt.toLocaleString()+'.00', check:'#'+g.check},
+    reason:(document.getElementById('reason-select').value||'')+(notes ? ' — '+notes : ''),
+  });
   showSnack('Submitted to approval queue — awaiting Finance review', '');
   resetWizard(); clearSelection();
   openAudit();
@@ -1496,6 +1694,7 @@ function addAuditEntry(entry) {
   AUDIT_LOG.unshift(entry);
   renderAuditLog();
   renderAuditAnalytics();
+  renderPendingQueue();
 }
 
 function renderAuditAnalytics() {
@@ -1511,7 +1710,7 @@ function renderAuditAnalytics() {
   const counts = cats.map(([n, fn]) => [n, AUDIT_LOG.filter(fn).length]);
   const max = Math.max(1, ...counts.map(c => c[1]));
   const reversals = AUDIT_LOG.filter(e => /nsf|reversal/i.test(e.type)).length;
-  const pending = AUDIT_LOG.filter(e => /pending approval/i.test(e.type)).length;
+  const pending = PENDING.length;
   el.innerHTML = `
     <div class="an-wrap">
       <div class="an-title"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 12V8M6 12V4M10 12V6"/></svg>Correction insights</div>
@@ -1519,13 +1718,82 @@ function renderAuditAnalytics() {
         <div class="an-stat"><div class="v">${total}</div><div class="l">Total entries</div></div>
         <div class="an-stat"><div class="v">${Math.max(0,total-reversals-pending)}</div><div class="l">Reclassifications</div></div>
         <div class="an-stat"><div class="v">${reversals}</div><div class="l">NSF / returns</div></div>
-        <div class="an-stat"><div class="v">${pending}</div><div class="l">Pending approval</div></div>
+        <div class="an-stat${pending?' an-stat-live':''}" ${pending?'onclick="document.getElementById(\'audit-pending\').scrollIntoView({behavior:\'smooth\'})" title="Jump to approval queue"':''}><div class="v" style="${pending?'color:var(--amber)':''}">${pending}</div><div class="l">Pending approval</div></div>
       </div>
       <div class="an-bars">
         ${counts.map(([n,c]) => `<div class="an-bar-row"><span class="nm">${n}</span><div class="track"><div class="fill" style="width:${c/max*100}%"></div></div><span class="ct">${c}</span></div>`).join('')}
       </div>
       <div style="font-size:11px;color:var(--text3);margin-top:10px">Tip: a spike in one reason usually points to an upstream data-entry or scanning issue worth fixing at the source.</div>
     </div>`;
+}
+
+function exportAuditCSV() {
+  const esc = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
+  const head = ['Entry ID','Type','Timestamp','User','From donor','From fund','From amount','From check','To donor','To fund','To amount','To check','Reason','Receipt action','Integrity hash'];
+  const rows = AUDIT_LOG.map(e => [e.id,e.type,e.ts,e.user,e.from.donor,e.from.fund,e.from.amt,e.from.check,e.to.donor,e.to.fund,e.to.amt,e.to.check,e.reason,e.receiptAction,e.hash].map(esc).join(','));
+  const csv = head.map(esc).join(',') + '\n' + rows.join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'audit-trail-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  showSnack('Audit trail exported — ' + AUDIT_LOG.length + ' entries (CSV)', 'green');
+}
+
+function renderPendingQueue() {
+  const el = document.getElementById('audit-pending'); if (!el) return;
+  if (!PENDING.length) {
+    el.innerHTML = `<div class="pq-wrap"><div class="pq-head"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1.5l5 2.2v3c0 2.6-2 4.5-5 5.6C4 11.2 2 9.3 2 6.7V3.7z"/><path d="M5 7l1.4 1.4L9.4 5.4"/></svg>Approval queue</div><div class="pq-empty">No corrections waiting on approval. High-impact corrections ($2,500+ or amount changes) land here for a Finance reviewer before they post.</div></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="pq-wrap">
+    <div class="pq-head"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1.5l5 2.2v3c0 2.6-2 4.5-5 5.6C4 11.2 2 9.3 2 6.7V3.7z"/><path d="M5 7l1.4 1.4L9.4 5.4"/></svg>Approval queue<span class="pq-count">${PENDING.length} awaiting review</span></div>
+    ${PENDING.map(p => `
+      <div class="pq-card" id="pq-${p.id}">
+        <div class="pq-top"><span class="pq-type">${p.type}</span><span class="pq-id">${p.id}</span></div>
+        <div class="pq-rule"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 1.3l4 1.8v2.4c0 2.1-1.6 3.6-4 4.5C3.6 9.1 2 7.6 2 5.5V3.1z"/></svg>${p.rule}</div>
+        <div class="pq-ft">
+          <div class="pq-col"><div class="pq-lbl">From</div><div class="pq-donor">${p.from.donor}</div><div class="pq-meta">${p.from.fund} · ${p.from.amt} · ${p.from.check}</div></div>
+          <svg class="pq-arrow" viewBox="0 0 16 12" fill="none" stroke="var(--text3)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h11M9 2l4 4-4 4"/></svg>
+          <div class="pq-col"><div class="pq-lbl">To</div><div class="pq-donor">${p.to.donor}</div><div class="pq-meta">${p.to.fund} · ${p.to.amt} · ${p.to.check}</div></div>
+        </div>
+        <div class="pq-reason">${p.reason}</div>
+        <div class="pq-sub">Submitted by ${p.by} · ${p.submitted}</div>
+        <div class="pq-actions">
+          <button class="pq-btn pq-reject" onclick="rejectPending('${p.id}')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg>Reject</button>
+          <button class="pq-btn pq-approve" onclick="approvePending('${p.id}')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg>Approve &amp; post</button>
+        </div>
+      </div>`).join('')}
+  </div>`;
+}
+
+function approvePending(id) {
+  const i = PENDING.findIndex(p => p.id === id); if (i < 0) return;
+  const p = PENDING[i];
+  PENDING.splice(i, 1);
+  addAuditEntry({
+    id:'AUD-APR-'+Date.now(), type:p.type+' — approved & posted', ts:'Just now', user:'Current user (approver)',
+    from:p.from, to:p.to,
+    reason:'Approved via Finance approval queue (was '+p.id+'). '+p.reason,
+    receiptAction:'Correction posted after second approval. Downstream actions executed.',
+    hash:Math.random().toString(36).substr(2,32),
+  });
+  showSnack('Approved — correction posted to the ledger', 'green');
+}
+
+function rejectPending(id) {
+  const i = PENDING.findIndex(p => p.id === id); if (i < 0) return;
+  const p = PENDING[i];
+  PENDING.splice(i, 1);
+  addAuditEntry({
+    id:'AUD-REJ-'+Date.now(), type:p.type+' — approval rejected', ts:'Just now', user:'Current user (approver)',
+    from:p.from, to:p.to,
+    reason:'Rejected via Finance approval queue (was '+p.id+'). Original gift left unchanged — returned to submitter.',
+    receiptAction:'No posting. No receipt action.',
+    hash:Math.random().toString(36).substr(2,32),
+  });
+  showSnack('Rejected — original gift left unchanged', 'red');
 }
 
 function clearSelection() {
@@ -1540,7 +1808,7 @@ function clearSelection() {
 }
 
 function openAudit() {
-  renderAuditLog(); renderAuditAnalytics();
+  renderAuditLog(); renderAuditAnalytics(); renderPendingQueue();
   document.getElementById('audit-drawer').classList.add('open');
   document.getElementById('audit-scrim').classList.add('show');
 }
@@ -1564,24 +1832,34 @@ function quickAction(id, action) {
 
 function renderTriage() {
   const el = document.getElementById('triage'); if (!el) return;
-  const nsf = GIFTS.filter(g => g.status === 'nsf').length;
-  const ocr = GIFTS.filter(g => { const fl = giftFlag(g); return fl && fl.cls === 'gf-ocr'; }).length;
-  const closed = GIFTS.filter(g => g.fundClosed).length;
-  const attn = GIFTS.filter(g => giftFlag(g)).length;
+  const base = periodBase();
+  const flagged = base.filter(g => giftFlag(g));
+  const attn = flagged.length;
+  const nsf = base.filter(g => g.status === 'nsf').length;
   const warn = '<svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7.5 5v3.5M7.5 10.8v.2"/><path d="M1.5 12.5L7.5 1.5l6 11H1.5z"/></svg>';
   const check = '<svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3 3 6-7"/></svg>';
-  const dot = (color, n, label, fn) => n > 0
-    ? `<span class="tr-dot" onclick="${fn}"><i style="background:${color}"></i>${n} ${label}</span>` : '';
-  const lead = attn > 0
-    ? `<span class="tr-lead"><span class="ic">${warn}</span>${attn} ${attn===1?'gift needs':'gifts need'} attention</span>`
-    : `<span class="tr-lead clear"><span class="ic">${check}</span>All gifts reviewed</span>`;
-  el.innerHTML = lead
-    + dot('var(--red)',   nsf,    'NSF',          "setListFilter('nsf')")
-    + dot('var(--amber)', ocr,    'low-confidence',"setListFilter('lowconf')")
-    + dot('#7C3AED',      closed, 'fund closed',  "setListFilter('closed')")
-    + `<span class="tr-audit"><a onclick="openAudit()">${AUDIT_LOG.length} logged corrections — audit trail →</a></span>`;
+  // oldest flagged age — gives the banner a reason to exist beyond repeating the chips
+  let ageTxt = '';
+  if (attn > 0) {
+    const oldest = flagged.reduce((m,g)=>{ const d=new Date(g.date); return (!m||d<m)?d:m; }, null);
+    if (oldest) { const days = Math.round((REVIEW_NOW - oldest)/86400000); ageTxt = days > 0 ? `oldest flagged ${days} day${days===1?'':'s'} ago` : 'all flagged today'; }
+  }
+  if (attn > 0) {
+    el.innerHTML =
+      `<span class="tr-lead"><span class="ic">${warn}</span>${attn} ${attn===1?'gift needs':'gifts need'} attention</span>`
+      + (ageTxt ? `<span class="tr-meta">${ageTxt}</span>` : '')
+      + `<div class="tr-actions">`
+      + (nsf > 0 ? `<button class="tr-cta danger" onclick="setListFilter('nsf')">Reverse ${nsf} NSF →</button>` : '')
+      + `<button class="tr-cta" onclick="setListFilter('flagged')">Review flagged →</button>`
+      + `</div>`;
+  } else {
+    el.innerHTML = `<span class="tr-lead clear"><span class="ic">${check}</span>All gifts reviewed — nothing needs attention${periodActive()?' in this period':''}</span>`;
+  }
   const qc = document.getElementById('queue-count');
-  if (qc) qc.textContent = GIFTS.length + ' gifts in review · ' + attn + ' flagged · ' + AUDIT_LOG.length + ' corrected this period';
+  if (qc) {
+    const scope = periodActive() ? ' (' + periodLabel().toLowerCase() + ')' : '';
+    qc.textContent = base.length + ' gifts in review' + scope + ' · ' + attn + ' flagged · ' + AUDIT_LOG.length + ' logged corrections';
+  }
 }
 
 // ── AUDIT RENDER ──────────────────────────────────────────────────────────────
