@@ -486,12 +486,22 @@ body{font-family:'DM Sans',sans-serif;background:#EEF2F7;color:var(--text);displ
 .lp-clear{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;font-family:'DM Sans',sans-serif;color:var(--blue);background:none;border:none;cursor:pointer;padding:2px 2px}
 .lp-clear svg{width:10px;height:10px}
 .lp-clear:hover{text-decoration:underline}
-/* Custom date range */
-.lp-range{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bluep)}
-.lp-range input[type=date]{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);background:white;outline:none}
-.lp-range input[type=date]:focus{border-color:var(--blue)}
-.lp-range-sep{font-size:11.5px;color:var(--text3)}
-.lp-range-apply{font-size:11.5px;font-weight:600;font-family:'DM Sans',sans-serif;padding:6px 12px;border-radius:7px;border:none;background:var(--blue);color:white;cursor:pointer}
+/* Period dropdown + custom range popover */
+.lp-period-wrap{position:relative;flex:0 0 auto}
+.lp-period{-webkit-appearance:none;appearance:none;padding:7px 28px 7px 10px}
+.lp-period-caret{position:absolute;right:9px;top:50%;transform:translateY(-50%);width:10px;height:6px;color:var(--text3);pointer-events:none}
+.lp-period.on + .lp-period-caret{color:var(--blue)}
+.lp-range{display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:50;width:244px;background:white;border:1px solid var(--border);border-radius:11px;box-shadow:0 10px 30px rgba(15,23,42,.14);padding:13px}
+.lp-period-wrap.open .lp-range{display:block}
+.lp-range-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);margin-bottom:9px}
+.lp-range-field{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.lp-range-field span{font-size:11.5px;color:var(--text2);width:34px;flex:0 0 auto}
+.lp-range-field input[type=date]{flex:1;min-width:0;padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surf);outline:none}
+.lp-range-field input[type=date]:focus{border-color:var(--blue);background:white}
+.lp-range-foot{display:flex;align-items:center;justify-content:space-between;margin-top:11px;padding-top:11px;border-top:1px solid var(--border)}
+.lp-range-reset{font-size:11.5px;font-weight:600;font-family:'DM Sans',sans-serif;background:none;border:none;color:var(--text2);cursor:pointer;padding:4px 2px}
+.lp-range-reset:hover{color:var(--text)}
+.lp-range-apply{font-size:11.5px;font-weight:600;font-family:'DM Sans',sans-serif;padding:6px 16px;border-radius:7px;border:none;background:var(--blue);color:white;cursor:pointer}
 .lp-range-apply:hover{filter:brightness(.95)}
 /* Banner (triage) extras */
 .tr-meta{font-size:11.5px;color:var(--text3)}
@@ -635,20 +645,26 @@ function atlasAddr(n){
         <div class="search-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M8 8l2 2"/></svg></div>
         <input type="text" class="lp-search" placeholder="Search gifts…" oninput="filterGifts(this.value)">
       </div>
-      <select class="lp-period" id="lp-period" onchange="setListPeriod(this.value)" title="Filter by date">
-        <option value="all">All dates</option>
-        <option value="today">Today</option>
-        <option value="week">This week</option>
-        <option value="month">This month</option>
-        <option value="year">This year</option>
-        <option value="custom">Custom range…</option>
-      </select>
-    </div>
-    <div class="lp-range" id="lp-range" style="display:none">
-      <input type="date" id="range-from" onchange="setRange()" title="From date">
-      <span class="lp-range-sep">to</span>
-      <input type="date" id="range-to" onchange="setRange()" title="To date">
-      <button class="lp-range-apply" onclick="setRange()">Apply</button>
+      <div class="lp-period-wrap" id="lp-period-wrap">
+        <select class="lp-period" id="lp-period" onmousedown="onPeriodMousedown(event)" onchange="setListPeriod(this.value)" title="Filter by date">
+          <option value="all">All dates</option>
+          <option value="today">Today</option>
+          <option value="week">This week</option>
+          <option value="month">This month</option>
+          <option value="year">This year</option>
+          <option value="custom">Custom range…</option>
+        </select>
+        <svg class="lp-period-caret" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
+        <div class="lp-range" id="lp-range">
+          <div class="lp-range-title">Custom date range</div>
+          <label class="lp-range-field"><span>From</span><input type="date" id="range-from" title="From date"></label>
+          <label class="lp-range-field"><span>To</span><input type="date" id="range-to" title="To date"></label>
+          <div class="lp-range-foot">
+            <button class="lp-range-reset" onclick="resetRange()">Clear</button>
+            <button class="lp-range-apply" onclick="setRange()">Apply</button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="lp-filter-row">
       <div class="lp-filter" id="lp-filter"></div>
@@ -1137,12 +1153,17 @@ function renderFilterSummary() {
 
 function setListFilter(s) { listStatus = s; renderListFilter(); renderGiftList(); }
 function filterGifts(v) { listSearch = v; renderGiftList(); }
+function openRange()  { const w = document.getElementById('lp-period-wrap'); if (w) w.classList.add('open'); }
+function closeRange() { const w = document.getElementById('lp-period-wrap'); if (w) w.classList.remove('open'); }
+function onPeriodMousedown(e) {
+  // If already on Custom, don't reopen the native list — just toggle the date popover.
+  if (listPeriod === 'custom') { e.preventDefault(); const w = document.getElementById('lp-period-wrap'); if (w) w.classList.toggle('open'); }
+}
 function setListPeriod(p) {
   listPeriod = p;
+  if (p === 'custom') openRange(); else closeRange();
   const sel = document.getElementById('lp-period');
-  if (sel) sel.classList.toggle('on', p !== 'all');
-  const range = document.getElementById('lp-range');
-  if (range) range.style.display = (p === 'custom') ? 'flex' : 'none';
+  if (sel) sel.classList.toggle('on', periodActive());
   renderListFilter(); renderGiftList();
 }
 function setRange() {
@@ -1151,12 +1172,21 @@ function setRange() {
   rangeFrom = fv ? new Date(fv + 'T00:00:00') : null;
   rangeTo   = tv ? new Date(tv + 'T23:59:59') : null;
   if (rangeFrom && rangeTo && rangeFrom > rangeTo) { const t = rangeFrom; rangeFrom = new Date(rangeTo); rangeFrom.setHours(0,0,0,0); rangeTo = new Date(t); rangeTo.setHours(23,59,59,0); }
+  const sel = document.getElementById('lp-period'); if (sel) sel.classList.toggle('on', periodActive());
+  closeRange();
+  renderListFilter(); renderGiftList();
+}
+function resetRange() {
+  rangeFrom = null; rangeTo = null;
+  const rf = document.getElementById('range-from'); if (rf) rf.value = '';
+  const rt = document.getElementById('range-to'); if (rt) rt.value = '';
+  const sel = document.getElementById('lp-period'); if (sel) sel.classList.remove('on');
   renderListFilter(); renderGiftList();
 }
 function clearAllFilters() {
   listStatus = 'all'; listPeriod = 'all'; listSearch = ''; rangeFrom = null; rangeTo = null;
   const sel = document.getElementById('lp-period'); if (sel) { sel.value = 'all'; sel.classList.remove('on'); }
-  const rg = document.getElementById('lp-range'); if (rg) rg.style.display = 'none';
+  closeRange();
   const rf = document.getElementById('range-from'); if (rf) rf.value = '';
   const rt = document.getElementById('range-to'); if (rt) rt.value = '';
   const sr = document.querySelector('.lp-search'); if (sr) sr.value = '';
@@ -1965,6 +1995,12 @@ function showSnack(msg, type='') {
   s.className = 'snack show' + (type?' '+type:'');
   setTimeout(()=>s.classList.remove('show'),3000);
 }
+
+// Close the custom-range popover when clicking outside it.
+document.addEventListener('click', function(e){
+  const w = document.getElementById('lp-period-wrap');
+  if (w && w.classList.contains('open') && !w.contains(e.target)) w.classList.remove('open');
+});
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
 renderListFilter();
