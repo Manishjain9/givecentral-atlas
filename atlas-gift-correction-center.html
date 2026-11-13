@@ -225,6 +225,9 @@ body{font-family:'DM Sans',sans-serif;background:#EEF2F7;color:var(--text);displ
 .cs-val{font-weight:600;color:var(--greend)}
 
 /* Audit trail */
+.ad-search{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);border-radius:7px;padding:5px 10px}
+.ad-search svg{width:12px;height:12px;color:var(--text3);flex-shrink:0}
+.ad-search input{border:none;outline:none;background:none;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);width:150px}
 .audit-entry{background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px}
 .ae-head{padding:10px 14px;background:var(--surf);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .ae-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -885,12 +888,13 @@ function atlasAddr(n){
       <div class="s">Immutable log · all entries are permanent · cannot be edited or deleted</div>
     </div>
     <div class="sp">
-      <select class="nsf-field-input" style="width:auto">
-        <option>All correction types</option>
-        <option>Donor reclassification</option>
-        <option>Fund reclassification</option>
-        <option>NSF / check return</option>
-        <option>Amount correction</option>
+      <div class="ad-search"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="5" cy="5" r="3.5"/><path d="M8 8l2 2"/></svg><input type="text" id="audit-search" placeholder="Search donor…" oninput="renderAuditLog()"></div>
+      <select class="nsf-field-input" id="audit-type" style="width:auto" onchange="renderAuditLog()">
+        <option value="all">All correction types</option>
+        <option value="donor">Donor reclassification</option>
+        <option value="fund">Fund reclassification</option>
+        <option value="nsf">NSF / check return</option>
+        <option value="amount">Amount correction</option>
       </select>
       <button class="btn btn-primary" style="font-size:12px;padding:6px 13px">Export CSV</button>
       <button class="ad-close" onclick="closeAudit()" title="Close"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>
@@ -1588,7 +1592,18 @@ function renderAuditLog() {
     'Donor & fund reclassification':{bg:'#EDE9FE',ico:'#7C3AED'},
     'Amount correction':          {bg:var_('amberl'),ico:var_('amber')},
   };
-  document.getElementById('audit-entries').innerHTML = AUDIT_LOG.map(e => {
+  var _q = (document.getElementById('audit-search')||{}).value || '';
+  _q = _q.toLowerCase().trim();
+  var _ty = (document.getElementById('audit-type')||{}).value || 'all';
+  var _tymap = { donor:'donor reclassification', fund:'fund reclassification', nsf:'nsf', amount:'amount' };
+  var _list = AUDIT_LOG.filter(function(e){
+    if (_q){ var hay = ((e.from&&e.from.donor||'')+' '+(e.to&&e.to.donor||'')+' '+(e.from&&e.from.check||'')).toLowerCase(); if (hay.indexOf(_q)<0) return false; }
+    if (_ty!=='all'){ var t=(e.type||'').toLowerCase(); if (_ty==='nsf'){ if (!(t.includes('nsf')||t.includes('reversal')||t.includes('check return'))) return false; } else if (t.indexOf(_tymap[_ty])<0) return false; }
+    return true;
+  });
+  var _entriesEl = document.getElementById('audit-entries');
+  if (!_list.length){ _entriesEl.innerHTML = '<div style="padding:34px 18px;text-align:center;color:var(--text3);font-size:13px">No audit entries match'+(_q?' “'+_q+'”':'')+'.</div>'; return; }
+  _entriesEl.innerHTML = _list.map(e => {
     const isNSF = e.type.toLowerCase().includes('nsf') || e.type.toLowerCase().includes('reversal') || e.type.toLowerCase().includes('check return');
     const iconBg  = isNSF ? 'var(--redl)' : 'var(--bluep)';
     const iconStr = isNSF ? '#DC2626' : 'var(--blue)';
