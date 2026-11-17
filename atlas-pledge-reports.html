@@ -135,12 +135,14 @@
     .flt-badge { display: none; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 20px; background: var(--navy); color: white; font-size: 10px; font-weight: 700; }
     .flt-badge.show { display: inline-flex; }
     .delinq-active .flt-badge { background: var(--rose); }
-    .flt-pop { position: fixed; z-index: 2000; background: white; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 40px rgba(15,23,42,.18); padding: 14px; width: 248px; max-height: min(70vh, 460px); overflow: auto; display: none; flex-direction: column; gap: 12px; }
-    .flt-pop.open { display: flex; }
-    .flt-pop .fl { display: block; }
+    .flt-pop { position: fixed; z-index: 2000; background: white; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 40px rgba(15,23,42,.18); padding: 16px; width: 380px; max-width: calc(100vw - 24px); max-height: min(80vh, 560px); overflow: auto; display: none; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+    .flt-pop.open { display: grid; }
+    .flt-pop .fl { display: block; margin: 0; }
     .flt-pop .fl > span { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text3); margin-bottom: 5px; }
     .flt-pop .filter-select { width: 100%; }
-    .flt-pop .flt-foot { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 11px; }
+    .flt-pop .flt-foot { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 12px; margin-top: 2px; }
+    .flt-pop .fl-range { grid-column: 1 / -1; display: none; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; padding: 10px 11px; background: var(--surface, #F8FAFC); border-radius: 9px; }
+    .flt-pop .fl-range input[type=date] { width: 100%; }
     .flt-chips { display: flex; flex-wrap: wrap; gap: 7px; padding: 8px 18px; background: var(--surf); border-bottom: 1px solid var(--border); }
     .delinq-active .flt-chips { background: #FFF5F5; border-bottom-color: #FBCFE8; }
     .flt-chips:empty { display: none; }
@@ -711,10 +713,23 @@
                 <select class="filter-select" id="pb-type" onchange="applyPledge()">
                   <option value="all">All gift types</option><option>Credit card</option><option>ACH / bank</option><option>Check</option><option>Stock</option><option>DAF</option>
                 </select></label>
+              <label class="fl"><span>Fund</span>
+                <select class="filter-select" id="pb-fund" onchange="applyPledge()">
+                  <option value="all">All funds</option><option>Cathedral Restoration</option><option>Bell Tower Fund</option><option>Sacred Art &amp; Windows</option><option>Endowment</option>
+                </select></label>
               <label class="fl"><span>Next payment</span>
                 <select class="filter-select" id="pb-when" onchange="applyPledge()">
                   <option value="all">Any time</option><option value="today">Due today</option><option value="week">Due this week</option><option value="month">Due this month</option><option value="year">Due this year</option>
                 </select></label>
+              <label class="fl"><span>Date range</span>
+                <select class="filter-select" id="pb-dr" onchange="applyPledge()">
+                  <option value="all">All dates</option><option value="fy">This fiscal year (Jul 2025 – Jun 2026)</option><option value="ytd">Calendar year to date</option><option value="custom">Custom range…</option>
+                </select></label>
+              <div class="fl fl-range" id="pb-dr-custom" style="display:none">
+                <input type="date" class="filter-select" id="pb-dr-from" onchange="applyPledge()">
+                <span style="font-size:11px;color:var(--text3);text-align:center">to</span>
+                <input type="date" class="filter-select" id="pb-dr-to" onchange="applyPledge()">
+              </div>
               <div class="flt-foot"><button class="flt-clear" onclick="clearFilters('pb')">Clear all</button><button class="flt-btn" onclick="toggleFilters('pb',event)">Done</button></div>
             </div>
           </div>
@@ -841,10 +856,23 @@
                 <select class="filter-select" id="dq-type" onchange="applyDelinq()">
                   <option value="all">All gift types</option><option>Credit card</option><option>ACH / bank</option><option>Check</option><option>Stock</option><option>DAF</option>
                 </select></label>
+              <label class="fl"><span>Fund</span>
+                <select class="filter-select" id="dq-fund" onchange="applyDelinq()">
+                  <option value="all">All funds</option><option>Cathedral Restoration</option><option>Bell Tower Fund</option><option>Sacred Art &amp; Windows</option><option>Endowment</option>
+                </select></label>
               <label class="fl"><span>Last contact</span>
                 <select class="filter-select" id="dq-when" onchange="applyDelinq()">
                   <option value="all">Any time</option><option value="today">Contacted today</option><option value="week">This week</option><option value="month">This month</option><option value="year">This year</option>
                 </select></label>
+              <label class="fl"><span>Date range</span>
+                <select class="filter-select" id="dq-dr" onchange="applyDelinq()">
+                  <option value="all">All dates</option><option value="fy">This fiscal year (Jul 2025 – Jun 2026)</option><option value="ytd">Calendar year to date</option><option value="custom">Custom range…</option>
+                </select></label>
+              <div class="fl fl-range" id="dq-dr-custom" style="display:none">
+                <input type="date" class="filter-select" id="dq-dr-from" onchange="applyDelinq()">
+                <span style="font-size:11px;color:var(--text3);text-align:center">to</span>
+                <input type="date" class="filter-select" id="dq-dr-to" onchange="applyDelinq()">
+              </div>
               <div class="flt-foot"><button class="flt-clear" onclick="clearFilters('dq')">Clear all</button><button class="flt-btn" onclick="toggleFilters('dq',event)">Done</button></div>
             </div>
           </div>
@@ -903,36 +931,36 @@
 <script>
 // ── DATA ─────────────────────────────────────────────────────────────────────
 const PLEDGES = [
-  { id:1,  donor:"O'Brien, James & Patricia",  parish:"Cathedral",      officer:"Mike D.", pledge:500000, paid:250000, overdue:25000,  status:"delinq",  nextAmt:25000,  nextDate:"Mar 1, 2026", installments:[1,1,1,1,1,0,0,0,0,0], notes:"Major donor — personal call req." },
-  { id:2,  donor:"Harrington, David & Susan",  parish:"Cathedral",      officer:"Mike D.", pledge:250000, paid:100000, overdue:25000,  status:"delinq",  nextAmt:25000,  nextDate:"Mar 1, 2026", installments:[1,1,1,1,0,0,0,0,0,0], notes:"No contact in 60 days" },
-  { id:3,  donor:"Sullivan Family Foundation", parish:"All parishes",   officer:"Mike D.", pledge:200000, paid:160000, overdue:0,      status:"current", nextAmt:20000,  nextDate:"Jun 1, 2026",  installments:[1,1,1,1,1,1,1,1,0,0] },
-  { id:4,  donor:"Walsh Estate",               parish:"St. Michael's",  officer:"Sarah R.",pledge:150000, paid:50000,  overdue:50000,  status:"delinq",  nextAmt:50000,  nextDate:"Jan 1, 2026",  installments:[1,1,0,0,0,0,0,0,0,0], notes:"Executor change — legal review" },
-  { id:5,  donor:"Catholic Community Foundation",parish:"Diocese",      officer:"Mike D.", pledge:125000, paid:75000,  overdue:0,      status:"current", nextAmt:12500,  nextDate:"Jul 1, 2026",  installments:[1,1,1,1,1,1,0,0,0,0] },
-  { id:6,  donor:"First Catholic Bank",        parish:"All parishes",   officer:"Sarah R.",pledge:100000, paid:100000, overdue:0,      status:"current", nextAmt:0,      nextDate:"—",            installments:[1,1,1,1,1,1,1,1,1,1] },
-  { id:7,  donor:"Kim, Dr. Patricia",          parish:"Holy Cross",     officer:"Janet W.",pledge:75000,  paid:30000,  overdue:7500,   status:"behind",  nextAmt:7500,   nextDate:"Apr 1, 2026",  installments:[1,1,1,1,0,0,0,0,0,0] },
-  { id:8,  donor:"Morrison, Peter & Clare",    parish:"St. Catherine's",officer:"Sarah R.",pledge:50000,  paid:40000,  overdue:0,      status:"current", nextAmt:5000,   nextDate:"Jun 1, 2026",  installments:[1,1,1,1,1,1,1,1,0,0] },
-  { id:9,  donor:"Ramirez, Elena & Carlos",    parish:"St. Michael's",  officer:"Sarah R.",pledge:50000,  paid:20000,  overdue:10000,  status:"delinq",  nextAmt:10000,  nextDate:"Feb 1, 2026",  installments:[1,1,0,0,0,0,0,0,0,0] },
-  { id:10, donor:"Grant, Michael",             parish:"Cathedral",      officer:"Mike D.", pledge:40000,  paid:32000,  overdue:0,      status:"current", nextAmt:4000,   nextDate:"Jul 1, 2026",  installments:[1,1,1,1,1,1,1,1,0,0] },
-  { id:11, donor:"Costello, Barbara & Frank",  parish:"Holy Cross",     officer:"Janet W.",pledge:25000,  paid:10000,  overdue:5000,   status:"behind",  nextAmt:5000,   nextDate:"Apr 15, 2026", installments:[1,1,0,0,0,0,0,0,0,0] },
-  { id:12, donor:"Walsh, Thomas & Anne",       parish:"St. Michael's",  officer:"Sarah R.",pledge:20000,  paid:12000,  overdue:2000,   status:"behind",  nextAmt:2000,   nextDate:"May 1, 2026",  installments:[1,1,1,1,1,1,0,0,0,0] },
-  { id:13, donor:"Fitzgerald, Anne",           parish:"Holy Cross",     officer:"Janet W.",pledge:15000,  paid:15000,  overdue:0,      status:"current", nextAmt:0,      nextDate:"—",            installments:[1,1,1,1,1,1,1,1,1,1] },
-  { id:14, donor:"Mendez, Carlos & Maria",     parish:"Cathedral",      officer:"Mike D.", pledge:10000,  paid:6000,   overdue:0,      status:"current", nextAmt:2000,   nextDate:"Jun 15, 2026", installments:[1,1,1,0,0,0,0,0,0,0] },
-  { id:15, donor:"Nguyen, Thomas",             parish:"St. Catherine's",officer:"Sarah R.",pledge:10000,  paid:4000,   overdue:2000,   status:"delinq",  nextAmt:2000,   nextDate:"Mar 1, 2026",  installments:[1,1,0,0,0,0,0,0,0,0] },
+  { id:1,  donor:"O'Brien, James & Patricia", fund:"Bell Tower Fund",  parish:"Cathedral",      officer:"Mike D.", pledge:500000, paid:250000, overdue:25000,  status:"delinq",  nextAmt:25000,  nextDate:"Mar 1, 2026", installments:[1,1,1,1,1,0,0,0,0,0], notes:"Major donor — personal call req." },
+  { id:2,  donor:"Harrington, David & Susan", fund:"Sacred Art & Windows",  parish:"Cathedral",      officer:"Mike D.", pledge:250000, paid:100000, overdue:25000,  status:"delinq",  nextAmt:25000,  nextDate:"Mar 1, 2026", installments:[1,1,1,1,0,0,0,0,0,0], notes:"No contact in 60 days" },
+  { id:3,  donor:"Sullivan Family Foundation", fund:"Endowment", parish:"All parishes",   officer:"Mike D.", pledge:200000, paid:160000, overdue:0,      status:"current", nextAmt:20000,  nextDate:"Jun 1, 2026",  installments:[1,1,1,1,1,1,1,1,0,0] },
+  { id:4,  donor:"Walsh Estate", fund:"Cathedral Restoration",               parish:"St. Michael's",  officer:"Sarah R.",pledge:150000, paid:50000,  overdue:50000,  status:"delinq",  nextAmt:50000,  nextDate:"Jan 1, 2026",  installments:[1,1,0,0,0,0,0,0,0,0], notes:"Executor change — legal review" },
+  { id:5,  donor:"Catholic Community Foundation", fund:"Bell Tower Fund",parish:"Diocese",      officer:"Mike D.", pledge:125000, paid:75000,  overdue:0,      status:"current", nextAmt:12500,  nextDate:"Jul 1, 2026",  installments:[1,1,1,1,1,1,0,0,0,0] },
+  { id:6,  donor:"First Catholic Bank", fund:"Sacred Art & Windows",        parish:"All parishes",   officer:"Sarah R.",pledge:100000, paid:100000, overdue:0,      status:"current", nextAmt:0,      nextDate:"—",            installments:[1,1,1,1,1,1,1,1,1,1] },
+  { id:7,  donor:"Kim, Dr. Patricia", fund:"Endowment",          parish:"Holy Cross",     officer:"Janet W.",pledge:75000,  paid:30000,  overdue:7500,   status:"behind",  nextAmt:7500,   nextDate:"Apr 1, 2026",  installments:[1,1,1,1,0,0,0,0,0,0] },
+  { id:8,  donor:"Morrison, Peter & Clare", fund:"Cathedral Restoration",    parish:"St. Catherine's",officer:"Sarah R.",pledge:50000,  paid:40000,  overdue:0,      status:"current", nextAmt:5000,   nextDate:"Jun 1, 2026",  installments:[1,1,1,1,1,1,1,1,0,0] },
+  { id:9,  donor:"Ramirez, Elena & Carlos", fund:"Bell Tower Fund",    parish:"St. Michael's",  officer:"Sarah R.",pledge:50000,  paid:20000,  overdue:10000,  status:"delinq",  nextAmt:10000,  nextDate:"Feb 1, 2026",  installments:[1,1,0,0,0,0,0,0,0,0] },
+  { id:10, donor:"Grant, Michael", fund:"Sacred Art & Windows",             parish:"Cathedral",      officer:"Mike D.", pledge:40000,  paid:32000,  overdue:0,      status:"current", nextAmt:4000,   nextDate:"Jul 1, 2026",  installments:[1,1,1,1,1,1,1,1,0,0] },
+  { id:11, donor:"Costello, Barbara & Frank", fund:"Endowment",  parish:"Holy Cross",     officer:"Janet W.",pledge:25000,  paid:10000,  overdue:5000,   status:"behind",  nextAmt:5000,   nextDate:"Apr 15, 2026", installments:[1,1,0,0,0,0,0,0,0,0] },
+  { id:12, donor:"Walsh, Thomas & Anne", fund:"Cathedral Restoration",       parish:"St. Michael's",  officer:"Sarah R.",pledge:20000,  paid:12000,  overdue:2000,   status:"behind",  nextAmt:2000,   nextDate:"May 1, 2026",  installments:[1,1,1,1,1,1,0,0,0,0] },
+  { id:13, donor:"Fitzgerald, Anne", fund:"Bell Tower Fund",           parish:"Holy Cross",     officer:"Janet W.",pledge:15000,  paid:15000,  overdue:0,      status:"current", nextAmt:0,      nextDate:"—",            installments:[1,1,1,1,1,1,1,1,1,1] },
+  { id:14, donor:"Mendez, Carlos & Maria", fund:"Sacred Art & Windows",     parish:"Cathedral",      officer:"Mike D.", pledge:10000,  paid:6000,   overdue:0,      status:"current", nextAmt:2000,   nextDate:"Jun 15, 2026", installments:[1,1,1,0,0,0,0,0,0,0] },
+  { id:15, donor:"Nguyen, Thomas", fund:"Endowment",             parish:"St. Catherine's",officer:"Sarah R.",pledge:10000,  paid:4000,   overdue:2000,   status:"delinq",  nextAmt:2000,   nextDate:"Mar 1, 2026",  installments:[1,1,0,0,0,0,0,0,0,0] },
 ];
 
 const DELINQ_DATA = [
-  { id:1,  donor:"O'Brien, James & Patricia",  pledge:500000, paid:250000, overdue:25000,  days:92,  freq:"Quarterly $25K",    lastContact:"Feb 10, 2026", officer:"Mike D.", action:"call",   priority:"critical", note:"Major donor — personal outreach from development director" },
-  { id:4,  donor:"Walsh Estate",               pledge:150000, paid:50000,  overdue:50000,  days:131, freq:"Annual $50K",       lastContact:"Nov 8, 2025",  officer:"Sarah R.",action:"legal",  priority:"critical", note:"Executor change — legal review required" },
-  { id:2,  donor:"Harrington, David & Susan",  pledge:250000, paid:100000, overdue:25000,  days:91,  freq:"Quarterly $25K",    lastContact:"Nov 22, 2025", officer:"Mike D.", action:"call",   priority:"critical", note:"No contact in 60+ days" },
-  { id:16, donor:"Andrews, William & Grace",   pledge:80000,  paid:20000,  overdue:20000,  days:107, freq:"Semi-annual $20K",  lastContact:"Jan 5, 2026",  officer:"Sarah R.",action:"letter", priority:"critical", note:"Letter sent Feb 2025 — no response" },
-  { id:9,  donor:"Ramirez, Elena & Carlos",    pledge:50000,  paid:20000,  overdue:10000,  days:70,  freq:"Semi-annual $10K",  lastContact:"Mar 15, 2026", officer:"Sarah R.",action:"call",   priority:"high",     note:"" },
-  { id:7,  donor:"Kim, Dr. Patricia",          pledge:75000,  paid:30000,  overdue:7500,   days:41,  freq:"Quarterly $7,500",  lastContact:"Apr 1, 2026",  officer:"Janet W.",action:"call",   priority:"high",     note:"Left voicemail" },
-  { id:17, donor:"Murphy, Robert & Helen",     pledge:45000,  paid:18000,  overdue:9000,   days:55,  freq:"Quarterly $4,500",  lastContact:"Mar 28, 2026", officer:"Mike D.", action:"letter", priority:"high",     note:"Email bounced" },
-  { id:18, donor:"Collins, Brian & Marie",     pledge:30000,  paid:12000,  overdue:6000,   days:38,  freq:"Quarterly $3,000",  lastContact:"Apr 5, 2026",  officer:"Janet W.",action:"reminder",priority:"high",    note:"" },
-  { id:19, donor:"Doyle, Michael",             pledge:20000,  paid:8000,   overdue:4000,   days:32,  freq:"Annual $4,000",     lastContact:"Apr 10, 2026", officer:"Sarah R.",action:"reminder",priority:"high",    note:"" },
-  { id:11, donor:"Costello, Barbara & Frank",  pledge:25000,  paid:10000,  overdue:5000,   days:27,  freq:"Semi-annual $5K",   lastContact:"Apr 15, 2026", officer:"Janet W.",action:"reminder",priority:"moderate", note:"" },
-  { id:15, donor:"Nguyen, Thomas",             pledge:10000,  paid:4000,   overdue:2000,   days:14,  freq:"Annual $2,000",     lastContact:"Apr 28, 2026", officer:"Sarah R.",action:"reminder",priority:"moderate", note:"" },
-  { id:20, donor:"Sullivan, Catherine",        pledge:12000,  paid:6000,   overdue:2000,   days:8,   freq:"Semi-annual $2K",   lastContact:"May 3, 2026",  officer:"Mike D.", action:"reminder",priority:"moderate", note:"Payment likely in transit" },
+  { id:1,  donor:"O'Brien, James & Patricia", fund:"Bell Tower Fund",  pledge:500000, paid:250000, overdue:25000,  days:92,  freq:"Quarterly $25K",    lastContact:"Feb 10, 2026", officer:"Mike D.", action:"call",   priority:"critical", note:"Major donor — personal outreach from development director" },
+  { id:4,  donor:"Walsh Estate", fund:"Cathedral Restoration",               pledge:150000, paid:50000,  overdue:50000,  days:131, freq:"Annual $50K",       lastContact:"Nov 8, 2025",  officer:"Sarah R.",action:"legal",  priority:"critical", note:"Executor change — legal review required" },
+  { id:2,  donor:"Harrington, David & Susan", fund:"Sacred Art & Windows",  pledge:250000, paid:100000, overdue:25000,  days:91,  freq:"Quarterly $25K",    lastContact:"Nov 22, 2025", officer:"Mike D.", action:"call",   priority:"critical", note:"No contact in 60+ days" },
+  { id:16, donor:"Andrews, William & Grace", fund:"Cathedral Restoration",   pledge:80000,  paid:20000,  overdue:20000,  days:107, freq:"Semi-annual $20K",  lastContact:"Jan 5, 2026",  officer:"Sarah R.",action:"letter", priority:"critical", note:"Letter sent Feb 2025 — no response" },
+  { id:9,  donor:"Ramirez, Elena & Carlos", fund:"Bell Tower Fund",    pledge:50000,  paid:20000,  overdue:10000,  days:70,  freq:"Semi-annual $10K",  lastContact:"Mar 15, 2026", officer:"Sarah R.",action:"call",   priority:"high",     note:"" },
+  { id:7,  donor:"Kim, Dr. Patricia", fund:"Endowment",          pledge:75000,  paid:30000,  overdue:7500,   days:41,  freq:"Quarterly $7,500",  lastContact:"Apr 1, 2026",  officer:"Janet W.",action:"call",   priority:"high",     note:"Left voicemail" },
+  { id:17, donor:"Murphy, Robert & Helen", fund:"Bell Tower Fund",     pledge:45000,  paid:18000,  overdue:9000,   days:55,  freq:"Quarterly $4,500",  lastContact:"Mar 28, 2026", officer:"Mike D.", action:"letter", priority:"high",     note:"Email bounced" },
+  { id:18, donor:"Collins, Brian & Marie", fund:"Sacred Art & Windows",     pledge:30000,  paid:12000,  overdue:6000,   days:38,  freq:"Quarterly $3,000",  lastContact:"Apr 5, 2026",  officer:"Janet W.",action:"reminder",priority:"high",    note:"" },
+  { id:19, donor:"Doyle, Michael", fund:"Endowment",             pledge:20000,  paid:8000,   overdue:4000,   days:32,  freq:"Annual $4,000",     lastContact:"Apr 10, 2026", officer:"Sarah R.",action:"reminder",priority:"high",    note:"" },
+  { id:11, donor:"Costello, Barbara & Frank", fund:"Endowment",  pledge:25000,  paid:10000,  overdue:5000,   days:27,  freq:"Semi-annual $5K",   lastContact:"Apr 15, 2026", officer:"Janet W.",action:"reminder",priority:"moderate", note:"" },
+  { id:15, donor:"Nguyen, Thomas", fund:"Endowment",             pledge:10000,  paid:4000,   overdue:2000,   days:14,  freq:"Annual $2,000",     lastContact:"Apr 28, 2026", officer:"Sarah R.",action:"reminder",priority:"moderate", note:"" },
+  { id:20, donor:"Sullivan, Catherine", fund:"Cathedral Restoration",        pledge:12000,  paid:6000,   overdue:2000,   days:8,   freq:"Semi-annual $2K",   lastContact:"May 3, 2026",  officer:"Mike D.", action:"reminder",priority:"moderate", note:"Payment likely in transit" },
 ];
 
 // ── enrich both datasets with a gift type / payment method (for filters + sorting) ──
@@ -954,9 +982,25 @@ function inWindow(dateStr, win){
   if (win==='year')   return d.getFullYear()===n.getFullYear();
   return true;
 }
+// Absolute date-range filter (fiscal year / calendar YTD / custom from–to)
+function inDateRange(dateStr, dr, from, to){
+  if (!dr || dr==='all') return true;
+  var d = new Date(dateStr); if (isNaN(d)) return false;
+  var lo=null, hi=null;
+  if (dr==='fy'){ lo=new Date(2025,6,1); hi=new Date(2026,5,30,23,59,59); }
+  else if (dr==='ytd'){ lo=new Date(REPORT_NOW.getFullYear(),0,1); hi=new Date(REPORT_NOW.getFullYear(),REPORT_NOW.getMonth(),REPORT_NOW.getDate(),23,59,59); }
+  else if (dr==='custom'){
+    lo = from ? new Date(from+'T00:00:00') : null;
+    hi = to   ? new Date(to+'T23:59:59')   : null;
+    if (lo && hi && lo>hi){ var t=lo; lo=hi; hi=t; }
+  } else return true;
+  if (lo && d<lo) return false;
+  if (hi && d>hi) return false;
+  return true;
+}
 
 // ── PLEDGE BALANCE: filter + sort state ───────────────────────────────────────
-var PB = { status:'all', q:'', officer:'all', parish:'all', type:'all', when:'all', sort:'balance' };
+var PB = { status:'all', q:'', officer:'all', parish:'all', type:'all', when:'all', fund:'all', dr:'all', drFrom:'', drTo:'', sort:'balance' };
 function renderPledge() {
   var rows = PLEDGES.filter(function(p){
     if (PB.status!=='all'){
@@ -967,7 +1011,9 @@ function renderPledge() {
     if (PB.parish!=='all'  && p.parish!==PB.parish) return false;
     if (PB.type!=='all'    && p.type!==PB.type) return false;
     if (PB.when!=='all'    && !inWindow(p.nextDate, PB.when)) return false;
-    if (PB.q){ var q=PB.q.toLowerCase(); if ((p.donor+' '+p.parish+' '+p.officer+' '+p.type).toLowerCase().indexOf(q)<0) return false; }
+    if (PB.fund!=='all'    && p.fund!==PB.fund) return false;
+    if (PB.dr!=='all'      && !inDateRange(p.nextDate, PB.dr, PB.drFrom, PB.drTo)) return false;
+    if (PB.q){ var q=PB.q.toLowerCase(); if ((p.donor+' '+p.parish+' '+p.officer+' '+p.type+' '+p.fund).toLowerCase().indexOf(q)<0) return false; }
     return true;
   });
   var dir = { pct:1, nextdate:1, donoraz:1, gifttype:1 }[PB.sort] ? 1 : -1;
@@ -1030,12 +1076,15 @@ function renderPledge() {
 }
 function applyPledge(){
   var s=document.getElementById('pb-search'), o=document.getElementById('pb-officer'), pa=document.getElementById('pb-parish'), ty=document.getElementById('pb-type'), wn=document.getElementById('pb-when'), so=document.getElementById('pb-sort');
+  var fn=document.getElementById('pb-fund'), dr=document.getElementById('pb-dr'), df=document.getElementById('pb-dr-from'), dt2=document.getElementById('pb-dr-to'), dc=document.getElementById('pb-dr-custom');
   PB.q = s?s.value:''; PB.officer = o?o.value:'all'; PB.parish = pa?pa.value:'all'; PB.type = ty?ty.value:'all'; PB.when = wn?wn.value:'all'; PB.sort = so?so.value:'balance';
+  PB.fund = fn?fn.value:'all'; PB.dr = dr?dr.value:'all'; PB.drFrom = df?df.value:''; PB.drTo = dt2?dt2.value:'';
+  if (dc) dc.style.display = (PB.dr==='custom') ? 'grid' : 'none';
   renderPledge();
 }
 
 // ── DELINQUENCY: filter + sort state ──────────────────────────────────────────
-var DQ = { sev:'all', q:'', officer:'all', action:'all', type:'all', when:'all', sort:'days' };
+var DQ = { sev:'all', q:'', officer:'all', action:'all', type:'all', when:'all', fund:'all', dr:'all', drFrom:'', drTo:'', sort:'days' };
 function renderDelinq() {
   var rows = DELINQ_DATA.filter(function(d){
     if (DQ.sev==='critical' && !(d.days>=90)) return false;
@@ -1045,7 +1094,9 @@ function renderDelinq() {
     if (DQ.action!=='all'   && d.action!==DQ.action) return false;
     if (DQ.type!=='all'     && d.type!==DQ.type) return false;
     if (DQ.when!=='all'     && !inWindow(d.lastContact, DQ.when)) return false;
-    if (DQ.q){ var q=DQ.q.toLowerCase(); if ((d.donor+' '+d.officer+' '+d.freq+' '+d.type).toLowerCase().indexOf(q)<0) return false; }
+    if (DQ.fund!=='all'     && d.fund!==DQ.fund) return false;
+    if (DQ.dr!=='all'       && !inDateRange(d.lastContact, DQ.dr, DQ.drFrom, DQ.drTo)) return false;
+    if (DQ.q){ var q=DQ.q.toLowerCase(); if ((d.donor+' '+d.officer+' '+d.freq+' '+d.type+' '+d.fund).toLowerCase().indexOf(q)<0) return false; }
     return true;
   });
   var dir = { contact:1, pct:1, donoraz:1 }[DQ.sort] ? 1 : -1;  // these ascend; others descend
@@ -1107,7 +1158,10 @@ function renderDelinq() {
 }
 function applyDelinq(){
   var s=document.getElementById('dq-search'), o=document.getElementById('dq-officer'), ac=document.getElementById('dq-action'), ty=document.getElementById('dq-type'), wn=document.getElementById('dq-when'), so=document.getElementById('dq-sort');
+  var fn=document.getElementById('dq-fund'), dr=document.getElementById('dq-dr'), df=document.getElementById('dq-dr-from'), dt2=document.getElementById('dq-dr-to'), dc=document.getElementById('dq-dr-custom');
   DQ.q = s?s.value:''; DQ.officer = o?o.value:'all'; DQ.action = ac?ac.value:'all'; DQ.type = ty?ty.value:'all'; DQ.when = wn?wn.value:'all'; DQ.sort = so?so.value:'days';
+  DQ.fund = fn?fn.value:'all'; DQ.dr = dr?dr.value:'all'; DQ.drFrom = df?df.value:''; DQ.drTo = dt2?dt2.value:'';
+  if (dc) dc.style.display = (DQ.dr==='custom') ? 'grid' : 'none';
   renderDelinq();
 }
 
@@ -1138,6 +1192,12 @@ function filterDelinq(f, btn) {
 // ── toolbar: meta (count + chips + badge), popover, clear, KPI, header sort ──
 var WHEN_LBL = { pb:{today:'Due today',week:'Due this week',month:'Due this month',year:'Due this year'},
                  dq:{today:'Contacted today',week:'Contacted this week',month:'Contacted this month',year:'Contacted this year'} };
+function drLabel(dr, from, to){
+  if(dr==='fy') return 'Date: FY 25–26';
+  if(dr==='ytd') return 'Date: YTD';
+  if(dr==='custom'){ return 'Date: '+(from||'…')+' → '+(to||'…'); }
+  return 'Date range';
+}
 function chipHTML(prefix, list){
   var host=document.getElementById(prefix+'-chips'); if(!host) return;
   host.innerHTML = list.map(function(c){ return '<span class="flt-chip"><b>'+c.lbl+'</b><button title="Remove" onclick="chipClear(\''+prefix+'\',\''+c.key+'\')">×</button></span>'; }).join('')
@@ -1151,6 +1211,8 @@ function pbMeta(n){
   if(PB.parish!=='all')  list.push({key:'parish',lbl:'Parish: '+PB.parish});
   if(PB.type!=='all')    list.push({key:'type',lbl:'Type: '+PB.type});
   if(PB.when!=='all')    list.push({key:'when',lbl:WHEN_LBL.pb[PB.when]||PB.when});
+  if(PB.fund!=='all')    list.push({key:'fund',lbl:'Fund: '+PB.fund});
+  if(PB.dr!=='all')      list.push({key:'dr',lbl:drLabel(PB.dr,PB.drFrom,PB.drTo)});
   var pop=list.filter(function(c){return c.key!=='q';}).length;
   var badge=document.getElementById('pb-fbadge'); if(badge){ badge.textContent=pop; badge.classList.toggle('show',pop>0); }
   chipHTML('pb', list);
@@ -1163,6 +1225,8 @@ function dqMeta(n){
   if(DQ.action!=='all')  list.push({key:'action',lbl:'Action: '+({call:'Personal call',legal:'Legal review',letter:'Formal letter',reminder:'Send reminder'}[DQ.action]||DQ.action)});
   if(DQ.type!=='all')    list.push({key:'type',lbl:'Type: '+DQ.type});
   if(DQ.when!=='all')    list.push({key:'when',lbl:WHEN_LBL.dq[DQ.when]||DQ.when});
+  if(DQ.fund!=='all')    list.push({key:'fund',lbl:'Fund: '+DQ.fund});
+  if(DQ.dr!=='all')      list.push({key:'dr',lbl:drLabel(DQ.dr,DQ.drFrom,DQ.drTo)});
   var pop=list.filter(function(c){return c.key!=='q';}).length;
   var badge=document.getElementById('dq-fbadge'); if(badge){ badge.textContent=pop; badge.classList.toggle('show',pop>0); }
   chipHTML('dq', list);
@@ -1174,7 +1238,9 @@ function chipClear(prefix, key){
 }
 function clearFilters(prefix){
   var s=document.getElementById(prefix+'-search'); if(s) s.value='';
-  ['officer','parish','type','when','action'].forEach(function(f){ var e=document.getElementById(prefix+'-'+f); if(e) e.value='all'; });
+  ['officer','parish','type','when','action','fund','dr'].forEach(function(f){ var e=document.getElementById(prefix+'-'+f); if(e) e.value='all'; });
+  ['-dr-from','-dr-to'].forEach(function(f){ var e=document.getElementById(prefix+f); if(e) e.value=''; });
+  var dc=document.getElementById(prefix+'-dr-custom'); if(dc) dc.style.display='none';
   var so=document.getElementById(prefix+'-sort'); if(so) so.value = prefix==='pb'?'balance':'days';
   if(prefix==='pb'){
     document.querySelectorAll('.report-body-pledge .filter-pill').forEach(function(b){ b.classList.toggle('active', (b.getAttribute('onclick')||'').indexOf("'all'")>=0); });
@@ -1186,7 +1252,12 @@ function clearFilters(prefix){
   closePop(prefix);
 }
 function toggleFilters(prefix, ev){ if(ev) ev.stopPropagation(); var pop=document.getElementById(prefix+'-pop'), btn=document.getElementById(prefix+'-filters-btn'); if(!pop) return; var open=!pop.classList.contains('open'); pop.classList.toggle('open',open); if(btn) btn.classList.toggle('on',open);
-  if(open && btn && btn.getBoundingClientRect){ var r=btn.getBoundingClientRect(), w=248; var left=Math.max(8, Math.min(r.right-w, window.innerWidth-w-8)); pop.style.left=left+'px'; pop.style.top=(r.bottom+6)+'px'; } }
+  if(open && btn && btn.getBoundingClientRect){ var r=btn.getBoundingClientRect();
+    var w=pop.offsetWidth||380, h=pop.offsetHeight||0, m=8;
+    var left=Math.max(m, Math.min(r.right-w, window.innerWidth-w-m));
+    var top=r.bottom+6;
+    if(top+h > window.innerHeight-m){ var up=r.top-6-h; top = up>=m ? up : Math.max(m, window.innerHeight-m-h); }
+    pop.style.left=left+'px'; pop.style.top=top+'px'; } }
 function closePop(prefix){ var pop=document.getElementById(prefix+'-pop'), btn=document.getElementById(prefix+'-filters-btn'); if(pop) pop.classList.remove('open'); if(btn) btn.classList.remove('on'); }
 document.addEventListener('click', function(e){ ['pb','dq'].forEach(function(p){ var pop=document.getElementById(p+'-pop'), btn=document.getElementById(p+'-filters-btn'); if(pop&&pop.classList.contains('open') && !pop.contains(e.target) && btn && !btn.contains(e.target)) closePop(p); }); });
 function kpiFilter(st){ showTab('balance'); document.querySelectorAll('.report-body-pledge .filter-pill').forEach(function(b){ if((b.getAttribute('onclick')||'').indexOf("filterBalance('"+st+"'")>=0) filterBalance(st,b); }); var w=document.getElementById('tabs-wrap'); if(w&&w.scrollIntoView) w.scrollIntoView({behavior:'smooth',block:'start'}); }
