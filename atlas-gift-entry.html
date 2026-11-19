@@ -1654,6 +1654,15 @@ body {
     });
   });
 
+  // ── Preselect a gift type from the URL (?type=newpledge, ?type=pledge, etc.) ──
+  try {
+    var _qt = new URLSearchParams(window.location.search).get('type');
+    if (_qt) {
+      var _pill = document.querySelector('.type-pill[data-type="' + _qt.replace(/[^a-z]/gi,'') + '"]');
+      if (_pill) _pill.click();
+    }
+  } catch (e) {}
+
   // ── Payment-method date (wire transfer or check, in any gift type) ──
   window.methDateSync = function(){
     var m = document.getElementById('meth-fld'), row = document.getElementById('meth-date-row');

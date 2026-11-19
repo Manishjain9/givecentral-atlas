@@ -1191,6 +1191,13 @@ body {
 
         <!-- ═══ GIFTS & PLEDGES TAB ═══ -->
         <div class="tab-content" id="tab-gifts">
+          <!-- Sub-view toggle: Transactions ledger vs. editable Pledges -->
+          <div class="gp-subtabs">
+            <button class="gp-subtab active" id="gpst-transactions" onclick="gpView('transactions')">Transactions</button>
+            <button class="gp-subtab" id="gpst-pledges" onclick="gpView('pledges')">Pledges</button>
+          </div>
+
+          <div id="gp-view-transactions">
           <!-- Filter strip -->
           <div class="section">
             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:12px">
@@ -1232,22 +1239,99 @@ body {
             </table>
           </div>
 
-          <!-- Open pledges section -->
-          <div class="section">
-            <div class="section-header">
-              <span class="section-title">Open pledges</span>
-              <a class="section-action" href="atlas-pledges-list.html">Manage all pledges <svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5h7M6 2.5l3 3-3 3"/></svg></a>
-            </div>
-            <div class="pledge-row" style="cursor:pointer" onclick="window.location.href='atlas-pledge-detail.html'">
-              <div class="pledge-header">
-                <div class="pledge-name">Catholic Ministry Appeal 2026</div>
-                <div style="font-size:12px;font-weight:600;color:var(--text)">$3,100 / $5,000</div>
+          </div><!-- /#gp-view-transactions -->
+
+          <style id="dp-css">
+          .gp-subtabs{display:inline-flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:16px}
+          .gp-subtab{font-size:12.5px;font-weight:600;font-family:'DM Sans',sans-serif;border:none;background:none;color:var(--text-2);border-radius:7px;padding:6px 16px;cursor:pointer}
+          .gp-subtab:hover{color:var(--text)}
+          .gp-subtab.active{background:#fff;color:var(--blue);box-shadow:0 1px 3px rgba(15,23,42,.08)}
+          #gp-view-transactions .gl-rowact{display:inline-flex;align-items:center;gap:8px;justify-content:flex-end}
+          #gp-view-transactions .gl-view{color:var(--blue);font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap}
+          #gp-view-transactions .gl-view:hover{text-decoration:underline}
+          #gp-view-transactions .gl-edit{font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;border:1px solid var(--border);background:#fff;color:var(--text-2);border-radius:7px;padding:5px 11px;cursor:pointer;white-space:nowrap}
+          #gp-view-transactions .gl-edit:hover{border-color:var(--blue);color:var(--blue)}
+          /* Inline gift-edit drawer */
+          #ge-scrim{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100040;opacity:0;pointer-events:none;transition:opacity .2s}
+          #ge-scrim.open{opacity:1;pointer-events:auto}
+          #ge-drawer{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:100vw;background:#fff;z-index:100041;box-shadow:-16px 0 40px rgba(15,23,42,.18);transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column;font-family:var(--font,'DM Sans',sans-serif)}
+          #ge-drawer.open{transform:none}
+          #ge-drawer .ge-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
+          #ge-drawer .ge-head .t{font-size:16px;font-weight:700;color:var(--text)}
+          #ge-drawer .ge-head .s{font-size:12px;color:var(--text-3);margin-top:2px}
+          #ge-drawer .ge-x{margin-left:auto;width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;color:var(--text-2);font-size:16px;line-height:1}
+          #ge-drawer .ge-x:hover{background:var(--surface)}
+          #ge-drawer .ge-body{flex:1;overflow-y:auto;padding:18px 22px}
+          #ge-drawer .ge-foot{padding:14px 22px;border-top:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:8px;justify-content:flex-end}
+          #ge-drawer .ge-foot .left{margin-right:auto}
+          #ge-drawer .ge-f{margin-bottom:14px}
+          #ge-drawer .ge-f label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);margin-bottom:5px}
+          #ge-drawer .ge-f input,#ge-drawer .ge-f select,#ge-drawer .ge-f textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font,'DM Sans',sans-serif);color:var(--text);background:#fff;outline:none}
+          #ge-drawer .ge-f input:focus,#ge-drawer .ge-f select:focus,#ge-drawer .ge-f textarea:focus{border-color:var(--blue)}
+          #ge-drawer .ge-f input:disabled,#ge-drawer .ge-f select:disabled{background:var(--surface);color:var(--text-3);cursor:not-allowed}
+          #ge-drawer .ge-lock{display:flex;gap:10px;align-items:flex-start;background:var(--amber-light,#FEF3C7);border:1px solid #FCD34D;border-radius:10px;padding:11px 13px;margin-bottom:16px;font-size:12px;color:#92400E;line-height:1.5}
+          #ge-drawer .ge-lock svg{width:15px;height:15px;flex:0 0 auto;margin-top:1px}
+          #ge-drawer .ge-lock a{color:#92400E;font-weight:700;text-decoration:underline;cursor:pointer}
+          #ge-drawer .ge-grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+          #ge-drawer .ge-chk{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500;color:var(--text-2);text-transform:none;letter-spacing:0;margin-bottom:6px;cursor:pointer}
+          #ge-drawer .ge-chk input{width:auto;margin:0}
+          #ge-btn{font-size:13px;font-weight:600;font-family:var(--font,'DM Sans',sans-serif);border-radius:8px;padding:9px 16px;cursor:pointer;border:1px solid transparent}
+          .ge-cancel{background:#fff;border-color:var(--border);color:var(--text-2)}.ge-cancel:hover{border-color:#94A3B8}
+          .ge-save{background:var(--blue);color:#fff}.ge-save:hover{background:#1D4ED8}
+          .ge-full{font-size:12px;font-weight:600;color:var(--blue);background:none;border:none;cursor:pointer;padding:0}
+          .ge-full:hover{text-decoration:underline}
+          #gp-view-pledges .dp-note{font-size:12.5px;color:var(--text-3);margin:-4px 0 14px;line-height:1.5}
+          #gp-view-pledges .dp-card{border:1px solid var(--border);border-radius:12px;margin-bottom:12px;background:#fff;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+          #gp-view-pledges .dp-card.editing{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-pale)}
+          #gp-view-pledges .dp-card.locked{opacity:.55}
+          #gp-view-pledges .dp-top{display:flex;align-items:center;gap:14px;padding:13px 16px}
+          #gp-view-pledges .dp-main{flex:1;min-width:0}
+          #gp-view-pledges .dp-name{font-size:13.5px;font-weight:600;color:var(--text)}
+          #gp-view-pledges .dp-meta{font-size:11.5px;color:var(--text-3);margin-top:2px}
+          #gp-view-pledges .dp-amt{text-align:right;white-space:nowrap}
+          #gp-view-pledges .dp-amt .v{font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+          #gp-view-pledges .dp-amt .l{font-size:10.5px;color:var(--text-3);margin-top:1px}
+          #gp-view-pledges .dp-prog{width:120px}
+          #gp-view-pledges .dp-track{height:5px;background:#E2E8F0;border-radius:3px;overflow:hidden}
+          #gp-view-pledges .dp-fill{height:100%;border-radius:3px}
+          #gp-view-pledges .dp-pct{font-size:10.5px;color:var(--text-3);margin-top:3px;text-align:right}
+          #gp-view-pledges .dp-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+          #gp-view-pledges .dpb-current{background:var(--green-light,#DCFCE7);color:var(--green)}
+          #gp-view-pledges .dpb-behind{background:var(--amber-light,#FEF3C7);color:var(--amber)}
+          #gp-view-pledges .dpb-delinq{background:var(--rose-light,#FFE4E6);color:var(--rose)}
+          #gp-view-pledges .dpb-fulfilled{background:#EDE9FE;color:#7C3AED}
+          #gp-view-pledges .dp-actions{display:inline-flex;gap:7px;align-items:center}
+          #gp-view-pledges .dp-view-btn{font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;border:none;background:none;color:var(--blue);border-radius:7px;padding:6px 8px;cursor:pointer;white-space:nowrap}
+          #gp-view-pledges .dp-view-btn:hover{text-decoration:underline}
+          #gp-view-pledges .dp-edit-btn{font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;border:1px solid var(--border);background:#fff;color:var(--text-2);border-radius:7px;padding:6px 13px;cursor:pointer;white-space:nowrap}
+          #gp-view-pledges .dp-edit-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue)}
+          #gp-view-pledges .dp-edit-btn:disabled{cursor:not-allowed;opacity:.6}
+          #gp-view-pledges .dp-newbtn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;font-family:'DM Sans',sans-serif;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 15px;cursor:pointer;box-shadow:0 1px 3px rgba(37,99,235,.3)}
+          #gp-view-pledges .dp-newbtn:hover{background:#1D4ED8}
+          #gp-view-pledges .dp-lock{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--text-3)}
+          #gp-view-pledges .dp-form{border-top:1px solid var(--border);background:var(--surface);padding:15px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+          #gp-view-pledges .dp-f{display:flex;flex-direction:column;gap:5px}
+          #gp-view-pledges .dp-f.full{grid-column:1/-1}
+          #gp-view-pledges .dp-f label{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3)}
+          #gp-view-pledges .dp-f input,#gp-view-pledges .dp-f select,#gp-view-pledges .dp-f textarea{padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;font-family:'DM Sans',sans-serif;color:var(--text);background:#fff;outline:none}
+          #gp-view-pledges .dp-f input:focus,#gp-view-pledges .dp-f select:focus,#gp-view-pledges .dp-f textarea:focus{border-color:var(--blue)}
+          #gp-view-pledges .dp-foot{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--border);padding-top:13px;margin-top:2px}
+          #gp-view-pledges .dp-btn{font-size:12.5px;font-weight:600;font-family:'DM Sans',sans-serif;border-radius:8px;padding:8px 16px;cursor:pointer;border:1px solid transparent}
+          #gp-view-pledges .dp-cancel{background:#fff;border-color:var(--border);color:var(--text-2)}
+          #gp-view-pledges .dp-cancel:hover{border-color:#94A3B8}
+          #gp-view-pledges .dp-save{background:var(--blue);color:#fff}
+          #gp-view-pledges .dp-save:hover{background:#1D4ED8}
+          #gp-view-pledges .dp-editing-banner{display:flex;align-items:center;gap:8px;font-size:12px;color:#1D4ED8;background:var(--blue-pale);border:1px solid var(--blue-light);border-radius:9px;padding:9px 13px;margin-bottom:14px}
+          </style>
+          <div id="gp-view-pledges" style="display:none">
+            <div class="section">
+              <div class="section-header">
+                <span class="section-title">Pledges &middot; <span id="dp-donor">Margaret T. Sullivan</span></span>
+                <button class="dp-newbtn" onclick="window.location.href='atlas-gift-entry.html?type=newpledge'"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" width="12" height="12"><path d="M6 1.5v9M1.5 6h9"/></svg>New pledge</button>
               </div>
-              <div class="pledge-progress"><div class="pledge-fill" style="width:62%"></div></div>
-              <div class="pledge-footer">
-                <span>62% paid · 2 installments remaining · Next due Jun 15</span>
-                <span style="color:var(--blue)">View pledge →</span>
-              </div>
+              <div class="dp-note">All standing pledge commitments for this donor. Open one to edit it — only a single pledge can be edited at a time; the others stay locked until you save or cancel.</div>
+              <div id="dp-editing-banner"></div>
+              <div id="dp-list"></div>
             </div>
           </div>
         </div>
@@ -2038,10 +2122,97 @@ body {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       const target = document.getElementById('tab-' + id);
       if (target) target.classList.add('active');
-      if (id === 'gifts') renderGiftLedger();
+      if (id === 'gifts') { renderGiftLedger(); gpView(GP_VIEW); }
       // Scroll to top of profile-main
       const main = document.querySelector('.profile-main');
       if (main) main.scrollTop = 0;
+    }
+    // Sub-view toggle inside the Gifts & Pledges tab
+    let GP_VIEW = 'transactions';
+    function gpView(view){
+      GP_VIEW = view;
+      var tx = document.getElementById('gp-view-transactions'), pl = document.getElementById('gp-view-pledges');
+      if (tx) tx.style.display = view==='transactions' ? '' : 'none';
+      if (pl) pl.style.display = view==='pledges' ? '' : 'none';
+      var bt = document.getElementById('gpst-transactions'), bp = document.getElementById('gpst-pledges');
+      if (bt) bt.classList.toggle('active', view==='transactions');
+      if (bp) bp.classList.toggle('active', view==='pledges');
+      if (view==='pledges') renderDonorPledges();
+    }
+
+    /* ═══════ Per-donor Pledges (Tab) — single-edit lock ═══════ */
+    const DONOR_PLEDGES = [
+      { id:'PL-2026-094', fund:'Catholic Ministry Appeal 2026', total:5000,  paid:3100, freq:'Annual',     next:'2026-06-15', nextAmt:1900, status:'current',   notes:'Signed pledge card on file. Prefers reminder 2 weeks before due.' },
+      { id:'PL-2026-061', fund:'Cathedral Capital Campaign',    total:25000, paid:5000, freq:'Annual',     next:'2026-09-01', nextAmt:5000, status:'current',   notes:'Verbally committed at board meeting; naming opportunity discussed.' },
+      { id:'PL-2025-128', fund:'School Scholarship Fund',       total:3000,  paid:3000, freq:'Quarterly',  next:'',           nextAmt:0,    status:'fulfilled', notes:'Completed Dec 2025.' },
+      { id:'PL-2025-040', fund:"Bishop's Annual Appeal 2025",   total:2000,  paid:500,  freq:'Semi-annual',next:'2026-02-01', nextAmt:750,  status:'behind',    notes:'One installment missed — courtesy reminder sent.' },
+    ];
+    let DP_EDITING = null; // id currently being edited (lock the rest)
+    const DP_STATUS = { current:['Current','dpb-current'], behind:['Behind schedule','dpb-behind'], delinq:['Delinquent','dpb-delinq'], fulfilled:['Fulfilled','dpb-fulfilled'] };
+    function dpMoney(n){ return '$' + (n||0).toLocaleString(); }
+    function dpDate(s){ if(!s) return '—'; var d=new Date(s+'T00:00:00'); return isNaN(d)?s:d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+    function renderDonorPledges(){
+      var host = document.getElementById('dp-list'); if(!host) return;
+      host.innerHTML = DONOR_PLEDGES.map(function(p){
+        var pct = p.total ? Math.round(p.paid/p.total*100) : 0;
+        var fill = pct>=100 ? '#7C3AED' : pct>=50 ? 'var(--green)' : 'var(--amber)';
+        var st = DP_STATUS[p.status] || DP_STATUS.current;
+        var locked = DP_EDITING && DP_EDITING !== p.id;
+        var editing = DP_EDITING === p.id;
+        var card = '<div class="dp-card'+(editing?' editing':'')+(locked?' locked':'')+'" id="dpc-'+p.id+'">';
+        card += '<div class="dp-top">'
+          + '<div class="dp-main"><div class="dp-name">'+p.fund+'</div>'
+          + '<div class="dp-meta">'+p.id+' &middot; '+p.freq+' &middot; '+(p.status==='fulfilled'?'Completed':'Next '+dpDate(p.next)+(p.nextAmt?' · '+dpMoney(p.nextAmt):''))+'</div></div>'
+          + '<div class="dp-prog"><div class="dp-track"><div class="dp-fill" style="width:'+pct+'%;background:'+fill+'"></div></div><div class="dp-pct">'+pct+'% paid</div></div>'
+          + '<div class="dp-amt"><div class="v">'+dpMoney(p.paid)+' / '+dpMoney(p.total)+'</div><div class="l">paid / pledged</div></div>'
+          + '<span class="dp-badge '+st[1]+'">'+st[0]+'</span>'
+          + (locked
+              ? '<span class="dp-lock"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" width="12" height="12"><rect x="2.5" y="5.5" width="7" height="5" rx="1"/><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5"/></svg>Locked</span>'
+              : '<div class="dp-actions"><button class="dp-view-btn" onclick="dpViewDetails(\''+p.id+'\')">View details</button><button class="dp-edit-btn" '+(editing?'disabled':'')+' onclick="dpEdit(\''+p.id+'\')">'+(editing?'Editing…':'Edit')+'</button></div>')
+          + '</div>';
+        if(editing) card += dpFormHTML(p);
+        card += '</div>';
+        return card;
+      }).join('');
+      var banner = document.getElementById('dp-editing-banner');
+      if(banner) banner.innerHTML = DP_EDITING
+        ? '<div class="dp-editing-banner"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" width="14" height="14"><path d="M2 10.5V12h1.5l6-6L8 4.5l-6 6z"/><path d="M8.5 4l1.5 1.5"/></svg>Editing <b style="margin:0 3px">'+(DONOR_PLEDGES.find(function(x){return x.id===DP_EDITING;})||{}).fund+'</b> — other pledges are locked until you save or cancel.</div>'
+        : '';
+    }
+    function dpFormHTML(p){
+      return '<div class="dp-form">'
+        + '<div class="dp-f"><label>Fund / designation</label><input id="dpf-fund" value="'+p.fund.replace(/"/g,'&quot;')+'"></div>'
+        + '<div class="dp-f"><label>Total pledge ($)</label><input id="dpf-total" type="number" value="'+p.total+'"></div>'
+        + '<div class="dp-f"><label>Paid to date ($)</label><input id="dpf-paid" type="number" value="'+p.paid+'"></div>'
+        + '<div class="dp-f"><label>Frequency</label><select id="dpf-freq">'+['Annual','Semi-annual','Quarterly','Monthly','One-time'].map(function(o){return '<option'+(o===p.freq?' selected':'')+'>'+o+'</option>';}).join('')+'</select></div>'
+        + '<div class="dp-f"><label>Next payment date</label><input id="dpf-next" type="date" value="'+(p.next||'')+'"></div>'
+        + '<div class="dp-f"><label>Next amount ($)</label><input id="dpf-nextamt" type="number" value="'+p.nextAmt+'"></div>'
+        + '<div class="dp-f"><label>Status</label><select id="dpf-status">'+Object.keys(DP_STATUS).map(function(k){return '<option value="'+k+'"'+(k===p.status?' selected':'')+'>'+DP_STATUS[k][0]+'</option>';}).join('')+'</select></div>'
+        + '<div class="dp-f full"><label>Notes</label><textarea id="dpf-notes" rows="2">'+(p.notes||'')+'</textarea></div>'
+        + '<div class="dp-foot"><button class="dp-btn dp-cancel" onclick="dpCancel()">Cancel</button><button class="dp-btn dp-save" onclick="dpSave(\''+p.id+'\')">Save changes</button></div>'
+        + '</div>';
+    }
+    function dpEdit(id){ openPledgeEdit(id); }
+    function openPledgeForGiftRow(fund){
+      var p = DONOR_PLEDGES.find(function(x){ return x.fund && fund && (x.fund.indexOf(fund)===0 || x.fund.indexOf(fund)>-1); }) || DONOR_PLEDGES[0];
+      if(p) openPledgeEdit(p.id);
+    }
+    function dpViewDetails(id){ window.location.href='atlas-pledge-detail.html'; }
+    function dpCancel(){ DP_EDITING = null; renderDonorPledges(); }
+    function dpSave(id){
+      var p = DONOR_PLEDGES.find(function(x){return x.id===id;}); if(!p) return;
+      var g=function(i){var e=document.getElementById(i);return e?e.value:null;};
+      p.fund = g('dpf-fund')||p.fund;
+      p.total = parseInt(g('dpf-total'),10)||p.total;
+      p.paid = parseInt(g('dpf-paid'),10); if(isNaN(p.paid)) p.paid=0;
+      p.freq = g('dpf-freq')||p.freq;
+      p.next = g('dpf-next')||'';
+      p.nextAmt = parseInt(g('dpf-nextamt'),10)||0;
+      p.status = g('dpf-status')||p.status;
+      p.notes = g('dpf-notes')||'';
+      DP_EDITING = null;
+      renderDonorPledges();
+      if(window.toast) toast('Pledge '+id+' updated'); else if(window.atlasToast) atlasToast('Pledge '+id+' updated');
     }
     function switchTabById(id){
       const tabEl = document.querySelector('.profile-tab[onclick*="\'' + id + '\'"]');
@@ -2102,7 +2273,7 @@ body {
       const tbody = document.getElementById('gifts-ledger-tbody');
       tbody.innerHTML = filtered.length === 0
         ? '<tr><td colspan="7" style="text-align:center;color:var(--text-3);padding:24px;font-style:italic">No gifts match the current filters</td></tr>'
-        : filtered.map(g => { var href='atlas-gift-detail.html?donor='+encodeURIComponent('Margaret T. Sullivan')+'&date='+encodeURIComponent(g.date)+'&fund='+encodeURIComponent(g.fund)+'&type='+encodeURIComponent(g.type)+'&method='+encodeURIComponent(g.det||'')+'&amount='+encodeURIComponent(fmtMoney(g.amount))+'&status='+encodeURIComponent(g.status); return `
+        : filtered.map(g => { var gi = GIFT_LEDGER.indexOf(g); var href='atlas-gift-detail.html?donor='+encodeURIComponent('Margaret T. Sullivan')+'&date='+encodeURIComponent(g.date)+'&fund='+encodeURIComponent(g.fund)+'&type='+encodeURIComponent(g.type)+'&method='+encodeURIComponent(g.det||'')+'&amount='+encodeURIComponent(fmtMoney(g.amount))+'&status='+encodeURIComponent(g.status); var isSchedPledge = (g.type==='Pledge'); var editAct = isSchedPledge ? ("openPledgeForGiftRow('"+(g.fund||'').replace(/'/g,"\\'")+"')") : ("openGiftEdit("+gi+")"); return `
           <tr style="cursor:pointer" onclick="window.location='${href}'">
             <td>${g.date}</td>
             <td>${g.fund}</td>
@@ -2110,11 +2281,169 @@ body {
             <td style="font-weight:600;color:${g.status === 'Pending' ? 'var(--amber)' : 'var(--text)'}">${fmtMoney(g.amount)}</td>
             <td>${g.rf||'—'}</td>
             <td>${statusBadge(g.status)}</td>
-            <td style="text-align:right"><a href="${href}" onclick="event.stopPropagation()" title="Open gift detail" style="color:var(--blue);font-size:13px;font-weight:700;text-decoration:none">→</a></td>
+            <td style="text-align:right;white-space:nowrap"><div class="gl-rowact"><a class="gl-view" href="${href}" onclick="event.stopPropagation()" title="Open gift detail">View details</a><button class="gl-edit" onclick="event.stopPropagation();${editAct}" title="${isSchedPledge?'Manage in Pledges':'Edit this gift'}">Edit</button></div></td>
           </tr>`; }).join('');
       const total = filtered.reduce((s,g) => g.status !== 'Pending' ? s + g.amount : s, 0);
       document.getElementById('gifts-ledger-count').textContent = filtered.length + ' gift' + (filtered.length === 1 ? '' : 's');
       document.getElementById('gifts-totals-line').textContent = fmtMoney(total) + ' total';
+    }
+
+    function glEditGift(){ window.location.href='atlas-gift-entry.html'; }
+
+    /* ── Inline edit drawer — shared by gifts and pledges ── */
+    var GE_IDX = null, GE_MODE = 'gift', GE_PLEDGE_ID = null;
+    var GE_FUNDS = ['Catholic Ministry Appeal',"St. Michael's Parish",'Cathedral Capital','Marian Congress','Giving Tuesday'];
+    function geFullHref(g){
+      return 'atlas-gift-entry.html?mode=edit'
+        + '&donor=' + encodeURIComponent('Margaret T. Sullivan')
+        + '&date='  + encodeURIComponent(g.date)
+        + '&fund='  + encodeURIComponent(g.fund)
+        + '&type='  + encodeURIComponent(g.type)
+        + '&method='+ encodeURIComponent(g.det||'')
+        + '&amount='+ encodeURIComponent(fmtMoney(g.amount))
+        + '&status='+ encodeURIComponent(g.status);
+    }
+    var GE_REC = null, GE_SAVE = null, GE_FULL = '';
+    // Generic gift drawer: rec = {date,fund,type,amount(number),method,rf,status}; saveCb(vals,posted); fullHref string.
+    function openGiftDrawer(rec, saveCb, fullHref){
+      GE_MODE = 'gift'; GE_PLEDGE_ID = null; GE_IDX = null;
+      GE_REC = rec; GE_SAVE = saveCb || null; GE_FULL = fullHref || 'atlas-gift-entry.html';
+      var tEl = document.getElementById('ge-title'); if(tEl) tEl.textContent = 'Edit gift';
+      var fEl0 = document.getElementById('ge-full'); if(fEl0) fEl0.textContent = 'Open full editor →';
+      var posted = (rec.status === 'Received');
+      document.getElementById('ge-sub').textContent = rec.type + ' · ' + rec.date + ' · ' + fmtMoney(rec.amount);
+      var funds = GE_FUNDS.slice(); if(rec.fund && funds.indexOf(rec.fund)<0) funds.unshift(rec.fund);
+      var fundOpts = funds.map(function(f){ return '<option'+(f===rec.fund?' selected':'')+'>'+f+'</option>'; }).join('');
+      var dis = posted ? 'disabled' : '';
+      var body = '';
+      if (posted) {
+        body += '<div class="ge-lock"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg><div>This gift is <b>posted</b>. Amount, fund and date are locked — changing them is a financial correction. Use <a onclick="geCorrect()">Correct / reverse</a> to adjust those. Receipt, soft credit and notes can still be edited here.</div></div>';
+      }
+      body += '<div class="ge-grid2">'
+        + '<div class="ge-f"><label>Amount</label><input id="ge-amount" type="text" value="'+fmtMoney(rec.amount)+'" '+dis+'></div>'
+        + '<div class="ge-f"><label>Gift date</label><input id="ge-date" type="text" value="'+(rec.date||'')+'" '+dis+'></div>'
+        + '</div>';
+      body += '<div class="ge-f"><label>Campaign / fund</label><select id="ge-fund" '+dis+'>'+fundOpts+'</select></div>';
+      body += '<div class="ge-f"><label>Appeal</label><input id="ge-appeal" type="text" value="'+(rec.appeal||'').replace(/"/g,'&quot;')+'" placeholder="e.g. Spring 2026 mailing"></div>';
+      body += '<div class="ge-f"><label>Payment method / reference</label><input id="ge-method" type="text" value="'+(rec.method||'').replace(/"/g,'&quot;')+'" '+dis+'></div>';
+      body += '<div class="ge-f"><label>Received from</label><input id="ge-rf" type="text" value="'+(rec.rf||'').replace(/"/g,'&quot;')+'" '+dis+'></div>';
+      // Tax receipt (metadata — editable even when posted)
+      var rcptNo = rec.receiptno || (posted ? 'R-2026-' + String(1000 + Math.round((rec.amount||0)/10)).slice(-4) : 'Not yet issued');
+      var rcptSt = rec.receiptStatus || (posted ? 'Receipted' : 'Not receipted');
+      var rcptOpts = ['Receipted','Not receipted','Do not receipt'].map(function(o){ return '<option'+(o===rcptSt?' selected':'')+'>'+o+'</option>'; }).join('');
+      body += '<div class="ge-grid2">'
+        + '<div class="ge-f"><label>Tax receipt</label><select id="ge-rcpt">'+rcptOpts+'</select></div>'
+        + '<div class="ge-f"><label>Receipt #</label><input id="ge-rcptno" type="text" value="'+rcptNo+'" disabled></div>'
+        + '</div>';
+      body += '<div class="ge-f"><label>Tribute · in honor / memory of</label><input id="ge-tribute" type="text" value="'+(rec.tribute||'').replace(/"/g,'&quot;')+'" placeholder="None"></div>';
+      body += '<div class="ge-f"><label>Soft credit</label><input id="ge-soft" type="text" placeholder="None" value=""></div>';
+      body += '<div class="ge-f"><label>Acknowledgement</label><select id="ge-ack"><option>Not sent</option><option'+(posted?' selected':'')+'>Sent</option></select></div>';
+      body += '<div class="ge-f" style="margin-bottom:10px"><label>Donor intent</label><label class="ge-chk"><input type="checkbox" id="ge-anon"'+(rec.anon?' checked':'')+'> Anonymous gift</label><label class="ge-chk"><input type="checkbox" id="ge-dna"'+(rec.dna?' checked':'')+'> Do not acknowledge</label></div>';
+      body += '<div class="ge-f"><label>Internal notes</label><textarea id="ge-notes" rows="3" placeholder="Add a note…">'+(rec.notes||'')+'</textarea></div>';
+      document.getElementById('ge-body').innerHTML = body;
+      document.getElementById('ge-full').onclick = function(){ window.location.href = GE_FULL; };
+      document.getElementById('ge-scrim').classList.add('open');
+      document.getElementById('ge-drawer').classList.add('open');
+      document.getElementById('ge-drawer').setAttribute('aria-hidden','false');
+    }
+    window.openGiftDrawer = openGiftDrawer;
+    function openGiftEdit(idx){
+      var g = GIFT_LEDGER[idx]; if(!g) return;
+      openGiftDrawer(
+        { date:g.date, fund:g.fund, type:g.type, amount:g.amount, method:g.det, rf:g.rf, status:g.status },
+        function(vals, posted){ if(!posted){ g.amount=vals.amount; g.date=vals.date; g.fund=vals.fund; g.det=vals.method; g.rf=vals.rf; } g.appeal=vals.appeal; g.tribute=vals.tribute; g.receiptStatus=vals.receiptStatus; g.anon=vals.anon; g.dna=vals.dna; g.notes=vals.notes; renderGiftLedger(); },
+        geFullHref(g)
+      );
+    }
+    function closeGiftEdit(){
+      document.getElementById('ge-scrim').classList.remove('open');
+      document.getElementById('ge-drawer').classList.remove('open');
+      document.getElementById('ge-drawer').setAttribute('aria-hidden','true');
+      GE_IDX = null; GE_REC = null; GE_SAVE = null;
+    }
+    function geCorrect(){ window.location.href='atlas-gift-correction-center.html'; }
+    function geOpenFull(){ if(GE_FULL) window.location.href = GE_FULL; }
+    function saveGiftEdit(){
+      if (GE_MODE === 'pledge') { savePledgeDrawer(); return; }
+      if (!GE_REC) { closeGiftEdit(); return; }
+      var posted = (GE_REC.status === 'Received');
+      var vals = {};
+      if (!posted) {
+        var amtEl=document.getElementById('ge-amount'); var n=amtEl?parseInt((amtEl.value||'').replace(/[^0-9.]/g,''),10):NaN; vals.amount=isNaN(n)?GE_REC.amount:n;
+        var dEl=document.getElementById('ge-date'); vals.date=(dEl&&dEl.value)?dEl.value:GE_REC.date;
+        var fEl=document.getElementById('ge-fund'); vals.fund=fEl?fEl.value:GE_REC.fund;
+        var mEl=document.getElementById('ge-method'); vals.method=mEl?mEl.value:GE_REC.method;
+        var rEl=document.getElementById('ge-rf'); vals.rf=rEl?rEl.value:GE_REC.rf;
+      }
+      // Metadata — editable even when posted
+      var ap=document.getElementById('ge-appeal'); if(ap) vals.appeal=ap.value;
+      var tr=document.getElementById('ge-tribute'); if(tr) vals.tribute=tr.value;
+      var rc=document.getElementById('ge-rcpt'); if(rc) vals.receiptStatus=rc.value;
+      var an=document.getElementById('ge-anon'); if(an) vals.anon=an.checked;
+      var dn=document.getElementById('ge-dna'); if(dn) vals.dna=dn.checked;
+      var nt=document.getElementById('ge-notes'); if(nt) vals.notes=nt.value;
+      if (GE_SAVE) GE_SAVE(vals, posted);
+      closeGiftEdit();
+      var msg = posted ? 'Gift metadata saved' : 'Gift updated';
+      if(window.toast) toast(msg); else if(window.atlasToast) atlasToast(msg);
+    }
+
+    /* ── Pledge template in the same drawer ── */
+    function openPledgeEdit(id){
+      var p = DONOR_PLEDGES.find(function(x){return x.id===id;}); if(!p) return;
+      GE_MODE = 'pledge'; GE_PLEDGE_ID = id; GE_IDX = null;
+      var tEl = document.getElementById('ge-title'); if(tEl) tEl.textContent = 'Edit pledge';
+      var fEl = document.getElementById('ge-full'); if(fEl) fEl.textContent = 'Open full pledge →';
+      document.getElementById('ge-sub').textContent = p.id + ' · ' + p.fund;
+      var freqOpts = ['Annual','Semi-annual','Quarterly','Monthly','One-time'].map(function(o){return '<option'+(o===p.freq?' selected':'')+'>'+o+'</option>';}).join('');
+      var statusOpts = Object.keys(DP_STATUS).map(function(k){return '<option value="'+k+'"'+(k===p.status?' selected':'')+'>'+DP_STATUS[k][0]+'</option>';}).join('');
+      var body = ''
+        + '<div class="ge-f"><label>Fund / designation</label><input id="pe-fund" type="text" value="'+(p.fund||'').replace(/"/g,'&quot;')+'"></div>'
+        + '<div class="ge-grid2">'
+        +   '<div class="ge-f"><label>Total pledge ($)</label><input id="pe-total" type="number" value="'+p.total+'"></div>'
+        +   '<div class="ge-f"><label>Paid to date ($)</label><input id="pe-paid" type="number" value="'+p.paid+'"></div>'
+        + '</div>'
+        + '<div class="ge-grid2">'
+        +   '<div class="ge-f"><label>Frequency</label><select id="pe-freq">'+freqOpts+'</select></div>'
+        +   '<div class="ge-f"><label>Status</label><select id="pe-status">'+statusOpts+'</select></div>'
+        + '</div>'
+        + '<div class="ge-grid2">'
+        +   '<div class="ge-f"><label>Next payment date</label><input id="pe-next" type="date" value="'+(p.next||'')+'"></div>'
+        +   '<div class="ge-f"><label>Next amount ($)</label><input id="pe-nextamt" type="number" value="'+p.nextAmt+'"></div>'
+        + '</div>'
+        + '<div class="ge-grid2">'
+        +   '<div class="ge-f"><label>Pledge start date</label><input id="pe-start" type="date" value="'+(p.start||'')+'"></div>'
+        +   '<div class="ge-f"><label>End date</label><input id="pe-end" type="date" value="'+(p.end||'')+'"></div>'
+        + '</div>'
+        + '<div class="ge-grid2">'
+        +   '<div class="ge-f"><label>Payment method on file</label><select id="pe-method">'+['Auto-pay · card on file','Auto-pay · ACH on file','Manual (invoice / reminder)','Check by mail'].map(function(o){return '<option'+((p.method||'Manual (invoice / reminder)')===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select></div>'
+        +   '<div class="ge-f"><label>Reminder</label><select id="pe-reminder">'+['7 days before','14 days before','30 days before','No reminder'].map(function(o){return '<option'+((p.reminder||'14 days before')===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select></div>'
+        + '</div>'
+        + '<div class="ge-f"><label>Notes</label><textarea id="pe-notes" rows="3">'+(p.notes||'')+'</textarea></div>';
+      document.getElementById('ge-body').innerHTML = body;
+      document.getElementById('ge-full').onclick = function(){ window.location.href = 'atlas-pledge-detail.html'; };
+      document.getElementById('ge-scrim').classList.add('open');
+      document.getElementById('ge-drawer').classList.add('open');
+      document.getElementById('ge-drawer').setAttribute('aria-hidden','false');
+    }
+    function savePledgeDrawer(){
+      var p = DONOR_PLEDGES.find(function(x){return x.id===GE_PLEDGE_ID;}); if(!p){ closeGiftEdit(); return; }
+      var g=function(i){var e=document.getElementById(i);return e?e.value:null;};
+      if(g('pe-fund')!=null) p.fund=g('pe-fund')||p.fund;
+      var t=parseInt(g('pe-total'),10); if(!isNaN(t)) p.total=t;
+      var pd=parseInt(g('pe-paid'),10); if(!isNaN(pd)) p.paid=pd;
+      if(g('pe-freq')) p.freq=g('pe-freq');
+      if(g('pe-status')) p.status=g('pe-status');
+      p.next=g('pe-next')||'';
+      var na=parseInt(g('pe-nextamt'),10); p.nextAmt=isNaN(na)?0:na;
+      p.start=g('pe-start')||'';
+      p.end=g('pe-end')||'';
+      if(g('pe-method')) p.method=g('pe-method');
+      if(g('pe-reminder')) p.reminder=g('pe-reminder');
+      p.notes=g('pe-notes')||'';
+      closeGiftEdit();
+      renderDonorPledges();
+      if(window.toast) toast('Pledge '+p.id+' updated'); else if(window.atlasToast) atlasToast('Pledge '+p.id+' updated');
     }
 
     function exportGiftLedger(){
@@ -4134,7 +4463,8 @@ window.clFilter=function(cat,el){
   window.rgRowMenu=function(e,i){
     e.stopPropagation(); var r=ROWS[i]||{};
     rowMenu.innerHTML=''
-      +'<button onclick="window.rgRowAct(\'view\','+i+')"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1 7s2.5-4.5 6-4.5S13 7 13 7s-2.5 4.5-6 4.5S1 7 1 7z"/><circle cx="7" cy="7" r="1.8"/></svg>View gift</button>'
+      +'<button onclick="window.rgRowAct(\'view\','+i+')"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1 7s2.5-4.5 6-4.5S13 7 13 7s-2.5 4.5-6 4.5S1 7 1 7z"/><circle cx="7" cy="7" r="1.8"/></svg>View gift details</button>'
+      +'<button onclick="window.rgRowAct(\'edit\','+i+')"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.5l2.5 2.5M2 12l.5-2.5 7-7 2 2-7 7L2 12z"/></svg>Edit gift</button>'
       +(r.receiptStatus==='Issued'?'<button onclick="window.rgRowAct(\'resend\','+i+')"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="3" width="11" height="8" rx="1.5"/><path d="M1.5 4L7 8l5.5-4"/></svg>Resend receipt</button>':'')
       +'<button onclick="window.rgRowAct(\'correct\','+i+')"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7a5 5 0 1 1-1.5-3.6"/><path d="M12 2v3H9"/></svg>Correct / reverse</button>';
     rowMenu.classList.add('open');
@@ -4144,7 +4474,22 @@ window.clFilter=function(cat,el){
     rowMenu.style.left=left+'px'; rowMenu.style.top=top+'px';
   };
   window.rgRowAct=function(a,i){ rowMenu.classList.remove('open'); var r=ROWS[i]||{};
-    if(a==='view') rtoast('Opening gift · '+r.date+' · '+r.amount);
+    var dn=((document.querySelector('.donor-name')||{}).textContent||'Margaret T. Sullivan').trim();
+    if(a==='view'){
+      var href='atlas-gift-detail.html?donor='+encodeURIComponent(dn)+'&date='+encodeURIComponent(r.date||'')+'&fund='+encodeURIComponent(r.fund||r.campaign||'')+'&type='+encodeURIComponent(r.type||'')+'&method='+encodeURIComponent(r.method||'')+'&amount='+encodeURIComponent(r.amount||'')+'&status='+encodeURIComponent(r.status||'');
+      window.location.href=href;
+    }
+    else if(a==='edit'){
+      var full='atlas-gift-entry.html?mode=edit&donor='+encodeURIComponent(dn)+'&date='+encodeURIComponent(r.date||'')+'&fund='+encodeURIComponent(r.fund||r.campaign||'')+'&type='+encodeURIComponent(r.type||'')+'&method='+encodeURIComponent(r.method||'')+'&amount='+encodeURIComponent(r.amount||'')+'&status='+encodeURIComponent(r.status||'');
+      var amtNum=parseInt(String(r.amount||'').replace(/[^0-9]/g,''),10)||0;
+      if(window.openGiftDrawer){
+        window.openGiftDrawer(
+          { date:r.date, fund:(r.fund||r.campaign), type:r.type, amount:amtNum, method:r.method, rf:r.receivedfrom, status:r.status },
+          function(vals, posted){ if(!posted){ r.amount='$'+Number(vals.amount).toLocaleString()+'.00'; r.date=vals.date; r.fund=vals.fund; r.method=vals.method; r.receivedfrom=vals.rf; } r.appeal=vals.appeal; r.tribute=vals.tribute; r.receiptStatusForm=vals.receiptStatus; renderTable(); },
+          full
+        );
+      } else { window.location.href=full; }
+    }
     else if(a==='resend') rtoast('Receipt re-sent · '+(r.receiptno||''));
     else if(a==='correct'){ var dn=(document.querySelector('.donor-name')||{}).textContent||'Margaret T. Sullivan'; window.atlasCorrect&&window.atlasCorrect({donor:dn.trim(),date:r.date,designation:r.designation,amount:r.amount,type:r.type,receipt:r.receiptStatus}); }
   };
@@ -4717,5 +5062,19 @@ window.clFilter=function(cat,el){
 })();
 </script>
 <script id="nav-active-sync">(function(){function run(){try{var cur=(location.pathname.split("/").pop()||"index.html").toLowerCase();document.querySelectorAll(".nav-item[href]").forEach(function(a){var h=(a.getAttribute("href")||"").split(/[?#]/)[0].toLowerCase().split("/").pop();if(h&&h===cur)a.classList.add("active");});}catch(e){}}if(document.readyState!=="loading")run();else document.addEventListener("DOMContentLoaded",run);})();</script>
+<!-- Inline gift-edit drawer (Transactions ledger) -->
+<div id="ge-scrim" onclick="closeGiftEdit()"></div>
+<aside id="ge-drawer" aria-hidden="true">
+  <div class="ge-head">
+    <div><div class="t" id="ge-title">Edit gift</div><div class="s" id="ge-sub">—</div></div>
+    <button class="ge-x" onclick="closeGiftEdit()" title="Close">✕</button>
+  </div>
+  <div class="ge-body" id="ge-body"></div>
+  <div class="ge-foot">
+    <button class="ge-full left" id="ge-full" onclick="geOpenFull()">Open full editor →</button>
+    <button id="ge-btn" class="ge-cancel" onclick="closeGiftEdit()">Cancel</button>
+    <button id="ge-btn" class="ge-save" onclick="saveGiftEdit()">Save changes</button>
+  </div>
+</aside>
 </body>
 </html>
