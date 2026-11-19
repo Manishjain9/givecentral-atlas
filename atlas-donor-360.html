@@ -1222,7 +1222,20 @@ body {
               <span class="section-title">Recent gifts</span>
               <div style="display:flex;align-items:center;gap:14px;position:relative">
                 <button type="button" class="rg-cols-btn" id="gl-cols-btn" onclick="glToggleCols(event)"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1.5" y="1.5" width="10" height="10" rx="1.5"/><path d="M5 1.5v10M8.5 1.5v10"/></svg>Columns</button>
-                <div class="gl-cols-pop" id="gl-cols-menu"></div>
+                <div class="cc-ov" id="gl-colcfg" onclick="if(event.target===this)closeColCfg()">
+                  <div class="cc-modal">
+                    <div class="cc-head">
+                      <div class="cc-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M6 2v12M10 2v12"/></svg></div>
+                      <div style="flex:1"><div class="cc-title">Column configuration</div><div class="cc-sub" id="gl-colcfg-sub">Drag to reorder.</div></div>
+                      <button class="cc-x" onclick="closeColCfg()" title="Close">✕</button>
+                    </div>
+                    <div class="cc-body" id="gl-colcfg-list"></div>
+                    <div class="cc-foot">
+                      <button class="cc-reset" onclick="glColReset()">Reset to default</button>
+                      <div style="display:flex;gap:8px"><button class="cc-cancel" onclick="closeColCfg()">Cancel</button><button class="cc-apply" onclick="glColApply()">Apply</button></div>
+                    </div>
+                  </div>
+                </div>
                 <span class="section-action" id="gifts-totals-line">$84,250 total</span>
               </div>
             </div>
@@ -1242,11 +1255,34 @@ body {
           .gp-subtab.active{background:#fff;color:var(--blue);box-shadow:0 1px 3px rgba(15,23,42,.08)}
           .dp-newbtn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;font-family:'DM Sans',sans-serif;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 15px;cursor:pointer;box-shadow:0 1px 3px rgba(37,99,235,.3)}
           .dp-newbtn:hover{background:#1D4ED8}
-          .gl-cols-pop{position:absolute;top:calc(100% + 8px);right:0;z-index:200;min-width:190px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 14px 40px rgba(15,23,42,.18);padding:6px;display:none}
-          .gl-cols-pop.open{display:block}
-          .gl-cols-pop .gl-col-item{display:flex;align-items:center;gap:8px;padding:7px 11px;font-size:12.5px;color:var(--text);cursor:pointer;white-space:nowrap;border-radius:7px}
-          .gl-cols-pop .gl-col-item:hover{background:var(--surface)}
-          .gl-cols-pop .gl-col-item input{width:auto;margin:0}
+          .cc-ov{position:fixed;inset:0;z-index:100060;background:transparent;display:none;align-items:center;justify-content:center;padding:22px}
+          .cc-ov.open .cc-modal{box-shadow:0 30px 90px rgba(15,23,42,.28),0 0 0 1px var(--border)}
+          .cc-ov.open{display:flex}
+          .cc-modal{background:#fff;border-radius:16px;width:min(560px,100%);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,.35);overflow:hidden;text-align:left}
+          .cc-head{display:flex;align-items:flex-start;gap:13px;padding:18px 22px;border-bottom:1px solid var(--border)}
+          .cc-ic{width:40px;height:40px;border-radius:11px;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+          .cc-ic svg{width:20px;height:20px}
+          .cc-title{font-size:17px;font-weight:700;color:var(--text)}
+          .cc-sub{font-size:12.5px;color:var(--text-3);margin-top:3px}
+          .cc-x{border:none;background:none;font-size:17px;color:var(--text-3);cursor:pointer;line-height:1;padding:2px 4px}
+          .cc-body{flex:1;overflow-y:auto;padding:14px 22px;display:flex;flex-direction:column;gap:8px}
+          .cc-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:11px;background:var(--surface,#F8FAFC)}
+          .cc-row.dragging{opacity:.5}
+          .cc-handle{color:var(--text-3);cursor:grab;display:flex}
+          .cc-label{flex:1;font-size:14px;font-weight:600;color:var(--text)}
+          .cc-req{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3)}
+          .cc-toggle{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;font-family:'DM Sans',sans-serif;border-radius:20px;padding:6px 13px;cursor:pointer;border:1px solid var(--border)}
+          .cc-toggle .cc-dot{width:7px;height:7px;border-radius:50%}
+          .cc-toggle.on{background:var(--blue-pale);border-color:var(--blue-light);color:var(--blue)}
+          .cc-toggle.on .cc-dot{background:var(--blue)}
+          .cc-toggle.off{background:#fff;color:var(--text-3)}
+          .cc-toggle.off .cc-dot{background:#94A3B8}
+          .cc-toggle:disabled{opacity:.6;cursor:not-allowed}
+          .cc-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 22px;border-top:1px solid var(--border)}
+          .cc-reset{border:none;background:none;color:var(--blue);font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer}
+          .cc-cancel{border:1px solid var(--border);background:#fff;color:var(--text-2);font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;border-radius:9px;padding:9px 18px;cursor:pointer}
+          .cc-apply{border:none;background:var(--blue);color:#fff;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;border-radius:9px;padding:9px 20px;cursor:pointer}
+          .cc-apply:hover{background:#1D4ED8}
           .gl-pager{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 2px 2px;flex-wrap:wrap}
           .gl-pager .gl-pg-status{font-size:12px;color:var(--text-3)}
           .gl-pager .gl-pg-nav{display:flex;align-items:center;gap:6px}
@@ -2265,12 +2301,20 @@ body {
     }
 
     // ── Recent-gifts rich table (own copy, with Columns control + kebab) ──
-    var GL_COLS = [
-      {id:'date', label:'Date'}, {id:'fundgl', label:'Fund · GL'}, {id:'designation', label:'Designation'},
-      {id:'type', label:'Type'}, {id:'receipt', label:'Receipt'}, {id:'amount', label:'Amount', num:true},
-      {id:'appeal', label:'Appeal'}, {id:'rf', label:'Received from'}, {id:'status', label:'Status'}
-    ];
-    var GL_VIS = {date:1,fundgl:1,designation:1,type:1,receipt:1,amount:1,appeal:1,rf:0,status:0};
+    var GL_COLS = {
+      date:{label:'Date', required:true}, designation:{label:'Designation'}, type:{label:'Type'},
+      receipt:{label:'Receipt'}, amount:{label:'Amount', num:true, required:true}, appeal:{label:'Appeal'},
+      fundgl:{label:'Fund · GL'}, method:{label:'Payment method'}, campaign:{label:'Campaign'},
+      reference:{label:'Reference / Check #'}, receiptno:{label:'Receipt #'}, rf:{label:'Received from'},
+      status:{label:'Status'}, softcredit:{label:'Soft credit'}, tribute:{label:'Tribute'},
+      ack:{label:'Acknowledgement'}, enteredby:{label:'Entered by'}, batch:{label:'Batch'},
+      entity:{label:'Legal entity'}, glcode:{label:'GL code'}, postmark:{label:'Postmark date'},
+      giftid:{label:'Gift ID'}, solicitor:{label:'Solicitor'}, package:{label:'Package'}, notes:{label:'Notes'}
+    };
+    var GL_ORDER = ['date','fundgl','designation','type','receipt','amount','appeal','rf','status','method','campaign','reference','receiptno','softcredit','tribute','ack','enteredby','batch','entity','glcode','postmark','giftid','solicitor','package','notes'];
+    var GL_DEFAULT_ORDER = GL_ORDER.slice();
+    var GL_VIS = {date:1,fundgl:1,designation:1,type:1,receipt:1,amount:1,appeal:1};
+    var GL_DEFAULT_VIS = Object.assign({}, GL_VIS);
     var GL_PAGE = 0, GL_PER = 10;
     var FUND_GL = {'Catholic Ministry Appeal':'4100',"St. Michael's Parish":'4200','Cathedral Capital':'5200','Marian Congress':'4300','Giving Tuesday':'4000','General Fund':'4000'};
     function glTypePill(t){
@@ -2280,6 +2324,7 @@ body {
     }
     function glReceiptPill(g){ var ok=(g.status==='Received'); return '<span style="display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:'+(ok?'var(--green-light)':'var(--rose-light)')+';color:'+(ok?'var(--green)':'var(--rose)')+'">'+(ok?'Issued':'Not issued')+'</span>'; }
     function glDesignation(g){ var sfx = g.appeal ? (' · '+g.appeal) : (g.det ? (' · '+g.det) : ''); return g.fund + sfx; }
+    function glReceiptNo(g){ return g.status==='Received' ? ('R-2026-'+String(1000+Math.round((g.amount||0)/10)).slice(-4)) : 'Not issued'; }
     function glCell(id, g){
       if(id==='date') return g.date;
       if(id==='fundgl') return g.fund+' · GL '+(FUND_GL[g.fund]||'—');
@@ -2290,6 +2335,22 @@ body {
       if(id==='appeal') return g.appeal||'—';
       if(id==='rf') return g.rf||'—';
       if(id==='status') return statusBadge(g.status);
+      if(id==='method') return g.det||'—';
+      if(id==='campaign') return g.fund||'—';
+      if(id==='reference') return (g.det&&/#/.test(g.det)) ? g.det : (g.det||'—');
+      if(id==='receiptno') return glReceiptNo(g);
+      if(id==='softcredit') return '—';
+      if(id==='tribute') return g.tribute||'—';
+      if(id==='ack') return g.status==='Received'?'Sent':'Not sent';
+      if(id==='enteredby') return 'Sarah Reynolds';
+      if(id==='batch') return 'BX-'+String(g.year||2026)+'-014';
+      if(id==='entity') return 'Diocese of Albany';
+      if(id==='glcode') return FUND_GL[g.fund]||'—';
+      if(id==='postmark') return g.date;
+      if(id==='giftid') return 'G-'+String(g.year||2026)+'-'+String(1000+Math.round((g.amount||0)/7)).slice(-4);
+      if(id==='solicitor') return 'Sarah Reynolds';
+      if(id==='package') return g.appeal||'—';
+      if(id==='notes') return g.notes||'—';
       return '—';
     }
     function glHref(g){ return 'atlas-gift-detail.html?donor='+encodeURIComponent('Margaret T. Sullivan')+'&date='+encodeURIComponent(g.date)+'&fund='+encodeURIComponent(g.fund)+'&type='+encodeURIComponent(g.type)+'&method='+encodeURIComponent(g.det||'')+'&amount='+encodeURIComponent(fmtMoney(g.amount))+'&status='+encodeURIComponent(g.status); }
@@ -2298,7 +2359,7 @@ body {
       if(!ySel) return;
       var y=ySel.value, t=tSel.value, f=fSel.value;
       var filtered = GIFT_LEDGER.filter(function(g){ return (y==='all'||String(g.year)===y) && (t==='all'||g.type===t) && (f==='all'||g.fund===f); });
-      var vis = GL_COLS.filter(function(c){ return GL_VIS[c.id]; });
+      var vis = GL_ORDER.filter(function(id){ return GL_VIS[id] && GL_COLS[id]; }).map(function(id){ return {id:id, label:GL_COLS[id].label, num:GL_COLS[id].num}; });
       var head=document.getElementById('gl-head');
       if(head) head.innerHTML = vis.map(function(c){ return '<th'+(c.num?' class="num"':'')+'>'+c.label+'</th>'; }).join('')+'<th class="kb"></th>';
       var tbody=document.getElementById('gifts-ledger-tbody');
@@ -2329,17 +2390,47 @@ body {
             + '<button class="gl-pg-btn" '+(GL_PAGE>=pages-1?'disabled':'')+' onclick="glPage(1)">Next ›</button></span>';
         }
       }
-      renderGlCols();
     }
     function glPage(d){ GL_PAGE += d; renderGiftLedger(); var w=document.querySelector('#tab-gifts .rg-table-wrap'); if(w&&w.scrollIntoView) w.scrollIntoView({behavior:'smooth',block:'nearest'}); }
     function glResetPage(){ GL_PAGE=0; renderGiftLedger(); }
-    // Columns show/hide menu
-    function renderGlCols(){
-      var menu=document.getElementById('gl-cols-menu'); if(!menu) return;
-      menu.innerHTML = GL_COLS.map(function(c){ return '<label class="gl-col-item"><input type="checkbox" '+(GL_VIS[c.id]?'checked':'')+' onchange="glSetCol(\''+c.id+'\',this.checked)"> '+c.label+'</label>'; }).join('');
+
+    // ── Column configuration modal (drag to reorder + show/hide) ──
+    var GL_WORK_ORDER = null, GL_WORK_VIS = null, GL_DRAG_ID = null;
+    function glToggleCols(){ openColCfg(); }
+    function openColCfg(){
+      GL_WORK_ORDER = GL_ORDER.slice();
+      GL_WORK_VIS = Object.assign({}, GL_VIS);
+      renderColCfg();
+      var ov=document.getElementById('gl-colcfg'); if(ov) ov.classList.add('open');
     }
-    function glSetCol(id,on){ GL_VIS[id]=on?1:0; renderGiftLedger(); }
-    function glToggleCols(e){ if(e) e.stopPropagation(); var m=document.getElementById('gl-cols-menu'); if(m){ m.classList.toggle('open'); renderGlCols(); } }
+    function closeColCfg(){ var ov=document.getElementById('gl-colcfg'); if(ov) ov.classList.remove('open'); }
+    function renderColCfg(){
+      var list=document.getElementById('gl-colcfg-list'); if(!list) return;
+      var shown=GL_WORK_ORDER.filter(function(id){return GL_WORK_VIS[id];}).length;
+      var sub=document.getElementById('gl-colcfg-sub'); if(sub) sub.textContent='Drag to reorder. Changes apply to this view — '+shown+' of '+GL_WORK_ORDER.length+' columns shown.';
+      list.innerHTML = GL_WORK_ORDER.map(function(id){
+        var c=GL_COLS[id]; if(!c) return '';
+        var on=!!GL_WORK_VIS[id], req=!!c.required;
+        return '<div class="cc-row" draggable="true" data-id="'+id+'">'
+          + '<span class="cc-handle"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 4h10M2 7h10M2 10h10"/></svg></span>'
+          + '<span class="cc-label">'+c.label+'</span>'
+          + (req?'<span class="cc-req">Required</span>':'')
+          + '<button class="cc-toggle '+(on?'on':'off')+'" '+(req?'disabled':'')+' onclick="glColToggle(\''+id+'\')"><span class="cc-dot"></span>'+(on?'Shown':'Hidden')+'</button>'
+          + '</div>';
+      }).join('');
+      // drag wiring
+      [].forEach.call(list.querySelectorAll('.cc-row'), function(row){
+        row.addEventListener('dragstart', function(){ GL_DRAG_ID=row.dataset.id; row.classList.add('dragging'); });
+        row.addEventListener('dragend', function(){ row.classList.remove('dragging'); GL_DRAG_ID=null; });
+        row.addEventListener('dragover', function(e){ e.preventDefault(); var tgt=row.dataset.id; if(!GL_DRAG_ID||GL_DRAG_ID===tgt) return;
+          var from=GL_WORK_ORDER.indexOf(GL_DRAG_ID), to=GL_WORK_ORDER.indexOf(tgt);
+          GL_WORK_ORDER.splice(from,1); GL_WORK_ORDER.splice(to,0,GL_DRAG_ID); renderColCfg();
+        });
+      });
+    }
+    function glColToggle(id){ if(GL_COLS[id]&&GL_COLS[id].required) return; GL_WORK_VIS[id]=GL_WORK_VIS[id]?0:1; renderColCfg(); }
+    function glColApply(){ GL_ORDER=GL_WORK_ORDER.slice(); GL_VIS=Object.assign({},GL_WORK_VIS); closeColCfg(); renderGiftLedger(); }
+    function glColReset(){ GL_WORK_ORDER=GL_DEFAULT_ORDER.slice(); GL_WORK_VIS=Object.assign({},GL_DEFAULT_VIS); renderColCfg(); }
     // Row kebab menu
     var glMenu=null;
     function glRowMenu(e, gi){
