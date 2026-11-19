@@ -691,6 +691,22 @@ body {
       <div class="pp-card">
         <h3><span class="step">2</span> Payment</h3>
 
+        <div id="pp-custom-banner" style="display:none;align-items:flex-start;gap:9px;background:#EDE9FE;border:1px solid #DDD6FE;border-radius:9px;padding:10px 13px;margin-bottom:14px;font-size:12px;color:#5B21B6;line-height:1.5">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;margin-top:1px"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5M8 11h.01"/></svg>
+          <div><b>Off-schedule / custom payment.</b> Enter any amount — Atlas applies it to the outstanding balance and reconciles the remaining instalments. Use this for partial, extra, or early payoff payments that don't match the schedule.</div>
+        </div>
+
+        <div class="row2" style="margin-bottom:14px">
+          <div>
+            <span class="lbl">Apply to</span>
+            <select class="fld" id="pp-applyto"><option value="installment">Next instalment — 2 of 3</option><option value="balance">Outstanding balance</option></select>
+          </div>
+          <div>
+            <span class="lbl">Payment type</span>
+            <select class="fld" id="pp-paytype"><option value="scheduled">Scheduled instalment</option><option value="custom">Custom · off-schedule</option></select>
+          </div>
+        </div>
+
         <div class="row3">
           <div>
             <span class="lbl">Amount<span class="req">*</span></span>
@@ -767,7 +783,7 @@ body {
 
         <div class="sum-row"><span class="l">Pledge</span><span class="v">PL-2026-094<small>Margaret O'Brien</small></span></div>
         <div class="sum-row"><span class="l">Payment</span><span class="v amount">$10,000<small>Check #2841 · May 4</small></span></div>
-        <div class="sum-row"><span class="l">Instalment</span><span class="v">2 of 3</span></div>
+        <div class="sum-row"><span class="l" id="pp-sum-inst-l">Instalment</span><span class="v" id="pp-sum-inst">2 of 3</span></div>
         <div class="sum-row"><span class="l">After this gift</span><span class="v">67% paid<small>$10k remaining</small></span></div>
         <div class="sum-row"><span class="l">Receipt</span><span class="v">Pledge-payment template<small>shows pledge balance</small></span></div>
 
@@ -1662,5 +1678,53 @@ body {
 </script>
 <!-- /ATLAS-NAVCOLLAPSE -->
 <script id="nav-active-sync">(function(){function run(){try{var cur=(location.pathname.split("/").pop()||"index.html").toLowerCase();document.querySelectorAll(".nav-item[href]").forEach(function(a){var h=(a.getAttribute("href")||"").split(/[?#]/)[0].toLowerCase().split("/").pop();if(h&&h===cur)a.classList.add("active");});}catch(e){}}if(document.readyState!=="loading")run();else document.addEventListener("DOMContentLoaded",run);})();</script>
+<!-- Custom vs scheduled payment mode -->
+<script>
+(function(){
+  function qp(k){ try{ return new URLSearchParams(location.search).get(k)||''; }catch(e){ return ''; } }
+  function applyMode(custom){
+    var banner=document.getElementById('pp-custom-banner');
+    var paytype=document.getElementById('pp-paytype');
+    var applyto=document.getElementById('pp-applyto');
+    var amt=document.getElementById('pp-amt');
+    var sumInst=document.getElementById('pp-sum-inst'), sumInstL=document.getElementById('pp-sum-inst-l');
+    var titleEl=document.querySelector('.page-title'), subEl=document.querySelector('.page-sub');
+    var crumbEl=document.querySelector('.crumb span');
+    if(banner) banner.style.display = custom ? 'flex' : 'none';
+    if(paytype) paytype.value = custom ? 'custom' : 'scheduled';
+    if(applyto) applyto.value = custom ? 'balance' : 'installment';
+    if(custom){
+      if(titleEl) titleEl.textContent='Record a custom payment';
+      if(subEl) subEl.textContent='Off-schedule payment — enter any amount; Atlas applies it to the outstanding balance and reconciles the schedule.';
+      if(crumbEl) crumbEl.textContent='Custom payment';
+      if(amt){ amt.value=''; amt.setAttribute('placeholder','$0.00'); }
+      var refEl=document.querySelector('.pp-card .row2 input.fld[value*="instalment"]');
+    } else {
+      if(titleEl) titleEl.textContent='Record a pledge payment';
+      if(subEl) subEl.textContent='Pick the pledge first — Atlas will auto-decrement the balance, attach the gift, and trigger the next instalment reminder.';
+      if(crumbEl) crumbEl.textContent='Record payment';
+      if(amt && !amt.value){ amt.value='$10,000.00'; }
+    }
+    syncSummary();
+  }
+  function syncSummary(){
+    var applyto=document.getElementById('pp-applyto');
+    var paytype=document.getElementById('pp-paytype');
+    var sumInst=document.getElementById('pp-sum-inst'), sumInstL=document.getElementById('pp-sum-inst-l');
+    if(!sumInst) return;
+    var toBalance = applyto && applyto.value==='balance';
+    sumInstL.textContent = toBalance ? 'Applied to' : 'Instalment';
+    sumInst.textContent = toBalance ? ((paytype&&paytype.value==='custom')?'Outstanding balance · custom':'Outstanding balance') : '2 of 3';
+  }
+  function boot(){
+    var custom = /custom/i.test(qp('mode'));
+    applyMode(custom);
+    var paytype=document.getElementById('pp-paytype'), applyto=document.getElementById('pp-applyto');
+    if(paytype) paytype.addEventListener('change', function(){ applyMode(paytype.value==='custom'); });
+    if(applyto) applyto.addEventListener('change', syncSummary);
+  }
+  if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
 </body>
 </html>
