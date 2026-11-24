@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 Annual Catholic Appeal</title>
+<style>
+  :root{
+    --orange:#BF6B3F;
+    --orange-dark:#A95C33;
+    --field:#E9EDF2;
+    --field-br:#DDE3EA;
+    --label:#333740;
+    --req:#D0021B;
+    --ink:#2B2F36;
+    --muted:#9AA1AB;
+    --line:#E3E7EC;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Montserrat","Segoe UI",Arial,sans-serif;
+    color:var(--ink);
+    background:#ffffff;
+    font-size:14px;
+  }
+  img{max-width:100%;display:block;}
+  a{color:#2F6FB0;text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  /* ===== HERO ===== */
+  .hero{
+    position:relative;
+    min-height:320px;
+    background:
+      radial-gradient(120% 90% at 50% 18%, rgba(255,214,170,.55), transparent 60%),
+      linear-gradient(180deg,#f6c9b0 0%,#f3a98f 26%,#e98f86 48%,#b98aa6 74%,#8f7fae 100%);
+    overflow:hidden;
+    display:flex;
+    align-items:flex-start;
+  }
+  .hero::after{
+    /* silhouette crowd suggestion */
+    content:"";position:absolute;left:0;right:0;bottom:0;height:120px;
+    background:linear-gradient(180deg,rgba(60,40,70,0) 0%,rgba(60,40,70,.55) 100%);
+  }
+  .hero-lang{
+    position:absolute;top:14px;left:18px;z-index:3;
+    background:#fff;border:1px solid #cfcfcf;border-radius:3px;
+    font-size:11px;padding:3px 8px;color:#333;
+  }
+  .hero-cross{
+    position:absolute;left:50%;top:40px;transform:translateX(-50%);
+    width:70px;height:150px;z-index:2;
+  }
+  .hero-cross::before{content:"";position:absolute;left:50%;top:0;transform:translateX(-50%);width:16px;height:150px;background:#5a2e2a;border-radius:3px;}
+  .hero-cross::after{content:"";position:absolute;left:50%;top:40px;transform:translateX(-50%);width:70px;height:16px;background:#5a2e2a;border-radius:3px;}
+  .hero-title{
+    position:relative;z-index:3;
+    padding:46px 0 0 48px;
+    color:#fff;
+    font-weight:800;
+    line-height:.96;
+    letter-spacing:.5px;
+    text-shadow:0 3px 18px rgba(120,70,70,.45);
+  }
+  .hero-title .l1{font-size:40px;}
+  .hero-title .l2{font-size:62px;}
+  .hero-appeal{
+    position:absolute;top:70px;right:120px;z-index:3;
+    color:#fff;text-align:right;font-weight:700;font-size:20px;line-height:1.3;
+    text-shadow:0 2px 10px rgba(120,70,70,.5);
+  }
+  .hero-crest{
+    position:absolute;top:60px;right:28px;z-index:3;
+    width:74px;height:92px;border-radius:6px 6px 40px 40px;
+    background:#7b1f2b;border:2px solid #d9b65c;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(0,0,0,.25);
+  }
+  .hero-crest span{font-size:30px;}
+
+  /* ===== DESCRIPTION ===== */
+  .desc{
+    max-width:940px;margin:0 auto;padding:22px 20px 20px;
+    color:#4a4f57;font-size:13.5px;line-height:1.7;
+  }
+
+  /* ===== SECTION BARS ===== */
+  .bar{
+    background:var(--orange);
+    color:#fff;font-weight:700;letter-spacing:.3px;
+    padding:13px 20px;font-size:15px;
+  }
+  .bar.full{width:100%;}
+  .wrap{max-width:940px;margin:0 auto;padding:0 20px;}
+  .bar-full{background:var(--orange);}
+  .bar-full .wrap{color:#fff;font-weight:700;padding-top:13px;padding-bottom:13px;font-size:15px;}
+
+  /* ===== FORM ===== */
+  .section{padding:22px 0 8px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px 26px;}
+  .field{margin-bottom:16px;}
+  label.lbl{display:block;font-weight:700;color:var(--label);font-size:13px;margin-bottom:7px;}
+  label.lbl .req{color:var(--req);margin-left:2px;}
+  .inp{
+    width:100%;height:46px;border:1px solid var(--field-br);background:var(--field);
+    border-radius:4px;padding:0 14px;font-size:14px;color:#2B2F36;font-family:inherit;
+  }
+  .inp::placeholder{color:#9AA1AB;}
+  textarea.inp{height:70px;padding:10px 14px;resize:vertical;}
+  select.inp{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'><path d='M3 5l4 4 4-4' fill='none' stroke='%23333' stroke-width='1.6'/></svg>");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;}
+  select.inp.soft{background:var(--field);color:#6a7079;}
+  select.dark{background:#ffffff;}
+
+  /* radios top */
+  .toprow{display:flex;align-items:center;gap:40px;margin:18px 0 20px;}
+  .radio{display:flex;align-items:center;gap:9px;font-weight:600;color:#2B2F36;cursor:pointer;font-size:14px;}
+  .radio input{width:17px;height:17px;accent-color:#1b2a4a;}
+  .info-i{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:#2F6FB0;color:#fff;font-size:10px;font-weight:700;margin-left:4px;}
+
+  /* amount + parish */
+  .amt-parish{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start;}
+  .amt-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .amt-btn{
+    min-width:62px;height:40px;padding:0 14px;border:1px solid #cfd5dc;background:#fff;color:#2B2F36;
+    border-radius:4px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;
+  }
+  .amt-btn.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+  .amt-other{position:relative;flex:1;min-width:150px;}
+  .amt-other .dollar{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#8a9099;font-weight:700;}
+  .amt-other input{width:100%;height:40px;border:1px solid var(--field-br);background:var(--field);border-radius:4px;padding:0 12px 0 26px;font-size:13px;}
+
+  .fee{display:flex;align-items:center;gap:9px;margin:16px 0 4px;font-weight:600;color:#2B2F36;}
+  .fee input{width:18px;height:18px;accent-color:#1b2a4a;}
+
+  /* payment methods */
+  .pay{display:grid;grid-template-columns:320px 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:6px;}
+  .pm-list{border-right:1px solid var(--line);background:#fff;}
+  .pm{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);cursor:pointer;}
+  .pm:last-child{border-bottom:none;}
+  .pm.active{background:#F3F7FC;}
+  .pm input{width:17px;height:17px;accent-color:#1b2a4a;}
+  .pm .pm-ico{display:flex;gap:3px;align-items:center;}
+  .pm .pm-ico img{height:16px;}
+  .pm .card-badges{display:flex;gap:3px;}
+  .badge{height:16px;width:24px;border-radius:3px;display:inline-block;background:#eee;font-size:8px;color:#333;text-align:center;line-height:16px;font-weight:700;border:1px solid #ddd;}
+  .pm .pm-name{font-weight:600;color:#2B2F36;}
+  .pm-body{padding:22px 24px;}
+  .pm-body h4{margin:0 0 18px;font-size:14px;color:#2B2F36;}
+
+  /* bottom buttons */
+  .actions{max-width:940px;margin:0 auto;padding:30px 20px 10px;display:flex;justify-content:center;gap:16px;border-top:1px solid var(--line);margin-top:26px;}
+  .btn{min-width:200px;height:46px;border-radius:5px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;letter-spacing:.3px;}
+  .btn-reset{background:#fff;border:1px solid #cfd5dc;color:#2B2F36;}
+  .btn-preview{background:var(--orange);border:1px solid var(--orange);color:#fff;}
+  .btn-preview:hover{background:var(--orange-dark);}
+
+  .footer{max-width:940px;margin:0 auto;padding:22px 20px 40px;color:#6a7079;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;}
+  .pci{display:flex;align-items:center;gap:8px;color:#b23b3b;font-weight:800;font-size:11px;}
+  .pci .shield{width:26px;height:30px;background:#c0392b;clip-path:polygon(50% 0,100% 18%,100% 62%,50% 100%,0 62%,0 18%);display:inline-block;}
+
+  .login-here{display:inline-flex;align-items:center;gap:7px;font-weight:700;margin:4px 0 18px;}
+  .login-here svg{width:15px;height:15px;}
+
+  @media(max-width:820px){
+    .grid2,.amt-parish{grid-template-columns:1fr;}
+    .pay{grid-template-columns:1fr;}
+    .pm-list{border-right:none;border-bottom:1px solid var(--line);}
+    .hero-title{padding-left:22px;}
+    .hero-title .l2{font-size:44px;}
+    .hero-appeal{right:94px;font-size:15px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-lang">Select Language&nbsp;|&nbsp;▼</div>
+  <div class="hero-cross"></div>
+  <div class="hero-title"><div class="l1">IN MISSION,</div><div class="l2">WE ARE ONE</div></div>
+  <div class="hero-appeal">2026 Annual<br>Catholic Appeal<br>Diocese of San Diego</div>
+  <div class="hero-crest"><span>✝</span></div>
+</div>
+
+<!-- DESCRIPTION -->
+<p class="desc">
+  The 2026 Our Annual Catholic Appeal enables us to fund our pastoral center ministry offices and programs that help our
+  community members to live their faith. They include our schools and programs to support faith formation at all ages, to
+  strengthen families, to promote a culture of life, to care for creation, to engage youth and young adults, to assist the
+  marginalized, to sustain our clergy and those preparing for the priesthood, and to extend a helping hand to the marginalized.
+</p>
+
+<!-- DONATE BAR -->
+<div class="bar-full"><div class="wrap">DONATE NOW - ANNUAL CATHOLIC APPEAL 2026</div></div>
+
+<div class="wrap section">
+
+  <!-- gift type -->
+  <div class="toprow">
+    <label class="radio"><input type="radio" name="gifttype" checked> Make One-Time Gift/Pledge Payment <span class="info-i">i</span></label>
+    <label class="radio"><input type="radio" name="gifttype"> Create New Pledge <span class="info-i">i</span></label>
+  </div>
+
+  <!-- amount + parish -->
+  <div class="amt-parish">
+    <div class="field">
+      <label class="lbl">Amount <span class="req">*</span></label>
+      <div class="amt-row">
+        <button type="button" class="amt-btn active">$120</button>
+        <button type="button" class="amt-btn">$250</button>
+        <button type="button" class="amt-btn">$500</button>
+        <button type="button" class="amt-btn">$1,000</button>
+        <button type="button" class="amt-btn">$2,500</button>
+        <div class="amt-other"><span class="dollar">$</span><input type="text" placeholder="Enter Other Amount"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="lbl">Parish <span class="req">*</span></label>
+      <select class="inp dark">
+        <option>--Select--</option>
+        <option>No Parish Affiliation</option>
+        <option selected>All Hallows -032 - La Jolla</option>
+        <option>Ascension - 088 - San Diego</option>
+        <option>Blessed Sacrament - 046 - San Diego</option>
+        <option>Christ the King - 047 - San Diego</option>
+        <option>Corpus Christi - 090 - Bonita</option>
+        <option>Good Shepherd - 048 - San Diego</option>
+        <option>Guardian Angels - 082 - Santee</option>
+        <option>Holy Family - 049 - San Diego</option>
+        <option>Holy Spirit - 050 - San Diego</option>
+        <option>Holy Trinity -16 - El Cajon</option>
+        <option>Immaculata - 051 - San Diego</option>
+        <option>Immaculate Conception - 052 - San Diego</option>
+        <option>Immaculate Heart of Mary - 045 - Ramona</option>
+        <option>Mary Star of the Sea - 033 - La Jolla</option>
+        <option>Mater Dei - 118 - Chula Vista</option>
+        <option>Mission San Antonio de Pala - 042 - Pala</option>
+        <option>Mission San Diego de Alcala - 053 - San Diego</option>
+        <option>Mission San Luis Rey - 079 - Oceanside</option>
+        <option>Most Precious Blood - 010 - Chula Vista</option>
+        <option>Nativity - 091 - Rancho Santa Fe</option>
+        <option>Our Lady of Angels - 054 - San Diego</option>
+        <option>Our Lady of Grace - 017 - El Cajon</option>
+        <option>Our Lady of Guadalupe - 006 - Calexico</option>
+        <option>Our Lady of Guadalupe - 011 - Chula Vista</option>
+        <option>Our Lady of Guadalupe - 055 - San Diego</option>
+        <option>Our Lady of Light - 015 - Descanso</option>
+        <option>Our Lady of Mt. Carmel - 056 - San Diego</option>
+        <option>Our Lady of Mt. Carmel - 083 - San Ysidro</option>
+        <option>Our Lady of Perpetual Help - 034 - Lakeside</option>
+        <option>Our Lady of Refuge - 057 - San Diego</option>
+        <option>Our Lady of the Rosary - 058 - San Diego</option>
+        <option>Our Lady of the Sacred Heart - 059 - San Diego</option>
+        <option>Our Lady of the Valley 021 - El Centro</option>
+        <option>Our Mother of Confidence - 060 - San Diego</option>
+        <option>Queen of Angels - 001 - Alpine</option>
+        <option>Resurrection - 023 - Escondido</option>
+        <option>Sacred Heart - 004 - Brawley</option>
+        <option>Sacred Heart - 014 - Coronado</option>
+        <option>Sacred Heart - 061 - San Diego</option>
+        <option>San Rafael - 078 - San Diego</option>
+        <option>Santa Sophia - 085 - Spring Valley</option>
+        <option>Santa Ysabel Inidian Mission - 081 - Santa Ysabel</option>
+        <option>St. Adelaide of Burgundy - 113 - Campo</option>
+        <option>St. Agnes - 062 - San Diego</option>
+        <option>St. Anne - 063 - San Diego</option>
+        <option>St. Anthony of Padua - 027 - Imperial</option>
+        <option>St. Anthony of Padua - 037 - National City</option>
+        <option>St. Brigid - 064 - San Diego</option>
+        <option>St. Catherine Laboure - 065 - San Diego</option>
+        <option>St. Charles - 028 - San Diego</option>
+        <option>St. Charles Borromeo - 066 - San Diego</option>
+        <option>St. Columba - 067 - San Diego</option>
+        <option>St. Didacus - 068 - San Diego</option>
+        <option>St. Elizabeth of Hungary - 031 - Julian</option>
+        <option>St. Elizabeth of Seton - 008 - Carlsbad</option>
+        <option>St. Francis of Assisi - 086 - Vista</option>
+        <option>St. Gabriel - 043 - Poway</option>
+        <option>St. Gregory the Great - 098 - San Diego</option>
+        <option>St. James - 084 - Solana Beach</option>
+        <option>St. John of the Cross - 036 - Lemon Grove</option>
+        <option>St. John the Evangelist - 022 - Encinitas</option>
+        <option>St. John the Evangelist - 069 - San Diego</option>
+        <option>St. Joseph Cathedral - 070 - San Diego</option>
+        <option>St. Joseph Holtville - 026 - Holtville</option>
+        <option>St. Joseph Westmorland - 116 - Westmorland</option>
+        <option>St. Jude Shrine of the West - 071 - San Diego</option>
+        <option>St. Kateri Tekakwitha - 114 - Lakeside</option>
+        <option>St. Kieran - 018 - El Cajon</option>
+        <option>St. Louise de Marillac - 019 - El Cajon</option>
+        <option>St. Luke - 111 - El Cajon</option>
+        <option>St. Margaret - 040 - Oceanside</option>
+        <option>St. Margaret Mary - 005 - Brawley</option>
+        <option>St. Mark - 080 - San Marcos</option>
+        <option>St. Martin of Tours - 035 - La Mesa</option>
+        <option>St. Mary - 024 - Escondido</option>
+        <option>St. Mary - 038 - National City</option>
+        <option>St. Mary Magdalene - 072 - San Diego</option>
+        <option>St. Mary, Star of the Sea - 041 - Oceanside</option>
+        <option>St. Maximilian Kolbe Mission - 120 - San Diego</option>
+        <option>St. Michael - 044 - Poway</option>
+        <option>St. Michael - 073 - San Diego</option>
+        <option>St. Patrick - 007 - Calipatria</option>
+        <option>St. Patrick - 009 - Carlsbad</option>
+        <option>St. Patrick - 074 - San Diego</option>
+        <option>St. Peter - 025 - Fallbrook</option>
+        <option>St. Pius X - 012 - Chula Vista</option>
+        <option>St. Pius X - 030 - Jamul</option>
+        <option>St. Richard - 002 - Borrego Springs</option>
+        <option>St. Rita - 075 - San Diego</option>
+        <option>St. Rose of Lima - 013 - Chula Vista</option>
+        <option>St. Stephen - 089 - Valley Center</option>
+        <option>St. Therese - 076 - San Diego</option>
+        <option>St. Therese of Carmel - 100 - San Diego</option>
+        <option>St. Thomas Indian Mission - 087 - Winterhaven</option>
+        <option>St. Thomas More - 110 - Oceanside</option>
+        <option>St. Timothy - 099 - Escondido</option>
+        <option>St. Vincent de Paul - 077 - San Diego</option>
+      </select>
+    </div>
+  </div>
+
+  <label class="fee"><input type="checkbox" checked> I would like to cover the processing fee. <span class="info-i">?</span></label>
+
+  <div class="field" style="margin-top:14px;max-width:420px;">
+    <label class="lbl">Comments:</label>
+    <textarea class="inp"></textarea>
+  </div>
+</div>
+
+<!-- YOUR INFORMATION -->
+<div class="bar-full"><div class="wrap">Your Information</div></div>
+
+<div class="wrap section">
+  <a class="login-here" href="#">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 2h3v12h-3M9 8H2M5 5L2 8l3 3"/></svg>
+    LOGIN HERE
+  </a>
+
+  <div class="field" style="max-width:450px;">
+    <label class="lbl">Title</label>
+    <select class="inp">
+      <option selected>--Select--</option><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Miss</option>
+      <option>Mr. and Mrs.</option><option>Mrs. and Mr.</option><option>Mr. and Ms.</option><option>Dr.</option>
+      <option>Dr. and Mrs.</option><option>Mr. and Dr.</option><option>Dr. and Dr.</option><option>Hon.</option>
+      <option>Senor</option><option>Senora</option><option>Senorita</option><option>Prof.</option><option>Rev.</option>
+      <option>Archbishop</option><option>Bishop</option><option>Brother</option><option>Cardinal</option><option>Deacon</option>
+      <option>Father</option><option>Friar</option><option>Monsignor</option><option>Most Rev.</option><option>Mother</option>
+      <option>Rev. Msgr.</option><option>Sister</option><option>Very Rev.</option><option>Rabbi</option><option>Pastor</option>
+      <option>Lady</option><option>Sir</option>
+    </select>
+  </div>
+
+  <div class="grid2">
+    <div class="field"><label class="lbl">First Name<span class="req">*</span></label><input class="inp" placeholder="First Name"></div>
+    <div class="field"><label class="lbl">Last Name<span class="req">*</span></label><input class="inp" placeholder="Last Name"></div>
+
+    <div class="field"><label class="lbl">Mobile</label><input class="inp" placeholder="Mobile"></div>
+    <div class="field"><label class="lbl">Email Address<span class="req">*</span></label><input class="inp" value="globalbm"></div>
+
+    <div class="field"><label class="lbl">Street Address<span class="req">*</span></label><input class="inp" placeholder="House # and Street"></div>
+    <div class="field"><label class="lbl">Unit number or C/O</label><input class="inp" placeholder="Unit number or C/O"></div>
+
+    <div class="field"><label class="lbl">Country</label><select class="inp soft"><option>United States</option><option>Canada</option><option>Mexico</option></select></div>
+    <div class="field"><label class="lbl">State<span class="req">*</span></label><select class="inp soft"><option>--Please Select--</option><option>California</option><option>Arizona</option><option>Nevada</option></select></div>
+
+    <div class="field"><label class="lbl">City <span class="req">*</span></label><input class="inp" placeholder="City"></div>
+    <div class="field"><label class="lbl">Zip <span class="req">*</span></label><input class="inp" placeholder="Zip"></div>
+  </div>
+
+  <label class="fee" style="margin-top:6px;"><input type="checkbox" checked> Save Profile</label>
+
+  <div class="field" style="max-width:450px;margin-top:4px;">
+    <label class="lbl">Username <span class="req">*</span></label>
+    <input class="inp" placeholder="username">
+  </div>
+
+  <div class="grid2">
+    <div class="field"><label class="lbl">Password <span class="req">*</span></label><input class="inp" type="password" value="password12345"></div>
+    <div class="field"><label class="lbl">Confirm Password <span class="req">*</span></label><input class="inp" type="password" placeholder="confirm password"></div>
+  </div>
+</div>
+
+<!-- PAYMENT INFORMATION -->
+<div class="bar-full"><div class="wrap">Payment Information</div></div>
+
+<div class="wrap section">
+  <label class="lbl" style="margin-bottom:12px;">Choose Payment Method</label>
+
+  <div class="pay">
+    <div class="pm-list">
+      <label class="pm active">
+        <input type="radio" name="pm" checked>
+        <span class="card-badges"><span class="badge" style="color:#1a1f71">VISA</span><span class="badge" style="color:#eb001b">MC</span><span class="badge" style="color:#ff6000">DISC</span><span class="badge" style="color:#016fd0">AMEX</span></span>
+        <span class="pm-name">Credit Card</span>
+      </label>
+      <label class="pm">
+        <input type="radio" name="pm">
+        <span class="pm-name">🏛&nbsp; Bank Account</span>
+      </label>
+      <label class="pm">
+        <input type="radio" name="pm">
+        <span class="pm-name">G&nbsp;Pay &nbsp; paze &nbsp; &#63743;&nbsp;Pay</span>
+      </label>
+      <label class="pm">
+        <input type="radio" name="pm">
+        <span class="pm-name">🧾&nbsp; Bill me later</span>
+      </label>
+    </div>
+
+    <div class="pm-body">
+      <h4>Enter your credit card details below:</h4>
+      <div class="field"><label class="lbl">Name on Card <span class="req">*</span></label><input class="inp" placeholder="Name on Card"></div>
+      <div class="field"><label class="lbl">Card Number <span class="req">*</span></label><input class="inp" placeholder="XXX-XXX-XXX"></div>
+      <div class="grid2">
+        <div class="field">
+          <label class="lbl">Expiration <span class="req">*</span></label>
+          <div style="display:flex;gap:12px;">
+            <select class="inp soft"><option>MM</option><option>01</option><option>02</option><option>03</option></select>
+            <select class="inp soft"><option>YYYY</option><option>2026</option><option>2027</option><option>2028</option></select>
+          </div>
+        </div>
+        <div class="field"><label class="lbl">CVV <span class="req">*</span></label><input class="inp" placeholder=""></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label class="lbl">Country</label><select class="inp soft"><option>United States</option><option>Canada</option></select></div>
+        <div class="field"><label class="lbl">Zip <span class="req">*</span></label><input class="inp" placeholder="Zip"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIONS -->
+<div class="actions">
+  <button type="button" class="btn btn-reset" onclick="document.querySelectorAll('input[type=text],input[type=password],textarea').forEach(function(e){e.value='';});">RESET</button>
+  <button type="button" class="btn btn-preview">PREVIEW TOTAL</button>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div>If you have any questions, you can contact us by emailing our Development office at: <a href="mailto:gperfecto@sdcatholic.org">gperfecto@sdcatholic.org</a></div>
+  <div class="pci"><span class="shield"></span>PCI DSS<br>CERTIFIED</div>
+</div>
+
+</body>
+</html>
