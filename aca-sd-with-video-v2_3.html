@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Annual Catholic Appeal - San Diego</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <!-- Select2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+
+    <!-- CSS STYLE SHEET (absolute URL so this file also works outside the site) -->
+    <link rel="stylesheet" href="https://www.givecentral.org/gulp/redesign/new_css/aca-san-diego-v1.css">
+
+    <style>
+        .top-bar,
+        header,
+        footer,
+        .go-top {
+            display: none !important;
+        }
+
+        div[style*="z-index: -10000;"] {
+            display: none !important;
+        }
+
+        .san-diego-hero {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(270deg, rgba(0, 0, 0, 0) 38.94%, rgba(0, 0, 0, 0.5) 100%), url("https://www.givecentral.org/redesign/images/aca-san-diego-banner-bg-new.webp") center/cover no-repeat, url("https://www.givecentral.org/redesign/images/aca-san-diego-banner-bg-new.png") center/cover no-repeat;
+            background-position: center center;
+        }
+    </style>
+
+    <!-- ===== NEW: VIDEO CARD (move into aca-san-diego-v1.css when approved) ===== -->
+    <style>
+        /* Right column now stacks the video card above the amounts image */
+        .san-diego-hero-media {
+            width: 340px;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .san-diego-hero-media .san-diego-hero-amounts {
+            width: 100%;
+        }
+
+        .san-diego-hero-video {
+            background: #6A4C86;
+            border-radius: 18px;
+            padding: 10px 10px 12px;
+            box-shadow: 0px 4px 30px 0px rgba(206, 206, 206, 0.7);
+        }
+
+        .san-diego-hero-video-thumb {
+            position: relative;
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            padding: 0;
+            border: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #3b2a50;
+            cursor: pointer;
+        }
+
+        .san-diego-hero-video-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .san-diego-hero-video-thumb::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.15);
+            transition: background 0.2s ease;
+        }
+
+        .san-diego-hero-video-thumb:hover img { transform: scale(1.04); }
+        .san-diego-hero-video-thumb:hover::after { background: rgba(0, 0, 0, 0.05); }
+
+        .san-diego-hero-video-thumb:focus-visible {
+            outline: 3px solid #ffffff;
+            outline-offset: 2px;
+        }
+
+        .san-diego-hero-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 1;
+            width: 58px;
+            height: 58px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: #EC8B33;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+            transition: transform 0.2s ease;
+        }
+
+        .san-diego-hero-video-thumb:hover .san-diego-hero-play {
+            transform: translate(-50%, -50%) scale(1.08);
+        }
+
+        .san-diego-hero-play::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 54%;
+            transform: translate(-50%, -50%);
+            border-style: solid;
+            border-width: 10px 0 10px 17px;
+            border-color: transparent transparent transparent #ffffff;
+        }
+
+        .san-diego-hero-video-title {
+            margin-top: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.3;
+            text-align: center;
+            color: #ffffff;
+        }
+
+
+        /* ===== NEW: compact HTML amounts card ===== */
+        .san-diego-hero-amounts {
+            width: 100%;
+            padding: 6px;
+            border: 2px dashed rgba(255, 255, 255, 0.85);
+            border-radius: 20px;
+            box-shadow: 0px 4px 30px 0px rgba(206, 206, 206, 0.7);
+        }
+
+        .san-diego-hero-amounts-inner {
+            background: #6A4C86;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .san-diego-hero-amounts-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+            padding: 10px 16px;
+            font-family: var(--montserrat);
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #ffffff;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .san-diego-hero-amounts-icon {
+            width: 34px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+
+        .san-diego-hero-amounts-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .san-diego-hero-amounts-list li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 9px 16px;
+            background: #7B5C98;
+        }
+
+        .san-diego-hero-amounts-list li:nth-child(even) {
+            background: #9A83B2;
+        }
+
+        .san-diego-hero-amounts-label {
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #ffffff;
+        }
+
+        .san-diego-hero-amounts-value {
+            font-size: 20px;
+            font-weight: 800;
+            line-height: 1.1;
+            color: #ffffff;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 1600px) {
+            .san-diego-hero-amounts { padding: 0.35vw; border-radius: 1.16vw; }
+            .san-diego-hero-amounts-inner { border-radius: 0.81vw; }
+            .san-diego-hero-amounts-head { font-size: 0.99vw; padding: 0.58vw 0.93vw; gap: 0.58vw; }
+            .san-diego-hero-amounts-icon { width: 1.98vw; height: 1.63vw; }
+            .san-diego-hero-amounts-list li { padding: 0.52vw 0.93vw; gap: 0.7vw; }
+            .san-diego-hero-amounts-label { font-size: 0.81vw; }
+            .san-diego-hero-amounts-value { font-size: 1.16vw; }
+        }
+
+        /* Short laptop screens (e.g. 1280x720, 1366x768): tighten vertical spacing
+           so the whole hero, including Donate, fits without scrolling */
+        @media (min-width: 992px) and (max-height: 820px) {
+            .san-diego-hero-overlay { padding-top: 2.5vw; padding-bottom: 2.5vw; }
+            .san-diego-hero-logo img { margin-bottom: 16px; }
+            .san-diego-hero-description p { margin-bottom: 24px; }
+            .san-diego-hero-button { margin-top: 20px; }
+        }
+
+        /* Scales with the page's existing ≥1600px vw system */
+        @media (min-width: 1600px) {
+            .san-diego-hero-media { width: 19.7vw; gap: 1.16vw; }
+            .san-diego-hero-video { border-radius: 1.05vw; padding: 0.58vw 0.58vw 0.7vw; }
+            .san-diego-hero-video-thumb { border-radius: 0.58vw; }
+            .san-diego-hero-play { width: 3.4vw; height: 3.4vw; }
+            .san-diego-hero-play::before { border-width: 0.58vw 0 0.58vw 0.99vw; }
+            .san-diego-hero-video-title { font-size: 0.87vw; margin-top: 0.58vw; }
+        }
+
+        /* Columns stack under 991px: video + amounts sit below the Donate button */
+        @media (max-width: 991px) {
+            .san-diego-hero-media { width: 60%; }
+            .san-diego-hero-media .san-diego-hero-amounts { width: 100%; }
+        }
+
+        @media (max-width: 576px) {
+            .san-diego-hero-media { width: 95%; }
+        }
+
+        /* ===== VERSION B: video left, parish form right ===== */
+        .san-diego-hero-video--left {
+            width: 100%;
+            max-width: 480px;
+            padding: 12px 12px 14px;
+        }
+
+        .san-diego-hero-video--left .san-diego-hero-play { width: 72px; height: 72px; }
+        .san-diego-hero-video--left .san-diego-hero-play::before { border-width: 12px 0 12px 20px; }
+        .san-diego-hero-video--left .san-diego-hero-video-title { font-size: 16px; }
+
+        .san-diego-hero-media .san-diego-hero-form-block {
+            width: 100%;
+            max-width: 100%;
+            margin-top: 6px;
+        }
+
+        .san-diego-hero-media .select2-container { max-width: 100%; }
+
+        .san-diego-hero-media .san-diego-hero-button {
+            width: 100%;
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .san-diego-hero-media .san-diego-hero-form-title {
+            font-weight: 600;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+        }
+
+        @media (min-width: 1600px) {
+            .san-diego-hero-video--left { max-width: 28vw; padding: 0.7vw 0.7vw 0.81vw; }
+            .san-diego-hero-video--left .san-diego-hero-play { width: 4.2vw; height: 4.2vw; }
+            .san-diego-hero-video--left .san-diego-hero-play::before { border-width: 0.7vw 0 0.7vw 1.16vw; }
+            .san-diego-hero-video--left .san-diego-hero-video-title { font-size: 0.93vw; }
+            .san-diego-hero-media .select2-container { max-width: 100%; }
+            .san-diego-hero-media .san-diego-hero-button { margin-top: 0.93vw; }
+        }
+
+        /* Mobile: keep the call to action high —
+           logo, title, text, parish + Donate, then video, then amounts */
+        @media (max-width: 991px) {
+            .san-diego-hero-inner > .san-diego-hero-left,
+            .san-diego-hero-inner > .san-diego-hero-right,
+            .san-diego-hero-right > .san-diego-hero-media { display: contents; }
+            .san-diego-hero-logo { order: 1; }
+            .san-diego-hero-title { order: 2; }
+            .san-diego-hero-description { order: 3; }
+            .san-diego-hero-media .san-diego-hero-form-block { order: 4; margin-top: 0; }
+            .san-diego-hero-video--left { order: 5; max-width: 100%; }
+            .san-diego-hero-media .san-diego-hero-amounts { order: 6; width: 60%; }
+            .san-diego-hero-inner { gap: 24px; }
+            .san-diego-hero-media .san-diego-hero-button { width: fit-content; }
+        }
+
+        @media (max-width: 576px) {
+            .san-diego-hero-media .san-diego-hero-amounts { width: 95%; align-self: center; }
+            .san-diego-hero-inner { gap: 20px; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <div id="google_translate_element" style="display:none;"></div> -->
+    <div class="page-wrap">
+        <section class="san-diego-hero">
+            <div class="san-diego-hero-overlay">
+                <!-- <div class="translate-wrapper">
+                    <div id="google_translate_element_leaderboard"></div>
+                </div> -->
+                <div class="lang-dd" id="langDd">
+                    <button type="button" class="lang-dd__btn" id="langBtn">
+                        <span class="lang-dd__label" id="langLabel">English</span>
+                        <span class="lang-dd__chev">▼</span>
+                    </button>
+
+                    <ul class="lang-dd__menu" id="langMenu">
+                        <li class="lang-dd__item" data-lang="en">English</li>
+                        <li class="lang-dd__item" data-lang="es">Spanish</li>
+                        <li class="lang-dd__item" data-lang="vi">Vietnamese</li>
+                    </ul>
+                </div>
+                <div class="san-diego-hero-inner">
+                    <div class="san-diego-hero-left">
+                        <!-- LOGO IMAGE -->
+                        <div class="san-diego-hero-logo">
+                            <img src="https://www.givecentral.org/redesign/images/aca-san-diego-logo-english.png"
+                                alt="Diocese of San Diego" />
+                        </div>
+
+                        <!-- TITLE -->
+                        <h1 class="san-diego-hero-title"><span>In Mission,</span>We are One</h1>
+
+                        <!-- DESCRIPTION -->
+                        <div class="san-diego-hero-description">
+                            <p>
+                                The 2026 Annual Catholic Appeal enables us to fund the Diocese of San Diego's ministry
+                                offices and programs that help our community members to live their faith. These
+                                reinforce our Catholic schools, sustain our retired clergy and those preparing for the
+                                priesthood, support faith formation at all ages, strengthen families, promote a culture
+                                of life, care for creation, engage youth and young adults and extend a helping hand to
+                                the needy.
+                            </p>
+                        </div>
+
+                        <!-- NEW: VIDEO CARD -->
+                        <div class="san-diego-hero-video san-diego-hero-video--left">
+                            <a class="san-diego-hero-video-thumb" href="https://www.youtube.com/watch?v=Z8hGBGbx5wg"
+                                target="_blank" rel="noopener" aria-label="Watch the 2026 Annual Catholic Appeal video on YouTube (opens in a new tab)">
+                                <img src="https://img.youtube.com/vi/Z8hGBGbx5wg/maxresdefault.jpg"
+                                    onerror="this.onerror=null;this.src='https://img.youtube.com/vi/Z8hGBGbx5wg/hqdefault.jpg';"
+                                    alt="" width="1280" height="720" />
+                                <span class="san-diego-hero-play" aria-hidden="true"></span>
+                            </a>
+                            <p class="san-diego-hero-video-title">Watch: 2026 Annual Catholic Appeal</p>
+                        </div>
+
+                    </div>
+                    <!-- RIGHT SIDE: AMOUNTS IMAGE + PARISH FORM (MOVED) -->
+                    <div class="san-diego-hero-right">
+                        <div class="san-diego-hero-media">
+
+                            <!-- NEW: "HOW YOUR GIFT IS USED" AS HTML (replaces the old PNG amounts image) -->
+                            <div class="san-diego-hero-amounts" role="region" aria-labelledby="acaGiftUsedTitle">
+                                <div class="san-diego-hero-amounts-inner">
+                                    <h2 class="san-diego-hero-amounts-head" id="acaGiftUsedTitle">
+                                        <svg class="san-diego-hero-amounts-icon" viewBox="0 0 48 40" aria-hidden="true">
+                                            <path fill="#ffffff" fill-opacity="0.85" d="M30 2c-3 0-5.4 1.7-6.5 4C22.4 3.7 20 2 17 2c-4.2 0-7.5 3.3-7.5 7.4C9.5 17 23.5 25 23.5 25S37.5 17 37.5 9.4C37.5 5.3 34.2 2 30 2z"/>
+                                            <path fill="#ffffff" fill-opacity="0.6" d="M2 26h7l9 3h9.5c1.9 0 3.5 1.4 3.5 3.2 0 .3 0 .5-.1.8l10.4-4.5c1.8-.8 3.9 0 4.6 1.7.6 1.5 0 3.2-1.4 4L31 39H14L9 36.5H2z"/>
+                                        </svg>
+                                        How Your Gift is Used
+                                    </h2>
+                                    <ul class="san-diego-hero-amounts-list">
+                                        <li><span class="san-diego-hero-amounts-label">Catholic Schools</span><span class="san-diego-hero-amounts-value">$1,000,000</span></li>
+                                        <li><span class="san-diego-hero-amounts-label">Clergy Formation and Support</span><span class="san-diego-hero-amounts-value">$1,000,000</span></li>
+                                        <li><span class="san-diego-hero-amounts-label">Faith Formation</span><span class="san-diego-hero-amounts-value">$1,000,000</span></li>
+                                        <li><span class="san-diego-hero-amounts-label">Catholic Charities</span><span class="san-diego-hero-amounts-value">$500,000</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                                <!-- FORM -->
+                                <div class="san-diego-hero-form-block">
+                                    <h3 class="san-diego-hero-form-title" id="acaFindParish">Find Your Parish</h3>
+                                    <div class="san-diego-hero-form">
+                                        <select class="san-diego-hero-select" id='dropdown_events'>
+                                            <option value="#">Select your parish</option>
+                                            <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=2">All Hallows - La Jolla (2)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=3">Ascension - San Diego (3)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=4">Blessed Sacrament - San Diego (4)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=5">Christ the King - San Diego (5)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=7">Corpus Christi - Bonita (7)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=8">Good Shepherd - San Diego (8)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=9">Guardian Angels - Santee (9)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=10">Holy Family - San Diego (10)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=11">Holy Spirit - San Diego (11)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=12">Holy Trinity - El Cajon (12)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=13">Immaculata - San Diego (13)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=14">Immaculate Conception - San Diego (14)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=15">Immaculate Heart of Mary - Ramona (15)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=16">Mary Star of the Sea - La Jolla (16)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=17">Mater Dei - Chula Vista (17)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=18">Mission San Antonio de Pala - Pala (18)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=19">Mission San Diego de Alcala - San Diego (19)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=20">Mission San Luis Rey - Oceanside (20)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=21">Most Precious Blood - Chula Vista (21)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=6">Nativity - Rancho Santa Fe (6)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=1">No Parish Affiliation (1)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=22">Our Lady of Angels - San Diego (22)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=23">Our Lady of Grace - El Cajon (23)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=26">Our Lady of Guadalupe - San Diego (26)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=25">Our Lady of Guadalupe - Chula Vista (25)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=24">Our Lady of Guadalupe - Calexico (24)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=27">Our Lady of Light - Descanso (27)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=28">Our Lady of Mt. Carmel - San Diego (28)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=29">Our Lady of Mt. Carmel - San Ysidro (29)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=30">Our Lady of Perpetual Help - Lakeside (30)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=31">Our Lady of Refuge - San Diego (31)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=32">Our Lady of the Rosary - San Diego (32)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=33">Our Lady of the Sacred Heart - San Diego (33)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=34">Our Lady of the Valley - El Centro (34)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=35">Our Mother of Confidence - San Diego (35)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=36">Queen of Angels - Alpine (36)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=37">Resurrection - Escondido (37)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=39">Sacred Heart - Coronado (39)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=38">Sacred Heart - Brawley (38)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=40">Sacred Heart - San Diego (40)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=41">San Rafael - San Diego (41)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=42">Santa Sophia - Spring Valley (42)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=43">Santa Ysabel Inidian Mission - Santa Ysabel (43)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=44">St. Adelaide of Burgundy - Campo (44)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=45">St. Agnes - San Diego (45)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=46">St. Anne - San Diego (46)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=47">St. Anthony of Padua - Imperial (47)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=48">St. Anthony of Padua - National City (48)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=49">St. Brigid - San Diego (49)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=50">St. Catherine Laboure - San Diego (50)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=51">St. Charles - San Diego (51)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=52">St. Charles Borromeo - San Diego (52)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=53">St. Columba - San Diego (53)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=54">St. Didacus - San Diego (54)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=55">St. Elizabeth of Hungary - Julian (55)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=56">St. Elizabeth of Seton - Carlsbad (56)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=57">St. Francis of Assisi - Vista (57)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=58">St. Gabriel - Poway (58)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=59">St. Gregory the Great - San Diego (59)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=60">St. James - Solana Beach (60)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=61">St. John of the Cross - Lemon Grove (61)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=62">St. John the Evangelist - Encinitas (62)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=63">St. John the Evangelist - San Diego (63)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=64">St. Joseph Cathedral - San Diego (64)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=65">St. Joseph Holtville - Holtville (65)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=66">St. Joseph Westmorland - Westmorland (66)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=67">St. Jude Shrine of the West - San Diego (67)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=68">St. Kateri Tekakwitha - Lakeside (68)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=69">St. Kieran - El Cajon (69)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=70">St. Louise de Marillac - El Cajon (70)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=71">St. Luke - El Cajon (71)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=72">St. Margaret - Oceanside (72)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=73">St. Margaret Mary - Brawley (73)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=74">St. Mark - San Marcos (74)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=75">St. Martin of Tours - La Mesa (75)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=77">St. Mary - Escondido (77)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=78">St. Mary - National City (78)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=76">St. Mary Magdalene - San Diego (76)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=79">St. Mary, Star of the Sea - Oceanside (79)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=80">St. Maximilian Kolbe Mission - San Diego (80)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=82">St. Michael - San Diego (82)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=81">St. Michael - Poway (81)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=83">St. Patrick - Calipatria (83)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=85">St. Patrick - San Diego (85)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=84">St. Patrick - Carlsbad (84)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=86">St. Peter - Fallbrook (86)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=88">St. Pius X - Jamul (88)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=87">St. Pius X - Chula Vista (87)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=89">St. Richard - Borrego Springs (89)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=90">St. Rita - San Diego (90)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=91">St. Rose of Lima - Chula Vista (91)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=92">St. Stephen - Valley Center (92)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=93">St. Therese - San Diego (93)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=94">St. Therese of Carmel - San Diego (94)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=95">St. Thomas Indian Mission - Winterhaven (95)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=96">St. Thomas More - Oceanside (96)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=97">St. Timothy - Escondido (97)</option>
+                                    <option value="https://www.givecentral.org/appeals-form-registration/acp68eddfc11d92f/user/guest?parish=98">St. Vincent de Paul - San Diego (98)</option>
+                                        </select>
+                                        <div class="error_msg"></div>
+                                        <button class="san-diego-hero-button" id='donate'>Donate Now!</button>
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+</body>
+
+</html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+<script type="text/javascript">
+    function initLeaderboardTranslate() {
+        var container = document.getElementById("google_translate_element_leaderboard");
+        if (!container) return;
+        // Remove any previous translate widget inside this container
+        var old = container.querySelector(".goog-te-gadget");
+        //  if (old) old.remove();
+        // Create Google Translate widget (ONLY EN + ES)
+        new google.translate.TranslateElement(
+            {
+                pageLanguage: 'en',
+                includedLanguages: 'en,es,vi',
+                autoDisplay: false,
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            },
+            'google_translate_element_leaderboard'
+        );
+    }
+    // Our callback
+    window.googleTranslateElementInit = initLeaderboardTranslate;
+    // Load script ONLY IF not already loaded by layout
+    (function () {
+        var exists = document.querySelector('script[src*="translate_a/element.js"]');
+        if (!exists) {
+            var s = document.createElement("script");
+            s.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+            document.head.appendChild(s);
+        } else {
+            // Script already loaded → simply run our init
+            if (window.google && google.translate) {
+                initLeaderboardTranslate();
+            } else {
+                // If still loading, retry
+                setTimeout(initLeaderboardTranslate, 500);
+            }
+        }
+    })();
+
+    // Initialize Select2
+    $(document).ready(function () {
+        $('#dropdown_events').select2({
+            placeholder: "Select your parish",
+            allowClear: false
+        });
+    });
+
+    $(document).on("click", "#donate", function (e) {
+        e.preventDefault();
+        const url = $('#dropdown_events').val();
+        const $error = $('.error_msg');
+        $error.text('');
+        if (!url || url === '#') {
+            $error.text('Select a Parish to donate');
+            return;
+        }
+        $('#dropdown_events').val('#');
+        window.location.href = url;
+    });
+
+    $('#dropdown_events').on('change', function () {
+        $('.error_msg').text('');
+    });
+
+    (function () {
+        const dd = document.getElementById('langDd');
+        const btn = document.getElementById('langBtn');
+        const label = document.getElementById('langLabel');
+
+        btn.onclick = function (e) {
+            e.stopPropagation();
+            dd.classList.toggle('is-open');
+        };
+
+        document.querySelectorAll('.lang-dd__item').forEach(item => {
+            item.onclick = function () {
+                const lang = this.dataset.lang;
+                const text = this.textContent;
+
+                // change button label
+                label.textContent = text;
+                dd.classList.remove('is-open');
+
+                // your custom actions
+                if (lang === 'en') {
+                    window.location.href = '/aca-sd';
+                }
+
+                if (lang === 'es') {
+                    window.location.href = '/aca-sd?lang=es';
+                }
+
+                if (lang === 'vi') {
+                    window.location.href = '/aca-sd?lang=vi';
+                }
+            };
+        });
+
+        document.onclick = () => dd.classList.remove('is-open');
+    })();
+
+</script>
