@@ -642,7 +642,7 @@ function rpToast(m){var t=document.getElementById("rp-toast");t.textContent=m;t.
 (function(){
   var CFG=window.__RP; if(!CFG) return;
   var card=document.querySelector(".dt-card");
-  var orig=card?[].slice.call(card.querySelectorAll(".dt-row[data-row]")):[];
+  var orig=card?[].slice.call(card.querySelectorAll(".dt-row[data-row]")):[];try{window.__rpAllNames=orig.map(function(_r){return _r.getAttribute("data-name");}).filter(Boolean).filter(function(v,i,a){return a.indexOf(v)===i;});}catch(e){}
   var pager=card?card.querySelector(".pager"):null;
   var sels=document.querySelectorAll(".rep-toolbar .right select");
   var groupSel=sels[0], sortSel=sels[1];
@@ -701,7 +701,7 @@ function rpToast(m){var t=document.getElementById("rp-toast");t.textContent=m;t.
   });
 
   function filtered(){
-    return orig.filter(function(r){
+    return orig.filter(function(r){var _nq=(window.__rpNameQ||"");if(_nq&&nm(r).indexOf(_nq)<0)return false;
       for(var k in active){var a=active[k];
         if(a.range){var d=dt(r);if(d<a.range[0]||d>a.range[1])return false;}
         else if(r.getAttribute("data-"+k)!==a.value)return false;}
@@ -744,7 +744,7 @@ function rpToast(m){var t=document.getElementById("rp-toast");t.textContent=m;t.
   if(sortSel)sortSel.addEventListener("change",function(){page=0;render();rpToast("Sorted · "+sortSel.value);});
   if(groupSel)groupSel.addEventListener("change",function(){page=0;render();rpToast(/none/i.test(groupSel.value)?"Grouping cleared":"Grouped by "+groupSel.value);});
   if(pager&&pager.querySelector(".pg-prev")){pager.querySelector(".pg-prev").addEventListener("click",function(){if(page>0){page--;render();}});pager.querySelector(".pg-next").addEventListener("click",function(){page++;render();});}
-  chips(); render();
+  chips(); render(); window.__rpSetQ=function(q){window.__rpNameQ=q;page=0;render();};
 })();
 </script>
 </div><!-- /.dash --></div><!-- /.main -->
@@ -1299,4 +1299,5 @@ window.rpSchedFreq=function(){ var f=document.getElementById('sc-freq'), day=doc
 <script src="atlas-notify.js"></script>
 
 <script src="atlas-search.js"></script>
+<script src="atlas-report-search.js"></script>
 </body></html>

@@ -922,9 +922,10 @@ body {
     // candidate seed pool for the detail table (deterministic mock rows)
     var POOL=Math.max(perPage, Math.min(estNum||perPage, 48));
     function matchedSeeds(){
-      var out=[];
+      var out=[]; var nq=(window.__rcNameQ||"");
       for(var s=0;s<POOL;s++){
         if(state.filter){ var ci=state.filter.colIndex; var txt=cellText(cols[ci],s,ci); if(txt!==state.filter.val) continue; }
+        if(nq){ var t0=(cellText(cols[0],s,0)||"").toLowerCase(); if(t0.indexOf(nq)<0) continue; }
         out.push(s);
       }
       return out;
@@ -940,18 +941,19 @@ body {
       var colTpl=cols.map(function(c,i){ return i===0?'1.9fr':(isMoneyCol(c)?'0.9fr':'1fr'); }).join(' ');
       var headHTML='<div class="dt-head" style="grid-template-columns:'+colTpl+'">'+cols.map(function(c){ return '<div'+(isMoneyCol(c)?' style="text-align:right"':'')+'>'+esc(c)+'</div>'; }).join('')+'</div>';
       var seeds=matchedSeeds();
-      var totalRowsDisp = state.filter ? seeds.length : (estNum||perPage);
-      totalPages = Math.max(1, Math.min(24, Math.ceil((state.filter?seeds.length:(estNum||perPage))/perPage)));
+      var hasFilter = state.filter || window.__rcNameQ;
+      var totalRowsDisp = hasFilter ? seeds.length : (estNum||perPage);
+      totalPages = Math.max(1, Math.min(24, Math.ceil((hasFilter?seeds.length:(estNum||perPage))/perPage)));
       if(state.page>totalPages) state.page=totalPages;
       var offset=(state.page-1)*perPage;
-      var pageSeeds = state.filter ? seeds.slice(offset, offset+perPage) : (function(){ var a=[]; for(var k=0;k<perPage;k++) a.push(offset+k); return a; })();
+      var pageSeeds = hasFilter ? seeds.slice(offset, offset+perPage) : (function(){ var a=[]; for(var k=0;k<perPage;k++) a.push(offset+k); return a; })();
       var rowsHTML='';
       pageSeeds.forEach(function(seed){
         rowsHTML+='<div class="dt-row" style="grid-template-columns:'+colTpl+'">'+cols.map(function(c,ci){ return '<div>'+cellHTML(c,seed,ci)+'</div>'; }).join('')+'</div>';
       });
       if(!pageSeeds.length) rowsHTML='<div style="padding:26px 18px;text-align:center;color:var(--text-3);font-size:13px">No rows match this filter.</div>';
       var from=totalRowsDisp?offset+1:0, to=Math.min(offset+perPage,totalRowsDisp);
-      var statusTxt = state.filter
+      var statusTxt = hasFilter
         ? ('Showing '+from.toLocaleString()+'–'+to.toLocaleString()+' of '+totalRowsDisp.toLocaleString()+' filtered rows')
         : ('Showing '+from.toLocaleString()+'–'+to.toLocaleString()+' of '+totalRowsDisp.toLocaleString()+' rows');
       var prevDis=state.page<=1?' disabled':'', nextDis=state.page>=totalPages?' disabled':'';
@@ -1028,6 +1030,9 @@ body {
     renderChips();
     renderChart();
     renderTable();
+    // expose a donor/name search hook + the full first-column (donor) list for the shared report-search field
+    window.__rcSetQ=function(q){ window.__rcNameQ=q; state.page=1; renderTable(); };
+    try{ var _nm={}; for(var _s=0;_s<POOL;_s++){ var _t=cellText(cols[0],_s,0); if(_t) _nm[_t]=1; } window.__rpAllNames=Object.keys(_nm); }catch(e){}
 
     // wire controls
     document.getElementById('rc-csv').addEventListener('click', function(){ csvDownload(name); });
@@ -1053,4 +1058,5 @@ body {
 <script src="atlas-notify.js"></script>
 
 <script src="atlas-search.js"></script>
+<script src="atlas-report-search.js"></script>
 </body></html>
